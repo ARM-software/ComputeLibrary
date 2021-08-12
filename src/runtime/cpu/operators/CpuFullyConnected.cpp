@@ -150,9 +150,11 @@ CpuFullyConnected::CpuFullyConnected()
       _flattened_src(),
       _converted_weights(),
       _reshaped_weights(),
+      _trans_weights(),
+      _trans_weights_idx(AuxTensorIdx::Count),
       _aux_mem(Count),
-      _are_weights_converted(false),
-      _are_weights_reshaped(false),
+      _needs_weights_conversion(false),
+      _needs_weights_reshape(false),
       _is_fc_after_conv(false),
       _is_quantized_asymmetric(false),
       _is_prepared(false)
@@ -230,11 +232,13 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                                            dst,
                                                            fc_info));
 
-    _are_weights_converted   = true;
-    _are_weights_reshaped    = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
-    _is_fc_after_conv        = true;
-    _is_quantized_asymmetric = is_data_type_quantized_asymmetric(src->data_type());
-    _is_prepared             = false;
+    _needs_weights_conversion = false;
+    _needs_weights_reshape    = fc_info.transpose_weights ? !fc_info.are_weights_reshaped : false;
+    _needs_weights_reshape    = _needs_weights_reshape && !fc_info.retain_internal_weights;
+    _is_fc_after_conv         = true;
+    _is_quantized_asymmetric  = is_data_type_quantized_asymmetric(src->data_type());
+    _is_prepared              = false;
+    _trans_weights_idx        = AuxTensorIdx::Count;
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -258,12 +262,13 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     }
 
     // Reshape weights if needed
-    if(!_are_weights_reshaped)
+    if(_needs_weights_reshape)
     {
         // Reshape the weights
         _transpose_weights = std::make_unique<kernels::CpuTransposeKernel>();
         _transpose_weights->configure(weights, &_reshaped_weights);
-        weights_to_use = &_reshaped_weights;
+        weights_to_use     = &_reshaped_weights;
+        _trans_weights_idx = AuxTensorIdx::TransposedWeights;
     }
 
     // Convert weights if needed
@@ -276,8 +281,9 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                     src->tensor_shape(),
                                     fc_info.weights_trained_layout);
 
-        weights_to_use         = &_converted_weights;
-        _are_weights_converted = false;
+        weights_to_use            = &_converted_weights;
+        _needs_weights_conversion = true;
+        _trans_weights_idx        = AuxTensorIdx::ConvertedWeights;
     }
 
     if(_is_fc_after_conv)
@@ -291,7 +297,11 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
         configure_fc_fc(src, weights_to_use, biases, dst, fc_info.activation_info);
     }
 
-    _are_weights_reshaped = _are_weights_reshaped || fc_info.retain_internal_weights;
+    // Retain the tensorinfo with the weights to use
+    if(_needs_weights_reshape || _needs_weights_conversion)
+    {
+        _trans_weights = *weights_to_use;
+    }
 
     // Set auxiliary memory requirements
     auto gemm_mem_req = (_is_quantized_asymmetric) ? _mm_gemmlowp->workspace() : _mm_gemm->workspace();
@@ -308,7 +318,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     }
     else
     {
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), MemoryLifetime::Persistent, _reshaped_weights.total_size());
+        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), _needs_weights_conversion ? MemoryLifetime::Prepare : MemoryLifetime::Persistent, _reshaped_weights.total_size());
         _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Persistent, _converted_weights.total_size());
     }
     _aux_mem[FlattenedSrc] = MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
@@ -401,6 +411,7 @@ void CpuFullyConnected::run(ITensorPack &tensors)
     auto src = tensors.get_const_tensor(ACL_SRC_0);
 
     CpuAuxTensorHandler flattened_src(offset_int_vec(FlattenedSrc), _flattened_src, tensors, false);
+    CpuAuxTensorHandler transformed_wei(offset_int_vec(_trans_weights_idx), _trans_weights, tensors, false);
 
     // Linearize src if it comes from a convolutional layer
     if(_is_fc_after_conv)
@@ -411,6 +422,10 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 
     ITensorPack gemm_pack = tensors;
     gemm_pack.add_const_tensor(ACL_SRC_0, (_is_fc_after_conv) ? flattened_src.get() : src);
+    if(_needs_weights_reshape || _needs_weights_conversion)
+    {
+        gemm_pack.add_const_tensor(ACL_SRC_1, transformed_wei.get());
+    }
 
     // Run matrix multiply
     if(_is_quantized_asymmetric)
@@ -436,7 +451,7 @@ void CpuFullyConnected::prepare(ITensorPack &tensors)
         const ITensor *cur_weights = weights;
 
         // Reshape of the weights (happens only once)
-        if(!_are_weights_reshaped)
+        if(_needs_weights_reshape)
         {
             // Run reshape weights kernel and mark weights as unused
             ITensorPack transpose_pack{ { ACL_SRC, weights }, { ACL_DST, reshaped_weights.get() } };
@@ -444,32 +459,29 @@ void CpuFullyConnected::prepare(ITensorPack &tensors)
 
             cur_weights->mark_as_unused();
             cur_weights = reshaped_weights.get();
-
-            _are_weights_reshaped = true;
         }
 
         // Convert weights if needed (happens only once)
-        if(!_are_weights_converted)
+        if(_needs_weights_conversion)
         {
             ITensorPack convert_pack{ { ACL_SRC, cur_weights }, { ACL_DST, converted_weights.get() } };
             _convert_weights->run(convert_pack);
 
             cur_weights->mark_as_unused();
             cur_weights = converted_weights.get();
-
-            _are_weights_converted = true;
         }
 
-        tensors.add_const_tensor(ACL_SRC_1, cur_weights);
+        ITensorPack gemm_pack = tensors;
+        gemm_pack.add_const_tensor(ACL_SRC_1, cur_weights);
 
         // Prepare GEMM prepare and release unused weights
         if(!_is_quantized_asymmetric)
         {
-            _mm_gemm->prepare(tensors);
+            _mm_gemm->prepare(gemm_pack);
         }
         else
         {
-            _mm_gemmlowp->prepare(tensors);
+            _mm_gemmlowp->prepare(gemm_pack);
         }
 
         _is_prepared = true;

@@ -672,15 +672,6 @@ void CpuGemmLowpMatrixMultiplyCore::prepare(ITensorPack &tensors)
         if(_asm_glue->is_configured())
         {
             _asm_glue->prepare(tensors);
-
-            auto has_reshape = std::find_if(_aux_mem.begin(),
-                                            _aux_mem.end(),
-                                            [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
-
-            if(has_reshape != std::end(_aux_mem))
-            {
-                original_b->mark_as_unused();
-            }
         }
         // Run non-assembly reshape
         else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue->is_configured())

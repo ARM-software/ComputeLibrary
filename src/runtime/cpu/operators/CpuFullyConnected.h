@@ -128,14 +128,16 @@ private:
     std::unique_ptr<CpuGemm>                         _mm_gemm;
     std::unique_ptr<CpuGemmLowpMatrixMultiplyCore>   _mm_gemmlowp;
 
-    TensorInfo _flattened_src;
-    TensorInfo _converted_weights;
-    TensorInfo _reshaped_weights;
+    TensorInfo   _flattened_src;
+    TensorInfo   _converted_weights;
+    TensorInfo   _reshaped_weights;
+    TensorInfo   _trans_weights;
+    AuxTensorIdx _trans_weights_idx;
 
     experimental::MemoryRequirements _aux_mem;
 
-    bool _are_weights_converted;
-    bool _are_weights_reshaped;
+    bool _needs_weights_conversion;
+    bool _needs_weights_reshape;
     bool _is_fc_after_conv;
     bool _is_quantized_asymmetric;
     bool _is_prepared;
