@@ -76,6 +76,11 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
 
     _impl->op->configure(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info);
 
+    if(_impl->weights_manager != nullptr)
+    {
+        _impl->weights_manager->manage(weights);
+    }
+
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
     _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
@@ -104,6 +109,19 @@ void NEFullyConnectedLayer::prepare()
         // Release temporary tensors that are only used in prepare stage
         release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace);
         _impl->is_prepared = true;
+
+        // Handle weights managed infrastructure
+        if(_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
+        {
+            // If function marks b as unused ensure that all prepare stages are done before releasing
+            const ITensor *original_b = _impl->original_weights;
+            if(!original_b->is_used())
+            {
+                _impl->weights_manager->mark_as_unused(original_b);
+            }
+            _impl->original_weights->mark_as_used();
+            _impl->weights_manager->release(_impl->original_weights);
+        }
     }
 }
 } // namespace arm_compute

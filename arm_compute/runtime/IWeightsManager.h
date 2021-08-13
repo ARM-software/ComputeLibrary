@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,9 +76,27 @@ public:
      * @return True if the weights tensor is managed else false
      */
     bool are_weights_managed(const ITensor *weights);
+    /** Release weights refcount and mark as unused if reaches 0
+     *
+     * @param[in] weights Weights to release
+     */
+    void release(const ITensor *weights);
+    /** Marks weights as unused
+     *
+     * @param weights Weights to mark unused
+     */
+    void mark_as_unused(const ITensor *weights);
+
+private:
+    struct CounterElement
+    {
+        bool             is_unused{ false };
+        std::atomic<int> counter{ 1 };
+    };
 
 private:
     std::map<const ITensor *, std::vector<ITransformWeights *>> _managed_weights;
+    std::map<const ITensor *, CounterElement>                   _managed_counter;
     std::map<const ITensor *, ITransformWeights *>              _managed_weights_parents;
 };
 } // arm_compute
