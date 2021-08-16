@@ -81,11 +81,11 @@ public:
      * @param[in] weights Weights to release
      */
     void release(const ITensor *weights);
-    /** Marks weights as unused
+    /** Pre-mark the weights as unused. The weights tensor will get marked as unused only when the counter goes to 0
      *
      * @param weights Weights to mark unused
      */
-    void mark_as_unused(const ITensor *weights);
+    void pre_mark_as_unused(const ITensor *weights);
 
 private:
     struct CounterElement
