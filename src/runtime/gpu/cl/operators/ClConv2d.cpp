@@ -31,7 +31,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "src/runtime/gpu/cl/operators/ClDirectConv2d.h"
-#include "src/runtime/gpu/cl/operators/ClGemmConvolution.h"
+#include "src/runtime/gpu/cl/operators/ClGemmConv2d.h"
 #include "src/runtime/gpu/cl/operators/ClWinogradConv2d.h"
 
 #include <memory>
@@ -104,7 +104,7 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         }
         case ConvolutionMethod::GEMM:
         {
-            auto f = std::make_unique<ClGemmConvolution>();
+            auto f = std::make_unique<ClGemmConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info, weights_info);
             _operator = std::move(f);
             break;
@@ -143,7 +143,7 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
-            ARM_COMPUTE_RETURN_ON_ERROR(ClGemmConvolution::validate(src, weights, biases, dst, conv2d_info, weights_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(ClGemmConv2d::validate(src, weights, biases, dst, conv2d_info, weights_info));
             break;
         }
         default:

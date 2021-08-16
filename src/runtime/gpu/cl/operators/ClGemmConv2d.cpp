@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/gpu/cl/operators/ClGemmConvolution.h"
+#include "src/runtime/gpu/cl/operators/ClGemmConv2d.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/PixelValue.h"
@@ -50,16 +50,16 @@ using namespace misc::shape_calculator;
 using namespace utils::cast;
 namespace opencl
 {
-ClGemmConvolution::ClGemmConvolution()
+ClGemmConv2d::ClGemmConv2d()
     : _weights_reshape_kernel(nullptr), _im2col_kernel(nullptr), _mm_gemm(nullptr), _mm_gemmlowp(nullptr), _col2im_kernel(nullptr), _activation_kernel(nullptr), _im2col_output(), _weights_reshaped(),
       _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _append_bias(false), _is_prepared(false), _aux_mem(AuxTensorIdx::Count)
 {
 }
-ClGemmConvolution::~ClGemmConvolution() = default;
+ClGemmConv2d::~ClGemmConv2d() = default;
 
-void ClGemmConvolution::configure_mm(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                     const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                                     int gemm_3d_depth, const ActivationLayerInfo &act_info)
+void ClGemmConv2d::configure_mm(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+                                const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
+                                int gemm_3d_depth, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights);
     ARM_COMPUTE_ERROR_THROW_ON(validate_mm(src, weights, biases, dst, gemmlowp_output_stage, gemm_3d_depth, _skip_im2col, act_info));
@@ -112,8 +112,8 @@ void ClGemmConvolution::configure_mm(const ClCompileContext &compile_context, co
     }
 }
 
-Status ClGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                      const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info)
+Status ClGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                 const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info)
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(src->data_type());
 
@@ -151,14 +151,14 @@ Status ClGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo 
     }
 }
 
-void ClGemmConvolution::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                  const Conv2dInfo &conv2d_info, const WeightsInfo &weights_info)
+void ClGemmConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+                             const Conv2dInfo &conv2d_info, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
-    ARM_COMPUTE_ERROR_THROW_ON(ClGemmConvolution::validate(src, weights, biases, dst,
-                                                           conv2d_info,
-                                                           weights_info));
+    ARM_COMPUTE_ERROR_THROW_ON(ClGemmConv2d::validate(src, weights, biases, dst,
+                                                      conv2d_info,
+                                                      weights_info));
 
     const DataType   data_type   = src->data_type();
     const DataLayout data_layout = src->data_layout();
@@ -334,8 +334,8 @@ void ClGemmConvolution::configure(const CLCompileContext &compile_context, ITens
     _aux_mem[GemmOutput]      = MemoryInfo(offset_int_vec(GemmOutput), MemoryLifetime::Temporary, _gemm_output.total_size());
 }
 
-Status ClGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv2dInfo &conv2d_info,
-                                   const WeightsInfo &weights_info)
+Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv2dInfo &conv2d_info,
+                              const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
@@ -371,8 +371,8 @@ Status ClGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *we
     const bool         is_quantized       = is_data_type_quantized_asymmetric(data_type);
     const bool         skip_im2col        = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv2d_info.conv_info.stride().first == 1
                                              && conv2d_info.conv_info.stride().second == 1);
-    const bool         skip_col2im        = data_layout == DataLayout::NHWC;
-    bool               fuse_activation    = true;
+    const bool skip_col2im     = data_layout == DataLayout::NHWC;
+    bool       fuse_activation = true;
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * conv2d_info.num_groups) != src->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -521,7 +521,7 @@ Status ClGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *we
     return Status{};
 }
 
-void ClGemmConvolution::run(ITensorPack &tensors)
+void ClGemmConv2d::run(ITensorPack &tensors)
 {
     prepare(tensors);
 
@@ -593,7 +593,7 @@ void ClGemmConvolution::run(ITensorPack &tensors)
     }
 }
 
-void ClGemmConvolution::prepare(ITensorPack &tensors)
+void ClGemmConv2d::prepare(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {
@@ -620,7 +620,7 @@ void ClGemmConvolution::prepare(ITensorPack &tensors)
         _is_prepared = true;
     }
 }
-experimental::MemoryRequirements ClGemmConvolution::workspace() const
+experimental::MemoryRequirements ClGemmConv2d::workspace() const
 {
     return _aux_mem;
 }

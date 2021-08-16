@@ -32,7 +32,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClGemmConvolution.h"
+#include "src/runtime/gpu/cl/operators/ClGemmConv2d.h"
 #include "support/Cast.h"
 
 #include <cmath>
@@ -47,15 +47,15 @@ using namespace arm_compute::experimental;
 
 struct CLGEMMConvolutionLayer::Impl
 {
-    const ITensor                             *weights{ nullptr };
-    std::unique_ptr<opencl::ClGemmConvolution> op{ nullptr };
-    ITensorPack                                run_pack{};
-    ITensorPack                                prep_pack{};
-    MemoryGroup                                memory_group{};
-    IWeightsManager                           *weights_manager{ nullptr };
-    MemoryRequirements                         aux_mem_req{};
-    WorkspaceData<CLTensor>                    workspace_tensors{};
-    bool                                       is_prepared{ false };
+    const ITensor                        *weights{ nullptr };
+    std::unique_ptr<opencl::ClGemmConv2d> op{ nullptr };
+    ITensorPack                           run_pack{};
+    ITensorPack                           prep_pack{};
+    MemoryGroup                           memory_group{};
+    IWeightsManager                      *weights_manager{ nullptr };
+    MemoryRequirements                    aux_mem_req{};
+    WorkspaceData<CLTensor>               workspace_tensors{};
+    bool                                  is_prepared{ false };
 };
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
@@ -79,7 +79,7 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     _impl->weights               = weights;
-    _impl->op                    = std::make_unique<opencl::ClGemmConvolution>();
+    _impl->op                    = std::make_unique<opencl::ClGemmConv2d>();
     const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups);
     _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv2d_info, weights_info);
 
@@ -103,7 +103,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
                                         const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups);
-    return opencl::ClGemmConvolution::validate(input, weights, biases, output, conv2d_info, weights_info);
+    return opencl::ClGemmConv2d::validate(input, weights, biases, output, conv2d_info, weights_info);
 }
 
 void CLGEMMConvolutionLayer::run()

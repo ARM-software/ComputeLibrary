@@ -30,7 +30,7 @@
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/cpu/operators/CpuConv2d.h"
 #include "src/runtime/cpu/operators/CpuDirectConv2d.h"
-#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
+#include "src/runtime/cpu/operators/CpuGemmConv2d.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 #include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
 

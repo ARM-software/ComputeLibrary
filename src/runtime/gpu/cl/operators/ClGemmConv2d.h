@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_GEMMCONVOLUTION_H
-#define ARM_COMPUTE_CL_GEMMCONVOLUTION_H
+#ifndef ARM_COMPUTE_CL_GEMM_CONV2D_H
+#define ARM_COMPUTE_CL_GEMM_CONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -55,21 +55,21 @@ class ClActivationKernel;
  * -# @ref opencl::kernels::ClCol2ImKernel (if NCHW data layout)
  * -# @ref opencl::kernels::ClActivationKernel
  */
-class ClGemmConvolution : public IClOperator
+class ClGemmConv2d : public IClOperator
 {
 public:
     /** Constructor */
-    ClGemmConvolution();
+    ClGemmConv2d();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ClGemmConvolution(const ClGemmConvolution &) = delete;
+    ClGemmConv2d(const ClGemmConv2d &) = delete;
     /** Default move constructor */
-    ClGemmConvolution(ClGemmConvolution &&) = default;
+    ClGemmConv2d(ClGemmConv2d &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ClGemmConvolution &operator=(const ClGemmConvolution &) = delete;
+    ClGemmConv2d &operator=(const ClGemmConv2d &) = delete;
     /** Default move assignment operator */
-    ClGemmConvolution &operator=(ClGemmConvolution &&) = default;
+    ClGemmConv2d &operator=(ClGemmConv2d &&) = default;
     /**Default destructor */
-    ~ClGemmConvolution();
+    ~ClGemmConv2d();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -182,4 +182,4 @@ private:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_GEMMCONVOLUTION_H */
+#endif /* ARM_COMPUTE_CL_GEMM_CONV2D_H */

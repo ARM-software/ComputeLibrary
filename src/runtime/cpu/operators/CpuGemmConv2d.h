@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMCONVOLUTION_H
-#define ARM_COMPUTE_CPU_GEMMCONVOLUTION_H
+#ifndef ARM_COMPUTE_CPU_GEMM_CONV2D_H
+#define ARM_COMPUTE_CPU_GEMM_CONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -55,21 +55,21 @@ class CpuReshapeKernel;
  * -# @ref kernels::CpuWeightsReshapeKernel
  *
  */
-class CpuGemmConvolution : public ICpuOperator
+class CpuGemmConv2d : public ICpuOperator
 {
 public:
     /** Constructor */
-    CpuGemmConvolution();
+    CpuGemmConv2d();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CpuGemmConvolution(const CpuGemmConvolution &) = delete;
+    CpuGemmConv2d(const CpuGemmConv2d &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    CpuGemmConvolution(CpuGemmConvolution &&) = delete;
+    CpuGemmConv2d(CpuGemmConv2d &&) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CpuGemmConvolution &operator=(const CpuGemmConvolution &) = delete;
+    CpuGemmConv2d &operator=(const CpuGemmConv2d &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    CpuGemmConvolution &operator=(CpuGemmConvolution &&) = delete;
+    CpuGemmConv2d &operator=(CpuGemmConv2d &&) = delete;
     /** Destructor */
-    ~CpuGemmConvolution();
+    ~CpuGemmConv2d();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -200,4 +200,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMMCONVOLUTION_H */
+#endif /* ARM_COMPUTE_CPU_GEMM_CONV2D_H */

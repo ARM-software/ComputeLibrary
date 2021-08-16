@@ -26,7 +26,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "src/runtime/cpu/operators/CpuDirectConv2d.h"
 #include "src/runtime/cpu/operators/CpuGemm.h"
-#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
+#include "src/runtime/cpu/operators/CpuGemmConv2d.h"
 #include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 #include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
 
@@ -62,7 +62,7 @@ void CpuConv2d::configure(ITensorInfo *input, ITensorInfo *weights, const ITenso
         }
         case ConvolutionMethod::GEMM:
         {
-            auto f = std::make_unique<CpuGemmConvolution>();
+            auto f = std::make_unique<CpuGemmConv2d>();
             f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math);
             _function = std::move(f);
             break;
@@ -101,7 +101,7 @@ Status CpuConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights,
             ARM_COMPUTE_RETURN_ON_ERROR(CpuWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM:
-            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConvolution::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math));
+            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM_CONV2D:
             ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmDirectConv2d::validate(input, weights, biases, output, info));

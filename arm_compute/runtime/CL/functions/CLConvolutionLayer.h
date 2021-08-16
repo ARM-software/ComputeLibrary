@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CLCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
@@ -40,7 +40,7 @@ class ITensorInfo;
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref opencl::ClGemmConvolution
+ * -# @ref opencl::ClGemmConv2d
  * -# @ref opencl::ClWinogradConv2d
  * -# @ref opencl::ClDirectConv2d
  * -# @ref CLFFTConvolutionLayer

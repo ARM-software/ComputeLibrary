@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
+#include "src/runtime/cpu/operators/CpuGemmConv2d.h"
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -51,15 +51,15 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuGemmConvolution::CpuGemmConvolution()
+CpuGemmConv2d::CpuGemmConv2d()
     : _weights_reshape_kernel(nullptr), _im2col_kernel(), _mm_gemm(), _mm_gemmlowp(), _col2im_kernel(), _reshape_kernel(), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(),
       _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false), _aux_mem(AuxTensorIdx::Count)
 {
 }
-CpuGemmConvolution::~CpuGemmConvolution() = default;
+CpuGemmConv2d::~CpuGemmConv2d() = default;
 
-void CpuGemmConvolution::configure_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act_info,
-                                      bool enable_fast_math, int gemm_3d_depth)
+void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act_info,
+                                 bool enable_fast_math, int gemm_3d_depth)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights);
     ARM_COMPUTE_ERROR_THROW_ON(validate_mm(src, weights, biases, dst, act_info, enable_fast_math, gemm_3d_depth, _skip_im2col));
@@ -137,8 +137,8 @@ void CpuGemmConvolution::configure_mm(const ITensorInfo *src, const ITensorInfo 
     }
 }
 
-Status CpuGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                       const ActivationLayerInfo &act_info, bool enable_fast_math, int gemm_3d_depth, bool skip_im2col)
+Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                  const ActivationLayerInfo &act_info, bool enable_fast_math, int gemm_3d_depth, bool skip_im2col)
 {
     const DataType data_type             = src->data_type();
     const bool     is_quantized          = is_data_type_quantized_asymmetric(data_type);
@@ -197,7 +197,7 @@ Status CpuGemmConvolution::validate_mm(const ITensorInfo *src, const ITensorInfo
     }
 }
 
-Status CpuGemmConvolution::validate_gemm3d(const ITensorInfo *input_info, const ITensorInfo *weights_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
+Status CpuGemmConv2d::validate_gemm3d(const ITensorInfo *input_info, const ITensorInfo *weights_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
 {
     const DataType     data_type = input_info->data_type();
     const unsigned int mult_y    = skip_im2col ? 1U : gemm_3d_depth;
@@ -211,21 +211,21 @@ Status CpuGemmConvolution::validate_gemm3d(const ITensorInfo *input_info, const 
     return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, false, gemm_3d_depth, skip_im2col);
 }
 
-void CpuGemmConvolution::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
+                              const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_UNUSED(num_groups, weights_info);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuGemmConvolution::validate(src,
-                                                            weights,
-                                                            biases,
-                                                            dst,
-                                                            conv_info,
-                                                            weights_info,
-                                                            dilation,
-                                                            act_info,
-                                                            enable_fast_math,
-                                                            num_groups));
+    ARM_COMPUTE_ERROR_THROW_ON(CpuGemmConv2d::validate(src,
+                                                       weights,
+                                                       biases,
+                                                       dst,
+                                                       conv_info,
+                                                       weights_info,
+                                                       dilation,
+                                                       act_info,
+                                                       enable_fast_math,
+                                                       num_groups));
 
     const DataType   data_type   = src->data_type();
     const DataLayout data_layout = src->data_layout();
@@ -353,8 +353,8 @@ void CpuGemmConvolution::configure(const ITensorInfo *src, const ITensorInfo *we
     _aux_mem[GemmOutput]      = MemoryInfo(offset_int_vec(GemmOutput), MemoryLifetime::Temporary, _gemm_output.total_size());
 }
 
-Status CpuGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+                               const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
@@ -489,7 +489,7 @@ Status CpuGemmConvolution::validate(const ITensorInfo *src, const ITensorInfo *w
     return Status{};
 }
 
-void CpuGemmConvolution::run(ITensorPack &tensors)
+void CpuGemmConv2d::run(ITensorPack &tensors)
 {
     prepare(tensors);
 
@@ -581,7 +581,7 @@ void CpuGemmConvolution::run(ITensorPack &tensors)
     }
 }
 
-void CpuGemmConvolution::prepare(ITensorPack &tensors)
+void CpuGemmConv2d::prepare(ITensorPack &tensors)
 {
     if(!_is_prepared)
     {
@@ -604,7 +604,7 @@ void CpuGemmConvolution::prepare(ITensorPack &tensors)
         _is_prepared = true;
     }
 }
-experimental::MemoryRequirements CpuGemmConvolution::workspace() const
+experimental::MemoryRequirements CpuGemmConv2d::workspace() const
 {
     return _aux_mem;
 }

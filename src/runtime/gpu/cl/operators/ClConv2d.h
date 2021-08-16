@@ -36,7 +36,7 @@ namespace opencl
 {
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref opencl::ClGemmConvolution
+ * -# @ref opencl::ClGemmConv2d
  * -# @ref opencl::ClWinogradConv2d
  * -# @ref opencl::ClDirectConv2d
  * -# @ref CLFFTConvolutionLayer
