@@ -63,7 +63,7 @@ void CpuConv2d::configure(ITensorInfo *input, ITensorInfo *weights, const ITenso
         case ConvolutionMethod::GEMM:
         {
             auto f = std::make_unique<CpuGemmConvolution>();
-            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
+            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
@@ -101,7 +101,7 @@ Status CpuConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights,
             ARM_COMPUTE_RETURN_ON_ERROR(CpuWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM:
-            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConvolution::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmConvolution::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math));
             break;
         case ConvolutionMethod::GEMM_CONV2D:
             ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmDirectConv2d::validate(input, weights, biases, output, info));
