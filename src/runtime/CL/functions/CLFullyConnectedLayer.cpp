@@ -76,7 +76,7 @@ void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context, c
 
     _impl->op               = std::make_unique<opencl::ClFullyConnected>();
     _impl->original_weights = weights;
-    _impl->is_prepared      = false;
+    _impl->is_prepared      = fc_info.retain_internal_weights;
 
     _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info);
 
@@ -85,9 +85,17 @@ void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context, c
         _impl->weights_manager->manage(weights);
     }
 
-    _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
-    _impl->workspace   = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    if(!_impl->is_prepared)
+    {
+        _impl->aux_mem_req = _impl->op->workspace();
+        _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
+        _impl->workspace   = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+    }
+    else
+    {
+        _impl->run_pack.add_tensor(ACL_SRC_0, input);
+        _impl->run_pack.add_tensor(ACL_DST, output);
+    }
 }
 
 Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,

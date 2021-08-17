@@ -564,6 +564,7 @@ void ClGemm::configure(const CLCompileContext &compile_context, ITensorInfo *a, 
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
+    _is_prepared                 = gemm_info.retain_internal_weights();
 
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
