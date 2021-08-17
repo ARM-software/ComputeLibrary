@@ -1,0 +1,53 @@
+fail_fast: false
+
+files: ^python/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-yaml
+        stages: [commit]
+      - id: check-json
+        stages: [commit]
+      - id: end-of-file-fixer
+        stages: [commit]
+        exclude: \.cp?p?$
+      - id: requirements-txt-fixer
+        stages: [commit]
+      - id: trailing-whitespace
+        stages: [commit]
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        description: Forces to replace line ending by the UNIX 'lf' character.
+      - id: detect-private-key
+        stages: [commit]
+      - id: check-executables-have-shebangs
+        stages: [commit]
+      - id: check-added-large-files
+        args: ['--maxkb=100']
+        stages: [commit]
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v2.6.0
+    hooks:
+      - id: reorder-python-imports
+        args: [--py3-plus]
+        pass_filenames: true
+  - repo: https://github.com/psf/black
+    rev: 21.7b0
+    hooks:
+      - id: black
+  - repo: https://github.com/asottile/blacken-docs
+    rev: v1.8.0
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: [black==21.7b0]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.7.2
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.9.0
+    hooks:
+      - id: markdownlint
+        args: ["--style", ".mdl.rb"]
