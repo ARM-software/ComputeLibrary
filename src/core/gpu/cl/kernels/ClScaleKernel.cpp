@@ -50,10 +50,10 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo *src, c
     const unsigned int dst_width  = dst->dimension(idx_width);
     const unsigned int dst_height = dst->dimension(idx_height);
 
-    float wr = arm_compute::scale_utils::calculate_resize_ratio(src_width, dst_width, align_corners);
-    float hr = arm_compute::scale_utils::calculate_resize_ratio(src_height, dst_height, align_corners);
+    float scale_x = arm_compute::scale_utils::calculate_resize_ratio(src_width, dst_width, align_corners);
+    float scale_y = arm_compute::scale_utils::calculate_resize_ratio(src_height, dst_height, align_corners);
 
-    return std::make_pair(wr, hr);
+    return std::make_pair(scale_x, scale_y);
 }
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info)
@@ -65,78 +65,22 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst == src);
     ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(src->data_type()) && !is_data_type_quantized_asymmetric(src->data_type()));
 
-    float            wr          = 0.f;
-    float            hr          = 0.f;
+    float            scale_x     = 0.f;
+    float            scale_y     = 0.f;
     const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
-    std::tie(wr, hr) = calculate_scale_factors(src, dst, data_layout, info.align_corners);
+    std::tie(scale_x, scale_y) = calculate_scale_factors(src, dst, data_layout, info.align_corners);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(info.interpolation_policy == InterpolationPolicy::AREA && (wr > 1.f || hr > 1.f));
+    ARM_COMPUTE_RETURN_ERROR_ON(info.interpolation_policy == InterpolationPolicy::AREA && (scale_x > 1.f || scale_y > 1.f));
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info, BorderSize &border)
-{
-    Window           win{};
-    bool             window_changed{};
-    unsigned int     num_elems_processed_per_iteration = 0;
-    const DataLayout data_layout                       = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
-
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-        {
-            if(info.border_mode == BorderMode::UNDEFINED)
-            {
-                border = BorderSize(0);
-            }
-
-            num_elems_processed_per_iteration = 4;
-            // Configure kernel window
-            win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration));
-            AccessWindowStatic input_access(src,
-                                            -border.left, -border.top,
-                                            src->dimension(0) + border.right,
-                                            src->dimension(1) + border.bottom);
-            AccessWindowHorizontal output_access(dst, 0, num_elems_processed_per_iteration);
-
-            output_access.set_valid_region(win, calculate_valid_region_scale(*src,
-                                                                             dst->tensor_shape(),
-                                                                             info.interpolation_policy,
-                                                                             info.sampling_policy,
-                                                                             info.border_mode == BorderMode::UNDEFINED));
-
-            window_changed = update_window_and_padding(win, input_access, output_access);
-        }
-        break;
-        case DataLayout::NHWC:
-        {
-            // Configure kernel window
-            win = calculate_max_window(*dst, Steps());
-        }
-        break;
-        default:
-            ARM_COMPUTE_ERROR("Data layout not supported");
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
-
-BorderSize ClScaleKernel::border_size() const
-{
-    return BorderSize(static_cast<size_t>(_data_layout == DataLayout::NCHW));
-}
 
 Status ClScaleKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, info));
-    const DataLayout data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
-    BorderSize       border      = BorderSize(static_cast<size_t>(data_layout == DataLayout::NCHW));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(), info, border).first);
-
     return Status{};
 }
 
@@ -153,37 +97,45 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     // Info required for the static tuning
     _data_layout = info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : info.data_layout;
 
-    float wr = 0.f;
-    float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(src, dst, _data_layout, info.align_corners);
-    const bool call_quantized_kernel = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
-
-    // Compute actual border size
-    BorderSize border  = border_size();
     const bool is_nhwc = _data_layout == DataLayout::NHWC;
+
+    float scale_x = 0.f;
+    float scale_y = 0.f;
+    std::tie(scale_x, scale_y) = calculate_scale_factors(src, dst, _data_layout, info.align_corners);
+    const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     auto interpolation_policy_to_use = info.interpolation_policy;
-    if(info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
+    if(info.interpolation_policy == InterpolationPolicy::AREA && scale_x <= 1.f && scale_y <= 1.f)
     {
         interpolation_policy_to_use = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(src, dst, info, border);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
-
     // Create kernel
+    const int          idx_width         = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int          idx_height        = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int src_width         = src->dimension(idx_width);
+    const unsigned int src_height        = src->dimension(idx_height);
+    const unsigned int dst_width         = dst->dimension(idx_width);
+    const unsigned int vec_size          = adjust_vec_size(is_nhwc ? 1 : 4, dst_width);
+    const unsigned int vec_size_leftover = (dst_width % vec_size);
+
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
-    build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
+    build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
+    build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
+
     build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
+    build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
+    build_opts.add_option_if(!is_nhwc, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
+    build_opts.add_option_if(!is_nhwc, "-DVEC_SIZE_LEFTOVER=" + ((vec_size_leftover == 0) ? support::cpp11::to_string(vec_size) : support::cpp11::to_string(vec_size_leftover)));
     build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(dst->dimension(2)));
     build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
     build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
-    if(call_quantized_kernel)
+    if(is_qasymm_bilinear)
     {
         const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
         build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
@@ -191,26 +143,16 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     }
     std::string interpolation_name = string_from_interpolation_policy(interpolation_policy_to_use);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
-    std::string kernel_name = "scale_" + interpolation_name;
-    kernel_name += call_quantized_kernel ? "_quantized_" : "_";
+    std::string kernel_name = "scale_" + interpolation_name + "_";
     kernel_name += lower_string(string_from_data_layout(_data_layout));
 
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
-    if(is_nhwc)
-    {
-        ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
-    }
 
-    const int          idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-    const int          idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-    unsigned int       idx        = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
-    const unsigned int src_width  = src->dimension(idx_width);
-    const unsigned int dst_height = src->dimension(idx_height);
+    // Configure kernel window
+    Window win = calculate_max_window(*dst, Steps(vec_size));
+    ICLKernel::configure_internal(win);
 
-    _kernel.setArg<float>(idx++, src_width);
-    _kernel.setArg<float>(idx++, dst_height);
-    _kernel.setArg<float>(idx++, wr);
-    _kernel.setArg<float>(idx++, hr);
+    ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
     // Set config_id for enabling LWS tuning
     _config_id = "scale_";

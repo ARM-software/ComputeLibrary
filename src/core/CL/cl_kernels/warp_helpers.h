@@ -63,12 +63,6 @@ inline const VEC_DATA_TYPE(DATA_TYPE, 4) read_texels4(const Image *in, const int
                                          *((__global DATA_TYPE *)offset(in, coords.s6, coords.s7)));
 }
 
-/** Returns the current thread coordinates. */
-inline const float2 get_current_coords()
-{
-    return (float2)(get_global_id(0) * 4, get_global_id(1));
-}
-
 /** Given a texel coordinates this function will return the following array of coordinates:
  * [ P, right neighbour, below neighbour, below right neighbour ]
  *

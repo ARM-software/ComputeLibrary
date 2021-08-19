@@ -394,7 +394,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
     { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
     { "scale_bilinear_nchw", "nchw/scale.cl" },
-    { "scale_bilinear_quantized_nchw", "nchw/scale_quantized.cl" },
     { "space_to_batch_nchw", "nchw/space_to_batch.cl" },
     { "space_to_batch_static_nchw", "nchw/space_to_batch.cl" },
     { "space_to_depth_nchw", "nchw/space_to_depth.cl" },
@@ -455,7 +454,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
     { "scale_bilinear_nhwc", "nhwc/scale.cl" },
-    { "scale_bilinear_quantized_nhwc", "nhwc/scale_quantized.cl" },
     { "space_to_batch_nhwc", "nhwc/space_to_batch.cl" },
     { "space_to_batch_static_nhwc", "nhwc/space_to_batch.cl" },
     { "space_to_depth_nhwc", "nhwc/space_to_depth.cl" },
@@ -827,10 +825,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/nchw/scale.clembed"
     },
     {
-        "nchw/scale_quantized.cl",
-#include "./cl_kernels/nchw/scale_quantized.clembed"
-    },
-    {
         "nchw/space_to_batch.cl",
 #include "./cl_kernels/nchw/space_to_batch.clembed"
     },
@@ -924,10 +918,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/scale.cl",
 #include "./cl_kernels/nhwc/scale.clembed"
-    },
-    {
-        "nhwc/scale_quantized.cl",
-#include "./cl_kernels/nhwc/scale_quantized.clembed"
     },
     {
         "nhwc/space_to_batch.cl",

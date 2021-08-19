@@ -241,7 +241,6 @@ if env['opencl'] and env['embed_kernels']:
                         'src/core/CL/cl_kernels/repeat.h',
                         'src/core/CL/cl_kernels/tile_helpers.h',
                         'src/core/CL/cl_kernels/types.h',
-                        'src/core/CL/cl_kernels/warp_helpers_quantized.h',
                         'src/core/CL/cl_kernels/warp_helpers.h'
                     ]
 
@@ -328,7 +327,6 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nchw/remap.cl',
                     'src/core/CL/cl_kernels/nchw/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nchw/scale.cl',
-                    'src/core/CL/cl_kernels/nchw/scale_quantized.cl',
                     'src/core/CL/cl_kernels/nchw/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nchw/space_to_depth.cl',
                     'src/core/CL/cl_kernels/nchw/upsample_layer.cl',
@@ -355,7 +353,6 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/remap.cl',
                     'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
-                    'src/core/CL/cl_kernels/nhwc/scale_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_depth.cl',
                     'src/core/CL/cl_kernels/nhwc/upsample_layer.cl',

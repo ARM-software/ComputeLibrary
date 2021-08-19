@@ -59,7 +59,6 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info);
 
     // Inherited methods overridden:
-    BorderSize border_size() const override;
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:

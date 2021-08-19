@@ -41,12 +41,7 @@ void ClScale::configure(const CLCompileContext &compile_context, ITensorInfo *sr
     k->set_target(CLScheduler::get().target());
     k->configure(compile_context, src, dst, info);
     _kernel = std::move(k);
-    if(!_kernel->border_size().empty())
-    {
-        auto b = std::make_unique<CLFillBorderKernel>();
-        b->configure(compile_context, src, _kernel->border_size(), info.border_mode, info.constant_border_value);
-        _border_handler = std::move(b);
-    }
+
     // Tune kernel
     CLScheduler::get().tune_kernel_static(*_kernel);
 }
@@ -59,10 +54,6 @@ Status ClScale::validate(const ITensorInfo *src, const ITensorInfo *dst, const S
 void ClScale::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    if(!_kernel->border_size().empty())
-    {
-        CLScheduler::get().enqueue_op(*_border_handler.get(), tensors, false);
-    }
     CLScheduler::get().enqueue_op(*_kernel.get(), tensors);
 }
 } // namespace opencl

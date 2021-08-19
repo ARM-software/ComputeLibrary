@@ -34,7 +34,6 @@ namespace opencl
 {
 /** Basic function to simulate a scale layer. This function calls the following OpenCL kernels:
  *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
  * -# @ref kernels::ClScaleKernel
  */
 class ClScale : public IClOperator
@@ -61,9 +60,6 @@ public:
 
     // Inherited method overridden
     void run(ITensorPack &tensors) override;
-
-protected:
-    std::unique_ptr<ICLKernel> _border_handler{ nullptr };
 };
 } // namespace opencl
 } // namespace arm_compute

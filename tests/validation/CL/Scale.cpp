@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,16 +183,6 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
     Status     result{};
 
     result = CLScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
-    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
-}
-
-TEST_CASE(WindowShrink, framework::DatasetMode::ALL)
-{
-    const auto input  = TensorInfo{ TensorShape(37U, 37U, 2U), 1, DataType::F32 };
-    const auto output = TensorInfo{ TensorShape(39U, 55U, 2U), 1, DataType::F32 };
-    Status     result{};
-
-    result = CLScale::validate(&input.clone()->set_is_resizable(false), &output.clone()->set_is_resizable(false), ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 

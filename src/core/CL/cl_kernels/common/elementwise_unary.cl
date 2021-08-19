@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "helpers.h"
-#include "warp_helpers.h"
 
 #if defined(DATA_TYPE) && defined(OPERATION)
 
