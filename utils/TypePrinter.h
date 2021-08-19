@@ -1056,6 +1056,19 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
+/** Formatted output of the ITensorInfo* type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ITensorInfo *info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
 /** Formatted output of the Dimensions type.
  *
  * @param[in] dimensions Type to output.
