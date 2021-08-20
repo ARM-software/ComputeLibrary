@@ -93,20 +93,19 @@ public:
 private:
     enum AuxTensorIdx
     {
-        GemmWorkspace = 0,
-        Pretranspose,
-        InterleavedLHS,
-        TransposedRHS,
-        TempResult,
-        PermutedInput,
-        InputTransformed,
-        InputWorkspace,
-        PermutedOutput,
-        PermutedWeights,
-        WeightsTransformed,
-        OutputTransformed,
-        OutputWorkspace,
-        Count
+        GemmWorkspace      = 0,
+        Pretranspose       = 1,
+        InterleavedLHS     = 2,
+        TransposedRHS      = 3,
+        TempResult         = 4,
+        TransformedInput   = 5,
+        TransformedOutput  = 6,
+        WorkspaceIO        = 7,
+        TransformedWeights = 8,
+        PermutedWeights    = 9,
+        PermutedInput      = TransformedOutput,
+        PermutedOutput     = TransformedInput,
+        Count              = 10
     };
 
     std::unique_ptr<CpuGemm>       _gemm_function;

@@ -104,6 +104,20 @@ struct MemoryInfo
           alignment(alignment)
     {
     }
+
+    bool merge(int slot, size_t new_size, size_t new_alignment = 0) noexcept
+    {
+        if(slot != this->slot)
+        {
+            return false;
+        }
+
+        size      = std::max(size, new_size);
+        alignment = std::max(alignment, new_alignment);
+
+        return true;
+    }
+
     int            slot{ ACL_UNKNOWN };
     MemoryLifetime lifetime{ MemoryLifetime::Temporary };
     size_t         size{ 0 };

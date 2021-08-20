@@ -194,8 +194,8 @@ template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, in
 unsigned int CpuWinogradConv2dTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_weight_storage_size(int num_output_channels, int num_input_channels) const
 {
     const KernelShape shape(num_output_channels, KernelRows, KernelCols, num_input_channels);
-    return static_cast<unsigned int>(
-               WinogradConv::get_kernel_storage_size(num_input_channels, num_output_channels));
+    // WinogradConv returns the size in bytes, we divide by `sizeof(T)` to express that in units of T
+    return static_cast<unsigned int>(WinogradConv::get_kernel_storage_size(num_input_channels, num_output_channels) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -297,7 +297,8 @@ unsigned int CpuWinogradConv2dTransformInputKernel<T, OutputTileRows, OutputTile
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(num_batches, num_rows, num_cols, num_channels);
     const KernelShape   kern_shape(1, KernelRows, KernelCols, num_channels);
-    return static_cast<unsigned int>(WinogradConv::get_input_storage_size(num_batches, num_rows, num_cols, num_channels, same_padding));
+    // Return the size, converted into units of TIn
+    return static_cast<unsigned int>(WinogradConv::get_input_storage_size(num_batches, num_rows, num_cols, num_channels, same_padding) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -432,8 +433,9 @@ unsigned int CpuWinogradConv2dTransformOutputKernel<T, OutputTileRows, OutputTil
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(num_batches, num_rows, num_cols, 1);
     const KernelShape   kern_shape(num_output_channels, KernelRows, KernelCols, 1);
+    // Return the size, converted into units of TOut
     return static_cast<unsigned int>(
-               WinogradConv::get_output_storage_size(num_batches, num_rows, num_cols, num_output_channels));
+               WinogradConv::get_output_storage_size(num_batches, num_rows, num_cols, num_output_channels) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
