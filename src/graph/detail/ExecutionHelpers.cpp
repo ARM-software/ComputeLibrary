@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -264,6 +264,8 @@ bool call_all_output_node_accessors(ExecutionWorkload &workload)
         bool valid_output = (output_tensor != nullptr) && output_tensor->call_accessor();
         is_valid          = is_valid && valid_output;
     });
+
+    sync_backends();
 
     return is_valid;
 }

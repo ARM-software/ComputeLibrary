@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,20 +80,28 @@ bool Tensor::call_accessor()
         return false;
     }
 
-    // Map tensor
-    _handle->map(true);
+    const bool access_data = _accessor->access_tensor_data();
 
-    // Return in case of null backend buffer
-    if(_handle->tensor().buffer() == nullptr)
+    if(access_data)
     {
-        return false;
+        // Map tensor
+        _handle->map(true);
+
+        // Return in case of null backend buffer
+        if(_handle->tensor().buffer() == nullptr)
+        {
+            return false;
+        }
     }
 
     // Call accessor
     bool retval = _accessor->access_tensor(_handle->tensor());
 
-    // Unmap tensor
-    _handle->unmap();
+    if(access_data)
+    {
+        // Unmap tensor
+        _handle->unmap();
+    }
 
     return retval;
 }

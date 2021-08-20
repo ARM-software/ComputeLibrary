@@ -162,6 +162,11 @@ DummyAccessor::DummyAccessor(unsigned int maximum)
 {
 }
 
+bool DummyAccessor::access_tensor_data()
+{
+    return false;
+}
+
 bool DummyAccessor::access_tensor(ITensor &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);

@@ -116,6 +116,17 @@ void release_default_graph_context(GraphContext &ctx)
     }
 }
 
+void sync_backends()
+{
+    for(const auto &backend : backends::BackendRegistry::get().backends())
+    {
+        if(backend.second->is_backend_supported())
+        {
+            backend.second->sync();
+        }
+    }
+}
+
 void setup_requested_backend_context(GraphContext &ctx, Target target)
 {
     if(backends::BackendRegistry::get().contains(target))

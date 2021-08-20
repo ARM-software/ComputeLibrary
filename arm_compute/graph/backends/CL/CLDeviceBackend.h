@@ -28,8 +28,8 @@
 
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLGEMMHeuristicsHandle.h"
-#include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/CLTypes.h"
 
 namespace arm_compute
 {
@@ -70,6 +70,7 @@ public:
     Status validate_node(INode &node) override;
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
     std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
+    void                                          sync() override;
 
 private:
     int                                _context_count;   /**< Counts how many contexts are currently using the backend */

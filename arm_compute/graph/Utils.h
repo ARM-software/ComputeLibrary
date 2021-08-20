@@ -107,6 +107,8 @@ void setup_requested_backend_context(GraphContext &ctx, Target target);
  * @param[in,out] ctx Graph Context
  */
 void release_default_graph_context(GraphContext &ctx);
+/** Synchronize kernels execution on the backends. On GPU, this results in a blocking call waiting for all kernels to be completed. */
+void sync_backends();
 /** Get size of a tensor's given dimension depending on its layout
  *
  * @param[in] descriptor            Descriptor
