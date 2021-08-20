@@ -28,7 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuGemmConv2d.h"
+#include "src/cpu/operators/CpuGemmConv2d.h"
 
 using namespace arm_compute::experimental;
 

@@ -29,9 +29,9 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/cpu/kernels/CpuWinogradConv2dKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
+#include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
+#include "src/cpu/operators/CpuWinogradConv2d.h"
 
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"

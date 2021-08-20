@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuElementwise.h"
+#include "src/cpu/operators/CpuElementwise.h"
 
 #include "arm_compute/core/ITensor.h"
 

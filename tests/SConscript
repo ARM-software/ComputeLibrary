@@ -134,7 +134,7 @@ if env['neon']:
     filter_pattern = test_env['test_filter']
     files_benchmark += Glob('benchmark/NEON/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/NEON/' + filter_pattern)
-    test_env.Append(CPPPATH = ["#/src/core/cpu/kernels/assembly/"])
+    test_env.Append(CPPPATH = ["#/src/cpu/kernels/assembly/"])
     if env['external_tests_dir']:
         files_benchmark += Glob(env['external_tests_dir'] + '/tests/benchmark/NEON/' + filter_pattern)
 

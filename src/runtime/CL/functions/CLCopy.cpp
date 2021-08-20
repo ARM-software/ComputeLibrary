@@ -28,7 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClCopy.h"
+#include "src/gpu/cl/operators/ClCopy.h"
 
 #include <utility>
 

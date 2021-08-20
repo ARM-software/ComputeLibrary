@@ -41,15 +41,15 @@
       "src/core/CL/ICLSimpleKernel.cpp",
       "src/core/CL/ICLTensor.cpp",
       "src/core/CL/OpenCL.cpp",
-      "src/core/gpu/cl/ClKernelLibrary.cpp",
-      "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
-      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
-      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
-      "src/core/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp",
-      "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp",
-      "src/core/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
-      "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
-      "src/core/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
+      "src/gpu/cl/ClKernelLibrary.cpp",
+      "src/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
+      "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
+      "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
+      "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeValhall.cpp",
+      "src/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedBifrost.cpp",
+      "src/gpu/cl/kernels/gemm/reshaped/ClGemmDefaultConfigReshapedValhall.cpp",
+      "src/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyBifrost.cpp",
+      "src/gpu/cl/kernels/gemm/reshaped_only_rhs/ClGemmDefaultConfigReshapedRhsOnlyValhall.cpp",
       "src/core/CL/kernels/CLFillBorderKernel.cpp",
       "src/gpu/cl/ClContext.cpp",
       "src/gpu/cl/ClQueue.cpp",
@@ -90,52 +90,52 @@
       "Activation": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClActivation.cpp"
+            "src/gpu/cl/operators/ClActivation.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClActivationKernel.cpp"
+            "src/gpu/cl/kernels/ClActivationKernel.cpp"
           ]
         }
       },
       "Add": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClAdd.cpp"
+            "src/gpu/cl/operators/ClAdd.cpp"
           ]
         }
       },
       "Cast": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClCast.cpp"
+            "src/gpu/cl/operators/ClCast.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClCastKernel.cpp"
+            "src/gpu/cl/kernels/ClCastKernel.cpp"
           ]
         }
       },
       "Concatenate": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClConcatenate.cpp"
+            "src/gpu/cl/operators/ClConcatenate.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClWidthConcatenate4TensorsKernel.cpp",
-            "src/core/gpu/cl/kernels/ClWidthConcatenate2TensorsKernel.cpp",
-            "src/core/gpu/cl/kernels/ClWidthConcatenateKernel.cpp",
-            "src/core/gpu/cl/kernels/ClHeightConcatenateKernel.cpp",
-            "src/core/gpu/cl/kernels/ClDepthConcatenateKernel.cpp",
-            "src/core/gpu/cl/kernels/ClBatchConcatenateKernel.cpp"
+            "src/gpu/cl/kernels/ClWidthConcatenate4TensorsKernel.cpp",
+            "src/gpu/cl/kernels/ClWidthConcatenate2TensorsKernel.cpp",
+            "src/gpu/cl/kernels/ClWidthConcatenateKernel.cpp",
+            "src/gpu/cl/kernels/ClHeightConcatenateKernel.cpp",
+            "src/gpu/cl/kernels/ClDepthConcatenateKernel.cpp",
+            "src/gpu/cl/kernels/ClBatchConcatenateKernel.cpp"
           ]
         }
       },
       "DirectConv2d": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClDirectConv2d.cpp"
+            "src/gpu/cl/operators/ClDirectConv2d.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClDirectConv2dKernel.cpp"
+            "src/gpu/cl/kernels/ClDirectConv2dKernel.cpp"
           ]
         }
       },
@@ -149,230 +149,230 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClFullyConnected.cpp"
+            "src/gpu/cl/operators/ClFullyConnected.cpp"
           ]
         }
       },
       "ConvertFullyConnectedWeights": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClConvertFullyConnectedWeights.cpp"
+            "src/gpu/cl/operators/ClConvertFullyConnectedWeights.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.cpp"
+            "src/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.cpp"
           ]
         }
       },
       "Permute": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClPermute.cpp"
+            "src/gpu/cl/operators/ClPermute.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClPermuteKernel.cpp"
+            "src/gpu/cl/kernels/ClPermuteKernel.cpp"
           ]
         }
       },
       "Pool2d": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClPool2d.cpp"
+            "src/gpu/cl/operators/ClPool2d.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClPool2dKernel.cpp"
+            "src/gpu/cl/kernels/ClPool2dKernel.cpp"
           ]
         }
       },
       "Conv2d": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClConv2d.cpp"
+            "src/gpu/cl/operators/ClConv2d.cpp"
           ]
         }
       },
       "PRelu": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClPRelu.cpp"
+            "src/gpu/cl/operators/ClPRelu.cpp"
           ]
         }
       },
       "Reshape": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClReshape.cpp"
+            "src/gpu/cl/operators/ClReshape.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClReshapeKernel.cpp"
+            "src/gpu/cl/kernels/ClReshapeKernel.cpp"
           ]
         }
       },
       "Copy": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClCopy.cpp"
+            "src/gpu/cl/operators/ClCopy.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClCopyKernel.cpp"
+            "src/gpu/cl/kernels/ClCopyKernel.cpp"
           ]
         }
       },
       "Crop": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClCrop.cpp"
+            "src/gpu/cl/operators/ClCrop.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClCropKernel.cpp"
+            "src/gpu/cl/kernels/ClCropKernel.cpp"
           ]
         }
       },
       "Dequantize": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClDequantize.cpp"
+            "src/gpu/cl/operators/ClDequantize.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClDequantizeKernel.cpp"
+            "src/gpu/cl/kernels/ClDequantizeKernel.cpp"
           ]
         }
       },
       "Elementwise": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClElementwiseOperations.cpp"
+            "src/gpu/cl/operators/ClElementwiseOperations.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClElementwiseKernel.cpp"
+            "src/gpu/cl/kernels/ClElementwiseKernel.cpp"
           ]
         }
       },
       "ElementwiseUnary": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClElementwiseUnary.cpp"
+            "src/gpu/cl/operators/ClElementwiseUnary.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClElementwiseUnaryKernel.cpp"
+            "src/gpu/cl/kernels/ClElementwiseUnaryKernel.cpp"
           ]
         }
       },
       "Fill": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClFill.cpp"
+            "src/gpu/cl/operators/ClFill.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClFillKernel.cpp"
+            "src/gpu/cl/kernels/ClFillKernel.cpp"
           ]
         }
       },
       "Flatten": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClFlatten.cpp"
+            "src/gpu/cl/operators/ClFlatten.cpp"
           ]
         }
       },
       "Floor": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClFloor.cpp"
+            "src/gpu/cl/operators/ClFloor.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClFloorKernel.cpp"
+            "src/gpu/cl/kernels/ClFloorKernel.cpp"
           ]
         }
       },
       "GEMM": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClGemm.cpp",
-            "src/runtime/gpu/cl/operators/ClGemmConv2d.cpp"
+            "src/gpu/cl/operators/ClGemm.cpp",
+            "src/gpu/cl/operators/ClGemmConv2d.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.cpp"
+            "src/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.cpp"
           ]
         }
       },
       "GEMMLowp": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.cpp",
-            "src/runtime/gpu/cl/operators/ClGemmLowpOutputStage.cpp"
+            "src/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.cpp",
+            "src/gpu/cl/operators/ClGemmLowpOutputStage.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpOffsetContributionKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpOffsetContributionOutputStageKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFloatKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleKernel.cpp",
-            "src/core/gpu/cl/kernels/ClGemmLowpReductionKernel.cpp" 
+            "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpOffsetContributionKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpOffsetContributionOutputStageKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFloatKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleKernel.cpp",
+            "src/gpu/cl/kernels/ClGemmLowpReductionKernel.cpp" 
           ]
         }
       },
       "Mul": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClMul.cpp"
+            "src/gpu/cl/operators/ClMul.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClMulKernel.cpp"
+            "src/gpu/cl/kernels/ClMulKernel.cpp"
           ]
         }
       },
       "Quantize": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClQuantize.cpp"
+            "src/gpu/cl/operators/ClQuantize.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClQuantizeKernel.cpp"
+            "src/gpu/cl/kernels/ClQuantizeKernel.cpp"
           ]
         }
       },
       "Scale": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClScale.cpp"
+            "src/gpu/cl/operators/ClScale.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClScaleKernel.cpp"
+            "src/gpu/cl/kernels/ClScaleKernel.cpp"
           ]
         }
       },
       "Softmax": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClSoftmax.cpp"
+            "src/gpu/cl/operators/ClSoftmax.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClSoftmaxKernel.cpp"
+            "src/gpu/cl/kernels/ClSoftmaxKernel.cpp"
           ]
         }
       },
       "Sub": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClSub.cpp"
+            "src/gpu/cl/operators/ClSub.cpp"
           ]
         }
       },
       "Transpose": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClTranspose.cpp"
+            "src/gpu/cl/operators/ClTranspose.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClTransposeKernel.cpp"
+            "src/gpu/cl/kernels/ClTransposeKernel.cpp"
           ]
         }
       },
@@ -428,8 +428,8 @@
       "GEMMConv2d": {
         "files": {
           "kernel": [
-            "src/core/gpu/cl/kernels/ClCol2ImKernel.cpp",
-            "src/core/gpu/cl/kernels/ClIm2ColKernel.cpp"
+            "src/gpu/cl/kernels/ClCol2ImKernel.cpp",
+            "src/gpu/cl/kernels/ClIm2ColKernel.cpp"
           ]
         }
       },
@@ -520,7 +520,7 @@
       "LogicalNot": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClLogicalNot.cpp"
+            "src/gpu/cl/operators/ClLogicalNot.cpp"
           ]
         }
       },
@@ -674,19 +674,19 @@
       "WeightsReshape": {
         "files": {
           "kernel": [
-            "src/core/gpu/cl/kernels/ClWeightsReshapeKernel.cpp"
+            "src/gpu/cl/kernels/ClWeightsReshapeKernel.cpp"
           ]
         }
       },
       "WinogradConv2d": {
         "files": {
           "operator": [
-            "src/runtime/gpu/cl/operators/ClWinogradConv2d.cpp"
+            "src/gpu/cl/operators/ClWinogradConv2d.cpp"
           ],
           "kernel": [
-            "src/core/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
-            "src/core/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
-            "src/core/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp"
+            "src/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
+            "src/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
+            "src/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp"
           ]
         }
       }
@@ -711,43 +711,43 @@
       "Activation": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuActivation.cpp"
+            "src/cpu/operators/CpuActivation.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuActivationKernel.cpp"
+            "src/cpu/kernels/CpuActivationKernel.cpp"
           ],
           "sve": {
             "fp32": [
-              "src/core/cpu/kernels/activation/sve/fp32.cpp"
+              "src/cpu/kernels/activation/sve/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/activation/sve/fp16.cpp"
+              "src/cpu/kernels/activation/sve/fp16.cpp"
             ],
             "qsymm16": [
-              "src/core/cpu/kernels/activation/sve/qsymm16.cpp"
+              "src/cpu/kernels/activation/sve/qsymm16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/activation/sve/qasymm8.cpp"
+              "src/cpu/kernels/activation/sve/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/activation/sve/qasymm8_signed.cpp"
+              "src/cpu/kernels/activation/sve/qasymm8_signed.cpp"
             ]
           },
           "neon": {
             "fp32": [
-              "src/core/cpu/kernels/activation/neon/fp32.cpp"
+              "src/cpu/kernels/activation/neon/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/activation/neon/fp16.cpp"
+              "src/cpu/kernels/activation/neon/fp16.cpp"
             ],
             "qsymm16": [
-              "src/core/cpu/kernels/activation/neon/qsymm16.cpp"
+              "src/cpu/kernels/activation/neon/qsymm16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/activation/neon/qasymm8.cpp"
+              "src/cpu/kernels/activation/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/activation/neon/qasymm8_signed.cpp"
+              "src/cpu/kernels/activation/neon/qasymm8_signed.cpp"
             ]
           }
         }
@@ -755,34 +755,34 @@
       "Add": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuAdd.cpp"
+            "src/cpu/operators/CpuAdd.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuAddKernel.cpp"
+            "src/cpu/kernels/CpuAddKernel.cpp"
           ],
           "sve": {
             "all": [
-              "src/core/cpu/kernels/add/sve/impl.cpp"
+              "src/cpu/kernels/add/sve/impl.cpp"
             ],
             "qsymm16": [
-              "src/core/cpu/kernels/add/sve/qsymm16.cpp"
+              "src/cpu/kernels/add/sve/qsymm16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/add/sve/qasymm8.cpp"
+              "src/cpu/kernels/add/sve/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/add/sve/qasymm8_signed.cpp"
+              "src/cpu/kernels/add/sve/qasymm8_signed.cpp"
             ]
           },
           "neon": {
             "qsymm16": [
-              "src/core/cpu/kernels/add/neon/qsymm16.cpp"
+              "src/cpu/kernels/add/neon/qsymm16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/add/neon/qasymm8.cpp"
+              "src/cpu/kernels/add/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/add/neon/qasymm8_signed.cpp"
+              "src/cpu/kernels/add/neon/qasymm8_signed.cpp"
             ]
           }
         }
@@ -862,64 +862,64 @@
       "Col2Im": {
         "files": {
           "kernel": [
-            "src/core/cpu/kernels/CpuCol2ImKernel.cpp"
+            "src/cpu/kernels/CpuCol2ImKernel.cpp"
           ]
         }
       },
       "Cast": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuCast.cpp"
+            "src/cpu/operators/CpuCast.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuCastKernel.cpp"
+            "src/cpu/kernels/CpuCastKernel.cpp"
           ]
         }
       },
       "Concatenate": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuConcatenate.cpp"
+            "src/cpu/operators/CpuConcatenate.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuConcatenateWidthKernel.cpp",
-            "src/core/cpu/kernels/CpuConcatenateBatchKernel.cpp",
-            "src/core/cpu/kernels/CpuConcatenateDepthKernel.cpp",
-            "src/core/cpu/kernels/CpuConcatenateHeightKernel.cpp"
+            "src/cpu/kernels/CpuConcatenateWidthKernel.cpp",
+            "src/cpu/kernels/CpuConcatenateBatchKernel.cpp",
+            "src/cpu/kernels/CpuConcatenateDepthKernel.cpp",
+            "src/cpu/kernels/CpuConcatenateHeightKernel.cpp"
           ]
         }
       },
       "ConvertFullyConnectedWeights": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp"
+            "src/cpu/operators/CpuConvertFullyConnectedWeights.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp"
+            "src/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp"
           ]
         }
       },
       "ConvertQuantizedSignedness": {
         "files": {
           "kernel": [
-            "src/core/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp"
+            "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.cpp"
           ]
         }
       },
       "Convolution": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuConv2d.cpp"
+            "src/cpu/operators/CpuConv2d.cpp"
           ]
         }
       },
       "Copy": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuCopy.cpp"
+            "src/cpu/operators/CpuCopy.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuCopyKernel.cpp"
+            "src/cpu/kernels/CpuCopyKernel.cpp"
           ]
         }
       },
@@ -937,16 +937,16 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuDepthwiseConv2d.cpp",
-            "src/runtime/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.cpp",
-            "src/core/cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.cpp"
+            "src/cpu/operators/CpuDepthwiseConv2d.cpp",
+            "src/cpu/operators/CpuDepthwiseConv2dAssemblyDispatch.cpp",
+            "src/cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.cpp"
           ],
           "kernel": [
             "src/core/NEON/kernels/convolution/common/padding.cpp",
             "src/core/NEON/kernels/convolution/common/qasymm8.cpp",
             "src/core/NEON/kernels/convolution/common/qsymm8.cpp",
             "src/core/NEON/kernels/convolution/common/utils.cpp",
-            "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.cpp"
+            "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.cpp"
           ],
           "sve": {
             "all": [
@@ -1068,10 +1068,10 @@
       "Dequantize": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuDequantize.cpp"
+            "src/cpu/operators/CpuDequantize.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuDequantizeKernel.cpp"
+            "src/cpu/kernels/CpuDequantizeKernel.cpp"
           ]
         }
       },
@@ -1082,25 +1082,25 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuDirectConv2d.cpp"
+            "src/cpu/operators/CpuDirectConv2d.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuDirectConv2dKernel.cpp",
-            "src/core/cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp"
+            "src/cpu/kernels/CpuDirectConv2dKernel.cpp",
+            "src/cpu/kernels/CpuDirectConv2dOutputStageKernel.cpp"
           ]
         }
       },
       "Elementwise": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuElementwise.cpp"
+            "src/cpu/operators/CpuElementwise.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuElementwiseKernel.cpp"
+            "src/cpu/kernels/CpuElementwiseKernel.cpp"
           ],
           "sve": {
             "all": [
-              "src/core/cpu/kernels/elementwise/sve/elementwise.cpp"
+              "src/cpu/kernels/elementwise/sve/elementwise.cpp"
             ]
           }
         }
@@ -1108,14 +1108,14 @@
       "ElementwiseUnary": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuElementwiseUnary.cpp"
+            "src/cpu/operators/CpuElementwiseUnary.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuElementwiseUnaryKernel.cpp"
+            "src/cpu/kernels/CpuElementwiseUnaryKernel.cpp"
           ],
           "sve": {
             "all": [
-              "src/core/cpu/kernels/elementwise/sve/elementwise_unary.cpp"
+              "src/cpu/kernels/elementwise/sve/elementwise_unary.cpp"
             ]
           }
         }
@@ -1142,34 +1142,34 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuFlatten.cpp"
+            "src/cpu/operators/CpuFlatten.cpp"
           ]
         }
       },
       "Fill": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuFill.cpp"
+            "src/cpu/operators/CpuFill.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuFillKernel.cpp"
+            "src/cpu/kernels/CpuFillKernel.cpp"
           ]
         }
       },
       "Floor": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuFloor.cpp"
+            "src/cpu/operators/CpuFloor.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuFloorKernel.cpp"
+            "src/cpu/kernels/CpuFloorKernel.cpp"
           ],
           "neon": {
             "fp32": [
-              "src/core/cpu/kernels/floor/neon/fp32.cpp"
+              "src/cpu/kernels/floor/neon/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/floor/neon/fp16.cpp"
+              "src/cpu/kernels/floor/neon/fp16.cpp"
             ]
           }
         }
@@ -1183,7 +1183,7 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuFullyConnected.cpp"
+            "src/cpu/operators/CpuFullyConnected.cpp"
           ]
         },
         "kernel": [
@@ -1199,12 +1199,12 @@
       },
       "GEMM": {
         "files": {
-          "operator" : ["src/runtime/cpu/operators/CpuGemm.cpp"],
+          "operator" : ["src/cpu/operators/CpuGemm.cpp"],
           "kernel": [
-            "src/core/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp"
+            "src/cpu/kernels/CpuGemmMatrixAdditionKernel.cpp",
+            "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.cpp",
+            "src/cpu/kernels/CpuGemmTranspose1xWKernel.cpp",
+            "src/cpu/kernels/CpuGemmInterleave4x4Kernel.cpp"
           ]
         }
       },
@@ -1214,18 +1214,18 @@
         ],
         "files": {
           "operator" : [
-              "src/runtime/cpu/operators/CpuGemmLowpOutputStage.cpp",
-              "src/runtime/cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp"
+              "src/cpu/operators/CpuGemmLowpOutputStage.cpp",
+              "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpMatrixMultiplyKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
-            "src/core/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp"
+            "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpMatrixMultiplyKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
+            "src/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp"
           ]
         }
       },
@@ -1240,17 +1240,17 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuGemmConv2d.cpp"
+            "src/cpu/operators/CpuGemmConv2d.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuWeightsReshapeKernel.cpp"
+            "src/cpu/kernels/CpuWeightsReshapeKernel.cpp"
           ]
         }
       },
       "GemmAssemblyDispatch": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp"
+            "src/cpu/operators/internal/CpuGemmAssemblyDispatch.cpp"
           ],
           "kernel": [
             "src/core/NEON/kernels/arm_gemm/gemm_fp16.cpp",
@@ -1396,37 +1396,37 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuGemmDirectConv2d.cpp"
+            "src/cpu/operators/CpuGemmDirectConv2d.cpp"
           ]
         }
       },
       "Mul": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuMul.cpp"
+            "src/cpu/operators/CpuMul.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuMulKernel.cpp"
+            "src/cpu/kernels/CpuMulKernel.cpp"
           ]
         }
       },
       "Quantize": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuQuantize.cpp"
+            "src/cpu/operators/CpuQuantize.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuQuantizeKernel.cpp"
+            "src/cpu/kernels/CpuQuantizeKernel.cpp"
           ]
         }
       },
       "Reshape": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuReshape.cpp"
+            "src/cpu/operators/CpuReshape.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuReshapeKernel.cpp"
+            "src/cpu/kernels/CpuReshapeKernel.cpp"
           ]
         }
       },
@@ -1447,7 +1447,7 @@
       "Im2Col": {
         "files": {
           "kernel": [
-            "src/core/cpu/kernels/CpuIm2ColKernel.cpp"
+            "src/cpu/kernels/CpuIm2ColKernel.cpp"
           ]
         }
       },
@@ -1516,21 +1516,21 @@
       "Permute": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuPermute.cpp"
+            "src/cpu/operators/CpuPermute.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuPermuteKernel.cpp"
+            "src/cpu/kernels/CpuPermuteKernel.cpp"
           ]
         }
       },
       "Pool2d": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuPool2d.cpp"
+            "src/cpu/operators/CpuPool2d.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuPool2dKernel.cpp",
-            "src/core/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp",
+            "src/cpu/kernels/CpuPool2dKernel.cpp",
+            "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp",
             "src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_nhwc_1x1_stride_any_depthfirst/generic.cpp",
             "src/core/NEON/kernels/arm_conv/pooling/pooling_fp16.cpp",
             "src/core/NEON/kernels/arm_conv/pooling/pooling_fp32.cpp",
@@ -1541,19 +1541,19 @@
           ],
           "neon": {
             "nchw": [
-              "src/core/cpu/kernels/pool2d/neon/nchw/all.cpp"
+              "src/cpu/kernels/pool2d/neon/nchw/all.cpp"
             ],
             "fp32": [
-              "src/core/cpu/kernels/pool2d/neon/fp32.cpp"
+              "src/cpu/kernels/pool2d/neon/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/pool2d/neon/fp16.cpp"
+              "src/cpu/kernels/pool2d/neon/fp16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/pool2d/neon/qasymm8.cpp"
+              "src/cpu/kernels/pool2d/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"
+              "src/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"
             ],
             "estate64": [
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
@@ -1701,40 +1701,40 @@
       "Scale": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuScale.cpp"
+            "src/cpu/operators/CpuScale.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuScaleKernel.cpp"
+            "src/cpu/kernels/CpuScaleKernel.cpp"
           ],
           "sve": {
             "fp32": [
-              "src/core/cpu/kernels/scale/sve/fp32.cpp"
+              "src/cpu/kernels/scale/sve/fp32.cpp"
             ],
             "fp16": [
-              "src/core/cpu/kernels/scale/sve/fp16.cpp"
+              "src/cpu/kernels/scale/sve/fp16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/scale/sve/qasymm8.cpp"
+              "src/cpu/kernels/scale/sve/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/scale/sve/qasymm8_signed.cpp"
+              "src/cpu/kernels/scale/sve/qasymm8_signed.cpp"
             ],
             "integer": [
-              "src/core/cpu/kernels/scale/sve/integer.cpp"
+              "src/cpu/kernels/scale/sve/integer.cpp"
             ]
           },
           "neon": {
             "fp16": [
-              "src/core/cpu/kernels/scale/neon/fp16.cpp"
+              "src/cpu/kernels/scale/neon/fp16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/scale/neon/qasymm8.cpp"
+              "src/cpu/kernels/scale/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/scale/neon/qasymm8_signed.cpp"
+              "src/cpu/kernels/scale/neon/qasymm8_signed.cpp"
             ],
             "integer": [
-              "src/core/cpu/kernels/scale/neon/integer.cpp"
+              "src/cpu/kernels/scale/neon/integer.cpp"
             ]
           }
         }
@@ -1745,14 +1745,14 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuSoftmax.cpp"
+            "src/cpu/operators/CpuSoftmax.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuSoftmaxKernel.cpp"
+            "src/cpu/kernels/CpuSoftmaxKernel.cpp"
           ],
           "sve": {
             "all": [
-              "src/core/cpu/kernels/softmax/impl/sve/impl.cpp"
+              "src/cpu/kernels/softmax/impl/sve/impl.cpp"
             ]
           }
         }
@@ -1760,20 +1760,20 @@
       "Sub": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuSub.cpp"
+            "src/cpu/operators/CpuSub.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuSubKernel.cpp"
+            "src/cpu/kernels/CpuSubKernel.cpp"
           ],
           "neon": {
             "qsymm16": [
-              "src/core/cpu/kernels/sub/neon/qsymm16.cpp"
+              "src/cpu/kernels/sub/neon/qsymm16.cpp"
             ],
             "qasymm8": [
-              "src/core/cpu/kernels/sub/neon/qasymm8.cpp"
+              "src/cpu/kernels/sub/neon/qasymm8.cpp"
             ],
             "qasymm8_signed": [
-              "src/core/cpu/kernels/sub/neon/qasymm8_signed.cpp"
+              "src/cpu/kernels/sub/neon/qasymm8_signed.cpp"
             ]
           }
         }
@@ -1781,10 +1781,10 @@
       "Transpose": {
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuTranspose.cpp"
+            "src/cpu/operators/CpuTranspose.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuTransposeKernel.cpp"
+            "src/cpu/kernels/CpuTransposeKernel.cpp"
           ]
         }
       },
@@ -1802,10 +1802,10 @@
         ],
         "files": {
           "operator": [
-            "src/runtime/cpu/operators/CpuWinogradConv2d.cpp"
+            "src/cpu/operators/CpuWinogradConv2d.cpp"
           ],
           "kernel": [
-            "src/core/cpu/kernels/CpuWinogradConv2dKernel.cpp",
+            "src/cpu/kernels/CpuWinogradConv2dKernel.cpp",
             "src/core/NEON/kernels/convolution/winograd/padding.cpp",
             "src/core/NEON/kernels/convolution/winograd/winograd.cpp",
             "src/core/NEON/kernels/convolution/winograd/winograd_transforms/input_1x8_fp32_fp32_integers.cpp",

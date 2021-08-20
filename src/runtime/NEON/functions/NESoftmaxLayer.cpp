@@ -25,10 +25,10 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "src/core/cpu/kernels/CpuSoftmaxKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
-#include "src/runtime/cpu/operators/CpuSoftmax.h"
+#include "src/cpu/kernels/CpuSoftmaxKernel.h"
+#include "src/cpu/operators/CpuSoftmax.h"
 
 namespace arm_compute
 {

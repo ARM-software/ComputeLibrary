@@ -30,7 +30,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/gpu/cl/kernels/ClTransposeKernel.h"
+#include "src/gpu/cl/kernels/ClTransposeKernel.h"
 
 namespace arm_compute
 {

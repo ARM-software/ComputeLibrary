@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuTranspose.h"
+#include "src/cpu/operators/CpuTranspose.h"
 
 namespace arm_compute
 {

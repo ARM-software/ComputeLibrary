@@ -31,7 +31,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/helpers/MemoryHelpers.h"
 
-#include "src/runtime/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
+#include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 
 using namespace arm_compute::experimental;
 

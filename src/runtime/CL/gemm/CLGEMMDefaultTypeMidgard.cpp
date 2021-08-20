@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/GPUTarget.h"
-#include "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.h"
+#include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <map>
 #include <utility>

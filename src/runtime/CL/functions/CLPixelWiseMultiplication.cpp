@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClMul.h"
+#include "src/gpu/cl/operators/ClMul.h"
 
 #include <utility>
 

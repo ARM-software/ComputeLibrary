@@ -27,9 +27,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/gpu/cl/ClCompileContext.h"
 
-#include "src/core/gpu/cl/ClKernelLibrary.h"
+#include "src/gpu/cl/ClKernelLibrary.h"
 
 #include <utility>
 #include <vector>

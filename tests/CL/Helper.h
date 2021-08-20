@@ -29,8 +29,8 @@
 #include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/runtime/gpu/cl/IClOperator.h"
-#include "src/runtime/gpu/cl/operators/ClFill.h"
+#include "src/gpu/cl/IClOperator.h"
+#include "src/gpu/cl/operators/ClFill.h"
 
 #include "src/core/CL/ICLKernel.h"
 #include "support/Cast.h"

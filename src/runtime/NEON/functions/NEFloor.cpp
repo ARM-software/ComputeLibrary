@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuFloor.h"
+#include "src/cpu/operators/CpuFloor.h"
 
 namespace arm_compute
 {

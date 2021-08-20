@@ -27,7 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClDequantize.h"
+#include "src/gpu/cl/operators/ClDequantize.h"
 
 namespace arm_compute
 {

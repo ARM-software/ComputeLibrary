@@ -26,7 +26,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/utils/ScaleUtils.h"
-#include "src/runtime/cpu/operators/CpuScale.h"
+#include "src/cpu/operators/CpuScale.h"
 #include "support/Rounding.h"
 
 namespace arm_compute

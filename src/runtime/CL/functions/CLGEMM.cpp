@@ -32,7 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClGemm.h"
+#include "src/gpu/cl/operators/ClGemm.h"
 
 namespace arm_compute
 {

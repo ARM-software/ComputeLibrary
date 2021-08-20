@@ -27,7 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/runtime/cpu/operators/CpuFlatten.h"
+#include "src/cpu/operators/CpuFlatten.h"
 
 namespace arm_compute
 {

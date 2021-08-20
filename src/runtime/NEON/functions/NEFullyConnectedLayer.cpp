@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuFullyConnected.h"
+#include "src/cpu/operators/CpuFullyConnected.h"
 
 namespace arm_compute
 {

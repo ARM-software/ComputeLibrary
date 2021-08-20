@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClFullyConnected.h"
+#include "src/gpu/cl/operators/ClFullyConnected.h"
 
 namespace arm_compute
 {

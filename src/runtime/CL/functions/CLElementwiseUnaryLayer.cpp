@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClElementwiseUnary.h"
+#include "src/gpu/cl/operators/ClElementwiseUnary.h"
 
 namespace arm_compute
 {

@@ -457,7 +457,7 @@ if env['neon']:
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/core/cpu/kernels/assembly/",])
+                                      "src/cpu/kernels/assembly/",])
 
     # Load files based on user's options
     operators = filelist['cpu']['operators']

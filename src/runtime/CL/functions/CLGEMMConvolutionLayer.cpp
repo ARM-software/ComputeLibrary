@@ -32,7 +32,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClGemmConv2d.h"
+#include "src/gpu/cl/operators/ClGemmConv2d.h"
 #include "support/Cast.h"
 
 #include <cmath>

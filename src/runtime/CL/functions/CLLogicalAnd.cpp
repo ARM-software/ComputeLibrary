@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include <utility>
 

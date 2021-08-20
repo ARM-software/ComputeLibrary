@@ -27,7 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/runtime/cpu/operators/CpuDepthwiseConv2d.h"
+#include "src/cpu/operators/CpuDepthwiseConv2d.h"
 
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;

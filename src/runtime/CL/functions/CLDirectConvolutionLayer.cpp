@@ -28,8 +28,8 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/runtime/gpu/cl/operators/ClActivation.h"
-#include "src/runtime/gpu/cl/operators/ClDirectConv2d.h"
+#include "src/gpu/cl/operators/ClActivation.h"
+#include "src/gpu/cl/operators/ClDirectConv2d.h"
 
 namespace arm_compute
 {

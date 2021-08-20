@@ -28,9 +28,9 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/ICLKernel.h"
 
-#include "src/runtime/gpu/cl/operators/ClAdd.h"
-#include "src/runtime/gpu/cl/operators/ClElementwiseOperations.h"
-#include "src/runtime/gpu/cl/operators/ClSub.h"
+#include "src/gpu/cl/operators/ClAdd.h"
+#include "src/gpu/cl/operators/ClElementwiseOperations.h"
+#include "src/gpu/cl/operators/ClSub.h"
 
 namespace arm_compute
 {

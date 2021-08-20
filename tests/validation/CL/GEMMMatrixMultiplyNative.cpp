@@ -26,7 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
+#include "src/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"

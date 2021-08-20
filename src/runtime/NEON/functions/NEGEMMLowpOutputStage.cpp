@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuGemmLowpOutputStage.h"
+#include "src/cpu/operators/CpuGemmLowpOutputStage.h"
 
 namespace arm_compute
 {

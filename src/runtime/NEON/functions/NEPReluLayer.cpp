@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "src/runtime/cpu/operators/CpuPRelu.h"
+#include "src/cpu/operators/CpuPRelu.h"
 
 namespace arm_compute
 {

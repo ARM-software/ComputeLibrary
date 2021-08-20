@@ -32,8 +32,8 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
-#include "src/core/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
 
 namespace arm_compute
 {

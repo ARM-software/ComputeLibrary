@@ -26,7 +26,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "src/runtime/cpu/operators/CpuConv2d.h"
+#include "src/cpu/operators/CpuConv2d.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/DilatedConvolutionLayerDataset.h"

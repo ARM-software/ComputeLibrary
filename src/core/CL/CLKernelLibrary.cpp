@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Error.h"
-#include "src/core/gpu/cl/ClKernelLibrary.h"
+#include "src/gpu/cl/ClKernelLibrary.h"
 #include <algorithm>
 #include <array>
 #include <fstream>

@@ -30,7 +30,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuGemm.h"
+#include "src/cpu/operators/CpuGemm.h"
 
 using namespace arm_compute::experimental;
 

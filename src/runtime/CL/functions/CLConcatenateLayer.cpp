@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClConcatenate.h"
+#include "src/gpu/cl/operators/ClConcatenate.h"
 
 namespace arm_compute
 {

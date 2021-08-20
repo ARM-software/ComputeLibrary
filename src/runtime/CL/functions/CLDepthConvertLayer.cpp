@@ -27,7 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClCast.h"
+#include "src/gpu/cl/operators/ClCast.h"
 
 #include <utility>
 

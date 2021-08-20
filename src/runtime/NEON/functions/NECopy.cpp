@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuCopy.h"
+#include "src/cpu/operators/CpuCopy.h"
 
 #include <utility>
 

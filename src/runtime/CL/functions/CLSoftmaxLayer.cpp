@@ -28,10 +28,10 @@
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "src/core/gpu/cl/kernels/ClSoftmaxKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClPermute.h"
-#include "src/runtime/gpu/cl/operators/ClSoftmax.h"
+#include "src/gpu/cl/kernels/ClSoftmaxKernel.h"
+#include "src/gpu/cl/operators/ClPermute.h"
+#include "src/gpu/cl/operators/ClSoftmax.h"
 
 namespace arm_compute
 {

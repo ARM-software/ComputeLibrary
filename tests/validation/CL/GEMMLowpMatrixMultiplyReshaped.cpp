@@ -23,9 +23,9 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.h"
-#include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
-#include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.h"
+#include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
+#include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"

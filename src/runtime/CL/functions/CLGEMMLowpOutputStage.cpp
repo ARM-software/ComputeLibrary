@@ -32,7 +32,7 @@
 #include "arm_compute/core/Types.h"
 
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClGemmLowpOutputStage.h"
+#include "src/gpu/cl/operators/ClGemmLowpOutputStage.h"
 
 #include <algorithm>
 

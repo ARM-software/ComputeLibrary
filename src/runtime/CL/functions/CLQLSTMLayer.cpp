@@ -32,8 +32,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
-#include "src/core/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
 
 namespace arm_compute
 {

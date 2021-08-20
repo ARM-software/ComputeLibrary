@@ -34,9 +34,9 @@
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/core/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
