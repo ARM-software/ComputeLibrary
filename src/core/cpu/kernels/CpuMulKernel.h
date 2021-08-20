@@ -37,7 +37,6 @@ namespace kernels
 class CpuMulKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuMulKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuMulKernel);
     /** Initialise the kernel's input, dst and border mode.
@@ -122,7 +121,6 @@ private:
 class CpuComplexMulKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
     CpuComplexMulKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuComplexMulKernel);
     /** Initialise the kernel's src, dst and border mode.

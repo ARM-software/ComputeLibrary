@@ -30,6 +30,13 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- An issue has been identified when running the graph_deepspeech_v0_4_1 graph example.
+    - Versions Affected: >= 21.08
+    - Conditions:
+        - Data type input: F32
+        - Backend: OpenCL
+    - Result: The execution of the graph_deepspeech_v0_4_1 could fail on OpenCL backend for systems with a small RAM. The issue is due to the extra temporary memory required to reshape the network weights
+
 - Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
     - Versions Affected: >= v21.05
     - OSs Affected: All

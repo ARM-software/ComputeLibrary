@@ -162,6 +162,9 @@ protected:
         TensorType bias    = create_tensor<TensorType>(bias_shape, bias_data_type, 1, quantization_info);
         TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, quantization_info, data_layout);
 
+        add_padding_x({ &src, &bias, &dst }, data_layout);
+        add_padding_x({ &weights }, data_layout, input_shape[0] % 4 == 0); // Don't add left padding if cl image will be used
+
         // Create and configure function
         FunctionType conv;
         conv.configure(&src, &weights, &bias, &dst, info, act_info);
@@ -170,8 +173,6 @@ protected:
         ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
-
-        add_padding_x({ &src, &bias, &dst }, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();

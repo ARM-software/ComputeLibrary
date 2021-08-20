@@ -38,7 +38,7 @@ namespace kernels
 class ClReshapeKernel : public IClKernel
 {
 public:
-    ClReshapeKernel() = default;
+    ClReshapeKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClReshapeKernel);
     /** Set the src and dst of the kernel
      *
@@ -47,11 +47,9 @@ public:
      * @param[out] dst             Destination tensor info. Data type supported: Same as @p src
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref ClReshapeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data type supported: All
-     * @param[in] dst Destination tensor info. Data type supported: Same as @p src
+     * Similar to @ref ClReshapeKernel::configure()
      *
      * @return a status
      */
@@ -63,4 +61,4 @@ public:
 } // namespace opencl
 } // namespace kernels
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CL_RESHAPE_KERNEL_H */
+#endif /* ARM_COMPUTE_CL_RESHAPE_KERNEL_H */

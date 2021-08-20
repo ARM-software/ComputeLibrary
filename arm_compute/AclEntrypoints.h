@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACLENTRYPOINTS_H_
-#define ARM_COMPUTE_ACLENTRYPOINTS_H_
+#ifndef ARM_COMPUTE_ACL_ENTRYPOINTS_H_
+#define ARM_COMPUTE_ACL_ENTRYPOINTS_H_
 
 #include "arm_compute/AclTypes.h"
 
@@ -232,7 +232,35 @@ AclStatus AclPackTensors(AclTensorPack pack, AclTensor *tensors, int32_t *slot_i
  */
 AclStatus AclDestroyTensorPack(AclTensorPack pack);
 
+/** Eager execution of a given operator on a list of inputs and outputs
+ *
+ * @param[in]     op      Operator to execute
+ * @param[in]     queue   Queue to schedule the operator on
+ * @param[in,out] tensors A list of input and outputs tensors to execute the operator on
+ *
+ * @return Status Code
+ *
+ * Returns:
+ *  - @ref AclSuccess if function was completed successfully
+ *  - @ref AclOutOfMemory if there was a failure allocating memory resources
+ *  - @ref AclUnsupportedTarget if the requested target is unsupported
+ *  - @ref AclInvalidArgument if a given argument is invalid
+ *  - @ref AclRuntimeError on any other runtime related error
+ */
+AclStatus AclRunOperator(AclOperator op, AclQueue queue, AclTensorPack tensors);
+
+/** Destroy a given operator object
+ *
+ * @param[in,out] op A valid operator object to destroy
+ *
+ * @return Status code
+ *
+ * Returns:
+ *  - @ref AclSuccess if functions was completed successfully
+ *  - @ref AclInvalidArgument if the provided context is invalid
+ */
+AclStatus AclDestroyOperator(AclOperator op);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACLENTRYPOINTS_H_ */
+#endif /* ARM_COMPUTE_ACL_ENTRYPOINTS_H_ */

@@ -24,20 +24,35 @@
 #ifndef ARM_COMPUTE_NECAST_H
 #define ARM_COMPUTE_NECAST_H
 
+#include "arm_compute/runtime/IFunction.h"
+
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref NEDepthConvertLayerKernel.
+/** Basic function to run @ref cpu::kernels::CpuCastKernel.
  * This function ignores the scale and zeroPoint of quanized tensors,so QASYMM8 input is treated as uint8 values.
  */
-class NECast : public INESimpleFunctionNoBorder
+class NECast : public IFunction
 {
 public:
+    /** Constructor */
+    NECast();
+    /** Destructor */
+    ~NECast();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NECast(const NECast &) = delete;
+    /** Default move constructor */
+    NECast(NECast &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NECast &operator=(const NECast &) = delete;
+    /** Default move assignment operator */
+    NECast &operator=(NECast &&);
     /** Initialize the function's source, destination
      *
      * Valid data layouts:
@@ -71,6 +86,13 @@ public:
      * @return a status
      */
     static Status validate(ITensorInfo *input, ITensorInfo *output, ConvertPolicy policy);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NECAST_H*/

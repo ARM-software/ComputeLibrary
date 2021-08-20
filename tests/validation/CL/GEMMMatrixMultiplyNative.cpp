@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -44,9 +44,10 @@ namespace test
 namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::opencl::kernels;
 
-// Create function for CLGEMMMatrixMultiplyNativeKernel
-using CLGEMMMatrixMultiplyNative = CLSynthetizeFunction<CLGEMMMatrixMultiplyNativeKernel>;
+// Create function for ClGemmMatrixMultiplyNativeKernel
+using CLGEMMMatrixMultiplyNative = CLSynthetizeOperator<ClGemmMatrixMultiplyNativeKernel>;
 
 // Fixture for CLGEMMMatrixMultiplyNative
 template <typename T>
@@ -184,7 +185,7 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
     // Create and configure function
     CLGEMMMatrixMultiplyNative gemm;
-    gemm.configure(&lhs, &rhs, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, kernel_info);
+    gemm.configure(lhs.info(), rhs.info(), bias.info(), dst.info(), 1.0f, 1.0f, lhs_info, rhs_info, kernel_info);
 }
 } // namespace
 

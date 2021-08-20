@@ -39,11 +39,8 @@ public:
      * Valid configurations (src0,src1) -> dst :
      *
      *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
      *   - (QASYMM8, QASYMM8)               -> QASYMM8
      *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
      *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
@@ -56,26 +53,9 @@ public:
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuSub
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Valid configurations (src0,src1) -> dst :
-     *
-     *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
-     *   - (QASYMM8, QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
-     *   - (S16,S16)                        -> S16
-     *   - (S32,S32)                        -> S32
-     *   - (F16,F16)                        -> F16
-     *   - (F32,F32)                        -> F32
-     *
-     * @param[in] src0     First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] src1     Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] dst      Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32
-     * @param[in] policy   Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     * Similar to @ref CpuSub::configure()
      *
      * @return a status
      */

@@ -35,8 +35,6 @@ namespace cpu
 class CpuMul : public ICpuOperator
 {
 public:
-    /** Default Constructor */
-    CpuMul() = default;
     /** Initialise the kernel's inputs, dst and convertion policy.
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
@@ -81,8 +79,6 @@ public:
 class CpuComplexMul : public ICpuOperator
 {
 public:
-    /** Default Constructor */
-    CpuComplexMul() = default;
     /** Initialise the kernel's inputs, dst.
      *
      * @param[in, out] src1     First input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).

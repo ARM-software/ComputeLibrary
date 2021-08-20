@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -31,11 +32,9 @@
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
+#include <arm_sve.h>
 #include <cmath>
 #include <cstddef>
-
-#if defined(__ARM_FEATURE_SVE)
-#include <arm_sve.h>
 
 namespace arm_compute
 {
@@ -90,8 +89,8 @@ void qasymm8_sve_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor 
                                 bool align_corners, const Window &window)
 {
     // Data layout is NHWC
-    const int        idx_width   = 1;
-    const int        idx_height  = 2;
+    const int idx_width  = 1;
+    const int idx_height = 2;
 
     // Compute the ratio between source height and destination height
     const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(idx_height), dst->info()->dimension(idx_height), align_corners);
@@ -205,4 +204,4 @@ void qasymm8_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // __ARM_FEATURE_SVE
+#endif // defined(ARM_COMPUTE_ENABLE_SVE)

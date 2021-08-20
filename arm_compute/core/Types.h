@@ -105,9 +105,6 @@ enum class SamplingPolicy
     TOP_LEFT /**< Samples are taken at pixel top left corner */
 };
 
-/** Constant value of the border pixels when using BorderMode::CONSTANT */
-constexpr uint8_t CONSTANT_BORDER_VALUE = 199;
-
 /** [DataLayout enum definition] **/
 
 /** Supported tensor data layouts */
@@ -1540,12 +1537,16 @@ private:
 /** Fully connected layer info */
 struct FullyConnectedLayerInfo
 {
-    DataLayout          weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
-    bool                transpose_weights{ true };                  /**<  Transpose weights if true. */
-    bool                are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
-    bool                retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
-    bool                fp_mixed_precision{ false };                /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
-    ActivationLayerInfo activation_info{};                          /**<  Fused activation to apply after the matrix multiplication. */
+    /* Fused-activation parameters */
+    ActivationLayerInfo activation_info{}; /**<  Fused activation to apply after the matrix multiplication. */
+    /* Information about weights */
+    DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
+    bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
+    bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
+    bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+    bool       constant_weights{ true };                   /**<  If false, weights can vary between runs. */
+    /* Other parameters */
+    bool fp_mixed_precision{ false }; /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
 
     /** Sets the weights trained data layout
      *
@@ -1749,11 +1750,11 @@ private:
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
  *
- * The matrix A can only be reshaped through @ref CLGEMMReshapeLHSMatrixKernel or  @ref NEGEMMInterleave4x4Kernel
- * Note: Optionally just for @ref CLGEMMReshapeLHSMatrixKernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
+ * The matrix A can only be reshaped through @ref opencl::kernels::ClGemmReshapeLhsMatrixKernel or  @ref cpu::kernels::CpuGemmInterleave4x4Kernel
+ * Note: Optionally just for @ref opencl::kernels::ClGemmReshapeLhsMatrixKernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
  *
- * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel
- * Note: Optionally just for @ref CLGEMMReshapeRHSMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
+ * The matrix B can only be reshaped through @ref opencl::kernels::ClGemmReshapeRhsMatrixKernel or  @ref cpu::kernels::CpuGemmTranspose1xWKernel
+ * Note: Optionally just for @ref opencl::kernels::ClGemmReshapeRhsMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
  *
  */
 class GEMMReshapeInfo final
@@ -1947,10 +1948,12 @@ public:
           _reinterpret_input_as_3d(false),
           _retain_internal_weights(false),
           _gemmlowp_output_stage(),
+          _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
           _pretranpose_B(true),
-          _activation_info()
+          _activation_info(),
+          _constant_weights(true)
     {
     }
     /** Constructor
@@ -1965,12 +1968,14 @@ public:
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
      * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
+     * @param[in] constant_weights            (Optional) Weights have constant values throughout multiple executions
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo()) noexcept
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), bool constant_weights = true) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -1978,10 +1983,12 @@ public:
           _reinterpret_input_as_3d(reinterpret_input_as_3d),
           _retain_internal_weights(retain_internal_weights),
           _gemmlowp_output_stage(gemmlowp_output_stage),
+          _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
           _pretranpose_B(reshape_b_only_on_first_run),
-          _activation_info(activation_info)
+          _activation_info(activation_info),
+          _constant_weights(constant_weights)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2058,6 +2065,14 @@ public:
     {
         return _fp_mixed_precision;
     };
+    /** Flag which specifies if a shorter accumulator to be used.
+     *
+     * @return True if a shorter accumulator has to be used
+     */
+    bool fast_math() const
+    {
+        return _fast_math;
+    };
     /** Flag which specifies whether to broadcast the shape of the bias tensor.
      *
      * @return True if the shape of the bias tensor is to be broadcasted.
@@ -2098,6 +2113,14 @@ public:
     {
         _activation_info = activation_info;
     }
+    /** Flag which specifies if the values of the weights tensor are constant throughout multiple executions or not
+     *
+     * @return True if the weights tensor is constant
+     */
+    bool constant_weights() const
+    {
+        return _constant_weights;
+    };
 
 private:
     bool                    _is_a_reshaped;
@@ -2107,10 +2130,12 @@ private:
     bool                    _reinterpret_input_as_3d;
     bool                    _retain_internal_weights;
     GEMMLowpOutputStageInfo _gemmlowp_output_stage;
+    bool                    _fast_math;
     bool                    _fp_mixed_precision;
     bool                    _broadcast_bias;
     bool                    _pretranpose_B;
     ActivationLayerInfo     _activation_info;
+    bool                    _constant_weights;
 };
 
 /** Winograd information */

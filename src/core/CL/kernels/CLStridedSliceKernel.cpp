@@ -70,6 +70,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
 }
 } // namespace
 
+CLStridedSliceKernel::CLStridedSliceKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output,
                                      const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)

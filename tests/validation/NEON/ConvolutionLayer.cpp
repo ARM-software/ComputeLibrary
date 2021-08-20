@@ -28,6 +28,10 @@
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
+#include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
+#include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
@@ -156,6 +160,108 @@ using NEWinogradConvolutionLayerMixedDataLayoutFixture = WinogradConvolutionLaye
 template <typename T>
 using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, T, false>;
 
+/** Test case for memory injection in @ref cpu::CpuWinogradConv2d.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto                winograd = std::make_unique<cpu::CpuWinogradConv2d>();
+    const auto          src_info = TensorInfo(TensorShape(8U, 8U, 32U), 1, DataType::F32);
+    const auto          w_info   = TensorInfo(TensorShape(1U), 1, DataType::F32);
+    const auto          b_info   = TensorInfo(TensorShape(1U, 3U, 32U, 1U), 1, DataType::F32);
+    auto                dst_info = TensorInfo(TensorShape(8U, 6U, 1U), 1, DataType::F32);
+    const PadStrideInfo pad_info{};
+
+    winograd->configure(&src_info, &b_info, &w_info, &dst_info, pad_info);
+
+    // telhs are newly created every call of this lambda function
+    auto a = create_tensor<Tensor>(src_info);
+    auto b = create_tensor<Tensor>(b_info);
+    auto c = create_tensor<Tensor>(w_info);
+    a.allocator()->allocate();
+    b.allocator()->allocate();
+    c.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &a }, { TensorType::ACL_SRC_1, &b }, { TensorType::ACL_SRC_2, &c } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &b }, { TensorType::ACL_SRC_2, &c } };
+
+    auto mg       = MemoryGroup{};
+    auto ws       = manage_workspace<Tensor>(winograd->workspace(), mg, run_pack, prep_pack);
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+        library->fill_tensor_value(Accessor(a), 1.f);
+        library->fill_tensor_value(Accessor(b), 2.f);
+        library->fill_tensor_value(Accessor(c), 3.f);
+
+        // This operator is configured once and captured by this lambda.
+        winograd->prepare(prep_pack);
+        winograd->run(run_pack);
+        return dst;
+    };
+
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEWinogradConvolutionLayer.
+ *
+ * Make sure @ref NEWinogradConvolutionLayer still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto                gemm     = std::make_unique<NEWinogradConvolutionLayer>();
+    const auto          src_info = TensorInfo(TensorShape(8U, 8U, 32U), 1, DataType::F32);
+    const auto          w_info   = TensorInfo(TensorShape(1U), 1, DataType::F32);
+    const auto          b_info   = TensorInfo(TensorShape(1U, 3U, 32U, 1U), 1, DataType::F32);
+    auto                dst_info = TensorInfo(TensorShape(8U, 6U, 1U), 1, DataType::F32);
+    const PadStrideInfo pad_info{};
+
+    auto run_conv = [&]()
+    {
+        auto src = create_tensor<Tensor>(src_info);
+        auto w   = create_tensor<Tensor>(w_info);
+        auto b   = create_tensor<Tensor>(b_info);
+        auto dst = create_tensor<Tensor>(dst_info);
+
+        gemm->configure(&src, &b, &w, &dst, pad_info);
+
+        src.allocator()->allocate();
+        b.allocator()->allocate();
+        w.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(b), 2.f);
+        library->fill_tensor_value(Accessor(w), 3.f);
+        gemm->run();
+        return dst;
+    };
+
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
 TEST_SUITE(FP32)
 
 TEST_SUITE(Conv1x3)
@@ -169,13 +275,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, frame
     validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEWinogradConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT,
-                                    combine(combine(combine(combine(combine(combine(combine(combine(
-                                                framework::dataset::make("Input", TensorShape(8U, 8U, 32U)),
-                                                framework::dataset::make("Weight", TensorShape(1U, 3U, 32U, 1U))),
-                                                framework::dataset::make("Bias", TensorShape(1U))),
-                                                framework::dataset::make("Output", TensorShape(8U, 6U, 1U))),
-                                                framework::dataset::make("PadStrideInfo", PadStrideInfo(1, 1, 0, 0))),
-                                                framework::dataset::make("Dilation", Size2D(1U, 1U))),
+                       combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                   framework::dataset::make("Input", TensorShape(8U, 8U, 32U)),
+                                                                                   framework::dataset::make("Weight", TensorShape(1U, 3U, 32U, 1U))),
+                                                                               framework::dataset::make("Bias", TensorShape(1U))),
+                                                                       framework::dataset::make("Output", TensorShape(8U, 6U, 1U))),
+                                                               framework::dataset::make("PadStrideInfo", PadStrideInfo(1, 1, 0, 0))),
+                                                       framework::dataset::make("Dilation", Size2D(1U, 1U))),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                        ActivationFunctionsDataset),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -404,6 +510,101 @@ using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Acces
 template <typename T>
 using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
+/** Test case for memory injection in @ref cpu::CpuGemmConvolution.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto        conv        = std::make_unique<cpu::CpuGemmConvolution>();
+    const auto  src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NCHW);
+    auto        dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  conv_info   = PadStrideInfo(1, 1, 0, 0, 2, 2, DimensionRoundingType::FLOOR);
+    WeightsInfo weights_info(false, 3U, 3U, 1U);
+    conv->configure(&src_info, &weight_info, &bias_info, &dst_info, conv_info, weights_info);
+
+    // tensors are newly created every call of this lambda function
+    auto src    = create_tensor<Tensor>(src_info);
+    auto weight = create_tensor<Tensor>(weight_info);
+    auto bias   = create_tensor<Tensor>(bias_info);
+    src.allocator()->allocate();
+    weight.allocator()->allocate();
+    bias.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &src }, { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+
+    auto mg = MemoryGroup{};
+    auto ws = manage_workspace<Tensor>(conv->workspace(), mg, run_pack, prep_pack);
+
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        // This operator is configured once and captured by this lambda.
+        conv->prepare(prep_pack);
+        conv->run(run_pack);
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEGEMMConvolutionLayer.
+ *
+ * Make sure @ref NEGEMMConvolutionLayer still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto        conv        = std::make_unique<NEGEMMConvolutionLayer>();
+    const auto  src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NCHW);
+    auto        dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NCHW);
+    const auto  conv_info   = PadStrideInfo(1, 1, 0, 0, 2, 2, DimensionRoundingType::FLOOR);
+    WeightsInfo weights_info(false, 3U, 3U, 1U);
+    auto        run_conv = [&]()
+    {
+        auto src    = create_tensor<Tensor>(src_info);
+        auto weight = create_tensor<Tensor>(weight_info);
+        auto bias   = create_tensor<Tensor>(bias_info);
+        auto dst    = create_tensor<Tensor>(dst_info);
+        conv->configure(&src, &weight, &bias, &dst, conv_info, weights_info);
+        src.allocator()->allocate();
+        weight.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        conv->run();
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
 TEST_SUITE(Float)
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
 TEST_SUITE(BFLOAT16)
@@ -444,17 +645,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::ALL,
-                            combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        ActivationFunctionsDataset))
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                           framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                           framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                       framework::dataset::make("Bias", TensorShape(2U))),
+                                                                               framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                       framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                               framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                               framework::dataset::make("DataType", DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
@@ -489,18 +690,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                        QuantizedActivationFunctionsDataset))
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                                   framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                                   framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                               framework::dataset::make("Bias", TensorShape(2U))),
+                                                                                       framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                               framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                                       framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                               QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -519,18 +720,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>,
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
-                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                        QuantizedActivationFunctionsDataset))
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                                   framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                                   framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                               framework::dataset::make("Bias", TensorShape(2U))),
+                                                                                       framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                               framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                                       framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                               QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -570,6 +771,99 @@ TEST_SUITE_END() // GEMMConvolutionLayer
 TEST_SUITE(DirectGEMMConv2d)
 template <typename T>
 using NEDirectGEMMConv2dLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEGEMMConv2d, T>;
+
+/** Test case for memory injection in @ref cpu::CpuGemmDirectConv2d.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
+{
+    auto       conv        = std::make_unique<cpu::CpuGemmDirectConv2d>();
+    const auto src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NHWC);
+    const auto weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NHWC);
+    const auto bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NHWC);
+    auto       dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NHWC);
+    const auto conv_info   = Conv2dInfo{};
+    conv->configure(&src_info, &weight_info, &bias_info, &dst_info, conv_info);
+
+    // tensors are newly created every call of this lambda function
+    auto src    = create_tensor<Tensor>(src_info);
+    auto weight = create_tensor<Tensor>(weight_info);
+    auto bias   = create_tensor<Tensor>(bias_info);
+    src.allocator()->allocate();
+    weight.allocator()->allocate();
+    bias.allocator()->allocate();
+
+    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &src }, { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &weight }, { TensorType::ACL_SRC_2, &bias } };
+
+    auto mg = MemoryGroup{};
+    auto ws = manage_workspace<Tensor>(conv->workspace(), mg, run_pack, prep_pack);
+
+    auto run_conv = [&]() -> Tensor
+    {
+        auto dst = create_tensor<Tensor>(dst_info);
+        dst.allocator()->allocate();
+        run_pack.add_tensor(TensorType::ACL_DST, &dst);
+
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        // This operator is configured once and captured by this lambda.
+        conv->prepare(prep_pack);
+        conv->run(run_pack);
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
+
+/** Test case for memory injection in @ref NEGEMMConv2d.
+ *
+ * Make sure @ref NEGEMMConv2d still works through injecting the memory at configure time using the old API.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
+{
+    auto       conv        = std::make_unique<NEGEMMConv2d>();
+    const auto src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NHWC);
+    const auto weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NHWC);
+    const auto bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NHWC);
+    auto       dst_info    = TensorInfo(TensorShape(1U, 7U, 3U), 1, DataType::F32, DataLayout::NHWC);
+    const auto conv_info   = Conv2dInfo{};
+    auto       run_conv    = [&]()
+    {
+        auto src    = create_tensor<Tensor>(src_info);
+        auto weight = create_tensor<Tensor>(weight_info);
+        auto bias   = create_tensor<Tensor>(bias_info);
+        auto dst    = create_tensor<Tensor>(dst_info);
+        conv->configure(&src, &weight, &bias, &dst, conv_info);
+        src.allocator()->allocate();
+        weight.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+        library->fill_tensor_value(Accessor(src), 1.f);
+        library->fill_tensor_value(Accessor(weight), 2.f);
+        library->fill_tensor_value(Accessor(bias), 3.f);
+        conv->run();
+        return dst;
+    };
+    auto result_0 = run_conv();
+    auto result_1 = run_conv();
+    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+    }
+}
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)

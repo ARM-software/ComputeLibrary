@@ -82,6 +82,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 CLQLSTMLayerNormalizationKernel::CLQLSTMLayerNormalizationKernel()
     : _input(nullptr), _weight(nullptr), _bias(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias)

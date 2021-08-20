@@ -271,6 +271,140 @@ public:
                                                                                                       quantization_info, activation_info, mixed_layout);
     }
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class FullyConnectedWithDynamicWeightsFixture : public framework::Fixture
+{
+private:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        if(_data_type == DataType::F16)
+        {
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution(-1.0f, 1.0f);
+            library->fill(tensor, distribution, i);
+        }
+        else if(_data_type == DataType::F32)
+        {
+            std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+            library->fill(tensor, distribution, i);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, i);
+        }
+    }
+
+    void fill_transposed_weights(TensorType &weights, TensorShape weights_shape, int seed)
+    {
+        RawTensor tmp(weights_shape, _data_type, 1);
+
+        // Fill with original shape
+        fill(tmp, seed);
+
+        // Transpose elementwise
+        tmp = transpose(tmp);
+
+        AccessorType weights_accessor(weights);
+
+        for(int i = 0; i < tmp.num_elements(); ++i)
+        {
+            Coordinates coord = index2coord(tmp.shape(), i);
+            std::copy_n(static_cast<const RawTensor::value_type *>(tmp(coord)),
+                        tmp.element_size(),
+                        static_cast<RawTensor::value_type *>(weights_accessor(coord)));
+        }
+    }
+
+    void validate_with_tolerance(TensorType &target, SimpleTensor<T> &ref)
+    {
+        if(_data_type == DataType::F32)
+        {
+            constexpr RelativeTolerance<float> rel_tolerance_f32(0.05f);
+            constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f);
+            validate(AccessorType(target), ref, rel_tolerance_f32, 0, abs_tolerance_f32);
+        }
+        else
+        {
+            validate(AccessorType(target), ref);
+        }
+    }
+
+public:
+    template <typename...>
+    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
+               DataType data_type, ActivationLayerInfo activation_info)
+    {
+        _data_type = data_type;
+
+        // Setup tensor meta-data
+        TensorInfo src_info(src_shape, 1, data_type);
+        _src.allocator()->init(src_info);
+
+        TensorShape tr_weights_shape{ weights_shape[1], weights_shape[0] };
+        TensorInfo  wei_info(tr_weights_shape, 1, data_type);
+        _weights.allocator()->init(wei_info);
+
+        TensorInfo bias_info(bias_shape, 1, data_type);
+        _bias.allocator()->init(bias_info);
+
+        TensorInfo dst_info(dst_shape, 1, data_type);
+        _dst.allocator()->init(dst_info);
+
+        // Configure FC layer and mark the weights as non constant
+        FullyConnectedLayerInfo fc_info;
+        fc_info.activation_info      = activation_info;
+        fc_info.are_weights_reshaped = true;
+        fc_info.transpose_weights    = false;
+        fc_info.constant_weights     = false;
+        FunctionType fc;
+        fc.configure(&_src, &_weights, &_bias, &_dst, fc_info);
+
+        // Allocate all the tensors
+        _src.allocator()->allocate();
+        _weights.allocator()->allocate();
+        _bias.allocator()->allocate();
+        _dst.allocator()->allocate();
+
+        // Run multiple iterations with different inputs
+        constexpr int num_iterations    = 5;
+        int           randomizer_offset = 0;
+        for(int i = 0; i < num_iterations; ++i)
+        {
+            // Run target
+            {
+                fill(AccessorType(_src), randomizer_offset);
+                fill_transposed_weights(_weights, weights_shape, randomizer_offset + 1);
+                fill(AccessorType(_bias), randomizer_offset + 2);
+
+                fc.run();
+            }
+
+            // Run reference and compare
+            {
+                SimpleTensor<T> src{ src_shape, data_type };
+                SimpleTensor<T> weights{ weights_shape, data_type };
+                SimpleTensor<T> bias{ bias_shape, data_type };
+
+                // Fill reference
+                fill(src, randomizer_offset);
+                fill(weights, randomizer_offset + 1);
+                fill(bias, randomizer_offset + 2);
+
+                auto dst = reference::activation_layer(reference::fully_connected_layer<T>(src, weights, bias, dst_shape), activation_info);
+
+                // Validate
+                validate_with_tolerance(_dst, dst);
+            }
+
+            randomizer_offset += 100;
+        }
+    }
+
+private:
+    TensorType _src{}, _weights{}, _bias{}, _dst{};
+    DataType   _data_type{ DataType::UNKNOWN };
+};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

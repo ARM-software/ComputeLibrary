@@ -59,8 +59,9 @@ public:
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation,
                unsigned int depth_multiplier, DataType input_data_type, DataType weights_data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo weights_quantization_info, QuantizationInfo output_quantization_info,
-               DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false)
+               DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false, bool in_place = false)
     {
+        ARM_COMPUTE_ERROR_ON(mixed_layout && in_place);
         _mixed_layout              = mixed_layout;
         _input_shape               = in_shape;
         _input_data_type           = input_data_type;
@@ -73,6 +74,7 @@ public:
         _act_info                  = act_info;
         _depth_multiplier          = depth_multiplier;
         _dilation                  = dilation;
+        _in_place                  = in_place;
 
         _bias_data_type = is_data_type_quantized(_input_data_type) ? DataType::S32 : _input_data_type;
 
@@ -101,13 +103,25 @@ public:
         }
 
         // Create tensors
-        _src     = create_tensor<TensorType>(input_shape, _input_data_type, 1, _input_quantization_info, _data_layout);
-        _weights = create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
-        _biases  = create_tensor<TensorType>(_biases_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
-        _target  = create_tensor<TensorType>(output_shape, _input_data_type, 1, _output_quantization_info, _data_layout);
+        _src                      = create_tensor<TensorType>(input_shape, _input_data_type, 1, _input_quantization_info, _data_layout);
+        _weights                  = create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
+        _biases                   = create_tensor<TensorType>(_biases_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
+        TensorType *target_to_use = nullptr;
+        if(!_in_place)
+        {
+            _target       = create_tensor<TensorType>(output_shape, _input_data_type, 1, _output_quantization_info, _data_layout);
+            target_to_use = &_target;
+        }
+
+        add_padding_x({ &_src, &_biases }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, true);
+        if(!_in_place)
+        {
+            add_padding_x({ &_target }, _data_layout);
+        }
 
         // Create Depthwise Convolution configure function
-        _dwc.configure(&_src, &_weights, &_biases, &_target, _pad_stride_info, _depth_multiplier, _act_info, _dilation);
+        _dwc.configure(&_src, &_weights, &_biases, target_to_use, _pad_stride_info, _depth_multiplier, _act_info, _dilation);
 
         ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
@@ -117,19 +131,20 @@ public:
 
     void allocate_and_run_target()
     {
-        // TODO: uncomment after COMPMID-4361
-        // add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
         _biases.allocator()->allocate();
-        _target.allocator()->allocate();
 
         ARM_COMPUTE_ASSERT(!_src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!_weights.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!_biases.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
+
+        if(!_in_place)
+        {
+            _target.allocator()->allocate();
+            ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
+        }
 
         // Fill tensors
         fill(AccessorType(_src), 0);
@@ -164,6 +179,7 @@ public:
 protected:
     void mix_layout(FunctionType &layer, TensorType &src, TensorType &dst)
     {
+        ARM_COMPUTE_ERROR_ON(_in_place);
         // Test Multi DataLayout graph cases, when the data layout changes after configure
         src.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
         dst.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
@@ -183,7 +199,7 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint8_t> distribution(0, 10);
+                std::uniform_int_distribution<uint8_t> distribution(0, 15);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -241,9 +257,10 @@ protected:
     unsigned int        _depth_multiplier{};
     Size2D              _dilation{};
     bool                _mixed_layout{ false };
+    bool                _in_place{ false };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, bool in_place = false>
 class DepthwiseConvolutionLayerValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
@@ -253,7 +270,7 @@ public:
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier,
                                                                                                                data_type, data_type, QuantizationInfo(), QuantizationInfo(), QuantizationInfo(),
-                                                                                                               data_layout, act_info, mixed_layout);
+                                                                                                               data_layout, act_info, mixed_layout, in_place);
     }
 };
 
@@ -276,7 +293,7 @@ public:
 
         if(padding_valid)
         {
-            _conv_info = PadStrideInfo();
+            _conv_info = PadStrideInfo(stride.width, stride.height);
         }
         else
         {
@@ -301,6 +318,10 @@ public:
         _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
         _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
 
+        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, true);
+        add_padding_y({ &_src, &_target }, _data_layout);
+
         // Create Depthwise Convolution configure function
         const ConvolutionInfo info
         {
@@ -316,8 +337,6 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -394,20 +413,22 @@ protected:
     unsigned int  _depth_multiplier{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool in_place = false>
 class DepthwiseConvolutionLayerNativeConfigurableValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
     template <typename...>
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
-               DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0)
+               DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0, bool export_to_cl_image)
     {
-        _dilation         = dilation;
-        _depth_multiplier = depth_multiplier;
-        _data_type        = data_type;
-        _data_layout      = data_layout;
-        _act_info         = act_info;
-        _n0               = n0;
+        _dilation           = dilation;
+        _depth_multiplier   = depth_multiplier;
+        _data_type          = data_type;
+        _data_layout        = data_layout;
+        _act_info           = act_info;
+        _n0                 = n0;
+        _export_to_cl_image = export_to_cl_image;
+        _in_place           = in_place;
 
         _input_shape   = TensorShape(width, height, channel, batch);
         _weights_shape = TensorShape(kernel_size.width, kernel_size.height, channel * _depth_multiplier);
@@ -415,11 +436,11 @@ public:
 
         if(padding_valid)
         {
-            _conv_info = PadStrideInfo();
+            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
         }
         else
         {
-            _conv_info = calculate_same_pad(_input_shape, _weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, _dilation);
+            _conv_info = PadStrideInfo(stride.width, stride.height);
         }
     }
 
@@ -435,19 +456,39 @@ public:
         }
 
         // Create tensors
-        _src     = create_tensor<TensorType>(input_shape, _data_type, 1, QuantizationInfo(), _data_layout);
-        _weights = create_tensor<TensorType>(weights_shape, _data_type, 1, QuantizationInfo(), _data_layout);
-        _biases  = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
-        _target  = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
+        _src                      = create_tensor<TensorType>(input_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _weights                  = create_tensor<TensorType>(weights_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _biases                   = create_tensor<TensorType>(_biases_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        TensorType *target_to_use = nullptr;
+        if(!_in_place)
+        {
+            _target       = create_tensor<TensorType>(TensorShape(), _data_type, 1, QuantizationInfo(), _data_layout);
+            target_to_use = &_target;
+        }
 
-        DWCWeightsKernelInfo dwc_weights_info;
-        dwc_weights_info.n0 = _n0;
+        DWCComputeKernelInfo dwc_info;
+        dwc_info.n0                         = _n0;
+        dwc_info.m0                         = _conv_info.stride().first == 1 && _dilation.x() == 1 ? 8 : 1;
+        dwc_info.export_weights_to_cl_image = _export_to_cl_image;
 
-        DWCKernelInfo dwc_info;
-        dwc_info.activation_info = _act_info;
+#if defined(ARM_COMPUTE_OPENCL_ENABLED)
+        if(_export_to_cl_image)
+        {
+            _validate_output |= image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
+            _validate_output |= (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) != 0);
+        }
+#endif // ARM_COMPUTE_OPENCL_ENABLED
+
+        const ConvolutionInfo conv_kernel_info
+        {
+            _conv_info, _depth_multiplier, _act_info, _dilation
+        };
+
+        add_padding_x({ &_src, &_biases, &_target }, _data_layout);
+        add_padding_x({ &_weights }, _data_layout, _export_to_cl_image); // Don't add left padding if cl image will be used
 
         // Create Depthwise Convolution configure function
-        _dwc.configure(&_src, &_weights, &_biases, &_target, dwc_weights_info, dwc_info, _conv_info, _depth_multiplier, _dilation);
+        _dwc.configure(&_src, &_weights, &_biases, target_to_use, dwc_info, conv_kernel_info);
 
         ARM_COMPUTE_ASSERT(_src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(_weights.info()->is_resizable());
@@ -457,18 +498,19 @@ public:
 
     void allocate_and_run_target()
     {
-        add_padding_x({ &_src, &_weights, &_biases, &_target }, _data_layout);
-
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
         _biases.allocator()->allocate();
-        _target.allocator()->allocate();
 
         ARM_COMPUTE_ASSERT(!_src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!_weights.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!_biases.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
+        if(!_in_place)
+        {
+            _target.allocator()->allocate();
+            ARM_COMPUTE_ASSERT(!_target.info()->is_resizable());
+        }
 
         // Fill tensors
         fill(AccessorType(_src), 0);
@@ -477,13 +519,22 @@ public:
 
         // Test Multi DataLayout graph cases, when the data layout changes after configure
         _src.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
-        _target.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        if(!_in_place)
+        {
+            _target.info()->set_data_layout(_data_layout == DataLayout::NCHW ? DataLayout::NHWC : DataLayout::NCHW);
+        }
 
         // Compute function
-        _dwc.run();
+        if(_validate_output)
+        {
+            _dwc.run();
+        }
 
         // Reinstating original data layout for the test suite to properly check the values
-        _target.info()->set_data_layout(_data_layout);
+        if(!_in_place)
+        {
+            _target.info()->set_data_layout(_data_layout);
+        }
     }
 
     void compute_reference()
@@ -498,7 +549,10 @@ public:
 
         const ConvolutionInfo info{ _conv_info, _depth_multiplier, _act_info, _dilation };
         const TensorShape     dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), info);
-        _reference                      = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
+        if(_validate_output)
+        {
+            _reference = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
+        }
     }
 
 protected:
@@ -542,9 +596,12 @@ protected:
     Size2D              _dilation{};
     unsigned int        _depth_multiplier{};
     unsigned int        _n0{};
+    bool                _export_to_cl_image{};
+    bool                _validate_output{ true };
+    bool                _in_place{ false };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, bool in_place = false>
 class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
@@ -554,11 +611,11 @@ public:
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier, data_type,
                                                                                                                data_type, input_quantization_info, input_quantization_info, output_quantization_info,
-                                                                                                               data_layout, act_info, mixed_layout);
+                                                                                                               data_layout, act_info, mixed_layout, in_place);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW, bool in_place = false>
 class DepthwiseConvolutionLayerValidationQuantizedPerChannelFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
@@ -580,7 +637,7 @@ public:
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier,
                                                                                                                 input_data_type, weights_data_type,
                                                                                                                 input_quantization_info, QuantizationInfo(weights_scales), output_quantization_info,
-                                                                                                                data_layout, act_info);
+                                                                                                                data_layout, act_info, false, in_place);
     }
 };
 } // namespace validation

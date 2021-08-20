@@ -62,11 +62,6 @@ Status validate_arguments(const ITensorInfo *src, unsigned int width_offset, con
 }
 } // namespace
 
-CpuConcatenateWidthKernel::CpuConcatenateWidthKernel()
-    : _width_offset(0)
-{
-}
-
 void CpuConcatenateWidthKernel::configure(const ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

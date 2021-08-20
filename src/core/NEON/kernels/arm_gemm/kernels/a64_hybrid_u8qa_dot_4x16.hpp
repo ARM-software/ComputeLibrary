@@ -22,8 +22,8 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
 
+#ifdef __aarch64__
 #include "../std_transforms_fixed.hpp"
 #include "../performance_parameters.hpp"
 
@@ -44,7 +44,8 @@ void a64_hybrid_u8qa_dot_4x16_a55( ARGLIST );
 class cls_a64_hybrid_u8qa_dot_4x16
 {
 public:
-    typedef uint8_t operand_type;
+    typedef uint8_t lhs_operand_type;
+    typedef uint8_t rhs_operand_type;
     typedef uint8_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -70,16 +71,24 @@ public:
         return false;
     }
 
-    StdTransformsFixed<operand_type, result_type, 4, 16, 4> transforms = {};
-
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    StdTransformsFixed<rhs_operand_type, result_type, 4, 16, 4> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
-        switch (ci->get_cpu_model()) {
-            case CPUModel::A55r1:
-                return { 7.5301 };
-            default:
-                return { 27.5482 };
+        if (std::is_same<T, uint8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A55r1:
+                    return { 7.5301 };
+                default:
+                    return { 27.5482 };
+                case CPUModel::A510:
+                    return { 14.81 };
+                case CPUModel::V1:
+                    return { 48.36 };
+            }
         }
+
+        return { 1.0 };
     }
 
     // Default to the generic kernel
@@ -99,4 +108,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // __aarch64__

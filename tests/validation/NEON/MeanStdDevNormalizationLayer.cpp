@@ -47,7 +47,7 @@ namespace
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<half> tolerance_f16(half(0.2f));
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-RelativeTolerance<float> tolerance_f32(1e-8f);
+RelativeTolerance<float> tolerance_f32(1e-4f);
 } // namespace
 
 TEST_SUITE(NEON)
@@ -81,7 +81,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
                        framework::dataset::make("DataType", DataType::F16)),
                        framework::dataset::make("InPlace", { false, true })),
-                       framework::dataset::make("Epsilon", { 1e-8 })))
+                       framework::dataset::make("Epsilon", { 1e-3 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
@@ -101,7 +101,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMeanStdDevNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(),
                        framework::dataset::make("DataType", DataType::F32)),
                        framework::dataset::make("InPlace", { false, true })),
-                       framework::dataset::make("Epsilon", { 1e-8 })))
+                       framework::dataset::make("Epsilon", { 1e-7 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@ namespace arm_compute
 // Forward declarations
 class IScheduler;
 class IAssetManager;
-struct DeviceProperties;
 
 /** Context interface */
 class IRuntimeContext
@@ -51,11 +50,6 @@ public:
      * @return The asset manager registered to the context
      */
     virtual IAssetManager *asset_manager() = 0;
-    /** Device propertied accessor
-     *
-     * @return Device properties
-     */
-    virtual const DeviceProperties &properties() = 0;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_IRUNTIME_CONTEXT_H */

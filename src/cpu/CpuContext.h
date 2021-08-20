@@ -26,6 +26,7 @@
 
 #include "src/common/AllocatorWrapper.h"
 #include "src/common/IContext.h"
+#include "src/common/cpuinfo/CpuInfo.h"
 
 namespace arm_compute
 {
@@ -34,17 +35,8 @@ namespace cpu
 /** Structure that encodes the CPU capabilities to be used */
 struct CpuCapabilities
 {
-    bool neon{ false };
-    bool sve{ false };
-    bool sve2{ false };
-
-    bool fp16{ false };
-    bool bf16{ false };
-    bool dot{ false };
-    bool mmla_int8{ false };
-    bool mmla_fp{ false };
-
-    int32_t max_threads{ -1 };
+    cpuinfo::CpuInfo cpu_info{};
+    int32_t          max_threads{ -1 };
 };
 
 /** CPU context implementation class */
@@ -70,6 +62,10 @@ public:
     // Inherrited methods overridden
     ITensorV2 *create_tensor(const AclTensorDescriptor &desc, bool allocate) override;
     IQueue *create_queue(const AclQueueOptions *options) override;
+    std::tuple<IOperator *, StatusCode> create_activation(const AclTensorDescriptor &src,
+                                                          const AclTensorDescriptor     &dst,
+                                                          const AclActivationDescriptor &act,
+                                                          bool                           is_validate) override;
 
 private:
     AllocatorWrapper _allocator;

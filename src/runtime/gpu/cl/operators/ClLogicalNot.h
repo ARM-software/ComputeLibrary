@@ -35,8 +35,6 @@ namespace opencl
 class ClLogicalNot : public IClOperator
 {
 public:
-    /** Constructor */
-    ClLogicalNot() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  compile_context The compile context to be used.
@@ -46,8 +44,7 @@ public:
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Soure tensor info. Data types supported: U8.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to ClLogicalNot::configure()
      *
      * @return a status
      */

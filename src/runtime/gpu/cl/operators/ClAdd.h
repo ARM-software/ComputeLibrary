@@ -39,8 +39,6 @@ namespace opencl
 class ClAdd : public IClOperator
 {
 public:
-    /** Default Constructor */
-    ClAdd() = default;
     /** Configure function for a given list of arguments.
      *
      * Valid configurations (src1,src2) -> dst :
@@ -68,27 +66,9 @@ public:
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, ConvertPolicy policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref ClAdd
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Valid configurations (src1,src2) -> dst :
-     *
-     *   - (U8,U8)           -> U8
-     *   - (U8,U8)           -> S16
-     *   - (S16,U8)          -> S16
-     *   - (U8,S16)          -> S16
-     *   - (S16,S16)         -> S16
-     *   - (S32,S32)         -> S32
-     *   - (F16,F16)         -> F16
-     *   - (F32,F32)         -> F32
-     *   - (QASYMM8,QASYMM8) -> QASYMM8
-     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (QSYMM16,QSYMM16) -> QSYMM16
-     *
-     * @param[in] src1     First source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
-     * @param[in] src2     Second source tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
-     * @param[in] dst      Destination tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
-     * @param[in] policy   Policy to use to handle overflow.
-     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
+     * Similar to @ref ClAdd::configure()
      *
      * @return a status
      */

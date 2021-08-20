@@ -24,9 +24,7 @@
 
 #pragma once
 
-#ifdef CYCLE_PROFILING
-#include "profiler.hpp"
-#endif // CYCLE_PROFILING
+#include "common.hpp"
 
 namespace arm_conv
 {
@@ -53,11 +51,6 @@ struct PoolingWindow
 struct PoolingStride
 {
     unsigned int rows, cols;
-};
-
-struct PaddingValues
-{
-    unsigned int left, top, right, bottom;
 };
 
 class IPoolingCommon

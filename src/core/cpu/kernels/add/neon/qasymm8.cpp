@@ -199,7 +199,7 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
             {
                 const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - iq1_info.offset) * iq1_info.scale;
                 const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - iq2_info.offset) * iq2_info.scale;
-                *(output_ptr + x) = quantize_qasymm8((afs + bfs), dst->info()->quantization_info());
+                *(output_ptr + x) = quantize_qasymm8((afs + bfs), oq_info);
             }
         },
         input1, input2, output);

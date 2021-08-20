@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__ARM_FEATURE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -29,7 +30,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE)
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -128,4 +128,4 @@ void fp32_sve_activation(const ITensor *src, ITensor *dst, const ActivationLayer
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif // __ARM_FEATURE_SVE
+#endif /* defined(__ARM_FEATURE_SVE) */

@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SVE
 
 template<>
 void MergeResults<3, 8, true>(int32_t *out, const int32_t *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const int32_t *bias, Activation , bool append)
@@ -1394,4 +1394,4 @@ void MergeResults<3, 8, true>(int32_t *out, const int32_t *in, const int ldout, 
     }
 }
 
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

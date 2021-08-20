@@ -34,7 +34,6 @@
 #include "arm_compute/graph/backends/CL/CLSubTensorHandle.h"
 #include "arm_compute/graph/backends/CL/CLTensorHandle.h"
 
-#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
@@ -89,7 +88,7 @@ void CLDeviceBackend::initialize_backend()
     // Setup Scheduler
     CLScheduler::get().default_init(&_tuner, &_gemm_heuristics, _backend_type);
     // Create allocator with new context
-    _allocator = std::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
+    _allocator = std::make_unique<CLBufferAllocator>();
 }
 
 void CLDeviceBackend::release_backend_context(GraphContext &ctx)

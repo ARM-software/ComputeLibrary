@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,16 @@ public:
         add_config(TensorShape(32U, 1U), TensorShape(17U, 32U), TensorShape(17U, 1U), TensorShape(17U, 1U), 0.4f, 0.7f);
     }
 };
+
+class SmallBatchedGEMMDataset final : public GEMMDataset
+{
+public:
+    SmallBatchedGEMMDataset()
+    {
+        add_config(TensorShape(2U, 4U, 1U, 3U), TensorShape(5U, 2U, 3U), TensorShape(5U), TensorShape(5U, 4U, 1U, 3U), 1.0f, 0.0f);
+    }
+};
+
 class SmallGEMMOutput3DDataset final : public GEMMDataset
 {
 public:

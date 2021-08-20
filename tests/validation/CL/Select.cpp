@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,6 +107,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     validate(CLAccessor(_target), _reference);
 }
 
+FIXTURE_DATA_TEST_CASE(RunOneDim,
+                       CLSelectFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
+                                       framework::dataset::make("has_same_rank", { false, true })),
+                               framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLSelectFixture<half>,
                        framework::DatasetMode::NIGHTLY,
@@ -122,6 +133,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(run_small_dataset, framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunOneDim,
+                       CLSelectFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
+                                       framework::dataset::make("has_same_rank", { false, true })),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -144,6 +166,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLSelectFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunOneDim,
+                       CLSelectFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(framework::dataset::make("Shape", TensorShape(1U, 16U)),
+                                       framework::dataset::make("has_same_rank", { false, true })),
+                               framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

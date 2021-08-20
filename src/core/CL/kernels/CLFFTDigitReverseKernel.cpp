@@ -70,6 +70,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLFFTDigitReverseKernel::CLFFTDigitReverseKernel()
     : _input(nullptr), _output(nullptr), _idx(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLFFTDigitReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config)

@@ -4,10 +4,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "arm_compute/core/NEON/kernels/assembly " \
-           "arm_compute/core/NEON/kernels/convolution/common " \
-           "arm_compute/core/NEON/kernels/convolution/depthwise " \
-           "arm_compute/core/NEON/kernels/convolution/winograd " \
+    return "src/core/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \
@@ -66,6 +63,7 @@ def filter_clang_tidy_lines( lines ):
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
                 ("CPUUtils.cpp" in line and "use of undeclared identifier 'HWCAP_SVE'" in line) or
+               ("sve" in line) or
                 ("'arm_compute_version.embed' file not found" in line) ):
                 print_context=False
                 continue
@@ -111,15 +109,15 @@ def filter_clang_tidy_lines( lines ):
                ("NEWinogradLayerKernel.cpp" in line and "use '= default' to define a trivial destructor" in line) or
                ("NEGEMMLowpMatrixMultiplyCore.cpp" in line and "constructor does not initialize these fields" in line) or
                ("NEGEMMLowpAssemblyMatrixMultiplyCore" in line and "constructor does not initialize these fields" in line) or
-               ("CpuDepthwiseConvolutionNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
-               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
-               ("CpuDepthwiseConvolutionAssemblyDispatch" in line and "modernize-use-equals-default" in line) or
+               ("CpuDepthwiseConv2dNativeKernel" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConv2dAssemblyDispatch" in line and re.search(r"parameter '[^']+' is unused", line)) or
+               ("CpuDepthwiseConv2dAssemblyDispatch" in line and "modernize-use-equals-default" in line) or
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
                ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
-               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line) or # This is to prevent false positive, should be reassessed with the newer clang-tidy
-               ("CpuDepthwiseConvolutionNativeKernel.cpp" in line and "cppcoreguidelines-pro-type-member-init" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
+               ("sve" in line) or
+               ("CpuDepthwiseConv2dNativeKernel.cpp" in line and "misc-non-private-member-variables-in-classes" in line)): # This is to prevent false positive, should be reassessed with the newer clang-tidy
                 print_context=False
                 continue
 

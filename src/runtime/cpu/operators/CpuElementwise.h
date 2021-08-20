@@ -52,13 +52,11 @@ public:
      * @param[out] dst  The output tensor information.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if the given information will lead to a valid configuration
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in]  src0 The first source tensor information.
-     * @param[in]  src1 The second source tensor information. With PRelu, this is used as alpha tensor.
-     * @param[out] dst  The output tensor information.
+     * Similar to @ref CpuElementwiseArithmetic::configure()
      *
-     * @return A status
+     * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 };
@@ -85,11 +83,9 @@ public:
      * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for division
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: S32/F16/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * Similar to @ref CpuElementwiseDivision::configure()
      *
      * @return a status
      */
@@ -112,11 +108,9 @@ public:
      * @param[out]     dst  Output tensor info. Data types supported: Same as @p src0.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for power
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: F16/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: Same as @p src0.
+     * Similar to @ref CpuElementwisePower::configure()
      *
      * @return a status
      */
@@ -139,12 +133,9 @@ public:
      * @param[in]      op   Comparison Operation to be performed.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ComparisonOperation op);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: U16/U32.
-     * @param[in] op   Comparison Operation to be performed.
+     * Similar to @ref CpuElementwiseComparison::configure()
      *
      * @return a status
      */
@@ -167,11 +158,9 @@ public:
      * @param[out]     dst  Output tensor info. Data types supported: U16/U32.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuComparisonKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src0 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] src1 Second tensor input info. Data types supported: Same as @p src0.
-     * @param[in] dst  Output tensor info. Data types supported: U16/U32.
+     * Similar to @ref CpuElementwiseComparisonStatic::configure()
      *
      * @return a status
      */

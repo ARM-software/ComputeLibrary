@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -209,10 +209,10 @@ struct Measurement
 
         /** Stored value */
         union
-            {
-                double        floating_point;
-                long long int integer;
-            } v;
+        {
+            double        floating_point;
+            long long int integer;
+        } v;
         bool is_floating_point; /**< Is the stored value floating point or integer ? */
     };
 

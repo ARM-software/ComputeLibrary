@@ -63,6 +63,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int width_offset, con
 
 ClWidthConcatenateKernel::ClWidthConcatenateKernel()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status ClWidthConcatenateKernel::validate(const ITensorInfo *src, unsigned int width_offset, const ITensorInfo *dst)

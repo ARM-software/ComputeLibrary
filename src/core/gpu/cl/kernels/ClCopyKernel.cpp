@@ -68,6 +68,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Window
 
 } // namespace
 
+ClCopyKernel::ClCopyKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClCopyKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, Window *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

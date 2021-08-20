@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,113 +23,37 @@
  */
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
+
+#include "src/core/CL/ICLKernel.h"
+#include "src/runtime/gpu/cl/operators/ClGemmLowpOutputStage.h"
 
 #include <algorithm>
 
 namespace arm_compute
 {
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                    int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                                                                    int min, int max)
+struct CLGEMMLowpOutputStage::Impl
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-}
+    const ICLTensor                               *src{ nullptr };
+    const ICLTensor                               *bias{ nullptr };
+    ICLTensor                                     *dst{ nullptr };
+    std::unique_ptr<opencl::ClGemmLowpOutputStage> op{ nullptr };
+    ITensorPack                                    run_pack{};
+};
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                    int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                                                                    int min, int max)
+CLGEMMLowpOutputStage::CLGEMMLowpOutputStage()
+    : _impl(std::make_unique<Impl>())
 {
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_multiplier = result_fixedpoint_multiplier;
-    info.gemmlowp_shift      = result_shift;
-    info.gemmlowp_offset     = result_offset_after_shift;
-    info.gemmlowp_min_bound  = min;
-    info.gemmlowp_max_bound  = max;
-    info.output_data_type    = DataType::QASYMM8;
-    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
-    k->configure(compile_context, input, bias, output, &info);
-    _kernel = std::move(k);
 }
-
-Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                                                                     int min, int max)
-{
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_min_bound = min;
-    info.gemmlowp_max_bound = max;
-    info.output_data_type   = DataType::QASYMM8;
-    return CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(input, bias, output, &info);
-}
-
-void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                                                                   int min, int max)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-}
-
-void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
-                                                                   int min, int max)
-{
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_multiplier = result_fixedpoint_multiplier;
-    info.gemmlowp_shift      = result_shift;
-    info.gemmlowp_offset     = result_offset_after_shift;
-    info.gemmlowp_min_bound  = min;
-    info.gemmlowp_max_bound  = max;
-    info.output_data_type    = DataType::QASYMM8_SIGNED;
-    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
-    k->configure(compile_context, input, bias, output, &info);
-    _kernel = std::move(k);
-}
-
-Status CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                                                                    int min, int max)
-{
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_min_bound = min;
-    info.gemmlowp_max_bound = max;
-    info.output_data_type   = DataType::QASYMM8_SIGNED;
-    return CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(input, bias, output, &info);
-}
-
-void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                    int result_fixedpoint_multiplier, int result_shift,
-                                                                    int min, int max)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
-}
-
-void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
-                                                                    int result_fixedpoint_multiplier, int result_shift,
-                                                                    int min, int max)
-{
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_multiplier = result_fixedpoint_multiplier;
-    info.gemmlowp_shift      = result_shift;
-    info.gemmlowp_min_bound  = min;
-    info.gemmlowp_max_bound  = max;
-    info.output_data_type    = DataType::QSYMM16;
-    auto k                   = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
-    k->configure(compile_context, input, bias, output, &info);
-    _kernel = std::move(k);
-}
-
-Status CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                                                                     int min, int max)
-{
-    GEMMLowpOutputStageInfo info{};
-    info.gemmlowp_min_bound = min;
-    info.gemmlowp_max_bound = max;
-    info.output_data_type   = DataType::QSYMM16;
-    return CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(input, bias, output, &info);
-}
+CLGEMMLowpOutputStage::CLGEMMLowpOutputStage(CLGEMMLowpOutputStage &&) = default;
+CLGEMMLowpOutputStage &CLGEMMLowpOutputStage::operator=(CLGEMMLowpOutputStage &&) = default;
+CLGEMMLowpOutputStage::~CLGEMMLowpOutputStage()                                   = default;
 
 void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
 {
@@ -140,49 +64,22 @@ void CLGEMMLowpOutputStage::configure(const CLCompileContext &compile_context, c
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    switch(info.type)
-    {
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
-        {
-            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel>();
-            k->configure(compile_context, input, bias, output, &info);
-            _kernel = std::move(k);
-            break;
-        }
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN:
-        {
-            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
-            k->configure(compile_context, input, bias, output, &info);
-            _kernel = std::move(k);
-            break;
-        }
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
-        {
-            auto k = std::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
-            k->configure(compile_context, input, bias, output, &info);
-            _kernel = std::move(k);
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Unsupported GEMMLowpOutputStage type.");
-    }
+    _impl->src  = input;
+    _impl->bias = bias;
+    _impl->dst  = output;
+
+    _impl->op = std::make_unique<opencl::ClGemmLowpOutputStage>();
+    _impl->op->configure(compile_context, input->info(), bias != nullptr ? bias->info() : nullptr, output->info(), info);
+    _impl->run_pack = { { ACL_SRC, _impl->src }, { ACL_BIAS, _impl->bias }, { ACL_DST, _impl->dst } };
 }
 
 Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16);
+    return opencl::ClGemmLowpOutputStage::validate(input, bias, output, info);
+}
 
-    switch(info.type)
-    {
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
-            return CLGEMMLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(input, bias, output, &info);
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN:
-            return CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(input, bias, output, &info);
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
-            return CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::validate(input, bias, output, &info);
-        default:
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported GEMMLowpOutputStage type.");
-    }
+void CLGEMMLowpOutputStage::run()
+{
+    _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

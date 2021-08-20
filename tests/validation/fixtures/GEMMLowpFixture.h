@@ -97,7 +97,7 @@ void fill(U &&tensor, int i)
 template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d, bool reinterpret_output_as_3d, typename OutputType, bool is_fused = false>
 TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
                                    GEMMLowpOutputStageInfo output_stage = GEMMLowpOutputStageInfo(), DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8,
-                                   QuantizationInfo b_qinfo = QuantizationInfo())
+                                   QuantizationInfo b_qinfo = QuantizationInfo(), bool reshape_b_only_on_first_run = false)
 {
     // Create tensors
     DataType data_type_output = output_stage.type == GEMMLowpOutputStageType::NONE ? DataType::S32 : data_type_a;
@@ -126,7 +126,8 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     // Create and configure function
     // The GEMMinfo includes the values of the depth in case of reinterpreted 3d input/output
     FunctionType gemmlowp;
-    gemmlowp.configure(&a, &b, is_fused ? &bias : nullptr, &output, GEMMInfo(false, false, false, (reinterpret_output_as_3d ? shape_output[2] : 0), reinterpret_input_as_3d, false, output_stage));
+    gemmlowp.configure(&a, &b, is_fused ? &bias : nullptr, &output, GEMMInfo(false, false, reshape_b_only_on_first_run, (reinterpret_output_as_3d ? shape_output[2] : 0), reinterpret_input_as_3d, false,
+                                                                             output_stage));
 
     ARM_COMPUTE_ASSERT(a.info()->is_resizable());
     ARM_COMPUTE_ASSERT(b.info()->is_resizable());
@@ -208,11 +209,12 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, typename TI = uint8_t, typename TW = uint8_t>
-class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture : public framework::Fixture
+class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b,
+               bool reshape_b_only_on_first_run)
     {
         ARM_COMPUTE_ASSERT(output_stage.type != GEMMLowpOutputStageType::NONE);
         DataType data_type_a = data_type_b == DataType::QASYMM8_SIGNED ? DataType::QASYMM8_SIGNED : DataType::QASYMM8;
@@ -232,21 +234,21 @@ public:
             }
 
             _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_a, data_type_b, QuantizationInfo(scales));
-            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_a, data_type_b, QuantizationInfo(scales));
+            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_a, data_type_b, QuantizationInfo(scales), reshape_b_only_on_first_run);
         }
         else
         {
             _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, b_offset, output_stage, data_type_a, data_type_b, QuantizationInfo());
-            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, b_offset, output_stage, data_type_a, data_type_b, QuantizationInfo());
+            _target    = compute_target(shape_a, shape_b, shape_output, a_offset, b_offset, output_stage, data_type_a, data_type_b, QuantizationInfo(), reshape_b_only_on_first_run);
         }
     }
 
 protected:
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage,
-                              DataType data_type_a, DataType data_type_b, QuantizationInfo b_qinfo)
+                              DataType data_type_a, DataType data_type_b, QuantizationInfo b_qinfo, bool reshape_b_only_on_first_run = false)
     {
         return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, qasymm8_t, true>(shape_a, shape_b, shape_output, a_offset, b_offset,
-                output_stage, data_type_a, data_type_b, b_qinfo);
+                output_stage, data_type_a, data_type_b, b_qinfo, reshape_b_only_on_first_run);
     }
 
     SimpleTensor<TI> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
@@ -275,6 +277,19 @@ protected:
 
     TensorType       _target{};
     SimpleTensor<TI> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, typename TI = uint8_t, typename TW = uint8_t>
+class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture : public
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b)
+    {
+        GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>::setup(shape_a, shape_b,
+                shape_output, a_offset, b_offset, output_stage, data_type_b, false);
+    }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType>
@@ -869,7 +884,7 @@ protected:
     SimpleTensor<int16_t> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+template <typename TensorType, typename AccessorType, typename ReshapeLHSOperatorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 {
 public:
@@ -939,12 +954,12 @@ protected:
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
-        ReshapeLHSFunctionType reshape_lhs;
-        ReshapeRHSFunctionType reshape_rhs;
+        ReshapeLHSOperatorType reshape_lhs;
+        ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
-        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
-        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -969,9 +984,12 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        reshape_lhs.run();
-        reshape_rhs.run();
-        gemm.run();
+        ITensorPack reshape_lhs_pack = { { ACL_SRC, &lhs }, { ACL_DST, &lhs_reshaped } };
+        reshape_lhs.run(reshape_lhs_pack);
+        ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+        reshape_rhs.run(reshape_rhs_pack);
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1017,7 +1035,7 @@ protected:
     SimpleTensor<int32_t> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+template <typename TensorType, typename AccessorType, typename ReshapeLHSOperatorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyReshaped3DValidationFixture : public framework::Fixture
 {
 public:
@@ -1091,12 +1109,12 @@ protected:
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
-        ReshapeLHSFunctionType reshape_lhs;
-        ReshapeRHSFunctionType reshape_rhs;
+        ReshapeLHSOperatorType reshape_lhs;
+        ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
-        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
-        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1121,9 +1139,12 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        reshape_lhs.run();
-        reshape_rhs.run();
-        gemm.run();
+        ITensorPack reshape_lhs_pack = { { ACL_SRC, &lhs }, { ACL_DST, &lhs_reshaped } };
+        reshape_lhs.run(reshape_lhs_pack);
+        ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+        reshape_rhs.run(reshape_rhs_pack);
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1171,7 +1192,7 @@ protected:
     SimpleTensor<int32_t> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+template <typename TensorType, typename AccessorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyReshapedOnlyRHSValidationFixture : public framework::Fixture
 {
 public:
@@ -1244,10 +1265,10 @@ protected:
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
-        ReshapeRHSFunctionType reshape_rhs;
+        ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
-        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+        gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info);
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1270,8 +1291,10 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        reshape_rhs.run();
-        gemm.run();
+        ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+        reshape_rhs.run(reshape_rhs_pack);
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1312,7 +1335,7 @@ protected:
     SimpleTensor<int32_t> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+template <typename TensorType, typename AccessorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::Fixture
 {
 public:
@@ -1389,10 +1412,10 @@ protected:
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
-        ReshapeRHSFunctionType reshape_rhs;
+        ReshapeRHSOperatorType reshape_rhs;
         GEMMFunctionType       gemm;
-        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+        gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info);
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1415,8 +1438,10 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        reshape_rhs.run();
-        gemm.run();
+        ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+        reshape_rhs.run(reshape_rhs_pack);
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1506,7 +1531,7 @@ protected:
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        gemm.configure(lhs.info(), rhs.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1527,7 +1552,8 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }
@@ -1603,7 +1629,7 @@ protected:
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &dst, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        gemm.configure(lhs.info(), rhs.info(), dst.info(), lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
 
         ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
         ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
@@ -1624,7 +1650,8 @@ protected:
         fill(AccessorType(rhs), 1);
 
         // Compute GEMM
-        gemm.run();
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs }, { ACL_DST, &dst } });
+        gemm.run(gemm_pack);
 
         return dst;
     }

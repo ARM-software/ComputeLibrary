@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.h"
+#include "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/framework/Macros.h"
@@ -38,7 +38,7 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CpuDepthwiseConvolutionKernel
-using CpuDepthwiseConvolutionNative = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConvolutionNativeKernel>;
+using CpuDepthwiseConvolutionNative = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConv2dNativeKernel>;
 
 // Fixture for NEDepthwiseConvolutionLayerKernel
 template <typename T>
@@ -124,7 +124,7 @@ TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
     auto biases  = create_tensor<Tensor>(bias_shape, data_type, 1, QuantizationInfo(), data_layout);
     auto dst     = create_tensor<Tensor>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
 
-    cpu::kernels::CpuDepthwiseConvolutionNativeKernel dwc;
+    cpu::kernels::CpuDepthwiseConv2dNativeKernel dwc;
     const ConvolutionInfo info{pad_stride_info, 1, ActivationLayerInfo(), Size2D(1, 1)};
     dwc.configure(src.info(), weights.info(), biases.info(), dst.info(), info);
 

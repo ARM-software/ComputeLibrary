@@ -26,127 +26,101 @@
 
 #include "arm_compute/core/Error.h"
 
-#include <array>
-#include <string>
-#include <vector>
+#include <memory>
 
 namespace arm_compute
 {
-/** CPU models - we only need to detect CPUs we have
- * microarchitecture-specific code for.
+#define ARM_COMPUTE_CPU_MODEL_LIST \
+    X(GENERIC)                     \
+    X(GENERIC_FP16)                \
+    X(GENERIC_FP16_DOT)            \
+    X(A53)                         \
+    X(A55r0)                       \
+    X(A55r1)                       \
+    X(A35)                         \
+    X(A73)                         \
+    X(A510)                        \
+    X(X1)                          \
+    X(V1)                          \
+    X(A64FX)
+
+/** CPU models types
  *
- * Architecture features are detected via HWCAPs.
+ * @note We only need to detect CPUs we have microarchitecture-specific code for.
+ * @note Architecture features are detected via HWCAPs.
  */
 enum class CPUModel
 {
-    GENERIC,
-    GENERIC_FP16,
-    GENERIC_FP16_DOT,
-    A35,
-    A53,
-    A55r0,
-    A55r1,
-    KLEIN,
-    X1,
-    A73
+#define X(model) model,
+    ARM_COMPUTE_CPU_MODEL_LIST
+#undef X
 };
-
-/** Global memory policy.
- * The functions in the runtime will use different strategies based on the policy currently set.
- *
- * MINIMIZE will try to reduce the amount allocated by the functions at the expense of performance normally.
- * NORMAL won't try to save any memory and will favor speed over memory consumption
- *
- */
-enum class MemoryPolicy
-{
-    MINIMIZE,
-    NORMAL
-};
-
-/** Convert a cpumodel value to a string
- *
- * @param val CPUModel value to be converted
- *
- * @return String representing the corresponding CPUModel.
- */
-inline std::string cpu_model_to_string(CPUModel val)
-{
-    switch(val)
-    {
-        case CPUModel::GENERIC:
-        {
-            return std::string("GENERIC");
-        }
-        case CPUModel::KLEIN:
-        {
-            return std::string("KLEIN");
-        }
-        case CPUModel::GENERIC_FP16:
-        {
-            return std::string("GENERIC_FP16");
-        }
-        case CPUModel::GENERIC_FP16_DOT:
-        {
-            return std::string("GENERIC_FP16_DOT");
-        }
-        case CPUModel::A53:
-        {
-            return std::string("A53");
-        }
-        case CPUModel::A55r0:
-        {
-            return std::string("A55r0");
-        }
-        case CPUModel::A55r1:
-        {
-            return std::string("A55r1");
-        }
-        case CPUModel::X1:
-        {
-            return std::string("X1");
-        }
-        case CPUModel::A73:
-        {
-            return std::string("A73");
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Invalid CPUModel.");
-            return std::string("GENERIC");
-        }
-    }
-}
 
 class CPUInfo final
 {
-public:
-    /** Constructor */
+protected:
     CPUInfo();
+    ~CPUInfo();
 
-    /** Disable copy constructor and assignment operator to avoid copying the vector of CPUs each time
-     *  CPUInfo is initialized once in the IScheduler and ThreadInfo will get a pointer to it.
+public:
+    /** Access the KernelLibrary singleton.
+     * This method has been deprecated and will be removed in future releases
+     * @return The KernelLibrary instance.
      */
-    CPUInfo &operator=(const CPUInfo &cpuinfo) = delete;
-    CPUInfo(const CPUInfo &cpuinfo)            = delete;
-    CPUInfo &operator=(CPUInfo &&cpuinfo) = default;
-    CPUInfo(CPUInfo &&cpuinfo)            = default;
+    static CPUInfo &get();
+
+    /* Delete move and copy constructors and assignment operator
+    s */
+    CPUInfo(CPUInfo const &) = delete;            // Copy construct
+    CPUInfo(CPUInfo &&)      = delete;            // Move construct
+    CPUInfo &operator=(CPUInfo const &) = delete; // Copy assign
+    CPUInfo &operator=(CPUInfo &&) = delete;      // Move assign
 
     /** Checks if the cpu model supports fp16.
      *
      * @return true of the cpu supports fp16, false otherwise
      */
     bool has_fp16() const;
+    /** Checks if the cpu model supports bf16.
+     *
+     * @return true of the cpu supports bf16, false otherwise
+     */
+    bool has_bf16() const;
+    /** Checks if the cpu model supports bf16.
+     *
+     * @return true of the cpu supports bf16, false otherwise
+     */
+    bool has_svebf16() const;
     /** Checks if the cpu model supports dot product.
      *
      * @return true of the cpu supports dot product, false otherwise
      */
     bool has_dotprod() const;
+    /** Checks if the cpu model supports floating-point matrix multiplication.
+     *
+     * @return true of the cpu supports floating-point matrix multiplication, false otherwise
+     */
+    bool has_svef32mm() const;
+    /** Checks if the cpu model supports integer matrix multiplication.
+     *
+     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     */
+    bool has_i8mm() const;
+    /** Checks if the cpu model supports integer matrix multiplication.
+     *
+     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     */
+    bool has_svei8mm() const;
     /** Checks if the cpu model supports sve.
      *
      * @return true of the cpu supports sve, false otherwise
      */
     bool has_sve() const;
+    /** Checks if the cpu model supports sve2.
+     *
+     * @return true of the cpu supports sve2, false otherwise
+     */
+    bool has_sve2() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,
@@ -169,43 +143,6 @@ public:
      * @return the size of the L1 cache
      */
     unsigned int get_L2_cache_size() const;
-    /** Set the L1 cache size
-     *
-     * @param[in] size the new size to be set.
-     */
-    void set_L1_cache_size(unsigned int size);
-    /** Set the L2 cache size
-     *
-     * @param[in] size the new size to be set.
-     */
-    void set_L2_cache_size(unsigned int size);
-    /** Set fp16 support
-     *
-     * @param[in] fp16 whether the cpu supports fp16.
-     */
-    void set_fp16(const bool fp16);
-    /** Set dot product support
-     *
-     * @param[in] dotprod whether the cpu supports dot product.
-     */
-    void set_dotprod(const bool dotprod);
-    /** Set sve support
-     *
-     * @param[in] sve whether the cpu supports sve.
-     */
-    void set_sve(const bool sve);
-    /** Set the cpumodel for a given cpu core
-     *
-     * @param[in] cpuid the id of the core to be set.
-     * @param[in] model the @ref CPUModel to be set.
-     */
-    void set_cpu_model(unsigned int cpuid, CPUModel model);
-    /** Set max number of cpus
-     *
-     * @param[in] cpu_count the number of CPUs in the system.
-     */
-    void set_cpu_num(unsigned int cpu_count);
-
     /** Return the maximum number of CPUs present
      *
      * @return Number of CPUs
@@ -213,39 +150,8 @@ public:
     unsigned int get_cpu_num() const;
 
 private:
-    std::vector<CPUModel> _percpu        = {};
-    bool                  _fp16          = false;
-    bool                  _dotprod       = false;
-    bool                  _sve           = false;
-    unsigned int          _L1_cache_size = 32768;
-    unsigned int          _L2_cache_size = 262144;
-};
-
-class MEMInfo final
-{
-public:
-    MEMInfo();
-
-    /** Return the total amount of RAM memory in the system expressed in KB.
-     *
-     * @return Total memory
-     */
-    size_t get_total_in_kb() const;
-
-    static void set_policy(MemoryPolicy policy);
-    static MemoryPolicy get_policy();
-
-    /** Common memory sizes expressed in Kb to avoid having them
-     *  duplicated throughout the code.
-     */
-    static const size_t ONE_GB_IN_KB = { 1035842 };
-    static const size_t TWO_GB_IN_KB = { ONE_GB_IN_KB * 2 };
-
-private:
-    size_t              _total;
-    size_t              _free;
-    size_t              _buffer;
-    static MemoryPolicy _policy;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 /** Information about executing thread and CPU. */

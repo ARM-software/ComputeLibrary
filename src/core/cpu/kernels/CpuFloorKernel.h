@@ -45,10 +45,9 @@ public:
      * @param[out] dst Destination tensor. Same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuFloorKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data type supported: F16/F32.
-     * @param[in] dst Destination tensor info. Same as @p src
+     * Similar to CpuFloorKernel::configure()
      *
      * @return a status
      */
@@ -65,6 +64,13 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+private:
+    using FloorUKernelPtr = std::add_pointer<void(const void *, void *, int)>::type;
+
+private:
+    FloorUKernelPtr _run_method{ nullptr };
+    std::string     _name{};
 };
 } // namespace kernels
 } // namespace cpu

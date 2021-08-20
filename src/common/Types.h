@@ -24,6 +24,7 @@
 #ifndef SRC_COMMON_TYPES_H_
 #define SRC_COMMON_TYPES_H_
 
+#include "arm_compute/AclDescriptors.h"
 #include "arm_compute/AclTypes.h"
 
 namespace arm_compute

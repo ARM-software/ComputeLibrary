@@ -68,13 +68,14 @@ public:
      * |S16            |U8             |S16            |
      * |S16            |S16            |S16            |
      * |F16            |F16            |F16            |
-     * |F32            |S32            |F32            |
+     * |F32            |F32            |F32            |
+     * |S32            |S32            |S32            |
      *
-     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]      overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
@@ -86,11 +87,11 @@ public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]      overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate

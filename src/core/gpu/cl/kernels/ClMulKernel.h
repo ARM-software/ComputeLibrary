@@ -34,12 +34,15 @@ namespace opencl
 {
 namespace kernels
 {
-/** Interface for the pixelwise multiplication kernel. */
+/** Interface for the pixelwise multiplication kernel.
+ *
+ * For binary elementwise ops in-place cannot be enabled by passing nullptr to dst, it can only be enabled by passing either src1 or src2 to dst instead.
+ *
+*/
 class ClMulKernel : public IClKernel
 {
 public:
-    /** Default constructor */
-    ClMulKernel() = default;
+    ClMulKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClMulKernel);
     /** Initialise the kernel's src and dst.
      *
@@ -50,6 +53,7 @@ public:
      *   - (U8,S16)                        -> S16
      *   - (S16,U8)                        -> S16
      *   - (S16,S16)                       -> S16
+     *   - (S32,S32)                       -> S32
      *   - (F16,F16)                       -> F16
      *   - (F32,F32)                       -> F32
      *   - (QASYMM8,QASYMM8)               -> QASYMM8
@@ -58,9 +62,9 @@ public:
      *   - (QSYMM16,QSYMM16)               -> S32
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src1            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in]  src2            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[out] dst             The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in]  src1            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
+     * @param[in]  src2            An src tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
+     * @param[out] dst             The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32/S32
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
@@ -86,8 +90,7 @@ public:
 class ClComplexMulKernel : public ICLKernel
 {
 public:
-    /** Default constructor */
-    ClComplexMulKernel() = default;
+    ClComplexMulKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClComplexMulKernel);
     /** Initialise the kernel's src and dst.
      *

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACLTYPES_H_
-#define ARM_COMPUTE_ACLTYPES_H_
+#ifndef ARM_COMPUTE_ACL_TYPES_H_
+#define ARM_COMPUTE_ACL_TYPES_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -39,6 +39,8 @@ typedef struct AclQueue_ *AclQueue;
 typedef struct AclTensor_ *AclTensor;
 /**< Opaque Tensor pack object */
 typedef struct AclTensorPack_ *AclTensorPack;
+/**< Opaque Operator object */
+typedef struct AclOperator_ *AclOperator;
 
 // Capabilities bitfield (Note: if multiple are enabled ComputeLibrary will pick the best possible)
 typedef uint64_t AclTargetCapabilities;
@@ -209,4 +211,4 @@ typedef enum
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACLTYPES_H_ */
+#endif /* ARM_COMPUTE_ACL_TYPES_H_ */

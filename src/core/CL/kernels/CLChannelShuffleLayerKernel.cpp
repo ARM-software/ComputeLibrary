@@ -66,27 +66,38 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, *input->clone());
 
-    const bool             is_nhwc                             = input->data_layout() == DataLayout::NHWC;
-    const unsigned int     num_elems_processed_per_iteration_x = is_nhwc ? 4 : max_cl_vector_width / input->element_size();
-    constexpr unsigned int num_elems_processed_per_iteration_y = 2;
+    const bool is_nhwc = input->data_layout() == DataLayout::NHWC;
+    if(is_nhwc)
+    {
+        unsigned int num_elems_processed_per_iteration_x = adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
+        Window       win                                 = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x));
+        Window       win_collapsed                       = win.collapse(win, Window::DimZ);
+        return std::make_pair(Status{}, win_collapsed);
+    }
+    else
+    {
+        const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / input->element_size();
+        constexpr unsigned int num_elems_processed_per_iteration_y = 2;
 
-    // Configure kernel window
-    Window                win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    AccessWindowRectangle output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+        // Configure kernel window
+        Window                win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+        AccessWindowRectangle output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
 
-    const bool window_changed = update_window_and_padding(win, input_access, output_access);
+        const bool window_changed = update_window_and_padding(win, input_access, output_access);
 
-    Window win_collapsed = win.collapse(win, Window::DimZ);
+        Window win_collapsed = win.collapse(win, Window::DimZ);
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win_collapsed);
+        Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+        return std::make_pair(err, win_collapsed);
+    }
 }
 } // namespace
 
 CLChannelShuffleLayerKernel::CLChannelShuffleLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
@@ -97,24 +108,35 @@ void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *o
 void CLChannelShuffleLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), num_groups));
+    auto padding_info = get_padding_info({ input, output });
 
     _input  = input;
     _output = output;
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), num_groups));
-
-    const DataLayout   data_layout = input->info()->data_layout();
-    const bool         is_nhwc     = data_layout == DataLayout::NHWC;
-    const unsigned int channels    = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
-    const unsigned int vec_size    = is_nhwc ? 4 : max_cl_vector_width / input->info()->element_size();
+    const DataLayout   data_layout          = input->info()->data_layout();
+    const bool         is_nhwc              = data_layout == DataLayout::NHWC;
+    const unsigned int channels             = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
+    unsigned int       vec_size_x           = 0;
+    unsigned int       vec_size_x_leftovers = 0;
+    if(is_nhwc)
+    {
+        vec_size_x           = adjust_vec_size(max_cl_vector_width / input->info()->element_size(), input->info()->dimension(0));
+        vec_size_x_leftovers = input->info()->dimension(0) % vec_size_x;
+    }
+    else
+    {
+        vec_size_x = max_cl_vector_width / input->info()->element_size();
+    }
 
     // Set kernel build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
     build_opts.add_option("-DK=" + support::cpp11::to_string(channels / num_groups));
-    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option_if(is_nhwc, "-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_x_leftovers));
+    build_opts.add_option_if(is_nhwc, "-DSRC_DIM_X=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DSRC_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
-    build_opts.add_option("-DLAST_ACCESSED=" + support::cpp11::to_string(std::max(static_cast<int>(channels - vec_size), 0)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
@@ -145,6 +167,10 @@ void CLChannelShuffleLayerKernel::configure(const CLCompileContext &compile_cont
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    if(data_layout == DataLayout::NHWC)
+    {
+        ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
+    }
 }
 
 Status CLChannelShuffleLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups)

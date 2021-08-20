@@ -75,12 +75,31 @@ std::string generate_id_for_tuning_common(const std::string &kernel_name, const 
     return config_id;
 }
 
+Status validate_in_place_output_shape(const bool in_place, const bool src1_in_place, const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst, const TensorShape &out_shape)
+{
+    if(in_place)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, src1_in_place ? src1.tensor_shape() : src2.tensor_shape(), 0),
+                                        "Wrong shape for dst, cannot do in_place calculation");
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
+                                        "Wrong shape for dst");
+    }
+    return Status{};
+}
+
 Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(&src1, &src2, &dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src1, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
+
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
 
@@ -91,19 +110,22 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &src
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, src1, src2, dst, out_shape));
     }
 
     return Status{};
 }
 
-Status validate_arguments_divide_operation(const ITensorInfo* src1, const ITensorInfo* src2, const ITensorInfo* dst)
+Status validate_arguments_divide_operation(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::F16, DataType::F32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
+
+    // Check whether it is in_place calculation
+    const bool in_place      = (src1 == dst) || (src2 == dst);
+    const bool src1_in_place = in_place && (src1 == dst);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
@@ -114,8 +136,7 @@ Status validate_arguments_divide_operation(const ITensorInfo* src1, const ITenso
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F16, DataType::F32, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, *src1, *src2, *dst, out_shape));
     }
 
     return Status{};
@@ -127,50 +148,34 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &src1, const I
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::S16, DataType::QSYMM16, DataType::F16,
                                                          DataType::S32, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
-                                                         DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
 
-    const bool is_quantized = is_data_type_quantized(src1.data_type()) || is_data_type_quantized(src2.data_type());
-    if(is_quantized)
+    if(is_data_type_quantized_symmetric(src1.data_type()))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &src2);
-
-        if(is_data_type_quantized_symmetric(src1.data_type()))
-        {
-            const int32_t in1_offset = src1.quantization_info().uniform().offset;
-            const int32_t in2_offset = src2.quantization_info().uniform().offset;
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_offset != 0, "For quantized symmetric, offset must be zero");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
-        }
+        const int32_t in1_offset = src1.quantization_info().uniform().offset;
+        const int32_t in2_offset = src2.quantization_info().uniform().offset;
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_offset != 0, "For quantized symmetric, offset must be zero");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
     }
 
-    const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
 
+    const TensorShape out_shape = TensorShape::broadcast_shape(src1.tensor_shape(), src2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
 
     // Validate in case of configured dst
     if(dst.total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                             DataType::S16, DataType::QSYMM16, DataType::F16,
-                                                             DataType::S32, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((dst.data_type() == DataType::U8) && ((src1.data_type() != DataType::U8) || (src2.data_type() != DataType::U8)),
-                                        "dst can only be U8 if both inputs are U8");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
-                                        "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0), "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_in_place_output_shape(in_place, src1_in_place, src1, src2, dst, out_shape));
 
-        if(is_quantized)
+        if(is_data_type_quantized_symmetric(dst.data_type()))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src1, &dst);
-
-            if(is_data_type_quantized_symmetric(dst.data_type()))
-            {
-                const int32_t offset = dst.quantization_info().uniform().offset;
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(offset != 0, "For quantized symmetric, offset must be zero");
-            }
+            const int32_t offset = dst.quantization_info().uniform().offset;
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(offset != 0, "For quantized symmetric, offset must be zero");
         }
     }
     return Status{};
@@ -182,9 +187,7 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &s
 
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / dst.element_size(), dst.dimension(0));
 
-    build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(src1.data_type()));
-    build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(src2.data_type()));
-    build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst.data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src1.data_type()));
     build_opts.add_option("-DVEC_SIZE_IN1=" + support::cpp11::to_string(src1.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_IN2=" + support::cpp11::to_string(src2.dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_OUT=" + support::cpp11::to_string(num_elems_processed_per_iteration));
@@ -205,6 +208,12 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &s
     }
     build_opts.add_option_if(src1.data_type() == DataType::S32, "-DS32");
 
+    // Check whether it is in_place calculation
+    const bool in_place      = (&src1 == &dst) || (&src2 == &dst);
+    const bool src1_in_place = in_place && (&src1 == &dst);
+    build_opts.add_option_if(in_place, "-DIN_PLACE");
+    build_opts.add_option_if(src1_in_place, "-DSRC1_IN_PLACE");
+
     return build_opts;
 }
 
@@ -220,32 +229,7 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(src1, src2);
     const TensorShape &out_shape = broadcast_pair.first;
 
-    set_shape_if_empty(dst, out_shape);
-
-    if(src1.data_type() == DataType::S16 || src2.data_type() == DataType::S16)
-    {
-        set_format_if_unknown(dst, Format::S16);
-    }
-    else if(src1.data_type() == DataType::F16 || src2.data_type() == DataType::F16)
-    {
-        set_format_if_unknown(dst, Format::F16);
-    }
-    else if(src1.data_type() == DataType::F32 || src2.data_type() == DataType::F32)
-    {
-        set_format_if_unknown(dst, Format::F32);
-    }
-    else if(src1.data_type() == DataType::QASYMM8 || src2.data_type() == DataType::QASYMM8)
-    {
-        set_data_type_if_unknown(dst, DataType::QASYMM8);
-    }
-    else if(src1.data_type() == DataType::QASYMM8_SIGNED || src2.data_type() == DataType::QASYMM8_SIGNED)
-    {
-        set_data_type_if_unknown(dst, DataType::QASYMM8_SIGNED);
-    }
-    else if(src1.data_type() == DataType::QSYMM16 || src2.data_type() == DataType::QSYMM16)
-    {
-        set_data_type_if_unknown(dst, DataType::QSYMM16);
-    }
+    auto_init_if_empty(dst, out_shape, 1, src1.data_type());
 
     return configure_window_arithmetic_common(dst);
 }
@@ -258,7 +242,6 @@ std::pair<Status, Window> validate_and_configure_window_for_logical_binary_opera
     set_shape_if_empty(dst, out_shape);
     set_data_type_if_unknown(dst, DataType::U8);
 
-    // The arithmetic utility functions can be share
     return configure_window_arithmetic_common(dst);
 }
 
@@ -266,14 +249,16 @@ std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(src1, src2);
     const TensorShape &out_shape = broadcast_pair.first;
+
     auto_init_if_empty(dst, out_shape, 1, src1.data_type());
+
     return configure_window_arithmetic_common(dst);
 }
 } // namespace
 
-void ClElementwiseKernel::configure_common(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
+ClElementwiseKernel::ClElementwiseKernel()
 {
-    configure_common(CLKernelLibrary::get().get_compile_context(), src1, src2, dst);
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void ClElementwiseKernel::configure_common(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
@@ -281,10 +266,6 @@ void ClElementwiseKernel::configure_common(const ClCompileContext &compile_conte
     // Configure kernel window
     auto win_config = validate_and_configure_window(*src1, *src2, *dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-
-    _src1 = src1;
-    _src2 = src2;
-    _dst  = dst;
 
     std::string kernel_name = "elementwise_operation_" + name();
     if(is_data_type_quantized(src1->data_type()))
@@ -318,6 +299,8 @@ void ClElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, ::c
     const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
     auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src_0, src_1, dst);
+
     const TensorShape &in_shape1 = src_0->info()->tensor_shape();
     const TensorShape &in_shape2 = src_1->info()->tensor_shape();
     const TensorShape &out_shape = dst->info()->tensor_shape();
@@ -342,12 +325,18 @@ void ClElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, ::c
     Window slice      = collapsed.first_slice_window_3D();
     Window slice_src1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
     Window slice_src2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
+
+    // Check whether it is in_place calculation
+    const bool in_place = (src_0 == dst) || (src_1 == dst);
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, src_0, slice_src1);
         add_3D_tensor_argument(idx, src_1, slice_src2);
-        add_3D_tensor_argument(idx, dst, slice);
+        if(!in_place)
+        {
+            add_3D_tensor_argument(idx, dst, slice);
+        }
 
         enqueue(queue, *this, slice, lws_hint());
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_src1));

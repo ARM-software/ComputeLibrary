@@ -22,8 +22,8 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
+#ifdef __aarch64__
 #include "../std_transforms_fixed.hpp"
 #include "../performance_parameters.hpp"
 
@@ -44,7 +44,8 @@ void a64_hybrid_fp16_mla_6x32_a55( ARGLIST );
 class cls_a64_hybrid_fp16_mla_6x32
 {
 public:
-    typedef __fp16 operand_type;
+    typedef __fp16 lhs_operand_type;
+    typedef __fp16 rhs_operand_type;
     typedef __fp16 result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -70,16 +71,24 @@ public:
         return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 6, 32, 1> transforms = {};
-
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    StdTransformsFixed<rhs_operand_type, result_type, 6, 32, 1> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
-        switch (ci->get_cpu_model()) {
-            case CPUModel::A55r1:
-                return { 6.94 };
-            default:
-                return { 14.53 };
+        if (std::is_same<T, __fp16>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A55r1:
+                    return { 6.94 };
+                case CPUModel::A510:
+                    return { 8.94 };
+                case CPUModel::V1:
+                    return { 29.26 };
+                default:
+                    return { 14.53 };
+            }
         }
+
+        return { 1.0 };
     }
 
     // Default to the generic kernel
@@ -99,4 +108,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // __aarch64__

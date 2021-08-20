@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
 
@@ -123,5 +123,5 @@ inline svint16x2_t svquantize_qsymm16_z(svbool_t pg, const svfloat32x4_t qv, con
 }
 
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #endif // ARM_COMPUTE_NESYMM_H

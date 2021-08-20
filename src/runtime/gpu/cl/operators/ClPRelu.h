@@ -38,8 +38,6 @@ namespace opencl
 class ClPRelu : public IClOperator
 {
 public:
-    /** Default constructor */
-    ClPRelu() = default;
     /** Set the input and output tensor.
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
@@ -50,11 +48,9 @@ public:
      * @param[out] output          Destination tensor. Data type supported: same as @p input
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref arm_compute::opencl::kernels::ClArithmeticKernel for PRELU
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] alpha  PRelu layer parameters. Data types supported: same of @p input.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * Similar to ClPRelu::configure()
      *
      * @return a status
      */

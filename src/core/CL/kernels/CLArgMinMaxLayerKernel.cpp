@@ -69,6 +69,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_outp
 CLArgMinMaxLayerKernel::CLArgMinMaxLayerKernel()
     : _input(nullptr), _prev_output(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::ARG_IDX_MAX)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)

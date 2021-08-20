@@ -132,6 +132,14 @@ private:
 
 /** Main program for LeNet
  *
+ * Model is based on:
+ *      http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf
+ *      "Gradient-Based Learning Applied to Document Recognition"
+ *      Yann LeCun, Léon Bottou, Yoshua Bengio, and Patrick Haffner
+ *
+ * The original model uses tanh instead of relu activations. However the use of relu activations in lenet has been
+ * widely adopted to improve accuracy.*
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

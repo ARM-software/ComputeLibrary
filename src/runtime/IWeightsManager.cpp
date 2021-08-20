@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 namespace arm_compute
 {
 IWeightsManager::IWeightsManager()
-    : _managed_weights(), _managed_weights_parents()
+    : _managed_weights(), _managed_counter(), _managed_weights_parents()
 {
 }
 
@@ -35,6 +35,11 @@ void IWeightsManager::manage(const ITensor *weights, ITransformWeights *parent)
     if(!are_weights_managed(weights))
     {
         _managed_weights[weights];
+        _managed_counter[weights];
+    }
+    else
+    {
+        _managed_counter[weights].counter++;
     }
 
     // In case the weights are an output of a previous reshape function
@@ -145,5 +150,29 @@ ITensor *IWeightsManager::acquire(const ITensor *weights, ITransformWeights *wei
     manage(transformed_weights, weights_transform);
 
     return transformed_weights;
+}
+
+void IWeightsManager::release(const ITensor *weights)
+{
+    if(weights == nullptr || !are_weights_managed(weights))
+    {
+        return;
+    }
+
+    _managed_counter[weights].counter--;
+    if(_managed_counter[weights].counter == 0 && _managed_counter[weights].is_unused)
+    {
+        weights->mark_as_unused();
+    }
+}
+
+void IWeightsManager::mark_as_unused(const ITensor *weights)
+{
+    if(weights == nullptr || !are_weights_managed(weights))
+    {
+        return;
+    }
+
+    _managed_counter[weights].is_unused = true;
 }
 } // namespace arm_compute

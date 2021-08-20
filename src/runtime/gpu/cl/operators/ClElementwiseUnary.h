@@ -35,8 +35,6 @@ namespace opencl
 class ClRsqrt : public IClOperator
 {
 public:
-    /** Constructor */
-    ClRsqrt() = default;
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -44,10 +42,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClRsqrt
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClRsqrt::configure()
      *
      * @return a status
      */
@@ -58,8 +55,6 @@ public:
 class ClExp : public IClOperator
 {
 public:
-    /** Constructor */
-    ClExp() = default;
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -67,10 +62,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClExp
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClExp::configure()
      *
      * @return a status
      */
@@ -81,8 +75,6 @@ public:
 class ClNeg : public IClOperator
 {
 public:
-    /** Constructor */
-    ClNeg() = default;
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -90,10 +82,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClNeg
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClNeg::configure()
      *
      * @return a status
      */
@@ -104,8 +95,6 @@ public:
 class ClSin : public IClOperator
 {
 public:
-    /** Constructor */
-    ClSin() = default;
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -113,10 +102,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClSin
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClSin::configure()
      *
      * @return a status
      */
@@ -127,8 +115,6 @@ public:
 class ClLog : public IClOperator
 {
 public:
-    /** Constructor */
-    ClLog() = default;
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -136,10 +122,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClLog
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClLog::configure()
      *
      * @return a status
      */
@@ -157,10 +142,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClAbs
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClAbs::configure()
      *
      * @return a status
      */
@@ -178,10 +162,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClRound
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src First source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data types supported: same as @p src.
+     * Similar to @ref ClRound::configure()
      *
      * @return a status
      */

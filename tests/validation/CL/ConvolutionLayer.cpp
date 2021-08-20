@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -216,18 +216,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<float>, framework
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::ALL, 
-                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType",DataType::F32)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                           framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                           framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                       framework::dataset::make("Bias", TensorShape(2U))),
+                                                                               framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                       framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                               framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                               framework::dataset::make("DataType", DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -288,18 +288,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::ALL,
-                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        QuantizationData),
-                                                        QuantizedActivationFunctionsSmallDataset))
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                                   framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                                   framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                               framework::dataset::make("Bias", TensorShape(2U))),
+                                                                                       framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                               framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                                       framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       QuantizationData),
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -318,18 +318,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<int8_t>,
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::ALL,
-                                            combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                        framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
-                                                        framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
-                                                        framework::dataset::make("Bias", TensorShape(2U))),
-                                                        framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
-                                                        framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
-                                                        framework::dataset::make("Dilation", Size2D(1, 1))),
-                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                        QuantizationData),
-                                                        QuantizedActivationFunctionsSmallDataset))
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                                                   framework::dataset::make("Input", TensorShape(23U, 27U, 5U)),
+                                                                                                   framework::dataset::make("Weights", TensorShape(3U, 3U, 5U, 2U))),
+                                                                                               framework::dataset::make("Bias", TensorShape(2U))),
+                                                                                       framework::dataset::make("Output", TensorShape(11U, 25U, 2U))),
+                                                                               framework::dataset::make("PadStrideInfo", PadStrideInfo(2, 1, 0, 0))),
+                                                                       framework::dataset::make("Dilation", Size2D(1, 1))),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       QuantizationData),
+                               QuantizedActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

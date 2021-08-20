@@ -24,15 +24,14 @@
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 
+#include "src/core/NEON/wrapper/svtraits.h"
 #include "src/core/cpu/kernels/elementwise/sve/elementwise_list.h"
 
 namespace arm_compute
 {
 namespace cpu
-{
-namespace sve
 {
 using namespace arm_compute::wrapper;
 
@@ -176,7 +175,7 @@ inline void comparison_op_quantized_loop(svbool_t pg, const QuantizedLoopArgumen
     const auto in1 = load_quantized(args.input1_ptr, pg, args.in1_offset, args.in1_scale);
     const auto in2 = load_quantized(args.input2_ptr, pg, args.in2_offset, args.in2_scale);
 
-    using OutputVectorType = typename sve_vector<OutputScalarType>::type;
+    using OutputVectorType = typename wrapper::traits::sve_vector<OutputScalarType>::type;
 
     const auto result = svcreate4(
                             elementwise_comparison_op<svfloat32_t, OutputVectorType>(pg, svget4(in1, 0), svget4(in2, 0), args.op),
@@ -200,7 +199,7 @@ inline void comparison_op_broadcast_quantized_loop(svbool_t pg, const BroadcastQ
     const auto &af = args.reorder ? in2 : in1;
     const auto &bf = args.reorder ? in1 : in2;
 
-    using OutputVectorType = typename sve_vector<OutputScalarType>::type;
+    using OutputVectorType = typename wrapper::traits::sve_vector<OutputScalarType>::type;
 
     const auto result = svcreate4(
                             elementwise_comparison_op<svfloat32_t, OutputVectorType>(pg, svget4(af, 0), svget4(bf, 0), args.op),
@@ -221,8 +220,8 @@ template <typename InputScalarType, typename OutputScalarType, typename Operator
 using BroadcastQuantizedLoopFuncType = void (*)(svbool_t, const BroadcastQuantizedLoopArguments<InputScalarType, OutputScalarType, OperatorType> &);
 
 template <typename InputVectorType, typename OutputVectorType, typename OperatorType,
-          typename InputScalarType  = typename sve_scalar<InputVectorType>::type,
-          typename OutputScalarType = typename sve_scalar<OutputVectorType>::type>
+          typename InputScalarType  = typename wrapper::sve_scalar<InputVectorType>::type,
+          typename OutputScalarType = typename wrapper::sve_scalar<OutputVectorType>::type>
 void elementwise_quantized_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
                               OperatorType op,
                               LoopQuantizedFuncType<InputScalarType, OutputScalarType, OperatorType>          func,
@@ -344,7 +343,7 @@ void elementwise_quantized_op(const ITensor *in1, const ITensor *in2, ITensor *o
 template <ArithmeticOperation op, typename ScalarType>
 void elementwise_arithmetic_quantized_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    using VectorType = typename sve_vector<ScalarType>::type;
+    using VectorType = typename wrapper::traits::sve_vector<ScalarType>::type;
     elementwise_quantized_op<VectorType, VectorType, ArithmeticOperation>(in1, in2, out, window, op,
                                                                           &arithmetic_op_quantized_loop<ScalarType, ScalarType>,
                                                                           &arithmetic_op_broadcast_quantized_loop<ScalarType, ScalarType>);
@@ -354,16 +353,14 @@ template <ComparisonOperation op, typename InputScalarType, typename OutputScala
 void elementwise_comparison_quantized_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     static_assert(sizeof(InputScalarType) >= sizeof(OutputScalarType), "input data type's width should be equal to or greater than output data type's width");
-    using InputVectorType  = typename sve_vector<InputScalarType>::type;
-    using OutputVectorType = typename sve_vector<OutputScalarType>::type;
+    using InputVectorType  = typename wrapper::traits::sve_vector<InputScalarType>::type;
+    using OutputVectorType = typename wrapper::traits::sve_vector<OutputScalarType>::type;
     elementwise_quantized_op<InputVectorType, OutputVectorType, ComparisonOperation>(in1, in2, out, window, op,
                                                                                      &comparison_op_quantized_loop<InputScalarType, OutputScalarType>,
                                                                                      &comparison_op_broadcast_quantized_loop<InputScalarType, OutputScalarType>);
 }
-
-} // namespace sve
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H */

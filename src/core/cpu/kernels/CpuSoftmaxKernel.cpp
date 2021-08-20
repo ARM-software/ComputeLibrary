@@ -34,8 +34,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 
 #include "src/core/common/Registrars.h"
-#include "src/core/cpu/kernels/softmax/impl/NEON/list.h"
-#include "src/core/cpu/kernels/softmax/impl/SVE/list.h"
+#include "src/core/cpu/kernels/softmax/impl/neon/list.h"
+#include "src/core/cpu/kernels/softmax/impl/sve/list.h"
 
 namespace arm_compute
 {
@@ -47,7 +47,8 @@ namespace
 {
 struct SoftmaxSelectorData
 {
-    DataType dt;
+    DataType       dt;
+    const CPUInfo &ci;
 };
 using SoftmaxSelectorPtr          = std::add_pointer<bool(const SoftmaxSelectorData &data)>::type;
 using SoftmaxLogits1DMaxKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &)>::type;
@@ -69,112 +70,113 @@ struct SoftmaxLogits1DMaxKernel
 
 static const SoftmaxLogits1DKernel available_logits_1d_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "sve_softmax_logits_1d_float",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
+        "sve_fp32_softmax_logits_1d",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32) && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::sve_softmax_logits_1d_float<float>)
     },
     {
-        "sve_softmax_logits_1d_float",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16); },
+        "sve_fp16_softmax_logits_1d",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16) && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_softmax_logits_1d_float<float16_t>)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+
+#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
-        "neon_softmax_logits_1d_float",
+        "neon_fp32_softmax_logits_1d",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
         REGISTER_FP32_NEON(arm_compute::cpu::neon_softmax_logits_1d_float<float>)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "neon_softmax_logits_1d_float",
+        "neon_fp16_softmax_logits_1d",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16); },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_softmax_logits_1d_float<float16_t>)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
-        "sve_softmax_logits_1d_quantized",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8); },
+        "sve2_qu8_softmax_logits_1d",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8) && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::sve_softmax_logits_1d_quantized<qasymm8_t>)
     },
     {
-        "sve_softmax_logits_1d_quantized",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+        "sve2_qs8_softmax_logits_1d",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve2(); },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::sve_softmax_logits_1d_quantized<qasymm8_signed_t>)
     },
-#else  /* !defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     {
-        "neon_softmax_logits_1d_quantized",
+        "neon_qu8_softmax_logits_1d",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_softmax_logits_1d_quantized<qasymm8_t>)
     },
     {
-        "neon_softmax_logits_1d_quantized",
+        "neon_qs8_softmax_logits_1d",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_softmax_logits_1d_quantized<qasymm8_signed_t>)
     },
-#endif /* defined(__ARM_FEATURE_SVE2) */
-
 };
 
 static const SoftmaxLogits1DMaxKernel available_logits_1d_max_kernels[] =
 {
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
-        "sve_logits_1d_max",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
+        "sve_fp32_logits_1d_max",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32) && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::sve_logits_1d_max<float>)
     },
     {
-        "sve_logits_1d_max",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16); },
+        "sve_fp16_logits_1d_max",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16) && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_logits_1d_max<float16_t>)
     },
     {
-        "sve_logits_1d_max",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8); },
+        "sve_qu8_logits_1d_max",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8) && data.ci.has_sve(); },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::sve_logits_1d_max<qasymm8_t>)
     },
     {
-        "sve_logits_1d_max",
-        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+        "sve_qs8_logits_1d_max",
+        [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve(); },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::sve_logits_1d_max<qasymm8_signed_t>)
     },
-#else /* !defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
-        "neon_logits_1d_max",
+        "neon_fp32_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F32); },
         REGISTER_FP32_NEON(arm_compute::cpu::neon_logits_1d_max<float>)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
-        "neon_logits_1d_max",
+        "neon_fp16_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::F16); },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_logits_1d_max<float16_t>)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
-        "neon_logits_1d_max",
+        "neon_qu8_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_logits_1d_max<qasymm8_t>)
     },
     {
-        "neon_logits_1d_max",
+        "neon_qs8_logits_1d_max",
         [](const SoftmaxSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_logits_1d_max<qasymm8_signed_t>)
     },
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 };
 
 const SoftmaxLogits1DKernel *get_implementation_logits(const SoftmaxSelectorData &data)
 {
     for(const auto &uk : available_logits_1d_kernels)
     {
-        if(uk.is_selected({ data.dt }))
+        if(uk.is_selected({ data.dt, CPUInfo::get() }))
         {
             return &uk;
         }
@@ -186,7 +188,7 @@ const SoftmaxLogits1DMaxKernel *get_implementation_logits_max(const SoftmaxSelec
 {
     for(const auto &uk : available_logits_1d_max_kernels)
     {
-        if(uk.is_selected({ data.dt }))
+        if(uk.is_selected({ data.dt, CPUInfo::get() }))
         {
             return &uk;
         }
@@ -212,15 +214,9 @@ Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorI
 
 } // namespace
 
-CpuLogits1DMaxKernel::CpuLogits1DMaxKernel()
-{
-}
-
 void CpuLogits1DMaxKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-
-    // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_max(*src, *dst));
 
     // Softmax across the x dimension
@@ -228,8 +224,13 @@ void CpuLogits1DMaxKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*dst, output_shape, 1, src->data_type(), src->quantization_info());
 
-    Window win = calculate_max_window(*src, Steps());
+    const auto *uk = get_implementation_logits_max(SoftmaxSelectorData{ src->data_type(), CPUInfo::get() });
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuLogits1DMaxKernel").append("/").append(uk->name);
+
+    Window win = calculate_max_window(*src, Steps());
     ICpuKernel::configure(win);
 }
 
@@ -246,17 +247,17 @@ void CpuLogits1DMaxKernel::run_op(ITensorPack &tensors, const Window &window, co
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto       dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    const auto *uk = get_implementation_logits_max(SoftmaxSelectorData{ src->info()->data_type() });
-    uk->ukernel(src, dst, window);
+    _run_method(src, dst, window);
 }
 
 const char *CpuLogits1DMaxKernel::name() const
 {
-    return "CpuLogits1DMaxKernel";
+    return _name.c_str();
 }
 
 namespace
@@ -300,20 +301,10 @@ Status validate_arguments_logits_softmax(const ITensorInfo &src, const ITensorIn
 } // namespace
 
 template <bool IS_LOG>
-CpuLogits1DSoftmaxKernel<IS_LOG>::CpuLogits1DSoftmaxKernel()
-    : _beta(1.0f)
-{
-}
-
-template <bool IS_LOG>
 void CpuLogits1DSoftmaxKernel<IS_LOG>::configure(const ITensorInfo *src, const ITensorInfo *max, ITensorInfo *dst, const float beta, ITensorInfo *tmp)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, max, dst, tmp);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, max, dst, tmp);
-    // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*src, *max, *dst, beta, *tmp, IS_LOG));
-
-    _beta = beta;
 
     // Configure kernel window
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(src->data_type());
@@ -325,6 +316,15 @@ void CpuLogits1DSoftmaxKernel<IS_LOG>::configure(const ITensorInfo *src, const I
     // Tmp auto initialization if not yet initialized
     const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : src->data_type();
     auto_init_if_empty(*tmp, TensorInfo(*src).set_data_type(tmp_data_type).reset_padding());
+
+    const auto *uk = get_implementation_logits(SoftmaxSelectorData{ src->data_type(), CPUInfo::get() });
+    ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+    std::string kernel_name = IS_LOG ? std::string("CpuLogits1DLogSoftmaxKernel") : std::string("CpuLogits1DSoftmaxKernel");
+
+    _beta       = beta;
+    _run_method = uk->ukernel;
+    _name       = kernel_name.append("/").append(uk->name);
 
     // Configure kernel window
     Window win = calculate_max_window(*max, Steps());
@@ -348,6 +348,7 @@ void CpuLogits1DSoftmaxKernel<IS_LOG>::run_op(ITensorPack &tensors, const Window
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     auto       max = tensors.get_tensor(TensorType::ACL_SRC_1);
@@ -360,22 +361,13 @@ void CpuLogits1DSoftmaxKernel<IS_LOG>::run_op(ITensorPack &tensors, const Window
     ARM_COMPUTE_ERROR_ON(tmp->info()->total_size() < (info.num_threads * tmp_size_for_thread));
 
     void *tmp_for_thread = tmp->buffer() + (info.thread_id * tmp_size_for_thread);
-
-    const auto *uk = get_implementation_logits(SoftmaxSelectorData{ src->info()->data_type() });
-    uk->ukernel(src, max, tmp_for_thread, dst, _beta, IS_LOG, window);
+    _run_method(src, max, tmp_for_thread, dst, _beta, IS_LOG, window);
 }
 
 template <bool IS_LOG>
 const char    *CpuLogits1DSoftmaxKernel<IS_LOG>::name() const
 {
-    if(IS_LOG)
-    {
-        return "CpuLogits1DSoftmaxKernel";
-    }
-    else
-    {
-        return "CpuLogits1DLogSoftmaxKernel";
-    }
+    return _name.c_str();
 }
 
 template class CpuLogits1DSoftmaxKernel<true>;

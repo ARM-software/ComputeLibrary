@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,7 @@ template <bool output_timestamps>
 class SchedulerClock : public Instrument
 {
 public:
+    using LayerData = std::map<std::string, std::string>;
     /** Construct a Scheduler timer.
      *
      * @param[in] scale_factor Measurement scale factor.
@@ -85,6 +86,7 @@ public:
     void                        start() override;
     void                        test_stop() override;
     Instrument::MeasurementsMap measurements() const override;
+    std::string                 instrument_header() const override;
 
     /** Kernel information */
     struct kernel_info
@@ -96,6 +98,7 @@ public:
 
 private:
     std::list<kernel_info>                       _kernels;
+    std::map<std::string, LayerData>             _layer_data_map;
     IScheduler                                  *_real_scheduler;
     Scheduler::Type                              _real_scheduler_type;
     std::function<decltype(graph::execute_task)> _real_graph_function;

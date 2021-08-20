@@ -35,8 +35,6 @@ namespace opencl
 class ClActivation : public IClOperator
 {
 public:
-    /** Constructor */
-    ClActivation() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  compile_context The compile context to be used.
@@ -45,11 +43,9 @@ public:
      * @param[in]  activation_info Activation layer parameters.
      */
     void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ActivationLayerInfo &activation_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClActivation
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src      Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
-     * @param[in] dst      Destination tensor info. Data type supported: same as @p src
-     * @param[in] act_info Activation layer information.
+     * Similar to @ref ClActivation::configure()
      *
      * @return a status
      */

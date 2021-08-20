@@ -40,8 +40,7 @@ namespace kernels
 class ClWidthConcatenate2TensorsKernel : public IClKernel
 {
 public:
-    /** Default constructor */
-    ClWidthConcatenate2TensorsKernel() = default;
+    ClWidthConcatenate2TensorsKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClWidthConcatenate2TensorsKernel);
     /** Initialise the kernel's sources and destination
      *
@@ -51,11 +50,9 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: Same as @p src1.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref ClWidthConcatenate2TensorsKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src1 First tensor info. Data types supported: All.
-     * @param[in] src2 Second tensor info. Data types supported: same as @p src1
-     * @param[in] dst  Destination tensor info. Data types supported: Same as @p src1.
+     * Similar to @ref ClWidthConcatenate2TensorsKernel::configure()
      *
      * @return a status
      */

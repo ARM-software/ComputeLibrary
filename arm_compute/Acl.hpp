@@ -87,6 +87,7 @@ OBJECT_DELETER(AclContext, AclDestroyContext)
 OBJECT_DELETER(AclQueue, AclDestroyQueue)
 OBJECT_DELETER(AclTensor, AclDestroyTensor)
 OBJECT_DELETER(AclTensorPack, AclDestroyTensorPack)
+OBJECT_DELETER(AclOperator, AclDestroyOperator)
 
 #undef OBJECT_DELETER
 
@@ -747,6 +748,48 @@ public:
             ++i;
         }
         return detail::as_enum<StatusCode>(AclPackTensors(_object.get(), tensors.data(), slots.data(), size));
+    }
+};
+
+/** Operator class
+ *
+ * Operators are the basic algorithmic blocks responsible for performing distinct operations
+ */
+class Operator : public detail::ObjectBase<AclOperator_>
+{
+public:
+    /** Run an operator on a given input list
+     *
+     * @param[in,out] queue Queue to scheduler the operator on
+     * @param pack  Tensor list to be used as input
+     *
+     * @return Status Code
+     */
+    StatusCode run(Queue &queue, TensorPack &pack)
+    {
+        return detail::as_cenum<StatusCode>(AclRunOperator(_object.get(), queue.get(), pack.get()));
+    }
+
+protected:
+    /** Constructor */
+    Operator() = default;
+};
+
+/// Operators
+using ActivationDesc = AclActivationDescriptor;
+class Activation : public Operator
+{
+public:
+    Activation(Context &ctx, const TensorDescriptor &src, const TensorDescriptor &dst, const ActivationDesc &desc, StatusCode *status = nullptr)
+    {
+        AclOperator op;
+        const auto  st = detail::as_enum<StatusCode>(AclActivation(&op, ctx.get(), src.get(), dst.get(), desc));
+        reset(op);
+        report_status(st, "[Compute Library] Failure during Activation operator creation");
+        if(status)
+        {
+            *status = st;
+        }
     }
 };
 } // namespace acl

@@ -27,15 +27,15 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClDequantization.h"
+#include "src/runtime/gpu/cl/operators/ClDequantize.h"
 
 namespace arm_compute
 {
 struct CLDequantizationLayer::Impl
 {
-    const ICLTensor                          *src{ nullptr };
-    ICLTensor                                *dst{ nullptr };
-    std::unique_ptr<opencl::ClDequantization> op{ nullptr };
+    const ICLTensor                      *src{ nullptr };
+    ICLTensor                            *dst{ nullptr };
+    std::unique_ptr<opencl::ClDequantize> op{ nullptr };
 };
 
 CLDequantizationLayer::CLDequantizationLayer()
@@ -54,13 +54,13 @@ void CLDequantizationLayer::configure(const CLCompileContext &compile_context, c
     _impl->src = input;
     _impl->dst = output;
 
-    _impl->op = std::make_unique<opencl::ClDequantization>();
+    _impl->op = std::make_unique<opencl::ClDequantize>();
     _impl->op->configure(compile_context, input->info(), output->info());
 }
 
 Status CLDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return opencl::ClDequantization::validate(input, output);
+    return opencl::ClDequantize::validate(input, output);
 }
 
 void CLDequantizationLayer::run()

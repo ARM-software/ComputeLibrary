@@ -74,6 +74,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 CLMaxUnpoolingLayerKernel::CLMaxUnpoolingLayerKernel()
     : _input(nullptr), _output(nullptr), _indices(nullptr)
 {
+    _type = CLKernelType::POOL;
 }
 
 void CLMaxUnpoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)

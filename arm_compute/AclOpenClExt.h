@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACLOPENCLEXT_H_
-#define ARM_COMPUTE_ACLOPENCLEXT_H_
+#ifndef ARM_COMPUTE_ACL_OPENCL_EXT_H_
+#define ARM_COMPUTE_ACL_OPENCL_EXT_H_
 
 #include "arm_compute/AclTypes.h"
 
@@ -109,4 +109,4 @@ AclStatus AclGetClMem(AclTensor tensor, cl_mem *opencl_mem);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACLOPENCLEXT_H_ */
+#endif /* ARM_COMPUTE_ACL_OPENCL_EXT_H_ */

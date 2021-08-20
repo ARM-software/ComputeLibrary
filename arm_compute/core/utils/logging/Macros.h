@@ -30,6 +30,20 @@
 
 #ifdef ARM_COMPUTE_LOGGING_ENABLED
 
+#ifdef __GNUC__
+inline std::string signature_name(const std::string &pretty_func)
+{
+    const auto scope_op = pretty_func.find("::");
+    const auto begin    = pretty_func.substr(0, scope_op).rfind(" ") + 1;
+    const auto end      = pretty_func.rfind("(") - begin;
+
+    return pretty_func.substr(begin, end) + "()";
+}
+#define ARM_COMPUTE_SIGNATURE_NAME signature_name(__PRETTY_FUNCTION__)
+#else /* __GNUC__ */
+#define ARM_COMPUTE_SIGNATURE_NAME (__func__)
+#endif /* __GNUC__ */
+
 #define ARM_COMPUTE_LOG_MSG(logger_name, log_level, msg)                                 \
     do                                                                                   \
     {                                                                                    \
@@ -47,7 +61,7 @@
         if(__logger != nullptr)                                                          \
         {                                                                                \
             std::ostringstream s;                                                        \
-            s << __func__ << ":" << msg;                                                 \
+            s << ARM_COMPUTE_SIGNATURE_NAME << " : " << msg;                             \
             __logger->log(log_level, s.str());                                           \
         }                                                                                \
     } while(false)

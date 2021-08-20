@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_SOFTMAX_H
 #define ARM_COMPUTE_CPU_SOFTMAX_H
 
-#include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "src/core/cpu/ICpuKernel.h"
 #include "src/runtime/cpu/ICpuOperator.h"
@@ -57,7 +57,6 @@ template <bool IS_LOG = false>
 class CpuSoftmaxGeneric : public ICpuOperator
 {
 public:
-    /** Constructor */
     CpuSoftmaxGeneric();
     /** Set the input and output tensors.
      *
@@ -69,14 +68,9 @@ public:
      *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, float beta = 1.0f, int32_t axis = 0);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuSoftmax
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst  Destination tensor info. Data types supported: same as @p input
-     * @param[in] beta (Optional) A scaling factor for the exponent.
-     * @param[in] axis (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
-     *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
+     * Similar to @ref CpuSoftmaxGeneric::configure()
      *
      * @return a status
      */
@@ -87,15 +81,27 @@ public:
     experimental::MemoryRequirements workspace() const override;
 
 private:
-    CpuPermute                   _permute_input;
-    CpuPermute                   _permute_output;
-    std::unique_ptr<ICpuKernel>  _max_kernel;
-    std::unique_ptr<ICpuKernel>  _softmax_kernel;
-    std::unique_ptr<ITensorInfo> _max;
-    std::unique_ptr<ITensorInfo> _tmp;
-    std::unique_ptr<ITensorInfo> _input_permuted;
-    std::unique_ptr<ITensorInfo> _output_permuted;
-    bool                         _needs_permute;
+    enum InternalTensorIdx
+    {
+        MAX = 0,
+        TMP,
+        PERMUTED_SRC,
+        PERMUTED_DST,
+        COUNT
+    };
+
+    CpuPermute                  _permute_input;
+    CpuPermute                  _permute_output;
+    std::unique_ptr<ICpuKernel> _max_kernel;
+    std::unique_ptr<ICpuKernel> _softmax_kernel;
+
+    TensorInfo _max;
+    TensorInfo _tmp;
+    TensorInfo _input_permuted;
+    TensorInfo _output_permuted;
+
+    bool                             _needs_permute;
+    experimental::MemoryRequirements _aux_mem{};
 };
 using CpuSoftmax    = CpuSoftmaxGeneric<false>;
 using CpuLogSoftmax = CpuSoftmaxGeneric<true>;

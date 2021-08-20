@@ -24,10 +24,11 @@
 #ifndef ARM_COMPUTE_CLDEPTHCONVERT_H
 #define ARM_COMPUTE_CLDEPTHCONVERT_H
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
-#include <cstdint>
+#include "arm_compute/core/Types.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -35,10 +36,22 @@ class CLCompileContext;
 class ICLTensor;
 class ITensorInfo;
 
-/** Basic function to run @ref CLDepthConvertLayerKernel. */
-class CLDepthConvertLayer : public ICLSimpleFunction
+/** Basic function to run @ref opencl::kernels::ClCastKernel */
+class CLDepthConvertLayer : public IFunction
 {
 public:
+    /** Constructor */
+    CLDepthConvertLayer();
+    /** Destructor */
+    ~CLDepthConvertLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthConvertLayer(const CLDepthConvertLayer &) = delete;
+    /** Default move constructor */
+    CLDepthConvertLayer(CLDepthConvertLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthConvertLayer &operator=(const CLDepthConvertLayer &) = delete;
+    /** Default move assignment operator */
+    CLDepthConvertLayer &operator=(CLDepthConvertLayer &&);
     /** Initialize the function's source, destination
      *
      * Valid data layouts:
@@ -94,6 +107,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLDEPTHCONVERT_H*/

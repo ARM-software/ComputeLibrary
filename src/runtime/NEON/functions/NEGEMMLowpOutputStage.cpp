@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,57 +25,23 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ScaleKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
+#include "src/runtime/cpu/operators/CpuGemmLowpOutputStage.h"
 
 namespace arm_compute
 {
-NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint() = default;
-
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                    int result_offset_after_shift, int min, int max)
+struct NEGEMMLowpOutputStage::Impl
 {
-    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-    _kernel = std::move(k);
-}
+    const ITensor                               *src{ nullptr };
+    const ITensor                               *bias{ nullptr };
+    ITensor                                     *dst{ nullptr };
+    ITensorPack                                  run_pack{};
+    std::unique_ptr<cpu::CpuGemmLowpOutputStage> op{ nullptr };
+};
 
-Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+NEGEMMLowpOutputStage::NEGEMMLowpOutputStage()
+    : _impl(std::make_unique<Impl>())
 {
-    return NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, min, max);
 }
-
-NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint() = default;
-
-void NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                   int result_offset_after_shift, int min, int max)
-{
-    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
-    _kernel = std::move(k);
-}
-
-Status NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
-{
-    return NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::validate(input, bias, output, min, max);
-}
-
-NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::~NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint() = default;
-
-void NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift, int min, int max)
-{
-    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
-    _kernel = std::move(k);
-}
-
-Status NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
-{
-    return NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(input, bias, output, min, max);
-}
-
 NEGEMMLowpOutputStage::~NEGEMMLowpOutputStage() = default;
 
 void NEGEMMLowpOutputStage::configure(const ITensor *input, const ITensor *bias, ITensor *output, const GEMMLowpOutputStageInfo &info)
@@ -83,104 +49,27 @@ void NEGEMMLowpOutputStage::configure(const ITensor *input, const ITensor *bias,
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpOutputStage::validate(input->info(), bias != nullptr ? bias->info() : nullptr, output->info(), info));
+    _impl->src  = input;
+    _impl->bias = bias;
+    _impl->dst  = output;
+    _impl->op   = std::make_unique<cpu::CpuGemmLowpOutputStage>();
+    _impl->op->configure(input->info(), (bias == nullptr) ? nullptr : bias->info(), output->info(), info);
 
-    switch(info.type)
+    _impl->run_pack =
     {
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
-        {
-            switch(info.output_data_type)
-            {
-                case DataType::QASYMM8:
-                {
-                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
-                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                    _kernel = std::move(k);
-                    break;
-                }
-                case DataType::QASYMM8_SIGNED:
-                {
-                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
-                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                    _kernel = std::move(k);
-                    break;
-                }
-                case DataType::QSYMM16:
-                {
-                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
-                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                    _kernel = std::move(k);
-                    break;
-                }
-                default:
-                {
-                    ARM_COMPUTE_ERROR("Unsupported output data type.");
-                    break;
-                }
-            }
-            break;
-        }
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN:
-        {
-            switch(info.output_data_type)
-            {
-                case DataType::QASYMM8:
-                case DataType::QASYMM8_SIGNED:
-                {
-                    auto k = std::make_unique<NEGEMMLowpQuantizeDownInt32ScaleKernel>();
-                    k->configure(input, bias, output, &info);
-                    _kernel = std::move(k);
-                    break;
-                }
-                default:
-                {
-                    ARM_COMPUTE_ERROR("Unsupported output data type.");
-                    break;
-                }
-            }
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Unsupported GEMMLowpOutputStage type.");
-    }
+        { TensorType::ACL_SRC, _impl->src },
+        { TensorType::ACL_BIAS, _impl->bias },
+        { TensorType::ACL_DST, _impl->dst }
+    };
 }
 
 Status NEGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::UNKNOWN, "NEGEMMLowpQuantizeDownScaleByFixedPoint cannot be used with UNKNOWN output data type.");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16);
+    return cpu::CpuGemmLowpOutputStage::validate(input, bias, output, info);
+}
 
-    ARM_COMPUTE_RETURN_ERROR_ON((info.type != GEMMLowpOutputStageType::QUANTIZE_DOWN) && (info.type != GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT));
-
-    switch(info.type)
-    {
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
-        {
-            switch(output->data_type())
-            {
-                case DataType::QASYMM8:
-                    return NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                case DataType::QASYMM8_SIGNED:
-                    return NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                case DataType::QSYMM16:
-                    return NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
-                default:
-                    return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
-            }
-        }
-        case GEMMLowpOutputStageType::QUANTIZE_DOWN:
-        {
-            switch(output->data_type())
-            {
-                case DataType::QASYMM8:
-                case DataType::QASYMM8_SIGNED:
-                    return NEGEMMLowpQuantizeDownInt32ScaleKernel::validate(input, bias, output, &info);
-                default:
-                    return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
-            }
-        }
-        default:
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported GEMMLowpOutputStage type.");
-    }
+void NEGEMMLowpOutputStage::run()
+{
+    _impl->op->run(_impl->run_pack);
 }
 } // namespace arm_compute

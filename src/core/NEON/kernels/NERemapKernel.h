@@ -54,17 +54,18 @@ public:
 
     /** Initialize the kernel's input, output and border mode.
      *
-     * @param[in]  input  Source tensor. Data type supported: U8.
-     * @param[in]  map_x  Map for X coordinates. Data type supported: F32.
-     * @param[in]  map_y  Map for Y coordinates. Data type supported: F32.
-     * @param[out] output Destination tensor. Data types supported: U8. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
-     * @param[in]  policy The interpolation type.
+     * @param[in]  input                 Source tensor. Data type supported: U8.
+     * @param[in]  map_x                 Map for X coordinates. Data type supported: F32.
+     * @param[in]  map_y                 Map for Y coordinates. Data type supported: F32.
+     * @param[out] output                Destination tensor. Data types supported: U8. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
+     * @param[in]  policy                The interpolation type.
+     * @param[in]  border_mode           Border mode to use on the input tensor.
+     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT. Defaults to 0.
      */
-    void configure(const ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy);
+    void configure(const ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     /** function to perform nearest interpolation on the given window */
@@ -74,10 +75,12 @@ private:
     /** Remap function to use for the particular interpolation type passed to configure() */
     void (NERemapKernel::*_func)(const Window &window);
 
-    const ITensor *_input;  /**< Input image */
-    ITensor       *_output; /**< Output image */
-    const ITensor *_map_x;  /**< Input remap x coordinates */
-    const ITensor *_map_y;  /**< Input remap y coordinates */
+    const ITensor *_input;                 /**< Input image */
+    ITensor       *_output;                /**< Output image */
+    const ITensor *_map_x;                 /**< Input remap x coordinates */
+    const ITensor *_map_y;                 /**< Input remap y coordinates */
+    BorderMode     _border_mode;           /**< Border mode */
+    uint8_t        _constant_border_value; /**< Border value to use */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEREMAPKERNEL_H */

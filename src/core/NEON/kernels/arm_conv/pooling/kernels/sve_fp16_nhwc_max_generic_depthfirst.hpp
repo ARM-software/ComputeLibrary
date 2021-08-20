@@ -26,7 +26,7 @@
 
 #pragma once
 
-#if defined(__ARM_FEATURE_SVE) && defined(__ARM_FP16_ARGS)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS)
 
 namespace arm_conv {
 namespace pooling {
@@ -51,4 +51,4 @@ struct sve_fp16_nhwc_max_generic_depthfirst
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE) && defined(__ARM_FP16_ARGS)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS)

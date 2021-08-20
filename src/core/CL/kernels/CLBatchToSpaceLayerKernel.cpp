@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,7 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
 CLBatchToSpaceLayerKernel::CLBatchToSpaceLayerKernel()
     : _input(nullptr), _block_shape(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)

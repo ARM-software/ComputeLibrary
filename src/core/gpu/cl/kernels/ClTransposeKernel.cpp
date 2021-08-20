@@ -43,6 +43,11 @@ namespace opencl
 {
 namespace kernels
 {
+ClTransposeKernel::ClTransposeKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClTransposeKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

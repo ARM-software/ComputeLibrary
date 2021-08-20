@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,6 +116,12 @@ void PrettyPrinter::print_list_tests(const std::vector<TestInfo> &infos)
         *_stream << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
     }
 }
+
+void PrettyPrinter::print_profiler_header(const std::string &header_data)
+{
+    ARM_COMPUTE_UNUSED(header_data);
+}
+
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     for(const auto &instrument : measurements)

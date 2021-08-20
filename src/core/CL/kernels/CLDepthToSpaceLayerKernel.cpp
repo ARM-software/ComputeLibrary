@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 CLDepthToSpaceLayerKernel::CLDepthToSpaceLayerKernel()
     : _input(nullptr), _output(nullptr), _block_shape()
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLDepthToSpaceLayerKernel::configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape)

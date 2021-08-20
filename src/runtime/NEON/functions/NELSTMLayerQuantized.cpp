@@ -26,15 +26,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
-#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
-#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 #include <cmath>
@@ -152,7 +143,13 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     _memory_group.manage(&_output_lowp);
-    _output_stage.configure(&_output_highp, &_bias, &_output_lowp, output_multiplier, output_shift);
+
+    GEMMLowpOutputStageInfo info;
+    info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    info.gemmlowp_multiplier = output_multiplier;
+    info.gemmlowp_shift      = output_shift;
+    info.output_data_type    = DataType::QSYMM16;
+    _output_stage.configure(&_output_highp, &_bias, &_output_lowp, info);
     _output_highp.allocator()->allocate();
     _bias.allocator()->allocate();
 
@@ -358,7 +355,12 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
     // _output_stage
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(&output_highp, &bias_concatenated, &output_lowp));
+    GEMMLowpOutputStageInfo info;
+    info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    info.gemmlowp_multiplier = output_multiplier;
+    info.gemmlowp_shift      = output_shift;
+    info.output_data_type    = DataType::QSYMM16;
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&output_highp, &bias_concatenated, &output_lowp, info));
 
     TensorInfo input_gate_input;
     TensorInfo forget_gate_input;

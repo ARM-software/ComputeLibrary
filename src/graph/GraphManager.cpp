@@ -29,10 +29,11 @@
 #include "arm_compute/graph/PassManager.h"
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Utils.h"
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 #include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
 #include "arm_compute/graph/detail/ExecutionHelpers.h"
 
-#include "arm_compute/graph/algorithms/TopologicalSort.h"
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -45,6 +46,8 @@ GraphManager::GraphManager()
 
 void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target)
 {
+    ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Initiate graph configuration!");
+
     // Check if graph has been registered
     if(_workloads.find(graph.id()) != std::end(_workloads))
     {
@@ -121,6 +124,8 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
 
 void GraphManager::execute_graph(Graph &graph)
 {
+    ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Initiate graph execution!");
+
     // Check if graph is finalized
     auto it = _workloads.find(graph.id());
     ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_workloads), "Graph is not registered!");

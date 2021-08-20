@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,45 @@
  */
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "src/core/NEON/kernels/NEDepthConvertLayerKernel.h"
-
-#include <utility>
+#include "arm_compute/core/Validate.h"
+#include "src/runtime/cpu/operators/CpuCast.h"
 
 namespace arm_compute
 {
+struct NECast::Impl
+{
+    const ITensor                *src{ nullptr };
+    ITensor                      *dst{ nullptr };
+    std::unique_ptr<cpu::CpuCast> op{ nullptr };
+};
+
+NECast::NECast()
+    : _impl(std::make_unique<Impl>())
+{
+}
+NECast::NECast(NECast &&) = default;
+NECast &NECast::operator=(NECast &&) = default;
+NECast::~NECast()                    = default;
+
 void NECast::configure(ITensor *input, ITensor *output, ConvertPolicy policy)
 {
-    auto k = std::make_unique<NEDepthConvertLayerKernel>();
-    k->configure(input, output, policy, 0);
-    _kernel = std::move(k);
+    _impl->src = input;
+    _impl->dst = output;
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
+
+    _impl->op = std::make_unique<cpu::CpuCast>();
+    _impl->op->configure(_impl->src->info(), _impl->dst->info(), policy);
 }
 
 Status NECast::validate(ITensorInfo *input, ITensorInfo *output, ConvertPolicy policy)
 {
-    return NEDepthConvertLayerKernel::validate(input, output, policy, 0);
+    return cpu::CpuCast::validate(input, output, policy);
+}
+
+void NECast::run()
+{
+    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    _impl->op->run(pack);
 }
 } // namespace arm_compute

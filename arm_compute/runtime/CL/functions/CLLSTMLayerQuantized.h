@@ -47,16 +47,16 @@ class ICLTensor;
  *
  * This function calls the following CL functions/kernels:
  *
- * -# @ref CLGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
- * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
- * -# @ref CLTranspose                                           Matrix transpose
- * -# @ref CLConcatenateLayer                                    Tensor concatenation
- * -# @ref CLActivationLayer                                     Activation functions (tanh and logistic)
- * -# @ref CLArithmeticAddition                                  Elementwise addition
- * -# @ref CLPixelWiseMultiplication                             Elementwise multiplication
- * -# @ref CLSlice                                               Tensor slicing
- * -# @ref CLDequantizationLayer                                 Dequantize into float
- * -# @ref CLQuantizationLayer                                   Quantize from float
+ * -# @ref CLGEMMLowpMatrixMultiplyCore      Quantized matrix multiplication core. Accumulators are 32-bit integers
+ * -# @ref CLGEMMLowpOutputStage             Convert 32-bit integers into QSYMM16
+ * -# @ref CLTranspose                       Matrix transpose
+ * -# @ref CLConcatenateLayer                Tensor concatenation
+ * -# @ref CLActivationLayer                 Activation functions (tanh and logistic)
+ * -# @ref CLArithmeticAddition              Elementwise addition
+ * -# @ref CLPixelWiseMultiplication         Elementwise multiplication
+ * -# @ref CLSlice                           Tensor slicing
+ * -# @ref CLDequantizationLayer             Dequantize into float
+ * -# @ref CLQuantizationLayer               Quantize from float
  * */
 class CLLSTMLayerQuantized : public IFunction
 {
@@ -170,30 +170,30 @@ private:
     MemoryGroup _memory_group;
 
     // Functions used
-    CLGEMMLowpMatrixMultiplyCore                        _gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint _output_stage;
-    CLTranspose                                         _transpose_weights;
-    CLConcatenateLayer                                  _concat_input_weights;
-    CLConcatenateLayer                                  _concat_recurrent_weights;
-    CLConcatenateLayer                                  _concat_weights;
-    CLConcatenateLayer                                  _concat_inputs;
-    CLConcatenateLayer                                  _concat_bias;
-    CLActivationLayer                                   _sigmoid_forget_gate;
-    CLActivationLayer                                   _sigmoid_input_gate;
-    CLActivationLayer                                   _sigmoid_output_gate;
-    CLActivationLayer                                   _tanh_modulation_gate;
-    CLActivationLayer                                   _tanh_output_state;
-    CLArithmeticAddition                                _add_cell_state_tmps;
-    CLArithmeticAddition                                _add2;
-    CLPixelWiseMultiplication                           _mul_forget_gate_cell_state;
-    CLPixelWiseMultiplication                           _mul_input_gate_input_mod_gate;
-    CLPixelWiseMultiplication                           _mul_output_state_tmp_output_gate;
-    CLSlice                                             _slice_input_tensor;
-    CLSlice                                             _slice_forget_tensor;
-    CLSlice                                             _slice_cell_tensor;
-    CLSlice                                             _slice_output_tensor;
-    CLDequantizationLayer                               _dequantize;
-    CLQuantizationLayer                                 _quantize;
+    CLGEMMLowpMatrixMultiplyCore _gemmlowp;
+    CLGEMMLowpOutputStage        _output_stage;
+    CLTranspose                  _transpose_weights;
+    CLConcatenateLayer           _concat_input_weights;
+    CLConcatenateLayer           _concat_recurrent_weights;
+    CLConcatenateLayer           _concat_weights;
+    CLConcatenateLayer           _concat_inputs;
+    CLConcatenateLayer           _concat_bias;
+    CLActivationLayer            _sigmoid_forget_gate;
+    CLActivationLayer            _sigmoid_input_gate;
+    CLActivationLayer            _sigmoid_output_gate;
+    CLActivationLayer            _tanh_modulation_gate;
+    CLActivationLayer            _tanh_output_state;
+    CLArithmeticAddition         _add_cell_state_tmps;
+    CLArithmeticAddition         _add2;
+    CLPixelWiseMultiplication    _mul_forget_gate_cell_state;
+    CLPixelWiseMultiplication    _mul_input_gate_input_mod_gate;
+    CLPixelWiseMultiplication    _mul_output_state_tmp_output_gate;
+    CLSlice                      _slice_input_tensor;
+    CLSlice                      _slice_forget_tensor;
+    CLSlice                      _slice_cell_tensor;
+    CLSlice                      _slice_output_tensor;
+    CLDequantizationLayer        _dequantize;
+    CLQuantizationLayer          _quantize;
 
     // Tensor pointers
     const ICLTensor *_input_to_input_weights;

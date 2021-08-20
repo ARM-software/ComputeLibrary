@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 CLPadLayerKernel::CLPadLayerKernel()
     : _input(nullptr), _output(nullptr), _4d_enabled(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLPadLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)

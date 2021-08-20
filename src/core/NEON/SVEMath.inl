@@ -24,7 +24,7 @@
 #include <cmath>
 #include <limits>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(__ARM_FEATURE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE)
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -117,22 +117,22 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svexp_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     auto top    = svcvtlt_f32_x(pg, x);
     auto pg_top = pg;
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svexp_f32_z(pg, bottom);
     top    = svexp_f32_z(pg_top, top);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
 
 inline svfloat32_t svtanh_f32_z(svbool_t pg, svfloat32_t val)
@@ -196,22 +196,22 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     auto top    = svcvtlt_f32_x(pg, x);
     auto pg_top = pg;
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svlog_f32_z(pg, bottom);
     top    = svlog_f32_z(pg_top, top);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
 
 inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
@@ -269,22 +269,22 @@ inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 inline svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val)
 {
     auto bottom = svcvt_f32_z(pg, val);
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     auto top    = svcvtlt_f32_x(pg, val);
     auto pg_top = pg;
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(val))));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svsin_f32_z(pg, bottom);
     top    = svsin_f32_z(pg_top, top);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
 
 inline svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b)
@@ -297,27 +297,27 @@ inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
     auto a_bottom = svcvt_f32_z(pg, a);
     auto b_bottom = svcvt_f32_z(pg, b);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     auto pg_top = pg;
     auto a_top  = svcvtlt_f32_x(pg, a);
     auto b_top  = svcvtlt_f32_x(pg, b);
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto a_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(a))));
     auto b_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(b))));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
     auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
     return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);
-#else  /* defined(__ARM_FEATURE_SVE2) */
+#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, res_bottom), svcvt_f16_z(pg_top, res_top));
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
 
-#if defined(__ARM_FEATURE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 template <>
 inline svuint8_t convert_float_to_int<svuint8_t>(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3)
 {
@@ -385,7 +385,7 @@ inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0, const sv
 
     return out;
 }
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */

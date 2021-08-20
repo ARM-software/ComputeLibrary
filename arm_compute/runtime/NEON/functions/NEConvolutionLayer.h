@@ -38,9 +38,9 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following functions:
- * -# @ref NEGEMMConvolutionLayer     (executed only in case GEMM is required for the operation)
- * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
- * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)
+ * -# @ref cpu::CpuGemm     (executed only in case GEMM is required for the operation)
+ * -# @ref cpu::CpuWinogradConv2d (executed only in case Winograd is required for the operation)
+ * -# @ref cpu::CpuDirectConv2d   (executed only in case Direct Convolution is required for the operation)
  * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
  *
  *
@@ -78,12 +78,12 @@ public:
     NEConvolutionLayer(const NEConvolutionLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEConvolutionLayer &operator=(const NEConvolutionLayer &) = delete;
+    /** Default move constructor */
+    NEConvolutionLayer(NEConvolutionLayer &&) = default;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEConvolutionLayer(NEConvolutionLayer &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
-    NEConvolutionLayer &operator=(NEConvolutionLayer &&) = delete;
+    NEConvolutionLayer &operator=(NEConvolutionLayer &&) = default;
     /** Default destructor */
-    ~NEConvolutionLayer() = default;
+    ~NEConvolutionLayer();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -111,7 +111,7 @@ public:
      *                              Data types supported: Same as @p input.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info     Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                              tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                              tensor has also been transposed with cpu::kernels::CpuGemmTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
@@ -133,7 +133,7 @@ public:
      *                             Data types supported: Same as @p input.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info     Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                             tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                             tensor has also been transposed with cpu::kernels::CpuGemmTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
@@ -156,7 +156,7 @@ public:
      *                             Data types supported: Same as @p input.
      * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info     Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                             tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                             tensor has also been transposed with cpu::kernels::CpuGemmTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
@@ -171,8 +171,8 @@ public:
     void prepare() override;
 
 private:
-    std::shared_ptr<IMemoryManager> _memory_manager;
-    std::unique_ptr<IFunction>      _function; /**< Function to run */
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NECONVOLUTIONLAYER_H */

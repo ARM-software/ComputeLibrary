@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/CL/CLAccessor.h"
@@ -32,7 +32,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ElementWiseUnaryFixture.h"
+#include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
 
 namespace arm_compute
 {
@@ -49,6 +49,15 @@ TEST_SUITE(CL)
 TEST_SUITE(NegLayer)
 template <typename T>
 using CLNegLayerFixture = NegValidationFixture<CLTensor, CLAccessor, CLNegLayer, T>;
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNegLayerFixture<int>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::S32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
+#include "src/core/gpu/cl/ClCompileContext.h"
+
+#include "src/core/gpu/cl/ClKernelLibrary.h"
 
 #include <utility>
 #include <vector>
@@ -386,26 +388,15 @@ size_t get_cl_image_pitch_alignment(const cl::Device &device)
     }
 }
 
-cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts)
-{
-    if(ctx && ctx->kernel_library())
-    {
-        // New api going through the core context
-        return static_cast<cl::Kernel>(ctx->kernel_library()->create_kernel(kernel_name, build_opts.options()));
-    }
-    else
-    {
-        // Legacy code through the singleton
-        return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-    }
-}
-
 cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
 {
-    const std::string program_name = CLKernelLibrary::get().get_program_name(kernel_name);
-    std::pair<std::string, bool> kernel_src = CLKernelLibrary::get().get_program(program_name);
-    const std::string kernel_path = CLKernelLibrary::get().get_kernel_path();
-    return static_cast<cl::Kernel>(ctx.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts, kernel_src.second));
+    opencl::ClKernelLibrary &klib = opencl::ClKernelLibrary::get();
+
+    const std::string program_name = klib.program_name(kernel_name);
+    auto              kernel_src   = klib.program(program_name);
+    const std::string kernel_path  = klib.kernel_path();
+
+    return static_cast<cl::Kernel>(ctx.create_kernel(kernel_name, program_name, kernel_src.program, kernel_path, build_opts, kernel_src.is_binary));
 }
 
 cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size)
@@ -435,6 +426,56 @@ void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
                                      &wbsm_hint);
     ARM_COMPUTE_UNUSED(err);
     ARM_COMPUTE_ERROR_ON(err != CL_SUCCESS);
+}
+
+bool export_weights_to_cl_image(const ITensorInfo *tensor)
+{
+    if(tensor->tensor_shape()[0] % 4)
+    {
+        return false;
+    }
+
+    // If not floating point
+    if(!is_data_type_float(tensor->data_type()))
+    {
+        return false;
+    }
+
+    // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
+    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        return false;
+    }
+
+    // Check cl image pitch alignment
+    if(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
+    {
+        return false;
+    }
+
+    const size_t image_w     = tensor->tensor_shape()[0] / 4;
+    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
+    const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
+    const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
+
+    if(image_w > max_image_w || image_h > max_image_h)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values)
+{
+    for(const int value : values)
+    {
+        if(value > max_manual_loop_unrolling)
+        {
+            built_opts.add_option("-DUNROLL_WITH_PRAGMA");
+            return;
+        }
+    }
 }
 
 } // namespace arm_compute

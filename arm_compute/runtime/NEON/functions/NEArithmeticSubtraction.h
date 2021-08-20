@@ -68,9 +68,6 @@ public:
      * |QSYMM16        |QSYMM16        |QASYMM16       |
      * |QSYMM16        |QSYMM16        |S32            |
      * |U8             |U8             |U8             |
-     * |U8             |U8             |S16            |
-     * |U8             |S16            |S16            |
-     * |S16            |U8             |S16            |
      * |S16            |S16            |S16            |
      * |S32            |S32            |S32            |
      * |F16            |F16            |F16            |

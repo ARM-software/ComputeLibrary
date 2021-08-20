@@ -29,7 +29,7 @@
 namespace arm_compute
 {
 CLRuntimeContext::CLRuntimeContext()
-    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _core_context(), _backend_type()
+    : _gpu_owned_scheduler(std::make_unique<CLScheduler>()), _gpu_scheduler(_gpu_owned_scheduler.get()), _symbols(), _backend_type()
 {
     _symbols.load_default();
     auto ctx_dev_err = create_opencl_context_and_device(_backend_type);
@@ -40,17 +40,11 @@ CLRuntimeContext::CLRuntimeContext()
     _gpu_owned_scheduler->init(ctx, queue, dev, &_tuner);
     const std::string cl_kernels_folder("./cl_kernels");
     CLKernelLibrary::get().init(cl_kernels_folder, ctx, dev);
-    _core_context = CLCoreRuntimeContext(&CLKernelLibrary::get(), _gpu_owned_scheduler->context(), _gpu_owned_scheduler->queue());
 }
 
 CLKernelLibrary &CLRuntimeContext::kernel_library()
 {
     return CLKernelLibrary::get();
-}
-
-CLCoreRuntimeContext *CLRuntimeContext::core_runtime_context()
-{
-    return &_core_context;
 }
 
 void CLRuntimeContext::set_gpu_scheduler(CLScheduler *scheduler)

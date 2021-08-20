@@ -88,9 +88,9 @@ public:
     Small2DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 7U, 7U },
-                     TensorShape{ 27U, 13U },
-                     TensorShape{ 128U, 64U }
+        TensorShape{ 1U, 7U },
+                     TensorShape{ 5U, 13U },
+                     TensorShape{ 32U, 64U }
     })
     {
     }
@@ -165,7 +165,7 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 9U, 9U },
+        TensorShape{ 1U, 9U },
                      TensorShape{ 27U, 13U, 2U },
     })
     {
@@ -201,6 +201,25 @@ public:
               ShapeDataset("Shape0",
     {
         TensorShape{ 9U, 9U },
+                     TensorShape{ 10U, 2U, 14U, 2U },
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 9U },
+        TensorShape{ 10U },
+    }))
+    {
+    }
+};
+/** Data set containing pairs of tiny tensor shapes that are broadcast compatible and can do in_place calculation. */
+class TinyShapesBroadcastInplace final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    TinyShapesBroadcastInplace()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 9U },
                      TensorShape{ 10U, 2U, 14U, 2U },
     }),
     ShapeDataset("Shape1",

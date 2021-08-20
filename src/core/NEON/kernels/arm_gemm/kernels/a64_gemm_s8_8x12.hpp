@@ -61,13 +61,38 @@ public:
     StdTransformsFixed<operand_type, result_type, 8, 12, 4> transforms = {};
     StdTransformsFixed<operand_type, result_type, 8, 12, 4, true> transforms_quantized = {};
 
+    template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
-        switch (ci->get_cpu_model()) {
-            case CPUModel::A55r1:
-                return { 15.361, 0.9341, 0.1636 };
+        if (std::is_same<T, int8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A510:
+                    return { 19.73, 3.38, 0.27 };
 
-            default:
-                return { 29.0698, 3.9793, 0.4003 };
+                case CPUModel::A55r1:
+                    return { 15.361, 0.9341, 0.1636 };
+
+                case CPUModel::V1:
+                    return { 62.40, 4.71, 0.67 };
+
+                default:
+                    return { 29.0698, 3.9793, 0.4003 };
+            }
+        }
+
+        if (std::is_same<T, int32_t>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A510:
+                    return { 19.73, 3.38, 3.70 };
+
+                case CPUModel::A55r1:
+                    return { 14.286, 1.171, 1.209 };
+
+                case CPUModel::V1:
+                    return { 61.58, 4.78, 10.83 };
+
+                default:
+                    return { 31.82, 3.51, 8.03 };
+            }
         }
     }
 

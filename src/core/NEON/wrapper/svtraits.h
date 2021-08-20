@@ -23,7 +23,7 @@
  */
 #ifndef SRC_CORE_NEON_WRAPPER_SVTRAITS_H
 #define SRC_CORE_NEON_WRAPPER_SVTRAITS_H
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
 
@@ -66,5 +66,5 @@ DEFINE_TYPES(bfloat16_t)
 } // namespace wrapper
 } // namespace arm_compute
 
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #endif /* #ifndef SRC_CORE_NEON_WRAPPER_SVTRAITS_H */

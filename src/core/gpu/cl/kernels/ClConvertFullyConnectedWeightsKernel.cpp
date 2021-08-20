@@ -40,6 +40,11 @@ namespace opencl
 {
 namespace kernels
 {
+ClConvertFullyConnectedWeightsKernel::ClConvertFullyConnectedWeightsKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape,
                                                      DataLayout data_layout)
 {

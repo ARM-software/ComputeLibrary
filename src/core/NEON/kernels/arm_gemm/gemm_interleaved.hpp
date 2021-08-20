@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,7 +192,7 @@ void kernel_and_merge<true, Requantize32>::run(
 
     {
 #ifdef CYCLE_PROFILING
-        auto p=prof.ScopedProfiler(PROFILE_QUANTIZE, (strategy::out_height() * bblocks * strategy::out_width() * sizeof(Tr)));
+        auto p=prof.ScopedProfiler(PROFILE_QUANTIZE, ((m_max-m_0) * bblocks * strategy::out_width() * sizeof(Tr)));
 #endif
         // The interleaved kernel outputs in blocks - each block is a
         // row-major matrix of size out_width * out_height.  The merge
@@ -496,7 +496,7 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
     static unsigned int get_k_block_size(const GemmArgs &args) {
         if (args._cfg && args._cfg->inner_block_size) {
-            return args._cfg->inner_block_size;
+            return roundup(args._cfg->inner_block_size, strategy::k_unroll());
         }
 
         // K blocking not supported if we are requantizing.
@@ -947,47 +947,55 @@ public:
             /* Figure out the size of each block. */
             unsigned int k_size = (current.kmax() - current.k0());
 
-            // We need to insert padding at the end of each K section.
-            // The computation needed is a little delicate - the coordinates from the block walker are expressed in
-            // terms of the full, padded, _Ktotal.
-            // But we need to transform each section with reference to the original, unpadded, input, letting the
-            // transform pad each section as needed.
+            if (_Ksections > 1) {
+                // We need to insert padding at the end of each K section.
+                // The computation needed is a little delicate - the coordinates from the block walker are expressed in
+                // terms of the full, padded, _Ktotal.
+                // But we need to transform each section with reference to the original, unpadded, input, letting the
+                // transform pad each section as needed.
 
-            // This is needed for computations below.
-            const unsigned int rounded_section_size = roundup(_Ksize, strategy::k_unroll());
+                // This is needed for computations below.
+                const unsigned int rounded_section_size = roundup(_Ksize, strategy::k_unroll());
 
-            // The expected output format is also an entire <out_width> columns interleaved, then the next set of
-            // columns, and so on.  This means, as we are breaking it up vertically, we have to do it one column at
-            // a time.
-            for (unsigned int x0=current.x0(); x0 < current.xmax(); x0 += strategy::out_width() ){
-                unsigned int xmax = std::min(x0 + strategy::out_width(), current.xmax());
+                // The expected output format is also an entire <out_width> columns interleaved, then the next set of
+                // columns, and so on.  This means, as we are breaking it up vertically, we have to do it one column at
+                // a time.
+                for (unsigned int x0=current.x0(); x0 < current.xmax(); x0 += strategy::out_width() ) {
+                    unsigned int xmax = std::min(x0 + strategy::out_width(), current.xmax());
 
-                // Track where we are and how much work is left.
-                unsigned int kpos  = current.k0();
-                unsigned int kleft = k_size;
+                    // Track where we are and how much work is left.
+                    unsigned int kpos  = current.k0();
+                    unsigned int kleft = k_size;
 
-                while (kleft) {
-                    // Which section are we in?  Based on the rounded-up section size.
-                    unsigned int k_section_base = kpos / rounded_section_size;
-                    // How far into the section are we?
-                    unsigned int k_offset = kpos - (k_section_base * rounded_section_size);
+                    while (kleft) {
+                        // Which section are we in?  Based on the rounded-up section size.
+                        unsigned int k_section_base = kpos / rounded_section_size;
+                        // How far into the section are we?
+                        unsigned int k_offset = kpos - (k_section_base * rounded_section_size);
 
-                    // We will either copy the rest of this section, or to the end of the requested length.
-                    unsigned int k_length = std::min(_Ksize - k_offset, kleft);
+                        // We will either copy the rest of this section, or to the end of the requested length.
+                        unsigned int k_length = std::min(_Ksize - k_offset, kleft);
 
-                    strat.transforms.PrepareB(buffer, B + (current.multi() * B_multi_stride), ldb,
-                                              x0, xmax,
-                                              (k_section_base * _Ksize) + k_offset,               // K starting point - compute row to read based on our section and the true section length.
-                                              (k_section_base * _Ksize) + k_offset + k_length);   // K end point - starting point plus length computed above.
+                        strat.transforms.PrepareB(buffer, B + (current.multi() * B_multi_stride), ldb,
+                                                  x0, xmax,
+                                                  (k_section_base * _Ksize) + k_offset,               // K starting point - compute row to read based on our section and the true section length.
+                                                  (k_section_base * _Ksize) + k_offset + k_length);   // K end point - starting point plus length computed above.
 
-                    // We need to modify our position based on the ROUNDED version of what we just did.
-                    unsigned int padded_length = roundup(k_length, strategy::k_unroll());
+                        // We need to modify our position based on the ROUNDED version of what we just did.
+                        unsigned int padded_length = roundup(k_length, strategy::k_unroll());
 
-                    buffer += strategy::out_width() * padded_length;
+                        buffer += strategy::out_width() * padded_length;
 
-                    kpos  += padded_length;
-                    kleft -= padded_length;
+                        kpos  += padded_length;
+                        kleft -= padded_length;
+                    }
                 }
+            } else {
+                // In the single K section case, can process the whole lot in one go.
+                // Caution: 'blockwalker::kmax()' rounds up, so clamp to valid _Ksize.
+                strat.transforms.PrepareB(buffer, B + (current.multi() * B_multi_stride), ldb,
+                                          current.x0(), current.xmax(), current.k0(), std::min(current.kmax(), _Ksize));
+                buffer += roundup(current.xmax() - current.x0(), strategy::out_width()) * roundup(current.kmax() - current.k0(), strategy::k_unroll());
             }
         } while (current.advance());
     }
@@ -1019,12 +1027,15 @@ public:
     }
 
     // Estimate cycles for given problem given provided parameters
-    static uint64_t estimate_cycles(const GemmArgs &args, const PerformanceParameters &params) {
+    template<typename perf_type>
+    static uint64_t estimate_cycles(const GemmArgs &args) {
         unsigned int k_blocks = iceildiv(args._Ksize, get_k_block_size(args));
+
+        const PerformanceParameters &params = strategy::template get_performance_parameters<perf_type>(args._ci);
 
         uint64_t total_macs    = static_cast<uint64_t>(args._nbatches) * args._nmulti * roundup(args._Msize, strategy::out_height()) * roundup(args._Nsize, strategy::out_width()) * get_ktotal(args);
         uint64_t prepare_bytes = static_cast<uint64_t>(args._nbatches) * args._nmulti * roundup(args._Msize, strategy::out_height()) * get_ktotal(args) * sizeof(Toi);
-        uint64_t merge_bytes   = static_cast<uint16_t>(args._nbatches) * args._nmulti * k_blocks * roundup(args._Msize, strategy::out_height()) * roundup(args._Nsize, strategy::out_width()) * sizeof(Tr);
+        uint64_t merge_bytes   = static_cast<uint16_t>(args._nbatches) * args._nmulti * k_blocks * args._Msize * roundup(args._Nsize, strategy::out_width()) * sizeof(Tr);
 
         float mac_cycles     = static_cast<float>(total_macs) / params.kernel_macs_cycle;
         float prepare_cycles = static_cast<float>(prepare_bytes) / params.prepare_bytes_cycle;
@@ -1041,6 +1052,17 @@ public:
         }
 
         return static_cast<uint64_t>(total_cycles);
+    }
+
+    GemmConfig get_config() override {
+        GemmConfig c;
+
+        c.method = GemmMethod::GEMM_INTERLEAVED;
+        c.inner_block_size = _k_block;
+        c.outer_block_size = _x_block;
+        c.filter = get_type_name<strategy>();
+
+        return c;
     }
 };
 

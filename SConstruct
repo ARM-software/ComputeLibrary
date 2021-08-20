@@ -53,6 +53,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
+    BoolVariable("fat_binary", "Build fat binary version of library. Note works only for armv8.2-a", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -64,6 +65,7 @@ vars.AddVariables(
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
+    BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
@@ -210,7 +212,7 @@ if 'v7a' in env['arch']:
 elif 'v8' in env['arch']:
     if 'sve2' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
-        env.Append(CPPDEFINES = ['SVE2'])
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
     elif 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
     elif 'armv8r64' in env['arch']:
@@ -221,9 +223,12 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['MMLA_INT8', 'V8P6', 'V8P6_BF', 'ARM_COMPUTE_FORCE_BF16'])
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
-            env.Append(CPPDEFINES = ['MMLA_FP32'])
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+    if 'v8.' in env['arch']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
         env.Append(CCFLAGS = ['-m32'])
@@ -254,6 +259,11 @@ if 'x86' not in env['arch']:
             prefix = "aarch64-linux-android-"
         elif env['os'] == 'tizen':
             prefix = "aarch64-tizen-linux-gnu-"
+
+if 'sve' in env['arch']:
+    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE'])
+else:
+    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON'])
 
 if env['build'] == 'native':
     prefix = ""
@@ -297,6 +307,15 @@ if not GetOption("help"):
 
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
+
+if env['fat_binary']:
+    if env['arch'] != 'armv8.2-a':
+        print("Currently fat binary is only supported with armv8.2-a")
+        Exit(1)
+    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON',
+                           '-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
+                           '-DARM_COMPUTE_ENABLE_FP16', '-DARM_COMPUTE_ENABLE_BF16',
+                           '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
 
 if env['data_type_support']:
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):

@@ -45,10 +45,9 @@ public:
      * @param[out] dst Destination tensor. Data types supported: Same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuTransposeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor to permute. Data types supported: All
-     * @param[in] dst Destination tensor. Data types supported: Same as @p src
+     * Similar to CpuTransposeKernel::configure()
      *
      * @return a status
      */

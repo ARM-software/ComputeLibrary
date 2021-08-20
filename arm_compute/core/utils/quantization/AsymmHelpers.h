@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,6 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
  * @param[in]  input                  Input tensor info.
  * @param[in]  weights                Weights tensor info.
  * @param[in]  output                 Output tensor info.
- * @param[in]  idx_ofms               Dimension index to get OFMs from the weights tensor.
  * @param[out] output_multipliers_ptr Pointer to the buffer where to store per-channel multipliers.
  * @param[out] output_shifts_ptr      Pointer to the buffer where to store per-channel shifts.
  *
@@ -98,7 +97,6 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
 void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               const ITensorInfo *weights,
                                               const ITensorInfo *output,
-                                              unsigned int       idx_ofms,
                                               int32_t           *output_multipliers_ptr,
                                               int32_t           *output_shifts_ptr);
 

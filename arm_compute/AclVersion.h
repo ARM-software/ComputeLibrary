@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACLVERSION_H_
-#define ARM_COMPUTE_ACLVERSION_H_
+#ifndef ARM_COMPUTE_ACL_VERSION_H_
+#define ARM_COMPUTE_ACL_VERSION_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,4 +53,4 @@ const AclVersion *AclVersionInfo();
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* ARM_COMPUTE_ACLVERSION_H_ */
+#endif /* ARM_COMPUTE_ACL_VERSION_H_ */

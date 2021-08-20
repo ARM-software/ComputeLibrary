@@ -76,17 +76,16 @@ class NEDeconvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDeconvolutionLayer(const NEDeconvolutionLayer &) = delete;
+    /** Default move constructor */
+    NEDeconvolutionLayer(NEDeconvolutionLayer &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEDeconvolutionLayer &operator=(const NEDeconvolutionLayer &) = delete;
-    /** Prevent instances of this class from being moved (As this class contains pointers) */
-    NEDeconvolutionLayer(NEDeconvolutionLayer &&) = delete;
-    /** Prevent instances of this class from being moved (As this class contains pointers) */
-    NEDeconvolutionLayer &operator=(NEDeconvolutionLayer &&) = delete;
+    /** Default move assignment operator */
+    NEDeconvolutionLayer &operator=(NEDeconvolutionLayer &&) = default;
     /** Default destructor */
-    virtual ~NEDeconvolutionLayer() = default;
+    ~NEDeconvolutionLayer() = default;
 
     /** Set the input, weights, biases and output tensors.
      *

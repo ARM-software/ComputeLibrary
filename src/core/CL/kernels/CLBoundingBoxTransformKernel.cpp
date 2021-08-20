@@ -85,6 +85,7 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
 CLBoundingBoxTransformKernel::CLBoundingBoxTransformKernel()
     : _boxes(nullptr), _pred_boxes(nullptr), _deltas(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLBoundingBoxTransformKernel::configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)

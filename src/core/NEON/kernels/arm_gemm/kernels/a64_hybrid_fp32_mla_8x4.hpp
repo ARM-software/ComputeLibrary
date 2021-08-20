@@ -22,8 +22,8 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
 
+#ifdef __aarch64__
 #include "../std_transforms_fixed.hpp"
 
 #define ARGLIST  \
@@ -43,7 +43,8 @@ void a64_hybrid_fp32_mla_8x4_a55( ARGLIST );
 class cls_a64_hybrid_fp32_mla_8x4
 {
 public:
-    typedef float operand_type;
+    typedef float lhs_operand_type;
+    typedef float rhs_operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -69,7 +70,7 @@ public:
         return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 8, 4, 1> transforms = {};
+    StdTransformsFixed<rhs_operand_type, result_type, 8, 4, 1> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=a64_hybrid_fp32_mla_8x4;
@@ -89,4 +90,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // __aarch64__

@@ -26,7 +26,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace pooling {
@@ -204,4 +204,4 @@ void sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

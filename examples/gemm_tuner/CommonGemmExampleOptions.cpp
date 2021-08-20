@@ -39,7 +39,7 @@ using namespace utils;
     return os;
 }
 
-CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser, DataType default_data_type)
+CommonGemmExampleOptions::CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser, arm_compute::DataType default_data_type)
     : help(parser.add_option<ToggleOption>("help")),
       M(parser.add_positional_option<SimpleOption<size_t>>("M", 100)),
       N(parser.add_positional_option<SimpleOption<size_t>>("N", 100)),

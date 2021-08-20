@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run @ref cpu::CpuDequantization that dequantizes an input tensor */
+/** Basic function to run @ref cpu::CpuDequantize that dequantizes an input tensor */
 class NEDequantizationLayer : public IFunction
 {
 public:

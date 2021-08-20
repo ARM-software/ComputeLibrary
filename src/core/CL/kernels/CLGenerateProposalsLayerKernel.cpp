@@ -68,6 +68,7 @@ Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anc
 CLComputeAllAnchorsKernel::CLComputeAllAnchorsKernel()
     : _anchors(nullptr), _all_anchors(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLComputeAllAnchorsKernel::configure(const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)

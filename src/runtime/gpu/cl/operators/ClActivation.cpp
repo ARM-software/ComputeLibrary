@@ -26,6 +26,10 @@
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/core/gpu/cl/kernels/ClActivationKernel.h"
 
+#include "src/common/IOperator.h"
+#include "src/common/utils/LegacySupport.h"
+#include "src/gpu/cl/ClContext.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -42,4 +46,35 @@ Status ClActivation::validate(const ITensorInfo *src, const ITensorInfo *dst, co
     return kernels::ClActivationKernel::validate(src, dst, act_info);
 }
 } // namespace opencl
+
+namespace gpu
+{
+namespace opencl
+{
+std::tuple<IOperator *, StatusCode> ClContext::create_activation(const AclTensorDescriptor &src, const AclTensorDescriptor &dst, const AclActivationDescriptor &act, bool is_validate)
+{
+    TensorInfo src_info = detail::convert_to_legacy_tensor_info(src);
+    TensorInfo dst_info = detail::convert_to_legacy_tensor_info(dst);
+    auto       info     = detail::convert_to_activation_info(act);
+
+    if(is_validate && !bool(arm_compute::opencl::ClActivation::validate(&src_info.set_is_resizable(false), &dst_info.set_is_resizable(false), info)))
+    {
+        return std::make_tuple(nullptr, StatusCode::UnsupportedConfig);
+    }
+
+    auto act_op = std::make_unique<arm_compute::opencl::ClActivation>();
+    act_op->configure(CLKernelLibrary::get().get_compile_context(), &src_info, &dst_info, info);
+
+    auto op = new arm_compute::IOperator(static_cast<IContext *>(this));
+    if(op == nullptr)
+    {
+        ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources");
+        return std::make_tuple(nullptr, StatusCode::OutOfMemory);
+    }
+    op->set_internal_operator(std::move(act_op));
+
+    return std::make_tuple(op, StatusCode::Success);
+}
+} // namespace opencl
+} // namespace gpu
 } // namespace arm_compute

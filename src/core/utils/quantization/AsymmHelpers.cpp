@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -185,15 +185,14 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
 void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               const ITensorInfo *weights,
                                               const ITensorInfo *output,
-                                              unsigned int       idx_ofms,
                                               int32_t           *output_multipliers_ptr,
                                               int32_t           *output_shifts_ptr)
 {
-    const unsigned int num_filters = is_data_type_quantized_per_channel(weights->data_type()) ? weights->dimension(idx_ofms) : 1;
-
     const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
     const QuantizationInfo        wq_info = weights->quantization_info();
     const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+    const unsigned int num_filters = wq_info.scale().size();
 
     for(unsigned int i = 0; i < num_filters; ++i)
     {

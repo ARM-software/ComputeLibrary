@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ class ITensorAllocator
 {
 public:
     /** Default constructor. */
-    ITensorAllocator();
+    ITensorAllocator() = default;
     /** Allow instances of this class to be copy constructed */
     ITensorAllocator(const ITensorAllocator &) = default;
     /** Allow instances of this class to be copied */
@@ -54,6 +54,14 @@ public:
      * @param[in] alignment Alignment in bytes that the underlying base pointer should comply with.
      */
     void init(const TensorInfo &input, size_t alignment = 0);
+    /** Initialize a tensor based with a reference TensorInfo
+     *
+     * @note ITensorAllocator won't own the TensorInfo thus these need to out-live
+     *
+     * @param[in] input     TensorInfo object containing the description of the tensor to initialize.
+     * @param[in] alignment Alignment in bytes that the underlying base pointer should comply with.
+     */
+    void soft_init(TensorInfo &input, size_t alignment = 0);
     /** Return a reference to the tensor's metadata
      *
      * @return Reference to the tensor's metadata.
@@ -93,8 +101,9 @@ protected:
     virtual void unlock() = 0;
 
 private:
-    TensorInfo _info;      /**< Tensor's metadata. */
-    size_t     _alignment; /**< Tensor's alignment in bytes */
+    TensorInfo  _info_owned{};             /**< Tensor's metadata. */
+    TensorInfo *_info_external{ nullptr }; /**< External Tensor's metadata */
+    size_t      _alignment{};              /**< Tensor's alignment in bytes */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_ITENSORALLOCATOR_H */

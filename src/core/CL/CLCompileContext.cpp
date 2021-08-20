@@ -29,6 +29,8 @@
 #include "arm_compute/core/Utils.h"
 #include "support/StringSupport.h"
 
+#include <regex>
+
 namespace arm_compute
 {
 CLBuildOptions::CLBuildOptions()
@@ -261,6 +263,18 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
     else
     {
         ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
+    }
+
+    if(gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD)
+    {
+        const std::string device_vers = _device.device_version();
+        const std::regex  ddk_regex("r([0-9]*)p[0-9]");
+        std::smatch       ddk_match;
+
+        if(std::regex_search(device_vers, ddk_match, ddk_regex) && std::stoi(ddk_match[1]) >= 11)
+        {
+            concat_str += " -DUNROLL_WITH_PRAGMA ";
+        }
     }
 
     std::string build_options = stringify_set(build_options_set, kernel_path) + concat_str;

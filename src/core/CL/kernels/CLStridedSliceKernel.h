@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,9 @@ namespace arm_compute
 class CLStridedSliceKernel : public ICLKernel
 {
 public:
+    /** Default constructor */
+    CLStridedSliceKernel();
+
     /** Configure kernel
      *
      * @note Supported tensor rank: up to 4

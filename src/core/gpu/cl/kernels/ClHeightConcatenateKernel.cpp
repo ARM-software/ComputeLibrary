@@ -64,6 +64,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int height_offset, co
 ClHeightConcatenateKernel::ClHeightConcatenateKernel()
     : _height_offset(0)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 Status ClHeightConcatenateKernel::validate(const ITensorInfo *src, unsigned int height_offset, const ITensorInfo *dst)

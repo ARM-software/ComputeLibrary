@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_KERNEL_H
-#define ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H
+#define ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -44,8 +44,7 @@ namespace kernels
 class CpuConvertFullyConnectedWeightsKernel : public ICpuKernel
 {
 public:
-    /** Default constructor */
-    CpuConvertFullyConnectedWeightsKernel();
+    CpuConvertFullyConnectedWeightsKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConvertFullyConnectedWeightsKernel);
     /** Set the src and dst tensor.
      *
@@ -55,12 +54,9 @@ public:
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_input_shape, DataLayout data_layout);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuConvertFullyConnectedWeightsKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src                  Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
-     * @param[in] dst                  The converted weights tensor info. Shape and Data Type: Same as @p src.
-     * @param[in] original_input_shape Shape of the original src tensor (the one entering fully connected layer).
-     * @param[in] data_layout          The data layout the weights have been trained in.
+     * Similar to @ref CpuConvertFullyConnectedWeightsKernel::configure()
      *
      * @return a status
      */
@@ -71,19 +67,10 @@ public:
     const char *name() const override;
 
 private:
-    unsigned int _factor1; /*  equals to the number of elements per original src plane if @p data_layout == NCHW; its number of channels otherwise */
-    unsigned int _factor2; /*  equals to the number of elements per original src plane if @p data_layout == NHWC; its number of channels otherwise */
-
-    /** Template function to run the permute
-     *
-     * @param[in] in     Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
-     * @param[in] out    The converted weights tensor info. Shape and Data Type: Same as @p in.
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T>
-    void run_convert_fc_weights(const ITensor *in, ITensor *out, const Window &window);
+    unsigned int _factor1{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NCHW; its number of channels otherwise */
+    unsigned int _factor2{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NHWC; its number of channels otherwise */
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_CONVERTFULLYCONNECTEDWEIGHTS_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_CONVERT_FULLYCONNECTED_WEIGHTS_KERNEL_H */

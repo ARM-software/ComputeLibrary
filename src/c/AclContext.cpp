@@ -75,7 +75,7 @@ arm_compute::IContext *create_context(AclTarget target, const AclContextOptions 
 }
 } // namespace
 
-extern "C" AclStatus AclCreateContext(AclContext              *ctx,
+extern "C" AclStatus AclCreateContext(AclContext              *external_ctx,
                                       AclTarget                target,
                                       const AclContextOptions *options)
 {
@@ -91,13 +91,13 @@ extern "C" AclStatus AclCreateContext(AclContext              *ctx,
         return AclInvalidArgument;
     }
 
-    auto acl_ctx = create_context(target, options);
+    auto ctx = create_context(target, options);
     if(ctx == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Couldn't allocate internal resources for context creation!");
         return AclOutOfMemory;
     }
-    *ctx = acl_ctx;
+    *external_ctx = ctx;
 
     return AclSuccess;
 }

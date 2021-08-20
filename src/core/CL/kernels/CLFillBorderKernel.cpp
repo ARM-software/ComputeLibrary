@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@ namespace arm_compute
 CLFillBorderKernel::CLFillBorderKernel()
     : ICLKernel(), _tensor(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 bool CLFillBorderKernel::is_parallelisable() const

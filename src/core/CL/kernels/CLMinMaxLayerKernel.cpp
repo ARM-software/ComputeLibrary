@@ -83,6 +83,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
 CLMinMaxLayerKernel::CLMinMaxLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLMinMaxLayerKernel::configure(const ICLTensor *input, ICLTensor *output)

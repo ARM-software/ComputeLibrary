@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_SVEMATH_H
 #define ARM_COMPUTE_SVEMATH_H
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "src/core/NEON/wrapper/intrinsics/svcvt.h"
 #include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
 #include "src/core/NEON/wrapper/intrinsics/svreinterpret.h"
@@ -185,5 +185,5 @@ int_vec_type convert_float_to_int(const svfloat32_t &in_0, const svfloat32_t &in
 
 } // namespace arm_compute
 #include "src/core/NEON/SVEMath.inl"
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #endif /* ARM_COMPUTE_SVEMATH_H */

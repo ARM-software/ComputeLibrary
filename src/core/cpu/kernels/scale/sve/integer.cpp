@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -30,11 +31,9 @@
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
+#include <arm_sve.h>
 #include <cmath>
 #include <cstddef>
-
-#if defined(__ARM_FEATURE_SVE)
-#include <arm_sve.h>
 
 namespace arm_compute
 {
@@ -298,4 +297,4 @@ void s16_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, con
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // __ARM_FEATURE_SVE
+#endif // ARM_COMPUTE_ENABLE_SVE

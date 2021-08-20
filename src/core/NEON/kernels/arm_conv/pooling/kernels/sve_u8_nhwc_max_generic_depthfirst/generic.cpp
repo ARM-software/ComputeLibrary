@@ -24,7 +24,7 @@
 
 #include <cstdint>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace pooling {
@@ -220,4 +220,4 @@ void sve_u8_nhwc_max_generic_depthfirst_impl(
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

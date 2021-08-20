@@ -45,14 +45,14 @@ The main data-types that the Machine Learning functions support are the followin
     <li>F16: 16-bit half precision floating point
     <li>S32: 32-bit signed integer
     <li>U8: 8-bit unsigned char
-    <li>All: include all above data types
+    <li>All: Agnostic to any specific data type
   </ul>
 
 Compute Library supports the following data layouts (fast changing dimension from right to left):
   <ul>
     <li>NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
     <li>NCHW: Legacy layout where width is in the fastest changing dimension
-    <li>All: include all above data layouts
+    <li>All: Agnostic to any specific data layout
   </ul>
 where N = batches, C = channels, H = height, W = width
 
@@ -164,9 +164,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
     <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
-    <tr><td>U8<td>U8<td>S16
-    <tr><td>U8<td>S16<td>S16
-    <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
@@ -192,9 +189,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QSYMM16<td>QSYMM16<td>QASYMM16
     <tr><td>QSYMM16<td>QSYMM16<td>S32
     <tr><td>U8<td>U8<td>U8
-    <tr><td>U8<td>U8<td>S16
-    <tr><td>U8<td>S16<td>S16
-    <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
     <tr><td>S32<td>S32<td>S32
     <tr><td>F16<td>F16<td>F16
@@ -264,7 +258,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">BitwiseAnd
-  <td rowspan="2" style="width:200px;"> Function to performe bitwise AND between 2 tensors.
+  <td rowspan="2" style="width:200px;"> Function to perform bitwise AND between 2 tensors.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_LOGICAL_AND
@@ -292,7 +286,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">BitwiseNot
-  <td rowspan="2" style="width:200px;"> Function to performe bitwise NOT.
+  <td rowspan="2" style="width:200px;"> Function to perform bitwise NOT.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_LOGICAL_NOT
@@ -320,7 +314,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">BitwiseOr
-  <td rowspan="2" style="width:200px;"> Function to performe bitwise OR between 2 tensors.
+  <td rowspan="2" style="width:200px;"> Function to perform bitwise OR between 2 tensors.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_LOGICAL_OR
@@ -348,7 +342,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">BitwiseXor
-  <td rowspan="2" style="width:200px;"> Function to performe bitwise XOR between 2 tensors.
+  <td rowspan="2" style="width:200px;"> Function to perform bitwise XOR between 2 tensors.
   <td rowspan="2">
       <ul>
        <li>n/a
@@ -535,7 +529,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">ConvertFullyConnectedWeights
-  <td rowspan="2" style="width:200px;"> Function to tranpose the wieghts for the fully connected layer.
+  <td rowspan="2" style="width:200px;"> Function to transpose the weights for the fully connected layer.
   <td rowspan="2">
       <ul>
        <li>n/a
@@ -678,7 +672,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">DeconvolutionLayer
-  <td rowspan="2" style="width:200px;"> Function to compute a deconvolution or tranpose convolution.
+  <td rowspan="2" style="width:200px;"> Function to compute a deconvolution or transpose convolution.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_TRANSPOSE_CONV_2D
@@ -957,7 +951,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
-  <td rowspan="13">ElementWiseOperations
+  <td rowspan="13">ElementwiseOperations
   <td rowspan="13" style="width:200px;"> Function to perform in Cpu: - Div - Max - Min - Pow - SquaredDiff - Comparisons (Equal, greater, greater_equal, less, less_equal, not_equal) Function to perform in CL: - Add - Sub - Div - Max - Min - Pow - SquaredDiff
   <td rowspan="13">
       <ul>
@@ -1242,6 +1236,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><th>src<th>dst
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
+    <tr><td>S32<td>S32
     </table>
 <tr>
   <td>CLSinLayer
@@ -1408,7 +1403,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">FillBorder
-  <td rowspan="2" style="width:200px;"> Function to .
+  <td rowspan="2" style="width:200px;"> Function to fill the borders within the XY-planes.
   <td rowspan="2">
       <ul>
        <li>n/a
@@ -1620,7 +1615,7 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F16<td>F16<td>F16<td>F16
     </table>
 <tr>
-  <td rowspan="1">GEMMConv2D
+  <td rowspan="1">GEMMConv2d
   <td rowspan="1" style="width:200px;"> General Matrix Multiplication.
   <td rowspan="1">
       <ul>
@@ -2193,7 +2188,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">PixelWiseMultiplication
-  <td rowspan="2" style="width:200px;"> Function to performe a multiplication.
+  <td rowspan="2" style="width:200px;"> Function to perform a multiplication.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_MUL
@@ -2237,11 +2232,12 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>S16<td>U8<td>S16
     <tr><td>S16<td>S16<td>S16
     <tr><td>F16<td>F16<td>F16
-    <tr><td>F32<td>S32<td>F32
+    <tr><td>F32<td>F32<td>F32
+    <tr><td>S32<td>S32<td>S32
     </table>
 <tr>
   <td rowspan="2">PoolingLayer
-  <td rowspan="2" style="width:200px;"> Function to performe pooling with the specified pooling operation.
+  <td rowspan="2" style="width:200px;"> Function to perform pooling with the specified pooling operation.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_AVERAGE_POOL_2D
@@ -2449,7 +2445,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">ReduceMean
-  <td rowspan="2" style="width:200px;"> Function to performe reduce mean operation.
+  <td rowspan="2" style="width:200px;"> Function to perform reduce mean operation.
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_MEAN
@@ -2483,7 +2479,7 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="2">ReductionOperation
-  <td rowspan="2" style="width:200px;"> Function to performe reduce with the following operations - ARG_IDX_MAX: Index of the max value - ARG_IDX_MIN: Index of the min value - MEAN_SUM:    Mean of sum - PROD:        Product - SUM_SQUARE:  Sum of squares - SUM:         Sum - MIN:         Min - MAX:         Max
+  <td rowspan="2" style="width:200px;"> Function to perform reduce with the following operations - ARG_IDX_MAX: Index of the max value - ARG_IDX_MIN: Index of the min value - MEAN_SUM:    Mean of sum - PROD:        Product - SUM_SQUARE:  Sum of squares - SUM:         Sum - MIN:         Min - MAX:         Max
   <td rowspan="2">
       <ul>
        <li>ANEURALNETWORKS_REDUCE_ALL
@@ -3100,23 +3096,11 @@ where N = batches, C = channels, H = height, W = width
     </table>
 <tr>
   <td rowspan="1">WinogradInputTransform
-  <td rowspan="1" style="width:200px;"> Function to.
+  <td rowspan="1" style="width:200px;"> Function to perform a Winograd transform on the input tensor.
   <td rowspan="1">
       <ul>
        <li>n/a
       </ul>
-  <td>CLWinogradInputTransform
-  <td>
-      <ul>
-       <li>NHWC
-       <li>NCHW
-      </ul>
-  <td>
-    <table>
-    <tr><th>src<th>dst
-    <tr><td>F16<td>F16
-    <tr><td>F32<td>F32
-    </table>
 </table>
 
 */

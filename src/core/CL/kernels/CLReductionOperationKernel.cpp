@@ -75,6 +75,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 CLReductionOperationKernel::CLReductionOperationKernel()
     : _input(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::SUM_SQUARE)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op)

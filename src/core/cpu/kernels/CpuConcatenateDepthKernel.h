@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_CPU_CONCATENATEDEPTH_KERNEL_H
-#define ARM_COMPUTE_CPU_CONCATENATEDEPTH_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONCATENATE_DEPTH_KERNEL_H
+#define ARM_COMPUTE_CPU_CONCATENATE_DEPTH_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
@@ -43,7 +43,7 @@ namespace kernels
 class CpuConcatenateDepthKernel : public ICpuKernel
 {
 public:
-    CpuConcatenateDepthKernel();
+    CpuConcatenateDepthKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConcatenateDepthKernel);
     /** Configure kernel for a given list of arguments
      *
@@ -56,11 +56,9 @@ public:
      *
      */
     void configure(const ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref CpuConcatenateDepthKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src          Source tensor info. Data types supported:  QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] depth_offset The offset on the Z axis.
-     * @param[in] dst          Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref CpuConcatenateDepthKernel::configure()
      *
      * @return a status
      */
@@ -74,10 +72,10 @@ private:
     using DepthConcatFunction = void(const ITensor *, ITensor *, unsigned int, const Window &);
 
 private:
-    DepthConcatFunction *_func;
-    unsigned int         _depth_offset;
+    DepthConcatFunction *_func{ nullptr };
+    unsigned int         _depth_offset{ 0 };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CONCATENATEDEPTH_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_CONCATENATE_DEPTH_KERNEL_H */

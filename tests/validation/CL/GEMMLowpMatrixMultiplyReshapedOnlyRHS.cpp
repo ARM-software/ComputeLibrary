@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,8 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -46,10 +46,10 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CLGEMMReshapeRHSMatrixKernel
-using CLGEMMReshapeRHSMatrix = CLSynthetizeFunction<CLGEMMReshapeRHSMatrixKernel>;
+using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmReshapeRhsMatrixKernel>;
 
 // Create function for CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS = CLSynthetizeFunction<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel>;
+using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshapedOnlyRHS
 using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture = GEMMLowpMatrixMultiplyReshapedOnlyRHSValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
@@ -157,7 +157,7 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
     // Create and configure function
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHS gemm;
-    gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
+    gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info);
 }
 } // namespace
 

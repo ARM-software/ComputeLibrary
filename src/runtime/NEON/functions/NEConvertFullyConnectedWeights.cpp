@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 
+#include "arm_compute/core/Validate.h"
 #include "src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.h"
 
 namespace arm_compute

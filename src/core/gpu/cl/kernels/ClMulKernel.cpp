@@ -53,15 +53,19 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1,
                                                          1,
                                                          DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16, DataType::S32,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2,
                                                          1,
                                                          DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16, DataType::S32,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(scale < 0, "Scale cannot be negative.");
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !is_data_type_float(dst->data_type()));
+
+    // Check whether it is in_place calculation
+    const bool in_place      = (src1 == dst) || (src2 == dst);
+    const bool src1_in_place = in_place && (src1 == dst);
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
 
@@ -83,14 +87,28 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
                                         "Dst can only be QASYMM8_SIGNED if both src are QASYMM8_SIGNED");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() == DataType::QSYMM16 && (src1->data_type() != DataType::QSYMM16 || src2->data_type() != DataType::QSYMM16),
                                         "Dst can only be QSYMM16 if both src are QSYMM16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() == DataType::S32 && (src1->data_type() != DataType::QSYMM16 || src2->data_type() != DataType::QSYMM16),
-                                        "Dst can only be S32 if both src are QSYMM16");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0), "Wrong shape for dst");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((src1->data_type() == DataType::S32 || src2->data_type() == DataType::S32) && (dst->data_type() != DataType::S32),
+                                        "Dst must be S32 if source tensors are S32");
+        if(in_place)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, src1_in_place ? src1->tensor_shape() : src2->tensor_shape(), 0),
+                                            "Wrong shape for dst, cannot do in_place calculation");
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
+                                            "Wrong shape for dst");
+        }
     }
 
     return Status{};
 }
 } // namespace
+
+ClMulKernel::ClMulKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
 
 void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
                             ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
@@ -127,7 +145,12 @@ void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo
     }
     else
     {
-        if(src1->element_size() == 2 || src2->element_size() == 2)
+        if(src1->element_size() == 4 || src2->element_size() == 4)
+        {
+            // use 64 bit accumulator for 32-bit input
+            acc_type = "long";
+        }
+        else if(src1->element_size() == 2 || src2->element_size() == 2)
         {
             // Use 32-bit accumulator for 16-bit input
             acc_type = "int";
@@ -184,11 +207,17 @@ void ClMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo
         }
     }
 
+    // Check whether it is in_place calculation
+    const bool in_place      = (src1 == dst) || (src2 == dst);
+    const bool src1_in_place = in_place && (src1 == dst);
+    build_opts.add_option_if(in_place, "-DIN_PLACE");
+    build_opts.add_option_if(src1_in_place, "-DSRC1_IN_PLACE");
+
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set scale argument
-    unsigned int idx = 3 * num_arguments_per_3D_tensor(); // Skip the src and dst parameters
+    unsigned int idx = (in_place ? 2 : 3) * num_arguments_per_3D_tensor(); // Skip the src and dst parameters
 
     if(scale_int >= 0 && !is_quantized)
     {
@@ -246,6 +275,8 @@ void ClMulKernel::run_op(ITensorPack &tensors, const Window &window, cl::Command
     const auto src_1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
     auto       dst   = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src_0, src_1, dst);
+
     const TensorShape &in_shape1 = src_0->info()->tensor_shape();
     const TensorShape &in_shape2 = src_1->info()->tensor_shape();
     const TensorShape &out_shape = dst->info()->tensor_shape();
@@ -270,12 +301,17 @@ void ClMulKernel::run_op(ITensorPack &tensors, const Window &window, cl::Command
     Window slice_input1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
     Window slice_input2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
 
+    // Check whether it is in_place calculation
+    const bool in_place = (src_0 == dst) || (src_1 == dst);
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, src_0, slice_input1);
         add_3D_tensor_argument(idx, src_1, slice_input2);
-        add_3D_tensor_argument(idx, dst, slice);
+        if(!in_place)
+        {
+            add_3D_tensor_argument(idx, dst, slice);
+        }
         enqueue(queue, *this, slice, lws_hint());
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
@@ -310,6 +346,11 @@ Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *sr
     return Status{};
 }
 } // namespace
+
+ClComplexMulKernel::ClComplexMulKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
 
 void ClComplexMulKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {

@@ -33,12 +33,12 @@
 
 #include "kernels/cpp_nhwc_1x1_stride_any_depthfirst.hpp"
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_max_generic_depthfirst.hpp"
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst.hpp"
 #include "kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst.hpp"
 #include "kernels/a64_fp16_nhwc_avg_generic_depthfirst.hpp"
@@ -74,11 +74,13 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
     },
   },
 #if defined(__aarch64__)
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst",
-    is_supported<sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>,
+    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
+      return args.cpu_info->has_sve() && is_supported<sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>(args, unused);
+    },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirst<sve_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
@@ -87,7 +89,9 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst",
-    is_supported<sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>,
+    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
+      return args.cpu_info->has_sve() && is_supported<sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>(args, unused);
+    },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirst<sve_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>(args);
@@ -96,7 +100,7 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp16_nhwc_avg_generic_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::AVERAGE; },
+    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.cpu_info->has_sve() && args.pool_type == PoolingType::AVERAGE; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirstGeneric<sve_fp16_nhwc_avg_generic_depthfirst>(args);
@@ -105,18 +109,20 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp16_nhwc_max_generic_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::MAX; },
+    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.cpu_info->has_sve() && args.pool_type == PoolingType::MAX; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirstGeneric<sve_fp16_nhwc_max_generic_depthfirst>(args);
     },
   },
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
   {
     PoolingMethod::DEPTHFIRST,
     "a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst",
-    is_supported<a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>,
+    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
+      return args.cpu_info->has_fp16() && is_supported<a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>(args, unused);
+    },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirst<a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
@@ -125,7 +131,9 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst",
-    is_supported<a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>,
+    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
+      return args.cpu_info->has_fp16() && is_supported<a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>(args, unused);
+    },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirst<a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst>(args);
@@ -134,7 +142,7 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "a64_fp16_nhwc_avg_generic_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::AVERAGE; },
+    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.cpu_info->has_fp16() && args.pool_type == PoolingType::AVERAGE; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirstGeneric<a64_fp16_nhwc_avg_generic_depthfirst>(args);
@@ -143,7 +151,7 @@ static const PoolingImplementation<__fp16, __fp16> pooling_fp16_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "a64_fp16_nhwc_max_generic_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::MAX; },
+    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.cpu_info->has_fp16() && args.pool_type == PoolingType::MAX; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<__fp16, __fp16> * {
       return new PoolingDepthfirstGeneric<a64_fp16_nhwc_max_generic_depthfirst>(args);

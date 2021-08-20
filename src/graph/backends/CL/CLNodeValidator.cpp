@@ -28,17 +28,7 @@
 
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
-#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLIm2ColKernel.h"
-#include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
-#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
+
 #include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 // Generic unblocked transposed 8x32-bit sized specialisation
 template <>
 template <typename T>
-inline void TransformImpl<8, 1, true, 4, 4, VLType::None>::Transform(
+void TransformImpl<8, 1, true, 4, 4, VLType::None>::Transform(
     T* out, const T* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {
@@ -45,7 +45,7 @@ inline void TransformImpl<8, 1, true, 4, 4, VLType::None>::Transform(
 // Generic 16x16-bit sized specialisation
 template <>
 template <typename T>
-inline void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
+void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
     T* out, const T* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {
@@ -59,7 +59,7 @@ inline void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
 
 // Specialised 16 x uint16_t version
 template <>
-inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x1(const uint16_t *&in0, uint16_t *out) {
+void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x1(const uint16_t *&in0, uint16_t *out) {
   __asm volatile (
     "VLD1.32	{d0-d3}, [%[in0]]!\n"
     "VST1.32	{d0-d3}, [%[out]]\n"
@@ -72,7 +72,7 @@ inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x1(con
 }
 
 template <>
-inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x2(const uint16_t *&in0, const uint16_t *&in1, uint16_t *out) {
+void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x2(const uint16_t *&in0, const uint16_t *&in1, uint16_t *out) {
   __asm volatile (
     "VLD1.32	{d0-d3}, [%[in0]]!\n"
     "VST1.32	{d0-d3}, [%[out]]!\n"
@@ -90,7 +90,7 @@ inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x2(con
 }
 
 template <>
-inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x4(const uint16_t *&in0, const uint16_t *&in1, const uint16_t *&in2, const uint16_t *&in3, uint16_t *out) {
+void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x4(const uint16_t *&in0, const uint16_t *&in1, const uint16_t *&in2, const uint16_t *&in3, uint16_t *out) {
   __asm __volatile (
     "VLD1.32	{d0-d3}, [%[in0]]!\n"
     "VST1.32	{d0-d3}, [%[out]]!\n"
@@ -117,7 +117,7 @@ inline void TransposeInterleaveCommon<16, uint16_t, uint16_t>::moveblock_1x4(con
 
 template <>
 template <>
-inline void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
+void TransformImpl<16, 1, true, 2, 2, VLType::None>::Transform(
     uint16_t* out, const uint16_t* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {

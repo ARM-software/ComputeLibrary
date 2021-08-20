@@ -34,18 +34,15 @@ namespace cpu
 class CpuTranspose : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuTranspose() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in]  src Source tensor to permute. Data types supported: All
      * @param[out] dst Destintation tensor. Data types supported: Same as @p src
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuTranspose
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor to permute. Data types supported: All
-     * @param[in] dst Destination tensor. Data types supported: Same as @p dst
+     * Similar to @ref CpuTranspose::configure()
      *
      * @return a status
      */

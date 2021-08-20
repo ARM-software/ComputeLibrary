@@ -37,6 +37,7 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
 
+#include "arm_compute/Acl.hpp"
 #include "support/Requires.h"
 
 namespace arm_compute
@@ -68,11 +69,11 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.25f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.1f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return RelativeTolerance<float>(0.05f);
             }
@@ -80,11 +81,11 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.9f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return RelativeTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return RelativeTolerance<float>(0.00001f);
             }
@@ -111,11 +112,11 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.25f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
@@ -123,11 +124,11 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
             switch(data_type)
             {
                 case DataType::F16:
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.9f);
-#else  // !defined(__ARM_FEATURE_SVE)
+#else  // !defined(ENABLE_SVE)
                     return AbsoluteTolerance<float>(0.01f);
-#endif // defined(__ARM_FEATURE_SVE)
+#endif // defined(ENABLE_SVE)
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
@@ -214,6 +215,48 @@ void test_float_sqrt_boundary_value()
 
 TEST_SUITE(NEON)
 TEST_SUITE(ActivationLayer)
+
+/** Test case for memory injection in @ref cpu::CpuWinogradConv2d.
+ *
+ * Configure the operator once and inject memory at run-time in multiple executions.
+ *
+ * Checks performed in order:
+ * - Both runs compute the same output
+ */
+TEST_CASE(ActivationAPI, framework::DatasetMode::ALL)
+{
+    acl::StatusCode err = acl::StatusCode::Success;
+
+    // Create context & Queue
+    acl::Context ctx(acl::Target::Cpu, &err);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+
+    acl::Queue queue(ctx, &err);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+
+    // Create activation operator
+    acl::TensorDescriptor src_info({ 2, 3 }, acl::DataType::Float32);
+    acl::TensorDescriptor dst_info({ 2, 3 }, acl::DataType::Float32);
+    acl::ActivationDesc   desc{ AclRelu, 6.f, 0.f, false };
+
+    acl::Activation act(ctx, src_info, dst_info, desc, &err);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+
+    // Create tensors and feed
+    acl::Tensor src(ctx, src_info, &err);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+    acl::Tensor dst(ctx, dst_info, &err);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+
+    acl::TensorPack pack(ctx);
+    err = pack.add(src, ACL_SRC);
+    err = pack.add(dst, ACL_DST);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+
+    // Execute operator
+    err = act.run(queue, pack);
+    ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
+}
 
 // *INDENT-OFF*
 // clang-format off

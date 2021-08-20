@@ -26,7 +26,7 @@
 
 #pragma once
 
-#if defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
 
 namespace arm_conv {
 namespace pooling {
@@ -51,4 +51,4 @@ struct sve_u8_nhwc_avg_generic_depthfirst
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE) && defined(SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,7 @@ Status validate_arguments(const ITensorInfo *output, const float start, const fl
 CLRangeKernel::CLRangeKernel()
     : _start(0), _end(1), _step(1), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLRangeKernel::configure(ICLTensor *output, const float start, const float end, const float step)

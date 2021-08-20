@@ -209,6 +209,7 @@ void Framework::log_test_end(const TestInfo &info)
     {
         func_on_all_printers([&](Printer * p)
         {
+            p->print_profiler_header(_test_results.at(info).header_data);
             p->print_measurements(_test_results.at(info).measurements);
         });
     }
@@ -532,6 +533,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
     }
 
+    result.header_data  = profiler.header();
     result.measurements = profiler.measurements();
 
     set_test_result(info, result);
@@ -630,6 +632,7 @@ void Framework::print_test_results(Printer &printer) const
     for(const auto &test : _test_results)
     {
         printer.print_test_header(test.first);
+        printer.print_profiler_header(test.second.header_data);
         printer.print_measurements(test.second.measurements);
         printer.print_test_footer();
     }
@@ -679,7 +682,7 @@ std::vector<TestInfo> Framework::test_infos() const
 
     for(const auto &factory : _test_factories)
     {
-        TestInfo test_info{ id, factory->name(), factory->mode(), factory->status() };
+        const TestInfo test_info{ id, factory->name(), factory->mode(), factory->status() };
 
         if(_test_filter->is_selected(test_info))
         {

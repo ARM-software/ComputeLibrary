@@ -43,8 +43,7 @@ namespace cpu
 class CpuConcatenate : public ICpuOperator
 {
 public:
-    /** Constructor */
-    CpuConcatenate();
+    CpuConcatenate() = default;
     /** Configure operator for a given list of arguments
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
@@ -56,15 +55,9 @@ public:
      * @param[in]     axis        Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
     void configure(const std::vector<const ITensorInfo *> &srcs_vector, ITensorInfo *dst, size_t axis);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref kernels::CpuConcatenateWidthKernel, @ref kernels::CpuConcatenateHeightKernel,
-     *       @ref kernels::CpuConcatenateDepthKernel and @ref kernels::CpuConcatenateBatchKernel.
-     *
-     * @param[in] srcs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] dst         Output tensor info. Data types supported: Same as @p srcs_vector.
-     * @param[in] axis        Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
+     * Similar to @ref CpuConcatenate::configure()
      *
      * @return a status
      */
@@ -74,9 +67,9 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::vector<std::unique_ptr<ICpuKernel>> _concat_kernels;
-    unsigned int                             _num_srcs;
-    unsigned int                             _axis;
+    std::vector<std::unique_ptr<ICpuKernel>> _concat_kernels{};
+    unsigned int                             _num_srcs{ 0 };
+    unsigned int                             _axis{ 0 };
 };
 } // namespace cpu
 } // namespace arm_compute

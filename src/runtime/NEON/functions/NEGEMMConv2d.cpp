@@ -24,68 +24,31 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMConv2d.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
-
-#include <set>
+#include "arm_compute/runtime/Tensor.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
 
 namespace arm_compute
 {
-namespace
+using OperatorType = cpu::CpuGemmDirectConv2d;
+using namespace arm_compute::experimental;
+
+struct NEGEMMConv2d::Impl
 {
-GEMMLowpOutputStageInfo calculate_output_stage_metadata(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const ActivationLayerInfo &act)
-{
-    // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
-    // Extract and negate input and weights offset
-    const QuantizationInfo        iqinfo    = input->quantization_info();
-    const QuantizationInfo        wqinfo    = weights->quantization_info();
-    const QuantizationInfo        oqinfo    = (output->total_size() == 0) ? iqinfo : output->quantization_info();
-    const UniformQuantizationInfo uoqinfo   = oqinfo.uniform();
-    const DataType                data_type = input->data_type();
-    // Merge activation with output stage
-    const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
-                                                                               ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                               ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
-                                                                             };
-    PixelValue type_min{};
-    PixelValue type_max{};
-    std::tie(type_min, type_max) = get_min_max(data_type);
-    int32_t min_activation = type_min.get<int32_t>();
-    int32_t max_activation = type_max.get<int32_t>();
-    if(supported_acts.count(act.activation()) != 0)
-    {
-        std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act, data_type, uoqinfo);
-    }
-    GEMMLowpOutputStageInfo os_info;
-    os_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    os_info.gemmlowp_offset          = uoqinfo.offset;
-    os_info.gemmlowp_min_bound       = min_activation;
-    os_info.gemmlowp_max_bound       = max_activation;
-    os_info.is_quantized_per_channel = (weights->data_type() == DataType::QSYMM8_PER_CHANNEL);
-    quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, os_info);
-    return os_info;
-}
-AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect)
-{
-    AsmGemmInfo asm_info;
-    asm_info.method                  = is_indirect ? AsmConvMethod::Indirect : AsmConvMethod::Conv;
-    asm_info.ps_info                 = info.conv_info;
-    asm_info.activation_info         = info.act_info;
-    asm_info.depth_output_gemm3d     = true;
-    asm_info.reinterpret_input_as_3d = true;
-    asm_info.padding_top             = info.conv_info.pad_top();
-    asm_info.padding_left            = info.conv_info.pad_left();
-    asm_info.padding_value           = 0.f;
-    asm_info.negated_offsets         = false;
-    return asm_info;
-}
-} // namespace
+    const ITensor                   *weights{ nullptr };
+    std::unique_ptr<OperatorType>    op{ nullptr };
+    ITensorPack                      run_pack{};
+    ITensorPack                      prep_pack{};
+    WorkspaceData<Tensor>            workspace{};
+    MemoryGroup                      memory_group{};
+    bool                             is_prepared{ false };
+    experimental::MemoryRequirements aux_mem_req{};
+};
 
 NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _gemm_asm_func(std::make_unique<NEGEMMAssemblyDispatch>(memory_manager)), _activation_func(), _weights_permute_func(), _original_weights(nullptr), _permuted_weights(), _is_prepared(false),
-      _run_activation(false)
+    : _impl(std::make_unique<Impl>())
 {
+    _impl->memory_group = MemoryGroup(memory_manager);
 }
 
 NEGEMMConv2d::~NEGEMMConv2d() = default;
@@ -93,84 +56,54 @@ NEGEMMConv2d::~NEGEMMConv2d() = default;
 void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEGEMMConv2d::validate(input->info(),
-                                                      weights->info(),
-                                                      biases != nullptr ? biases->info() : nullptr,
-                                                      output->info(),
-                                                      info));
-    _original_weights = weights;
-    _weights_permute_func.configure(weights, &_permuted_weights, PermutationVector{ 3, 0, 1, 2 });
 
-    // Configure assembly dispatch
-    AsmGemmInfo asm_info = init_assembly_metadata(info, false);
-    if(is_data_type_quantized(input->info()->data_type()))
-    {
-        asm_info.output_stage = calculate_output_stage_metadata(input->info(), weights->info(), output->info(), info.act_info);
-    }
-    _gemm_asm_func->configure(input, &_permuted_weights, biases, output, asm_info);
+    _impl->weights     = weights;
+    _impl->is_prepared = false;
+    _impl->op          = std::make_unique<OperatorType>();
 
-    // Configure activation
-    if(info.act_info.enabled() && !_gemm_asm_func->is_activation_supported(info.act_info))
-    {
-        _activation_func.configure(output, nullptr, info.act_info);
-        _run_activation = true;
-    }
+    _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), info);
+
+    _impl->aux_mem_req = _impl->op->workspace();
+    _impl->run_pack    = { { TensorType::ACL_SRC_0, input }, { TensorType::ACL_SRC_2, biases }, { TensorType::ACL_DST, output } };
+    _impl->prep_pack   = { { TensorType::ACL_SRC_1, weights }, { TensorType::ACL_SRC_2, biases } };
+    _impl->workspace   = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
 }
+
 Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.num_groups > 1, "Grouping (num_groups != 1) is not supported on Neon");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() != DataLayout::NHWC, "Data layout supported is NHWC");
-    const DataType    data_type = input->data_type();
-    const TensorShape i_shape   = input->tensor_shape();
-    const TensorShape w_shape   = weights->tensor_shape();
-    ARM_COMPUTE_RETURN_ERROR_ON(w_shape[0] != i_shape[0]);
-    ARM_COMPUTE_RETURN_ERROR_ON(info.dilation != Size2D(1U, 1U));
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-    // Validate biases
-    if(biases != nullptr)
-    {
-        if(is_data_type_quantized_asymmetric(data_type))
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
-        }
-        else if(data_type == DataType::BFLOAT16)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        }
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(3));
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
-    }
-
-    AsmGemmInfo asm_info = init_assembly_metadata(info, false);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMAssemblyDispatch::validate(input, weights, biases, output, asm_info));
-    return Status{};
+    return OperatorType::validate(input, weights, biases, output, info);
 }
+
 void NEGEMMConv2d::run()
 {
     prepare();
 
-    _gemm_asm_func->run();
-    if(_run_activation)
-    {
-        _activation_func.run();
-    }
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
+    _impl->op->run(_impl->run_pack);
 }
+
 void NEGEMMConv2d::prepare()
 {
-    if(!_is_prepared)
+    if(!_impl->is_prepared)
     {
-        _permuted_weights.allocator()->allocate();
-        _weights_permute_func.run();
-        _original_weights->mark_as_unused();
-        _is_prepared = true;
+        _impl->op->prepare(_impl->prep_pack);
+
+        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
+                                        _impl->aux_mem_req.end(),
+                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+
+        if(has_reshape != std::end(_impl->aux_mem_req))
+        {
+            _impl->weights->mark_as_unused();
+        }
+        else
+        {
+            _impl->run_pack.add_const_tensor(ACL_SRC_1, _impl->weights);
+        }
+
+        // Release temporary tensors that are only used in prepare stage
+        release_temporaries<Tensor>(_impl->aux_mem_req, _impl->workspace);
+        _impl->is_prepared = true;
     }
 }
 } // namespace arm_compute

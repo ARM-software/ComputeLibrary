@@ -23,7 +23,10 @@
  */
 #include "src/runtime/cpu/operators/CpuActivation.h"
 
+#include "src/common/IOperator.h"
+#include "src/common/utils/LegacySupport.h"
 #include "src/core/cpu/kernels/CpuActivationKernel.h"
+#include "src/cpu/CpuContext.h"
 
 namespace arm_compute
 {
@@ -39,6 +42,31 @@ void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, con
 Status CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
     return kernels::CpuActivationKernel::validate(input, output, activation_info);
+}
+
+std::tuple<IOperator *, StatusCode> CpuContext::create_activation(const AclTensorDescriptor &src, const AclTensorDescriptor &dst, const AclActivationDescriptor &act, bool is_validate)
+{
+    TensorInfo src_info = detail::convert_to_legacy_tensor_info(src);
+    TensorInfo dst_info = detail::convert_to_legacy_tensor_info(dst);
+    auto       info     = detail::convert_to_activation_info(act);
+
+    if(is_validate && !bool(CpuActivation::validate(&src_info.set_is_resizable(false), &dst_info.set_is_resizable(false), info)))
+    {
+        return std::make_tuple(nullptr, StatusCode::UnsupportedConfig);
+    }
+
+    auto act_op = std::make_unique<cpu::CpuActivation>();
+    act_op->configure(&src_info, &dst_info, info);
+
+    auto op = new arm_compute::IOperator(static_cast<IContext *>(this));
+    if(op == nullptr)
+    {
+        ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources");
+        return std::make_tuple(nullptr, StatusCode::OutOfMemory);
+    }
+    op->set_internal_operator(std::move(act_op));
+
+    return std::make_tuple(op, StatusCode::Success);
 }
 } // namespace cpu
 } // namespace arm_compute

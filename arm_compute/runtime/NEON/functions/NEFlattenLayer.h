@@ -26,7 +26,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -37,6 +38,17 @@ class ITensorInfo;
 class NEFlattenLayer : public IFunction
 {
 public:
+    NEFlattenLayer();
+    /** Destructor */
+    ~NEFlattenLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFlattenLayer(const NEFlattenLayer &) = delete;
+    /** Default move constructor */
+    NEFlattenLayer(NEFlattenLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFlattenLayer &operator=(const NEFlattenLayer &) = delete;
+    /** Default move assignment operator */
+    NEFlattenLayer &operator=(NEFlattenLayer &&);
     /** Initialise the kernel's input and output.
      *
      *  Valid data layouts:
@@ -68,7 +80,8 @@ public:
     void run() override;
 
 private:
-    NEReshapeLayer _reshape{};
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 

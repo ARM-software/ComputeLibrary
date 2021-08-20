@@ -27,37 +27,14 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"
-#include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
-#include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-// Forward declarations
-class NEGEMMInterleave4x4Kernel;
-class NEGEMMMatrixAdditionKernel;
-class NEGEMMMatrixMultiplyKernel;
-class NEGEMMTranspose1xWKernel;
-class NEGEMMAssemblyDispatch;
-
 /** Basic function to execute GEMM. This function calls the following kernels:
  *
- * If optimized assembly is available:
- *  -# @ref NEGEMMAssemblyDispatch
- *  -# @ref NEActivationLayer (if alpha != 1.0)
- * Else:
- *  -# @ref NEGEMMInterleave4x4Kernel (if the output tensor is a matrix)
- *  -# @ref NEGEMMTranspose1xWKernel (if the output tensor is a matrix)
- *  -# @ref NEGEMMMatrixMultiplyKernel
- * In both cases:
- *  -# @ref NEGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
- * Else:
- *  -# @ref NEArithmeticAddition (if c != nullptr and is reshaped once and not optimized assembly in place)
- *
- *  -# @ref NEActivationLayer (if activation is specified in GEMMInfo)
+ *  -# @ref cpu::CpuGemm
  */
 class NEGEMM : public IFunction
 {
@@ -101,14 +78,7 @@ public:
     void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: BFLOAT16/F16/F32
-     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor info. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should happen only for the first run
+     * Similar to @ref NEGEMM::configure()
      *
      * @return a status
      */
@@ -119,28 +89,8 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                                 _memory_group;
-    IWeightsManager                            *_weights_manager;
-    std::unique_ptr<NEGEMMInterleave4x4Kernel>  _interleave_kernel;
-    std::unique_ptr<NEGEMMTranspose1xWKernel>   _transpose_kernel;
-    std::unique_ptr<NEGEMMMatrixMultiplyKernel> _mm_kernel;
-    std::unique_ptr<NEGEMMAssemblyDispatch>     _asm_glue;
-    std::unique_ptr<NEGEMMMatrixAdditionKernel> _ma_kernel;
-    NEActivationLayer                           _alpha_scale_func;
-    NEArithmeticAddition                        _add_bias;
-    NEActivationLayer                           _activation_func;
-
-    Tensor         _tmp_a;
-    Tensor         _tmp_b;
-    Tensor         _tmp_d;
-    const ITensor *_original_b;
-    bool           _run_vector_matrix_multiplication;
-    bool           _run_alpha_scale;
-    bool           _run_addition;
-    bool           _run_bias_addition;
-    bool           _run_activation;
-    bool           _reshape_b_only_on_first_run;
-    bool           _is_prepared;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMM_H */

@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "src/core/gpu/cl/kernels/ClSoftmaxKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/runtime/gpu/cl/operators/ClPermute.h"
 #include "src/runtime/gpu/cl/operators/ClSoftmax.h"
 
@@ -43,7 +44,8 @@ struct CLSoftmaxLayerGeneric<IS_LOG>::Impl
     ICLTensor                    *dst{ nullptr };
     std::unique_ptr<OperatorType> op{ nullptr };
     MemoryGroup                   memory_group{};
-    std::vector<std::pair<TensorType, std::unique_ptr<CLTensor>>> workspace_tensors{};
+    ITensorPack                   run_pack{};
+    WorkspaceData<CLTensor>       workspace_tensors{};
 };
 
 template <bool IS_LOG>
@@ -71,7 +73,9 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
 
     SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->info()->data_type(), axis };
     _impl->op->configure(compile_context, *input->info(), *output->info(), softmax_info);
-    allocate_workspace();
+
+    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST, _impl->dst } };
+    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 template <bool IS_LOG>
@@ -82,46 +86,12 @@ Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
 }
 
 template <bool IS_LOG>
-void           CLSoftmaxLayerGeneric<IS_LOG>::allocate_workspace()
-{
-    const auto memory_requirements = _impl->op->workspace();
-    std::for_each(memory_requirements.begin(), memory_requirements.end(), [this](const experimental::MemoryInfo & memory_info)
-    {
-        auto tensor_info = TensorInfo{ TensorShape(memory_info.size), 1, DataType::U8 };
-        _impl->workspace_tensors.emplace_back(memory_info.type, std::make_unique<CLTensor>());
-        auto tensor = _impl->workspace_tensors.back().second.get();
-        ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-        tensor->allocator()->init(tensor_info);
-        _impl->memory_group.manage(tensor);
-    });
-
-    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
-    {
-        auto tensor = wt.second.get();
-        tensor->allocator()->allocate();
-    });
-}
-
-template <bool IS_LOG>
 void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
-
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
-
-    ITensorPack pack;
-    pack.add_tensor(TensorType::ACL_SRC, _impl->src);
-    pack.add_tensor(TensorType::ACL_DST, _impl->dst);
-
-    std::for_each(_impl->workspace_tensors.begin(), _impl->workspace_tensors.end(), [&pack](std::pair<TensorType, std::unique_ptr<CLTensor>> &wt)
-    {
-        auto tensor = wt.second.get();
-        ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
-        pack.add_tensor(wt.first, tensor);
-    });
-
-    _impl->op->run(pack);
+    _impl->op->run(_impl->run_pack);
 }
 
 template class CLSoftmaxLayerGeneric<false>;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,9 +26,9 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -46,15 +46,16 @@ namespace test
 namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::opencl::kernels;
 
-// Create function for CLGEMMReshapeLHSMatrixKernel
-using CLGEMMReshapeLHSMatrix = CLSynthetizeFunction<CLGEMMReshapeLHSMatrixKernel>;
+// Create function for ClGemmReshapeLhsMatrixKernel
+using CLGEMMReshapeLHSMatrix = CLSynthetizeOperator<ClGemmReshapeLhsMatrixKernel>;
 
-// Create function for CLGEMMReshapeRHSMatrixKernel
-using CLGEMMReshapeRHSMatrix = CLSynthetizeFunction<CLGEMMReshapeRHSMatrixKernel>;
+// Create function for ClGemmReshapeRhsMatrixKernel
+using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<ClGemmReshapeRhsMatrixKernel>;
 
-// Create function for CLGEMMMatrixMultiplyReshapedKernel
-using CLGEMMMatrixMultiplyReshaped = CLSynthetizeFunction<CLGEMMMatrixMultiplyReshapedKernel>;
+// Create function for ClGemmMatrixMultiplyReshapedKernel
+using CLGEMMMatrixMultiplyReshaped = CLSynthetizeOperator<ClGemmMatrixMultiplyReshapedKernel>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped
 template <typename T>
@@ -327,7 +328,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                framework::dataset::make("Expected", { true, true, false, false, false, true, true,true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
-   ARM_COMPUTE_EXPECT(bool(CLGEMMMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
+   ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
                                                           &input1_info.clone()->set_is_resizable(true),
                                                           &input2_info.clone()->set_is_resizable(true),
                                                           &output_info.clone()->set_is_resizable(true),1.f,1.f,
@@ -562,7 +563,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       false})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
-   ARM_COMPUTE_EXPECT(bool(CLGEMMMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
+   ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
                                                           &input1_info.clone()->set_is_resizable(true),
                                                           &input2_info.clone()->set_is_resizable(true),
                                                           &output_info.clone()->set_is_resizable(true),1.f,1.f,
@@ -933,7 +934,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       false})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
-   ARM_COMPUTE_EXPECT(bool(CLGEMMMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
+   ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
                                                           &input1_info.clone()->set_is_resizable(true),
                                                           &input2_info.clone()->set_is_resizable(true),
                                                           &output_info.clone()->set_is_resizable(true),1.f,1.f,

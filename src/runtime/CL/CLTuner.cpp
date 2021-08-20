@@ -63,11 +63,6 @@ void CLTuner::set_tuner_mode(CLTunerMode mode)
     _tuning_info.tuner_mode = mode;
 }
 
-CLTunerMode CLTuner::get_tuner_mode() const
-{
-    return _tuning_info.tuner_mode;
-}
-
 void CLTuner::tune_kernel_static(ICLKernel &kernel)
 {
     ARM_COMPUTE_UNUSED(kernel);
@@ -117,11 +112,6 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
             }
         }
     }
-}
-
-void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws)
-{
-    add_tuning_params(kernel_id, CLTuningParams(optimal_lws));
 }
 
 void CLTuner::add_tuning_params(const std::string &kernel_id, CLTuningParams optimal_tuning_params)
@@ -245,25 +235,6 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, ITensorPac
     // Restore real function
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_clEnqueueNDRangeKernel;
     return opt_tuning_params;
-}
-
-void CLTuner::import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table)
-{
-    _tuning_params_table.clear();
-    for(auto && params : lws_table)
-    {
-        add_tuning_params(params.first, CLTuningParams(params.second));
-    }
-}
-
-const std::unordered_map<std::string, cl::NDRange> &CLTuner::lws_table()
-{
-    _lws_table.clear();
-    for(auto && params : _tuning_params_table)
-    {
-        _lws_table.emplace(params.first, params.second.get_lws());
-    }
-    return _lws_table;
 }
 
 const std::unordered_map<std::string, CLTuningParams> &CLTuner::tuning_params_table() const

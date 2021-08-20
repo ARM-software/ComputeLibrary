@@ -48,13 +48,9 @@ public:
      * @param[in]  perm Permutation vector
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuPermuteKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @note Arbitrary permutation vectors are supported with rank not greater than 4
-     *
-     * @param[in] src  Source tensor to permute. Data types supported: All
-     * @param[in] dst  Destination tensor. Data types supported: Same as @p src
-     * @param[in] perm Permutation vector
+     * Similar to @ref CpuPermuteKernel::configure()
      *
      * @return a status
      */

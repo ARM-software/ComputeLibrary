@@ -25,13 +25,14 @@
 #define ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTS_H
 
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/ITransformWeights.h"
-#include "arm_compute/runtime/Tensor.h"
+
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
+class ITensorInfo;
 
 /** Basic function to run @ref cpu::kernels::CpuConvertFullyConnectedWeightsKernel. */
 class NEConvertFullyConnectedWeights : public IFunction
@@ -84,45 +85,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
-namespace weights_transformations
-{
-/** Basic function to manage @ref NEConvertFullyConnectedWeights. */
-class NEConvertFullyConnectedWeightsManaged : public ITransformWeights
-{
-public:
-    void run() override
-    {
-        _output.allocator()->allocate();
-        _func.run();
-        _reshape_run = true;
-    }
-
-    void release() override
-    {
-        _output.allocator()->free();
-    }
-
-    ITensor *get_weights() override
-    {
-        return &_output;
-    }
-
-    uint32_t uid() override
-    {
-        return _uid;
-    }
-
-    void configure(const ITensor *input, const TensorShape &original_input_shape, DataLayout data_layout)
-    {
-        _func.configure(input, &_output, original_input_shape, data_layout);
-    }
-
-private:
-    static constexpr uint32_t      _uid = 0x4;
-    Tensor                         _output{};
-    NEConvertFullyConnectedWeights _func{};
-};
-} // namespace weights_transformations
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTS_H */

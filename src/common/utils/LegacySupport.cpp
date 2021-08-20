@@ -107,5 +107,59 @@ AclTensorDescriptor convert_to_descriptor(const TensorInfo &info)
     };
     return desc;
 }
+
+ActivationLayerInfo convert_to_activation_info(const AclActivationDescriptor &desc)
+{
+    ActivationLayerInfo::ActivationFunction act;
+    switch(desc.type)
+    {
+        case AclActivationType::AclIdentity:
+            act = ActivationLayerInfo::ActivationFunction::IDENTITY;
+            break;
+        case AclActivationType::AclLogistic:
+            act = ActivationLayerInfo::ActivationFunction::LOGISTIC;
+            break;
+        case AclActivationType::AclTanh:
+            act = ActivationLayerInfo::ActivationFunction::TANH;
+            break;
+        case AclActivationType::AclRelu:
+            act = ActivationLayerInfo::ActivationFunction::RELU;
+            break;
+        case AclActivationType::AclBoundedRelu:
+            act = ActivationLayerInfo::ActivationFunction::BOUNDED_RELU;
+            break;
+        case AclActivationType::AclLuBoundedRelu:
+            act = ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU;
+            break;
+        case AclActivationType::AclLeakyRelu:
+            act = ActivationLayerInfo::ActivationFunction::LEAKY_RELU;
+            break;
+        case AclActivationType::AclSoftRelu:
+            act = ActivationLayerInfo::ActivationFunction::SOFT_RELU;
+            break;
+        case AclActivationType::AclElu:
+            act = ActivationLayerInfo::ActivationFunction::ELU;
+            break;
+        case AclActivationType::AclAbs:
+            act = ActivationLayerInfo::ActivationFunction::ABS;
+            break;
+        case AclActivationType::AclSquare:
+            act = ActivationLayerInfo::ActivationFunction::SQUARE;
+            break;
+        case AclActivationType::AclSqrt:
+            act = ActivationLayerInfo::ActivationFunction::SQRT;
+            break;
+        case AclActivationType::AclLinear:
+            act = ActivationLayerInfo::ActivationFunction::LINEAR;
+            break;
+        case AclActivationType::AclHardSwish:
+            act = ActivationLayerInfo::ActivationFunction::HARD_SWISH;
+            break;
+        default:
+            return ActivationLayerInfo();
+    }
+
+    return ActivationLayerInfo(act, desc.a, desc.b);
+}
 } // namespace detail
 } // namespace arm_compute

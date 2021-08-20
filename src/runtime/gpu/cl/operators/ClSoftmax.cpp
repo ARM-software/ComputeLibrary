@@ -24,82 +24,30 @@
 #include "src/runtime/gpu/cl/operators/ClSoftmax.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/gpu/cl/kernels/ClSoftmaxKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/runtime/gpu/cl/operators/ClPermute.h"
+#include "src/runtime/gpu/cl/utils/ClAuxTensorHandler.h"
 #include "support/Cast.h"
+
+using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
 namespace opencl
 {
-namespace
-{
-void run_permute(ClPermute *op, const ITensor *src, ITensor *dst)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, op);
-    ITensorPack pack;
-    pack.add_const_tensor(TensorType::ACL_SRC, src);
-    pack.add_tensor(TensorType::ACL_DST, dst);
-    op->run(pack);
-}
-} // namespace
-
 ClSoftmax::ClSoftmax()
     : _permute_input(std::make_unique<ClPermute>()),
       _permute_output(std::make_unique<ClPermute>()),
       _max_shift_exp_sum_kernel(std::make_unique<kernels::ClLogits1DMaxShiftExpSumKernel>()),
       _norm_kernel(std::make_unique<kernels::ClLogits1DNormKernel>()),
-      _max_info(_internal_info[static_cast<uint32_t>(InternalTensorIdx::MAX)]),
-      _sum_info(_internal_info[static_cast<uint32_t>(InternalTensorIdx::SUM)]),
-      _tmp_info(_internal_info[static_cast<uint32_t>(InternalTensorIdx::TMP)]),
-      _permuted_src_info(_internal_info[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_SRC)]),
-      _permuted_dst_info(_internal_info[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_DST)])
+      _max_info(),
+      _sum_info(),
+      _tmp_info(),
+      _permuted_src_info(),
+      _permuted_dst_info(),
+      _aux_mem(InternalTensorIdx::COUNT)
 {
-}
-
-TensorType ClSoftmax::convert_internal_idx_to_tensor_type(InternalTensorIdx idx) const
-{
-    switch(idx)
-    {
-        case InternalTensorIdx::MAX:
-            return TensorType::ACL_INT_0;
-        case InternalTensorIdx::SUM:
-            return TensorType::ACL_INT_1;
-        case InternalTensorIdx::TMP:
-            return TensorType::ACL_INT_2;
-        case InternalTensorIdx::PERMUTED_SRC:
-            return TensorType::ACL_INT_3;
-        case InternalTensorIdx::PERMUTED_DST:
-            return TensorType::ACL_INT_4;
-        default:
-            ARM_COMPUTE_ERROR("invalid internal tensor index is given.");
-            break;
-    };
-    return TensorType::ACL_UNKNOWN;
-}
-
-void ClSoftmax::create_internal_tensor(TensorInfo &info, InternalTensorIdx idx)
-{
-    const auto tensor_idx = static_cast<uint32_t>(idx);
-    if(!_internal_tensor[tensor_idx])
-    {
-        _internal_tensor[tensor_idx] = std::make_unique<CLTensor>();
-    }
-    _internal_tensor[tensor_idx]->allocator()->init(info);
-}
-
-void ClSoftmax::create_internal_tensor()
-{
-    for(uint32_t i = 0; i < static_cast<uint32_t>(InternalTensorIdx::COUNT); i++)
-    {
-        const auto tensor_idx = static_cast<InternalTensorIdx>(i);
-
-        if(!_needs_permute && (tensor_idx == InternalTensorIdx::PERMUTED_DST || tensor_idx == InternalTensorIdx::PERMUTED_SRC))
-        {
-            continue;
-        }
-        create_internal_tensor(_internal_info[i], static_cast<InternalTensorIdx>(i));
-    }
 }
 
 void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &dst, const SoftmaxKernelInfo &info)
@@ -137,6 +85,13 @@ void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensor
         const auto perm_info = softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
         _permute_output->configure(compile_context, &_permuted_dst_info, &dst, perm_info);
     }
+
+    _aux_mem[InternalTensorIdx::SUM] = MemoryInfo(offset_int_vec(InternalTensorIdx::SUM), MemoryLifetime::Temporary, _sum_info.total_size());
+    _aux_mem[InternalTensorIdx::TMP] = MemoryInfo(offset_int_vec(InternalTensorIdx::TMP), MemoryLifetime::Temporary, _tmp_info.total_size());
+    _aux_mem[InternalTensorIdx::MAX] = MemoryInfo(offset_int_vec(InternalTensorIdx::MAX), MemoryLifetime::Temporary, _max_info.total_size());
+
+    _aux_mem[InternalTensorIdx::PERMUTED_SRC] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), MemoryLifetime::Temporary, _permuted_src_info.total_size());
+    _aux_mem[InternalTensorIdx::PERMUTED_DST] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_DST), MemoryLifetime::Temporary, _permuted_dst_info.total_size());
 }
 
 Status ClSoftmax::validate(const ITensorInfo &src, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
@@ -172,105 +127,60 @@ Status ClSoftmax::validate(const ITensorInfo &src, const ITensorInfo &dst, const
     return Status{};
 }
 
-void ClSoftmax::import_workspace_memory(ITensorPack &tensors)
-{
-    auto import_workspace_memory = [this, &tensors](InternalTensorIdx idx)
-    {
-        const auto workspace_idx   = convert_internal_idx_to_tensor_type(idx);
-        auto       imported_tensor = tensors.get_tensor(workspace_idx);
-        if(imported_tensor)
-        {
-            auto imported_memory = utils::cast::polymorphic_downcast<ICLTensor *>(imported_tensor)->cl_buffer();
-            _internal_tensor[static_cast<uint32_t>(idx)].get()->allocator()->import_memory(imported_memory);
-        }
-    };
-
-    import_workspace_memory(InternalTensorIdx::PERMUTED_SRC);
-    import_workspace_memory(InternalTensorIdx::PERMUTED_DST);
-    import_workspace_memory(InternalTensorIdx::MAX);
-    import_workspace_memory(InternalTensorIdx::SUM);
-    import_workspace_memory(InternalTensorIdx::TMP);
-}
-
-void ClSoftmax::run_source_permute(const ITensor *src)
-{
-    if(_needs_permute)
-    {
-        auto permuted_src = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_SRC)].get();
-        run_permute(_permute_input.get(), src, permuted_src);
-    }
-}
-
-void ClSoftmax::run_destination_permute(ITensor *dst)
-{
-    if(_needs_permute)
-    {
-        auto permuted_dst = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_DST)].get();
-        run_permute(_permute_output.get(), permuted_dst, dst);
-    }
-}
-
-void ClSoftmax::run_max_sum(const ITensor *src)
-{
-    auto max = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::MAX)].get();
-    auto sum = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::SUM)].get();
-    auto tmp = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::TMP)].get();
-
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, tmp, max, sum);
-
-    ITensorPack sum_pack;
-    sum_pack.add_const_tensor(TensorType::ACL_SRC, src);
-    sum_pack.add_tensor(TensorType::ACL_DST, tmp);
-    sum_pack.add_tensor(TensorType::ACL_INT_0, max);
-    sum_pack.add_tensor(TensorType::ACL_INT_1, sum);
-
-    CLScheduler::get().enqueue_op(*_max_shift_exp_sum_kernel.get(), sum_pack, false);
-}
-
-void ClSoftmax::run_norm(ITensor *dst)
-{
-    auto sum = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::SUM)].get();
-    auto tmp = _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::TMP)].get();
-
-    ARM_COMPUTE_ERROR_ON_NULLPTR(tmp, sum, dst);
-
-    ITensorPack norm_pack;
-    norm_pack.add_const_tensor(TensorType::ACL_SRC, tmp);
-    norm_pack.add_tensor(TensorType::ACL_DST, dst);
-    norm_pack.add_tensor(TensorType::ACL_INT_0, sum);
-
-    CLScheduler::get().enqueue_op(*_norm_kernel.get(), norm_pack, false);
-}
-
 void ClSoftmax::run(ITensorPack &tensors)
 {
-    create_internal_tensor();
-
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    import_workspace_memory(tensors);
-    run_source_permute(src);
-    run_max_sum(!_needs_permute ? src : _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_SRC)].get());
-    run_norm(!_needs_permute ? dst : _internal_tensor[static_cast<uint32_t>(InternalTensorIdx::PERMUTED_DST)].get());
-    run_destination_permute(dst);
+    CLAuxTensorHandler sum(offset_int_vec(InternalTensorIdx::SUM), _sum_info, tensors, false);
+    CLAuxTensorHandler tmp(offset_int_vec(InternalTensorIdx::TMP), _tmp_info, tensors, false);
+    CLAuxTensorHandler max(offset_int_vec(InternalTensorIdx::MAX), _max_info, tensors, false);
+
+    CLAuxTensorHandler permuted_src(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _permuted_src_info, tensors, false);
+    CLAuxTensorHandler permuted_dst(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _permuted_dst_info, tensors, false);
+
+    if(_needs_permute)
+    {
+        ITensorPack pack;
+        pack.add_const_tensor(TensorType::ACL_SRC, src);
+        pack.add_tensor(TensorType::ACL_DST, permuted_src.get());
+        _permute_input.get()->run(pack);
+    }
+
+    ITensorPack sum_pack;
+    ITensorPack norm_pack;
+    if(_needs_permute)
+    {
+        sum_pack.add_const_tensor(TensorType::ACL_SRC, permuted_src.get());
+        norm_pack.add_tensor(TensorType::ACL_DST, permuted_dst.get());
+    }
+    else
+    {
+        sum_pack.add_const_tensor(TensorType::ACL_SRC, src);
+        norm_pack.add_tensor(TensorType::ACL_DST, dst);
+    }
+    sum_pack.add_tensor(TensorType::ACL_DST, tmp.get());
+    sum_pack.add_tensor(TensorType::ACL_INT_0, max.get());
+    sum_pack.add_tensor(TensorType::ACL_INT_1, sum.get());
+
+    norm_pack.add_const_tensor(TensorType::ACL_SRC, tmp.get());
+    norm_pack.add_tensor(TensorType::ACL_INT_0, sum.get());
+
+    CLScheduler::get().enqueue_op(*_max_shift_exp_sum_kernel.get(), sum_pack, false);
+    CLScheduler::get().enqueue_op(*_norm_kernel.get(), norm_pack, false);
+
+    if(_needs_permute)
+    {
+        ITensorPack pack;
+        pack.add_const_tensor(TensorType::ACL_SRC, permuted_dst.get());
+        pack.add_tensor(TensorType::ACL_DST, dst);
+        _permute_output.get()->run(pack);
+    }
 }
 
 experimental::MemoryRequirements ClSoftmax::workspace() const
 {
-    experimental::MemoryRequirements req{};
-
-    req.emplace_back(convert_internal_idx_to_tensor_type(InternalTensorIdx::SUM), _sum_info.total_size(), 0);
-    req.emplace_back(convert_internal_idx_to_tensor_type(InternalTensorIdx::TMP), _tmp_info.total_size(), 0);
-    req.emplace_back(convert_internal_idx_to_tensor_type(InternalTensorIdx::MAX), _max_info.total_size(), 0);
-
-    if(_needs_permute)
-    {
-        req.emplace_back(convert_internal_idx_to_tensor_type(InternalTensorIdx::PERMUTED_SRC), _permuted_src_info.total_size(), 0);
-        req.emplace_back(convert_internal_idx_to_tensor_type(InternalTensorIdx::PERMUTED_DST), _permuted_dst_info.total_size(), 0);
-    }
-
-    return req;
+    return _aux_mem;
 }
 } // namespace opencl
 } // namespace arm_compute

@@ -61,6 +61,11 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 }
 } // namespace
 
+ClFloorKernel::ClFloorKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClFloorKernel::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);

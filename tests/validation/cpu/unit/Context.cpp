@@ -94,13 +94,13 @@ TEST_CASE(CpuCapabilities, framework::DatasetMode::ALL)
     opts.copts.capabilities = AclCpuCapabilitiesDot | AclCpuCapabilitiesMmlaInt8 | AclCpuCapabilitiesSve2;
     arm_compute::cpu::CpuContext ctx(&opts.copts);
 
-    ARM_COMPUTE_ASSERT(ctx.capabilities().dot == true);
-    ARM_COMPUTE_ASSERT(ctx.capabilities().mmla_int8 == true);
-    ARM_COMPUTE_ASSERT(ctx.capabilities().sve2 == true);
-    ARM_COMPUTE_ASSERT(ctx.capabilities().fp16 == false);
+    ARM_COMPUTE_ASSERT(ctx.capabilities().cpu_info.has_dotprod() == true);
+    ARM_COMPUTE_ASSERT(ctx.capabilities().cpu_info.has_i8mm() == true);
+    ARM_COMPUTE_ASSERT(ctx.capabilities().cpu_info.has_sve2() == true);
+    ARM_COMPUTE_ASSERT(ctx.capabilities().cpu_info.has_fp16() == false);
 
     arm_compute::cpu::CpuContext ctx_legacy(nullptr);
-    ARM_COMPUTE_ASSERT(ctx_legacy.capabilities().neon == true);
+    ARM_COMPUTE_ASSERT(ctx_legacy.capabilities().cpu_info.has_neon() == true);
 }
 
 TEST_SUITE_END() // Context

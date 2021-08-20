@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLCol2ImKernel.h"
+#include "src/core/gpu/cl/kernels/ClCol2ImKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"
@@ -40,7 +40,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(Col2Im)
 
-using CLCol2Im = CLSynthetizeFunction<CLCol2ImKernel>;
+using ClCol2Im = ClSynthetizeOperatorWithBorder<opencl::kernels::ClCol2ImKernel>;
 
 /** Negative tests
  *
@@ -59,7 +59,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::SIZET);
         const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 1U, 2U), 1, DataType::F32);
         const auto conv_size = Size2D(3, 4);
-        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        const auto status    = opencl::kernels::ClCol2ImKernel::validate(&input, &output, conv_size);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -68,7 +68,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
         const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 1U, 2U), 1, DataType::F32, DataLayout::NHWC);
         const auto conv_size = Size2D(3, 4);
-        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        const auto status    = opencl::kernels::ClCol2ImKernel::validate(&input, &output, conv_size);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -77,13 +77,13 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
         const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 2U, 2U), 1, DataType::F32);
         const auto conv_size = Size2D(3, 4);
-        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        const auto status    = opencl::kernels::ClCol2ImKernel::validate(&input, &output, conv_size);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 }
 
 template <typename T>
-using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, T, true>;
+using ClCol2ImFixture = Col2ImOpValidationFixture<CLTensor, CLAccessor, ClCol2Im, T, true>;
 
 /** Test kernel for single-precision floating point
  *
@@ -99,7 +99,7 @@ using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, 
  *  Kernel tested col2im
  */
 FIXTURE_DATA_TEST_CASE(FP32,
-                       CLCol2ImFixture<float>,
+                       ClCol2ImFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", { TensorShape(8U, 16U, 3U, 1U), TensorShape(17U, 16U, 3U, 1U), TensorShape(7U, 16U, 3U, 1U) }),
@@ -125,7 +125,7 @@ FIXTURE_DATA_TEST_CASE(FP32,
  *  Kernel tested col2im
  */
 FIXTURE_DATA_TEST_CASE(F16,
-                       CLCol2ImFixture<half>,
+                       ClCol2ImFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
@@ -151,7 +151,7 @@ FIXTURE_DATA_TEST_CASE(F16,
  *  Kernel tested col2im
  */
 FIXTURE_DATA_TEST_CASE(QASYMM8,
-                       CLCol2ImFixture<uint8_t>,
+                       ClCol2ImFixture<uint8_t>,
                        framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),

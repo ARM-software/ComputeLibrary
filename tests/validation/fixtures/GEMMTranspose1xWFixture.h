@@ -89,7 +89,7 @@ protected:
 
         // Create and configure function
         FunctionType f;
-        f.configure(&a, &b);
+        f.configure(a.info(), b.info());
 
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
         ARM_COMPUTE_ASSERT(b.info()->is_resizable());
@@ -106,7 +106,8 @@ protected:
         fill(AccessorType(b), 1);
 
         // Compute GEMM function
-        f.run();
+        ITensorPack tensors{ { ACL_SRC, &a }, { ACL_DST, &b } };
+        f.run(tensors);
 
         return b;
     }

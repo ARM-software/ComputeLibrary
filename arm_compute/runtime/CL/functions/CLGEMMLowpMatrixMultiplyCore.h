@@ -28,20 +28,14 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 class CLCompileContext;
 class IMemoryManager;
 class ICLTensor;
 class ITensorInfo;
-class CLDepthConvertLayerKernel;
-class CLGEMMLowpMatrixMultiplyNativeKernel;
-class CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel;
-class CLGEMMLowpOffsetContributionKernel;
-class CLGEMMLowpOffsetContributionOutputStageKernel;
-class CLGEMMLowpMatrixAReductionKernel;
-class CLGEMMLowpMatrixBReductionKernel;
-class CLGEMMReshapeRHSMatrixKernel;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. */
 class CLGEMMLowpMatrixMultiplyCore : public IFunction
@@ -134,40 +128,8 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup _memory_group;
-
-    // Kernels used
-    std::unique_ptr<CLDepthConvertLayerKernel>                     _weights_to_qasymm8;
-    std::unique_ptr<CLGEMMLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel> _mm_reshaped_only_rhs_kernel;
-    std::unique_ptr<CLGEMMReshapeRHSMatrixKernel>                  _mtx_b_reshape_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
-    std::unique_ptr<CLGEMMLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
-    std::unique_ptr<CLGEMMLowpOffsetContributionKernel>            _offset_contribution_kernel;
-    std::unique_ptr<CLGEMMLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
-
-    // Temporary tensors
-    CLTensor _qasymm8_weights;
-    CLTensor _vector_sum_col;
-    CLTensor _vector_sum_row;
-    CLTensor _tmp_b;
-    CLTensor _mm_result_s32;
-    CLTensor _gemm_output_stage_multipliers;
-    CLTensor _gemm_output_stage_shifts;
-
-    // Tensor pointers
-    const ICLTensor *_matrix_a;
-    const ICLTensor *_original_b;
-    const ICLTensor *_output;
-
-    int32_t _a_offset;
-    int32_t _b_offset;
-    bool    _is_gemm_reshaped;
-    bool    _reshape_b_only_on_first_run;
-    bool    _is_prepared;
-    bool    _run_output_stage;
-    bool    _convert_to_qasymm8;
-    bool    _run_offset_contribution;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H */

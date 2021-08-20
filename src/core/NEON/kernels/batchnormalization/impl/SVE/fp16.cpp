@@ -29,7 +29,7 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -114,4 +114,4 @@ void fp16_sve_batch_normalization(ITensor *src, ITensor *dst, const ITensor *mea
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif // __ARM_FEATURE_SVE
+#endif // ENABLE_SVE

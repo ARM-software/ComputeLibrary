@@ -25,31 +25,29 @@
 #define ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/functions/CLGEMM.h"
-#include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class CLCompileContext;
-class CLWinogradFilterTransformKernel;
-class CLWinogradOutputTransformKernel;
 class ICLTensor;
 class ITensorInfo;
 
 /** Basic function to execute Winograd-based convolution on OpenCL. This function calls the following OpenCL functions/kernels:
  *
- *  -# @ref CLWinogradInputTransform
- *  -# @ref CLWinogradFilterTransformKernel (only once)
- *  -# @ref CLGEMM
- *  -# @ref CLWinogradOutputTransformKernel
+ *  -# @ref opencl::ClWinogradConv2d
  *
  */
 class CLWinogradConvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor */
+    /** Default Constructor */
     CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Default Destructor */
+    ~CLWinogradConvolutionLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLWinogradConvolutionLayer(const CLWinogradConvolutionLayer &) = delete;
     /** Default move constructor */
@@ -58,8 +56,6 @@ public:
     CLWinogradConvolutionLayer &operator=(const CLWinogradConvolutionLayer &) = delete;
     /** Default move assignment operator */
     CLWinogradConvolutionLayer &operator=(CLWinogradConvolutionLayer &&) = default;
-    /** Default destructor */
-    ~CLWinogradConvolutionLayer();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -136,16 +132,8 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                                      _memory_group;
-    CLGEMM                                           _batched_mm;
-    CLWinogradInputTransform                         _input_transform;
-    std::unique_ptr<CLWinogradFilterTransformKernel> _filter_transform;
-    std::unique_ptr<CLWinogradOutputTransformKernel> _output_transform;
-    CLTensor                                         _input0;
-    CLTensor                                         _input1;
-    CLTensor                                         _batched_mm_output;
-    const ICLTensor                                 *_original_weights;
-    bool                                             _is_prepared;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H */

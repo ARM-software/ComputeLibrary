@@ -45,11 +45,8 @@ public:
      * Valid configurations (src0,src1) -> dst :
      *
      *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
      *   - (QASYMM8, QASYMM8)               -> QASYMM8
      *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
      *   - (S16,S16)                        -> S16
      *   - (S32,S32)                        -> S32
      *   - (F16,F16)                        -> F16
@@ -61,25 +58,9 @@ public:
      * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is quantized.
      */
     void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy);
-    /** Static function to check if given info will lead to a valid configuration of @ref CpuSubKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * Valid configurations (src0,src1) -> dst :
-     *
-     *   - (U8,U8)                          -> U8
-     *   - (U8,U8)                          -> S16
-     *   - (QASYMM8, QASYMM8)               -> QASYMM8
-     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
-     *   - (S16,U8)                         -> S16
-     *   - (U8,S16)                         -> S16
-     *   - (S16,S16)                        -> S16
-     *   - (S32,S32)                        -> S32
-     *   - (F16,F16)                        -> F16
-     *   - (F32,F32)                        -> F32
-     *
-     * @param[in] src0   An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
-     * @param[in] src1   An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32
-     * @param[in] dst    The dst tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/S32/F16/F32.
-     * @param[in] policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
+     * Similar to CpuSubKernel::configure()
      *
      * @return a status
      */
@@ -90,7 +71,12 @@ public:
     const char *name() const override;
 
 private:
+    using SubKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+
+private:
     ConvertPolicy _policy{};
+    SubKernelPtr  _run_method{ nullptr };
+    std::string   _name{};
 };
 } // namespace kernels
 } // namespace cpu

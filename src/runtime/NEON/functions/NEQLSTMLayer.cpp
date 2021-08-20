@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEQLSTMLayer.h"
 
+#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -30,14 +31,8 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "src/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
-#include "src/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "src/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
-#include "src/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
+#include "src/core/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute
@@ -225,29 +220,29 @@ void NEQLSTMLayer::configure(const ITensor *input,
         _input_to_input_weights     = lstm_params.input_to_input_weights();
         _recurrent_to_input_weights = lstm_params.recurrent_to_input_weights();
 
-        _input_to_input_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-        _recurrent_to_input_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-        _input_to_input_reduction->configure(_input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-        _recurrent_to_input_reduction->configure(_recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+        _input_to_input_reduction     = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+        _recurrent_to_input_reduction = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+        _input_to_input_reduction->configure(_input_to_input_weights->info(), _input_to_input_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+        _recurrent_to_input_reduction->configure(_recurrent_to_input_weights->info(), _recurrent_to_input_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     }
 
-    _input_to_forget_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_forget_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _input_to_cell_reduction       = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_cell_reduction   = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _input_to_output_reduction     = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-    _recurrent_to_output_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
+    _input_to_forget_reduction     = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+    _recurrent_to_forget_reduction = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+    _input_to_cell_reduction       = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+    _recurrent_to_cell_reduction   = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+    _input_to_output_reduction     = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+    _recurrent_to_output_reduction = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
 
-    _recurrent_to_cell_reduction->configure(input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_forget_reduction->configure(recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_cell_reduction->configure(input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_cell_reduction->configure(recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_output_reduction->configure(input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_output_reduction->configure(recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_forget_reduction->configure(input_to_forget_weights->info(), _input_to_forget_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_forget_reduction->configure(recurrent_to_forget_weights->info(), _recurrent_to_forget_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_cell_reduction->configure(input_to_cell_weights->info(), _input_to_cell_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_cell_reduction->configure(recurrent_to_cell_weights->info(), _recurrent_to_cell_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_output_reduction->configure(input_to_output_weights->info(), _input_to_output_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_output_reduction->configure(recurrent_to_output_weights->info(), _recurrent_to_output_eff_bias.info(), GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     if(_has_projection)
     {
-        _projection_reduction = std::make_unique<NEGEMMLowpMatrixAReductionKernel>();
-        _projection_reduction->configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
+        _projection_reduction = std::make_unique<cpu::kernels::CpuGemmLowpMatrixAReductionKernel>();
+        _projection_reduction->configure(_projection_weights->info(), _projection_eff_bias.info(), GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
         if(_projection_bias != nullptr)
         {
             _projection_bias_add.configure(_projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
@@ -660,21 +655,26 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const TensorInfo projection_eff_bias_info(TensorShape(output_size), 1, DataType::S32);
     if(!lstm_params.has_cifg_opt())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(lstm_params.input_to_input_weights(), &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(lstm_params.recurrent_to_input_weights(), &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset,
-                                                                               true)));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(lstm_params.input_to_input_weights(), &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false,
+                                                                                              -qinput.offset, true)));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(lstm_params.recurrent_to_input_weights(), &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false,
+                                                                                              -qoutput_state_in.offset,
+                                                                                              true)));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(input_to_forget_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(recurrent_to_forget_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true)));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(input_to_cell_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(recurrent_to_cell_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true)));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(input_to_output_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(recurrent_to_output_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(input_to_forget_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(recurrent_to_forget_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false,
+                                                                                          -qoutput_state_in.offset, true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(input_to_cell_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(recurrent_to_cell_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset,
+                                                                                          true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(input_to_output_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true)));
+    ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(recurrent_to_output_weights, &eff_bias_info, GEMMLowpReductionKernelInfo(num_units, false,
+                                                                                          -qoutput_state_in.offset, true)));
     if(lstm_params.has_projection())
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(lstm_params.projection_weights(), &projection_eff_bias_info, GEMMLowpReductionKernelInfo(output_size, false,
-                                                                               lstm_params.hidden_state_zero(),
-                                                                               true)));
+        ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmLowpMatrixAReductionKernel::validate(lstm_params.projection_weights(), &projection_eff_bias_info, GEMMLowpReductionKernelInfo(output_size, false,
+                                                                                              lstm_params.hidden_state_zero(),
+                                                                                              true)));
         if(lstm_params.projection_bias() != nullptr)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.projection_bias(), 1, DataType::S32);
@@ -1109,8 +1109,20 @@ void NEQLSTMLayer::prepare()
         {
             _input_to_input_eff_bias.allocator()->allocate();
             _recurrent_to_input_eff_bias.allocator()->allocate();
-            NEScheduler::get().schedule(_input_to_input_reduction.get(), Window::DimY);
-            NEScheduler::get().schedule(_recurrent_to_input_reduction.get(), Window::DimY);
+
+            ITensorPack packII =
+            {
+                { TensorType::ACL_SRC, _input_to_input_weights },
+                { TensorType::ACL_DST, &_input_to_input_eff_bias }
+            };
+            NEScheduler::get().schedule_op(_input_to_input_reduction.get(), Window::DimY, _input_to_input_reduction->window(), packII);
+
+            ITensorPack packRI =
+            {
+                { TensorType::ACL_SRC, _recurrent_to_input_weights },
+                { TensorType::ACL_DST, &_recurrent_to_input_eff_bias }
+            };
+            NEScheduler::get().schedule_op(_recurrent_to_input_reduction.get(), Window::DimY, _recurrent_to_input_reduction->window(), packRI);
 
             _input_to_input_weights_transposed.allocator()->allocate();
             _recurrent_to_input_weights_transposed.allocator()->allocate();
@@ -1125,17 +1137,58 @@ void NEQLSTMLayer::prepare()
         _recurrent_to_cell_eff_bias.allocator()->allocate();
         _input_to_output_eff_bias.allocator()->allocate();
         _recurrent_to_output_eff_bias.allocator()->allocate();
-        NEScheduler::get().schedule(_input_to_forget_reduction.get(), Window::DimY);
-        NEScheduler::get().schedule(_recurrent_to_forget_reduction.get(), Window::DimY);
-        NEScheduler::get().schedule(_input_to_cell_reduction.get(), Window::DimY);
-        NEScheduler::get().schedule(_recurrent_to_cell_reduction.get(), Window::DimY);
-        NEScheduler::get().schedule(_input_to_output_reduction.get(), Window::DimY);
-        NEScheduler::get().schedule(_recurrent_to_output_reduction.get(), Window::DimY);
+
+        ITensorPack packIF =
+        {
+            { TensorType::ACL_SRC, _input_to_forget_weights },
+            { TensorType::ACL_DST, &_input_to_forget_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_input_to_forget_reduction.get(), Window::DimY, _input_to_forget_reduction->window(), packIF);
+
+        ITensorPack packRF =
+        {
+            { TensorType::ACL_SRC, _recurrent_to_forget_weights },
+            { TensorType::ACL_DST, &_recurrent_to_forget_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_recurrent_to_forget_reduction.get(), Window::DimY, _recurrent_to_forget_reduction->window(), packRF);
+
+        ITensorPack packIC =
+        {
+            { TensorType::ACL_SRC, _input_to_cell_weights },
+            { TensorType::ACL_DST, &_input_to_cell_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_input_to_cell_reduction.get(), Window::DimY, _input_to_cell_reduction->window(), packIC);
+
+        ITensorPack packRC =
+        {
+            { TensorType::ACL_SRC, _recurrent_to_cell_weights },
+            { TensorType::ACL_DST, &_recurrent_to_cell_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_recurrent_to_cell_reduction.get(), Window::DimY, _recurrent_to_cell_reduction->window(), packRC);
+
+        ITensorPack packIO =
+        {
+            { TensorType::ACL_SRC, _input_to_output_weights },
+            { TensorType::ACL_DST, &_input_to_output_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_input_to_output_reduction.get(), Window::DimY, _input_to_output_reduction->window(), packIO);
+
+        ITensorPack packRO =
+        {
+            { TensorType::ACL_SRC, _recurrent_to_output_weights },
+            { TensorType::ACL_DST, &_recurrent_to_output_eff_bias }
+        };
+        NEScheduler::get().schedule_op(_recurrent_to_output_reduction.get(), Window::DimY, _recurrent_to_output_reduction->window(), packRO);
 
         if(_has_projection)
         {
             _projection_eff_bias.allocator()->allocate();
-            NEScheduler::get().schedule(_projection_reduction.get(), Window::DimY);
+            ITensorPack pack =
+            {
+                { TensorType::ACL_SRC, _projection_weights },
+                { TensorType::ACL_DST, &_projection_eff_bias }
+            };
+            NEScheduler::get().schedule_op(_projection_reduction.get(), Window::DimY, _projection_reduction->window(), pack);
             if(_projection_bias != nullptr)
             {
                 _projection_bias_add.run();

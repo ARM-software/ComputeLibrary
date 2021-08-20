@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_CONVERTFULLYCONNECTEDWEIGHTS_H
-#define ARM_COMPUTE_CL_CONVERTFULLYCONNECTEDWEIGHTS_H
+#ifndef ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_H
+#define ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_H
 
 #include "src/core/gpu/cl/ClCompileContext.h"
 #include "src/runtime/gpu/cl/IClOperator.h"
@@ -35,8 +35,6 @@ namespace opencl
 class ClConvertFullyConnectedWeights : public IClOperator
 {
 public:
-    /** Constructor */
-    ClConvertFullyConnectedWeights() = default;
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in] compile_context    The compile context to be used.
@@ -46,12 +44,9 @@ public:
      * @param[in] data_layout        The data layout the weights have been trained in.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
-    /**  Static function to check if given info will lead to a valid configuration of @ref kernels::ClConvertFullyConnectedWeightsKernel.
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src                First tensor src info. Data types supported: All.
-     * @param[in] dst                Output tensor info. Data types supported: same as @p src.
-     * @param[in] original_src_shape Shape of the original src tensor (the one entering fully connected layer).
-     * @param[in] data_layout        The data layout the weights have been trained in.
+     * Similar to @ref ClConvertFullyConnectedWeights::configure()
      *
      * @return a status
      */
@@ -59,4 +54,4 @@ public:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_CONVERTFULLYCONNECTEDWEIGHTS_H */
+#endif /* ARM_COMPUTE_CL_CONVERT_FULLYCONNECTED_WEIGHTS_H */

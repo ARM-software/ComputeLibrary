@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,16 @@ namespace wrapper
         return svpow_##postfix##_z(pg, a, b);                      \
     }
 
+#define SVPOW_Z_IMPL_INT(type, postfix)                            \
+    inline type svpow_z(svbool_t pg, const type &a, const type &b) \
+    {                                                              \
+        ARM_COMPUTE_UNUSED(pg, a, b);                              \
+        ARM_COMPUTE_ERROR("Not supported");                        \
+    }
+
 SVPOW_Z_IMPL(svfloat32_t, f32)
 SVPOW_Z_IMPL(svfloat16_t, f16)
+SVPOW_Z_IMPL_INT(svint16_t, s16)
 
 #undef SVPOW_Z_IMPL
 

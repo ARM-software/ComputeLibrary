@@ -21,14 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
 
 #include <cmath>
 #include <cstddef>
 
-#if defined(__ARM_FEATURE_SVE2)
 #include "src/core/NEON/SVEAsymm.h"
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
@@ -251,4 +250,4 @@ void qasymm8_sve_activation(const ITensor *src, ITensor *dst, const ActivationLa
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE2) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */

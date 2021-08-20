@@ -68,6 +68,11 @@ Status ClWidthConcatenate2TensorsKernel::validate(const ITensorInfo *src1, const
     return Status{};
 }
 
+ClWidthConcatenate2TensorsKernel::ClWidthConcatenate2TensorsKernel()
+{
+    _type = CLKernelType::ELEMENTWISE;
+}
+
 void ClWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);

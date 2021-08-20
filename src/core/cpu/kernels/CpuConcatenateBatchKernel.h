@@ -21,17 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CONCATENATEBATCH_KERNEL_H
-#define ARM_COMPUTE_CPU_CONCATENATEBATCH_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_CONCATENATE_BATCH_KERNEL_H
+#define ARM_COMPUTE_CPU_CONCATENATE_BATCH_KERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/core/cpu/ICpuKernel.h"
 
 namespace arm_compute
 {
-// Forward declarations
-class ITensor;
-
 namespace cpu
 {
 namespace kernels
@@ -42,7 +39,7 @@ namespace kernels
 class CpuConcatenateBatchKernel : public ICpuKernel
 {
 public:
-    CpuConcatenateBatchKernel();
+    CpuConcatenateBatchKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuConcatenateBatchKernel);
     /** Configure kernel for a given list of arguments
      *
@@ -51,11 +48,9 @@ public:
      * @param[in,out] dst          Destination tensor info. Data types supported: Same as @p src.
      */
     void configure(const ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst);
-    /**  Static function to check if given info will lead to a valid configuration of @ref CpuConcatenateBatchKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src          Source tensor info. Data types supported: All.
-     * @param[in] batch_offset The offset on axis # 3.
-     * @param[in] dst          Destination tensor info. Data types supported: Same as @p src.
+     * Similar to @ref CpuConcatenateBatchKernel::configure()
      *
      * @return a status
      */
@@ -69,10 +64,10 @@ private:
     using BatchConcatFunction = void(const ITensor *, ITensor *, unsigned int, const Window &);
 
 private:
-    BatchConcatFunction *_func;
-    unsigned int         _batch_offset;
+    BatchConcatFunction *_func{ nullptr };
+    unsigned int         _batch_offset{ 0 };
 };
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CONCATENATEBATCH_KERNEL_H */
+#endif /* ARM_COMPUTE_CPU_CONCATENATE_BATCH_KERNEL_H */

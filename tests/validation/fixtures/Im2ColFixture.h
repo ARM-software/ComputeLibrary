@@ -45,7 +45,7 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool batch_size_on_z>
-class Im2ColValidationFixture : public framework::Fixture
+class Im2ColOpValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -88,7 +88,7 @@ protected:
 
         // Create and configure function
         FunctionType im2col_func;
-        im2col_func.configure(&src, &dst, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), _num_groups);
+        im2col_func.configure(src.info(), dst.info(), _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), _num_groups);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
@@ -103,8 +103,13 @@ protected:
         // Fill tensors
         fill(AccessorType(src));
 
+        arm_compute::ITensorPack pack =
+        {
+            { arm_compute::TensorType::ACL_SRC, &src },
+            { arm_compute::TensorType::ACL_DST, &dst }
+        };
         // Compute function
-        im2col_func.run();
+        im2col_func.run(pack);
 
         return dst;
     }

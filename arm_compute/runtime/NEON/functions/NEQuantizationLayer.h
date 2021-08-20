@@ -35,7 +35,7 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 
-/** Basic function to run a quantization layer using @ref cpu::CpuQuantization */
+/** Basic function to run a quantization layer using @ref cpu::CpuQuantize */
 class NEQuantizationLayer : public IFunction
 {
 public:

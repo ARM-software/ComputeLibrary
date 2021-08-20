@@ -1,4 +1,4 @@
-# Copyright (c) 2016, 2017 Arm Limited.
+# Copyright (c) 2016-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -24,11 +24,11 @@ import os.path
 import re
 import subprocess
 import zlib
-import base64
-import string
+import json
+import codecs
 
-VERSION = "v21.05"
-LIBRARY_VERSION_MAJOR = 23
+VERSION = "v21.08"
+LIBRARY_VERSION_MAJOR = 24
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -42,6 +42,20 @@ def build_bootcode_objs(sources):
     arm_compute_env.Append(ASFLAGS = "-I bootcode/")
     obj = arm_compute_env.Object(sources)
     obj = install_lib(obj)
+    Default(obj)
+    return obj
+
+def build_sve_objs(sources):
+
+    tmp_env = arm_compute_env.Clone()
+    tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
+    obj = tmp_env.SharedObject(sources)
+    Default(obj)
+    return obj
+
+def build_objs(sources):
+
+    obj = arm_compute_env.SharedObject(sources)
     Default(obj)
     return obj
 
@@ -123,7 +137,8 @@ def resolve_includes(target, source, env):
         with open(file[1].target_name.get_path(), 'w+') as out_file:
             file_to_write = "\n".join( file[1].file_contents )
             if env['compress_kernels']:
-                file_to_write = zlib.compress(file_to_write, 9).encode("base64").replace("\n", "")
+                file_to_write = zlib.compress(file_to_write.encode('utf-8'), 9)
+                file_to_write = codecs.encode(file_to_write, "base64").decode('utf-8').replace("\n", "")
             file_to_write = "R\"(" + file_to_write + ")\""
             out_file.write(file_to_write)
 
@@ -138,6 +153,73 @@ def create_version_file(target, source, env):
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
+def get_cpu_runtime_files(operator):
+    file_list = []
+    operators = filelist['cpu']['operators']
+
+    if "operator" in operators[operator]["files"]:
+        file_list += operators[operator]["files"]["operator"]
+    return file_list
+
+def get_gpu_runtime_files(operator):
+    file_list = []
+    operators = filelist['gpu']['operators']
+
+    if "operator" in operators[operator]["files"]:
+        file_list += operators[operator]["files"]["operator"]
+    return file_list
+
+def get_cpu_kernel_files(operator):
+
+    file_list = []
+    file_list_sve = []
+    operators = filelist['cpu']['operators']
+
+    if env['estate'] == '64' and "neon" in operators[operator]['files'] and "estate64" in operators[operator]['files']['neon']:
+        file_list += operators[operator]['files']['neon']['estate64']
+    if env['estate'] == '32' and "neon" in operators[operator]['files'] and "estate32" in operators[operator]['files']['neon']:
+        file_list += operators[operator]['files']['neon']['estate32']
+
+    if "kernel" in operators[operator]["files"]:
+        file_list += operators[operator]["files"]["kernel"]
+
+    if ("neon" in operators[operator]["files"]):
+        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["qasymm8"]
+        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["qasymm8_signed"]
+        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["qsymm16"]
+        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["neon"]):
+                file_list += operators[operator]["files"]["neon"]["integer"]
+
+    if (not "sve" in env['arch'] or env['fat_binary']) and ("neon" in operators[operator]["files"]):
+        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["fp16"]
+        if any(i in env['data_type_support'] for i in ['all', 'fp32']) and ("fp32" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["fp32"]
+        if any(i in env['data_layout_support'] for i in ['all', 'nchw']) and ("nchw" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]['files']['neon']['nchw']
+        if ("all" in operators[operator]["files"]["neon"]):
+            file_list += operators[operator]["files"]["neon"]["all"]
+    if ("sve" in env['arch'] or env['fat_binary']) and ("sve" in operators[operator]["files"]):
+        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["fp16"]
+        if any(i in env['data_type_support'] for i in ['all', 'fp32'])  and ("fp32" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["fp32"]
+        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["qasymm8"]
+        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["qasymm8_signed"]
+        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["qsymm16"]
+        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["integer"]
+        if ("all" in operators[operator]["files"]["sve"]):
+            file_list_sve += operators[operator]["files"]["sve"]["all"]
+
+    return file_list, file_list_sve
+
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
@@ -148,10 +230,143 @@ cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 # Generate embed files
 generate_embed = [ version_file ]
 if env['opencl'] and env['embed_kernels']:
-    cl_files = Glob('src/core/CL/cl_kernels/*.cl')
-    cl_files += Glob('src/core/CL/cl_kernels/*.h')
+    
+    # Header files
+    cl_helper_files = [ 'src/core/CL/cl_kernels/activation_float_helpers.h',
+                        'src/core/CL/cl_kernels/activation_quant_helpers.h',
+                        'src/core/CL/cl_kernels/gemm_helpers.h',
+                        'src/core/CL/cl_kernels/helpers_asymm.h',
+                        'src/core/CL/cl_kernels/helpers.h',
+                        'src/core/CL/cl_kernels/load_store_utility.h',
+                        'src/core/CL/cl_kernels/repeat.h',
+                        'src/core/CL/cl_kernels/tile_helpers.h',
+                        'src/core/CL/cl_kernels/types.h',
+                        'src/core/CL/cl_kernels/warp_helpers_quantized.h',
+                        'src/core/CL/cl_kernels/warp_helpers.h'
+                    ]
 
-    embed_files = [ f.get_path()+"embed" for f in cl_files ]
+    # Common kernels
+    cl_files_common = ['src/core/CL/cl_kernels/common/activation_layer.cl',
+                       'src/core/CL/cl_kernels/common/activation_layer_quant.cl',
+                       'src/core/CL/cl_kernels/common/arg_min_max.cl',
+                       'src/core/CL/cl_kernels/common/batchnormalization_layer.cl',
+                       'src/core/CL/cl_kernels/common/bounding_box_transform.cl',
+                       'src/core/CL/cl_kernels/common/bounding_box_transform_quantized.cl',
+                       'src/core/CL/cl_kernels/common/bitwise_op.cl',
+                       'src/core/CL/cl_kernels/common/cast.cl',
+                       'src/core/CL/cl_kernels/common/comparisons.cl',
+                       'src/core/CL/cl_kernels/common/concatenate.cl',
+                       'src/core/CL/cl_kernels/common/col2im.cl',
+                       'src/core/CL/cl_kernels/common/convert_fc_weights.cl',
+                       'src/core/CL/cl_kernels/common/copy_tensor.cl',
+                       'src/core/CL/cl_kernels/common/crop_tensor.cl',
+                       'src/core/CL/cl_kernels/common/deconvolution_layer.cl',
+                       'src/core/CL/cl_kernels/common/dequantization_layer.cl',
+                       'src/core/CL/cl_kernels/common/elementwise_operation.cl',
+                       'src/core/CL/cl_kernels/common/elementwise_operation_quantized.cl',
+                       'src/core/CL/cl_kernels/common/elementwise_unary.cl',
+                       'src/core/CL/cl_kernels/common/fft_digit_reverse.cl',
+                       'src/core/CL/cl_kernels/common/fft.cl',
+                       'src/core/CL/cl_kernels/common/fft_scale.cl',
+                       'src/core/CL/cl_kernels/common/fill_border.cl',
+                       'src/core/CL/cl_kernels/common/floor.cl',
+                       'src/core/CL/cl_kernels/common/gather.cl',
+                       'src/core/CL/cl_kernels/common/gemm.cl',
+                       'src/core/CL/cl_kernels/common/gemv.cl',
+                       'src/core/CL/cl_kernels/common/gemm_v1.cl',
+                       'src/core/CL/cl_kernels/common/gemmlowp.cl',
+                       'src/core/CL/cl_kernels/common/generate_proposals.cl',
+                       'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',
+                       'src/core/CL/cl_kernels/common/instance_normalization.cl',
+                       'src/core/CL/cl_kernels/common/l2_normalize.cl',
+                       'src/core/CL/cl_kernels/common/mean_stddev_normalization.cl',
+                       'src/core/CL/cl_kernels/common/unpooling_layer.cl',
+                       'src/core/CL/cl_kernels/common/memset.cl',
+                       'src/core/CL/cl_kernels/common/nonmax.cl',
+                       'src/core/CL/cl_kernels/common/minmax_layer.cl',
+                       'src/core/CL/cl_kernels/common/pad_layer.cl',
+                       'src/core/CL/cl_kernels/common/permute.cl',
+                       'src/core/CL/cl_kernels/common/pixelwise_mul_float.cl',
+                       'src/core/CL/cl_kernels/common/pixelwise_mul_int.cl',
+                       'src/core/CL/cl_kernels/common/qlstm_layer_normalization.cl',
+                       'src/core/CL/cl_kernels/common/quantization_layer.cl',
+                       'src/core/CL/cl_kernels/common/range.cl',
+                       'src/core/CL/cl_kernels/common/reduction_operation.cl',
+                       'src/core/CL/cl_kernels/common/pooling_layer.cl',
+                       'src/core/CL/cl_kernels/common/reshape_layer.cl',
+                       'src/core/CL/cl_kernels/common/convolution_layer.cl',
+                       'src/core/CL/cl_kernels/common/reverse.cl',
+                       'src/core/CL/cl_kernels/common/roi_align_layer.cl',
+                       'src/core/CL/cl_kernels/common/roi_align_layer_quantized.cl',
+                       'src/core/CL/cl_kernels/common/roi_pooling_layer.cl',
+                       'src/core/CL/cl_kernels/common/select.cl',
+                       'src/core/CL/cl_kernels/common/softmax_layer.cl',
+                       'src/core/CL/cl_kernels/common/softmax_layer_quantized.cl',
+                       'src/core/CL/cl_kernels/common/stack_layer.cl',
+                       'src/core/CL/cl_kernels/common/slice_ops.cl',
+                       'src/core/CL/cl_kernels/common/tile.cl',
+                       'src/core/CL/cl_kernels/common/transpose.cl'
+                    ]
+
+    # NCHW kernels
+    cl_files_nchw = ['src/core/CL/cl_kernels/nchw/batch_to_space.cl',
+                    'src/core/CL/cl_kernels/nchw/batchnormalization_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/channel_shuffle.cl',
+                    'src/core/CL/cl_kernels/nchw/depth_to_space.cl',
+                    'src/core/CL/cl_kernels/nchw/direct_convolution_quantized.cl',
+                    'src/core/CL/cl_kernels/nchw/direct_convolution1x1.cl',
+                    'src/core/CL/cl_kernels/nchw/direct_convolution3x3.cl',
+                    'src/core/CL/cl_kernels/nchw/direct_convolution5x5.cl',
+                    'src/core/CL/cl_kernels/nchw/dequantization_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/im2col.cl',
+                    'src/core/CL/cl_kernels/nchw/normalization_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/normalize_planar_yuv_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/normalize_planar_yuv_layer_quantized.cl',
+                    'src/core/CL/cl_kernels/nchw/pooling_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/pooling_layer_quantized.cl',
+                    'src/core/CL/cl_kernels/nchw/prior_box_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/remap.cl',
+                    'src/core/CL/cl_kernels/nchw/reorg_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/scale.cl',
+                    'src/core/CL/cl_kernels/nchw/scale_quantized.cl',
+                    'src/core/CL/cl_kernels/nchw/space_to_batch.cl',
+                    'src/core/CL/cl_kernels/nchw/space_to_depth.cl',
+                    'src/core/CL/cl_kernels/nchw/upsample_layer.cl',
+                    'src/core/CL/cl_kernels/nchw/winograd_filter_transform.cl',
+                    'src/core/CL/cl_kernels/nchw/winograd_input_transform.cl',
+                    'src/core/CL/cl_kernels/nchw/winograd_output_transform.cl'
+                ]
+
+    # NHWC kernels
+    cl_files_nhwc = ['src/core/CL/cl_kernels/nhwc/batch_to_space.cl',
+                    'src/core/CL/cl_kernels/nhwc/batchnormalization_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/channel_shuffle.cl',
+                    'src/core/CL/cl_kernels/nhwc/direct_convolution.cl',
+                    'src/core/CL/cl_kernels/nhwc/depth_to_space.cl',
+                    'src/core/CL/cl_kernels/nhwc/dequantization_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/dwc_native_fp_nhwc.cl',
+                    'src/core/CL/cl_kernels/nhwc/dwc_native_quantized_nhwc.cl',
+                    'src/core/CL/cl_kernels/nhwc/im2col.cl',
+                    'src/core/CL/cl_kernels/nhwc/normalization_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
+                    'src/core/CL/cl_kernels/nhwc/pooling_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/pooling_layer_quantized.cl',
+                    'src/core/CL/cl_kernels/nhwc/remap.cl',
+                    'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/scale.cl',
+                    'src/core/CL/cl_kernels/nhwc/scale_quantized.cl',
+                    'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
+                    'src/core/CL/cl_kernels/nhwc/space_to_depth.cl',
+                    'src/core/CL/cl_kernels/nhwc/upsample_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/winograd_filter_transform.cl',
+                    'src/core/CL/cl_kernels/nhwc/winograd_input_transform.cl',
+                    'src/core/CL/cl_kernels/nhwc/winograd_output_transform.cl'
+                ]
+
+    cl_files = cl_helper_files + cl_files_common + cl_files_nchw + cl_files_nhwc
+
+    embed_files = [ f+"embed" for f in cl_files ]
     arm_compute_env.Append(CPPPATH =[Dir("./src/core/CL/").path] )
 
     generate_embed.append(arm_compute_env.Command(embed_files, cl_files, action=resolve_includes))
@@ -172,6 +387,9 @@ arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 arm_compute_env.Append(LIBS = ['dl'])
 
+with (open(Dir('#').path + '/filelist.json')) as fp:
+    filelist = json.load(fp)
+
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
@@ -184,190 +402,85 @@ core_files += Glob('src/core/utils/misc/*.cpp')
 if env["logging"]:
     core_files += Glob('src/core/utils/logging/*.cpp')
 
-runtime_files = Glob('src/runtime/*.cpp')
-runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
-runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
+runtime_files_hp = Glob('src/runtime/*.cpp')
+runtime_files_hp += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
+runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
 
 # C API files
-c_api_files = ['src/c/AclContext.cpp',
-               'src/c/AclQueue.cpp',
-               'src/c/AclTensor.cpp',
-               'src/c/AclTensorPack.cpp',
-               'src/c/AclVersion.cpp',
-               ]
+runtime_files_hp += filelist['c_api']['common']
+runtime_files_hp += filelist['c_api']['operators']
+
 if env['opencl']:
-    c_api_files += ['src/c/cl/AclOpenClExt.cpp']
+    runtime_files_hp += filelist['c_api']['gpu']
 
 # Common backend files
-common_backend_files = ['src/common/utils/LegacySupport.cpp',
-                        'src/common/AllocatorWrapper.cpp',
-                        'src/common/ITensorV2.cpp',
-                        'src/common/TensorPack.cpp',
-                        ]
+core_files += filelist['common']
 
-core_files += common_backend_files
-runtime_files += c_api_files
-# CLHarrisCorners uses the Scheduler to run CPP kernels
-runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
+# Initialize high priority core files
+core_files_hp = core_files
+core_files_sve_hp = []
+core_files = []
+
+runtime_files_hp += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
 graph_files = Glob('src/graph/*.cpp')
 graph_files += Glob('src/graph/*/*.cpp')
 
 if env['cppthreads']:
-     runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+     runtime_files_hp += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
 if env['openmp']:
-     runtime_files += Glob('src/runtime/OMP/OMPScheduler.cpp')
+     runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
-    core_files += Glob('src/core/CL/*.cpp')
-    core_files += Glob('src/core/CL/kernels/*.cpp')
-    core_files += Glob('src/core/CL/gemm/*.cpp')
-    core_files += Glob('src/core/CL/gemm/native/*.cpp')
-    core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
-    core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
-    core_files += Glob('src/core/gpu/cl/*.cpp')
-    core_files += Glob('src/core/gpu/cl/kernels/*.cpp')
+    operators = filelist['gpu']['operators']
+    for operator in operators:
+        if operator in filelist['gpu']['high_priority']:
+            runtime_files_hp += get_gpu_runtime_files(operator)
+            if "kernel" in operators[operator]["files"]:
+                core_files_hp += operators[operator]["files"]["kernel"]
+        else:
+            runtime_files += get_gpu_runtime_files(operator)
+            if "kernel" in operators[operator]["files"]:
+                core_files += operators[operator]["files"]["kernel"]
 
-    runtime_files += Glob('src/runtime/CL/*.cpp')
+    runtime_files_hp += filelist['gpu']['common']
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
-    runtime_files += Glob('src/runtime/CL/gemm/*.cpp')
-    runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
-    runtime_files += Glob('src/runtime/gpu/cl/*.cpp')
-    runtime_files += Glob('src/runtime/gpu/cl/operators/*.cpp')
-    runtime_files += Glob('src/runtime/CL/mlgo/*.cpp')
-    runtime_files += Glob('src/runtime/CL/gemm_auto_heuristics/*.cpp')
-
-    runtime_files += Glob('src/gpu/cl/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
-
+sve_o = []
+core_files_sve = []
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
-
-    core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_*/*.cpp')
 
     # build winograd/depthwise sources for either v7a / v8a
-    core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
-                                      "arm_compute/core/NEON/kernels/assembly/"])
+                                      "arm_compute/core/NEON/kernels/assembly/",
+                                      "src/core/cpu/kernels/assembly/",])
+
+    # Load files based on user's options
+    operators = filelist['cpu']['operators']
+    for operator in operators:
+        if operator in filelist['cpu']['high_priority']:
+            runtime_files_hp += get_cpu_runtime_files(operator)
+            file_list, file_list_sve = get_cpu_kernel_files(operator)
+            core_files_hp += file_list
+            core_files_sve_hp += file_list_sve
+        else:
+            runtime_files += get_cpu_runtime_files(operator)
+            file_list, file_list_sve = get_cpu_kernel_files(operator)
+            core_files += file_list
+            core_files_sve += file_list_sve
+
+    runtime_files_hp += filelist['cpu']['common']
+    runtime_files_hp += Glob('src/runtime/NEON/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
-
-    if env['estate'] == '32':
-        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a32_*/*.cpp')
-
-    if env['estate'] == '64':
-        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
-        core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/a64_*/*.cpp')
-        if "sve" in env['arch']:
-             core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
-             core_files += Glob('src/core/NEON/kernels/arm_conv/pooling/kernels/sve_*/*.cpp')
-
-    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/fp16.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/fp32.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/qasymm8.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/qasymm8_signed.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/qsymm16.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'integer']):
-        core_files += Glob('src/core/NEON/kernels/*/impl/*/integer.cpp')
-
-    runtime_files += Glob('src/runtime/NEON/*.cpp')
-    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
-    runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
-
-    cpu_kernel_hp_files = ['src/core/cpu/kernels/CpuActivationKernel.cpp',
-                           'src/core/cpu/kernels/CpuDepthwiseConvolutionNativeKernel.cpp',
-                           'src/core/cpu/kernels/CpuDirectConvolutionKernel.cpp',
-                           'src/core/cpu/kernels/CpuDirectConvolutionOutputStageKernel.cpp',
-                           'src/core/cpu/kernels/CpuPermuteKernel.cpp',
-                           'src/core/cpu/kernels/CpuPoolingAssemblyWrapperKernel.cpp',
-                           'src/core/cpu/kernels/CpuPoolingKernel.cpp',
-                           'src/core/cpu/kernels/CpuReshapeKernel.cpp',
-                          ]
-    cpu_kernel_files = ['src/core/cpu/kernels/CpuAddKernel.cpp',
-                        'src/core/cpu/kernels/CpuConcatenateBatchKernel.cpp',
-                        'src/core/cpu/kernels/CpuConcatenateDepthKernel.cpp',
-                        'src/core/cpu/kernels/CpuConcatenateHeightKernel.cpp',
-                        'src/core/cpu/kernels/CpuConcatenateWidthKernel.cpp',
-                        'src/core/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.cpp',
-                        'src/core/cpu/kernels/CpuCopyKernel.cpp',
-                        'src/core/cpu/kernels/CpuDequantizationKernel.cpp',
-                        'src/core/cpu/kernels/CpuElementwiseKernel.cpp',
-                        'src/core/cpu/kernels/CpuElementwiseUnaryKernel.cpp',
-                        'src/core/cpu/kernels/CpuFillKernel.cpp',
-                        'src/core/cpu/kernels/CpuFloorKernel.cpp',
-                        'src/core/cpu/kernels/CpuMulKernel.cpp',
-                        'src/core/cpu/kernels/CpuQuantizationKernel.cpp',
-                        'src/core/cpu/kernels/CpuScaleKernel.cpp',
-                        'src/core/cpu/kernels/CpuSoftmaxKernel.cpp',
-                        'src/core/cpu/kernels/CpuSubKernel.cpp',
-                        'src/core/cpu/kernels/CpuTransposeKernel.cpp',
-                       ]
-    core_files += [cpu_kernel_hp_files, cpu_kernel_files]
-
-    core_files += Glob('src/core/cpu/kernels/*/*.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
-        core_files += Glob('src/core/cpu/kernels/*/*/fp16.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
-        core_files += Glob('src/core/cpu/kernels/*/*/fp32.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
-        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
-        core_files += Glob('src/core/cpu/kernels/*/*/qasymm8_signed.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
-        core_files += Glob('src/core/cpu/kernels/*/*/qsymm16.cpp')
-    if any(i in env['data_type_support'] for i in ['all', 'integer']):
-        core_files += Glob('src/core/cpu/kernels/*/*/integer.cpp')
-
-    if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
-        core_files += Glob('src/core/cpu/kernels/*/*/nchw/all.cpp')
-
-    cpu_rt_files = ['src/cpu/CpuContext.cpp',
-                    'src/cpu/CpuQueue.cpp',
-                    'src/cpu/CpuTensor.cpp'
-                   ]
-    cpu_operator_hp_files = ['src/runtime/cpu/operators/CpuActivation.cpp',
-                             'src/runtime/cpu/operators/CpuDepthwiseConvolution.cpp',
-                             'src/runtime/cpu/operators/CpuDepthwiseConvolutionAssemblyDispatch.cpp',
-                             'src/runtime/cpu/operators/CpuDirectConvolution.cpp',
-                             'src/runtime/cpu/operators/CpuPermute.cpp',
-                             'src/runtime/cpu/operators/CpuPooling.cpp',
-                             'src/runtime/cpu/operators/CpuPoolingAssemblyDispatch.cpp',
-                            ]
-    cpu_operator_files = ['src/runtime/cpu/operators/CpuAdd.cpp',
-                          'src/runtime/cpu/operators/CpuConcatenate.cpp',
-                          'src/runtime/cpu/operators/CpuConvertFullyConnectedWeights.cpp',
-                          'src/runtime/cpu/operators/CpuCopy.cpp',
-                          'src/runtime/cpu/operators/CpuDequantization.cpp',
-                          'src/runtime/cpu/operators/CpuElementwise.cpp',
-                          'src/runtime/cpu/operators/CpuElementwiseUnary.cpp',
-                          'src/runtime/cpu/operators/CpuFill.cpp',
-                          'src/runtime/cpu/operators/CpuFloor.cpp',
-                          'src/runtime/cpu/operators/CpuMul.cpp',
-                          'src/runtime/cpu/operators/CpuQuantization.cpp',
-                          'src/runtime/cpu/operators/CpuReshape.cpp',
-                          'src/runtime/cpu/operators/CpuScale.cpp',
-                          'src/runtime/cpu/operators/CpuSoftmax.cpp',
-                          'src/runtime/cpu/operators/CpuSub.cpp',
-                          'src/runtime/cpu/operators/CpuTranspose.cpp',
-                         ]
-    runtime_files += [ cpu_rt_files, cpu_operator_hp_files, cpu_operator_files ]
 
 bootcode_o = []
 if env['os'] == 'bare_metal':
@@ -375,20 +488,39 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, core_files, static=True)
+high_priority_o = build_objs(core_files_hp + runtime_files_hp)
+high_priority_sve_o = []
+if (env['fat_binary']):
+    sve_o = build_sve_objs(core_files_sve)
+    high_priority_sve_o = build_sve_objs(core_files_sve_hp)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
+else:
+    high_priority_o += build_objs(core_files_sve_hp)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files, static=True)
+Export('arm_compute_a')
+if env['high_priority']:
+    arm_compute_hp_a = build_library('arm_compute_hp-static', arm_compute_env, high_priority_o + high_priority_sve_o, static=True)
+    Export('arm_compute_hp_a')
+
+if env['os'] != 'bare_metal' and not env['standalone']:
+    if (env['fat_binary']):
+        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + sve_o + high_priority_sve_o + high_priority_o + runtime_files, static=False)
+    else:
+        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files , static=False)
+
+    Export('arm_compute_so')
+
+    if env['high_priority']:
+        arm_compute_hp_so = build_library('arm_compute_hp', arm_compute_env, high_priority_sve_o + high_priority_o, static=False)
+        Export('arm_compute_hp_so')
+
+# Generate dummy core lib for backwards compatibility
+arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_core_so = build_library('arm_compute_core', arm_compute_env, core_files, static=False)
-    Export('arm_compute_core_so')
-
-arm_compute_a = build_library('arm_compute-static', arm_compute_env, runtime_files, static=True, libs = [ arm_compute_core_a ])
-Export('arm_compute_a')
-
-if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', arm_compute_env, runtime_files, static=False, libs = [ "arm_compute_core" ])
-    Depends(arm_compute_so, arm_compute_core_so)
-    Export('arm_compute_so')
+    arm_compute_core_a_so = build_library('arm_compute_core', arm_compute_env, [], static=False)
+    Export('arm_compute_core_a_so')
 
 arm_compute_graph_env = arm_compute_env.Clone()
 
@@ -398,7 +530,7 @@ arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_grap
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
+    arm_compute_graph_so = build_library('arm_compute_graph', arm_compute_graph_env, graph_files, static=False, libs = [ "arm_compute" ])
     Depends(arm_compute_graph_so, arm_compute_so)
     Export('arm_compute_graph_so')
 
@@ -410,6 +542,6 @@ else:
 Default(alias)
 
 if env['standalone']:
-    Depends([alias,arm_compute_core_a], generate_embed)
+    Depends([alias], generate_embed)
 else:
-    Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)
+    Depends([alias], generate_embed)

@@ -75,10 +75,10 @@ Similarly, all common functions that process shapes, like calculating output sha
 @subsection S4_1_2_add_kernel Add a kernel
 As we mentioned at the beginning, the kernel is the implementation of the operator or algorithm partially using a specific programming language related to the backend we want to use. Adding a kernel in the library means implementing the algorithm in a SIMD technology like Arm® Neon™ or OpenCL. All kernels in Compute Library must implement a common interface IKernel or one of the specific subinterfaces.
 IKernel is the common interface for all the kernels in the core library, it contains the main methods for configure and run the kernel itself, such as window()  that return the maximum window the kernel can be executed on or is_parallelisable() for indicate whether or not the kernel is parallelizable. If the kernel is parallelizable then the window returned by the window() method can be split into sub-windows which can then be run in parallel, in the other case, only the window returned by window() can be passed to the run method.
-There are specific interfaces for OpenCL and Neon: @ref ICLKernel, INEKernel (using INEKernel = @ref ICPPKernel).
+There are specific interfaces for OpenCL and Neon™: @ref ICLKernel, INEKernel (using INEKernel = @ref ICPPKernel).
 
 - @ref ICLKernel is the common interface for all the OpenCL kernels. It implements the inherited methods and adds all the methods necessary to configure the CL kernel, such as set/return the Local-Workgroup-Size hint, add single, array or tensor argument, set the targeted GPU architecture according to the CL device. All these methods are used during the configuration and the run of the operator.
-- INEKernel inherits from @ref IKernel as well and it's the common interface for all kernels implemented in Neon, it adds just the run and the name methods.
+- INEKernel inherits from @ref IKernel as well and it's the common interface for all kernels implemented in Neon™, it adds just the run and the name methods.
 
 There are two others implementation of @ref IKernel called @ref ICLSimpleKernel and INESimpleKernel, they are the interface for simple kernels that have just one input tensor and one output tensor.
 Creating a new kernel implies adding new files:
@@ -87,7 +87,7 @@ Creating a new kernel implies adding new files:
 - src/core/CL/kernels/CLReshapeLayerKernel.cpp
 - src/core/CL/CLKernelLibrary.cpp
 
-Neon kernel
+Neon™ kernel
 - arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h
 - src/core/NEON/kernels/NEReshapeLayerKernel.cpp
 
@@ -153,7 +153,7 @@ OpenCL function
 - arm_compute/runtime/CL/functions/CLReshapeLayer.h
 - src/runtime/CL/functions/CLReshapeLayer.cpp
 
-Neon function
+Neon™ function
 - arm_compute/runtime/NEON/functions/NEReshapeLayer.h
 - src/runtime/NEON/functions/NEReshapeLayer.cpp
 
@@ -216,7 +216,7 @@ void CLAddReshapeLayer::run()
 
 @endcode
 
-For Neon:
+For Neon™:
 
 @code{.cpp}
 using namespace arm_compute;
@@ -264,7 +264,7 @@ At this point, everything is in place at the library level. If you are following
 
 @subsubsection S4_1_4_1_add_reference Add the reference implementation and the tests
 As mentioned in the introduction, the reference implementation is a pure C++ implementation without any optimization or backend specific instruction.
-The refence implementation consist of two files into the folder tests/validation/reference:
+The reference implementation consist of two files into the folder tests/validation/reference:
 - tests/validation/reference/ReshapeLayer.h
 - tests/validation/reference/ReshapeLayer.cpp
 
@@ -300,7 +300,7 @@ For example, dataset for ReshapeLayer:
 
 Benchmark and validation tests are based on the same framework to setup and run the tests. In addition to running simple, self-contained test functions the framework supports fixtures and data test cases.
 Fixtures can be used to share common setup, teardown or even run tasks among multiple test cases, for that purpose a fixture can define a "setup", "teardown" and "run" method.
-Adding tests for the new operator in the runtime library we need to implement at least the setup method, that is used to call two methods for configure, run and return the output respectively of the target (CL or Neon) and the reference (C++ implementation).
+Adding tests for the new operator in the runtime library we need to implement at least the setup method, that is used to call two methods for configure, run and return the output respectively of the target (CL or Neon™) and the reference (C++ implementation).
 
 For example let's have a look at Reshape Layer Fixture :
 
@@ -310,7 +310,7 @@ In the fixture class above we can see that the setup method computes the target 
 The compute_target method reflects the exact behavior expected when we call a function. The input and output tensor must be declared, function configured, tensors allocated, the input tensor filled with required data, and finally, the function must be run and the results returned.
 This fixture is used in the test case, that is a parameterized test case that inherits from a fixture. The test case will have access to all public and protected members of the fixture. Only the setup and teardown methods of the fixture will be used. The setup method of the fixture needs to be a template and must accept inputs from the dataset as arguments.
 The body of this function will be used as a test function.
-For the fixture test case the first argument is the name of the test case (has to be unique within the enclosing test suite), the second argument is the class name of the fixture, the third argument is the dataset mode in which the test will be active (PRECOMMIT or NIGTHLY) and the fourth argument is the dataset.
+For the fixture test case the first argument is the name of the test case (has to be unique within the enclosing test suite), the second argument is the class name of the fixture, the third argument is the dataset mode in which the test will be active (PRECOMMIT or NIGHTLY) and the fourth argument is the dataset.
 For example:
 
 @snippet tests/validation/CL/ActivationLayer.cpp CLActivationLayerFixture snippet

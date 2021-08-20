@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,12 +51,22 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     const int a_stride_w = K * M * D;
 
     const int b_stride_z = b.shape().num_dimensions() > 2 ? N * K : 0;     // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
-    const int b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+    int       b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+
+    // Note: There are 3 gemm types: batched-gemm, multi-gemm, and batched of multi-gemms. The third dimension of tensor b is overloaded when tensor b has exactly 3 dimensions:
+    // it can be either number of batches or multis. Batched-GEMM computation is detected only when the third dimension of "a" and "c" tensors is 1 and the number of dimensions is 4
+    const bool is_batched_gemm = b.shape().num_dimensions() == 3 && a.shape().num_dimensions() == 4 && c.shape().num_dimensions() == 4 && a.shape()[2] == 1 && c.shape()[2] == 1;
+
+    // Batched-GEMM
+    if(is_batched_gemm)
+    {
+        b_stride_w = b_stride_z;
+    }
 
     const int c_stride_z = N * M;
     const int c_stride_w = N * M * D;
 
-#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
+#if defined(_OPENMP) && !(defined(__arm__) && defined(__ANDROID__))
     #pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
     for(int w = 0; w < W; ++w)
@@ -106,12 +116,22 @@ SimpleTensor<T> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTenso
     const int a_stride_w = K * M * D;
 
     const int b_stride_z = b.shape().num_dimensions() > 2 ? N * K : 0;     // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
-    const int b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+    int       b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+
+    // Note: There are 3 gemm types: batched-gemm, multi-gemm, and batched of multi-gemms. The third dimension of tensor b is overloaded when tensor b has exactly 3 dimensions:
+    // it can be either number of batches or multis. Batched-GEMM computation is detected only when the third dimension of "a" and "c" tensors is 1 and the number of dimensions is 4
+    const bool is_batched_gemm = b.shape().num_dimensions() == 3 && a.shape().num_dimensions() == 4 && c.shape().num_dimensions() == 4 && a.shape()[2] == 1 && c.shape()[2] == 1;
+
+    // Batched-GEMM
+    if(is_batched_gemm)
+    {
+        b_stride_w = b_stride_z;
+    }
 
     const int c_stride_z = N * M;
     const int c_stride_w = N * M * D;
 
-#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
+#if defined(_OPENMP) && !(defined(__arm__) && defined(__ANDROID__))
     #pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
     for(int w = 0; w < W; ++w)

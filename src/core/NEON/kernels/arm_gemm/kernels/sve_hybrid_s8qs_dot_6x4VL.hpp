@@ -22,9 +22,10 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __ARM_FEATURE_SVE
 
+#ifdef ARM_COMPUTE_ENABLE_SVE
 #include "../std_transforms_sve.hpp"
+#include "../performance_parameters.hpp"
 
 #define ARGLIST  \
     unsigned int, const unsigned int *, \
@@ -42,7 +43,8 @@ void sve_hybrid_s8qs_dot_6x4VL( ARGLIST );
 class cls_sve_hybrid_s8qs_dot_6x4VL
 {
 public:
-    typedef int8_t operand_type;
+    typedef int8_t lhs_operand_type;
+    typedef int8_t rhs_operand_type;
     typedef int8_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -68,7 +70,22 @@ public:
         return false;
     }
 
-    StdTransformsSVE<operand_type, result_type, 6, 4, 4> transforms = {};
+    StdTransformsSVE<rhs_operand_type, result_type, 6, 4, 4> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    {
+
+        if (std::is_same<T, int8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 30.13 };
+                case CPUModel::A510:
+                    return { 19.77 };
+            }
+        }
+
+        return { 1.0 };
+    }
 
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_s8qs_dot_6x4VL;
@@ -80,4 +97,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // __ARM_FEATURE_SVE
+
+#endif // ARM_COMPUTE_ENABLE_SVE

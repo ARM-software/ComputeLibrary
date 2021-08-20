@@ -228,7 +228,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                        framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(),
+    ActivationLayerInfo(),
+    ActivationLayerInfo(),
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
 })),
         framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false })),
         input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)

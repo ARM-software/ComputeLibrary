@@ -25,105 +25,98 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 
 #include "arm_compute/core/Error.h"
+#include "src/common/cpuinfo/CpuInfo.h"
 
-#if !defined(BARE_METAL)
-#include <sched.h>
-#endif /* defined(BARE_METAL) */
-
-using namespace arm_compute;
-
-void CPUInfo::set_fp16(const bool fp16)
+namespace arm_compute
 {
-    _fp16 = fp16;
+struct CPUInfo::Impl
+{
+    cpuinfo::CpuInfo info{};
+    unsigned int     L1_cache_size = 32768;
+    unsigned int     L2_cache_size = 262144;
+};
+
+CPUInfo &CPUInfo::get()
+{
+    static CPUInfo _cpuinfo;
+    return _cpuinfo;
 }
 
-void CPUInfo::set_dotprod(const bool dotprod)
+CPUInfo::CPUInfo()
+    : _impl(std::make_unique<Impl>())
 {
-    _dotprod = dotprod;
+    _impl->info = cpuinfo::CpuInfo::build();
 }
 
-void CPUInfo::set_sve(const bool sve)
-{
-    _sve = sve;
-}
-
-void CPUInfo::set_cpu_model(unsigned int cpuid, CPUModel model)
-{
-    ARM_COMPUTE_ERROR_ON(cpuid >= _percpu.size());
-    if(_percpu.size() > cpuid)
-    {
-        _percpu[cpuid] = model;
-    }
-}
+CPUInfo::~CPUInfo() = default;
 
 unsigned int CPUInfo::get_cpu_num() const
 {
-    return _percpu.size();
-}
-
-bool CPUInfo::has_sve() const
-{
-    return _sve;
+    return _impl->info.num_cpus();
 }
 
 bool CPUInfo::has_fp16() const
 {
-    return _fp16;
+    return _impl->info.has_fp16();
+}
+
+bool CPUInfo::has_bf16() const
+{
+    return _impl->info.has_bf16();
+}
+
+bool CPUInfo::has_svebf16() const
+{
+    return _impl->info.has_svebf16();
 }
 
 bool CPUInfo::has_dotprod() const
 {
-    return _dotprod;
+    return _impl->info.has_dotprod();
 }
 
-CPUModel CPUInfo::get_cpu_model(unsigned int cpuid) const
+bool CPUInfo::has_svef32mm() const
 {
-    if(cpuid < _percpu.size())
-    {
-        return _percpu[cpuid];
-    }
-    return CPUModel::GENERIC;
+    return _impl->info.has_svef32mm();
 }
 
-unsigned int CPUInfo::get_L1_cache_size() const
+bool CPUInfo::has_i8mm() const
 {
-    return _L1_cache_size;
+    return _impl->info.has_i8mm();
 }
 
-void CPUInfo::set_L1_cache_size(unsigned int size)
+bool CPUInfo::has_svei8mm() const
 {
-    _L1_cache_size = size;
+    return _impl->info.has_svei8mm();
 }
 
-unsigned int CPUInfo::get_L2_cache_size() const
+bool CPUInfo::has_sve() const
 {
-    return _L2_cache_size;
+    return _impl->info.has_sve();
 }
 
-void CPUInfo::set_L2_cache_size(unsigned int size)
+bool CPUInfo::has_sve2() const
 {
-    _L2_cache_size = size;
-}
-
-void CPUInfo::set_cpu_num(unsigned int cpu_count)
-{
-    _percpu.resize(cpu_count);
-}
-
-CPUInfo::CPUInfo()
-    : _percpu(1)
-{
-    // The core library knows nothing about the CPUs so we set only 1 CPU to be generic.
-    // The runtime NESCheduler will initialise this vector with the correct CPU models.
-    // See void detect_cpus_configuration(CPUInfo &cpuinfo) in CPPUtils.h
-    _percpu[0] = CPUModel::GENERIC;
+    return _impl->info.has_sve2();
 }
 
 CPUModel CPUInfo::get_cpu_model() const
 {
-#if defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__))
-    return get_cpu_model(0);
-#else  /* defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__)) */
-    return get_cpu_model(sched_getcpu());
-#endif /* defined(BARE_METAL) || defined(__APPLE__) || (!defined(__arm__) && !defined(__aarch64__)) */
+    return _impl->info.cpu_model();
 }
+
+CPUModel CPUInfo::get_cpu_model(unsigned int cpuid) const
+{
+    return _impl->info.cpu_model(cpuid);
+}
+
+unsigned int CPUInfo::get_L1_cache_size() const
+{
+    return _impl->L1_cache_size;
+}
+
+unsigned int CPUInfo::get_L2_cache_size() const
+{
+    return _impl->L2_cache_size;
+}
+} // namespace arm_compute

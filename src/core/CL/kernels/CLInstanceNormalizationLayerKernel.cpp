@@ -72,6 +72,7 @@ Status validate_arguments_meanvar(const ITensorInfo *input, const ITensorInfo *o
 CLComputeMeanVariance::CLComputeMeanVariance()
     : _input(nullptr), _output(nullptr)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, bool use_mixed_precision)
@@ -152,6 +153,7 @@ void CLComputeMeanVariance::run(const Window &window, cl::CommandQueue &queue)
 CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _mean(nullptr), _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *mean_var, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)

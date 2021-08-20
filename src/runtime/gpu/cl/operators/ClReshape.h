@@ -35,8 +35,6 @@ namespace opencl
 class ClReshape : public IClOperator
 {
 public:
-    /** Constructor */
-    ClReshape() = default;
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  compile_context The compile context to be used.
@@ -44,11 +42,9 @@ public:
      * @param[out] output          Output info. Data type supported: Same as @p input
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
-
-    /** Static function to check if given info will lead to a valid configuration of @ref kernels::ClReshapeKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input  Input tensor info. Data type supported: All
-     * @param[in] output Output tensor info. Data type supported: Same as @p input
+     * Similar to ClReshape::configure()
      *
      * @return a status
      */

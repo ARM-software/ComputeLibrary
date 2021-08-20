@@ -35,8 +35,6 @@ namespace opencl
 class ClFloor : public IClOperator
 {
 public:
-    /** Constructor */
-    ClFloor() = default;
     /** Configure operator for a given list of arguments
      *
      * @param[in] compile_context The compile context to be used.
@@ -44,10 +42,9 @@ public:
      * @param[in] dst             Destination tensor info. Data type supported: same as @p src
      */
     void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClFloor
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor info. Data types supported: F16/F32.
-     * @param[in] dst Destination tensor info. Data type supported: same as @p src
+     * Similar to ClFloor::configure()
      *
      * @return a status
      */

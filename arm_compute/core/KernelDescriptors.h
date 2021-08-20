@@ -96,16 +96,12 @@ struct GEMMKernelInfo
     GEMMLowpOutputStageInfo output_stage{};                   /**< GEMMLowp output stage information */
 };
 
-/** Descriptor used by the depthwise convolution kernels */
-struct DWCKernelInfo
+/** Compute descriptor used by the depthwise convolution native kernel */
+struct DWCComputeKernelInfo
 {
-    ActivationLayerInfo activation_info{}; /**< Activation function to perform after the depthwise convolution */
-};
-
-/** Descriptor used by the depthwise convolution kernels to retrieve the number of output elements processed by each thread */
-struct DWCWeightsKernelInfo
-{
-    unsigned int n0{ 0 }; /**< Number of columns processed by each thread */
+    unsigned int n0{ 0 };                             /**< Number of columns processed by each thread */
+    unsigned int m0{ 0 };                             /**< Number of rows processed by each thread */
+    bool         export_weights_to_cl_image{ false }; /**< Export the weights to cl_image */
 };
 
 /** Descriptor used by the softmax kernels */
@@ -209,6 +205,18 @@ struct ScaleKernelInfo
     bool                use_padding;           /**< Indication of using padding */
     bool                align_corners;         /**< Align corners of input and output */
     DataLayout          data_layout;           /**< Data layout to use */
+};
+
+struct RemapInfo
+{
+    RemapInfo() = default;
+    RemapInfo(InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
+        : policy(policy), border_mode(border_mode), constant_border_value(constant_border_value)
+    {
+    }
+    InterpolationPolicy policy;
+    BorderMode          border_mode;
+    PixelValue          constant_border_value;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

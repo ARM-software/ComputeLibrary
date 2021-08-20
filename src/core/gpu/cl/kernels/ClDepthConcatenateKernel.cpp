@@ -61,6 +61,7 @@ Status validate_arguments(const ITensorInfo *src, unsigned int depth_offset, con
 ClDepthConcatenateKernel::ClDepthConcatenateKernel()
     : _depth_offset(0)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void ClDepthConcatenateKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int depth_offset, ITensorInfo *dst)

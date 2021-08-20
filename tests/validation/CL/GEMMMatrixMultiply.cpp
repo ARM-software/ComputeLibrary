@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
@@ -44,9 +44,10 @@ namespace test
 namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::opencl::kernels;
 
 // Create function for CLGEMMMatrixMultiplyKernel
-using CLGEMMMatrixMultiplyNative = CLSynthetizeFunction<CLGEMMMatrixMultiplyKernel>;
+using CLGEMMMatrixMultiplyNative = CLSynthetizeOperator<ClGemmMatrixMultiplyKernel>;
 
 // Fixture for GEMMMatrixMultiplyValidationFixture
 template <typename T>
@@ -140,7 +141,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const bool is_interleaved_transposed = false;
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -154,7 +155,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const bool is_interleaved_transposed = false;
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -169,7 +170,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const GEMMReshapeInfo reshape_info  = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
         const bool fp_mixed_precision        = true;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -183,7 +184,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const bool is_interleaved_transposed = false;
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -197,7 +198,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const bool is_interleaved_transposed = false;
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -214,7 +215,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, true);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
         const bool fp_mixed_precision        = false;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -231,7 +232,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
         const bool fp_mixed_precision        = false;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 
@@ -246,7 +247,7 @@ TEST_CASE(Negative, framework::DatasetMode::ALL)
         const bool is_interleaved_transposed = false;
         const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(12, 14, 13, 1, 1, 0, false, false);
         const GPUTarget gpu_target           = GPUTarget::MIDGARD;
-        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
+        const auto status    = ClGemmMatrixMultiplyKernel::validate(&lhs, &rhs, nullptr, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target);
         ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
     }
 }

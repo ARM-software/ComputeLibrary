@@ -22,8 +22,8 @@
  * IN THE SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
 
+#ifdef __aarch64__
 #include "../std_transforms_fixed.hpp"
 #include "../performance_parameters.hpp"
 
@@ -44,7 +44,8 @@ void a64_hybrid_u8u32_dot_6x16_a55( ARGLIST );
 class cls_a64_hybrid_u8u32_dot_6x16
 {
 public:
-    typedef uint8_t operand_type;
+    typedef uint8_t lhs_operand_type;
+    typedef uint8_t rhs_operand_type;
     typedef uint32_t result_type;
 
     typedef void (*kern_type)( ARGLIST );
@@ -70,16 +71,37 @@ public:
         return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 6, 16, 4> transforms = {};
-
-    static PerformanceParameters get_performance_parameters(const CPUInfo *ci)
+    StdTransformsFixed<rhs_operand_type, result_type, 6, 16, 4> transforms = {};
+    template<typename T>
+    static inline PerformanceParameters get_performance_parameters(const CPUInfo *ci)
     {
-        switch (ci->get_cpu_model()) {
-            case CPUModel::A55r1:
-                return { 12.667, 2.0799, 0.2279 };
-            default:
-                return { 29.6736, 11.4025, 0.5591 };
+        if (std::is_same<T, uint8_t>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A55r1:
+                    return { 9.5238, 2.0799, 0.2279 };
+                default:
+                    return { 29.6736, 11.4025, 0.5591 };
+                case CPUModel::A510:
+                    return { 16.65, 3.92, 0.48 };
+                case CPUModel::V1:
+                    return { 55.42, 19.29, 0.92 };
+            }
         }
+
+        if (std::is_same<T, uint32_t>::value) {
+            switch (ci->get_cpu_model()) {
+                default:
+                    return { 31.63 };
+                case CPUModel::A55r1:
+                    return { 9.217 };
+                case CPUModel::A510:
+                    return { 15.89 };
+                case CPUModel::V1:
+                    return { 53.87 };
+            }
+        }
+
+        return { 1.0 };
     }
 
     // Default to the generic kernel
@@ -99,4 +121,5 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
+
 #endif // __aarch64__

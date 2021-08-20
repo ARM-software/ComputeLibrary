@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TYPE_PRINTER_H__
 
-#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -78,7 +77,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
 
         for(unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
         {
-            os << "x" << dimensions[d];
+            os << "," << dimensions[d];
         }
     }
 
@@ -1842,6 +1841,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G78:
             os << "G78";
             break;
+        case GPUTarget::G31:
+            os << "G31";
+            break;
         case GPUTarget::TODX:
             os << "TODX";
             break;
@@ -2014,60 +2016,6 @@ inline std::string to_string(const DetectionWindow &detection_window)
     return str.str();
 }
 
-/** Formatted output of the CPUModel type.
- *
- * @param[out] os        Output stream
- * @param[in]  cpu_model Model to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const CPUModel &cpu_model)
-{
-    switch(cpu_model)
-    {
-        case CPUModel::GENERIC:
-            os << "GENERIC";
-            break;
-        case CPUModel::GENERIC_FP16:
-            os << "GENERIC_FP16";
-            break;
-        case CPUModel::GENERIC_FP16_DOT:
-            os << "GENERIC_FP16_DOT";
-            break;
-        case CPUModel::A53:
-            os << "A53";
-            break;
-        case CPUModel::A55r0:
-            os << "A55r0";
-            break;
-        case CPUModel::A55r1:
-            os << "A55r1";
-            break;
-        case CPUModel::A73:
-            os << "A73";
-            break;
-        case CPUModel::X1:
-            os << "X1";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the CPUModel type.
- *
- * @param[in] cpu_model Model to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const CPUModel &cpu_model)
-{
-    std::stringstream str;
-    str << cpu_model;
-    return str.str();
-}
 /** Formatted output of a vector of objects.
  *
  * @param[out] os   Output stream

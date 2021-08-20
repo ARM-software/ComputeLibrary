@@ -51,8 +51,8 @@
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFFT1D.h"
 #include "arm_compute/runtime/CL/functions/CLFFT2D.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
@@ -111,6 +111,5 @@
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 #include "arm_compute/runtime/CL/functions/CLUnstack.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 
 #endif /* ARM_COMPUTE_CLFUNCTIONS_H */

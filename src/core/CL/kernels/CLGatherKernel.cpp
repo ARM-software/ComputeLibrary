@@ -75,6 +75,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 CLGatherKernel::CLGatherKernel()
     : _input(nullptr), _indices(nullptr), _output(nullptr), _axis(0)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)

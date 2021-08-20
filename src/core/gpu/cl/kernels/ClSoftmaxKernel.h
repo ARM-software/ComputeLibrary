@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
-#define ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
+#ifndef ARM_COMPUTE_CL_SOFTMAX_KERNEL_H
+#define ARM_COMPUTE_CL_SOFTMAX_KERNEL_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -50,8 +50,7 @@ public:
     /** Info for whether a parallel reduction will be run and the vector size of the execution. */
     using ParallelReductionInfo = std::tuple<bool, unsigned int>;
 
-    /** Default constructor */
-    ClLogits1DMaxShiftExpSumKernel() = default;
+    ClLogits1DMaxShiftExpSumKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClLogits1DMaxShiftExpSumKernel);
     /** Configure the kernel using the given information about tensors
      *
@@ -63,12 +62,9 @@ public:
      * @param[in]     info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &max, ITensorInfo &dst, ITensorInfo &sum, const SoftmaxKernelInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClLogits1DMaxShiftExpSumKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
-     * @param[in] max Max values tensor. Data types supported: same as @p src
-     * @param[in] dst Destination tensor. Data types supported: same as @p src
-     * @param[in] sum Sum of 1D logits tensor. Data types supported: same as @p src
+     * Similar to @ref ClLogits1DMaxShiftExpSumKernel::configure()
      *
      * @return a status
      */
@@ -93,8 +89,7 @@ public:
 class ClLogits1DNormKernel : public IClKernel
 {
 public:
-    /** Default constructor */
-    ClLogits1DNormKernel() = default;
+    ClLogits1DNormKernel();
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClLogits1DNormKernel);
 
     /** Set the input and output tensors.
@@ -106,12 +101,9 @@ public:
      * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
     void configure(const CLCompileContext &compile_context, const ITensorInfo &src, const ITensorInfo &sum, ITensorInfo &dst, const SoftmaxKernelInfo &info);
-    /** Static function to check if given info will lead to a valid configuration of @ref ClLogits1DNormKernel
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] src  Source tensor. Data types supported: S32/F16/F32. If this kernel is used for log softmax, only F32/F16 is supported.
-     * @param[in] sum  Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
-     * @param[in] dst  Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
-     * @param[in] info Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
+     * Similar to @ref ClLogits1DNormKernel::configure()
      *
      * @return a status
      */
@@ -123,4 +115,4 @@ public:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H */
+#endif /* ARM_COMPUTE_CL_SOFTMAX_KERNEL_H */

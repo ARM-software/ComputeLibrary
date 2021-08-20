@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_NELSTMLAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"

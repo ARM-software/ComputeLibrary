@@ -29,7 +29,11 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/cpu/kernels/CpuSoftmaxKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
+#include "src/runtime/cpu/utils/CpuAuxTensorHandler.h"
+
+using namespace arm_compute::experimental;
 
 namespace arm_compute
 {
@@ -37,7 +41,16 @@ namespace cpu
 {
 template <bool IS_LOG>
 CpuSoftmaxGeneric<IS_LOG>::CpuSoftmaxGeneric()
-    : _permute_input(), _permute_output(), _max_kernel(), _softmax_kernel(), _max(nullptr), _tmp(nullptr), _input_permuted(nullptr), _output_permuted(nullptr), _needs_permute(false)
+    : _permute_input(),
+      _permute_output(),
+      _max_kernel(),
+      _softmax_kernel(),
+      _max(),
+      _tmp(),
+      _input_permuted(),
+      _output_permuted(),
+      _needs_permute(false),
+      _aux_mem(InternalTensorIdx::COUNT)
 {
 }
 
@@ -54,13 +67,12 @@ void CpuSoftmaxGeneric<IS_LOG>::configure(const ITensorInfo *src, ITensorInfo *d
 
     if(_needs_permute)
     {
-        _input_permuted = std::make_unique<TensorInfo>();
-        _permute_input.configure(src, _input_permuted.get(), softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
+        _permute_input.configure(src, &_input_permuted, softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
     }
 
     // We want to deal with a 2D input. Either it is the permuted version of the original input (4D case)
     // or it is the original input case (2D case)
-    const ITensorInfo *tmp_input = (_needs_permute ? _input_permuted.get() : src);
+    const ITensorInfo *tmp_input = (_needs_permute ? &_input_permuted : src);
 
     // Create intermediate tensors shapes
     TensorShape max_sum_shape = tmp_input->tensor_shape();
@@ -71,31 +83,35 @@ void CpuSoftmaxGeneric<IS_LOG>::configure(const ITensorInfo *src, ITensorInfo *d
     TensorInfo       max_info(tmp_input->clone()->set_tensor_shape(max_sum_shape));
 
     // Init intermediate tensors
-    _max = std::make_unique<TensorInfo>(max_info);
-    _tmp = std::make_unique<TensorInfo>(tensor_info_tmp);
+    _max = TensorInfo(max_info);
+    _tmp = TensorInfo(tensor_info_tmp);
 
     // Configure kernels
     auto mk = std::make_unique<kernels::CpuLogits1DMaxKernel>();
-    mk->configure(tmp_input, _max.get());
+    mk->configure(tmp_input, &_max);
     _max_kernel = std::move(mk);
 
     auto sm = std::make_unique<kernels::CpuLogits1DSoftmaxKernel<IS_LOG>>();
     if(_needs_permute)
     {
-        _output_permuted = std::make_unique<TensorInfo>();
-
         // The normalization kernel stores the result in a permuted output tensor
-        sm->configure(tmp_input, _max.get(), _output_permuted.get(), beta, _tmp.get());
+        sm->configure(tmp_input, &_max, &_output_permuted, beta, &_tmp);
 
         // Re-permute the permuted output into the requested (4D) output
-        _permute_output.configure(_output_permuted.get(), dst, softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
+        _permute_output.configure(&_output_permuted, dst, softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis));
     }
     else
     {
         // Softmax 2D case
-        sm->configure(tmp_input, _max.get(), dst, beta, _tmp.get());
+        sm->configure(tmp_input, &_max, dst, beta, &_tmp);
     }
     _softmax_kernel = std::move(sm);
+
+    _aux_mem[InternalTensorIdx::MAX] = MemoryInfo(offset_int_vec(InternalTensorIdx::MAX), MemoryLifetime::Temporary, _max.total_size());
+    _aux_mem[InternalTensorIdx::TMP] = MemoryInfo(offset_int_vec(InternalTensorIdx::TMP), MemoryLifetime::Temporary, _tmp.total_size());
+
+    _aux_mem[InternalTensorIdx::PERMUTED_SRC] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), MemoryLifetime::Temporary, _input_permuted.total_size());
+    _aux_mem[InternalTensorIdx::PERMUTED_DST] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_DST), MemoryLifetime::Temporary, _output_permuted.total_size());
 }
 
 template <bool IS_LOG>
@@ -141,33 +157,45 @@ void CpuSoftmaxGeneric<IS_LOG>::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
 
+    auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    CpuAuxTensorHandler tmp(offset_int_vec(InternalTensorIdx::TMP), _tmp, tensors, true);
+    CpuAuxTensorHandler max(offset_int_vec(InternalTensorIdx::MAX), _max, tensors, true);
+
+    CpuAuxTensorHandler input_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _input_permuted, tensors, true);
+    CpuAuxTensorHandler output_permuted(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _output_permuted, tensors, true);
+
     ITensorPack max_pack;
     ITensorPack softmax_pack;
 
     if(_needs_permute)
     {
-        ITensorPack permute_in_pack;
-        permute_in_pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(ACL_SRC));
-        permute_in_pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(ACL_INT_2));
+        ITensorPack permute_in_pack = { { TensorType::ACL_SRC, src }, { TensorType::ACL_DST, input_permuted.get() } };
         _permute_input.run(permute_in_pack);
 
-        max_pack.add_tensor(TensorType::ACL_SRC, tensors.get_tensor(ACL_INT_2));
+        max_pack = { { TensorType::ACL_SRC, input_permuted.get() }, { TensorType::ACL_DST, max.get() } };
 
-        softmax_pack.add_tensor(TensorType::ACL_SRC_0, tensors.get_tensor(ACL_INT_2));
-        softmax_pack.add_tensor(TensorType::ACL_SRC_1, tensors.get_tensor(ACL_INT_1));
-        softmax_pack.add_tensor(TensorType::ACL_DST_0, tensors.get_tensor(ACL_INT_3));
-        softmax_pack.add_tensor(TensorType::ACL_DST_1, tensors.get_tensor(ACL_INT_0));
+        softmax_pack =
+        {
+            { TensorType::ACL_SRC_0, input_permuted.get() },
+            { TensorType::ACL_SRC_1, max.get() },
+            { TensorType::ACL_DST_0, output_permuted.get() },
+            { TensorType::ACL_DST_1, tmp.get() }
+        };
     }
     else
     {
-        max_pack.add_tensor(TensorType::ACL_SRC, tensors.get_const_tensor(ACL_SRC));
-        softmax_pack.add_tensor(TensorType::ACL_SRC_0, tensors.get_const_tensor(ACL_SRC));
-        softmax_pack.add_tensor(TensorType::ACL_SRC_1, tensors.get_tensor(ACL_INT_1));
-        softmax_pack.add_tensor(TensorType::ACL_DST_0, tensors.get_tensor(ACL_DST));
-        softmax_pack.add_tensor(TensorType::ACL_DST_1, tensors.get_tensor(ACL_INT_0));
-    }
+        max_pack = { { TensorType::ACL_SRC, src }, { TensorType::ACL_DST, max.get() } };
 
-    max_pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(ACL_INT_1));
+        softmax_pack =
+        {
+            { TensorType::ACL_SRC_0, src },
+            { TensorType::ACL_SRC_1, max.get() },
+            { TensorType::ACL_DST_0, dst },
+            { TensorType::ACL_DST_1, tmp.get() }
+        };
+    }
 
     NEScheduler::get().schedule_op(_max_kernel.get(), Window::DimY, _max_kernel->window(), max_pack);
     NEScheduler::get().schedule_op(_softmax_kernel.get(), Window::DimY, _softmax_kernel->window(), softmax_pack);
@@ -175,8 +203,8 @@ void CpuSoftmaxGeneric<IS_LOG>::run(ITensorPack &tensors)
     if(_needs_permute)
     {
         ITensorPack permute_out_pack;
-        permute_out_pack.add_tensor(TensorType::ACL_SRC, tensors.get_tensor(ACL_INT_3));
-        permute_out_pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(ACL_DST));
+        permute_out_pack.add_tensor(TensorType::ACL_SRC, output_permuted.get());
+        permute_out_pack.add_tensor(TensorType::ACL_DST, dst);
         _permute_output.run(permute_out_pack);
     }
 }
@@ -184,18 +212,7 @@ void CpuSoftmaxGeneric<IS_LOG>::run(ITensorPack &tensors)
 template <bool                   IS_LOG>
 experimental::MemoryRequirements CpuSoftmaxGeneric<IS_LOG>::workspace() const
 {
-    experimental::MemoryRequirements req{};
-
-    req.push_back({ TensorType::ACL_INT_0, _tmp->total_size(), 0 });
-    req.push_back({ TensorType::ACL_INT_1, _max->total_size(), 0 });
-
-    if(_needs_permute)
-    {
-        req.push_back({ TensorType::ACL_INT_2, _input_permuted->total_size(), 0 });
-        req.push_back({ TensorType::ACL_INT_3, _output_permuted->total_size(), 0 });
-    }
-
-    return req;
+    return _aux_mem;
 }
 
 template class CpuSoftmaxGeneric<false>;

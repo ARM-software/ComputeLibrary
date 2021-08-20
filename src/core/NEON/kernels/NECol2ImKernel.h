@@ -34,7 +34,7 @@ class ITensor;
 
 /** Kernel to perform col2im reshaping.
  *
- * Rearranges each matrix column into image blocks. It's the inverse operation of @ref NEIm2ColKernel.
+ * Rearranges each matrix column into image blocks. It's the inverse operation of @ref cpu::kernels::CpuIm2ColKernel.
  *
  * For example, a vector of 9 elements can be reshaped to a block(image) of 3x3:
  *

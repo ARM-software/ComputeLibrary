@@ -24,8 +24,10 @@
 #ifndef ARM_COMPUTE_NESOFTMAXLAYER_H
 #define ARM_COMPUTE_NESOFTMAXLAYER_H
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -88,7 +90,6 @@ public:
     void run() override;
 
 private:
-    MemoryGroup _memory_group;
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #ifdef __aarch64__
 
+#include "../performance_parameters.hpp"
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm {
@@ -65,6 +66,30 @@ public:
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 4, 4, 16> transforms = {};
     StdTransformsFixed<operand_type, result_type, 4, 4, 16, true> transforms_quantized = {};
+
+    template<typename T>
+    static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
+        if (std::is_same<T, uint32_t>::value) {
+            switch (ci->get_cpu_model()) {
+                case CPUModel::A510:
+                    return { 2.64, 2.72, 2.64 };
+
+                default:
+                    return { 7.95, 3.76, 7.27 };
+            }
+        }
+
+        if (std::is_same<T, uint8_t>::value) {
+            switch(ci->get_cpu_model()) {
+                case CPUModel::A510:
+                    return { 2.64, 1.79, 0.10 };
+                default:
+                    return { 7.95, 4.09, 0.33 };
+            }
+        }
+
+        return { 0.0 };
+    }
 
     kern_type kernel = a64_gemm_u8_4x4;
 

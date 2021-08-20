@@ -230,7 +230,7 @@
  *  @brief Scalar operations
  */
 
-/** @dir src/core/CL/gemm
+/** @dir src/core/gpu/cl/kernels/gemm
  *  @brief Folder containing all the configuration files for GEMM
  */
 

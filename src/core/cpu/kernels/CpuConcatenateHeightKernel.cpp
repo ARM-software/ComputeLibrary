@@ -62,11 +62,6 @@ Status validate_arguments(const ITensorInfo *src, unsigned int height_offset, co
 }
 } // namespace
 
-CpuConcatenateHeightKernel::CpuConcatenateHeightKernel()
-    : _height_offset(0)
-{
-}
-
 void CpuConcatenateHeightKernel::configure(const ITensorInfo *src, unsigned int height_offset, ITensorInfo *dst)
 {
     ARM_COMPUTE_UNUSED(src);

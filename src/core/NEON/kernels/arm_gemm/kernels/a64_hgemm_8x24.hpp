@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,7 @@ public:
     // Use the standard fixed size transforms.
     StdTransformsFixed<operand_type, result_type, 8, 24> transforms = {};
 
+    template<typename T>
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         switch (ci->get_cpu_model()) {
             case CPUModel::A55r1:

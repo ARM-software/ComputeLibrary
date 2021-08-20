@@ -83,6 +83,10 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G76;
     }
+    else if(version.find("G31") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G31;
+    }
     else
     {
         return arm_compute::GPUTarget::UNKNOWN;

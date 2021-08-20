@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,84 +23,33 @@
  */
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLWinogradFilterTransformKernel.h"
-#include "src/core/CL/kernels/CLWinogradOutputTransformKernel.h"
+#include "arm_compute/core/KernelDescriptors.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/core/helpers/MemoryHelpers.h"
+#include "src/runtime/gpu/cl/operators/ClWinogradConv2d.h"
+#include "support/Cast.h"
 
-using namespace arm_compute;
-
-namespace
+namespace arm_compute
 {
-Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims, DataLayout data_layout)
+struct CLWinogradConvolutionLayer::Impl
 {
-    Size2D output_tile = Size2D{};
-
-    const unsigned int kernel_max_dim = std::max(kernel_dims.width, kernel_dims.height);
-
-    // Check if the input spatial dimensions are smaller than 4
-    const bool is_input_lt4_nchw = (input_dims.width <= 4 && input_dims.height <= 4) && (data_layout == DataLayout::NCHW);
-
-    if(kernel_max_dim == 3U)
-    {
-        if(kernel_dims == Size2D(3U, 3U))
-        {
-            output_tile = is_input_lt4_nchw ? Size2D(2U, 2U) : Size2D(4U, 4U);
-        }
-        else if(kernel_dims == Size2D(3U, 1U))
-        {
-            output_tile = is_input_lt4_nchw ? Size2D(2U, 1U) : Size2D(4U, 1U);
-        }
-        else
-        {
-            output_tile = is_input_lt4_nchw ? Size2D(1U, 2U) : Size2D(1U, 4U);
-        }
-    }
-    else if(kernel_max_dim == 5U)
-    {
-        output_tile = Size2D(kernel_dims.width == 1 ? 1U : 4U,
-                             kernel_dims.height == 1 ? 1U : 4U);
-    }
-    else if(kernel_max_dim == 7U)
-    {
-        output_tile = Size2D(kernel_dims.width == 1 ? 1U : 2U,
-                             kernel_dims.height == 1 ? 1U : 2U);
-    }
-
-    return output_tile;
-}
-
-bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_size)
-{
-    // Check if we want to configure a Winograd configuration which requires fast math
-    using WinogradConfiguration = std::pair<std::pair<int, int>, std::pair<int, int>>;
-
-    std::vector<WinogradConfiguration> fast_math_winograd =
-    {
-        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
-        WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7))
-    };
-
-    auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),
-                            std::pair<int, int>(kernel_size.width, kernel_size.height));
-
-    return std::find(fast_math_winograd.begin(), fast_math_winograd.end(), p) != fast_math_winograd.end();
-}
-} // namespace
+    const ICLTensor                          *src{ nullptr };
+    const ICLTensor                          *weights{ nullptr };
+    const ICLTensor                          *biases{ nullptr };
+    ICLTensor                                *dst{ nullptr };
+    std::unique_ptr<opencl::ClWinogradConv2d> op{ nullptr };
+    ITensorPack                               run_pack{};
+    MemoryGroup                               memory_group{};
+    WorkspaceData<CLTensor>                   workspace_tensors{};
+    bool                                      is_prepared{ false };
+};
 
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(std::make_unique<CLWinogradFilterTransformKernel>()),
-      _output_transform(std::make_unique<CLWinogradOutputTransformKernel>()), _input0(), _input1(), _batched_mm_output(), _original_weights(nullptr), _is_prepared(false)
+    : _impl(std::make_unique<Impl>())
 {
+    _impl->memory_group = MemoryGroup(memory_manager);
 }
 
 CLWinogradConvolutionLayer::~CLWinogradConvolutionLayer() = default;
@@ -115,139 +64,47 @@ void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_conte
                                            const PadStrideInfo       &conv_info,
                                            const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    // Get indices for the width and height
-    const size_t idx_width  = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    _impl->src     = input;
+    _impl->weights = weights;
+    _impl->biases  = biases;
+    _impl->dst     = output;
 
-    // Input shape, kernel size and output tile
-    const Size2D input_dims  = Size2D(input->info()->tensor_shape()[idx_width], input->info()->tensor_shape()[idx_height]);
-    const Size2D kernel_size = Size2D(weights->info()->tensor_shape()[idx_width], weights->info()->tensor_shape()[idx_height]);
-    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, input->info()->data_layout());
+    _impl->op = std::make_unique<opencl::ClWinogradConv2d>();
+    _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, act_info, enable_fast_math);
 
-    // Check if the Winograd configuration requires fast math
-    if(!enable_fast_math)
+    _impl->run_pack =
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32); //disable winograd for fp16 if fast math is false.
-        ARM_COMPUTE_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
-    }
-    const WinogradInfo winograd_info = WinogradInfo(output_tile,
-                                                    kernel_size,
-                                                    input_dims,
-                                                    conv_info,
-                                                    input->info()->data_layout());
-
-    _is_prepared      = false;
-    _original_weights = weights;
-
-    // Manage intermediate tensors
-    _memory_group.manage(&_input0);
-    _memory_group.manage(&_batched_mm_output);
-
-    // Do not manage _input1 as it contains the weights
-
-    // Configure input transform
-    _input_transform.configure(compile_context, input, &_input0, winograd_info);
-
-    // Configure filter transform
-    _filter_transform->configure(compile_context, weights, &_input1, winograd_info);
-
-    // Configure batched matrix multiply
-    _batched_mm.configure(compile_context, &_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false,
-                                                                                                                  GEMMLowpOutputStageInfo(),
-                                                                                                                  (input->info()->data_type() == DataType::F16)));
-
-    // Configure output transform
-    _output_transform->configure(compile_context, &_batched_mm_output, biases, output, winograd_info, act_info);
-
-    // Allocate temporary tensors
-    _input0.allocator()->allocate();
-    _batched_mm_output.allocator()->allocate();
+        { TensorType::ACL_SRC_0, _impl->src },
+        { TensorType::ACL_SRC_1, _impl->weights },
+        { TensorType::ACL_SRC_2, _impl->biases },
+        { TensorType::ACL_DST, _impl->dst }
+    };
+    _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->run_pack);
 }
 
 Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                             const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
-    // Get indeces for the width and height
-    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-
-    // Input shape, kernel size and output tile
-    const Size2D input_dims  = Size2D(input->tensor_shape()[idx_width], input->tensor_shape()[idx_height]);
-    const Size2D kernel_size = Size2D(weights->tensor_shape()[idx_width], weights->tensor_shape()[idx_height]);
-    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, input->data_layout());
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((conv_info.pad_left() > (kernel_size.x() / 2u)) || (conv_info.pad_right() > (kernel_size.x() / 2u))), "Winograd only supports padding up to half kernel size");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((conv_info.pad_top() > (kernel_size.y() / 2u)) || (conv_info.pad_bottom() > (kernel_size.y() / 2u))), "Winograd only supports padding up to half kernel size");
-
-    // Check if the Winograd configuration requires fast math
-    if(!enable_fast_math)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32); //disable winograd for fp16 if fast math is false.
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
-    }
-
-    const WinogradInfo winograd_info = WinogradInfo(output_tile,
-                                                    kernel_size,
-                                                    input_dims,
-                                                    conv_info,
-                                                    input->data_layout());
-
-    // Validate input transform
-    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
-    const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransform::validate(input, &input0, winograd_info));
-
-    // Validate filter transform
-    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
-    const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1, winograd_info));
-
-    // Validate batched matrix multiply
-    TensorShape batched_mm_output_shape = input0.tensor_shape();
-    batched_mm_output_shape[0]          = input1.tensor_shape()[0];
-    const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false,
-                                                                                                                     GEMMLowpOutputStageInfo(), (input->data_type() == DataType::F16))));
-
-    // Configure output transform
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info, act_info));
-
-    return Status{};
+    return opencl::ClWinogradConv2d::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 }
 
 void CLWinogradConvolutionLayer::run()
 {
+    MemoryGroupResourceScope scope_mg(_impl->memory_group);
     prepare();
-
-    MemoryGroupResourceScope scope_mg(_memory_group);
-
-    // Run input transform
-    _input_transform.run();
-
-    // Run batched matrix multiplication
-    _batched_mm.run();
-
-    // Run output transform
-    CLScheduler::get().enqueue(*_output_transform);
+    _impl->op->run(_impl->run_pack);
 }
 
 void CLWinogradConvolutionLayer::prepare()
 {
-    if(!_is_prepared)
+    if(!_impl->is_prepared)
     {
-        // Run filter transform and mark original weights as unused
-        _input1.allocator()->allocate();
-        CLScheduler::get().enqueue(*_filter_transform, false);
-        _original_weights->mark_as_unused();
+        _impl->op->prepare(_impl->run_pack);
 
-        // Prepare GEMM and release reshaped weights if marked unused by CLGEMM
-        _batched_mm.prepare();
-        if(!_input1.is_used())
-        {
-            _input1.allocator()->free();
-        }
-
-        CLScheduler::get().queue().finish();
-        _is_prepared = true;
+        // Release Preparation tensors
+        release_prepare_tensors(_impl->workspace_tensors, _impl->run_pack);
+        _impl->run_pack.remove_tensor(TensorType::ACL_SRC_1);
+        _impl->is_prepared = true;
     }
 }
+} // namespace arm_compute

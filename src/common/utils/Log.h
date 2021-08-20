@@ -43,6 +43,7 @@
 #else /* ARM_COMPUTE_LOGGING_ENABLED */
 #define ARM_COMPUTE_CREATE_ACL_LOGGER()
 #endif /* ARM_COMPUTE_LOGGING_ENABLED */
+
 /** Log a message to the logger
  *
  * @param[in] log_level Logging level
@@ -54,6 +55,7 @@
         ARM_COMPUTE_CREATE_ACL_LOGGER();                       \
         ARM_COMPUTE_LOG_MSG("ComputeLibrary", log_level, msg); \
     } while(false)
+
 /** Log a message with format to the logger
  *
  * @param[in] log_level Logging level
@@ -66,6 +68,7 @@
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                \
         ARM_COMPUTE_LOG_MSG_WITH_FORMAT("ComputeLibrary", log_level, fmt, __VA_ARGS__); \
     } while(false)
+
 /** Log an error message to the logger
  *
  * @param[in] msg Message to log
@@ -86,6 +89,17 @@
     {                                                                                                    \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                                 \
         ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME("ComputeLibrary", arm_compute::logging::LogLevel::ERROR, msg); \
+    } while(false)
+
+/** Log an information message to the logger with function name before the message
+ *
+ * @param[in] msg Message to log
+ */
+#define ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(msg)                                                     \
+    do                                                                                                  \
+    {                                                                                                   \
+        ARM_COMPUTE_CREATE_ACL_LOGGER();                                                                \
+        ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME("ComputeLibrary", arm_compute::logging::LogLevel::INFO, msg); \
     } while(false)
 
 #endif /* SRC_COMMON_LOG_H */

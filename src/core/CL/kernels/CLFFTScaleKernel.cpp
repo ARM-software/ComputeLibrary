@@ -55,6 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 CLFFTScaleKernel::CLFFTScaleKernel()
     : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
+    _type = CLKernelType::ELEMENTWISE;
 }
 
 void CLFFTScaleKernel::configure(ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config)

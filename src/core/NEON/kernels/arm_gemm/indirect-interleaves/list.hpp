@@ -40,6 +40,7 @@
 #include "a64_interleave8_block2_bf16_bf16.hpp"
 #include "a64_interleave8_block2_fp32_fp32.hpp"
 #include "a64_interleave8_block4_bf16_bf16.hpp"
+#include "a64_interleave8_block4_fp32_bf16.hpp"
 #include "a64_interleave8_block4_s8_s8.hpp"
 #include "a64_interleave8_block4_s8_s8_summing.hpp"
 #include "a64_interleave8_block4_u8_u8_summing.hpp"

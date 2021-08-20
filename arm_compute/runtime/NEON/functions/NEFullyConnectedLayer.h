@@ -25,14 +25,13 @@
 #define ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 
-#include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
-#include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -77,10 +76,10 @@ private:
 } // namespace weights_transformations
 
 /** Basic function to compute a Fully Connected layer. This function calls the following kernels:
- *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# @ref cpu::kernels::CpuIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NETranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
- *  -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- *  -# @ref NEGEMMMatrixAdditionKernel or @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric) (if @p biases is not equal to nullptr)
+ *  -# @ref NEGEMM or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ *  -# @ref cpu::kernels::CpuGemmMatrixAdditionKernel or @ref NEGEMMLowpOutputStage (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -129,17 +128,7 @@ public:
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEFullyConnectedLayer
      *
-     * @param[in] input   Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights Weights tensor info. The weights must be 2 dimensional.
-     *                    If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
-     *                    If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
-     *                    Data type supported: Same as @p input.
-     * @param[in] biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] output  Destination tensor info. Its shape should be equal to the output of a matrix multiplication between:
-     *                    - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
-     *                    - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
-     *                    Data type supported: Same as @p input.
-     * @param[in] fc_info (Optional) Fully connected layer additional info
+     * Similar to @ref NEFullyConnectedLayer
      *
      * @return a status
      */
@@ -151,28 +140,8 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
-    void configure_conv_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
-    void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
-
-    MemoryGroup                                                         _memory_group;
-    IWeightsManager                                                    *_weights_manager;
-    NEFlattenLayer                                                      _flatten;
-    NEConvertFullyConnectedWeights                                      _convert_weights;
-    weights_transformations::NEConvertFullyConnectedWeightsManaged      _convert_weights_managed;
-    NETranspose                                                         _reshape_weights_function;
-    weights_transformations::NEFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
-    NEGEMM                                                              _mm_gemm;
-    NEGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
-    Tensor                                                              _flatten_output;
-    Tensor                                                              _converted_weights_output;
-    Tensor                                                              _reshape_weights_output;
-    const ITensor                                                      *_original_weights;
-    bool                                                                _are_weights_converted;
-    bool                                                                _are_weights_reshaped;
-    bool                                                                _is_fc_after_conv;
-    bool                                                                _is_quantized_asymmetric;
-    bool                                                                _is_prepared;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H */
