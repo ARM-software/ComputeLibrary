@@ -1,0 +1,4 @@
+var arm__conv_2depthwise_2kernels_2a64__u8q__packed__to__nhwc__5x5__s1__with__multiplier__output4x2__dot__depthfirst_2generic_8cpp =
+[
+    [ "a64_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst_impl", "arm__conv_2depthwise_2kernels_2a64__u8q__packed__to__nhwc__5x5__s1__with__multiplier__output4x2__dot__depthfirst_2generic_8cpp.xhtml#a289635efdf0b9159f40e4e8133100e34", null ]
+];

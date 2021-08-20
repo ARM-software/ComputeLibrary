@@ -1,0 +1,8 @@
+var classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel =
+[
+    [ "CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml#aaae13e7d5aaf50f1b6cb3ccce3419b76", null ],
+    [ "ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml#a38cd489c8f48a265727a81266211959d", null ],
+    [ "configure", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml#ac98e2f42794e4c32e991c42f1c68f733", null ],
+    [ "name", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml#aef1a10d4d6422ca58d53d8414d5954bd", null ],
+    [ "run_op", "classarm__compute_1_1cpu_1_1kernels_1_1_cpu_gemm_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml#a883429dd6cf828bfdd64b255afc458da", null ]
+];

@@ -1,0 +1,5 @@
+var classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall =
+[
+    [ "ClGemmDefaultConfigReshapedRhsOnlyValhall", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall.xhtml#a70d5e57c4a7724a5690c375737951fb2", null ],
+    [ "configure", "classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall.xhtml#ab6d0980d5c4bff1c0e3284b895c36248", null ]
+];

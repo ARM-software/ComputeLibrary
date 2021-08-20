@@ -1,0 +1,13 @@
+<map id="src/core/cpu/kernels/add/neon" name="src/core/cpu/kernels/add/neon">
+<area shape="rect" id="node1" href="dir_294b3ea3a5f2229f80bbc89a5559ae68.xhtml" title="neon" alt="" coords="27,52,99,100"/>
+<area shape="rect" id="node2" href="dir_707aa52d67938117542c6646238d6f70.xhtml" title="helpers" alt="" coords="39,244,111,292"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000085_000029.xhtml" title="3" alt="" coords="76,218,85,233"/>
+<area shape="rect" id="node3" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="19,340,131,388"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000085_000000.xhtml" title="14" alt="" coords="41,313,58,328"/>
+<area shape="rect" id="node4" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml" title="NEON" alt="" coords="100,148,172,196"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000085_000024.xhtml" title="4" alt="" coords="108,121,118,135"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000029_000000.xhtml" title="15" alt="" coords="74,314,92,329"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000024_000029.xhtml" title="79" alt="" coords="99,225,116,240"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000024_000000.xhtml" title="248" alt="" coords="100,322,125,337"/>
+<area shape="rect" id="clust1" href="dir_008146e9f07342395a361b77d189d6d1.xhtml" title="add" alt="" coords="16,16,109,111"/>
+</map>

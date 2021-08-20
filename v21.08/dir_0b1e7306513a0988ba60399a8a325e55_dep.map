@@ -1,0 +1,6 @@
+<map id="src/core/gpu/cl/kernels/gemm/reshaped_only_rhs" name="src/core/gpu/cl/kernels/gemm/reshaped_only_rhs">
+<area shape="rect" id="node1" href="dir_0b1e7306513a0988ba60399a8a325e55.xhtml" title="reshaped_only_rhs" alt="" coords="27,52,171,100"/>
+<area shape="rect" id="node2" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="43,148,155,196"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000117_000000.xhtml" title="12" alt="" coords="98,122,116,137"/>
+<area shape="rect" id="clust1" href="dir_3096ae5899e020c693921d49c0c42f78.xhtml" title="gemm" alt="" coords="16,16,181,111"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="src/core/NEON/kernels/arm_conv/depthwise" name="src/core/NEON/kernels/arm_conv/depthwise">
+<area shape="rect" id="node2" href="dir_b7f97eccce2eea27364902fe679cf4c6.xhtml" title="interleaves" alt="" coords="38,159,133,207"/>
+<area shape="rect" id="node4" href="dir_74739ff5fdb79cbfe4bc8a8496df703a.xhtml" title="cpu" alt="" coords="117,351,189,399"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000123_000081.xhtml" title="1" alt="" coords="115,324,124,338"/>
+<area shape="rect" id="node5" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml" title="arm_gemm" alt="" coords="105,255,202,303"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000123_000124.xhtml" title="1" alt="" coords="128,227,137,242"/>
+<area shape="rect" id="node3" href="dir_032f7aa13c62ebf44c0c8538051c1ee7.xhtml" title="kernels" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000128_000123.xhtml" title="24" alt="" coords="80,132,97,146"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000128_000081.xhtml" title="26" alt="" coords="192,335,209,350"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000128_000124.xhtml" title="74" alt="" coords="157,229,174,244"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000124_000081.xhtml" title="25" alt="" coords="153,325,170,339"/>
+<area shape="rect" id="clust2" href="dir_abb214ad2a926c78a0f27cabc6cb4a00.xhtml" alt="" coords="27,52,235,217"/>
+<area shape="rect" id="clust1" href="dir_ea98ae4f30fbc97db6231c6535bdb2d9.xhtml" title="arm_conv" alt="" coords="16,16,245,228"/>
+</map>

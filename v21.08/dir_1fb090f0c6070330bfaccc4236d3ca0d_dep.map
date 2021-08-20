@@ -1,0 +1,24 @@
+<map id="arm_compute/core" name="arm_compute/core">
+<area shape="rect" id="node4" href="dir_a0d10d1f11f896cb40f799a595f5f383.xhtml" title="experimental" alt="" coords="96,186,205,234"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000001_000011.xhtml" title="2" alt="" coords="163,162,172,176"/>
+<area shape="rect" id="node5" href="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml" title="utils" alt="" coords="229,186,301,234"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000001_000012.xhtml" title="7" alt="" coords="229,159,239,174"/>
+<area shape="rect" id="node7" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="333,186,405,234"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000001_000027.xhtml" title="9" alt="" coords="315,175,324,189"/>
+<area shape="rect" id="node2" href="dir_1633709b037eda5b8477677909f78129.xhtml" title="CL" alt="" coords="229,90,301,138"/>
+<area shape="rect" id="node3" href="dir_7484b841a86f2d7fdd057c9b24fbf230.xhtml" title="CPP" alt="" coords="37,90,109,138"/>
+<area shape="rect" id="edge14-headlabel" href="dir_000009_000011.xhtml" title="1" alt="" coords="121,158,131,173"/>
+<area shape="rect" id="node6" href="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml" title="runtime" alt="" coords="334,90,407,138"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000009_000007.xhtml" title="1" alt="" coords="357,62,366,77"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000012_000007.xhtml" title="1" alt="" coords="312,136,322,151"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000012_000027.xhtml" title="4" alt="" coords="310,194,320,208"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000007_000002.xhtml" title="24" alt="" coords="311,115,328,129"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000007_000009.xhtml" title="3" alt="" coords="91,69,100,83"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000007_000011.xhtml" title="5" alt="" coords="221,179,230,194"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000007_000012.xhtml" title="4" alt="" coords="314,173,324,187"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000007_000027.xhtml" title="5" alt="" coords="374,160,383,174"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000027_000001.xhtml" title="6" alt="" coords="214,134,223,149"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000027_000012.xhtml" title="3" alt="" coords="315,211,324,225"/>
+<area shape="rect" id="clust2" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" alt="" coords="27,79,312,244"/>
+<area shape="rect" id="clust1" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="16,43,323,255"/>
+</map>

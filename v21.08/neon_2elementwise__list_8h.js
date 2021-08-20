@@ -1,0 +1,25 @@
+var neon_2elementwise__list_8h =
+[
+    [ "elementwise_arithm_op", "neon_2elementwise__list_8h.xhtml#abbfe5d27e11d8842fdb4cef411832f8e", null ],
+    [ "elementwise_arithm_op", "neon_2elementwise__list_8h.xhtml#a29b215a8ed4583d1d4ac5d1e226bf9ef", null ],
+    [ "elementwise_arithm_op< ArithmeticOperation::DIV, typename wrapper::traits::neon_vector< float, 4 > >", "neon_2elementwise__list_8h.xhtml#ad3c3a3a2edcc9ae7274708f1babf305a", null ],
+    [ "elementwise_arithm_op< ArithmeticOperation::DIV, typename wrapper::traits::neon_vector< int32_t, 4 > >", "neon_2elementwise__list_8h.xhtml#a2dd8a3579e2536f06cbda2c602ff6261", null ],
+    [ "elementwise_arithm_op< ArithmeticOperation::POWER, typename wrapper::traits::neon_vector< float, 4 > >", "neon_2elementwise__list_8h.xhtml#af7232f84a3d1ac94e631f1abf4f1fdca", null ],
+    [ "elementwise_arithm_op_broadcast", "neon_2elementwise__list_8h.xhtml#a6e4a309149d475d17fdfd2d11c26b916", null ],
+    [ "elementwise_arithm_op_broadcast_loop", "neon_2elementwise__list_8h.xhtml#a1d55687f004c1a3302485b2cb8da093b", null ],
+    [ "elementwise_arithm_op_loop", "neon_2elementwise__list_8h.xhtml#a7ecfb489f7d67ef4d8c1ba77e1060702", null ],
+    [ "elementwise_arithm_op_scalar", "neon_2elementwise__list_8h.xhtml#a4c0ec3e8fab2ea0202cedcc94da53f25", null ],
+    [ "elementwise_comp_op", "neon_2elementwise__list_8h.xhtml#ac758cf39f9e6885c73b6814ac80ff0ec", null ],
+    [ "elementwise_comp_op_16", "neon_2elementwise__list_8h.xhtml#a38e6bb15e7ac2da0795f3cfef2f29d6d", null ],
+    [ "elementwise_comp_op_16_loop", "neon_2elementwise__list_8h.xhtml#a550901088b6a737a17d7eeb052ba9ef6", null ],
+    [ "elementwise_comp_op_32", "neon_2elementwise__list_8h.xhtml#a3b186f6a61b072a9952403a3ef8548b4", null ],
+    [ "elementwise_comp_op_32_loop", "neon_2elementwise__list_8h.xhtml#ae64977c9bd4690e8e3607e6fea754199", null ],
+    [ "elementwise_comp_op_8", "neon_2elementwise__list_8h.xhtml#af8cc8f4068cf9120bf433df94926221f", null ],
+    [ "elementwise_comp_op_8_loop", "neon_2elementwise__list_8h.xhtml#a0df077147bf38575572e36582af9f573", null ],
+    [ "elementwise_comp_op_broadcast", "neon_2elementwise__list_8h.xhtml#ae6f48be843bb47d4779d6613cd3ce68d", null ],
+    [ "elementwise_comp_op_broadcast_16_loop", "neon_2elementwise__list_8h.xhtml#a324f99e84c7277809b5a774363197382", null ],
+    [ "elementwise_comp_op_broadcast_32_loop", "neon_2elementwise__list_8h.xhtml#a15e0926812301b45c7e24e7eea269ab2", null ],
+    [ "elementwise_comp_op_broadcast_8_loop", "neon_2elementwise__list_8h.xhtml#ad2a62b7914c8bff0e139b376ec38dbe7", null ],
+    [ "elementwise_comp_op_scalar", "neon_2elementwise__list_8h.xhtml#abb34d4000c420ca4fed96903be0fdc64", null ],
+    [ "elementwise_op", "neon_2elementwise__list_8h.xhtml#a82713bd9209865da67e8624a162ef9c1", null ]
+];

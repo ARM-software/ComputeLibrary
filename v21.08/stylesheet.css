@@ -1,0 +1,221 @@
+/* Changes to tabs.css */
+
+.tabs, .tabs2, .tabs3 {
+    /* box-shadow: 0px 5px 30px rgba(0, 0, 0, 0.3); */
+    position: relative;
+}
+
+.tablist li {
+    line-height: 32px;
+}
+
+.tablist a {
+    color: #FFFFFF;
+    text-shadow: none;
+}
+
+.tablist a:hover {
+    text-shadow: 0px 1px 1px rgba(0, 0, 0, 1.0);
+    text-decoration: none;
+    background-repeat: no-repeat;
+    background-image: url('tab_s.png');;
+}
+
+.tablist li.current a {
+    text-shadow: none;
+}
+
+/* Changes to navtree.css */
+
+#nav-tree .selected {
+    background-image: url('tab_a_nav.png');
+    border-radius: 15px;
+    text-shadow: none;
+}
+
+#nav-tree .label a {
+    color: #444444;
+}
+
+#nav-tree .selected a {
+    color: #007fa3;
+    font-weight: bold
+}
+
+#nav-tree {
+    background-color: #fafafa;
+}
+
+#doc-content {
+    background-color: #fafafa;
+}
+
+.ui-resizable-e {
+    background: none;
+    background-color : lightgray;
+    width:4px;
+}
+
+#nav-tree {
+    background-image: none;
+    background-color: #fafafa;
+}
+
+
+/* Changes to doxygen.css */
+
+h2.groupheader {
+    border-bottom: 1px solid #979797;
+    color: #4C4C4C;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight : normal;
+}
+
+h1.glow, h2.glow, h3.glow, h4.glow, h5.glow, h6.glow {
+    text-shadow: 0 0 15px #007fa3;
+}
+
+div.qindex, div.navtab{
+    background-color: #EBEBEB;
+    border: 1px solid #B4B4B4;
+}
+
+div.qindex, div.navpath {
+    position : relative;
+}
+
+a {
+    color: #444444;
+}
+
+.contents a:visited {
+    color: #666666;
+}
+
+a.qindexHL {
+    background-color: #AFAFAf;
+    border: 1px double #9D9D9D;
+}
+
+a.code, a.code:visited {
+    color: #444444;
+}
+
+a.codeRef, a.codeRef:visited {
+    color: #444444;
+}
+
+div.fragment {
+    background-color: #FCFCFC;
+    border: 1px solid #CFCFCF;
+}
+
+div.line.glow {
+    background-color: #007fa3;
+}
+
+body {
+    background-color: #EEE;
+}
+
+.memberdecls td.glow, .fieldtable tr.glow {
+    background-color: #007fa3;
+}
+
+.memitem.glow {
+    /* box-shadow: 0 0 15px orange; */
+}
+
+.memproto, dl.reflist dt {
+    border-top: 1px solid #B8B8B8;
+    border-left: 1px solid #B8B8B8;
+    border-right: 1px solid #B8B8B8;
+    color: #333333;
+    background-color: #E2E2E2;
+}
+
+.memdoc, dl.reflist dd {
+    border-bottom: 1px solid #B8B8B8;
+    border-left: 1px solid #B8B8B8;
+    border-right: 1px solid #B8B8B8;
+    background-color: #FCFCFC;
+}
+
+table.doxtable td, table.doxtable th {
+    border: 1px solid #2D2D2D;
+}
+
+table.doxtable th {
+    background-color: #373737;
+}
+
+.navpath li.navelem a
+{
+    color: white;
+    text-shadow: none;
+}
+
+.navpath li.navelem a:hover
+{
+    color:white;
+    text-shadow : 0px 1px 1px rgba(0, 0, 0, 1.0);
+}
+
+dl.note
+{
+    border-color: #f68a33;
+}
+
+#projectlogo
+{
+    width:150px;
+    text-align:left;
+}
+
+#projectname
+{
+    font: 200% Tahoma, Arial,sans-serif;
+    color : #676767;
+    overflow:hidden;
+}
+
+#projectname #armdevcenter
+{
+    float:right;
+    padding-right: 20px;
+}
+
+#eula
+{
+    font-size: 80%;
+    font-weight: bold;
+}
+
+#titlearea
+{
+    background-color : white;
+    border-top: 5px solid white;
+    border-left: 10px solid white;
+    border-bottom: none;
+}
+
+a.copyright {
+    color: #FFFFFF;
+}
+
+a.copyright:hover {
+    color: #FFFFFF;
+}
+
+a.copyright:visited {
+    color: #FFFFFF;
+}
+
+div.toc h3 {
+    font: bold 12px/1.2 Arial,FreeSans,sans-serif;
+    color: #007fa3;
+    border-bottom: 0 none;
+    margin: 0;
+}

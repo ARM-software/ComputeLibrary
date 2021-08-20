@@ -1,0 +1,4 @@
+var arm__conv_2depthwise_2kernels_2a64__u8s8u8q__packed__to__nhwc__generic__with__multiplier__output8cfc5a265e1a2a2d0d670a75c57433e3 =
+[
+    [ "a64_u8s8u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl", "arm__conv_2depthwise_2kernels_2a64__u8s8u8q__packed__to__nhwc__generic__with__multiplier__output8cfc5a265e1a2a2d0d670a75c57433e3.xhtml#a1faf4162ac39ab65e93219e7345e4e87", null ]
+];

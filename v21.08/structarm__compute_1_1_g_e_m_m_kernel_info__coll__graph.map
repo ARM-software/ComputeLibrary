@@ -1,0 +1,6 @@
+<map id="GEMMKernelInfo" name="GEMMKernelInfo">
+<area shape="rect" id="node2" href="$structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml" title="GEMMLowp output stage info. " alt="" coords="5,5,208,32"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml" title="GEMM LHS (Left Hand Side) matrix information. " alt="" coords="233,5,386,32"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml" title="GEMM RHS (Right Hand Side) matrix information. " alt="" coords="411,5,565,32"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_activation_layer_info.xhtml" title="Activation Layer Information class. " alt="" coords="589,5,739,32"/>
+</map>

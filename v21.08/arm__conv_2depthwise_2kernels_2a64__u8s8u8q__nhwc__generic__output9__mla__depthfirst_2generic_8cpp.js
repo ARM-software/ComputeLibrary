@@ -1,0 +1,4 @@
+var arm__conv_2depthwise_2kernels_2a64__u8s8u8q__nhwc__generic__output9__mla__depthfirst_2generic_8cpp =
+[
+    [ "a64_u8s8u8q_nhwc_generic_output9_mla_depthfirst_impl", "arm__conv_2depthwise_2kernels_2a64__u8s8u8q__nhwc__generic__output9__mla__depthfirst_2generic_8cpp.xhtml#a7673d3dea4d7e2253857543ee263ae27", null ]
+];
