@@ -318,7 +318,7 @@ public:
             { ACL_SRC_2, &bias },
             { ACL_DST, &dst }
         });
-        reshape_lhs.run(gemm_pack);
+        gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:
         CLScheduler::get().sync();
