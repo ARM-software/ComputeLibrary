@@ -120,7 +120,7 @@ void sync_backends()
 {
     for(const auto &backend : backends::BackendRegistry::get().backends())
     {
-        if(backend.second->is_backend_supported())
+        if(backend.second->backend_allocator())
         {
             backend.second->sync();
         }
