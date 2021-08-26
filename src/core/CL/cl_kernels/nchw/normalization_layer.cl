@@ -134,9 +134,8 @@ __kernel void normalization_layer_in_map_nchw(TENSOR3D_DECLARATION(input),
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     kappa_v = SQCVT_SAT(KAPPA);
 
-    const int current_col = get_global_id(0) << 2;
-    const int left_pos    = max(-(int)RADIUS, -3 - current_col);
-    const int right_pos   = min((int)RADIUS, (int)WIDTH_SIZE - 1 - current_col);
+    const int left_pos  = -(int)RADIUS;
+    const int right_pos = (int)RADIUS;
 
 #if defined(IN_MAP_2D)
     const int current_row = get_global_id(1);
