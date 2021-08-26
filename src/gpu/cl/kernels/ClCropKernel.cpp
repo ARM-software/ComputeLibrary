@@ -56,7 +56,7 @@ void ClCropKernel::configure(const CLCompileContext &compile_context, const ITen
     _batch_index         = batch_index;
     _extrapolation_value = extrapolation_value;
 
-    const int vec_size_x = 4;
+    const uint32_t vec_size_x = 4;
     // Create and update the window (if needed)
     Window win = calculate_max_window(*dst);
 
@@ -66,9 +66,9 @@ void ClCropKernel::configure(const CLCompileContext &compile_context, const ITen
         win = *dst_window;
     }
 
-    const int  dst_width_x    = win.num_iterations(0);
-    const bool multi_access_x = dst_width_x >= vec_size_x;
-    const bool remainder_x    = dst_width_x % vec_size_x > 0;
+    const uint32_t dst_width_x    = win.num_iterations(0);
+    const bool     multi_access_x = dst_width_x >= vec_size_x;
+    const bool     remainder_x    = dst_width_x % vec_size_x > 0;
 
     if(multi_access_x)
     {

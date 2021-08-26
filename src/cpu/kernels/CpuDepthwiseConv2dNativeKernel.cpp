@@ -78,7 +78,7 @@ struct DepthwiseConvolutionRunInfo
           x_start(w.x().start()),
           x_end(w.x().end()),
           x_step(static_cast<uint32_t>(num_read_elements_per_iteration * depth_multiplier)),
-          x_leftover_start(std::max(static_cast<int32_t>(w.x().end()) - static_cast<int32_t>(x_step) + 1, int32_t(0))),
+          x_leftover_start(std::max(static_cast<int32_t>(w.x().end() + 1) - static_cast<int32_t>(x_step), int32_t(0))),
           input_stride_y(input.strides_in_bytes().y()),
           input_stride_z(input.strides_in_bytes().z()),
           input_max_offset(input.strides_in_bytes().z() * input.dimension(height_idx) - (input.padding().bottom + input.padding().top) * input.strides_in_bytes().y()),

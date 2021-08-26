@@ -41,15 +41,14 @@ static const uint8x8_t  c0_x8     = vdup_n_u8(0);
 static const uint8x16_t c0_x16    = vdupq_n_u8(0);
 static const uint8x8_t  c1_x8     = vdup_n_u8(1);
 static const uint8x16_t c1_x16    = vdupq_n_u8(1);
-static const int        step      = 16;
-static const int        half_step = step / 2;
+static const uint32_t   step      = 16;
+static const uint32_t   half_step = step / 2;
 
-void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, int len)
+void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, uint32_t len)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src0);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src1);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
 
     for(; len >= step; len -= step)
     {
@@ -76,11 +75,10 @@ void neon_logical_and(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, in
     }
 }
 
-void neon_logical_and_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_t *dst, int len)
+void neon_logical_and_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_t *dst, uint32_t len)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
 
     const auto broadcast_val_clamped_s   = std::min<uint8_t>(broadcast_val, 1);
     const auto broadcast_val_clamped_x16 = vdupq_n_u8(broadcast_val_clamped_s);
@@ -108,12 +106,11 @@ void neon_logical_and_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8
     }
 }
 
-void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, int len)
+void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, uint32_t len)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src0);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src1);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
 
     for(; len >= step; len -= step)
     {
@@ -140,11 +137,10 @@ void neon_logical_or(const uint8_t *src0, const uint8_t *src1, uint8_t *dst, int
     }
 }
 
-void neon_logical_or_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_t *dst, int len)
+void neon_logical_or_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_t *dst, uint32_t len)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
 
     const auto broadcast_val_clamped_s   = std::min<uint8_t>(broadcast_val, 1);
     const auto broadcast_val_clamped_x16 = vdupq_n_u8(broadcast_val_clamped_s);
@@ -172,11 +168,10 @@ void neon_logical_or_broadcast(const uint8_t *src, uint8_t broadcast_val, uint8_
     }
 }
 
-void neon_logical_not(const uint8_t *src, uint8_t *dst, int len)
+void neon_logical_not(const uint8_t *src, uint8_t *dst, uint32_t len)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(src);
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(dst);
-    ARM_COMPUTE_ASSERT(len >= 0);
 
     for(; len >= step; len -= step)
     {
@@ -204,7 +199,7 @@ void run_unary(const Window &window, const ITensor *src, ITensor *dst)
 {
     Window win{ window };
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    const auto len = static_cast<int>(window.x().end()) - static_cast<int>(window.x().start());
+    const auto len = window.x().end() - window.x().start();
 
     Iterator in(src, win);
     Iterator out(dst, win);
@@ -225,11 +220,11 @@ void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, 
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     const bool is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
-    const auto len                   = static_cast<int>(window.x().end()) - static_cast<int>(window.x().start());
+    const auto len                   = window.x().end() - window.x().start();
 
     if(is_broadcast_across_x)
     {
-        using LogicalBroadcastUKernelPtr        = std::add_pointer<void(const uint8_t *, uint8_t, uint8_t *, int)>::type;
+        using LogicalBroadcastUKernelPtr        = std::add_pointer<void(const uint8_t *, uint8_t, uint8_t *, uint32_t)>::type;
         LogicalBroadcastUKernelPtr logical_func = op == LogicalOperation::Or ? &neon_logical_or_broadcast : &neon_logical_and_broadcast;
 
         const bool     is_broadcast_input_1 = src1_win.x().step() == 0;
@@ -253,7 +248,7 @@ void run_binary(const Window &window, const ITensor *src0, const ITensor *src1, 
     }
     else
     {
-        using LogicalUKernelPtr        = std::add_pointer<void(const uint8_t *, const uint8_t *, uint8_t *, int)>::type;
+        using LogicalUKernelPtr        = std::add_pointer<void(const uint8_t *, const uint8_t *, uint8_t *, uint32_t)>::type;
         LogicalUKernelPtr logical_func = op == LogicalOperation::Or ? &neon_logical_or : &neon_logical_and;
 
         src0_win.set(Window::DimX, Window::Dimension(0, 1, 1));

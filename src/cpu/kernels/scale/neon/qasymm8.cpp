@@ -74,7 +74,7 @@ void qasymm8_neon_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor
             const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h) ?
                              (*(pixel_row_ptr + index_w * stride_w + index_h * stride_h)) :
                              const_border_value;
-            const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h) ?
+            const auto a01 = (-1 <= index_w && index_w + 1 < in_dim_w && 0 <= index_h && index_h < in_dim_h) ?
                              (*(pixel_row_ptr + (index_w + 1) * stride_w + index_h * stride_h)) :
                              const_border_value;
             const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h && index_h < in_dim_h - 1) ?
