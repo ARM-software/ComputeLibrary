@@ -2705,6 +2705,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -2730,7 +2733,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2748,7 +2751,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2772,9 +2775,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
     // Store output block
 #if defined(MIXED_PRECISION)
@@ -2975,6 +2975,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -3000,7 +3003,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3018,7 +3021,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3042,9 +3045,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
     // Store output block
 #if defined(MIXED_PRECISION)
@@ -3284,6 +3284,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     const uint y = get_global_id(1);
     const uint z = get_global_id(2);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
     {
@@ -3495,7 +3498,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3513,7 +3516,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3536,9 +3539,6 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
     // Store output block
 #if defined(MIXED_PRECISION)
@@ -3838,6 +3838,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -3863,7 +3866,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3880,7 +3883,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3903,9 +3906,6 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
     // Store output block
 #if defined(MIXED_PRECISION)
