@@ -328,10 +328,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pixelwise_mul_float", "common/pixelwise_mul_float.cl" },
     { "pixelwise_mul_int", "common/pixelwise_mul_int.cl" },
     { "pixelwise_mul_quantized", "common/pixelwise_mul_int.cl" },
-    { "pooling_layer_2", "common/pooling_layer.cl" },
-    { "pooling_layer_3", "common/pooling_layer.cl" },
-    { "pooling_layer_optimized_3", "common/pooling_layer.cl" },
-    { "pooling_layer_7", "common/pooling_layer.cl" },
     { "qlstm_layer_normalization", "common/qlstm_layer_normalization.cl" },
     { "quantization_layer", "common/quantization_layer.cl" },
     { "range", "common/range.cl" },
@@ -385,9 +381,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "normalize_planar_yuv_layer_nchw", "nchw/normalize_planar_yuv_layer.cl" },
     { "normalize_planar_yuv_layer_q8_nchw", "nchw/normalize_planar_yuv_layer_quantized.cl" },
     { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp32", "nchw/pooling_layer.cl" },
-    { "pooling_layer_2_nchw_indices_fp16", "nchw/pooling_layer.cl" },
-    { "pooling_layer_MxN_quantized_nchw", "nchw/pooling_layer_quantized.cl" },
+    { "pooling_layer_2_nchw_indices", "nchw/pooling_layer.cl" },
     { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
     { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
     { "remap_bilinear_nchw", "nchw/remap.cl" },
@@ -668,10 +662,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/pixelwise_mul_int.clembed"
     },
     {
-        "common/pooling_layer.cl",
-#include "./cl_kernels/common/pooling_layer.clembed"
-    },
-    {
         "common/qlstm_layer_normalization.cl",
 #include "./cl_kernels/common/qlstm_layer_normalization.clembed"
     },
@@ -803,10 +793,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nchw/pooling_layer.cl",
 #include "./cl_kernels/nchw/pooling_layer.clembed"
-    },
-    {
-        "nchw/pooling_layer_quantized.cl",
-#include "./cl_kernels/nchw/pooling_layer_quantized.clembed"
     },
     {
         "nchw/prior_box_layer.cl",

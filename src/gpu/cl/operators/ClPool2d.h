@@ -35,7 +35,6 @@ namespace opencl
 {
 /** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
  *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
  * -# @ref opencl::ClPool2d
  */
 class ClPool2d : public IClOperator
@@ -59,13 +58,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info, const ITensorInfo *indices = nullptr);
-
-    // Inherited method overridden
-    void run(ITensorPack &tensors) override;
-
-private:
-    std::unique_ptr<ICLKernel> _pooling{ nullptr };
-    std::unique_ptr<ICLKernel> _border_handler{ nullptr };
 };
 } // namespace opencl
 } // namespace arm_compute
