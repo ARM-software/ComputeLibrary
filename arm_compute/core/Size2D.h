@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,8 +41,9 @@ public:
      * @param[in] w Width of the image or rectangle
      * @param[in] h Height of the image or rectangle
      */
-    Size2D(size_t w, size_t h)
-        : width(w), height(h)
+    Size2D(size_t w, size_t h) noexcept
+        : width(w),
+          height(h)
     {
     }
     /** The area of the image or rectangle calculated as (width * height)
