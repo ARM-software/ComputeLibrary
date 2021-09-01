@@ -132,6 +132,13 @@ size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_
  * @return A list with the driving node of a given node
  */
 std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
+/** Get the list of driver nodes of a given node
+ *
+ * @param[in] node Node to find the driver node of
+ *
+ * @return A list with the driver node of a given node
+ */
+std::vector<NodeIdxPair> get_driver_nodes(const INode &node);
 /** Configures tensor
  *
  * @param[in, out] tensor Tensor to configure

@@ -194,6 +194,26 @@ std::vector<NodeIdxPair> get_driving_nodes(const INode &node)
     return driving_nodes;
 }
 
+std::vector<NodeIdxPair> get_driver_nodes(const INode &node)
+{
+    std::vector<NodeIdxPair> driver_nodes;
+
+    const Graph *g = node.graph();
+    ARM_COMPUTE_ERROR_ON(g == nullptr);
+
+    for(auto &input_edge_id : node.input_edges())
+    {
+        auto input_edge = g->edge(input_edge_id);
+        if(input_edge != nullptr)
+        {
+            ARM_COMPUTE_ERROR_ON(input_edge->producer() == nullptr);
+            driver_nodes.push_back({ input_edge->producer_id(), input_edge->producer_idx() });
+        }
+    }
+
+    return driver_nodes;
+}
+
 void configure_tensor(Tensor *tensor)
 {
     if(tensor != nullptr && tensor->handle() == nullptr)

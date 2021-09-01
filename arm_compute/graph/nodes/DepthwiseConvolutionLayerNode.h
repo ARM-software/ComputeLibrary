@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,6 +78,11 @@ public:
      * @param[in] fused_activation Fused activation to set
      */
     void set_fused_activation(ActivationLayerInfo fused_activation);
+    /** Sets convolution info
+     *
+     * @param[in] info Convolution info to set
+     */
+    void set_convolution_info(PadStrideInfo info);
     /** Computes depthwise convolution output descriptor
      *
      * @param[in] input_descriptor   Input descriptor

@@ -265,6 +265,74 @@ void fuse_node_with_activation(Graph &g, const Edge *output_edge, const std::set
     }
 }
 
+bool check_padding_info(const DataLayout &layout, const PaddingList &padding_list, PaddingInfo &pad_w, PaddingInfo &pad_h)
+{
+    if(layout == DataLayout::NCHW || layout == DataLayout::NHWC)
+    {
+        const PaddingInfo zero_padding(0, 0);
+
+        const unsigned int height_index = get_dimension_idx(layout, DataLayoutDimension::HEIGHT);
+        const unsigned int width_index  = get_dimension_idx(layout, DataLayoutDimension::WIDTH);
+
+        pad_w = width_index < padding_list.size() ? padding_list[width_index] : zero_padding;
+        pad_h = height_index < padding_list.size() ? padding_list[height_index] : zero_padding;
+
+        for(unsigned int i = 0; i < padding_list.size(); i++)
+        {
+            if(i != height_index && i != width_index && padding_list[i] != zero_padding)
+            {
+                // if the index is not either height or width, don't fuse
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+template <typename N>
+void fuse_pad_with_convolution(Graph &g, const Edge *output_edge)
+{
+    auto *pad_node  = arm_compute::utils::cast::polymorphic_downcast<PadLayerNode *>(output_edge->producer());
+    auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<N *>(output_edge->consumer());
+
+    const Edge *input_edge = pad_node->input_edge(0);
+    if(input_edge != nullptr && input_edge->tensor() != nullptr && pad_node->output(0)->accessor() == nullptr
+       && pad_node->pad_value().get<float>() == 0.0)
+    {
+        const DataLayout  layout       = input_edge->tensor()->desc().layout;
+        const PaddingList padding_list = pad_node->padding();
+        PaddingInfo       pad_w, pad_h;
+
+        if(check_padding_info(layout, padding_list, pad_w, pad_h))
+        {
+            // Add paddings to the convolution node
+            const PadStrideInfo conv_info = conv_node->convolution_info();
+            const PadStrideInfo new_conv_info(
+                conv_info.stride().first,
+                conv_info.stride().second,
+                conv_info.pad_left() + pad_w.first,
+                conv_info.pad_right() + pad_w.second,
+                conv_info.pad_top() + pad_h.first,
+                conv_info.pad_bottom() + pad_h.second,
+                conv_info.round());
+            conv_node->set_convolution_info(new_conv_info);
+
+            // Update drivers of the convolution node
+            std::vector<NodeIdxPair> pad_driver_nodes = get_driver_nodes(*pad_node);
+            g.remove_node(pad_node->id());
+
+            // Update fused node inputs
+            for(auto &driver_node : pad_driver_nodes)
+            {
+                g.add_connection(driver_node.node_id, driver_node.index, conv_node->id(), 0);
+            }
+        }
+    }
+}
+
 template <typename N1, typename N2, typename F, typename... Args>
 void fuse_layer(Graph &g, std::function<bool(INode &)> const &prec, const F fuse_fcn, Args &&... optional_arguments)
 {
@@ -333,6 +401,8 @@ void NodeFusionMutator::mutate(Graph &g)
     };
 
     // Fusion mutations
+    detail::fuse_layer<PadLayerNode, ConvolutionLayerNode>(g, empty_prec, detail::fuse_pad_with_convolution<ConvolutionLayerNode>);
+    detail::fuse_layer<PadLayerNode, DepthwiseConvolutionLayerNode>(g, empty_prec, detail::fuse_pad_with_convolution<DepthwiseConvolutionLayerNode>);
     detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
