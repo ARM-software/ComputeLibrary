@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ struct FFT2DInfo
     FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
 };
 
-/** Descriptor used by the Convolution function */
+/** Descriptor used by the 2d Convolution function */
 struct Conv2dInfo
 {
     Conv2dInfo() = default;
@@ -72,5 +72,29 @@ struct Conv2dInfo
     bool                enable_fast_math{ false };
     unsigned int        num_groups{ 1 };
 };
+
+/** Descriptor used by the 3d Convolution function */
+struct Conv3dInfo
+{
+    Conv3dInfo() = default;
+
+    Conv3dInfo(const Size3D                &stride,
+               const Padding3D             &padding,
+               const ActivationLayerInfo   &act_info,
+               const Size3D                &dilation,
+               const DimensionRoundingType &round_type,
+               bool                         enable_fast_math)
+        : stride(stride), padding(padding), act_info(act_info), dilation(dilation), round_type(round_type), enable_fast_math(enable_fast_math)
+    {
+    }
+
+    Size3D                stride{ 1U, 1U, 1U };
+    Padding3D             padding{};
+    ActivationLayerInfo   act_info{};
+    Size3D                dilation{ 1U, 1U, 1U };
+    DimensionRoundingType round_type{};
+    bool                  enable_fast_math{ false };
+};
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H */

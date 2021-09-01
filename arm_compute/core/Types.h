@@ -27,6 +27,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/Macros.h"
@@ -112,7 +113,8 @@ enum class DataLayout
 {
     UNKNOWN, /**< Unknown data layout */
     NCHW,    /**< Num samples, channels, height, width */
-    NHWC     /**< Num samples, height, width, channels */
+    NHWC,    /**< Num samples, height, width, channels */
+    NDHWC    /**< Num samples, depth, height, width, channels */
 };
 /** [DataLayout enum definition] **/
 
@@ -758,6 +760,17 @@ private:
     unsigned int _pad_bottom;
 
     DimensionRoundingType _round_type;
+};
+
+/** Padding information for 3D operations like Conv3d */
+struct Padding3D
+{
+    size_t left   = { 0 }; /**<  Padding across the width dimenstion on the left, in elements. */
+    size_t right  = { 0 }; /**<  Padding across the width dimenstion on the right, in elements. */
+    size_t top    = { 0 }; /**<  Padding across the height dimenstion  on the top, in elements. */
+    size_t bottom = { 0 }; /**<  Padding across the height dimenstion on the bottom, in elements. */
+    size_t front  = { 0 }; /**<  Padding across the depth dimenstion on the front, in elements. */
+    size_t back   = { 0 }; /**<  Padding across the depth dimenstion on the back, in elements. */
 };
 
 /** PriorBox layer info */

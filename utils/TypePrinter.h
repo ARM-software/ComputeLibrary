@@ -568,6 +568,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_lay
         case DataLayout::NCHW:
             os << "NCHW";
             break;
+        case DataLayout::NDHWC:
+            os << "NDHWC";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
