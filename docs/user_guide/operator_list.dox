@@ -454,6 +454,7 @@ where N = batches, C = channels, H = height, W = width
   <td>
       <ul>
        <li>NCHW
+       <li>NHWC
       </ul>
   <td>
     <table>
@@ -465,6 +466,7 @@ where N = batches, C = channels, H = height, W = width
   <td>
       <ul>
        <li>NCHW
+       <li>NHWC
       </ul>
   <td>
     <table>

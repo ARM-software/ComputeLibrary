@@ -46,6 +46,7 @@ public:
      *
      * Valid data layouts:
      * - NCHW
+     * - NHWC
      *
      * Valid data type configurations:
      * |src            |dst            |
