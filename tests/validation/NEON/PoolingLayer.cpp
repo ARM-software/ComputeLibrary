@@ -193,9 +193,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::F16))),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
-
-                                                                                                                 ))
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);

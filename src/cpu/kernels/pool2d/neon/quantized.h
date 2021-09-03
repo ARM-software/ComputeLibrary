@@ -467,6 +467,63 @@ inline void scale_vector_q16x8(bool exclude_padding, TVec &v, const Coordinates 
 }
 
 template <typename T>
+auto load16_boundary_aware(int srcw, int srch, int pad_l, int pad_r, int pad_t, int pad_b, int x, int y, const T *ptr, T fval)
+{
+    ARM_COMPUTE_UNUSED(pad_b, pad_r);
+    T vec[16];
+    //handle reading a row out of the tensor
+    const bool row_in_bounds((y >= pad_t) && (y < (srch + pad_t)));
+    for(int i = 0; i < 16; i++)
+    {
+        if(row_in_bounds && (x + i >= pad_l) && (x + i < (srcw + pad_l)))
+        {
+            vec[i] = *(ptr + i);
+        }
+        else
+        {
+            vec[i] = fval;
+        }
+    }
+    return wrapper::vloadq(vec);
+}
+
+template <typename T, typename V, bool deinterleave>
+inline void write16_boundary_aware(int x, int dst_w, const V &lower, const V &upper, T *ptr)
+{
+    if(deinterleave)
+    {
+        for(int i = 0; i < 8 && (i * 2 + x) < dst_w; ++i)
+        {
+            *(ptr + i * 2) = lower[i];
+        }
+        for(int i = 0; i < 8 && (i * 2 + x + 1) < dst_w; ++i)
+        {
+            *(ptr + 1 + i * 2) = upper[i];
+        }
+    }
+    else
+    {
+        for(int i = 0; i < 8 && (i + x) < dst_w; ++i)
+        {
+            *(ptr + i) = lower[i];
+        }
+        for(int i = 0; i < 8 && (i + x + 8) < dst_w; ++i)
+        {
+            *(ptr + i + 8) = upper[i];
+        }
+    }
+}
+
+template <typename T, typename V>
+inline void write8_boundary_aware(int x, int dst_w, const V &v, T *ptr)
+{
+    for(int i = 0; i < 8 && (i + x) < dst_w; ++i)
+    {
+        *(ptr + i) = v[i];
+    }
+}
+
+template <typename T>
 void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, PoolingLayerInfo &pool_info, const Window &window_src, const Window &window)
 {
     ARM_COMPUTE_UNUSED(dst1);
@@ -474,9 +531,8 @@ void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     Iterator out(dst0, window);
 
     /** SIMD vector types */
-    using q8x8_t    = typename wrapper::traits::neon_vector<T, 8>::type;
-    using q8x16_t   = typename wrapper::traits::neon_vector<T, 16>::type;
-    using q8x8x2_t  = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
+    using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
+    using q8x16_t = typename wrapper::traits::neon_vector<T, 16>::type;
     using q16_t     = typename wrapper::traits::promote_t<T>;
     using q16x4_t   = typename wrapper::traits::neon_vector<q16_t, 4>::type;
     using q16x8_t   = typename wrapper::traits::neon_vector<q16_t, 8>::type;
@@ -490,14 +546,11 @@ void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     const int     pool_pad_left   = pool_info.pad_stride_info.pad_left();
     const int     pool_pad_bottom = pool_info.pad_stride_info.pad_bottom();
     std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
-    const int upper_bound_w = src->info()->dimension(0) + (pool_info.exclude_padding ? 0 : pool_pad_right);
-    const int upper_bound_h = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-
-    const T *const src_top_ptr    = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top))));
-    const T *const src_bottom_ptr = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
-
-    const int scale_step_x = (pool_stride_x == 1) ? 2 : 1;
-
+    const int                     upper_bound_w        = src->info()->dimension(0) + (pool_info.exclude_padding ? 0 : pool_pad_right);
+    const int                     upper_bound_h        = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+    const T *const                src_top_ptr          = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top))));
+    const T *const                src_bottom_ptr       = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
+    const int                     scale_step_x         = (pool_stride_x == 1) ? 2 : 1;
     const UniformQuantizationInfo src_qinfo            = src->info()->quantization_info().uniform();
     const UniformQuantizationInfo dst_qinfo            = dst0->info()->quantization_info().uniform();
     const bool                    have_different_qinfo = src_qinfo != dst_qinfo;
@@ -505,13 +558,25 @@ void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     const float                   requant_scale  = dst_qinfo.scale / src_qinfo.scale;
     const int32_t                 requant_offset = dst_qinfo.offset - static_cast<int32_t>(static_cast<float>(src_qinfo.offset) / requant_scale);
     const UniformQuantizationInfo requant_qinfo  = UniformQuantizationInfo(requant_scale, requant_offset);
+    const int                     src_w          = src->info()->dimension(0);
+    const int                     src_h          = src->info()->dimension(1);
+    const int                     dst_w          = dst0->info()->dimension(0);
+
+    const T fill_value = (pool_info.pool_type == PoolingType::MAX) ? std::numeric_limits<T>::min() : T(0);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto top_data    = wrapper::vloadq(src_top_ptr + in.offset());
-        const auto bottom_data = wrapper::vloadq(src_bottom_ptr + in.offset());
-        q8x8_t     lower_res   = {};
-        q8x8_t     upper_res   = {};
+        const auto x_val   = id.x() * pool_stride_x;
+        const auto y_val_0 = id.y() * pool_stride_y;
+        const auto y_val_1 = (id.y() * pool_stride_y) + 1;
+
+        auto top_data = load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom,
+                                              x_val, y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value);
+        auto bottom_data = load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom,
+                                                 x_val, y_val_1, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value);
+
+        q8x8_t lower_res = {};
+        q8x8_t upper_res = {};
 
         if(pool_info.pool_type != PoolingType::MAX)
         {
@@ -580,16 +645,15 @@ void pooling2_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
             lower_res                  = wrapper::vgetlow(requantized_dst);
             upper_res                  = wrapper::vgethigh(requantized_dst);
         }
-
+        auto out_ptr = reinterpret_cast<T *>(out.ptr());
         // Store result
         if(pool_stride_x == 1)
         {
-            const q8x8x2_t res = { { lower_res, upper_res } };
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()), res);
+            write16_boundary_aware<T, q8x8_t, true>(id.x(), dst_w, lower_res, upper_res, out_ptr);
         }
         else
         {
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()), lower_res);
+            write8_boundary_aware<T, q8x8_t>(id.x(), dst_w, lower_res, out_ptr);
         }
     },
     in, out);
@@ -632,13 +696,27 @@ void pooling3_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
     const T *const src_middle_ptr = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
     const T *const src_bottom_ptr = reinterpret_cast<const T *>(src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2)));
 
+    const int src_w      = src->info()->dimension(0);
+    const int src_h      = src->info()->dimension(1);
+    const T   fill_value = (pool_info.pool_type == PoolingType::AVG) ? T(0) : std::numeric_limits<T>::min();
+    const int dst_w      = dst0->info()->dimension(0);
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto top_data    = wrapper::vloadq(src_top_ptr + in.offset());
-        const auto middle_data = wrapper::vloadq(src_middle_ptr + in.offset());
-        const auto bottom_data = wrapper::vloadq(src_bottom_ptr + in.offset());
-        q8x8_t     fres        = {};
-        q8x16_t    fqres       = {};
+        const auto x_val   = id.x() * pool_stride_x;
+        const auto y_val_0 = id.y() * pool_stride_y;
+        const auto y_val_1 = (id.y() * pool_stride_y) + 1;
+        const auto y_val_2 = (id.y() * pool_stride_y) + 2;
+
+        auto top_data = load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom,
+                                              x_val, y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value);
+        auto middle_data = load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom,
+                                                 x_val, y_val_1, reinterpret_cast<const T *>(src_middle_ptr + in.offset()), fill_value);
+        auto bottom_data = load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom,
+                                                 x_val, y_val_2, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value);
+
+        q8x8_t  fres  = {};
+        q8x16_t fqres = {};
 
         if(pool_info.pool_type == PoolingType::AVG)
         {
@@ -735,7 +813,7 @@ void pooling3_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
             {
                 fqres = vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(fqres), wrapper::vgethigh(fqres), requant_qinfo);
             }
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()), fqres);
+            write16_boundary_aware<T, q8x8_t, false>(id.x(), dst_w, wrapper::vgetlow(fqres), wrapper::vgethigh(fqres), reinterpret_cast<T *>(out.ptr()));
         }
         else
         {
@@ -743,7 +821,7 @@ void pooling3_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *ds
             {
                 fres = vrequantize_pooling<q8x8_t>(fres, requant_qinfo);
             }
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()), fres);
+            write8_boundary_aware<T, q8x8_t>(id.x(), dst_w, fres, reinterpret_cast<T *>(out.ptr()));
         }
     },
     in, out);
@@ -757,11 +835,8 @@ void poolingMxN_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *
     Iterator out(dst0, window);
 
     /** SIMD vector types */
-    using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
-    using q16_t   = typename wrapper::traits::promote_t<T>;
-    using q16x8_t = typename wrapper::traits::neon_vector<q16_t, 8>::type;
-    using q32_t   = typename wrapper::traits::promote_t<q16_t>;
-    using q32x4_t = typename wrapper::traits::neon_vector<q32_t, 4>::type;
+    using q16_t = typename wrapper::traits::promote_t<T>;
+    using q32_t = typename wrapper::traits::promote_t<q16_t>;
 
     const int pool_size_x     = pool_info.is_global_pooling ? src->info()->tensor_shape().x() : pool_info.pool_size.width;
     const int pool_size_y     = pool_info.is_global_pooling ? src->info()->tensor_shape().y() : pool_info.pool_size.height;
@@ -775,8 +850,13 @@ void poolingMxN_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *
     const int upper_bound_w = src->info()->dimension(0) + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
 
-    const UniformQuantizationInfo &src_qinfo = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo &dst_qinfo = dst0->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &src_qinfo        = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &dst_qinfo        = dst0->info()->quantization_info().uniform();
+    const int                      src_w            = src->info()->dimension(0);
+    const int                      src_h            = src->info()->dimension(1);
+    const T                        fill_value       = (pool_info.pool_type == PoolingType::AVG) ? T(0) : std::numeric_limits<T>::min();
+    const int                      stridex_in_bytes = static_cast<int>(src->info()->strides_in_bytes().x());
+    const int                      stridey_in_bytes = static_cast<int>(src->info()->strides_in_bytes().y());
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -784,8 +864,7 @@ void poolingMxN_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *
 
         if(pool_info.pool_type != PoolingType::MAX)
         {
-            q32x4_t vres = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
-            q32_t   sres = 0;
+            q32_t sres = 0;
 
             // Calculate scale
             const float scale = calculate_avg_scale(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
@@ -794,61 +873,33 @@ void poolingMxN_quantized_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *
             // Perform pooling
             for(int y = 0; y < pool_size_y; ++y)
             {
-                int x = 0;
-                for(; x <= (pool_size_x - 8); x += 8)
+                for(int x = 0; x < pool_size_x; ++x)
                 {
-                    const q8x8_t data = wrapper::vload(reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                                   (src->info()->strides_in_bytes().y())));
+                    const auto in_ptr = reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * stridex_in_bytes + (y - pool_pad_top) * stridey_in_bytes);
 
-                    const q16x8_t data_q16 = wrapper::vmovl(data);
-                    vres                   = wrapper::vadd(vres, wrapper::vaddl(wrapper::vgethigh(data_q16), wrapper::vgetlow(data_q16)));
-                }
-
-                // Leftover for loop
-                for(; x < pool_size_x; ++x)
-                {
-                    T data = *(reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                           (src->info()->strides_in_bytes().y())));
+                    const int idx  = x + id.x() * pool_stride_x - pool_pad_left;
+                    const int idy  = y + id.y() * pool_stride_y - pool_pad_top;
+                    const T   data = (idx < 0 || idy < 0 || idx >= src_w || idy >= src_h) ? fill_value : *in_ptr;
                     sres += data;
                 }
             }
-
-            // Reduction
-            const auto tmp = wrapper::vpadd(wrapper::vgethigh(vres), wrapper::vgetlow(vres));
-            sres += wrapper::vgetlane(tmp, 0) + wrapper::vgetlane(tmp, 1);
-
             // Divide by scale
             res = static_cast<T>(support::cpp11::round(sres * scale));
         }
         else
         {
-            q8x8_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_64_tag{});
-
             for(int y = 0; y < pool_size_y; ++y)
             {
-                int x = 0;
-                for(; x <= (pool_size_x - 8); x += 8)
+                for(int x = 0; x < pool_size_x; ++x)
                 {
-                    const q8x8_t data = wrapper::vload(reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                                   (src->info()->strides_in_bytes().y())));
-                    vres              = wrapper::vmax(vres, data);
-                }
-                // Leftover for loop
-                for(; x < pool_size_x; ++x)
-                {
-                    const T data = *(reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                 (src->info()->strides_in_bytes().y())));
-                    res          = std::max(res, data);
+                    const auto in_ptr = reinterpret_cast<const T *>(in.ptr() + (x - pool_pad_left) * stridex_in_bytes + (y - pool_pad_top) * stridey_in_bytes);
+
+                    const int idx  = x + id.x() * pool_stride_x - pool_pad_left;
+                    const int idy  = y + id.y() * pool_stride_y - pool_pad_top;
+                    const T   data = (idx < 0 || idy < 0 || idx >= src_w || idy >= src_h) ? fill_value : *in_ptr;
+                    res            = std::max(res, data);
                 }
             }
-
-            // Reduce max
-            vres = wrapper::vpmax(vres, vres);
-            vres = wrapper::vpmax(vres, vres);
-            vres = wrapper::vpmax(vres, vres);
-
-            // Get max value
-            res = std::max(res, wrapper::vgetlane(vres, 0));
         }
         // Store result
         res                                 = (src_qinfo != dst_qinfo) ? Qasymm8QuantizationHelper<T>::quantize(Qasymm8QuantizationHelper<T>::dequantize(res, src_qinfo), dst_qinfo) : res;

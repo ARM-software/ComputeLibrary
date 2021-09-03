@@ -73,7 +73,6 @@ public:
 
 private:
     std::unique_ptr<INEKernel> _pooling_layer_kernel;
-    std::unique_ptr<INEKernel> _border_handler;
     std::unique_ptr<INEKernel> _asm_glue;
 
     bool                             _is_global_pooling_layer;

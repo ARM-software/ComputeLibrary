@@ -239,7 +239,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, ITensorInfo *indices, const PoolingLayerInfo &pool_info,
                                                         unsigned int &num_elems_processed_per_iteration,
-                                                        BorderSize   &border_size,
                                                         int pool_size_x, int pool_size_y)
 {
     // dst auto inizialitation if not yet initialized
@@ -251,29 +250,22 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
                                                                                         pool_info)))
                            .set_data_type(DataType::U32) /* we store the offset to the element */);
     }
-    const auto          data_layout                  = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
-    unsigned int        num_elems_read_per_iteration = 0;
-    unsigned int        num_elems_horizontal_window  = 0;
-    int                 pool_stride_x                = 0;
-    int                 pool_stride_y                = 0;
-    const int           idx_width                    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int           idx_height                   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int           src_width                    = src->dimension(idx_width);
-    const int           src_height                   = src->dimension(idx_height);
-    const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info;
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
+    ARM_COMPUTE_ERROR_ON(src->data_layout() != DataLayout::NCHW);
+
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    const int           idx_width       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int           idx_height      = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    const int          pool_pad_right  = pad_stride_info.pad_right();
-    const int          pool_pad_top    = pad_stride_info.pad_top();
-    const int          pool_pad_left   = pad_stride_info.pad_left();
-    const int          pool_pad_bottom = pad_stride_info.pad_bottom();
-    const bool         is_square       = pool_size_x == pool_size_y;
-    const unsigned int pooled_w        = dst->dimension(idx_width);
-    const unsigned int pooled_h        = dst->dimension(idx_height);
+    const bool         is_square = pool_size_x == pool_size_y;
+    const unsigned int pooled_w  = dst->dimension(idx_width);
+    const unsigned int pooled_h  = dst->dimension(idx_height);
 
     //If it's not squared and optimized will be executed the MxN
-    num_elems_read_per_iteration      = 1;
     num_elems_processed_per_iteration = 1;
-    num_elems_horizontal_window       = 1;
 
     if(is_square)
     {
@@ -284,14 +276,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
                 switch(pool_size_x)
                 {
                     case 2:
-                        num_elems_read_per_iteration      = 16;
                         num_elems_processed_per_iteration = (pool_stride_x == 2) ? 8 : 15;
-                        num_elems_horizontal_window       = (pool_stride_x == 2) ? 8 : 16;
                         break;
                     case 3:
-                        num_elems_read_per_iteration      = 16;
                         num_elems_processed_per_iteration = (pool_stride_x == 2) ? 7 : 14;
-                        num_elems_horizontal_window       = (pool_stride_x == 2) ? 8 : 16;
                         break;
                     default:
                         break;
@@ -299,36 +287,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
                 break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
-                switch(pool_size_x)
-                {
-                    case 2:
-                    case 3:
-                        num_elems_read_per_iteration      = 4;
-                        num_elems_processed_per_iteration = 1;
-                        num_elems_horizontal_window       = 1;
-                        break;
-                    default:
-                        break;
-                }
+                num_elems_processed_per_iteration = 1;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
-                switch(pool_size_x)
-                {
-                    case 2:
-                        num_elems_read_per_iteration = 2;
-                        break;
-                    case 3:
-                        num_elems_read_per_iteration = 4; // We use vload4 for pooling3
-                        break;
-                    case 7:
-                        num_elems_read_per_iteration = 8; // We use vload8 for pooling7
-                        break;
-                    default:
-                        break;
-                }
                 num_elems_processed_per_iteration = 1;
-                num_elems_horizontal_window       = 1;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Element size not supported");
@@ -338,46 +301,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
 
     bool   window_changed = false;
     Window win{};
-    if(data_layout == DataLayout::NCHW)
-    {
-        // Number of iterations in X dimension
-        const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
-        // Upper limit for the number of right/bottom border elements that are accessed
-        const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_left + num_elems_read_per_iteration) - src_width;
-        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_top + pool_size_y) - src_height;
-        border_size             = BorderSize(pool_pad_top, pool_pad_right, pool_pad_bottom, pool_pad_left);
-        border_size.right       = std::max(upper_bound_w, pool_pad_right);
-        border_size.bottom      = std::max(upper_bound_h, pool_pad_bottom);
-        TensorShape dst_shape{ src->tensor_shape() };
-        dst_shape.set(0, pooled_w);
-        dst_shape.set(1, pooled_h);
-        TensorInfo dst_info(src->clone()->set_tensor_shape(dst_shape));
-        win = calculate_max_window(dst_info, Steps(num_elems_processed_per_iteration));
-        AccessWindowStatic     src_access(src, -pool_pad_left, -pool_pad_top, ceil_to_multiple(src_width + border_size.right, pool_size_x), src_height + border_size.bottom);
-        AccessWindowHorizontal dst_access(dst, 0, num_elems_horizontal_window);
-        if(indices)
-        {
-            AccessWindowHorizontal indices_access(indices, 0, num_elems_horizontal_window);
-            window_changed = update_window_and_padding(win, src_access, dst_access, indices_access);
-        }
-        else
-        {
-            window_changed = update_window_and_padding(win, src_access, dst_access);
-        }
-        dst_access.set_valid_region(win, ValidRegion(Coordinates(), dst->tensor_shape()));
-
-        border_size = src->padding();
-    }
+    // Upper limit for the number of right/bottom border elements that are accessed
+    TensorShape dst_shape{ src->tensor_shape() };
+    dst_shape.set(0, pooled_w);
+    dst_shape.set(1, pooled_h);
+    TensorInfo dst_info(src->clone()->set_tensor_shape(dst_shape));
+    win = calculate_max_window(dst_info, Steps(num_elems_processed_per_iteration));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
-
-BorderSize CpuPool2dKernel::border_size() const
-{
-    return _border_size;
-}
 
 void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
@@ -419,7 +353,7 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     {
         // Configure kernel window
         auto win_config = validate_and_configure_window(src, dst, indices, pool_info, _num_elems_processed_per_iteration,
-                                                        _border_size, pool_size.x(), pool_size.y());
+                                                        pool_size.x(), pool_size.y());
         ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
         ICpuKernel::configure(win_config.second);
     }
@@ -430,7 +364,6 @@ Status CpuPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst,
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
     unsigned int num_elems_processed_per_iteration = 0;
-    BorderSize   border_size(0);
 
     const bool is_global_pooling = pool_info.is_global_pooling;
 
@@ -444,7 +377,7 @@ Status CpuPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst,
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info, indices, Size2D(pool_size_x, pool_size_y)));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(),
-                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration, border_size,
+                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration,
                                                               pool_size_x, pool_size_y)
                                 .first);
 

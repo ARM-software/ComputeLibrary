@@ -39,7 +39,6 @@ namespace cpu
 {
 CpuPool2d::CpuPool2d()
     : _pooling_layer_kernel(),
-      _border_handler(),
       _asm_glue(),
       _is_global_pooling_layer(false),
       _data_layout(DataLayout::NCHW),
@@ -86,28 +85,6 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
         auto k = std::make_unique<kernels::CpuPool2dKernel>();
         k->configure(src, dst, pool_info, indices);
         _pooling_layer_kernel = std::move(k);
-
-        switch(_data_layout)
-        {
-            case DataLayout::NCHW:
-            {
-                // Configure border depending on operation required (quantize border in case of asymmetric data_type)
-                BorderMode border_mode = (!indices && pool_info.pool_type == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-                PixelValue zero_value((indices) ? std::numeric_limits<int>::min() : 0.f);
-                if(is_data_type_quantized_asymmetric(src->data_type()) && !pool_info.exclude_padding)
-                {
-                    zero_value = PixelValue(0, src->data_type(), src->quantization_info());
-                }
-                auto b = std::make_unique<NEFillBorderKernel>();
-                b->configure(src, _pooling_layer_kernel->border_size(), border_mode, zero_value);
-                _border_handler = std::move(b);
-                break;
-            }
-            case DataLayout::NHWC:
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Data layout not supported");
-        }
     }
 }
 
@@ -137,14 +114,9 @@ void CpuPool2d::run(ITensorPack &tensors)
         switch(_data_layout)
         {
             case DataLayout::NCHW:
-                // Fill border
-                NEScheduler::get().schedule_op(_border_handler.get(), Window::DimY, _border_handler->window(), tensors);
-
-                // Run pooling layer
                 NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), _is_global_pooling_layer ? Window::DimZ : Window::DimY, _pooling_layer_kernel->window(), tensors);
                 break;
             case DataLayout::NHWC:
-                // Run pooling layer
                 NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), Window::DimX, _pooling_layer_kernel->window(), tensors);
                 break;
             default:

@@ -675,8 +675,8 @@ public:
      * @param[in] stride_x   Stride, in elements, across x.
      * @param[in] stride_y   Stride, in elements, across y.
      * @param[in] pad_left   Padding across x on the left, in elements.
-     * @param[in] pad_top    Padding across y on the top, in elements.
      * @param[in] pad_right  Padding across x on the right, in elements.
+     * @param[in] pad_top    Padding across y on the top, in elements.
      * @param[in] pad_bottom Padding across y on the bottom, in elements.
      * @param[in] round      Dimensions rounding.
      */

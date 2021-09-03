@@ -60,7 +60,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
-    BorderSize  border_size() const override;
     const char *name() const override;
 
 private:
@@ -70,7 +69,6 @@ private:
     PoolingLayerInfo _pool_info{};
     DataLayout       _data_layout{ DataLayout::UNKNOWN };
     unsigned int     _num_elems_processed_per_iteration{ 0 };
-    BorderSize       _border_size{ 0 };
     Size2D           _pool_size{};
     int              _pool_stride_x{};
     PoolingKernelPtr _run_method{ nullptr };
