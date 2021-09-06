@@ -32,6 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -40,6 +41,10 @@
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <tuple>
 
 namespace arm_compute
 {
@@ -126,10 +131,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITens
                                                         const GEMMRHSMatrixInfo &rhs_info,
                                                         const GEMMKernelInfo &gemm_info, ElementsProcessed &num_elements_processed)
 {
-    ARM_COMPUTE_UNUSED(src0, src1, src2);
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool          reinterpret_output_as_3d            = gemm_info.depth_output_gemm3d != 0;
+
+    Window win{};
+    Window win_out{};
+    bool   window_changed = false;
+
+    // dst tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
 
     TensorInfo tmp_info(*dst);
 
@@ -146,7 +157,21 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITens
     num_elems_processed_per_iteration_x = rhs_info.n0;
     num_elems_processed_per_iteration_y = lhs_info.m0;
 
-    Window win = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    win_out = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    if(src2 != nullptr)
+    {
+        const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
+
+        const int bias_processed_per_iteration_y = gemm_info.broadcast_bias ? 1 : num_elems_processed_per_iteration_y;
+
+        AccessWindowStatic src2_access(src2, 0, 0,
+                                       ceil_to_multiple(src2->dimension(0), bias_processed_per_iteration_x),
+                                       ceil_to_multiple(src2->dimension(1), bias_processed_per_iteration_y));
+
+        window_changed = update_window_and_padding(win, src2_access); // window used by the execute_window_loop
+    }
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
@@ -154,7 +179,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITens
     const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(dst->num_dimensions()), 2u);
     collapsed                                = win.collapse(win, dimension_to_collapse);
 
-    return std::make_pair(Status{}, collapsed);
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -164,17 +190,14 @@ ClGemmMatrixMultiplyReshapedKernel::ClGemmMatrixMultiplyReshapedKernel()
 }
 
 void ClGemmMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compile_context,
-                                                   const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
+                                                   ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
                                                    const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
 
-    // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
-
-    auto padding_info         = get_padding_info({ src0, src1, src2, dst });
+    auto padding_info         = get_padding_info({ src0, dst });
     _reinterpret_output_as_3d = gemm_info.depth_output_gemm3d != 0;
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
     _add_bias                 = src2 != nullptr;
@@ -188,14 +211,7 @@ void ClGemmMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     ElementsProcessed num_elements_processed{};
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(src0->clone().get(),
-                                                    src1->clone().get(),
-                                                    (src2 != nullptr) ? src2->clone().get() : nullptr,
-                                                    dst->clone().get(),
-                                                    lhs_info,
-                                                    rhs_info,
-                                                    gemm_info,
-                                                    num_elements_processed);
+    auto win_config = validate_and_configure_window(src0, src1, src2, dst, lhs_info, rhs_info, gemm_info, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -288,7 +304,18 @@ Status ClGemmMatrixMultiplyReshapedKernel::validate(const ITensorInfo *src0, con
                                                     const GEMMLHSMatrixInfo &lhs_info,
                                                     const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
 {
+    ElementsProcessed num_elements_processed{};
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src0->clone().get(),
+                                                              src1->clone().get(),
+                                                              src2 != nullptr ? src2->clone().get() : nullptr,
+                                                              dst->clone().get(),
+                                                              lhs_info,
+                                                              rhs_info,
+                                                              gemm_info,
+                                                              num_elements_processed)
+                                .first);
+
     return Status{};
 }
 
