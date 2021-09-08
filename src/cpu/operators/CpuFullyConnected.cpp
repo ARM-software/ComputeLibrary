@@ -314,8 +314,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     {
         // Release permuted weights at the end of prepare as they are further transposed by the assembly dispatch
         // Do not release them if biases are dynamic and data type is quantized, since the weights tensor will be used for biases offset calculation
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric
-                                                                                     && !(biases->are_values_constant())) ?
+        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric && biases && !(biases->are_values_constant())) ?
                                                  MemoryLifetime::Persistent :
                                                  MemoryLifetime::Prepare,
                                                  _reshaped_weights.total_size());
