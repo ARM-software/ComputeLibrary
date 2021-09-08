@@ -362,48 +362,48 @@
 #define vload_partial_4(DATA, OFFSET, PTR) \
     DATA.s0123 = vload4(OFFSET, PTR);
 
-#define vload_partial_5(DATA, OFFSET, PTR)           \
-    DATA.s0123 = vload_partial_4(DATA, OFFSET, PTR); \
-    DATA.s4    = vload1(OFFSET, PTR + 4);
+#define vload_partial_5(DATA, OFFSET, PTR)    \
+    vload_partial_4(DATA.s0123, OFFSET, PTR); \
+    DATA.s4 = vload1(OFFSET, PTR + 4);
 
-#define vload_partial_6(DATA, OFFSET, PTR)           \
-    DATA.s0123 = vload_partial_4(DATA, OFFSET, PTR); \
-    DATA.s45   = vload_partial_2(DATA, OFFSET, PTR + 4);
+#define vload_partial_6(DATA, OFFSET, PTR)    \
+    vload_partial_4(DATA.s0123, OFFSET, PTR); \
+    vload_partial_2(DATA.s45, OFFSET, PTR + 4);
 
-#define vload_partial_7(DATA, OFFSET, PTR)           \
-    DATA.s0123 = vload_partial_4(DATA, OFFSET, PTR); \
-    DATA.s456  = vload_partial_3(DATA, OFFSET, PTR + 4);
+#define vload_partial_7(DATA, OFFSET, PTR)    \
+    vload_partial_4(DATA.s0123, OFFSET, PTR); \
+    vload_partial_3(DATA.s456, OFFSET, PTR + 4);
 
 #define vload_partial_8(DATA, OFFSET, PTR) \
     DATA.s01234567 = vload8(OFFSET, PTR);
 
-#define vload_partial_9(DATA, OFFSET, PTR)               \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s8        = vload1(OFFSET, PTR + 8);
+#define vload_partial_9(DATA, OFFSET, PTR)        \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    DATA.s8 = vload1(OFFSET, PTR + 8);
 
-#define vload_partial_10(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89       = vload_partial_2(DATA, OFFSET, PTR + 8);
+#define vload_partial_10(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_2(DATA.s89, OFFSET, PTR + 8);
 
-#define vload_partial_11(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89A      = vload_partial_3(DATA, OFFSET, PTR + 8);
+#define vload_partial_11(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_3(DATA.s89A, OFFSET, PTR + 8);
 
-#define vload_partial_12(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89AB     = vload_partial_4(DATA, OFFSET, PTR + 8);
+#define vload_partial_12(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_4(DATA.s89AB, OFFSET, PTR + 8);
 
-#define vload_partial_13(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89ABC    = vload_partial_5(DATA, OFFSET, PTR + 8);
+#define vload_partial_13(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_5(DATA.s89ABC, OFFSET, PTR + 8);
 
-#define vload_partial_14(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89ABCD   = vload_partial_6(DATA, OFFSET, PTR + 8);
+#define vload_partial_14(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_6(DATA.s89ABCD, OFFSET, PTR + 8);
 
-#define vload_partial_15(DATA, OFFSET, PTR)              \
-    DATA.s01234567 = vload_partial_8(DATA, OFFSET, PTR); \
-    DATA.s89ABCDE  = vload_partial_7(DATA, OFFSET, PTR + 8);
+#define vload_partial_15(DATA, OFFSET, PTR)       \
+    vload_partial_8(DATA.s01234567, OFFSET, PTR); \
+    vload_partial_7(DATA.s89ABCDE, OFFSET, PTR + 8);
 
 #define vload_partial_16(DATA, OFFSET, PTR) \
     DATA = vload16(OFFSET, PTR);
