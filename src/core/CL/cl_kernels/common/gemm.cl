@@ -1096,6 +1096,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     uint y = get_global_id(1);
     uint z = get_global_id(2);
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
     {
@@ -1250,7 +1253,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -1262,7 +1265,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -1277,9 +1280,6 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
@@ -1391,6 +1391,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -1596,7 +1599,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -1608,7 +1611,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -1623,9 +1626,6 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
@@ -1813,6 +1813,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     uint y = get_global_id(1);
     uint z = get_global_id(2);
 
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
+
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
     {
@@ -1992,7 +1995,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2004,7 +2007,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2019,9 +2022,6 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
@@ -2129,6 +2129,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -2301,7 +2304,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2313,7 +2316,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2328,9 +2331,6 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);

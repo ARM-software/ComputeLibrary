@@ -75,7 +75,7 @@ public:
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
     void configure(const ClCompileContext &compile_context,
-                   ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
+                   const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
                    const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info);
     /** Static function to check if given info will lead to a valid configuration
      *
