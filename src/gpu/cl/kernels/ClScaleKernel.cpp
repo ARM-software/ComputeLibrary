@@ -114,33 +114,82 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     // Create kernel
     const int          idx_width         = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const int          idx_height        = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const int          idx_channel       = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
     const unsigned int src_width         = src->dimension(idx_width);
     const unsigned int src_height        = src->dimension(idx_height);
+    const unsigned int src_channel       = src->dimension(idx_channel);
     const unsigned int dst_width         = dst->dimension(idx_width);
-    const unsigned int vec_size          = adjust_vec_size(is_nhwc ? 1 : 4, dst_width);
-    const unsigned int vec_size_leftover = (dst_width % vec_size);
+    const unsigned int dst_height        = dst->dimension(idx_height);
+    const unsigned int dst_channels      = dst->dimension(idx_channel);
+    unsigned int       vec_size          = 0;
+    unsigned int       vec_size_leftover = 0;
 
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
-    build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
-    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
-    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
-    build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
-    build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
-
-    build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
-    build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
-    build_opts.add_option_if(!is_nhwc, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
-    build_opts.add_option_if(!is_nhwc, "-DVEC_SIZE_LEFTOVER=" + ((vec_size_leftover == 0) ? support::cpp11::to_string(vec_size) : support::cpp11::to_string(vec_size_leftover)));
-    build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(dst->dimension(2)));
-    build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
-    build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
-    if(is_qasymm_bilinear)
+    if(_data_layout == DataLayout::NHWC)
     {
-        const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
-        build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
-        build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
+        vec_size          = adjust_vec_size(src->data_type() == DataType::F32 ? 4 : 8, dst_channels);
+        vec_size_leftover = dst_channels % vec_size;
+        build_opts.add_option("-DSRC_TENSOR_TYPE=BUFFER");
+        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
+        build_opts.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src_channel));
+        build_opts.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option("-DDST_TENSOR_TYPE=BUFFER");
+        build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst_width));
+        build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst_height));
+        build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst_channels));
+        build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
+        build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
+        build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
+        build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
+        build_opts.add_option("-DN0=" + support::cpp11::to_string(vec_size));
+        build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(vec_size_leftover));
+        build_opts.add_option_if(src->num_dimensions() > 3, "-DBATCHED_EXECUTION");
+        build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
+        build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
+        build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
+        build_opts.add_option_if(is_data_type_float(src->data_type()), "-DIS_FLOATING_POINT");
+        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+        if(is_qasymm_bilinear)
+        {
+            const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
+            build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
+            build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
+        }
+        else
+        {
+            build_opts.add_option("-DSCALE=" + support::cpp11::to_string(1));
+            build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(0));
+        }
     }
+    else if(_data_layout == DataLayout::NCHW)
+    {
+        vec_size          = adjust_vec_size(4, dst_width);
+        vec_size_leftover = dst_width % vec_size;
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
+        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
+        build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
+        build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
+        build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
+        build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + ((vec_size_leftover == 0) ? support::cpp11::to_string(vec_size) : support::cpp11::to_string(vec_size_leftover)));
+        build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
+        build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
+        build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
+        build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+        if(is_qasymm_bilinear)
+        {
+            const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
+            build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
+            build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_ON("Unsupported data layout");
+    }
+
     std::string interpolation_name = string_from_interpolation_policy(interpolation_policy_to_use);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "scale_" + interpolation_name + "_";
