@@ -3096,13 +3096,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F16<td>F16<td>F16<td>F16
     <tr><td>F32<td>F32<td>F32<td>F32
     </table>
-<tr>
-  <td rowspan="1">WinogradInputTransform
-  <td rowspan="1" style="width:200px;"> Function to perform a Winograd transform on the input tensor.
-  <td rowspan="1">
-      <ul>
-       <li>n/a
-      </ul>
 </table>
 
 */

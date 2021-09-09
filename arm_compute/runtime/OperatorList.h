@@ -989,14 +989,4 @@
  *
  */
 
-/** WinogradInputTransform
- *
- * Description:
- * Function to perform a Winograd transform on the input tensor.
- *
- * Equivalent Android NNAPI Op:
- * n/a
- *
- */
-
 #endif /* ARM_COMPUTE_OPERATOR_LIST_H */
