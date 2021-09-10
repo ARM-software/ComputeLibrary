@@ -252,7 +252,7 @@ int main(int argc, char **argv)
     qgemm.run();
     // Run output stage kernel
     gemmlowp_output_stage.run();
-    std::cout << "Done\n";
+    std::cout << "\nTest Passed\n";
 
 #if ARM_COMPUTE_DEBUG_ENABLED
     // Print quantized source matrices
