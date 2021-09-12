@@ -25,6 +25,7 @@
 
 #include "src/common/IOperator.h"
 #include "src/common/utils/LegacySupport.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/CpuContext.h"
 #include "src/cpu/kernels/CpuActivationKernel.h"
 
@@ -34,6 +35,7 @@ namespace cpu
 {
 void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, activation_info);
     auto k = std::make_unique<kernels::CpuActivationKernel>();
     k->configure(input, output, activation_info);
     _kernel = std::move(k);

@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuDequantizeKernel.h"
 
 namespace arm_compute
@@ -34,6 +35,7 @@ namespace cpu
 {
 void CpuDequantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuDequantizeKernel>();
     k->configure(src, dst);
     _kernel = std::move(k);

@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuMulKernel.h"
 
 namespace arm_compute
@@ -43,6 +44,8 @@ void CpuMul::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, f
                        const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
+
     auto k = std::make_unique<kernels::CpuMulKernel>();
     k->configure(src1, src2, dst, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
@@ -63,6 +66,8 @@ Status CpuComplexMul::validate(const ITensorInfo *src1, const ITensorInfo *src2,
 void CpuComplexMul::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
+
     auto k = std::make_unique<kernels::CpuComplexMulKernel>();
     k->configure(src1, src2, dst);
     _kernel = std::move(k);

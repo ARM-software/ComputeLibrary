@@ -33,8 +33,8 @@ namespace cpu
 {
 void CpuAdd::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_LOG_PARAMS(src0, src1, policy, act_info);
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy, act_info);
     auto k = std::make_unique<kernels::CpuAddKernel>();
     k->configure(src0, src1, dst, policy);
     _kernel = std::move(k);

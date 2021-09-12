@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuCol2ImKernel.h"
 #include "src/cpu/kernels/CpuIm2ColKernel.h"
@@ -226,6 +227,7 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
                                                        act_info,
                                                        enable_fast_math,
                                                        num_groups));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
     const DataType   data_type   = src->data_type();
     const DataLayout data_layout = src->data_layout();

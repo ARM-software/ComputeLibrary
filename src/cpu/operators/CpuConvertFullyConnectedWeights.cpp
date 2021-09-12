@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.h"
 
 namespace arm_compute
@@ -32,6 +33,7 @@ namespace cpu
 {
 void CpuConvertFullyConnectedWeights::configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, original_src_shape, data_layout);
     auto k = std::make_unique<kernels::CpuConvertFullyConnectedWeightsKernel>();
     k->configure(src, dst, original_src_shape, data_layout);
     _kernel = std::move(k);

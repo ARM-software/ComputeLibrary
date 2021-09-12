@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuElementwiseUnary.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseUnaryKernel.h"
 
@@ -33,6 +34,7 @@ using KernelType = kernels::CpuElementwiseUnaryKernel;
 
 void CpuElementwiseUnary::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(op, src, dst);
     auto k = std::make_unique<KernelType>();
     k->configure(op, src, dst);
     _kernel = std::move(k);

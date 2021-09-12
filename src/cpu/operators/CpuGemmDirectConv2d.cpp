@@ -26,6 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
 
@@ -112,6 +113,8 @@ void CpuGemmDirectConv2d::configure(const ITensorInfo *src, const ITensorInfo *w
                                                              biases != nullptr ? biases : nullptr,
                                                              dst,
                                                              info));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, info);
+
     _run_activation = info.act_info.enabled() && !_gemm_asm_func->is_activation_supported(info.act_info);
     _is_prepared    = false;
 

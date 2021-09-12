@@ -35,6 +35,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuConvertQuantizedSignednessKernel.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmLowpMatrixMultiplyKernel.h"
@@ -108,6 +109,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(const ITensorInfo *a, const ITenso
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmLowpMatrixMultiplyCore::validate(a, b, c, dst, gemm_info));
+    ARM_COMPUTE_LOG_PARAMS(a, b, c, dst, gemm_info);
 
     const ITensorInfo *matrix_a = a;
     const ITensorInfo *matrix_b = b;

@@ -25,6 +25,8 @@
 
 #include "src/cpu/kernels/CpuSubKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -32,6 +34,7 @@ namespace cpu
 void CpuSub::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy);
     auto k = std::make_unique<kernels::CpuSubKernel>();
     k->configure(src0, src1, dst, policy);
     _kernel = std::move(k);

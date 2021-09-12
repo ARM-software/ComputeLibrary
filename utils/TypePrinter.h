@@ -34,6 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
+#include "arm_compute/runtime/FunctionDescriptors.h"
 #include "support/StringSupport.h"
 
 #include <ostream>
@@ -425,6 +426,27 @@ inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
         str << info.activation();
     }
     return str.str();
+}
+
+/** Formatted output of the activation function info type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::ActivationLayerInfo *info)
+{
+    std::string ret_str = "nullptr";
+    if(info != nullptr)
+    {
+        std::stringstream str;
+        if(info->enabled())
+        {
+            str << info->activation();
+        }
+        ret_str = str.str();
+    }
+    return ret_str;
 }
 
 /** Formatted output of the activation function type.
@@ -1033,7 +1055,7 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
     return os;
 }
 
-/** Formatted output of the TensorInfo type.
+/** Formatted output of the const TensorInfo& type.
  *
  * @param[out] os   Output stream.
  * @param[in]  info Type to output.
@@ -1046,7 +1068,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
     return os;
 }
 
-/** Formatted output of the TensorInfo type.
+/** Formatted output of the const TensorInfo& type.
  *
  * @param[in] info Type to output.
  *
@@ -1059,7 +1081,38 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
+/** Formatted output of the const ITensorInfo& type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ITensorInfo &info)
+{
+    std::stringstream str;
+    str << &info;
+    return str.str();
+}
+
 /** Formatted output of the ITensorInfo* type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(ITensorInfo *info)
+{
+    std::string ret_str = "nullptr";
+    if(info != nullptr)
+    {
+        std::stringstream str;
+        str << info;
+        ret_str = str.str();
+    }
+    return ret_str;
+}
+
+/** Formatted output of the const ITensorInfo* type.
  *
  * @param[in] info Type to output.
  *
@@ -1067,8 +1120,62 @@ inline std::string to_string(const TensorInfo &info)
  */
 inline std::string to_string(const ITensorInfo *info)
 {
+    std::string ret_str = "nullptr";
+    if(info != nullptr)
+    {
+        std::stringstream str;
+        str << info;
+        ret_str = str.str();
+    }
+    return ret_str;
+}
+
+/** Formatted output of the const ITensor* type.
+ *
+ * @param[in] tensor Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ITensor *tensor)
+{
+    std::string ret_str = "nullptr";
+    if(tensor != nullptr)
+    {
+        std::stringstream str;
+        str << tensor->info();
+        ret_str = str.str();
+    }
+    return ret_str;
+}
+
+/** Formatted output of the ITensor* type.
+ *
+ * @param[in] tensor Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(ITensor *tensor)
+{
+    std::string ret_str = "nullptr";
+    if(tensor != nullptr)
+    {
+        std::stringstream str;
+        str << tensor->info();
+        ret_str = str.str();
+    }
+    return ret_str;
+}
+
+/** Formatted output of the ITensor& type.
+ *
+ * @param[in] tensor Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(ITensor &tensor)
+{
     std::stringstream str;
-    str << info;
+    str << tensor.info();
     return str.str();
 }
 
@@ -2204,6 +2311,387 @@ inline ::std::ostream &operator<<(::std::ostream &os, const CLTunerMode &val)
 {
     os << to_string(val);
     return os;
+}
+
+/** Formatted output of the ConvolutionInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  conv_info ConvolutionInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionInfo &conv_info)
+{
+    os << "PadStrideInfo = " << conv_info.pad_stride_info << ", "
+       << "depth_multiplier = " << conv_info.depth_multiplier << ", "
+       << "act_info = " << to_string(conv_info.act_info) << ", "
+       << "dilation = " << conv_info.dilation;
+    return os;
+}
+
+/** Converts a @ref ConvolutionInfo to string
+ *
+ * @param[in] info ConvolutionInfo value to be converted
+ *
+ * @return String  representing the corresponding ConvolutionInfo
+ */
+inline std::string to_string(const ConvolutionInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the FullyConnectedLayerInfo type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  layer_info FullyConnectedLayerInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const FullyConnectedLayerInfo &layer_info)
+{
+    os << "activation_info = " << to_string(layer_info.activation_info) << ", "
+       << "weights_trained_layout = " << layer_info.weights_trained_layout << ", "
+       << "transpose_weights = " << layer_info.transpose_weights << ", "
+       << "are_weights_reshaped = " << layer_info.are_weights_reshaped << ", "
+       << "retain_internal_weights = " << layer_info.retain_internal_weights << ", "
+       << "constant_weights = " << layer_info.transpose_weights << ", "
+       << "fp_mixed_precision = " << layer_info.fp_mixed_precision;
+    return os;
+}
+
+/** Converts a @ref FullyConnectedLayerInfo to string
+ *
+ * @param[in] info FullyConnectedLayerInfo value to be converted
+ *
+ * @return String  representing the corresponding FullyConnectedLayerInfo
+ */
+inline std::string to_string(const FullyConnectedLayerInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMLowpOutputStageType type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_type GEMMLowpOutputStageType to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageType &gemm_type)
+{
+    switch(gemm_type)
+    {
+        case GEMMLowpOutputStageType::NONE:
+            os << "NONE";
+            break;
+        case GEMMLowpOutputStageType::QUANTIZE_DOWN:
+            os << "QUANTIZE_DOWN";
+            break;
+        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
+            os << "QUANTIZE_DOWN_FIXEDPOINT";
+            break;
+        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
+            os << "QUANTIZE_DOWN_FLOAT";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Converts a @ref GEMMLowpOutputStageType to string
+ *
+ * @param[in] gemm_type GEMMLowpOutputStageType value to be converted
+ *
+ * @return String       representing the corresponding GEMMLowpOutputStageType
+ */
+inline std::string to_string(const GEMMLowpOutputStageType &gemm_type)
+{
+    std::stringstream str;
+    str << gemm_type;
+    return str.str();
+}
+
+/** Formatted output of the GEMMLowpOutputStageInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info GEMMLowpOutputStageInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageInfo &gemm_info)
+{
+    os << "type = " << gemm_info.type << ", "
+       << "gemlowp_offset = " << gemm_info.gemmlowp_offset << ", "
+       << "gemmlowp_multiplier" << gemm_info.gemmlowp_multiplier << ", "
+       << "gemmlowp_shift = " << gemm_info.gemmlowp_shift << ", "
+       << "gemmlowp_min_bound = " << gemm_info.gemmlowp_min_bound << ", "
+       << "gemmlowp_max_bound = " << gemm_info.gemmlowp_max_bound << ", "
+       << "gemmlowp_multipliers = " << gemm_info.gemmlowp_multiplier << ", "
+       << "gemmlowp_shifts = " << gemm_info.gemmlowp_shift << ", "
+       << "gemmlowp_real_multiplier = " << gemm_info.gemmlowp_real_multiplier << ", "
+       << "is_quantized_per_channel = " << gemm_info.is_quantized_per_channel << ", "
+       << "output_data_type = " << gemm_info.output_data_type;
+    return os;
+}
+
+/** Converts a @ref GEMMLowpOutputStageInfo to string
+ *
+ * @param[in] gemm_info GEMMLowpOutputStageInfo value to be converted
+ *
+ * @return String representing the corresponding GEMMLowpOutputStageInfo
+ */
+inline std::string to_string(const GEMMLowpOutputStageInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
+/** Formatted output of the Conv2dInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  conv_info Conv2dInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Conv2dInfo &conv_info)
+{
+    os << "conv_info = " << conv_info.conv_info << ", "
+       << "dilation = " << conv_info.dilation << ", "
+       << "act_info = " << to_string(conv_info.act_info) << ", "
+       << "enable_fast_math = " << conv_info.enable_fast_math << ", "
+       << "num_groups = " << conv_info.num_groups;
+    return os;
+}
+
+/** Converts a @ref Conv2dInfo to string
+ *
+ * @param[in] conv_info Conv2dInfo value to be converted
+ *
+ * @return String  representing the corresponding Conv2dInfo
+ */
+inline std::string to_string(const Conv2dInfo &conv_info)
+{
+    std::stringstream str;
+    str << conv_info;
+    return str.str();
+}
+
+/** Formatted output of the PixelValue type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  pixel_value PixelValue to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PixelValue &pixel_value)
+{
+    os << "value.u64= " << pixel_value.get<uint64_t>();
+    return os;
+}
+
+/** Converts a @ref PixelValue to string
+ *
+ * @param[in] pixel_value PixelValue value to be converted
+ *
+ * @return String representing the corresponding PixelValue
+ */
+inline std::string to_string(const PixelValue &pixel_value)
+{
+    std::stringstream str;
+    str << pixel_value;
+    return str.str();
+}
+
+/** Formatted output of the ScaleKernelInfo type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  scale_info ScaleKernelInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ScaleKernelInfo &scale_info)
+{
+    os << "interpolation_policy = " << scale_info.interpolation_policy << ", "
+       << "BorderMode = " << scale_info.border_mode << ", "
+       << "PixelValue = " << scale_info.constant_border_value << ", "
+       << "SamplingPolicy = " << scale_info.sampling_policy << ", "
+       << "use_padding = " << scale_info.use_padding << ", "
+       << "align_corners = " << scale_info.align_corners << ", "
+       << "data_layout = " << scale_info.data_layout;
+    return os;
+}
+
+/** Converts a @ref ScaleKernelInfo to string
+ *
+ * @param[in] scale_info ScaleKernelInfo value to be converted
+ *
+ * @return String representing the corresponding ScaleKernelInfo
+ */
+inline std::string to_string(const ScaleKernelInfo &scale_info)
+{
+    std::stringstream str;
+    str << scale_info;
+    return str.str();
+}
+
+/** Formatted output of the FFTDirection type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  fft_dir FFTDirection to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const FFTDirection &fft_dir)
+{
+    switch(fft_dir)
+    {
+        case FFTDirection::Forward:
+            os << "Forward";
+            break;
+        case FFTDirection::Inverse:
+            os << "Inverse";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Converts a @ref FFT1DInfo to string
+ *
+ * @param[in] fft_dir FFT1DInfo value to be converted
+ *
+ * @return String representing the corresponding FFT1DInfo
+ */
+inline std::string to_string(const FFTDirection &fft_dir)
+{
+    std::stringstream str;
+    str << fft_dir;
+    return str.str();
+}
+
+/** Formatted output of the FFT1DInfo type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  fft1d_info FFT1DInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const FFT1DInfo &fft1d_info)
+{
+    os << "axis = " << fft1d_info.axis << ", "
+       << "direction = " << fft1d_info.direction;
+    return os;
+}
+
+/** Converts a @ref FFT1DInfo to string
+ *
+ * @param[in] fft1d_info FFT1DInfo value to be converted
+ *
+ * @return String representing the corresponding FFT1DInfo
+ */
+inline std::string to_string(const FFT1DInfo &fft1d_info)
+{
+    std::stringstream str;
+    str << fft1d_info;
+    return str.str();
+}
+
+/** Formatted output of the FFT2DInfo type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  fft2d_info FFT2DInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const FFT2DInfo &fft2d_info)
+{
+    os << "axis = " << fft2d_info.axis0 << ", "
+       << "axis = " << fft2d_info.axis1 << ", "
+       << "direction = " << fft2d_info.direction;
+    return os;
+}
+
+/** Converts a @ref FFT2DInfo to string
+ *
+ * @param[in] fft2d_info FFT2DInfo value to be converted
+ *
+ * @return String representing the corresponding FFT2DInfo
+ */
+inline std::string to_string(const FFT2DInfo &fft2d_info)
+{
+    std::stringstream str;
+    str << fft2d_info;
+    return str.str();
+}
+
+/** Formatted output of the Coordinates2D type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  coord_2d Coordinates2D to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Coordinates2D &coord_2d)
+{
+    os << "x = " << coord_2d.x << ", "
+       << "y = " << coord_2d.y;
+    return os;
+}
+
+/** Converts a @ref Coordinates2D to string
+ *
+ * @param[in] coord_2d Coordinates2D value to be converted
+ *
+ * @return String representing the corresponding Coordinates2D
+ */
+inline std::string to_string(const Coordinates2D &coord_2d)
+{
+    std::stringstream str;
+    str << coord_2d;
+    return str.str();
+}
+
+/** Formatted output of the FuseBatchNormalizationType type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  fuse_type FuseBatchNormalizationType to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const FuseBatchNormalizationType &fuse_type)
+{
+    switch(fuse_type)
+    {
+        case FuseBatchNormalizationType::CONVOLUTION:
+            os << "CONVOLUTION";
+            break;
+        case FuseBatchNormalizationType::DEPTHWISECONVOLUTION:
+            os << "DEPTHWISECONVOLUTION";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Converts a @ref FuseBatchNormalizationType to string
+ *
+ * @param[in] fuse_type FuseBatchNormalizationType value to be converted
+ *
+ * @return String representing the corresponding FuseBatchNormalizationType
+ */
+inline std::string to_string(const FuseBatchNormalizationType &fuse_type)
+{
+    std::stringstream str;
+    str << fuse_type;
+    return str.str();
 }
 
 } // namespace arm_compute

@@ -25,12 +25,15 @@
 
 #include "src/cpu/kernels/CpuCastKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
 void CpuCast::configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, policy);
     auto k = std::make_unique<kernels::CpuCastKernel>();
     k->configure(src, dst, policy);
     _kernel = std::move(k);

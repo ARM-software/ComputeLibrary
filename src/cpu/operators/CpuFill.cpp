@@ -25,12 +25,15 @@
 
 #include "src/cpu/kernels/CpuFillKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
 void CpuFill::configure(const ITensorInfo *tensor, PixelValue constant_value)
 {
+    ARM_COMPUTE_LOG_PARAMS(tensor, constant_value);
     auto k = std::make_unique<kernels::CpuFillKernel>();
     k->configure(tensor, constant_value);
     _kernel = std::move(k);

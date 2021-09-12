@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/cpu/kernels/CpuPool2dKernel.h"
 #include "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
@@ -50,6 +51,8 @@ CpuPool2d::~CpuPool2d() = default;
 
 void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, pool_info, indices);
+
     // Check if we can run assembly kernels. Currently, indices are not supported by those kernels
     const bool run_optimised = bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 

@@ -25,12 +25,15 @@
 
 #include "src/cpu/kernels/CpuTransposeKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
 void CpuTranspose::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuTransposeKernel>();
     k->configure(src, dst);
     _kernel = std::move(k);

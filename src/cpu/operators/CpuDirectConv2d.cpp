@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -43,6 +44,8 @@ CpuDirectConv2d::CpuDirectConv2d(std::shared_ptr<IMemoryManager> memory_manager)
 void CpuDirectConv2d::configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *dst, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_LOG_PARAMS(src, weights, bias, dst, conv_info, act_info);
+
     _output_stage_kernel  = std::make_unique<kernels::CpuDirectConv2dOutputStageKernel>();
     _conv_kernel          = std::make_unique<kernels::CpuDirectConv2dKernel>();
     _input_border_handler = std::make_unique<NEFillBorderKernel>();

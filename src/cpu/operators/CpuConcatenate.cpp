@@ -36,6 +36,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
@@ -45,6 +46,7 @@ namespace cpu
 void CpuConcatenate::configure(const std::vector<const ITensorInfo *> &srcs_vector, ITensorInfo *dst, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(dst == nullptr);
+    ARM_COMPUTE_LOG_PARAMS(srcs_vector, dst, axis);
 
     _axis     = axis;
     _num_srcs = srcs_vector.size();

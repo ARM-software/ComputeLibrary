@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ScaleKernel.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 #include "src/cpu/kernels/CpuGemmLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
@@ -39,6 +40,7 @@ void CpuGemmLowpOutputStage::configure(ITensorInfo *src, ITensorInfo *bias, ITen
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CpuGemmLowpOutputStage::validate(src, bias, dst, info));
+    ARM_COMPUTE_LOG_PARAMS(src, bias, dst, info);
 
     switch(info.type)
     {

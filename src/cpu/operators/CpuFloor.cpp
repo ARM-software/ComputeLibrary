@@ -25,12 +25,15 @@
 
 #include "src/cpu/kernels/CpuFloorKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
 void CpuFloor::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::CpuFloorKernel>();
     k->configure(src, dst);
     _kernel = std::move(k);

@@ -29,6 +29,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
@@ -231,6 +232,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                                            biases != nullptr ? biases : nullptr,
                                                            dst,
                                                            fc_info));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, fc_info);
 
     _needs_weights_conversion = false;
     _needs_weights_reshape    = fc_info.transpose_weights ? !fc_info.are_weights_reshaped : false;

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/AssemblyUtils.h"
@@ -57,6 +58,7 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
                                                    ITensorInfo           *dst,
                                                    const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, weights, bias, dst, info);
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
     _pImpl->is_prepared            = false;

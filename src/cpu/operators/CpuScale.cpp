@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/kernels/CpuScaleKernel.h"
 #include "support/Rounding.h"
@@ -90,6 +91,7 @@ void CpuScale::configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelIn
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuScale::validate(src, dst, info));
+    ARM_COMPUTE_LOG_PARAMS(src, dst, info);
 
     _scale_info  = info;
     _is_prepared = false;

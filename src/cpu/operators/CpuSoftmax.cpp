@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/cpu/kernels/CpuSoftmaxKernel.h"
@@ -60,6 +61,7 @@ void CpuSoftmaxGeneric<IS_LOG>::configure(const ITensorInfo *src, ITensorInfo *d
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(CpuSoftmaxGeneric::validate(src, dst, beta, axis));
+    ARM_COMPUTE_LOG_PARAMS(src, dst, beta, axis);
 
     const unsigned int actual_axis = static_cast<unsigned int>(wrap_around(axis, static_cast<int32_t>(src->num_dimensions())));
 

@@ -25,12 +25,15 @@
 
 #include "src/cpu/kernels/CpuPermuteKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
 void CpuPermute::configure(const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, perm);
     auto k = std::make_unique<kernels::CpuPermuteKernel>();
     k->configure(src, dst, perm);
     _kernel = std::move(k);

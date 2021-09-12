@@ -134,15 +134,17 @@ logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &
 /** Function Template with variable number of inputs to collect all the passed parameters from
  *  the logging macro ARM_COMPUTE_LOG_PARAMS(...)
  *
- * @param[in] ...ins The input parameters in the variadic template
+ * @param[in] ...ins The input parameters in the variadic template, taken by reference, (not by value) to avoid
+ *                   detecting T as an abstract data type when passing any of these parameters as L-value reference
+ *                   to an abstract type.
  *
- * @return           vector of the parameters' data in a string format
+ * @return           Vector of the parameters' data in a string format
  */
 template <typename... Ts>
-const std::vector<std::string> logParams(Ts... ins)
+const std::vector<std::string> logParams(Ts &&... ins)
 {
     std::vector<std::string> data_registry{};
-    std::tuple<Ts...>        in_params_tuple(ins...);
+    std::tuple<Ts...>        in_params_tuple{ ins... };
 
     // Start logging the tuple elements, starting from 0 to tuple_size-1
     logParamsImpl<0>(data_registry, in_params_tuple);
@@ -210,8 +212,10 @@ inline const std::string constructDataLog(const std::vector<std::string> &params
  *
  * @param[in] ... Input parameters
  */
-#define ARM_COMPUTE_LOG_PARAMS(...)                                                       \
-    ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(constructDataLog(getParamsNames(#__VA_ARGS__), \
-                                                            logParams(__VA_ARGS__)));
-
+#define ARM_COMPUTE_LOG_PARAMS(...)                                                           \
+    do                                                                                        \
+    {                                                                                         \
+        ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(constructDataLog(getParamsNames(#__VA_ARGS__), \
+                                                                logParams(__VA_ARGS__)));     \
+    } while(false)
 #endif /* SRC_COMMON_LOG_H */

@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 
 namespace arm_compute
@@ -422,6 +423,8 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dGeneric::prepare(ITensorPack &tensors
 
 void CpuDepthwiseConv2d::configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, info);
+
     _depth_conv_func = get_depthwiseconvolution_function(src, weights, (biases != nullptr) ? biases : nullptr, dst, info);
     switch(_depth_conv_func)
     {

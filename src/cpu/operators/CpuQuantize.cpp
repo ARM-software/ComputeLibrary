@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuQuantizeKernel.h"
 
 namespace arm_compute
@@ -42,6 +43,7 @@ Status CpuQuantize::validate(const ITensorInfo *src, const ITensorInfo *dst)
 void CpuQuantize::configure(const ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
 
     // Configure quantize kernel
     auto k = std::make_unique<kernels::CpuQuantizeKernel>();

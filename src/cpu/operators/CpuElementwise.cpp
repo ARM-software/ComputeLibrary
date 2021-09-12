@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuElementwise.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseKernel.h"
 
@@ -47,6 +48,7 @@ void CpuElementwiseBase::run(ITensorPack &tensors)
 template <ArithmeticOperation op>
 void CpuElementwiseArithmetic<op>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuArithmeticKernel>();
     k->configure(op, src0, src1, dst);
     _kernel = std::move(k);
@@ -65,6 +67,7 @@ template class CpuElementwiseArithmetic<ArithmeticOperation::PRELU>;
 
 void CpuElementwiseDivision::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuDivisionKernel>();
     k->configure(src0, src1, dst);
     _kernel = std::move(k);
@@ -77,6 +80,7 @@ Status CpuElementwiseDivision::validate(const ITensorInfo *src0, const ITensorIn
 
 void CpuElementwisePower::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuPowerKernel>();
     k->configure(src0, src1, dst);
     _kernel = std::move(k);
@@ -90,6 +94,7 @@ Status CpuElementwisePower::validate(const ITensorInfo *src0, const ITensorInfo 
 template <ComparisonOperation COP>
 void CpuElementwiseComparisonStatic<COP>::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
     k->configure(COP, src0, src1, dst);
     _kernel = std::move(k);
@@ -103,6 +108,7 @@ Status CpuElementwiseComparisonStatic<COP>::validate(const ITensorInfo *src0, co
 
 void CpuElementwiseComparison::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ComparisonOperation op)
 {
+    ARM_COMPUTE_LOG_PARAMS(src0, src1, dst);
     auto k = std::make_unique<kernels::CpuComparisonKernel>();
     k->configure(op, src0, src1, dst);
     _kernel = std::move(k);
