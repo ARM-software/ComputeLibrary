@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/graph/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
+#include "src/graph/mutators/MutatorUtils.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -108,6 +110,63 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                input_info, output_info, padding, mode, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPadLayer::validate(&input_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), padding, PixelValue(), mode)) == expected, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(CheckFusingWithConvolution, framework::DatasetMode::ALL, zip(zip(
+                framework::dataset::make("DataLayout",  { DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NCHW,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::NHWC,
+                                                          DataLayout::UNKNOWN
+                                                        }),
+                framework::dataset::make("PaddingList", { PaddingList({{0, 0}, {1, 1}, {1, 1}}),          // nchw
+                                                          PaddingList({{1, 1}, {1, 1}, {0, 0}, {0, 0}}),
+                                                          PaddingList({{1, 1}, {1, 1}}),
+                                                          PaddingList({}),
+                                                          PaddingList({{0, 0}}),
+                                                          PaddingList({{0, 0}, {0, 0}, {0, 0}, {0, 0}}),
+                                                          PaddingList({{0, 0}, {0, 0}, {0, 0}, {1, 0}}),
+                                                          PaddingList({{0, 1}}),
+                                                          PaddingList({{0, 0}, {1, 1}, {1, 1}}),          // nhwc
+                                                          PaddingList({{0, 0}, {0, 0}, {1, 1}, {1, 1}}),
+                                                          PaddingList({{0, 0}, {1, 0}, {1, 1}, {0, 0}}),
+                                                          PaddingList({}),
+                                                          PaddingList({{0, 0}}),
+                                                          PaddingList({{0, 1}}),
+                                                          PaddingList({{0, 0}, {1, 1}}),
+                                                          PaddingList({{0, 0}})
+                                                        })),                           // unknown
+                framework::dataset::make("Expected",    { false,    // nchw
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          false,
+                                                          true,
+                                                          true,     // nhwc
+                                                          false,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          false,
+                                                          true,
+                                                          false     // unknown
+                                                        })),
+                data_layout, padding_list, expected)
+{
+    ARM_COMPUTE_EXPECT(expected == arm_compute::graph::is_padding_in_height_or_width(data_layout, padding_list), framework::LogLevel::ERRORS);
 }
 
 // clang-format on

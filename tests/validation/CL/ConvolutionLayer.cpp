@@ -188,6 +188,8 @@ template <typename T>
 using CLGEMMConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 template <typename T>
 using CLGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, true>;
+template <typename T>
+using CLConvolutionValidationWithPaddingFixture = ConvolutionValidationWithPaddingFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -232,6 +234,18 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLGEMMConvolutionLayerMixedDataLayout
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE(RunSmallWithPadding, CLConvolutionValidationWithPaddingFixture<float>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerPrePaddingDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::F32)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
+framework::dataset::make("PrePadLayer", { PaddingList({ { 1, 1 }, { 1, 1 } }) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 

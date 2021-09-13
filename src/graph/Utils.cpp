@@ -225,5 +225,6 @@ void configure_tensor(Tensor *tensor)
         tensor->set_handle(std::move(handle));
     }
 }
+
 } // namespace graph
 } // namespace arm_compute
