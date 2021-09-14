@@ -23,8 +23,10 @@
 # SOFTWARE.
 
 import SCons
+import json
 import os
 import subprocess
+import sys
 
 def version_at_least(version, required):
 
@@ -76,7 +78,8 @@ vars.AddVariables(
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
-    ("specs_file", "Specs file to use (e.g. rdimon.specs)", "")
+    ("specs_file", "Specs file to use (e.g. rdimon.specs)", ""),
+    ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
@@ -316,6 +319,13 @@ if env['fat_binary']:
                            '-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
                            '-DARM_COMPUTE_ENABLE_FP16', '-DARM_COMPUTE_ENABLE_BF16',
                            '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
+
+if env['high_priority'] and env['build_config']:
+    print("The high priority library cannot be built in conjuction with a user-specified build configuration")
+    Exit(1)
+
+if not env['high_priority'] and not env['build_config']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_GRAPH_ENABLED'])
 
 if env['data_type_support']:
     if any(i in env['data_type_support'] for i in ['all', 'fp16']):

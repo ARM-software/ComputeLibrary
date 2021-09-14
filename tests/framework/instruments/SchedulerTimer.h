@@ -97,14 +97,16 @@ public:
     };
 
 private:
-    std::list<kernel_info>                       _kernels;
-    std::map<std::string, LayerData>             _layer_data_map;
-    IScheduler                                  *_real_scheduler;
-    Scheduler::Type                              _real_scheduler_type;
+    std::list<kernel_info> _kernels;
+    std::map<std::string, LayerData> _layer_data_map;
+    IScheduler     *_real_scheduler;
+    Scheduler::Type _real_scheduler_type;
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
     std::function<decltype(graph::execute_task)> _real_graph_function;
-    ScaleFactor                                  _scale_factor;
-    std::shared_ptr<IScheduler>                  _interceptor;
-    std::vector<ISchedulerUser *>                _scheduler_users;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
+    ScaleFactor                   _scale_factor;
+    std::shared_ptr<IScheduler>   _interceptor;
+    std::vector<ISchedulerUser *> _scheduler_users;
 };
 
 using SchedulerTimer      = SchedulerClock<false>;

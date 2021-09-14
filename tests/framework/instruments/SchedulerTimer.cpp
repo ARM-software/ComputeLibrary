@@ -129,16 +129,24 @@ protected:
 
 private:
     std::list<struct SchedulerClock<output_timestamps>::kernel_info> &_kernels;
-    std::map<std::string, SchedulerTimer::LayerData>                 &_layer_data_map;
-    IScheduler                                                       &_real_scheduler;
-    WallClock<output_timestamps>                                      _timer;
-    std::string                                                       _prefix;
+    std::map<std::string, SchedulerTimer::LayerData> &_layer_data_map;
+    IScheduler                  &_real_scheduler;
+    WallClock<output_timestamps> _timer;
+    std::string                  _prefix;
 };
 
 template <bool output_timestamps>
 SchedulerClock<output_timestamps>::SchedulerClock(ScaleFactor scale_factor)
-    : _kernels(), _layer_data_map(), _real_scheduler(nullptr), _real_scheduler_type(), _real_graph_function(nullptr),
-      _scale_factor(scale_factor), _interceptor(nullptr), _scheduler_users()
+    : _kernels(),
+      _layer_data_map(),
+      _real_scheduler(nullptr),
+      _real_scheduler_type(),
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
+      _real_graph_function(nullptr),
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
+      _scale_factor(scale_factor),
+      _interceptor(nullptr),
+      _scheduler_users()
 {
     if(instruments_info != nullptr)
     {
@@ -149,6 +157,7 @@ SchedulerClock<output_timestamps>::SchedulerClock(ScaleFactor scale_factor)
 template <bool output_timestamps>
 void           SchedulerClock<output_timestamps>::test_start()
 {
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
     // Start intercepting tasks:
     ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
     _real_graph_function  = graph::TaskExecutor::get().execute_function;
@@ -182,6 +191,7 @@ void           SchedulerClock<output_timestamps>::test_start()
             scheduler->set_prefix("");
         }
     };
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
 
     ARM_COMPUTE_ERROR_ON(_real_scheduler != nullptr);
     _real_scheduler_type = Scheduler::get_type();
@@ -191,7 +201,9 @@ void           SchedulerClock<output_timestamps>::test_start()
         _real_scheduler = &Scheduler::get();
         _interceptor    = std::make_shared<Interceptor<output_timestamps>>(_kernels, _layer_data_map, *_real_scheduler, _scale_factor);
         Scheduler::set(std::static_pointer_cast<IScheduler>(_interceptor));
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
         graph::TaskExecutor::get().execute_function = task_interceptor;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
 
         // Create an interceptor for each scheduler
         // TODO(COMPID-2638) : Allow multiple schedulers, now it assumes the same scheduler is used.
@@ -217,10 +229,12 @@ void           SchedulerClock<output_timestamps>::test_stop()
 {
     // Restore real scheduler
     Scheduler::set(_real_scheduler_type);
-    _real_scheduler                             = nullptr;
-    _interceptor                                = nullptr;
+    _real_scheduler = nullptr;
+    _interceptor    = nullptr;
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
     graph::TaskExecutor::get().execute_function = _real_graph_function;
     _real_graph_function                        = nullptr;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
 
     // Restore schedulers
     std::for_each(std::begin(_scheduler_users), std::end(_scheduler_users),
@@ -270,9 +284,9 @@ Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() co
 }
 
 template <bool output_timestamps>
-std::string SchedulerClock<output_timestamps>::instrument_header() const
+std::string    SchedulerClock<output_timestamps>::instrument_header() const
 {
-    std::string output{""};
+    std::string output{ "" };
     output += R"("layer_data" : {)";
     for(auto i_it = _layer_data_map.cbegin(), i_end = _layer_data_map.cend(); i_it != i_end; ++i_it)
     {

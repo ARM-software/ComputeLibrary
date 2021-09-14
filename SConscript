@@ -38,26 +38,26 @@ Import('vars')
 Import('install_lib')
 
 def build_bootcode_objs(sources):
-
     arm_compute_env.Append(ASFLAGS = "-I bootcode/")
     obj = arm_compute_env.Object(sources)
     obj = install_lib(obj)
     Default(obj)
     return obj
 
-def build_sve_objs(sources):
 
+def build_sve_objs(sources):
     tmp_env = arm_compute_env.Clone()
     tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
     obj = tmp_env.SharedObject(sources)
     Default(obj)
     return obj
 
-def build_objs(sources):
 
+def build_objs(sources):
     obj = arm_compute_env.SharedObject(sources)
     Default(obj)
     return obj
+
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     if static:
@@ -72,6 +72,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     Default(obj)
     return obj
 
+
 def remove_incode_comments(code):
     def replace_with_empty(match):
         s = match.group(0)
@@ -82,6 +83,7 @@ def remove_incode_comments(code):
 
     comment_regex = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE)
     return re.sub(comment_regex, replace_with_empty, code)
+
 
 def resolve_includes(target, source, env):
     # File collection
@@ -142,6 +144,7 @@ def resolve_includes(target, source, env):
             file_to_write = "R\"(" + file_to_write + ")\""
             out_file.write(file_to_write)
 
+
 def create_version_file(target, source, env):
 # Generate string with build options library version to embed in the library:
     try:
@@ -153,72 +156,87 @@ def create_version_file(target, source, env):
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
-def get_cpu_runtime_files(operator):
-    file_list = []
-    operators = filelist['cpu']['operators']
 
-    if "operator" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["operator"]
-    return file_list
+def get_attrs_list(arch, estate, data_types, data_layouts):
+    attrs = []
 
-def get_gpu_runtime_files(operator):
-    file_list = []
-    operators = filelist['gpu']['operators']
+    # Manage data-types
+    if any(i in data_types for i in ['all']):
+        attrs += ['fp16', 'fp32', 'integer', 'qasymm8', 'qasymm8_signed', 'qsymm16']
+    else:
+        if any(i in data_types for i in ['fp16']): attrs += ['fp16']
+        if any(i in data_types for i in ['fp32']): attrs += ['fp32']
+        if any(i in data_types for i in ['integer']): attrs += ['integer']
+        if any(i in data_types for i in ['qasymm8']): attrs += ['qasymm8']
+        if any(i in data_types for i in ['qasymm8_signed']): attrs += ['qasymm8_signed']
+        if any(i in data_types for i in ['qsymm16']): attrs += ['qsymm16']
 
-    if "operator" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["operator"]
-    return file_list
+    # Manage data-layouts
+    if any(i in data_layouts for i in ['all']):
+        attrs += ['nhwc', 'nchw']
+    else:
+        if any(i in data_layouts for i in ['nhwc']): attrs += ['nhwc']
+        if any(i in data_layouts for i in ['nchw']): attrs += ['nchw']
 
-def get_cpu_kernel_files(operator):
+    # Manage execution state
+    estate_attr = 'estate32' if (estate == 'auto' and 'v7a' in arch) or '32' in estate else 'estate64'
+    attrs += [ estate_attr ]
 
-    file_list = []
-    file_list_sve = []
-    operators = filelist['cpu']['operators']
+    return attrs
 
-    if env['estate'] == '64' and "neon" in operators[operator]['files'] and "estate64" in operators[operator]['files']['neon']:
-        file_list += operators[operator]['files']['neon']['estate64']
-    if env['estate'] == '32' and "neon" in operators[operator]['files'] and "estate32" in operators[operator]['files']['neon']:
-        file_list += operators[operator]['files']['neon']['estate32']
 
-    if "kernel" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["kernel"]
+def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[]):
+    files = { "common" : [] }
 
-    if ("neon" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qasymm8"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qasymm8_signed"]
-        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qsymm16"]
-        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["neon"]):
-                file_list += operators[operator]["files"]["neon"]["integer"]
+    # Early return if filelist is empty
+    if backend not in filelist:
+        return files
 
-    if (not "sve" in env['arch'] or env['fat_binary']) and ("neon" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["fp16"]
-        if any(i in env['data_type_support'] for i in ['all', 'fp32']) and ("fp32" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["fp32"]
-        if any(i in env['data_layout_support'] for i in ['all', 'nchw']) and ("nchw" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]['files']['neon']['nchw']
-        if ("all" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["all"]
-    if ("sve" in env['arch'] or env['fat_binary']) and ("sve" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["fp16"]
-        if any(i in env['data_type_support'] for i in ['all', 'fp32'])  and ("fp32" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["fp32"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qasymm8"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qasymm8_signed"]
-        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qsymm16"]
-        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["integer"]
-        if ("all" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["all"]
+    # Iterate over operators and create the file lists to compiler
+    for operator in operators:
+        if operator in filelist[backend]['operators']:
+            files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
+            for tech in techs:
+                if tech in filelist[backend]['operators'][operator]["files"]:
+                    # Add tech as a key to dictionary if not there
+                    if tech not in files:
+                        files[tech] = []
 
-    return file_list, file_list_sve
+                    # Add tech files to the tech file list
+                    tech_files = filelist[backend]['operators'][operator]["files"][tech]
+                    files[tech] += tech_files.get('common', [])
+                    for attr in attrs:
+                        files[tech] += tech_files.get(attr, [])
+
+    # Remove duplicates if they exist
+    return {k: list(set(v)) for k,v in files.items()}
+
+def collect_operators(filelist, operators, backend=''):
+    ops = set()
+    for operator in operators:
+        if operator in filelist[backend]['operators']:
+            ops.add(operator)
+            if 'deps' in filelist[backend]['operators'][operator]:
+                ops.update(filelist[backend]['operators'][operator]['deps'])
+        else:
+            print("Operator {0} is unsupported on {1} backend!".format(operator, backend))
+
+    return ops
+
+
+def resolve_operator_dependencies(filelist, operators, backend=''):
+    resolved_operators = collect_operators(filelist, operators, backend)
+
+    are_ops_resolved = False
+    while not are_ops_resolved:
+        resolution_pass = collect_operators(filelist, resolved_operators, backend)
+        if len(resolution_pass) != len(resolved_operators):
+            resolved_operators.update(resolution_pass)
+        else:
+            are_ops_resolved = True
+
+    return resolved_operators
+
 
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
@@ -385,70 +403,61 @@ arm_compute_env.Append(LIBS = ['dl'])
 with (open(Dir('#').path + '/filelist.json')) as fp:
     filelist = json.load(fp)
 
-core_files = Glob('src/core/*.cpp')
-core_files += Glob('src/core/CPP/*.cpp')
-core_files += Glob('src/core/CPP/kernels/*.cpp')
-core_files += Glob('src/core/helpers/*.cpp')
-core_files += Glob('src/core/utils/*.cpp')
-core_files += Glob('src/core/utils/helpers/*.cpp')
-core_files += Glob('src/core/utils/io/*.cpp')
-core_files += Glob('src/core/utils/quantization/*.cpp')
-core_files += Glob('src/core/utils/misc/*.cpp')
-if env["logging"]:
-    core_files += Glob('src/core/utils/logging/*.cpp')
+# Common backend files
+lib_files = filelist['common']
 
-runtime_files_hp = Glob('src/runtime/*.cpp')
-runtime_files_hp += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
-runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
+# Logging files
+if env["logging"]:
+    lib_files += filelist['logging']
 
 # C API files
-runtime_files_hp += filelist['c_api']['common']
-runtime_files_hp += filelist['c_api']['operators']
+lib_files += filelist['c_api']['common']
+lib_files += filelist['c_api']['operators']
 
-if env['opencl']:
-    runtime_files_hp += filelist['c_api']['gpu']
+# Scheduler infrastructure
+lib_files += filelist['scheduler']['single']
+if env['cppthreads']:
+     lib_files += filelist['scheduler']['threads']
+if env['openmp']:
+     lib_files += filelist['scheduler']['omp']
 
-# Common backend files
-core_files += filelist['common']
-
-# Initialize high priority core files
-core_files_hp = core_files
-core_files_sve_hp = []
-core_files = []
-
-runtime_files_hp += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
-
+# Graph files
 graph_files = Glob('src/graph/*.cpp')
 graph_files += Glob('src/graph/*/*.cpp')
 
-if env['cppthreads']:
-     runtime_files_hp += Glob('src/runtime/CPP/CPPScheduler.cpp')
-
-if env['openmp']:
-     runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
+# Specify user-defined priority operators
+use_priority_ops = env['high_priority']
+priority_operators = filelist['high_priority']
+if env['build_config'] != "":
+    build_config = env['build_config']
+    build_config_contents = {}
+    if os.path.isfile(build_config):
+        with open(build_config) as f:
+            try:
+                build_config_contents = json.load(f)
+            except:
+                print("Warning: Build configuration file is of invalid JSON format!")
+    else:
+        try:
+            build_config_contents = json.loads(build_config)
+        except:
+            print("Warning: Build configuration string is of invalid JSON format!")
+    if build_config_contents:
+        priority_operators = build_config_contents.get("operators", [])
 
 if env['opencl']:
-    operators = filelist['gpu']['operators']
-    for operator in operators:
-        if operator in filelist['gpu']['high_priority']:
-            runtime_files_hp += get_gpu_runtime_files(operator)
-            if "kernel" in operators[operator]["files"]:
-                core_files_hp += operators[operator]["files"]["kernel"]
-        else:
-            runtime_files += get_gpu_runtime_files(operator)
-            if "kernel" in operators[operator]["files"]:
-                core_files += operators[operator]["files"]["kernel"]
+    lib_files += filelist['c_api']['gpu']
+    lib_files += filelist['gpu']['common']
 
-    runtime_files_hp += filelist['gpu']['common']
-    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
+    cl_operators = priority_operators if use_priority_ops else filelist['gpu']['operators'].keys()
+    cl_ops_to_build = resolve_operator_dependencies(filelist, cl_operators, 'gpu')
+    lib_files += get_operator_backend_files(filelist, cl_ops_to_build, 'gpu')['common']
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
 sve_o = []
-core_files_sve = []
+lib_files_sve = []
 if env['neon']:
-    core_files += Glob('src/core/NEON/*.cpp')
-
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
@@ -457,57 +466,54 @@ if env['neon']:
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/cpu/kernels/assembly/",])
 
-    # Load files based on user's options
-    operators = filelist['cpu']['operators']
-    for operator in operators:
-        if operator in filelist['cpu']['high_priority']:
-            runtime_files_hp += get_cpu_runtime_files(operator)
-            file_list, file_list_sve = get_cpu_kernel_files(operator)
-            core_files_hp += file_list
-            core_files_sve_hp += file_list_sve
-        else:
-            runtime_files += get_cpu_runtime_files(operator)
-            file_list, file_list_sve = get_cpu_kernel_files(operator)
-            core_files += file_list
-            core_files_sve += file_list_sve
+    lib_files += filelist['cpu']['common']
 
-    runtime_files_hp += filelist['cpu']['common']
-    runtime_files_hp += Glob('src/runtime/NEON/*.cpp')
-    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
+    # Setup SIMD file list to include
+    simd = []
+    if 'sve' in env['arch'] or env['fat_binary']: simd += ['sve']
+    if 'sve' not in env['arch'] or env['fat_binary']: simd += ['neon']
+
+    # Get attributes
+    attrs = get_attrs_list(env['arch'], env['estate'], env['data_type_support'], env['data_layout_support'])
+
+    # Setup data-type and data-layout files to include
+    cpu_operators = priority_operators if use_priority_ops else filelist['cpu']['operators'].keys()
+    cpu_ops_to_build = resolve_operator_dependencies(filelist, filelist['cpu']['operators'], 'cpu')
+    cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+    lib_files += cpu_files.get('common', [])
+    lib_files += cpu_files.get('neon', [])
+    lib_files_sve += cpu_files.get('sve', [])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
+# Restrict from building graph API if a reduced operator list has been provided
+if use_priority_ops:
+    print("Graph library requires all operators to be built")
+    graph_files = []
+
+# Build bootcode in case of bare-metal
 bootcode_o = []
 if env['os'] == 'bare_metal':
     bootcode_files = Glob('bootcode/*.s')
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-high_priority_o = build_objs(core_files_hp + runtime_files_hp)
-high_priority_sve_o = []
+# Build static libraries
 if (env['fat_binary']):
-    sve_o = build_sve_objs(core_files_sve)
-    high_priority_sve_o = build_sve_objs(core_files_sve_hp)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
+    sve_o = build_sve_objs(lib_files_sve)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + sve_o, static=True)
 else:
-    high_priority_o += build_objs(core_files_sve_hp)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files, static=True)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + lib_files_sve, static=True)
 Export('arm_compute_a')
-if env['high_priority']:
-    arm_compute_hp_a = build_library('arm_compute_hp-static', arm_compute_env, high_priority_o + high_priority_sve_o, static=True)
-    Export('arm_compute_hp_a')
 
+# Build shared libraries
 if env['os'] != 'bare_metal' and not env['standalone']:
     if (env['fat_binary']):
-        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + sve_o + high_priority_sve_o + high_priority_o + runtime_files, static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + sve_o, static=False)
     else:
-        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files , static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + lib_files_sve, static=False)
 
     Export('arm_compute_so')
-
-    if env['high_priority']:
-        arm_compute_hp_so = build_library('arm_compute_hp', arm_compute_env, high_priority_sve_o + high_priority_o, static=False)
-        Export('arm_compute_hp_so')
 
 # Generate dummy core lib for backwards compatibility
 arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
@@ -519,6 +525,7 @@ if env['os'] != 'bare_metal' and not env['standalone']:
 
 arm_compute_graph_env = arm_compute_env.Clone()
 
+# Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
 arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])

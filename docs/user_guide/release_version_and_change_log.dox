@@ -1315,7 +1315,7 @@ v17.09 Public major release
     - NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
-    - NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
+    - NEQuantizationLayerKernel NEMinMaxLayerKernel / @ref NEQuantizationLayer
     - @ref NEROIPoolingLayerKernel / @ref NEROIPoolingLayer
     - @ref NEReductionOperationKernel / @ref NEReductionOperation
     - NEReshapeLayerKernel / @ref NEReshapeLayer
@@ -1329,7 +1329,7 @@ v17.09 Public major release
     - CLGEMMTranspose1xW
     - CLGEMMMatrixVectorMultiplyKernel
     - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
-    - CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
+    - CLQuantizationLayerKernel CLMinMaxLayerKernel / @ref CLQuantizationLayer
     - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer
     - @ref CLReductionOperationKernel / @ref CLReductionOperation
     - CLReshapeLayerKernel / @ref CLReshapeLayer

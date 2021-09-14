@@ -1404,24 +1404,13 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>All<td>All
     </table>
 <tr>
-  <td rowspan="2">FillBorder
-  <td rowspan="2" style="width:200px;"> Function to fill the borders within the XY-planes.
-  <td rowspan="2">
+  <td rowspan="1">FillBorder
+  <td rowspan="1" style="width:200px;"> Function to fill the borders within the XY-planes.
+  <td rowspan="1">
       <ul>
        <li>n/a
       </ul>
   <td>NEFillBorder
-  <td>
-      <ul>
-       <li>All
-      </ul>
-  <td>
-    <table>
-    <tr><th>src<th>dst
-    <tr><td>All<td>All
-    </table>
-<tr>
-  <td>CLFillBorder
   <td>
       <ul>
        <li>All

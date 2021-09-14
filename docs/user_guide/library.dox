@@ -561,6 +561,35 @@ Selecting fat_binary when building Compute Library, will create a library that c
 Based on the CPU support, the appropriate kernel will be selected at runtime for execution. Currently this option is
 only supported with armv8.2-a as the base architecture.
 
+@subsection architecture_experimental_per_operator_build Per-operator build
+
+Dependencies for all operators have been explicitly defined, this provides the ability to users to generate Compute Library
+binaries that include a user-defined list of operators.
+
+An experimental flag 'build_config' has been introduced where a JSON configuration file can be provided and consumed.
+An example config looks like:
+@code{.py}
+{
+    "operators": [
+        "Activation",
+        "DepthwiseConv2d",
+        "Conv2d",
+        "Permute",
+        "Pool2d",
+        "Reshape"
+    ],
+    "data_types": [
+        "NHWC"
+    ]
+}
+@endcode
+
+Supported data-types options are:
+- "NHWC"
+- "NCHW"
+
+The list of supported operators can be found in filelist.json in the root of Compute Library repo.
+
 @subsection architecture_experimental_build_high_priority_operators Build high priority operators
 
 Selecting high_priority when building Compute Library, one new library will be created: libarm_compute_hp and
