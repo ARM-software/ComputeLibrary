@@ -201,11 +201,11 @@ public:
         return _buffer_per_multi * _args._nmulti * sizeof(To) + get_col_sum_size();
     }
 
-    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
         // Column sums go on the front of the pretransposed buffer in requantized cases.
         // We could optimize here in case we don't actually need to sum the columns, but this code is only run on setup.
         if (std::is_same<OutputStage, Requantize32>::value) {
-            col_bias = reinterpret_cast<int32_t *>(in_buffer);
+            col_bias = reinterpret_cast<int32_t *>(buffer);
 
             Requantize32 *qp_ptr = reinterpret_cast<Requantize32 *>(&_os);
 
@@ -213,10 +213,6 @@ public:
                 compute_col_sums(*qp_ptr, _args._Nsize, _args._Ksize, B + (i * B_multi_stride), ldb, col_bias + (i * _args._Nsize), _args._Ksize, i, 0);
             }
         }
-    }
-
-    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        requantize_bias(buffer, B, ldb, B_multi_stride);
 
         // The actual transposed buffer goes after the column sums (if any)
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);

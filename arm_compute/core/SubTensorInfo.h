@@ -196,21 +196,10 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_dynamic();
     }
-    bool are_values_constant() const override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        return _parent->are_values_constant();
-    }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_is_resizable(is_resizable);
-        return *this;
-    }
-    ITensorInfo &set_are_values_constant(bool are_values_constant) override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        _parent->set_are_values_constant(are_values_constant);
         return *this;
     }
     ValidRegion valid_region() const override

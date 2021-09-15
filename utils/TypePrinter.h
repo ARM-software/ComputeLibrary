@@ -1161,7 +1161,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "retain_internal_weights=" << info.retain_internal_weights() << ",";
     os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
     os << "broadcast_bias=" << info.broadcast_bias() << ",";
-    os << "pretranspose_B=" << info.pretranspose_B() << ",";
+    os << "pretranpose_B=" << info.pretranpose_B() << ",";
 
     return os;
 }

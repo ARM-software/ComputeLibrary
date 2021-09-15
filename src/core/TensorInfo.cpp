@@ -31,11 +31,11 @@
 
 #include <memory>
 
-namespace arm_compute
-{
+using namespace arm_compute;
+
 TensorInfo::TensorInfo()
     : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _dims_state(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
-      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW), _are_values_constant(true)
+      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
 
@@ -55,7 +55,6 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
-    _are_values_constant           = info.are_values_constant();
 }
 
 TensorInfo::TensorInfo(Format format)
@@ -378,4 +377,3 @@ int32_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 
     return offset;
 }
-} // namespace arm_compute

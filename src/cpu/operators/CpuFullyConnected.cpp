@@ -312,13 +312,9 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
 
     if(_aux_mem[Pretranspose].size > 0)
     {
-        // Release permuted weights at the end of prepare as they are further transposed by the assembly dispatch
-        // Do not release them if biases are dynamic and data type is quantized, since the weights tensor will be used for biases offset calculation
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric && biases && !(biases->are_values_constant())) ?
-                                                 MemoryLifetime::Persistent :
-                                                 MemoryLifetime::Prepare,
-                                                 _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights] = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
+        // Release permuted weights at the of prepare as they are further transposed by the assembly dispatch
+        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), MemoryLifetime::Prepare, _reshaped_weights.total_size());
+        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
     }
     else
     {
@@ -336,9 +332,10 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(biases != nullptr && biases->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
-    ARM_COMPUTE_RETURN_ERROR_ON(!weights->are_values_constant() && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!fc_info.constant_weights, "Non-constant weights are currently not supported");
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
@@ -358,19 +355,6 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
 
     // Check if we have a fully connected layer with batches
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-
-    if(biases != nullptr)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
-        if(is_data_type_quantized(src->data_type()))
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, biases);
-        }
-    }
 
     if(is_batched_fc_layer)
     {

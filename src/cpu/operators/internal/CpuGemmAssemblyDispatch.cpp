@@ -206,7 +206,6 @@ private:
     std::vector<TypeInput>           _indirect_pad{};
     arm_gemm::ConvolutionParameters  _cp{};
     experimental::MemoryRequirements _aux_mem{ Count };
-    bool                             _B_pretranspose_required{ false };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -392,7 +391,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
         const size_t       B_pretranspose_size = _gemm_kernel_asm->get_B_pretransposed_array_size();
         _pretranspose_info                     = TensorInfo(TensorShape(B_pretranspose_size), 1, DataType::U8);
         _aux_mem[Pretranspose]                 = MemoryInfo(offset_int_vec(Pretranspose), MemoryLifetime::Persistent, B_pretranspose_size, alignment);
-        _B_pretranspose_required               = true;
     }
 
     // Handle indirect GEMM convolution
@@ -485,35 +483,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
         ldb            = b->info()->strides_in_bytes().y() / sizeof(TypeInput);
         multi_stride_b = b->info()->strides_in_bytes().z() / sizeof(TypeInput);
         in1_ptr        = reinterpret_cast<const TypeInput *>(b->buffer() + b->info()->offset_first_element_in_bytes());
-    }
-
-    // If necessary, run pretranspose every time if either weights or biases are non-constant
-    if((b && !b->info()->are_values_constant()) || (c && !c->info()->are_values_constant() && c->info()->data_type() == DataType::S32))
-    {
-        if(c && c->info()->data_type() == DataType::S32)
-        {
-            _gemm_kernel_asm->set_quantized_bias(reinterpret_cast<const int32_t *>(c->buffer() + c->info()->offset_first_element_in_bytes()), 0);
-        }
-
-        // Pretranspose B if required
-        if(_B_pretranspose_required)
-        {
-            const int  ldb            = b->info()->strides_in_bytes().y() / sizeof(TypeInput);
-            const auto b_ptr          = reinterpret_cast<const TypeInput *>(b->buffer() + b->info()->offset_first_element_in_bytes());
-            const int  multi_stride_b = b->info()->strides_in_bytes().z() / sizeof(TypeInput);
-
-            CpuAuxTensorHandler pretranspose(offset_int_vec(Pretranspose), _pretranspose_info, tensors, true);
-            ARM_COMPUTE_ERROR_ON(pretranspose.get()->buffer() == nullptr);
-
-            if(b->info()->are_values_constant())
-            {
-                _gemm_kernel_asm->requantize_bias(pretranspose.get()->buffer(), b_ptr, ldb, multi_stride_b);
-            }
-            else
-            {
-                _gemm_kernel_asm->pretranspose_B_array(pretranspose.get()->buffer(), b_ptr, ldb, multi_stride_b);
-            }
-        }
     }
 
     const auto scheduling_hint = scheduling_hint_heuristic(_kernel_info.method, d->info()->data_type());
