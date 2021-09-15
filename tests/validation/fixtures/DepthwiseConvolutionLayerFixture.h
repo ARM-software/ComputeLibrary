@@ -446,6 +446,19 @@ public:
 
     void configure_target()
     {
+#if defined(ARM_COMPUTE_OPENCL_ENABLED)
+        if(_export_to_cl_image)
+        {
+            _validate_output &= image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
+            _validate_output &= (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) != 0);
+        }
+#endif // ARM_COMPUTE_OPENCL_ENABLED
+
+        if(!_validate_output)
+        {
+            return;
+        }
+
         TensorShape input_shape   = _input_shape;
         TensorShape weights_shape = _weights_shape;
 
@@ -471,14 +484,6 @@ public:
         dwc_info.m0                         = _conv_info.stride().first == 1 && _dilation.x() == 1 ? 8 : 1;
         dwc_info.export_weights_to_cl_image = _export_to_cl_image;
 
-#if defined(ARM_COMPUTE_OPENCL_ENABLED)
-        if(_export_to_cl_image)
-        {
-            _validate_output |= image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
-            _validate_output |= (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) != 0);
-        }
-#endif // ARM_COMPUTE_OPENCL_ENABLED
-
         const ConvolutionInfo conv_kernel_info
         {
             _conv_info, _depth_multiplier, _act_info, _dilation
@@ -498,6 +503,11 @@ public:
 
     void allocate_and_run_target()
     {
+        if(!_validate_output)
+        {
+            return;
+        }
+
         // Allocate tensors
         _src.allocator()->allocate();
         _weights.allocator()->allocate();
@@ -525,10 +535,7 @@ public:
         }
 
         // Compute function
-        if(_validate_output)
-        {
-            _dwc.run();
-        }
+        _dwc.run();
 
         // Reinstating original data layout for the test suite to properly check the values
         if(!_in_place)
@@ -539,6 +546,11 @@ public:
 
     void compute_reference()
     {
+        if(!_validate_output)
+        {
+            return;
+        }
+
         SimpleTensor<T> src{ _input_shape, _data_type };
         SimpleTensor<T> weights{ _weights_shape, _data_type };
         SimpleTensor<T> biases{ _biases_shape, _data_type };
@@ -549,10 +561,7 @@ public:
 
         const ConvolutionInfo info{ _conv_info, _depth_multiplier, _act_info, _dilation };
         const TensorShape     dst_shape = compute_depthwise_convolution_shape(TensorInfo(_input_shape, 1, _data_type), TensorInfo(_weights_shape, 1, _data_type), info);
-        if(_validate_output)
-        {
-            _reference = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
-        }
+        _reference                      = reference::activation_layer(reference::depthwise_convolution(src, weights, biases, dst_shape, _conv_info, _depth_multiplier, _dilation), _act_info);
     }
 
 protected:
