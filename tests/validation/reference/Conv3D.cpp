@@ -125,6 +125,7 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
 
     const TensorShape dst_shape = arm_compute::misc::shape_calculator::compute_conv3d_shape(src.shape(), weights.shape(), conv3d_info);
 
+    ARM_COMPUTE_UNUSED(src_channels, weights_out_ch, dst_channels, dst_shape, weights_CHin_dim);
     // Number of batches of source and destination tensors must match.
     ARM_COMPUTE_ERROR_ON(src.shape()[batch_dim] != dst.shape()[batch_dim]);
     // Input channels in the source and weights must match.
