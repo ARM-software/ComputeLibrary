@@ -61,7 +61,7 @@ namespace arm_compute
         - Convolution Layer uses QSYMM8_PER_CHANNEL as the data type of its weight
 
 - A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
-    - Versions Affected: >= 20.11
+    - Versions Affected: >= 20.11 && < 21.05
     - Conditions:
         - Data type input: F32/F16
         - Fused bounded relu activation with coefficient 'a' being negative
@@ -87,7 +87,7 @@ namespace arm_compute
         - Compiled using Android NDK >= r18b in debug mode.
 
 - An issue has been identified with CLCast.
-    - Versions Affected: >= 18.11
+    - Versions Affected: >= 18.11 && < 21.05
     - Conditions:
         - Data type input: F32
         - Data type output: All integer types
