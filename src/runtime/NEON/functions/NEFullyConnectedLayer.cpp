@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuFullyConnected.h"
 
@@ -69,6 +70,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                                biases != nullptr ? biases->info() : nullptr,
                                                                output->info(),
                                                                fc_info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, fc_info);
 
     _impl->op               = std::make_unique<cpu::CpuFullyConnected>();
     _impl->original_weights = weights;

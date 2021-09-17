@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,12 +30,15 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 
 namespace arm_compute
 {
 void NEPriorBoxLayer::configure(const ITensor *input1, const ITensor *input2, ITensor *output, const PriorBoxLayerInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input1, input2, output, info);
+
     auto k = std::make_unique<NEPriorBoxLayerKernel>();
     k->configure(input1, input2, output, info);
     _kernel = std::move(k);

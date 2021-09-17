@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,15 @@
 
 #include "src/core/NEON/kernels/NEGatherKernel.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
 {
 void NEGather::configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, indices, output, axis);
     auto k = std::make_unique<NEGatherKernel>();
     k->configure(input, indices, output, axis);
     _kernel = std::move(k);

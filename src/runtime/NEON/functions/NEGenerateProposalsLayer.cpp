@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
@@ -72,6 +73,7 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(NEGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
+    ARM_COMPUTE_LOG_PARAMS(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
 
     _is_nhwc                        = scores->info()->data_layout() == DataLayout::NHWC;
     const DataType scores_data_type = scores->info()->data_type();

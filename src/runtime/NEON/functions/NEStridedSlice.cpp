@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 namespace arm_compute
@@ -35,6 +36,8 @@ void NEStridedSlice::configure(const ITensorInfo *input, ITensorInfo *output,
                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+
     auto k = std::make_unique<NEStridedSliceKernel>();
     k->configure(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     _kernel = std::move(k);

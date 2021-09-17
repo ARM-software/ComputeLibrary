@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuGemmLowpMatrixReductionKernel.h"
@@ -87,6 +88,8 @@ Status NEQLSTMLayer::TensorCopyKernel::validate(const ITensorInfo &src, const IT
 void NEQLSTMLayer::TensorCopyKernel::configure(ITensor &src, ITensor &dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(NEQLSTMLayer::TensorCopyKernel::validate(*src.info(), *dst.info()));
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
+
     _src      = &src;
     _dst      = &dst;
     _row_size = std::min(_src->info()->tensor_shape().x(), _dst->info()->tensor_shape().x());
@@ -155,6 +158,10 @@ void NEQLSTMLayer::configure(const ITensor *input,
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
                                  forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out, output_state_out);
+
+    ARM_COMPUTE_LOG_PARAMS(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
+                           recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
+                           forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out, output_state_out);
 
     // Set lstm parameters
     LSTMParams<ITensorInfo> lstm_params_info{};

@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 
 namespace arm_compute
@@ -40,6 +41,8 @@ NEMaxUnpoolingLayer::NEMaxUnpoolingLayer()
 
 void NEMaxUnpoolingLayer::configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, indices, output, pool_info);
+
     const PixelValue zero_value(0.f);
     _fill_func              = std::make_unique<NEFill>();
     _unpooling_layer_kernel = std::make_unique<NEMaxUnpoolingLayerKernel>();

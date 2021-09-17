@@ -138,7 +138,7 @@ logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &
  *                   detecting T as an abstract data type when passing any of these parameters as L-value reference
  *                   to an abstract type.
  *
- * @return           Vector of the parameters' data in a string format
+ * @return  Vector of the parameters' data in a string format
  */
 template <typename... Ts>
 const std::vector<std::string> logParams(Ts &&... ins)
@@ -156,9 +156,9 @@ const std::vector<std::string> logParams(Ts &&... ins)
  *  It is Inline to avoid the redefinition of this function each time this header is included
  *
  * @param[in] in_params_str Constant reference to a string consists of the names of the input parameters provided
- *                           as:ARM_COMPUTE_LOG_PARAMS(src0, src1) the params_names = "src0, src1"
+ *                          as:ARM_COMPUTE_LOG_PARAMS(src0, src1) the params_names = "src0, src1"
  *
- * @return                   Vector of strings containing all the names of the input parameters
+ * @return  Vector of strings containing all the names of the input parameters
  */
 inline const std::vector<std::string> getParamsNames(const std::string &in_params_str)
 {
@@ -188,9 +188,9 @@ inline const std::vector<std::string> getParamsNames(const std::string &in_param
  * @param[in] params_names  Constant reference to a string consists of the the input parameters' names
  *                          provided e.g.: ARM_COMPUTE_LOG_PARAMS(src0, src1) then params_names = "src0, src1"
  * @param[in] data_registry Constant reference to a registry of all parameters' data in string format,
- *                           stringnized by arm_compute::to_string()
+ *                          stringnized by arm_compute::to_string()
  *
- * @return                   Log message string to be displayed
+ * @return  Log message string to be displayed
  */
 inline const std::string constructDataLog(const std::vector<std::string> &params_names,
                                           const std::vector<std::string> &data_registry)

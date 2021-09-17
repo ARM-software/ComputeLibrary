@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
@@ -43,6 +44,8 @@ NEL2NormalizeLayer::NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_ma
 
 void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, float epsilon)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, axis, epsilon);
+
     // Manage intermediate buffers
     _memory_group.manage(&_sumsq);
 

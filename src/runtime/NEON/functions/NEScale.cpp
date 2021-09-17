@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/common/utils/Log.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/operators/CpuScale.h"
 #include "support/Rounding.h"
@@ -49,6 +50,8 @@ NEScale::~NEScale() = default;
 
 void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, info);
+
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<cpu::CpuScale>();

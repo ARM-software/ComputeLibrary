@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,14 @@
 
 #include "src/core/NEON/kernels/NETileKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 void NETile::configure(const ITensor *input, ITensor *output, const Multiples &multiples)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, multiples);
+
     auto k = std::make_unique<NETileKernel>();
     k->configure(input, output, multiples);
     _kernel = std::move(k);

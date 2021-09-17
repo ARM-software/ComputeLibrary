@@ -24,6 +24,10 @@
 #ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TYPE_PRINTER_H__
 
+#ifdef ARM_COMPUTE_OPENCL_ENABLED
+#include "arm_compute/core/CL/ICLTensor.h"
+#endif /* ARM_COMPUTE_OPENCL_ENABLED */
+
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -35,6 +39,7 @@
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 #include "support/StringSupport.h"
 
 #include <ostream>
@@ -1094,24 +1099,6 @@ inline std::string to_string(const ITensorInfo &info)
     return str.str();
 }
 
-/** Formatted output of the ITensorInfo* type.
- *
- * @param[in] info Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(ITensorInfo *info)
-{
-    std::string ret_str = "nullptr";
-    if(info != nullptr)
-    {
-        std::stringstream str;
-        str << info;
-        ret_str = str.str();
-    }
-    return ret_str;
-}
-
 /** Formatted output of the const ITensorInfo* type.
  *
  * @param[in] info Type to output.
@@ -1130,7 +1117,18 @@ inline std::string to_string(const ITensorInfo *info)
     return ret_str;
 }
 
-/** Formatted output of the const ITensor* type.
+/** Formatted output of the ITensorInfo* type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(ITensorInfo *info)
+{
+    return to_string(static_cast<const ITensorInfo *>(info));
+}
+
+/** Formatted output of the ITensorInfo type obtained from const ITensor* type.
  *
  * @param[in] tensor Type to output.
  *
@@ -1142,13 +1140,13 @@ inline std::string to_string(const ITensor *tensor)
     if(tensor != nullptr)
     {
         std::stringstream str;
-        str << tensor->info();
+        str << "ITensor->info(): " << tensor->info();
         ret_str = str.str();
     }
     return ret_str;
 }
 
-/** Formatted output of the ITensor* type.
+/** Formatted output of the ITensorInfo type obtained from the ITensor* type.
  *
  * @param[in] tensor Type to output.
  *
@@ -1156,17 +1154,10 @@ inline std::string to_string(const ITensor *tensor)
  */
 inline std::string to_string(ITensor *tensor)
 {
-    std::string ret_str = "nullptr";
-    if(tensor != nullptr)
-    {
-        std::stringstream str;
-        str << tensor->info();
-        ret_str = str.str();
-    }
-    return ret_str;
+    return to_string(static_cast<const ITensor *>(tensor));
 }
 
-/** Formatted output of the ITensor& type.
+/** Formatted output of the ITensorInfo type obtained from the ITensor& type.
  *
  * @param[in] tensor Type to output.
  *
@@ -1175,9 +1166,40 @@ inline std::string to_string(ITensor *tensor)
 inline std::string to_string(ITensor &tensor)
 {
     std::stringstream str;
-    str << tensor.info();
+    str << "ITensor.info(): " << tensor.info();
     return str.str();
 }
+
+#ifdef ARM_COMPUTE_OPENCL_ENABLED
+/** Formatted output of the ITensorInfo type obtained from the const ICLTensor& type.
+ *
+ * @param[in] cl_tensor Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ICLTensor *cl_tensor)
+{
+    std::string ret_str = "nullptr";
+    if(cl_tensor != nullptr)
+    {
+        std::stringstream str;
+        str << "ICLTensor->info(): " << cl_tensor->info();
+        ret_str = str.str();
+    }
+    return ret_str;
+}
+
+/** Formatted output of the ITensorInfo type obtained from the ICLTensor& type.
+ *
+ * @param[in] cl_tensor Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(ICLTensor *cl_tensor)
+{
+    return to_string(static_cast<const ICLTensor *>(cl_tensor));
+}
+#endif /* ARM_COMPUTE_OPENCL_ENABLED */
 
 /** Formatted output of the Dimensions type.
  *
@@ -1268,7 +1290,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "retain_internal_weights=" << info.retain_internal_weights() << ",";
     os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
     os << "broadcast_bias=" << info.broadcast_bias() << ",";
-    os << "pretranpose_B=" << info.pretranpose_B() << ",";
+    os << "pretranspose_B=" << info.pretranspose_B() << ",";
 
     return os;
 }
@@ -1360,7 +1382,7 @@ inline std::string to_string(const Window::Dimension &dim)
     str << dim;
     return str.str();
 }
-/** Formatted output of the Window type.
+/** Formatted output of the Window& type.
  *
  * @param[in] win Type to output.
  *
@@ -1371,6 +1393,24 @@ inline std::string to_string(const Window &win)
     std::stringstream str;
     str << win;
     return str.str();
+}
+
+/** Formatted output of the Window* type.
+ *
+ * @param[in] win Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(Window *win)
+{
+    std::string ret_str = "nullptr";
+    if(win != nullptr)
+    {
+        std::stringstream str;
+        str << *win;
+        ret_str = str.str();
+    }
+    return ret_str;
 }
 
 /** Formatted output of the Rectangle type.
@@ -2322,10 +2362,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const CLTunerMode &val)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionInfo &conv_info)
 {
-    os << "PadStrideInfo = " << conv_info.pad_stride_info << ", "
+    os << "{PadStrideInfo = " << conv_info.pad_stride_info << ", "
        << "depth_multiplier = " << conv_info.depth_multiplier << ", "
        << "act_info = " << to_string(conv_info.act_info) << ", "
-       << "dilation = " << conv_info.dilation;
+       << "dilation = " << conv_info.dilation << "}";
     return os;
 }
 
@@ -2351,13 +2391,13 @@ inline std::string to_string(const ConvolutionInfo &info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FullyConnectedLayerInfo &layer_info)
 {
-    os << "activation_info = " << to_string(layer_info.activation_info) << ", "
+    os << "{activation_info = " << to_string(layer_info.activation_info) << ", "
        << "weights_trained_layout = " << layer_info.weights_trained_layout << ", "
        << "transpose_weights = " << layer_info.transpose_weights << ", "
        << "are_weights_reshaped = " << layer_info.are_weights_reshaped << ", "
        << "retain_internal_weights = " << layer_info.retain_internal_weights << ", "
        << "constant_weights = " << layer_info.transpose_weights << ", "
-       << "fp_mixed_precision = " << layer_info.fp_mixed_precision;
+       << "fp_mixed_precision = " << layer_info.fp_mixed_precision << "}";
     return os;
 }
 
@@ -2425,7 +2465,7 @@ inline std::string to_string(const GEMMLowpOutputStageType &gemm_type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageInfo &gemm_info)
 {
-    os << "type = " << gemm_info.type << ", "
+    os << "{type = " << gemm_info.type << ", "
        << "gemlowp_offset = " << gemm_info.gemmlowp_offset << ", "
        << "gemmlowp_multiplier" << gemm_info.gemmlowp_multiplier << ", "
        << "gemmlowp_shift = " << gemm_info.gemmlowp_shift << ", "
@@ -2435,7 +2475,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageI
        << "gemmlowp_shifts = " << gemm_info.gemmlowp_shift << ", "
        << "gemmlowp_real_multiplier = " << gemm_info.gemmlowp_real_multiplier << ", "
        << "is_quantized_per_channel = " << gemm_info.is_quantized_per_channel << ", "
-       << "output_data_type = " << gemm_info.output_data_type;
+       << "output_data_type = " << gemm_info.output_data_type << "}";
     return os;
 }
 
@@ -2461,11 +2501,11 @@ inline std::string to_string(const GEMMLowpOutputStageInfo &gemm_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Conv2dInfo &conv_info)
 {
-    os << "conv_info = " << conv_info.conv_info << ", "
+    os << "{conv_info = " << conv_info.conv_info << ", "
        << "dilation = " << conv_info.dilation << ", "
        << "act_info = " << to_string(conv_info.act_info) << ", "
        << "enable_fast_math = " << conv_info.enable_fast_math << ", "
-       << "num_groups = " << conv_info.num_groups;
+       << "num_groups = " << conv_info.num_groups << "}";
     return os;
 }
 
@@ -2491,7 +2531,7 @@ inline std::string to_string(const Conv2dInfo &conv_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PixelValue &pixel_value)
 {
-    os << "value.u64= " << pixel_value.get<uint64_t>();
+    os << "{value.u64= " << pixel_value.get<uint64_t>() << "}";
     return os;
 }
 
@@ -2517,13 +2557,13 @@ inline std::string to_string(const PixelValue &pixel_value)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ScaleKernelInfo &scale_info)
 {
-    os << "interpolation_policy = " << scale_info.interpolation_policy << ", "
+    os << "{interpolation_policy = " << scale_info.interpolation_policy << ", "
        << "BorderMode = " << scale_info.border_mode << ", "
        << "PixelValue = " << scale_info.constant_border_value << ", "
        << "SamplingPolicy = " << scale_info.sampling_policy << ", "
        << "use_padding = " << scale_info.use_padding << ", "
        << "align_corners = " << scale_info.align_corners << ", "
-       << "data_layout = " << scale_info.data_layout;
+       << "data_layout = " << scale_info.data_layout << "}";
     return os;
 }
 
@@ -2572,7 +2612,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FFTDirection &fft_di
 inline std::string to_string(const FFTDirection &fft_dir)
 {
     std::stringstream str;
-    str << fft_dir;
+    str << "{" << fft_dir << "}";
     return str.str();
 }
 
@@ -2585,8 +2625,8 @@ inline std::string to_string(const FFTDirection &fft_dir)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FFT1DInfo &fft1d_info)
 {
-    os << "axis = " << fft1d_info.axis << ", "
-       << "direction = " << fft1d_info.direction;
+    os << "{axis = " << fft1d_info.axis << ", "
+       << "direction = " << fft1d_info.direction << "}";
     return os;
 }
 
@@ -2612,9 +2652,9 @@ inline std::string to_string(const FFT1DInfo &fft1d_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FFT2DInfo &fft2d_info)
 {
-    os << "axis = " << fft2d_info.axis0 << ", "
+    os << "{axis = " << fft2d_info.axis0 << ", "
        << "axis = " << fft2d_info.axis1 << ", "
-       << "direction = " << fft2d_info.direction;
+       << "direction = " << fft2d_info.direction << "}";
     return os;
 }
 
@@ -2640,8 +2680,8 @@ inline std::string to_string(const FFT2DInfo &fft2d_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Coordinates2D &coord_2d)
 {
-    os << "x = " << coord_2d.x << ", "
-       << "y = " << coord_2d.y;
+    os << "{x = " << coord_2d.x << ", "
+       << "y = " << coord_2d.y << "}";
     return os;
 }
 
@@ -2692,6 +2732,97 @@ inline std::string to_string(const FuseBatchNormalizationType &fuse_type)
     std::stringstream str;
     str << fuse_type;
     return str.str();
+}
+
+/** Formatted output of the SoftmaxKernelInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info SoftmaxKernelInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const SoftmaxKernelInfo &info)
+{
+    os << "{beta = " << info.beta << ", "
+       << "is_log = " << info.is_log << ", "
+       << "input_data_type = " << info.input_data_type << ", "
+       << "axis = " << info.axis << "}";
+    return os;
+}
+
+/** Converts a @ref SoftmaxKernelInfo to string
+ *
+ * @param[in] info SoftmaxKernelInfo value to be converted
+ *
+ * @return String representing the corresponding SoftmaxKernelInfo
+ */
+inline std::string to_string(const SoftmaxKernelInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the ScaleKernelInfo type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  lstm_params LSTMParams to output.
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const LSTMParams<T> &lstm_params)
+{
+    os << "{input_to_input_weights=" << lstm_params.input_to_input_weights() << ", "
+       << "recurrent_to_input_weights=" << lstm_params.recurrent_to_input_weights() << ", "
+       << "cell_to_input_weights=" << lstm_params.cell_to_input_weights() << ", "
+       << "input_gate_bias=" << lstm_params.input_gate_bias() << ", "
+       << "cell_to_forget_weights=" << lstm_params.cell_to_forget_weights() << ", "
+       << "cell_to_output_weights=" << lstm_params.cell_to_output_weights() << ", "
+       << "projection_weights=" << lstm_params.projection_weights() << ", "
+       << "projection_bias=" << lstm_params.projection_bias() << ", "
+       << "input_layer_norm_weights=" << lstm_params.input_layer_norm_weights() << ", "
+       << "forget_layer_norm_weights=" << lstm_params.forget_layer_norm_weights() << ", "
+       << "cell_layer_norm_weights=" << lstm_params.cell_layer_norm_weights() << ", "
+       << "output_layer_norm_weights=" << lstm_params.output_layer_norm_weights() << ", "
+       << "cell_clip=" << lstm_params.cell_clip() << ", "
+       << "projection_clip=" << lstm_params.projection_clip() << ", "
+       << "input_intermediate_scale=" << lstm_params.input_intermediate_scale() << ", "
+       << "forget_intermediate_scale=" << lstm_params.forget_intermediate_scale() << ", "
+       << "cell_intermediate_scale=" << lstm_params.cell_intermediate_scale() << ", "
+       << "hidden_state_zero=" << lstm_params.hidden_state_zero() << ", "
+       << "hidden_state_scale=" << lstm_params.hidden_state_scale() << ", "
+       << "has_peephole_opt=" << lstm_params.has_peephole_opt() << ", "
+       << "has_projection=" << lstm_params.has_projection() << ", "
+       << "has_cifg_opt=" << lstm_params.has_cifg_opt() << ", "
+       << "use_layer_norm=" << lstm_params.use_layer_norm() << "}";
+    return os;
+}
+
+/** Converts a @ref LSTMParams to string
+ *
+ * @param[in] lstm_params LSTMParams<T> value to be converted
+ *
+ * @return String representing the corresponding LSTMParams
+ */
+template <typename T>
+inline std::string to_string(const LSTMParams<T> &lstm_params)
+{
+    std::stringstream str;
+    str << lstm_params;
+    return str.str();
+}
+
+/** Converts a @ref LSTMParams to string
+ *
+ * @param[in] num uint8_t value to be converted
+ *
+ * @return String representing the corresponding uint8_t
+ */
+inline std::string to_string(const uint8_t num)
+{
+    // Explicity cast the uint8_t to signed integer and call the corresponding overloaded to_string() function.
+    return ::std::to_string(static_cast<int>(num));
 }
 
 } // namespace arm_compute

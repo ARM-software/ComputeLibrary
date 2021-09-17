@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"
 
 namespace arm_compute
@@ -37,6 +38,7 @@ NERange::NERange()
 
 void NERange::configure(ITensor *output, const float start, const float end, const float step)
 {
+    ARM_COMPUTE_LOG_PARAMS(output, start, end, step);
     _kernel = std::make_unique<NERangeKernel>();
     _kernel->configure(output, start, end, step);
 }

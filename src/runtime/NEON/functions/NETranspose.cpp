@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
 #include "arm_compute/core/Validate.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuTranspose.h"
 
 namespace arm_compute
@@ -45,6 +46,7 @@ NETranspose::~NETranspose() = default;
 void NETranspose::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output);
 
     _impl->src = input;
     _impl->dst = output;

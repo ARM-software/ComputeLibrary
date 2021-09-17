@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"
@@ -105,6 +106,7 @@ void NEFFTConvolutionLayer::configure(ITensor *input, const ITensor *weights, co
                                       const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     ARM_COMPUTE_UNUSED(enable_fast_math);
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 
     _original_weights = weights;
     _original_bias    = biases;

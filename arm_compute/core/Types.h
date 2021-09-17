@@ -1964,7 +1964,7 @@ public:
           _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranpose_B(true),
+          _pretranspose_B(true),
           _activation_info(),
           _constant_weights(true)
     {
@@ -1999,7 +1999,7 @@ public:
           _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranpose_B(reshape_b_only_on_first_run),
+          _pretranspose_B(reshape_b_only_on_first_run),
           _activation_info(activation_info),
           _constant_weights(constant_weights)
     {
@@ -2098,17 +2098,17 @@ public:
      *
      * @return True if b should be pre-transposed else false.
      */
-    bool pretranpose_B() const
+    bool pretranspose_B() const
     {
-        return _pretranpose_B;
+        return _pretranspose_B;
     };
     /** Set pre-transpose b flag
      *
      * @param[in] flag Flag to set
      */
-    void set_pretranpose_B(bool flag)
+    void set_pretranspose_B(bool flag)
     {
-        _pretranpose_B = flag;
+        _pretranspose_B = flag;
     }
     /** Activation layer to apply after the matrix multiplication
      *
@@ -2146,7 +2146,7 @@ private:
     bool                    _fast_math;
     bool                    _fp_mixed_precision;
     bool                    _broadcast_bias;
-    bool                    _pretranpose_B;
+    bool                    _pretranspose_B;
     ActivationLayerInfo     _activation_info;
     bool                    _constant_weights;
 };

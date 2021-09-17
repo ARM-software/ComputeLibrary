@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,16 @@
 
 #include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 NEMeanStdDevNormalizationLayer::~NEMeanStdDevNormalizationLayer() = default;
 
 void NEMeanStdDevNormalizationLayer::configure(ITensor *input, ITensor *output, float epsilon)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, epsilon);
+
     auto k = std::make_unique<NEMeanStdDevNormalizationKernel>();
     k->configure(input, output, epsilon);
     _kernel = std::move(k);

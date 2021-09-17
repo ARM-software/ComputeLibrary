@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
 namespace arm_compute
@@ -42,6 +43,7 @@ NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manage
 }
 void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, axis, output, op);
     _reduction_function->configure(input, output, axis, op, false);
 }
 

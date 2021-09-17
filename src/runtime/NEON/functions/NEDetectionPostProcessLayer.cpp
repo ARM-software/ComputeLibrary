@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "src/common/utils/Log.h"
 
 #include <cstddef>
 #include <ios>
@@ -45,6 +46,7 @@ void NEDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, c
     ARM_COMPUTE_ERROR_THROW_ON(NEDetectionPostProcessLayer::validate(input_box_encoding->info(), input_scores->info(), input_anchors->info(), output_boxes->info(), output_classes->info(),
                                                                      output_scores->info(),
                                                                      num_detection->info(), info));
+    ARM_COMPUTE_LOG_PARAMS(input_box_encoding, input_scores, input_anchors, output_boxes, output_classes, output_scores, num_detection, info);
 
     const ITensor                *input_scores_to_use = input_scores;
     DetectionPostProcessLayerInfo info_to_use         = info;

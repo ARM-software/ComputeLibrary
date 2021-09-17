@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuDepthwiseConv2d.h"
 
 using namespace arm_compute::misc;
@@ -309,6 +310,8 @@ struct NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer::Impl
 void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                                             const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, weights, output, conv_info, depth_multiplier, biases, act_info, dilation);
+
     const ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
     _impl->op              = std::make_shared<cpu::CpuDepthwiseConv2d>();
     _impl->depth_conv_func = _impl->op->get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),

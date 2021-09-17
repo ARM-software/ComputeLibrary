@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuConv2d.h"
 #include "src/cpu/operators/CpuDirectConv2d.h"
@@ -66,6 +67,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     ARM_COMPUTE_UNUSED(num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math, num_groups));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
     switch(cpu::CpuConv2d::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))

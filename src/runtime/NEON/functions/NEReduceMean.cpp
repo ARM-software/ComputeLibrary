@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -112,6 +113,8 @@ Status NEReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
 
 void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, bool keep_dims, ITensor *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, reduction_axis, keep_dims, output);
+
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(NEReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
     // Output auto inizialitation if not yet initialized

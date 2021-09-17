@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NERemapKernel.h"
 
 #include <utility>
@@ -45,6 +46,7 @@ void NERemap::configure(ITensor *input, const ITensor *map_x, const ITensor *map
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_x, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_y, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(policy == InterpolationPolicy::AREA, "Area interpolation is not supported");
+    ARM_COMPUTE_LOG_PARAMS(input, map_x, map_y, output, policy, border_mode, constant_border_value);
 
     auto k = std::make_unique<NERemapKernel>();
     k->configure(input, map_x, map_y, output, policy, border_mode, constant_border_value.get<uint8_t>());
