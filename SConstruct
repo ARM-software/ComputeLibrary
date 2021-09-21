@@ -41,6 +41,50 @@ def version_at_least(version, required):
 
     return True
 
+def read_build_config_json(build_config):
+    build_config_contents = {}
+    custom_types = []
+    custom_layouts = []
+    if os.path.isfile(build_config):
+        with open(build_config) as f:
+            try:
+                build_config_contents = json.load(f)
+            except:
+                print("Warning: Build configuration file is of invalid JSON format!")
+    else:
+        try:
+            build_config_contents = json.loads(build_config)
+        except:
+            print("Warning: Build configuration string is of invalid JSON format!")
+    if build_config_contents:
+        custom_types = build_config_contents.get("data_types", [])
+        custom_layouts = build_config_contents.get("data_layouts", [])
+    return custom_types, custom_layouts
+
+def update_data_type_layout_flags(env, data_types, data_layouts):
+    # Manage data-types
+    if any(i in data_types for i in ['all', 'fp16']):
+        env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
+    if any(i in data_types for i in ['all', 'fp32']):
+        env.Append(CXXFLAGS = ['-DENABLE_FP32_KERNELS'])
+    if any(i in data_types for i in ['all', 'qasymm8']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_KERNELS'])
+    if any(i in data_types for i in ['all', 'qasymm8_signed']):
+        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
+    if any(i in data_types for i in ['all', 'qsymm16']):
+        env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
+    if any(i in data_types for i in ['all', 'integer']):
+        env.Append(CXXFLAGS = ['-DENABLE_INTEGER_KERNELS'])
+
+    # Manage data-layouts
+    if any(i in data_layouts for i in ['all', 'nhwc']):
+        env.Append(CXXFLAGS = ['-DENABLE_NHWC_KERNELS'])
+    if any(i in data_layouts for i in ['all', 'nchw']):
+        env.Append(CXXFLAGS = ['-DENABLE_NCHW_KERNELS'])
+
+    return env
+
+
 vars = Variables("scons")
 vars.AddVariables(
     BoolVariable("debug", "Debug", False),
@@ -327,25 +371,20 @@ if env['high_priority'] and env['build_config']:
 if not env['high_priority'] and not env['build_config']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_GRAPH_ENABLED'])
 
-if env['data_type_support']:
-    if any(i in env['data_type_support'] for i in ['all', 'fp16']):
-        env.Append(CXXFLAGS = ['-DENABLE_FP16_KERNELS'])
-    if any(i in env['data_type_support'] for i in ['all', 'fp32']):
-        env.Append(CXXFLAGS = ['-DENABLE_FP32_KERNELS'])
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8']):
-        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_KERNELS'])
-    if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']):
-        env.Append(CXXFLAGS = ['-DENABLE_QASYMM8_SIGNED_KERNELS'])
-    if any(i in env['data_type_support'] for i in ['all', 'qsymm16']):
-        env.Append(CXXFLAGS = ['-DENABLE_QSYMM16_KERNELS'])
-    if any(i in env['data_type_support'] for i in ['all', 'integer']):
-        env.Append(CXXFLAGS = ['-DENABLE_INTEGER_KERNELS'])
+data_types = []
+data_layouts = []
 
-if env['data_layout_support']:
-    if any(i in env['data_layout_support'] for i in ['all', 'nhwc']):
-        env.Append(CXXFLAGS = ['-DENABLE_NHWC_KERNELS'])
-    if any(i in env['data_layout_support'] for i in ['all', 'nchw']):
-        env.Append(CXXFLAGS = ['-DENABLE_NCHW_KERNELS'])
+# Set correct data types / layouts to build
+if env['high_priority']:
+    data_types = ['all']
+    data_layouts = ['all']
+elif env['build_config']:
+    data_types, data_layouts = read_build_config_json(env['build_config'])
+else:
+    data_types = env['data_type_support']
+    data_layouts = env['data_layout_support']
+
+env = update_data_type_layout_flags(env, data_types, data_layouts)
 
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
@@ -417,6 +456,10 @@ Export('version_at_least')
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
+if env['examples'] and (env['build_config'] or env['high_priority']):
+    print("WARNING: Building examples for selected operators not supported. Use examples=0")
+    Return()
+
 if env['examples'] and env['exceptions']:
     if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
         print("WARNING: Building examples for bare metal and armv7a is not supported. Use examples=0")
@@ -424,6 +467,9 @@ if env['examples'] and env['exceptions']:
     SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
 if env['exceptions']:
+    if env['build_config'] or env['high_priority']:
+        print("WARNING: Building tests for selected operators not supported")
+        Return()
     if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
         print("WARNING: Building tests for bare metal and armv7a is not supported")
         Return()

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 #include <cstddef>
 #include <cstdint>
 
@@ -530,3 +531,4 @@ void a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst_imp
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

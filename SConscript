@@ -157,31 +157,28 @@ def create_version_file(target, source, env):
         fd.write(build_info)
 
 
-def get_attrs_list(arch, estate, data_types, data_layouts):
+def get_attrs_list(env, data_types, data_layouts):
     attrs = []
 
     # Manage data-types
-    if any(i in data_types for i in ['all']):
+    if 'all' in data_types:
         attrs += ['fp16', 'fp32', 'integer', 'qasymm8', 'qasymm8_signed', 'qsymm16']
     else:
-        if any(i in data_types for i in ['fp16']): attrs += ['fp16']
-        if any(i in data_types for i in ['fp32']): attrs += ['fp32']
-        if any(i in data_types for i in ['integer']): attrs += ['integer']
-        if any(i in data_types for i in ['qasymm8']): attrs += ['qasymm8']
-        if any(i in data_types for i in ['qasymm8_signed']): attrs += ['qasymm8_signed']
-        if any(i in data_types for i in ['qsymm16']): attrs += ['qsymm16']
-
+        if 'fp16' in data_types: attrs += ['fp16']
+        if 'fp32' in data_types: attrs += ['fp32']
+        if 'integer' in data_types: attrs += ['integer']
+        if 'qasymm8' in data_types: attrs += ['qasymm8']
+        if 'qasymm8_signed' in data_types: attrs += ['qasymm8_signed']
+        if 'qsymm16' in data_types: attrs += ['qsymm16']
     # Manage data-layouts
-    if any(i in data_layouts for i in ['all']):
+    if 'all' in data_layouts:
         attrs += ['nhwc', 'nchw']
     else:
-        if any(i in data_layouts for i in ['nhwc']): attrs += ['nhwc']
-        if any(i in data_layouts for i in ['nchw']): attrs += ['nchw']
+        if 'nhwc' in data_layouts: attrs += ['nhwc']
+        if 'nchw' in data_layouts: attrs += ['nchw']
 
     # Manage execution state
-    estate_attr = 'estate32' if (estate == 'auto' and 'v7a' in arch) or '32' in estate else 'estate64'
-    attrs += [ estate_attr ]
-
+    attrs += ['estate32' if (env['estate'] == 'auto' and 'v7a' in env['arch']) or '32' in env['estate'] else 'estate64']
     return attrs
 
 
@@ -237,6 +234,27 @@ def resolve_operator_dependencies(filelist, operators, backend=''):
 
     return resolved_operators
 
+def read_build_config_json(build_config):
+    build_config_contents = {}
+    custom_operators = []
+    custom_types = []
+    custom_layouts = []
+    if os.path.isfile(build_config):
+        with open(build_config) as f:
+            try:
+                build_config_contents = json.load(f)
+            except:
+                print("Warning: Build configuration file is of invalid JSON format!")
+    else:
+        try:
+            build_config_contents = json.loads(build_config)
+        except:
+            print("Warning: Build configuration string is of invalid JSON format!")
+    if build_config_contents:
+        custom_operators = build_config_contents.get("operators", [])
+        custom_types = build_config_contents.get("data_types", [])
+        custom_layouts = build_config_contents.get("data_layouts", [])
+    return custom_operators, custom_types, custom_layouts
 
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
@@ -427,30 +445,25 @@ graph_files = Glob('src/graph/*.cpp')
 graph_files += Glob('src/graph/*/*.cpp')
 
 # Specify user-defined priority operators
-use_priority_ops = env['high_priority']
-priority_operators = filelist['high_priority']
-if env['build_config'] != "":
-    build_config = env['build_config']
-    build_config_contents = {}
-    if os.path.isfile(build_config):
-        with open(build_config) as f:
-            try:
-                build_config_contents = json.load(f)
-            except:
-                print("Warning: Build configuration file is of invalid JSON format!")
-    else:
-        try:
-            build_config_contents = json.loads(build_config)
-        except:
-            print("Warning: Build configuration string is of invalid JSON format!")
-    if build_config_contents:
-        priority_operators = build_config_contents.get("operators", [])
+custom_operators = []
+custom_types = []
+custom_layouts = []
+
+use_custom_ops = env['high_priority'] or env['build_config'];
+
+if env['high_priority']:
+    custom_operators = filelist['high_priority']
+    custom_types = ['all']
+    custom_layouts = ['all']
+
+if env['build_config']:
+    custom_operators, custom_types, custom_layouts = read_build_config_json(env['build_config'])
 
 if env['opencl']:
     lib_files += filelist['c_api']['gpu']
     lib_files += filelist['gpu']['common']
 
-    cl_operators = priority_operators if use_priority_ops else filelist['gpu']['operators'].keys()
+    cl_operators = custom_operators if use_custom_ops else filelist['gpu']['operators'].keys()
     cl_ops_to_build = resolve_operator_dependencies(filelist, cl_operators, 'gpu')
     lib_files += get_operator_backend_files(filelist, cl_ops_to_build, 'gpu')['common']
 
@@ -475,11 +488,15 @@ if env['neon']:
     if 'sve' not in env['arch'] or env['fat_binary']: simd += ['neon']
 
     # Get attributes
-    attrs = get_attrs_list(env['arch'], env['estate'], env['data_type_support'], env['data_layout_support'])
+    if(use_custom_ops):
+        attrs = get_attrs_list(env, custom_types, custom_layouts)
+    else:
+        attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
 
     # Setup data-type and data-layout files to include
-    cpu_operators = priority_operators if use_priority_ops else filelist['cpu']['operators'].keys()
-    cpu_ops_to_build = resolve_operator_dependencies(filelist, filelist['cpu']['operators'], 'cpu')
+    cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()
+    cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
+
     cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
     lib_files += cpu_files.get('common', [])
     lib_files += cpu_files.get('neon', [])
@@ -488,8 +505,8 @@ if env['neon']:
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
 # Restrict from building graph API if a reduced operator list has been provided
-if use_priority_ops:
-    print("Graph library requires all operators to be built")
+if use_custom_ops:
+    print("WARNING: Graph library requires all operators to be built")
     graph_files = []
 
 # Build bootcode in case of bare-metal

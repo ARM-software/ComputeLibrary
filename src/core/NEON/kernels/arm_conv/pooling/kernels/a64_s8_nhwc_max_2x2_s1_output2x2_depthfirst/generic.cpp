@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 
 #include <cstddef>
 #include <cstdint>
@@ -172,3 +173,4 @@ void a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
 
 }  // namespace pooling
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

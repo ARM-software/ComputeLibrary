@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 
 #include "arm_gemm.hpp"
 #include <cstddef>
@@ -660,3 +661,4 @@ void a64_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst_impl
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

@@ -24,7 +24,7 @@ import os
 
 
 def is_tflite_model(model_path):
-    """Check if a model is of TfLite type
+    """Check if a model is of TFLite type
 
     Parameters:
     ----------
@@ -34,7 +34,7 @@ def is_tflite_model(model_path):
     Returns
     ----------
     bool:
-        True if given path is a valid TfLite model
+        True if given path is a valid TFLite model
     """
 
     try:

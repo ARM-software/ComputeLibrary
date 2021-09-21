@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 #include <cstddef>
 #include <cstdint>
 
@@ -377,3 +378,4 @@ void a64_fp32_nhwc_generic_output9_mla_depthfirst_impl(
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

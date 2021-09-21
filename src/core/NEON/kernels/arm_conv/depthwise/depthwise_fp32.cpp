@@ -72,6 +72,7 @@ namespace
           );
   }
 
+#if defined(__aarch64__)
   unsigned int not_preferred(const DepthwiseArgs &, const Nothing &)
   {
     return std::numeric_limits<unsigned int>::max();
@@ -81,6 +82,7 @@ namespace
   {
     return args.channel_multiplier > 1 ? 0 : std::numeric_limits<unsigned int>::max();
   }
+#endif // defined(__aarch64__)
 }
 
 static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {

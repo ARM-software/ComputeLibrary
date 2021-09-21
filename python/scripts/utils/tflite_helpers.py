@@ -20,6 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+_TFLITE_TYPECODE2ACLNAME = {
+    0: "fp32", # Float32
+    1: "fp16", # Float16
+    2: "integer", # Int32
+    3: "qasymm8", # Uint8
+    # 4: "Unsupported", # Int64
+    # 5: "Unsupported", # String
+    6: "integer", # Bool
+    7: "qsymm16", # Int16
+    # 8: "Unsupported", # Complex64
+    9: "qasymm8_signed", # Int8
+}
+
 _TFLITE_TYPECODE2NAME = {
     0: "Float32",
     1: "Float16",
@@ -182,13 +195,36 @@ _TFLITE_TO_ACL = {
 }
 
 
-def tflite_typecode2name(toc):
-    """Stringify TfLite data-type opcodes
+def tflite_typecode2aclname(toc):
+    """Stringify TFLite data-type opcodes to ACL versions
 
     Parameters:
     ----------
     toc: int
-        TfLite type opcode
+        TFLite type opcode
+
+    Returns
+    ----------
+    str
+        Stringified opcode
+
+    Raises
+    ------
+    ValueError
+        If opcode does not exist in the map
+    """
+    if toc in _TFLITE_TYPECODE2ACLNAME:
+        return _TFLITE_TYPECODE2ACLNAME[toc]
+    else:
+        raise ValueError("Unknown ACL typecode %d" % toc)
+
+def tflite_typecode2name(toc):
+    """Stringify TFLite data-type opcodes
+
+    Parameters:
+    ----------
+    toc: int
+        TFLite type opcode
 
     Returns
     ----------
@@ -207,12 +243,12 @@ def tflite_typecode2name(toc):
 
 
 def tflite_op2acl(top):
-    """Map TfLite operators to ComputeLibrary ones
+    """Map TFLite operators to ComputeLibrary ones
 
     Parameters:
     ----------
     top: str
-        TfLite operator name
+        TFLite operator name
 
     Returns
     ----------

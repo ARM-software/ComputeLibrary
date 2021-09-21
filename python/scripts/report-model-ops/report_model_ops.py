@@ -31,20 +31,20 @@ import tflite
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 from utils.model_identification import identify_model_type
-from utils.tflite_helpers import tflite_op2acl, tflite_typecode2name
+from utils.tflite_helpers import tflite_op2acl, tflite_typecode2name, tflite_typecode2aclname
 
 SUPPORTED_MODEL_TYPES = ["tflite"]
 logger = logging.getLogger("report_model_ops")
 
 
-def get_ops_from_tflite_graph(model):
+def get_ops_types_from_tflite_graph(model):
     """
-    Helper function that extract operator related meta-data from a TfLite model
+    Helper function that extract operator related meta-data from a TFLite model
 
     Parameters
         ----------
     model: str
-        Respective TfLite model to analyse
+        Respective TFLite model to analyse
 
     Returns
     ----------
@@ -52,7 +52,7 @@ def get_ops_from_tflite_graph(model):
         A tuple with the sets of unique operator types and data-types that are present in the model
     """
 
-    logger.debug(f"Analysing TfLite mode '{model}'!")
+    logger.debug(f"Analysing TFLite mode '{model}'!")
 
     with open(model, "rb") as f:
         buf = f.read()
@@ -63,11 +63,16 @@ def get_ops_from_tflite_graph(model):
     unique_ops = {tflite.opcode2name(model.OperatorCodes(op_id).BuiltinCode()) for op_id in range(0, nr_unique_ops)}
 
     # Extract IO data-types
-    data_types = set()
+    supported_data_types = set()
+    unsupported_data_types = set()
     for subgraph_id in range(0, model.SubgraphsLength()):
         subgraph = model.Subgraphs(subgraph_id)
         for tensor_id in range(0, subgraph.TensorsLength()):
-            data_types.add(tflite_typecode2name(subgraph.Tensors(tensor_id).Type()))
+            try:
+                supported_data_types.add(tflite_typecode2aclname(subgraph.Tensors(tensor_id).Type()))
+            except ValueError:
+                unsupported_data_types.add(tflite_typecode2name(subgraph.Tensors(tensor_id).Type()))
+                logger.warning(f"Data type {tflite_typecode2name(subgraph.Tensors(tensor_id).Type())} is not supported by ComputeLibrary")
 
     # Perform mapping between TfLite ops to ComputeLibrary ones
     supported_ops = set()
@@ -75,17 +80,17 @@ def get_ops_from_tflite_graph(model):
     for top in unique_ops:
         try:
             supported_ops.add(tflite_op2acl(top))
-        except:
+        except ValueError:
             unsupported_ops.add(top)
-            logger.warning(f"Operator {top} has not ComputeLibrary mapping")
+            logger.warning(f"Operator {top} does not have ComputeLibrary mapping")
 
-    return (supported_ops, unsupported_ops, data_types)
+    return (supported_ops, unsupported_ops, supported_data_types, unsupported_data_types)
 
 
 def extract_model_meta(model, model_type):
     """
     Function that calls the appropriate model parser to extract model related meta-data
-    Supported parsers: TfLite
+    Supported parsers: TFLite
 
     Parameters
         ----------
@@ -101,13 +106,13 @@ def extract_model_meta(model, model_type):
     """
 
     if model_type == "tflite":
-        return get_ops_from_tflite_graph(model)
+        return get_ops_types_from_tflite_graph(model)
     else:
         logger.warning(f"Model type '{model_type}' is unsupported!")
         return ()
 
 
-def generate_build_config(ops, data_types):
+def generate_build_config(ops, data_types, data_layouts):
     """
     Function that generates a compatible ComputeLibrary operator-based build configuration
 
@@ -117,6 +122,8 @@ def generate_build_config(ops, data_types):
         Set with the operators to add in the build configuration
     data_types:
         Set with the data types to add in the build configuration
+    data_layouts:
+        Set with the data layouts to add in the build configuration
 
     Returns
     ----------
@@ -126,6 +133,7 @@ def generate_build_config(ops, data_types):
     config_data = {}
     config_data["operators"] = list(ops)
     config_data["data_types"] = list(data_types)
+    config_data["data_layouts"] = list(data_layouts)
 
     return config_data
 
@@ -134,7 +142,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(
         description="""Report map of operations in a list of models.
             The script consumes deep learning models and reports the type of operations and data-types used
-            Supported model types: TfLite """
+            Supported model types: TFLite """
     )
 
     parser.add_argument(
@@ -163,26 +171,35 @@ if __name__ == "__main__":
     # Extract operator mapping
     final_supported_ops = set()
     final_unsupported_ops = set()
-    final_dts = set()
+    final_supported_dts = set()
+    final_unsupported_dts = set()
+    final_layouts = {"nhwc"} # Data layout for TFLite is always NHWC
     for model in args.models:
         logger.debug(f"Starting analyzing {model} model")
 
         model_type = identify_model_type(model)
-        supported_model_ops, unsupported_mode_ops, model_dts = extract_model_meta(model, model_type)
+        supported_model_ops, unsupported_mode_ops, supported_model_dts, unsupported_model_dts = extract_model_meta(model, model_type)
         final_supported_ops.update(supported_model_ops)
         final_unsupported_ops.update(unsupported_mode_ops)
-        final_dts.update(model_dts)
+        final_supported_dts.update(supported_model_dts)
+        final_unsupported_dts.update(unsupported_model_dts)
 
     logger.info("=== Supported Operators")
     logger.info(final_supported_ops)
-    logger.info("=== Unsupported Operators")
-    logger.info(final_unsupported_ops)
+    if(len(final_unsupported_ops)):
+        logger.info("=== Unsupported Operators")
+        logger.info(final_unsupported_ops)
     logger.info("=== Data Types")
-    logger.info(final_dts)
+    logger.info(final_supported_dts)
+    if(len(final_unsupported_dts)):
+        logger.info("=== Unsupported Data Types")
+        logger.info(final_unsupported_dts)
+    logger.info("=== Data Layouts")
+    logger.info(final_layouts)
 
-    # Generate json file
+    # Generate JSON file
     if args.config:
         logger.debug("Generating JSON build configuration file")
-        config_data = generate_build_config(final_supported_ops, final_dts)
+        config_data = generate_build_config(final_supported_ops, final_supported_dts, final_layouts)
         with open(args.config, "w") as f:
             json.dump(config_data, f)
