@@ -786,7 +786,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 #endif // defined(REINTERPRET_OUTPUT_AS_3D)
     })
 
-    const bool cond_x = (xo > (N - N0));
+    const bool cond_x = (xo > (N - N0)) && (PARTIAL_STORE_N0 != 0);
 
 #if defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, xo, dst_stride_y, cond_x, c_lp, dst_indirect_y);
