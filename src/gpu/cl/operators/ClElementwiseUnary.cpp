@@ -25,12 +25,15 @@
 
 #include "src/gpu/cl/kernels/ClElementwiseUnaryKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClRsqrt::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::RSQRT);
     _kernel = std::move(k);

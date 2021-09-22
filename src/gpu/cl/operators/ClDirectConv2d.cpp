@@ -29,6 +29,8 @@
 #include "src/gpu/cl/kernels/ClActivationKernel.h"
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -48,6 +50,7 @@ void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorI
                                const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info);
 
     // Configure direct convolution kernel
     const ActivationLayerInfo conv2d_act_info = (src->data_layout() == DataLayout::NHWC && is_data_type_float(src->data_type())) ? act_info : ActivationLayerInfo();

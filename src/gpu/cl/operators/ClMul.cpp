@@ -27,6 +27,8 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClMulKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -34,6 +36,7 @@ namespace opencl
 void ClMul::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
                       ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
     auto k = std::make_unique<kernels::ClMulKernel>();
     k->configure(compile_context, src1, src2, dst, scale, overflow_policy, rounding_policy, act_info);
     _kernel = std::move(k);

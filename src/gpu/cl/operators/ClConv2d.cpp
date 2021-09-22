@@ -34,6 +34,8 @@
 #include "src/gpu/cl/operators/ClGemmConv2d.h"
 #include "src/gpu/cl/operators/ClWinogradConv2d.h"
 
+#include "src/common/utils/Log.h"
+
 #include <memory>
 
 namespace
@@ -83,6 +85,7 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(ClConv2d::validate(src, weights, ((biases != nullptr) ? biases : nullptr), dst, conv2d_info, weights_info));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv2d_info, weights_info);
 
     switch(ClConv2d::get_convolution_method(src, weights, dst, conv2d_info, weights_info, CLScheduler::get().target()))
     {

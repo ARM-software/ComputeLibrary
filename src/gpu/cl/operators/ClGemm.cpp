@@ -38,7 +38,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
-#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"
@@ -47,6 +46,7 @@
 #include "src/runtime/CL/gemm/CLGEMMKernelSelection.h"
 #include "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.h"
 
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 #include "utils/TypePrinter.h"
 
@@ -561,6 +561,7 @@ void ClGemm::configure(const CLCompileContext &compile_context, ITensorInfo *a, 
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate(a, b, c, output, alpha, beta, gemm_info));
+    ARM_COMPUTE_LOG_PARAMS(a, b, c, output, alpha, beta, gemm_info);
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();

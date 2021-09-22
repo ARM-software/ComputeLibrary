@@ -26,12 +26,15 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClFillKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClFill::configure(const ClCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *dst_window)
 {
+    ARM_COMPUTE_LOG_PARAMS(tensor, constant_value, dst_window);
     auto k = std::make_unique<kernels::ClFillKernel>();
     k->configure(compile_context, tensor, constant_value, dst_window);
     _kernel = std::move(k);

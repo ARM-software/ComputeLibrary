@@ -41,6 +41,8 @@
 #include "src/gpu/cl/operators/ClGemm.h"
 #include "src/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
+
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 namespace arm_compute
@@ -159,6 +161,7 @@ void ClGemmConv2d::configure(const CLCompileContext &compile_context, ITensorInf
     ARM_COMPUTE_ERROR_THROW_ON(ClGemmConv2d::validate(src, weights, biases, dst,
                                                       conv2d_info,
                                                       weights_info));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv2d_info, weights_info);
 
     const DataType   data_type   = src->data_type();
     const DataLayout data_layout = src->data_layout();

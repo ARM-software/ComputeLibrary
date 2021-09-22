@@ -28,6 +28,8 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClPool2dKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -35,6 +37,8 @@ namespace opencl
 void ClPool2d::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, dst, info, indices);
+
     // Configure pooling kernel
     auto k = std::make_unique<kernels::ClPool2dKernel>();
     k->set_target(CLScheduler::get().target());

@@ -26,12 +26,15 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClCopyKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClCopy::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, Window *dst_window)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, dst_window);
     auto k = std::make_unique<kernels::ClCopyKernel>();
     k->configure(compile_context, src, dst, dst_window);
     _kernel = std::move(k);

@@ -22,7 +22,10 @@
  * SOFTWARE.
  */
 #include "src/gpu/cl/operators/ClPRelu.h"
+
 #include "src/gpu/cl/kernels/ClElementwiseKernel.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -31,6 +34,7 @@ namespace opencl
 using KernelType = kernels::ClArithmeticKernel;
 void ClPRelu::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, alpha, output);
     auto k = std::make_unique<KernelType>();
     k->configure(compile_context, ArithmeticOperation::PRELU, input, alpha, (output == nullptr ? input : output));
     _kernel = std::move(k);

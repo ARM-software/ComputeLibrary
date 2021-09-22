@@ -30,6 +30,8 @@
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 #include "support/Cast.h"
 
+#include "src/common/utils/Log.h"
+
 using namespace arm_compute::experimental;
 
 namespace arm_compute
@@ -53,6 +55,7 @@ ClSoftmax::ClSoftmax()
 void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(src, dst, info));
+    ARM_COMPUTE_LOG_PARAMS(src, dst, info);
 
     const size_t actual_axis = static_cast<size_t>(wrap_around(info.axis, static_cast<int32_t>(src.num_dimensions())));
 

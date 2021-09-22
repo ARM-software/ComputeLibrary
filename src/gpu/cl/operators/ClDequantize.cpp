@@ -28,12 +28,15 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClDequantizeKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClDequantize::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClDequantizeKernel>();
     k->configure(compile_context, src, dst);
     _kernel = std::move(k);

@@ -25,12 +25,15 @@
 
 #include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClElementwiseDivision::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::DIV, src1, src2, dst, act_info);
     _kernel = std::move(k);

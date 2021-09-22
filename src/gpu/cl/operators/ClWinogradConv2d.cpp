@@ -36,6 +36,8 @@
 #include "src/gpu/cl/kernels/ClWinogradInputTransformKernel.h"
 #include "src/gpu/cl/kernels/ClWinogradOutputTransformKernel.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
+
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 using namespace arm_compute::experimental;
@@ -173,6 +175,8 @@ void ClWinogradConv2d::configure(const ClCompileContext &compile_context, ITenso
                                  const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, dst, conv_info, act_info, enable_fast_math));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info, enable_fast_math);
+
     // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(src->data_layout(), DataLayoutDimension::HEIGHT);

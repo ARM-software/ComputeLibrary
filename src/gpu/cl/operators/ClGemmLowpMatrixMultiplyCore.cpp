@@ -47,6 +47,7 @@
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 #include "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.h"
 
+#include "src/common/utils/Log.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -218,6 +219,7 @@ void ClGemmLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
     ARM_COMPUTE_ERROR_THROW_ON(ClGemmLowpMatrixMultiplyCore::validate(a, b, c != nullptr ? c : nullptr, output, gemm_info));
+    ARM_COMPUTE_LOG_PARAMS(a, b, c, output, gemm_info);
 
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
     _a_offset                    = a->quantization_info().uniform().offset;

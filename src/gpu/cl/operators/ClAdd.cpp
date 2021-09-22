@@ -26,6 +26,8 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -33,6 +35,7 @@ namespace opencl
 void ClAdd::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst,
                       ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, policy, act_info);
     auto k = std::make_unique<kernels::ClSaturatedArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::ADD, src1, src2, dst, policy, act_info);
     _kernel = std::move(k);

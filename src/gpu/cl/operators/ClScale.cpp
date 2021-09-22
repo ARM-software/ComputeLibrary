@@ -29,6 +29,8 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClScaleKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -36,6 +38,8 @@ namespace opencl
 void ClScale::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, dst, info);
+
     // Configure Scale kernel
     auto k = std::make_unique<kernels::ClScaleKernel>();
     k->set_target(CLScheduler::get().target());

@@ -28,6 +28,7 @@
 
 #include "src/common/IOperator.h"
 #include "src/common/utils/LegacySupport.h"
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClContext.h"
 
 namespace arm_compute
@@ -36,6 +37,7 @@ namespace opencl
 {
 void ClActivation::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, act_info);
     auto k = std::make_unique<kernels::ClActivationKernel>();
     k->configure(compile_context, src, dst, act_info);
     _kernel = std::move(k);

@@ -38,6 +38,7 @@
 #include "src/gpu/cl/operators/ClTranspose.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 #include <algorithm>
@@ -231,6 +232,7 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(ClFullyConnected::validate(src, weights, biases, dst, fc_info));
+    ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, fc_info);
 
     _are_weights_converted = true;
     _are_weights_reshaped  = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;

@@ -26,12 +26,15 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClFloorKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClFloor::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClFloorKernel>();
     k->configure(compile_context, src, dst);
     _kernel = std::move(k);

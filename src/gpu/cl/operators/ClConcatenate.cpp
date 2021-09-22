@@ -36,6 +36,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 namespace arm_compute
@@ -45,6 +47,7 @@ namespace opencl
 void ClConcatenate::configure(const CLCompileContext &compile_context, const std::vector<ITensorInfo *> &src_vector, ITensorInfo *dst, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(dst == nullptr);
+    ARM_COMPUTE_LOG_PARAMS(src_vector, dst, axis);
     _axis       = axis;
     _num_inputs = src_vector.size();
 

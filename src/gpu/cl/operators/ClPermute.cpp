@@ -26,12 +26,15 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClPermuteKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
 {
 void ClPermute::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const PermutationVector &perm)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst, perm);
     auto k = std::make_unique<kernels::ClPermuteKernel>();
     k->configure(compile_context, src, dst, perm);
     _kernel = std::move(k);

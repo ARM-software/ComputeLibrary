@@ -31,6 +31,8 @@
 #include "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFloatKernel.h"
 #include "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -38,6 +40,7 @@ namespace opencl
 void ClGemmLowpOutputStage::configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst, const GEMMLowpOutputStageInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_LOG_PARAMS(src, bias, dst, info);
 
     switch(info.type)
     {
