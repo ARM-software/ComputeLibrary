@@ -40,7 +40,7 @@ namespace arm_compute
 class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {
 public:
-    using TensorDimsState = Coordinates;
+    using TensorDimsState = std::vector<int>;
     /** Get the value representing dynamic dimension state
      *
      * @return Value representing dynamic dimension state
