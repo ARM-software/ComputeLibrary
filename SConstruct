@@ -43,7 +43,7 @@ vars = Variables("scons")
 vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
-    BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
+    BoolVariable("logging", "Enable Logging", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
@@ -381,7 +381,6 @@ if env['opencl']:
 
 if env['debug']:
     env['asserts'] = True
-    env['logging'] = True
     env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
