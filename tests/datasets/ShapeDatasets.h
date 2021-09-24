@@ -728,6 +728,23 @@ public:
     }
 };
 
+class SmallDirectConv3DShapes final : public ShapeDataset
+{
+public:
+    SmallDirectConv3DShapes()
+        : ShapeDataset("InputShape",
+    {
+        // Batch size 2
+        TensorShape{ 1U, 3U, 4U, 5U, 2U },
+                     // Batch size 3
+                     TensorShape{ 7U, 27U, 3U, 6U, 3U },
+                     // Batch size 1
+                     TensorShape{ 32U, 37U, 13U, 1U, 1U },
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for direct convolution. */
 class SmallDirectConvolutionTensorShiftShapes final : public ShapeDataset
 {

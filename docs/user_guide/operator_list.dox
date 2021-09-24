@@ -600,6 +600,36 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
+  <td rowspan="2">Conv3D
+  <td rowspan="2" style="width:200px;"> Function to compute a 3d convolution layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_3D
+      </ul>
+  <td>NEConv3D
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
+  <td>CLConv3D
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    </table>
+<tr>
   <td rowspan="2">Copy
   <td rowspan="2" style="width:200px;"> Function to copy a tensor.
   <td rowspan="2">

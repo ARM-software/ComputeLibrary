@@ -206,6 +206,16 @@
  *
  */
 
+/** Conv3D
+ *
+ * Description:
+ * Function to compute a 3d convolution layer.
+ *
+ * Equivalent Android NNAPI Op:
+ * ANEURALNETWORKS_CONV_3D
+ *
+ */
+
 /** Copy
  *
  * Description:

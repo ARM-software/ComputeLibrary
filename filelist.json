@@ -1279,6 +1279,18 @@
           "common" : [ "src/runtime/NEON/functions/NEDetectionPostProcessLayer.cpp" ]
         }
       },
+      "Conv3d": {
+        "deps": [
+          "Activation"
+        ],
+        "files": {
+          "common": [
+            "src/cpu/operators/CpuDirectConv3d.cpp",
+            "src/cpu/kernels/CpuDirectConv3dKernel.cpp",
+            "src/runtime/NEON/functions/NEConv3D.cpp"
+          ]
+        }
+      },
       "ElementwiseBinary": {
         "files": {
           "common": [
