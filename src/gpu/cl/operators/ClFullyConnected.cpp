@@ -170,8 +170,7 @@ void ClFullyConnected::configure_mm(const CLCompileContext &compile_context, ITe
                                          fc_info.fp_mixed_precision,      // fp_mixed_precision
                                          false,                           // fast_math
                                          true,                            // broadcast_bias
-                                         fc_info.activation_info,         // activation_info
-                                         fc_info.constant_weights);       // constant_weights
+                                         fc_info.activation_info);        // activation_info
 
     if(_is_quantized)
     {
@@ -335,7 +334,7 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
-    ARM_COMPUTE_RETURN_ERROR_ON(!fc_info.constant_weights && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
+    ARM_COMPUTE_RETURN_ERROR_ON(!weights->are_values_constant() && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
@@ -352,6 +351,19 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
 
     const ITensorInfo *src_to_use     = src;
     const ITensorInfo *weights_to_use = weights;
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+        if(is_data_type_quantized(src->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, biases);
+        }
+    }
 
     // Check if we have a fully connected layer with batches
     const bool is_batched_fc_layer = dst->dimension(1) > 1;

@@ -523,7 +523,7 @@ public:
         return size;
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         if (std::is_same<OutputStage, Requantize32>::value) {
             _col_bias = reinterpret_cast<int32_t *>(in_buffer);
 
@@ -534,6 +534,10 @@ public:
                 compute_col_sums(*qp_ptr, _args._Nsize, _args._Ksize * _args._Ksections, B + (i * B_multi_stride), ldb, _col_bias + (i * _args._Nsize), _args._Ksize * _args._Ksections, i, 0);
             }
         }
+    }
+
+    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+        requantize_bias(in_buffer, B, ldb, B_multi_stride);
 
         // Put the transposed data after the column sums - in non-transposing cases get_col_sum_size() == 0
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);

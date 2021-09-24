@@ -267,6 +267,10 @@ public:
     {
         return std::find(std::cbegin(_dims_state), std::cend(_dims_state), get_dynamic_state_value()) != std::cend(_dims_state);
     }
+    bool are_values_constant() const override
+    {
+        return _are_values_constant;
+    }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
@@ -287,6 +291,11 @@ public:
     DataLayout data_layout() const override
     {
         return _data_layout;
+    }
+    ITensorInfo &set_are_values_constant(bool are_values_constant) override
+    {
+        _are_values_constant = are_values_constant;
+        return *this;
     }
 
 private:
@@ -309,6 +318,7 @@ private:
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;
     DataLayout       _data_layout;
+    bool             _are_values_constant;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSORINFO_H */

@@ -212,6 +212,9 @@ public:
 
     /*** "Pretransposed" interface ***/
 
+    /* Compute col sums over all columns */
+    virtual void requantize_bias(void *, const To *, const int, const int) {};
+
     /* Perform pretranspose - the void * passed in must remain allocated for the duration of any execute calls. */
     /* Arguments are: output buffer pointer, source pointer, source row stride, source multi stride */
     virtual void pretranspose_B_array(void *, const To *, const int, const int) {};
