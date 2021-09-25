@@ -67,6 +67,45 @@ std::string to_string_if_not_null(T *arg)
     }
 }
 
+/** Formatted output of a vector of objects.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  args Vector of objects to print
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
+{
+    const size_t max_print_size = 5U;
+
+    os << "[";
+    bool   first = true;
+    size_t i;
+    for(i = 0; i < args.size(); ++i)
+    {
+        if(i == max_print_size)
+        {
+            break;
+        }
+        if(first)
+        {
+            first = false;
+        }
+        else
+        {
+            os << ", ";
+        }
+        os << args[i];
+    }
+    if(i < args.size())
+    {
+        os << ", ...";
+    }
+    os << "]";
+    return os;
+}
+
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -1037,25 +1076,16 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
 
     if(is_data_type_quantized(data_type))
     {
-        const QuantizationInfo qinfo = info->quantization_info();
-        os << "QuantizationInfo=";
-        if(is_data_type_quantized_per_channel(data_type))
-        {
-            os << "[";
-            const auto scales  = qinfo.scale();
-            const auto offsets = qinfo.offset();
-            os << "(" << scales[0] << ", " << offsets[0] << ")";
-            for(size_t i = 1; i < scales.size(); ++i)
-            {
-                os << ",(" << scales[i] << ", " << offsets[i] << ")";
-            }
-            os << "]";
-        }
-        else
-        {
-            os << "(" << qinfo.uniform().scale << ", "
-               << qinfo.uniform().offset << ")";
-        }
+        const QuantizationInfo qinfo   = info->quantization_info();
+        const auto             scales  = qinfo.scale();
+        const auto             offsets = qinfo.offset();
+
+        os << "QuantizationInfo={"
+           << "scales.size=" << scales.size()
+           << ", scale(s)=" << scales << ", ";
+
+        os << "offsets.size=" << offsets.size()
+           << ", offset(s)=" << offsets << "}";
     }
     return os;
 }
@@ -1773,8 +1803,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op
         case ElementWiseUnary::LOG:
             os << "LOG";
             break;
+        case ElementWiseUnary::SIN:
+            os << "SIN";
+            break;
+        case ElementWiseUnary::ABS:
+            os << "ABS";
+            break;
         case ElementWiseUnary::ROUND:
             os << "ROUND";
+            break;
+        case ElementWiseUnary::LOGICAL_NOT:
+            os << "LOGICAL_NOT";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -2177,34 +2216,6 @@ inline std::string to_string(const DetectionWindow &detection_window)
     std::stringstream str;
     str << detection_window;
     return str.str();
-}
-
-/** Formatted output of a vector of objects.
- *
- * @param[out] os   Output stream
- * @param[in]  args Vector of objects to print
- *
- * @return Modified output stream.
- */
-template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
-{
-    os << "[";
-    bool first = true;
-    for(auto &arg : args)
-    {
-        if(first)
-        {
-            first = false;
-        }
-        else
-        {
-            os << ", ";
-        }
-        os << arg;
-    }
-    os << "]";
-    return os;
 }
 
 /** Formatted output of @ref PriorBoxLayerInfo.
