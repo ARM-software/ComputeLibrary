@@ -177,8 +177,7 @@ void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     const auto                    is_signed_qasymm8  = is_data_type_quantized_asymmetric_signed(info.input_data_type);
     const int                     min_value          = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
 
-    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(reduction_dim_size);
-    const unsigned int    vector_size             = adjust_vec_size(std::get<1>(parallel_reduction_info), reduction_dim_size);
+    const unsigned int vector_size = adjust_vec_size(_serial_vector_size, reduction_dim_size);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -193,29 +192,12 @@ void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_option_if(is_data_type_float(dt) && info.is_log, "-DLOG_SOFTMAX");
     build_opts.add_option_if(is_data_type_float(dt), "-DMINVAL=" + ((dt == DataType::F16) ? std::string("-HALF_MAX") : std::string("-FLT_MAX")));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
 
     cl::NDRange lws_hint(cl::NullRange);
-    std::string kernel_name = std::string("softmax_layer_max_shift_exp_sum_") + (is_data_type_quantized_asymmetric(dt) ? "quantized_" : "");
-
-    // Configure parallel kernel if needed
-    if(std::get<0>(parallel_reduction_info))
-    {
-        kernel_name += "parallel";
-        bool is_grid_size_pow2 = (_grid_size != 0) && ((_grid_size & (_grid_size - 1)) == 0);
-        build_opts.add_option_if(is_grid_size_pow2 && _grid_size <= 256, "-DGRID_SIZE=" + support::cpp11::to_string(_grid_size));
-
-        // Handle boundary conditions.
-        const unsigned int multiple_grid_size = (reduction_dim_size / vector_size) % _grid_size;
-        build_opts.add_option_if((multiple_grid_size != 0) || ((reduction_dim_size % vector_size) != 0), "-DNON_MULTIPLE_OF_GRID_SIZE");
-        // Setting _lws_hint in this way can also communicate grid_size to ClLogits1DMaxShiftExpSumKernel::run().
-        // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
-        lws_hint = cl::NDRange(_grid_size);
-    }
-    else
-    {
-        kernel_name += "serial";
-    }
+    std::string kernel_name = std::string("softmax_layer_max_shift_exp_sum_") + (is_data_type_quantized_asymmetric(dt) ? "quantized_" : "") + "serial";
 
     // Create kernel.
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
@@ -313,6 +295,8 @@ void ClLogits1DNormKernel::configure(const CLCompileContext &compile_context, co
     build_opts.add_options_if(is_quantized_asymmetric,
                               prepare_quantized_softmax_build_options(qinfo.scale, info.beta).options());
     build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
+    build_opts.add_option_if(is_quantized_asymmetric, "-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
+    build_opts.add_option_if(is_quantized_asymmetric, "-DBETA=" + float_to_string_with_full_precision(info.beta));
 
     // Create kernel
     std::string kernel_name = std::string("softmax_layer_norm") + (is_quantized_asymmetric ? "_quantized" : "");
