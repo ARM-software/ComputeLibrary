@@ -33,6 +33,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 using namespace arm_compute::misc;
@@ -171,6 +173,7 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
                                                                      depth_multiplier,
                                                                      act_info,
                                                                      dilation));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
 
     _is_quantized     = is_data_type_quantized(input->info()->data_type());
     _is_prepared      = false;

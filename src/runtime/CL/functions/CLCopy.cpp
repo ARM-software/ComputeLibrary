@@ -30,6 +30,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClCopy.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -57,6 +59,7 @@ void CLCopy::configure(ICLTensor *input, ICLTensor *output, Window *dst_window)
 void CLCopy::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, Window *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_LOG_PARAMS(input, output, dst_window);
 
     _impl->src = input;
     _impl->dst = output;

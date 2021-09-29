@@ -30,6 +30,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/ICLKernel.h"
 
+#include "src/common/utils/Log.h"
+
 #include <cmath>
 #include <memory>
 #include <tuple>
@@ -52,6 +54,7 @@ void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context, IC
                                      const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, deconv_info, weights_info);
 
     switch(CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(), deconv_info, weights_info))
     {

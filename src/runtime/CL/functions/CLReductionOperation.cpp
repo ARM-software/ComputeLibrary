@@ -34,6 +34,8 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
@@ -109,6 +111,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
 void CLReductionOperation::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, axis, op, keep_dims);
     _reduction_axis      = axis;
     _is_reshape_required = !keep_dims;
 

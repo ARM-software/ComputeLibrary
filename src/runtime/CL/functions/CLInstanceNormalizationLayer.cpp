@@ -31,6 +31,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLInstanceNormalizationLayer::CLInstanceNormalizationLayer(CLRuntimeContext *ctx) // NOLINT
@@ -51,6 +53,7 @@ void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output
 
 void CLInstanceNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, gamma, beta, epsilon, use_mixed_precision);
     auto w = std::make_unique<CLComputeMeanVariance>();
     w->configure(compile_context, input, &_mean_var_tensor, use_mixed_precision);
     _mean_var_kernel = std::move(w);

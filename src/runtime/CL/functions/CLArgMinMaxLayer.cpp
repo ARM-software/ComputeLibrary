@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@
 #include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/runtime/Utils.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -119,6 +121,8 @@ void CLArgMinMaxLayer::configure(const ICLTensor *input, int axis, ICLTensor *ou
 void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, axis, output, op);
+
     _num_of_stages  = utils::calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
     _reduction_axis = axis;
 

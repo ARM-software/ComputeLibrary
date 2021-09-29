@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 
 #include "src/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -36,6 +38,7 @@ void CLDepthToSpaceLayer::configure(const ICLTensor *input, ICLTensor *output, i
 
 void CLDepthToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
     auto k = std::make_unique<CLDepthToSpaceLayerKernel>();
     k->configure(compile_context, input, output, block_shape);
     _kernel = std::move(k);

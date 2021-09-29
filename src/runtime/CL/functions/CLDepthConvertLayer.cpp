@@ -29,6 +29,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClCast.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -56,6 +58,7 @@ void CLDepthConvertLayer::configure(const ICLTensor *input, ICLTensor *output, C
 void CLDepthConvertLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
     ARM_COMPUTE_UNUSED(shift);
+    ARM_COMPUTE_LOG_PARAMS(input, output, policy, shift);
 
     _impl->src = input;
     _impl->dst = output;

@@ -30,6 +30,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClCrop.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -59,6 +61,7 @@ void CLCrop::configure(const CLCompileContext &compile_context, const ICLTensor 
                        Window *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_LOG_PARAMS(src, dst, start, end, batch_index, extrapolation_value, dst_window);
 
     _impl->src = src;
     _impl->dst = dst;

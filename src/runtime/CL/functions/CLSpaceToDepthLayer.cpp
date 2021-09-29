@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLSpaceToDepthLayer::CLSpaceToDepthLayer()
@@ -47,6 +49,7 @@ void CLSpaceToDepthLayer::configure(const ICLTensor *input, ICLTensor *output, i
 
 void CLSpaceToDepthLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, block_shape);
     _space_to_depth_kernel->configure(compile_context, input, output, block_shape);
 }
 

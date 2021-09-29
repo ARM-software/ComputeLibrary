@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 Status CLROIAlignLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
@@ -43,6 +45,8 @@ void CLROIAlignLayer::configure(const ICLTensor *input, const ICLTensor *rois, I
 
 void CLROIAlignLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
+
     // Configure ROI pooling kernel
     auto k = std::make_unique<CLROIAlignLayerKernel>();
     k->configure(compile_context, input, rois, output, pool_info);

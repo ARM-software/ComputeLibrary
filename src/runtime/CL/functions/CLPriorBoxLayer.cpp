@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 using namespace arm_compute;
 
 CLPriorBoxLayer::CLPriorBoxLayer()
@@ -46,6 +48,7 @@ void CLPriorBoxLayer::configure(const ICLTensor *input1, const ICLTensor *input2
 
 void CLPriorBoxLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input1, input2, output, info);
     _min           = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.min_sizes().size() * sizeof(float));
     _aspect_ratios = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.aspect_ratios().size() * sizeof(float));
     if(!info.max_sizes().empty())

@@ -29,6 +29,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClCast.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -56,6 +58,7 @@ void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy 
 void CLCast::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, policy);
 
     _impl->src = input;
     _impl->dst = output;

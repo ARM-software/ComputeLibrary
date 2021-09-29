@@ -46,6 +46,7 @@ Status ClElementwiseDivision::validate(const ITensorInfo *src1, const ITensorInf
 
 void ClElementwiseMax::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::MAX, src1, src2, dst, act_info);
     _kernel = std::move(k);
@@ -58,6 +59,7 @@ Status ClElementwiseMax::validate(const ITensorInfo *src1, const ITensorInfo *sr
 
 void ClElementwiseMin::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::MIN, src1, src2, dst, act_info);
     _kernel = std::move(k);
@@ -70,6 +72,7 @@ Status ClElementwiseMin::validate(const ITensorInfo *src1, const ITensorInfo *sr
 
 void ClElementwiseSquaredDiff::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::SQUARED_DIFF, src1, src2, dst, act_info);
     _kernel = std::move(k);
@@ -82,6 +85,7 @@ Status ClElementwiseSquaredDiff::validate(const ITensorInfo *src1, const ITensor
 
 void ClElementwisePower::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
     k->configure(compile_context, ArithmeticOperation::POWER, src1, src2, dst, act_info);
     _kernel = std::move(k);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -66,6 +68,7 @@ void CLUnstack::configure(const ICLTensor *input, const std::vector<ICLTensor *>
 
 void CLUnstack::configure(const CLCompileContext &compile_context, const ICLTensor *input, const std::vector<ICLTensor *> &output_vector, int axis)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output_vector, axis);
     std::vector<ITensorInfo *> outputs_vector_info(output_vector.size());
     std::transform(output_vector.begin(), output_vector.end(), outputs_vector_info.begin(), [](ICLTensor * t)
     {

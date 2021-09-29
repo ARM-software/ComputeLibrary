@@ -31,6 +31,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLSpaceToBatchLayer::CLSpaceToBatchLayer()
@@ -50,6 +52,7 @@ void CLSpaceToBatchLayer::configure(const ICLTensor *input, const ICLTensor *blo
 void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
+    ARM_COMPUTE_LOG_PARAMS(input, block_shape, paddings, output);
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
@@ -68,6 +71,7 @@ void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, con
                                     const Size2D &padding_right, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {

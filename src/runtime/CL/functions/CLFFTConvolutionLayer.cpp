@@ -38,6 +38,8 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/utils/helpers/fft.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace
@@ -113,6 +115,7 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, I
 {
     ARM_COMPUTE_UNUSED(enable_fast_math);
     ARM_COMPUTE_ERROR_THROW_ON(CLFFTConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info, act_info, enable_fast_math));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info, enable_fast_math);
 
     _original_weights = weights;
     _original_bias    = biases;

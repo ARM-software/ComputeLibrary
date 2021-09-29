@@ -32,6 +32,8 @@
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -81,6 +83,7 @@ void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(CLGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
+    ARM_COMPUTE_LOG_PARAMS(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
 
     _is_nhwc                        = scores->info()->data_layout() == DataLayout::NHWC;
     const DataType scores_data_type = scores->info()->data_type();

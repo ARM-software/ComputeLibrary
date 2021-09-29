@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/common/utils/Log.h"
 
 #include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 
@@ -51,6 +52,7 @@ void CLBatchNormalizationLayer::configure(const CLCompileContext &compile_contex
                                           const ICLTensor *gamma, float epsilon,
                                           ActivationLayerInfo act_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, mean, var, beta, gamma, epsilon, act_info);
     _norm_kernel->configure(compile_context, input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 

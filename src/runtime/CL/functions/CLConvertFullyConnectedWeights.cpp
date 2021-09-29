@@ -30,6 +30,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClConvertFullyConnectedWeights.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 struct CLConvertFullyConnectedWeights::Impl
@@ -54,6 +56,7 @@ void CLConvertFullyConnectedWeights::configure(const CLCompileContext &compile_c
                                                DataLayout data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, original_input_shape, data_layout);
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<opencl::ClConvertFullyConnectedWeights>();

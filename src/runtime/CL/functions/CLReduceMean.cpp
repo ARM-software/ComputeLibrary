@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -113,6 +115,8 @@ void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor 
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CLReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
+    ARM_COMPUTE_LOG_PARAMS(input, reduction_axis, keep_dims, output);
+
     // Output auto inizialitation if not yet initialized
     const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input->info(), reduction_axis, keep_dims);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));

@@ -30,6 +30,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClPermute.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 struct CLPermute::Impl
@@ -54,6 +56,7 @@ void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const Permu
 void CLPermute::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, perm);
 
     _impl->src = input;
     _impl->dst = output;

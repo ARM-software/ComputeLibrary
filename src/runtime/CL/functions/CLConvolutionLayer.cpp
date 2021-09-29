@@ -31,6 +31,8 @@
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClConv2d.h"
+
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 namespace arm_compute
@@ -70,6 +72,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math, num_groups));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
 
     const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, enable_fast_math, num_groups);
 

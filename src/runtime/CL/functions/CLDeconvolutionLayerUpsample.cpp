@@ -29,6 +29,8 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLDeconvolutionLayerUpsample::CLDeconvolutionLayerUpsample() // NOLINT
@@ -53,6 +55,7 @@ void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output
 void CLDeconvolutionLayerUpsample::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, info);
 
     _output = output;
     _fill.configure(compile_context, _output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));

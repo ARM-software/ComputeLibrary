@@ -46,6 +46,7 @@ Status ClRsqrt::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClExp::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::EXP);
     _kernel = std::move(k);
@@ -58,6 +59,7 @@ Status ClExp::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClNeg::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::NEG);
     _kernel = std::move(k);
@@ -70,6 +72,7 @@ Status ClNeg::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClSin::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::SIN);
     _kernel = std::move(k);
@@ -82,6 +85,7 @@ Status ClSin::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClAbs::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::ABS);
     _kernel = std::move(k);
@@ -94,6 +98,7 @@ Status ClAbs::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClLog::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::LOG);
     _kernel = std::move(k);
@@ -106,6 +111,7 @@ Status ClLog::validate(const ITensorInfo *src, const ITensorInfo *dst)
 
 void ClRound::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst)
 {
+    ARM_COMPUTE_LOG_PARAMS(src, dst);
     auto k = std::make_unique<kernels::ClElementWiseUnaryKernel>();
     k->configure(compile_context, src, dst, ElementWiseUnary::ROUND);
     _kernel = std::move(k);

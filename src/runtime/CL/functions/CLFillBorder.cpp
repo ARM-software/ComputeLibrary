@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
+#include "src/common/utils/Log.h"
+
 #include <utility>
 
 using namespace arm_compute;
@@ -36,6 +38,7 @@ void CLFillBorder::configure(ICLTensor *tensor, unsigned int border_width, Borde
 
 void CLFillBorder::configure(const CLCompileContext &compile_context, ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
+    ARM_COMPUTE_LOG_PARAMS(tensor, border_width, border_mode, constant_border_value);
     auto k = std::make_unique<CLFillBorderKernel>();
     k->configure(compile_context, tensor, BorderSize(border_width), border_mode, constant_border_value);
     _kernel = std::move(k);
