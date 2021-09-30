@@ -275,11 +275,11 @@ class DepthwiseDepthfirst : public DepthwiseCommon<TInput, TWeight, TOutput>
         for (int start_out_j = 0; start_out_j < static_cast<int>(output_width);)
         {
           const int start_in_j = start_out_j * m_strat->get_stride_cols() - this->m_args.padding.left;
-          const int pad_left = -std::min(0, start_in_j);
+          int pad_left = std::min(0, start_in_j);
 
           // Compute how many output tiles we can compute with the direct kernel.
           int n_direct_tiles = 0;
-          if (!pad_top && !pad_bottom && !pad_left)
+          if (!pad_top  && !pad_bottom && !pad_left)
           {
             // Determine the maximum number of tiles we could handle.
             n_direct_tiles = (output_width - start_out_j) / m_strat->get_output_cols();
@@ -323,7 +323,7 @@ class DepthwiseDepthfirst : public DepthwiseCommon<TInput, TWeight, TOutput>
             end_out_j - start_out_j,
             static_cast<int>(output_width) - start_out_j
           );
-
+          pad_left *= -1;
           // Construct the input pointer array - fill the array with pointers to
           // the input buffer and then fill in the required values.
           for (auto i = pad_top; i < m_strat->get_input_rows() - pad_bottom; i++)
