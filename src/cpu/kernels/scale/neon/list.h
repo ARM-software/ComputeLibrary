@@ -42,6 +42,8 @@ namespace cpu
                    InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset, \
                    bool align_corners, const Window &window)
 
+DECLARE_SCALE_KERNEL(s16_neon_scale);
+DECLARE_SCALE_KERNEL(u8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
 
@@ -51,43 +53,90 @@ template <typename T>
 void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, float sampling_offset,
                         bool align_corners, const Window &window)
 {
-    const size_t in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
-    const size_t in_stride_w  = src->info()->dimension(1) + src->info()->padding().top + src->info()->padding().bottom;
-    const size_t in_stride_wc = in_stride_w * in_stride_c;
-    const size_t in_dim_h     = src->info()->dimension(2);
+    ARM_COMPUTE_UNUSED(offsets);
 
-    // Compute the ratio between source height and destination height
-    const auto hr             = scale_utils::calculate_resize_ratio(in_dim_h, dst->info()->dimension(2), align_corners);
-    const auto window_start_x = static_cast<int32_t>(window.x().start());
-    const auto window_end_x   = static_cast<int32_t>(window.x().end());
-    const int  window_step_x  = 16 / sizeof(T);
+    // Compute the ratio between source and destination dimensions
+    const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
-    Window win(window);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    Iterator out(dst, win);
+    const int in_stride_y  = src->info()->strides_in_bytes()[1];
+    const int in_stride_z  = src->info()->strides_in_bytes()[2];
+    const int in_stride_w  = src->info()->strides_in_bytes()[3];
+    const int out_stride_y = dst->info()->strides_in_bytes()[1];
+    const int out_stride_z = dst->info()->strides_in_bytes()[2];
+    const int out_stride_w = dst->info()->strides_in_bytes()[3];
+    const int out_dim_ch   = dst->info()->dimension(0);
+    const int step_cout    = 16 / sizeof(T);
 
-    const uint8_t     *in_ptr_start        = src->buffer() + src->info()->offset_first_element_in_bytes();
-    const unsigned int in_stride_bytes_hwc = src->info()->strides_in_bytes()[3];
+    Window window_execution = window;
+    window_execution.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Window win_in_out(window);
+    win_in_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+    win_in_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    Iterator in(src, win_in_out);
+    Iterator out(dst, win_in_out);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    const int xo_start = window_execution.y().start();
+    const int xo_end   = window_execution.y().end();
+    const int xo_step  = window_execution.y().step();
+    const int yo_start = window_execution.z().start();
+    const int yo_end   = window_execution.z().end();
+    const int yo_step  = window_execution.z().step();
+    const int bo_start = window_execution[3].start();
+    const int bo_end   = window_execution[3].end();
+    const int bo_step  = window_execution[3].step();
+
+    for(int bo = bo_start; bo < bo_end; bo += bo_step)
     {
-        const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z()))) * in_stride_c;
-        const auto    in_hi      = static_cast<int>(align_corners ? utils::rounding::round_half_away_from_zero((id.z() + sampling_offset) * hr) : std::floor((id.z() + sampling_offset) * hr));
-        const int     offset_row = in_hi * in_stride_wc;
-        int32_t       x          = window_start_x;
-        const T      *in_ptr     = reinterpret_cast<const T *>(in_ptr_start + in_stride_bytes_hwc * id[3]);
+        const uint8_t *in_ptr_base  = in.ptr() + bo * in_stride_w;
+        uint8_t       *out_ptr_base = out.ptr() + bo * out_stride_w;
 
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
+        for(int yo = yo_start; yo < yo_end; yo += yo_step)
         {
-            wrapper::vstore(reinterpret_cast<T *>(out.ptr()) + x,
-                            wrapper::vloadq(in_ptr + offset + offset_row + x));
+            // Floating-point coordinate
+            float yi_f = ((yo + sampling_offset) * scale_y);
+            int   yi   = 0;
+            if(align_corners)
+            {
+                yi = utils::rounding::round_half_away_from_zero(yi_f);
+            }
+            else
+            {
+                yi = static_cast<int>(std::floor(yi_f));
+            }
+
+            for(int xo = xo_start; xo < xo_end; xo += xo_step)
+            {
+                // Floating-point coordinate
+                float xi_f = ((xo + sampling_offset) * scale_x);
+                int   xi   = 0;
+                if(align_corners)
+                {
+                    xi = utils::rounding::round_half_away_from_zero(xi_f);
+                }
+                else
+                {
+                    xi = static_cast<int>(std::floor(xi_f));
+                }
+
+                const uint8_t *in_ptr  = in_ptr_base + xi * in_stride_y + yi * in_stride_z;
+                uint8_t       *out_ptr = out_ptr_base + xo * out_stride_y + yo * out_stride_z;
+
+                int cout = 0;
+                for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                {
+                    auto out0 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                    wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T)), out0);
+                }
+
+                for(; cout < out_dim_ch; ++cout)
+                {
+                    auto out0                                                                                    = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                    *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T))) = out0;
+                }
+            }
         }
-        for(; x < window_end_x; ++x)
-        {
-            *(reinterpret_cast<T *>(out.ptr()) + x) = *(in_ptr + offset + offset_row + x);
-        }
-    },
-    out);
+    }
 }
 
 template <typename T>
@@ -95,21 +144,43 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                          BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
                          bool align_corners, const Window &window)
 {
-    // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+    ARM_COMPUTE_UNUSED(offsets);
+    ARM_COMPUTE_UNUSED(dx);
+    ARM_COMPUTE_UNUSED(dy);
+    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
-    Iterator  out(dst, window);
-    const int in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
+    // Compute the ratio between source and destination dimensions
+    const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+
+    const int in_stride_y  = src->info()->strides_in_bytes()[1];
+    const int in_stride_z  = src->info()->strides_in_bytes()[2];
+    const int in_stride_w  = src->info()->strides_in_bytes()[3];
+    const int out_stride_y = dst->info()->strides_in_bytes()[1];
+    const int out_stride_z = dst->info()->strides_in_bytes()[2];
+    const int out_stride_w = dst->info()->strides_in_bytes()[3];
     const int in_dim_w     = src->info()->dimension(1);
     const int in_dim_h     = src->info()->dimension(2);
-    const int in_stride_wc = in_stride_c * (in_dim_w + src->info()->padding().top + src->info()->padding().bottom);
+    const int out_dim_ch   = dst->info()->dimension(0);
+    const int step_cout    = 16 / sizeof(T);
 
-    // Don't increment in Y and Z direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    Iterator in(src, win_in);
+    Window window_execution = window;
+    window_execution.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Window win_in_out(window);
+    win_in_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+    win_in_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    Iterator in(src, win_in_out);
+    Iterator out(dst, win_in_out);
+
+    const int xo_start = window_execution.y().start();
+    const int xo_end   = window_execution.y().end();
+    const int xo_step  = window_execution.y().step();
+    const int yo_start = window_execution.z().start();
+    const int yo_end   = window_execution.z().end();
+    const int yo_step  = window_execution.z().step();
+    const int bo_start = window_execution[3].start();
+    const int bo_end   = window_execution[3].end();
+    const int bo_step  = window_execution[3].step();
 
     if(border_mode == BorderMode::CONSTANT)
     {
@@ -119,45 +190,203 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
         using ConstType = T;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         const T const_border_value = static_cast<T>(constant_border_value.get<ConstType>());
-        execute_window_loop(window, [&](const Coordinates & id)
+
+        for(int bo = bo_start; bo < bo_end; bo += bo_step)
         {
-            const auto    offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int32_t in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
-            const T      *in_ptr = reinterpret_cast<const T *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
+            const uint8_t *in_ptr_base  = in.ptr() + bo * in_stride_w;
+            uint8_t       *out_ptr_base = out.ptr() + bo * out_stride_w;
 
-            const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
+            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            {
+                // Floating-point coordinate
+                const float yi_f = ((yo + sampling_offset) * scale_y - sampling_offset);
+                // Integer coordinate
+                const auto yi = static_cast<int>(std::floor(yi_f));
+                // Weight for the y coordinate
+                const auto a1 = (yi_f - static_cast<float>(yi));
+                const auto b1 = (1.f - a1);
 
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
+                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                {
+                    // Floating-point coordinate
+                    const float xi_f = ((xo + sampling_offset) * scale_x - sampling_offset);
+                    // Integer coordinate
+                    const auto xi = static_cast<int>(std::floor(xi_f));
+                    // Weight for the x coordinate
+                    const auto a = (xi_f - static_cast<float>(xi));
+                    const auto b = (1.f - a);
+
+                    const auto s00_s = static_cast<T>(b * b1);
+                    const auto s01_s = static_cast<T>(a * b1);
+                    const auto s10_s = static_cast<T>(b * a1);
+                    const auto s11_s = static_cast<T>(a * a1);
+
+                    const uint8_t *in_ptr  = in_ptr_base + xi * in_stride_y + yi * in_stride_z;
+                    uint8_t       *out_ptr = out_ptr_base + xo * out_stride_y + yo * out_stride_z;
+
+                    int cout = 0;
+                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    {
+                        auto in00 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
+                        auto in01 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
+                        auto in10 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
+                        auto in11 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
+                        if((yi >= 0) && (yi < in_dim_h))
+                        {
+                            if((xi >= 0) && (xi < in_dim_w))
+                            {
+                                in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                            }
+                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            {
+                                in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y));
+                            }
+                        }
+                        if(((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
+                        {
+                            if((xi >= 0) && (xi < in_dim_w))
+                            {
+                                in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_z));
+                            }
+                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            {
+                                in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
+                            }
+                        }
+
+                        const auto s00  = wrapper::vdup_n(s00_s, ExactTagType{});
+                        const auto s01  = wrapper::vdup_n(s01_s, ExactTagType{});
+                        const auto s10  = wrapper::vdup_n(s10_s, ExactTagType{});
+                        const auto s11  = wrapper::vdup_n(s11_s, ExactTagType{});
+                        auto       out0 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        out0            = wrapper::vmla(out0, in00, s00);
+                        out0            = wrapper::vmla(out0, in01, s01);
+                        out0            = wrapper::vmla(out0, in10, s10);
+                        out0            = wrapper::vmla(out0, in11, s11);
+                        wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T)), out0);
+                    }
+
+                    for(; cout < out_dim_ch; ++cout)
+                    {
+                        auto in00 = static_cast<T>(const_border_value);
+                        auto in01 = static_cast<T>(const_border_value);
+                        auto in10 = static_cast<T>(const_border_value);
+                        auto in11 = static_cast<T>(const_border_value);
+                        if((yi >= 0) && (yi < in_dim_h))
+                        {
+                            if((xi >= 0) && (xi < in_dim_w))
+                            {
+                                in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                            }
+                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            {
+                                in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y));
+                            }
+                        }
+                        if(((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
+                        {
+                            if((xi >= 0) && (xi < in_dim_w))
+                            {
+                                in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_z));
+                            }
+                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            {
+                                in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
+                            }
+                        }
+                        auto out0 = static_cast<T>(0);
+                        out0 += in00 * s00_s;
+                        out0 += in01 * s01_s;
+                        out0 += in10 * s10_s;
+                        out0 += in11 * s11_s;
+                        *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T))) = out0;
+                    }
+                }
+            }
+        }
     }
     else if(border_mode == BorderMode::REPLICATE)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        for(int bo = bo_start; bo < bo_end; bo += bo_step)
         {
-            const auto offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int  in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
+            const uint8_t *in_ptr  = in.ptr() + bo * in_stride_w;
+            uint8_t       *out_ptr = out.ptr() + bo * out_stride_w;
 
-            auto clamped_w  = utility::clamp<int>(offset, 0, in_dim_w - 1);
-            auto clamped_w1 = utility::clamp<int>(offset + 1, 0, in_dim_w - 1);
-            auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
-            auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
+            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            {
+                // Floating-point coordinate
+                const float yi_f = ((yo + sampling_offset) * scale_y - sampling_offset);
+                // Integer coordinate
+                const auto yi = static_cast<int>(std::floor(yi_f));
+                // Weight for the y coordinate
+                const auto a1 = (yi_f - static_cast<float>(yi));
+                const auto b1 = (1.f - a1);
 
-            const auto a00 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
-            const auto a01 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
-            const auto a10 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
-            const auto a11 = *(reinterpret_cast<const T *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
+                const auto yi0 = utility::clamp<int>(yi, 0, in_dim_h - 1);
+                const auto yi1 = utility::clamp<int>(yi + 1, 0, in_dim_h - 1);
 
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
+                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                {
+                    // Floating-point coordinate
+                    const float xi_f = ((xo + sampling_offset) * scale_x - sampling_offset);
+                    // Integer coordinate
+                    const auto xi = static_cast<int>(std::floor(xi_f));
+                    // Weight for the x coordinate
+                    const auto a = (xi_f - static_cast<float>(xi));
+                    const auto b = (1.f - a);
+
+                    const auto s00_s = static_cast<T>(b * b1);
+                    const auto s01_s = static_cast<T>(a * b1);
+                    const auto s10_s = static_cast<T>(b * a1);
+                    const auto s11_s = static_cast<T>(a * a1);
+
+                    const auto xi0 = utility::clamp<int>(xi, 0, in_dim_w - 1);
+                    const auto xi1 = utility::clamp<int>(xi + 1, 0, in_dim_w - 1);
+
+                    int cout = 0;
+                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    {
+                        auto in00 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        auto in01 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        auto in10 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        auto in11 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        in00      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi0) * in_stride_z));
+                        in01      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi0) * in_stride_z));
+                        in10      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi1) * in_stride_z));
+                        in11      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi1) * in_stride_z));
+
+                        const auto s00  = wrapper::vdup_n(s00_s, ExactTagType{});
+                        const auto s01  = wrapper::vdup_n(s01_s, ExactTagType{});
+                        const auto s10  = wrapper::vdup_n(s10_s, ExactTagType{});
+                        const auto s11  = wrapper::vdup_n(s11_s, ExactTagType{});
+                        auto       out0 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
+                        out0            = wrapper::vmla(out0, in00, s00);
+                        out0            = wrapper::vmla(out0, in01, s01);
+                        out0            = wrapper::vmla(out0, in10, s10);
+                        out0            = wrapper::vmla(out0, in11, s11);
+                        wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T) + xo * out_stride_y + yo * out_stride_z), out0);
+                    }
+
+                    for(; cout < out_dim_ch; ++cout)
+                    {
+                        auto in00 = static_cast<T>(0);
+                        auto in01 = static_cast<T>(0);
+                        auto in10 = static_cast<T>(0);
+                        auto in11 = static_cast<T>(0);
+                        in00      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi0) * in_stride_z));
+                        in01      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi0) * in_stride_z));
+                        in10      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi1) * in_stride_z));
+                        in11      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi1) * in_stride_z));
+                        auto out0 = static_cast<T>(0);
+                        out0 += in00 * s00_s;
+                        out0 += in01 * s01_s;
+                        out0 += in10 * s10_s;
+                        out0 += in11 * s11_s;
+                        *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T) + xo * out_stride_y + yo * out_stride_z)) = out0;
+                    }
+                }
+            }
+        }
     }
     else
     {

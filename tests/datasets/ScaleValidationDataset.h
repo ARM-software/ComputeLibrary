@@ -147,7 +147,7 @@ framework::dataset::make("AlignCorners", { true }));
  */
 #define SCALE_SHAPE_DATASET(element_per_iteration)                                    \
     concat(concat(concat(ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 0>(),  \
-                        ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 2>()),  \
+                         ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 2>()), \
                   ScaleShapesBaseDataSet<3, 1, (element_per_iteration), 1>()),        \
            ScaleShapesBaseDataSet<3, 3, (element_per_iteration), 0>())
 
@@ -166,7 +166,7 @@ framework::dataset::make("AlignCorners", { true }));
  */
 #define SCALE_NIGHTLY_SHAPE_DATASET(element_per_iteration)                            \
     concat(concat(concat(ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 0>(),  \
-                        ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 1>()),  \
+                         ScaleShapesBaseDataSet<1, 1, (element_per_iteration), 1>()), \
                   ScaleShapesBaseDataSet<3, 1, (element_per_iteration), 0>()),        \
            ScaleShapesBaseDataSet<3, 3, (element_per_iteration), 0>())
 
@@ -175,6 +175,12 @@ framework::dataset::make("AlignCorners", { true }));
     combine(combine(combine(combine((shape), ScaleDataLayouts), \
                             ScaleInterpolationPolicySet),       \
                     datasets::BorderModes()),                   \
+            samping_policy_set)
+
+#define ASSEMBLE_NHWC_DATASET(shape, samping_policy_set)                                                      \
+    combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),       \
+                            ScaleInterpolationPolicySet),                                                     \
+                    framework::dataset::make("BorderMode", { BorderMode::CONSTANT, BorderMode::REPLICATE })), \
             samping_policy_set)
 
 /** Generating dataset for quantized data tyeps with the given shapes */

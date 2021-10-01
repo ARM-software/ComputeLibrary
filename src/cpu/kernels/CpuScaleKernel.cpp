@@ -123,12 +123,12 @@ static const ScaleKernel available_kernels[] =
     {
         "neon_u8_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::U8; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::common_neon_scale<uint8_t>)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_neon_scale)
     },
     {
         "neon_s16_scale",
         [](const ScaleSelectorData & data) { return data.dt == DataType::S16; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::common_neon_scale<int16_t>)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_scale)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 };
