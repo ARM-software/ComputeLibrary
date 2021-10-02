@@ -71,7 +71,7 @@ void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &ou
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(NEUnstack::validate(input->info(), outputs_vector_info, axis));
-    ARM_COMPUTE_LOG_PARAMS(input, output_vector, outputs_vector_info, axis);
+    ARM_COMPUTE_LOG_PARAMS(input, output_vector, axis);
 
     // Wrap around negative values
     const unsigned int axis_u = wrap_axis(axis, input->info());

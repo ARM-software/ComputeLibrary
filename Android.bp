@@ -710,6 +710,7 @@ cc_library_static {
         "src/runtime/CPP/functions/CPPDetectionPostProcessLayer.cpp",
         "src/runtime/CPP/functions/CPPNonMaximumSuppression.cpp",
         "src/runtime/CPP/functions/CPPPermute.cpp",
+        "src/runtime/CPP/functions/CPPSplit.cpp",
         "src/runtime/CPP/functions/CPPTopKV.cpp",
         "src/runtime/CPP/functions/CPPUpsample.cpp",
         "src/runtime/IScheduler.cpp",

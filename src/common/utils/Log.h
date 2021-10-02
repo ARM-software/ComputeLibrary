@@ -134,9 +134,9 @@ logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &
 /** Function Template with variable number of inputs to collect all the passed parameters from
  *  the logging macro ARM_COMPUTE_LOG_PARAMS(...)
  *
- * @param[in] ...ins The input parameters in the variadic template, taken by reference, (not by value) to avoid
- *                   detecting T as an abstract data type when passing any of these parameters as L-value reference
- *                   to an abstract type.
+ * @param[in] ...ins The input parameters in the variadic template, taken by universal references Ts.. &&, (not by value)
+ *                   to avoid detecting T as an abstract data type when passing any of these parameters as an L-value
+ *                   reference to an abstract type.
  *
  * @return  Vector of the parameters' data in a string format
  */

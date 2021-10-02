@@ -67,7 +67,22 @@ std::string to_string_if_not_null(T *arg)
     }
 }
 
+/** Fallback method: try to use std::to_string:
+ *
+ * @param[in] val Value to convert to string
+ *
+ * @return String representing val.
+ */
+template <typename T>
+inline std::string to_string(const T &val)
+{
+    return support::cpp11::to_string(val);
+}
+
 /** Formatted output of a vector of objects.
+ *
+ * @note: Using the overloaded to_string() instead of overloaded operator<<(), because to_string() functions are
+ *        overloaded for all types, where two or more of them can use the same operator<<(), ITensor is an example.
  *
  * @param[out] os   Output stream
  * @param[in]  args Vector of objects to print
@@ -75,7 +90,7 @@ std::string to_string_if_not_null(T *arg)
  * @return Modified output stream.
  */
 template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
+::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
 {
     const size_t max_print_size = 5U;
 
@@ -96,7 +111,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args
         {
             os << ", ";
         }
-        os << args[i];
+        os << to_string(args[i]);
     }
     if(i < args.size())
     {
@@ -104,6 +119,20 @@ inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args
     }
     os << "]";
     return os;
+}
+
+/** Formatted output of a vector of objects.
+ *
+ * @param[in] args Vector of objects to print
+ *
+ * @return String representing args.
+ */
+template <typename T>
+std::string to_string(const std::vector<T> &args)
+{
+    std::stringstream str;
+    str << args;
+    return str.str();
 }
 
 /** Formatted output of the Dimensions type.
@@ -1072,7 +1101,7 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
 
     os << "Shape=" << info->tensor_shape() << ","
        << "DataLayout=" << string_from_data_layout(data_layout) << ","
-       << "DataType=" << string_from_data_type(data_type) << ",";
+       << "DataType=" << string_from_data_type(data_type);
 
     if(is_data_type_quantized(data_type))
     {
@@ -1080,7 +1109,7 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
         const auto             scales  = qinfo.scale();
         const auto             offsets = qinfo.offset();
 
-        os << "QuantizationInfo={"
+        os << ", QuantizationInfo={"
            << "scales.size=" << scales.size()
            << ", scale(s)=" << scales << ", ";
 
@@ -2241,20 +2270,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PriorBoxLayerInfo &i
     return os;
 }
 
-/** Formatted output of a vector of objects.
- *
- * @param[in] args Vector of objects to print
- *
- * @return String representing args.
- */
-template <typename T>
-std::string to_string(const std::vector<T> &args)
-{
-    std::stringstream str;
-    str << args;
-    return str.str();
-}
-
 /** Formatted output of the WinogradInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
 {
@@ -2271,18 +2286,6 @@ inline std::string to_string(const WinogradInfo &type)
     std::stringstream str;
     str << type;
     return str.str();
-}
-
-/** Fallback method: try to use std::to_string:
- *
- * @param[in] val Value to convert to string
- *
- * @return String representing val.
- */
-template <typename T>
-inline std::string to_string(const T &val)
-{
-    return support::cpp11::to_string(val);
 }
 
 /** Convert a CLTunerMode value to a string
@@ -2782,20 +2785,20 @@ inline std::string to_string(const SoftmaxKernelInfo &info)
  * @return Modified output stream.
  */
 template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const LSTMParams<T> &lstm_params)
+::std::ostream &operator<<(::std::ostream &os, const LSTMParams<T> &lstm_params)
 {
-    os << "{input_to_input_weights=" << lstm_params.input_to_input_weights() << ", "
-       << "recurrent_to_input_weights=" << lstm_params.recurrent_to_input_weights() << ", "
-       << "cell_to_input_weights=" << lstm_params.cell_to_input_weights() << ", "
-       << "input_gate_bias=" << lstm_params.input_gate_bias() << ", "
-       << "cell_to_forget_weights=" << lstm_params.cell_to_forget_weights() << ", "
-       << "cell_to_output_weights=" << lstm_params.cell_to_output_weights() << ", "
-       << "projection_weights=" << lstm_params.projection_weights() << ", "
-       << "projection_bias=" << lstm_params.projection_bias() << ", "
-       << "input_layer_norm_weights=" << lstm_params.input_layer_norm_weights() << ", "
-       << "forget_layer_norm_weights=" << lstm_params.forget_layer_norm_weights() << ", "
-       << "cell_layer_norm_weights=" << lstm_params.cell_layer_norm_weights() << ", "
-       << "output_layer_norm_weights=" << lstm_params.output_layer_norm_weights() << ", "
+    os << "{input_to_input_weights=" << to_string(lstm_params.input_to_input_weights()) << ", "
+       << "recurrent_to_input_weights=" << to_string(lstm_params.recurrent_to_input_weights()) << ", "
+       << "cell_to_input_weights=" << to_string(lstm_params.cell_to_input_weights()) << ", "
+       << "input_gate_bias=" << to_string(lstm_params.input_gate_bias()) << ", "
+       << "cell_to_forget_weights=" << to_string(lstm_params.cell_to_forget_weights()) << ", "
+       << "cell_to_output_weights=" << to_string(lstm_params.cell_to_output_weights()) << ", "
+       << "projection_weights=" << to_string(lstm_params.projection_weights()) << ", "
+       << "projection_bias=" << to_string(lstm_params.projection_bias()) << ", "
+       << "input_layer_norm_weights=" << to_string(lstm_params.input_layer_norm_weights()) << ", "
+       << "forget_layer_norm_weights=" << to_string(lstm_params.forget_layer_norm_weights()) << ", "
+       << "cell_layer_norm_weights=" << to_string(lstm_params.cell_layer_norm_weights()) << ", "
+       << "output_layer_norm_weights=" << to_string(lstm_params.output_layer_norm_weights()) << ", "
        << "cell_clip=" << lstm_params.cell_clip() << ", "
        << "projection_clip=" << lstm_params.projection_clip() << ", "
        << "input_intermediate_scale=" << lstm_params.input_intermediate_scale() << ", "
@@ -2817,7 +2820,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const LSTMParams<T> &lstm_
  * @return String representing the corresponding LSTMParams
  */
 template <typename T>
-inline std::string to_string(const LSTMParams<T> &lstm_params)
+std::string to_string(const LSTMParams<T> &lstm_params)
 {
     std::stringstream str;
     str << lstm_params;
@@ -2834,6 +2837,80 @@ inline std::string to_string(const uint8_t num)
 {
     // Explicity cast the uint8_t to signed integer and call the corresponding overloaded to_string() function.
     return ::std::to_string(static_cast<int>(num));
+}
+
+/** Available non maxima suppression types */
+/** Formatted output of the NMSType type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  nms_type NMSType to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const NMSType &nms_type)
+{
+    switch(nms_type)
+    {
+        case NMSType::LINEAR:
+            os << "LINEAR";
+            break;
+        case NMSType::GAUSSIAN:
+            os << "GAUSSIAN";
+            break;
+        case NMSType::ORIGINAL:
+            os << "ORIGINAL";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Converts a @ref NMSType to string
+ *
+ * @param[in] nms_type NMSType value to be converted
+ *
+ * @return String representing the corresponding NMSType
+ */
+inline std::string to_string(const NMSType nms_type)
+{
+    std::stringstream str;
+    str << nms_type;
+    return str.str();
+}
+
+/** Formatted output of the BoxNMSLimitInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info BoxNMSLimitInfo to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const BoxNMSLimitInfo &info)
+{
+    os << "{score_thresh = " << info.score_thresh() << ", "
+       << "nms = " << info.nms() << ", "
+       << "detections_per_im = " << info.detections_per_im() << ", "
+       << "soft_nms_enabled = " << info.soft_nms_enabled() << ", "
+       << "soft_nms_min_score_thres = " << info.soft_nms_min_score_thres() << ", "
+       << "suppress_size = " << info.suppress_size() << ", "
+       << "min_size = " << info.min_size() << ", "
+       << "im_width = " << info.im_width() << ", "
+       << "im_height = " << info.im_height() << "}";
+    return os;
+}
+
+/** Converts a @ref BoxNMSLimitInfo to string
+ *
+ * @param[in] info BoxNMSLimitInfo value to be converted
+ *
+ * @return String representing the corresponding BoxNMSLimitInfo
+ */
+inline std::string to_string(const BoxNMSLimitInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
 }
 
 } // namespace arm_compute

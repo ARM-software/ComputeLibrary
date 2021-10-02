@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/runtime/Scheduler.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -130,10 +132,12 @@ CPPBoxWithNonMaximaSuppressionLimit::CPPBoxWithNonMaximaSuppressionLimit(std::sh
 {
 }
 
-void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,
-                                                    ITensor *batch_splits_out, ITensor *keeps, ITensor *keeps_size, const BoxNMSLimitInfo info)
+void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in,
+                                                    ITensor *scores_out, ITensor *boxes_out, ITensor *classes, ITensor *batch_splits_out,
+                                                    ITensor *keeps, ITensor *keeps_size, const BoxNMSLimitInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
+    ARM_COMPUTE_LOG_PARAMS(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes, batch_splits_out, keeps, keeps_size, info);
 
     _is_qasymm8 = scores_in->info()->data_type() == DataType::QASYMM8 || scores_in->info()->data_type() == DataType::QASYMM8_SIGNED;
 
