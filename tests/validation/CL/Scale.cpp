@@ -82,6 +82,7 @@ constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
 constexpr float                      tolerance_f32_absolute(0.001f);
 
 RelativeTolerance<float> tolerance_f32(0.05);
+constexpr float          abs_tolerance_f16(0.1f);
 RelativeTolerance<half>  tolerance_f16(half(0.1));
 
 constexpr float tolerance_num_f32(0.01f);
@@ -262,7 +263,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLScaleFixture<half>, framework::DatasetMode::ALL, A
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16, 0.0f, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, ScaleAlignCornersSamplingPolicySet))
 {
@@ -271,7 +272,7 @@ FIXTURE_DATA_TEST_CASE(RunAlignCorners, CLScaleFixture<half>, framework::Dataset
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16, 0.0f, abs_tolerance_f16);
 }
 const auto f16_nightly_shape = combine((SCALE_NIGHTLY_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
 FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(f16_nightly_shape, ScaleSamplingPolicySet))
@@ -281,7 +282,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly, CLScaleFixture<half>, framework::DatasetMode:
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16, 0.0f, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, ASSEMBLE_DATASET(f16_nightly_shape, ScaleAlignCornersSamplingPolicySet))
 {
@@ -290,7 +291,7 @@ FIXTURE_DATA_TEST_CASE(RunNightlyAlignCorners, CLScaleFixture<half>, framework::
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16, 0.0f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
