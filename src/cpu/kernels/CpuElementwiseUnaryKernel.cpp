@@ -62,17 +62,17 @@ static const ElementwiseUnaryKernel available_kernels[] =
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32; },
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
         REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>),
     },
     {
         "sve_fp16_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16; },
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
         REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<__fp16>),
     },
     {
         "sve_s32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32; },
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
         REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_SVE)
@@ -85,7 +85,7 @@ static const ElementwiseUnaryKernel available_kernels[] =
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16; },
+        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
         REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<__fp16>),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

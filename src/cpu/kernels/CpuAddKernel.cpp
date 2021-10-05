@@ -65,7 +65,7 @@ static const AddKernel available_kernels[] =
         "sve2_qu8_add",
         [](const AddSelectorData & data)
         {
-            return (data.dt == DataType::QASYMM8) && data.ci.has_sve();
+            return (data.dt == DataType::QASYMM8) && data.ci.has_sve2();
         },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::add_qasymm8_sve)
     },
@@ -73,7 +73,7 @@ static const AddKernel available_kernels[] =
         "sve2_qs8_add",
         [](const AddSelectorData & data)
         {
-            return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve();
+            return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve2();
         },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::add_qasymm8_signed_sve)
     },
@@ -81,7 +81,7 @@ static const AddKernel available_kernels[] =
         "sve2_qs16_add",
         [](const AddSelectorData & data)
         {
-            return (data.dt == DataType::QSYMM16) && data.ci.has_sve();
+            return (data.dt == DataType::QSYMM16) && data.ci.has_sve2();
         },
         REGISTER_QSYMM16_SVE(arm_compute::cpu::add_qsymm16_sve)
     },
