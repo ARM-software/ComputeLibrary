@@ -36,12 +36,13 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
+#include "src/core/experimental/PostOp.h"
 #include "support/StringSupport.h"
-
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -134,6 +135,133 @@ std::string to_string(const std::vector<T> &args)
     str << args;
     return str.str();
 }
+
+/** @name (EXPERIMENTAL_POST_OPS)
+ * @{
+ */
+/** Formmated output of the @ref experimental::PostOpType type
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  post_op_type Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, experimental::PostOpType post_op_type)
+{
+    os << "type=";
+    switch(post_op_type)
+    {
+        case experimental::PostOpType::Activation:
+        {
+            os << "Activation";
+            break;
+        }
+        case experimental::PostOpType::Eltwise_Add:
+        {
+            os << "Eltwise_Add";
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Unsupported PostOpType");
+            break;
+        }
+    }
+    return os;
+}
+/** Converts a @ref experimental::PostOpType to string
+ *
+ * @param[in] post_op_type PostOpType value to be converted
+ *
+ * @return String representing the corresponding PostOpType
+ */
+inline std::string to_string(experimental::PostOpType post_op_type)
+{
+    std::stringstream str;
+    str << post_op_type;
+    return str.str();
+}
+/** Formatted output of the @ref experimental::IPostOp type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  post_op Type to output.
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::IPostOp<T> &post_op)
+{
+    os << "<";
+    os << post_op.type() << ",";
+    os << "prev_op_arg_pos=" << post_op.prev_dst_pos() << ",";
+    switch(post_op.type())
+    {
+        case experimental::PostOpType::Activation:
+        {
+            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpAct<T> *>(&post_op);
+            os << "act_info=" << &(_post_op->_act_info);
+            break;
+        }
+        case experimental::PostOpType::Eltwise_Add:
+        {
+            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpEltwiseAdd<T> *>(&post_op);
+            os << "convert_policy=" << _post_op->_policy;
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Unsupported PostOpType");
+            break;
+        }
+    }
+    os << ">";
+    return os;
+}
+/** Converts an @ref experimental::IPostOp to string
+ *
+ * @param[in] post_op IPostOp value to be converted
+ *
+ * @return String representing the corresponding IPostOp
+ */
+template <typename T>
+inline std::string to_string(const experimental::IPostOp<T> &post_op)
+{
+    std::stringstream str;
+    str << post_op;
+    return str.str();
+}
+/** Formatted output of the @ref experimental::PostOpList type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  post_ops Type to output.
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::PostOpList<T> &post_ops)
+{
+    os << "[";
+    for(const auto &post_op : post_ops.get_list())
+    {
+        os << *post_op << ",";
+    }
+    os << "]";
+    return os;
+}
+/** Converts a @ref experimental::PostOpList to string
+ *
+ * @param[in] post_ops PostOpList value to be converted
+ *
+ * @return String representing the corresponding PostOpList
+ */
+template <typename T>
+inline std::string to_string(const experimental::PostOpList<T> &post_ops)
+{
+    std::stringstream str;
+    str << post_ops;
+    return str.str();
+}
+/** @} */ // end of group (EXPERIMENTAL_POST_OPS)
 
 /** Formatted output of the Dimensions type.
  *
@@ -244,8 +372,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm
     os << " fp_mixed_precision= " << gemm_info.fp_mixed_precision;
     os << " mult_transpose1xW_width= " << gemm_info.mult_transpose1xW_width;
     os << " mult_interleave4x4_height= " << gemm_info.mult_interleave4x4_height;
-    os << " a_offset = " << gemm_info.a_offset;
-    os << " b_offset = " << gemm_info.b_offset;
+    os << " a_offset= " << gemm_info.a_offset;
+    os << " b_offset= " << gemm_info.b_offset;
+    os << "post_ops= " << gemm_info.post_ops;
     os << ")";
     return os;
 }
@@ -487,7 +616,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
 
 /** Formatted output of the activation function info type.
  *
- * @param[in] info Type to output.
+ * @param[in] info ActivationLayerInfo to output.
  *
  * @return Formatted string.
  */
@@ -501,25 +630,35 @@ inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
     return str.str();
 }
 
-/** Formatted output of the activation function info type.
+/** Formatted output of the activation function info.
  *
- * @param[in] info Type to output.
+ * @param[out] os   Output stream.
+ * @param[in]  info ActivationLayerInfo to output.
  *
  * @return Formatted string.
  */
-inline std::string to_string(const arm_compute::ActivationLayerInfo *info)
+inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo *info)
 {
-    std::string ret_str = "nullptr";
     if(info != nullptr)
     {
-        std::stringstream str;
         if(info->enabled())
         {
-            str << info->activation();
+            os << info->activation();
+            os << "(";
+            os << "VAL_A=" << info->a() << ",";
+            os << "VAL_B=" << info->b();
+            os << ")";
         }
-        ret_str = str.str();
+        else
+        {
+            os << "disabled";
+        }
     }
-    return ret_str;
+    else
+    {
+        os << "nullptr";
+    }
+    return os;
 }
 
 /** Formatted output of the activation function type.

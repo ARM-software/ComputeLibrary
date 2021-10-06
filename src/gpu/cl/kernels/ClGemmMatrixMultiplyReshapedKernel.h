@@ -106,6 +106,7 @@ private:
     bool         _add_bias{ false };
     bool         _export_to_cl_image{ false };
     unsigned int _k{ 1 };
+    unsigned int _num_post_op_args{ 0 }; // (EXPERIMENTAL_POST_OPS) total number of post op arguments
 };
 } // namespace kernels
 } // namespace opencl

@@ -29,10 +29,9 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/common/utils/Log.h"
 
 #include "src/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {

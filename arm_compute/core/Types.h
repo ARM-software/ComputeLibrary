@@ -382,7 +382,11 @@ struct BorderSize
 /** Container for 2D padding size */
 using PaddingSize = BorderSize;
 
-/** Policy to handle overflow */
+/** Policy to handle integer overflow
+ *  @note: This is ignored by floating point operations where the overflow behavior adheres to the IEEE-754 standard
+ *         which states that in case of overflow ±infinity is returned for the round-to-nearest modes (and follows the
+ *         rounding rules for the directed rounding modes) by default.
+ */
 enum class ConvertPolicy
 {
     WRAP,    /**< Wrap around */

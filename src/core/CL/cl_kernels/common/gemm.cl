@@ -2524,6 +2524,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The data type used for the accumulators must be passed at compile time using -DDATA_TYPE_ACCUMULATOR (e.g. -DDATA_TYPE_ACCUMULATOR=float)
@@ -2798,6 +2799,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
@@ -3179,6 +3181,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
@@ -3560,6 +3563,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
@@ -3929,7 +3933,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
 #endif // defined(LHS_TRANSPOSE)
 
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(K) && defined(DATA_TYPE)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE) && defined(DATA_TYPE_ACCUMULATOR) && defined(M) && defined(N)
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE)
 

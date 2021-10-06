@@ -76,6 +76,11 @@ enum TensorType : int32_t
     ACL_VEC_COL_SUM = ACL_SRC_4,
     ACL_SHIFTS      = ACL_SRC_5,
     ACL_MULTIPLIERS = ACL_SRC_6,
+
+    // (EXPERIMENTAL_POST_OPS) Post ops arguments begin after everything else
+    EXPERIMENTAL_ACL_POST_OP_ARG       = 2048,
+    EXPERIMENTAL_ACL_POST_OP_ARG_FIRST = EXPERIMENTAL_ACL_POST_OP_ARG,
+    EXPERIMENTAL_ACL_POST_OP_ARG_LAST  = EXPERIMENTAL_ACL_POST_OP_ARG_FIRST + 1024, // Max number of post op arguments
 };
 
 namespace experimental

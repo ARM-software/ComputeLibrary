@@ -277,7 +277,10 @@ if env['opencl'] and env['embed_kernels']:
                         'src/core/CL/cl_kernels/repeat.h',
                         'src/core/CL/cl_kernels/tile_helpers.h',
                         'src/core/CL/cl_kernels/types.h',
-                        'src/core/CL/cl_kernels/warp_helpers.h'
+                        'src/core/CL/cl_kernels/warp_helpers.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_elementwise_op_helpers.h',
                     ]
 
     # Common kernels
@@ -307,6 +310,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
                        'src/core/CL/cl_kernels/common/gemv.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
