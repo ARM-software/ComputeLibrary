@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,5 +99,24 @@ ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const Tens
     valid_region.shape.set(idx_height, std::min<size_t>(valid_end_out_y - valid_start_out_y, dst_shape[idx_height]));
 
     return valid_region;
+}
+
+const std::map<DataLayout, std::vector<DataLayoutDimension>> &get_layout_map()
+{
+    constexpr DataLayoutDimension W = DataLayoutDimension::WIDTH;
+    constexpr DataLayoutDimension H = DataLayoutDimension::HEIGHT;
+    constexpr DataLayoutDimension C = DataLayoutDimension::CHANNEL;
+    constexpr DataLayoutDimension D = DataLayoutDimension::DEPTH;
+    constexpr DataLayoutDimension N = DataLayoutDimension::BATCHES;
+
+    static const std::map<DataLayout, std::vector<DataLayoutDimension>> layout_map =
+    {
+        { DataLayout::NDHWC, { C, W, H, D, N } },
+        { DataLayout::NCDHW, { W, H, D, C, N } },
+        { DataLayout::NHWC, { C, W, H, N } },
+        { DataLayout::NCHW, { W, H, C, N } }
+    };
+
+    return layout_map;
 }
 } // namespace arm_compute

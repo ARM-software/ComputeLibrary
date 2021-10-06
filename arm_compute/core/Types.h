@@ -114,6 +114,7 @@ enum class DataLayout
     UNKNOWN, /**< Unknown data layout */
     NCHW,    /**< Num samples, channels, height, width */
     NHWC,    /**< Num samples, height, width, channels */
+    NCDHW,   /**< Num samples, channels, depth, height, width */
     NDHWC    /**< Num samples, depth, height, width, channels */
 };
 /** [DataLayout enum definition] **/
@@ -124,6 +125,7 @@ enum class DataLayoutDimension
     CHANNEL, /**< channel */
     HEIGHT,  /**< height */
     WIDTH,   /**< width */
+    DEPTH,   /**< depth */
     BATCHES  /**< batches */
 };
 
@@ -765,6 +767,20 @@ private:
 /** Padding information for 3D operations like Conv3d */
 struct Padding3D
 {
+    Padding3D()
+    {
+    }
+
+    Padding3D(size_t pad_x, size_t pad_y, size_t pad_z)
+        : left(pad_x), right(pad_x), top(pad_y), bottom(pad_y), front(pad_z), back(pad_z)
+    {
+    }
+
+    Padding3D(size_t left, size_t right, size_t top, size_t bottom, size_t front, size_t back)
+        : left(left), right(right), top(top), bottom(bottom), front(front), back(back)
+    {
+    }
+
     size_t left   = { 0 }; /**<  Padding across the width dimenstion on the left, in elements. */
     size_t right  = { 0 }; /**<  Padding across the width dimenstion on the right, in elements. */
     size_t top    = { 0 }; /**<  Padding across the height dimenstion  on the top, in elements. */

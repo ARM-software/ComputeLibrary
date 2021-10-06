@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -180,6 +180,22 @@ inline Coordinates index2coords(const TensorShape &shape, int index);
  */
 inline int coords2index(const TensorShape &shape, const Coordinates &coord);
 
+/** Returns a static map used to find an index or dimension based on a data layout
+  *
+  * *** Layouts ***
+  *
+  * *** 4D ***
+  * [N C H W]
+  * [3 2 1 0]
+  * [N H W C]
+  *
+  * * *** 5D ***
+  * [N C D H W]
+  * [4 3 2 1 0]
+  * [N D H W C]
+  */
+const std::map<DataLayout, std::vector<DataLayoutDimension>> &get_layout_map();
+
 /** Get the index of the given dimension.
  *
  * @param[in] data_layout           The data layout.
@@ -187,7 +203,7 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord);
  *
  * @return The int conversion of the requested data layout index.
  */
-inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
+inline size_t get_data_layout_dimension_index(const DataLayout &data_layout, const DataLayoutDimension &data_layout_dimension);
 
 /** Get the DataLayoutDimension of a given index and layout.
  *
@@ -196,7 +212,7 @@ inline size_t get_data_layout_dimension_index(const DataLayout data_layout, cons
  *
  * @return The dimension which this index is requested for.
  */
-inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout data_layout, const size_t index);
+inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout &data_layout, const size_t index);
 
 /** Calculate the number of output tiles required by Winograd Convolution layer. This utility function can be used by the Winograd input transform
  *  to know the number of tiles on the x and y direction

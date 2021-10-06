@@ -666,6 +666,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_lay
         case DataLayout::NDHWC:
             os << "NDHWC";
             break;
+        case DataLayout::NCDHW:
+            os << "NCDHW";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -706,6 +709,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataLayoutDimension 
             break;
         case DataLayoutDimension::CHANNEL:
             os << "CHANNEL";
+            break;
+        case DataLayoutDimension::DEPTH:
+            os << "DEPTH";
             break;
         case DataLayoutDimension::BATCHES:
             os << "BATCHES";
