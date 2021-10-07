@@ -57,6 +57,15 @@ public:
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info);
 
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] small_network_mws          Minimum workload size for requsted configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
+
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;

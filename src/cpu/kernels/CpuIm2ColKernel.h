@@ -91,6 +91,14 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] small_network_mws          Minimum workload size for requsted configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
 private:
     /** Template function to run im2col

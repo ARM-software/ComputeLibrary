@@ -115,6 +115,19 @@ public:
             _name += "/" + kernel_name_tag;
         }
     }
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] small_network_mws         Minimum workload size for requsted configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override
+    {
+        ARM_COMPUTE_UNUSED(platform, thread_count);
+
+        return ICPPKernel::small_network_mws;
+    }
 
 private:
     arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;

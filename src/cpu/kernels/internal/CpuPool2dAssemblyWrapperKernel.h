@@ -112,6 +112,15 @@ private:
     void create_arm_pooling_requant(const ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, const CPUInfo &cpu_info);
 
     std::unique_ptr<arm_conv::pooling::IPoolingCommon> _kernel_asm{ nullptr };
+
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] small_network_mws          Minimum workload size for requsted configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 };
 } // namespace kernels
 } // namespace cpu

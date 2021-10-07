@@ -274,6 +274,13 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
 
     _kernel_asm = std::move(pooling_kernel_asm);
 }
+
+size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    return ICPPKernel::small_network_mws;
+}
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

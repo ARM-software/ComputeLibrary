@@ -134,6 +134,14 @@ const char *CpuReshapeKernel::name() const
 {
     return "CpuReshapeKernel";
 }
+
+size_t CpuReshapeKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    return ICPPKernel::small_network_mws;
+}
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

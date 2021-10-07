@@ -354,6 +354,13 @@ const char *CpuDepthwiseConv2dAssemblyWrapperKernel::name() const
 {
     return "CpuDepthwiseConv2dAssemblyWrapperKernel";
 }
+
+size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    return ICPPKernel::small_network_mws;
+}
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
