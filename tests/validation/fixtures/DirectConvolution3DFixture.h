@@ -48,7 +48,7 @@ public:
 
         TensorShape       weights_shape(num_kernels, input_shape[0], kernel_width, kernel_height, kernel_depth);
         const TensorShape bias_shape(num_kernels);
-        const Conv3dInfo  conv3d_info(Size3D(stride_x, stride_y, stride_z), Padding3D(pad_x, pad_y, pad_z), act_info, Size3D(), DimensionRoundingType::FLOOR, false);
+        const Conv3dInfo  conv3d_info(Size3D(stride_x, stride_y, stride_z), Padding3D(pad_x, pad_y, pad_z), act_info, Size3D(1U, 1U, 1U), DimensionRoundingType::FLOOR, false);
         const TensorShape output_shape = compute_conv3d_shape(input_shape, weights_shape, conv3d_info);
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, conv3d_info, has_bias, data_type, data_layout);
@@ -86,13 +86,6 @@ protected:
         TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
         TensorType bias    = has_bias ? create_tensor<TensorType>(bias_shape, data_type, 1, QuantizationInfo()) : TensorType();
         TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
-
-        add_padding_x({ &src, &dst, &weights }, data_layout);
-
-        if(has_bias)
-        {
-            add_padding_x({ &bias }, data_layout);
-        }
 
         // Create and configure function
         FunctionType conv{};

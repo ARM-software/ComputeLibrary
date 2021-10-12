@@ -140,7 +140,7 @@ bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &d
 {
     ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
-    if(data_layout == DataLayout::NCHW)
+    if(data_layout != DataLayout::NHWC)
     {
         if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
         {

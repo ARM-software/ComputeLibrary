@@ -141,13 +141,13 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
     {
         for(unsigned int z_out = 0; z_out < dst_depth; ++z_out)
         {
-            const int z_start = (z_out * stride_z) - pad_left;
+            const int z_start = (z_out * stride_z) - pad_front;
             for(unsigned int y_out = 0; y_out < dst_height; ++y_out)
             {
                 const int y_start = (y_out * stride_y) - pad_top;
                 for(unsigned int x_out = 0; x_out < dst_width; ++x_out)
                 {
-                    const int x_start = (x_out * stride_x) - pad_front;
+                    const int x_start = (x_out * stride_x) - pad_left;
                     for(unsigned int ch_out = 0; ch_out < dst_channels; ++ch_out)
                     {
                         T weighted_value = calculate_conv3d<T>(src, weights, conv3d_info.dilation, batch, z_start,
