@@ -251,7 +251,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
                            .set_data_type(DataType::U32) /* we store the offset to the element */);
     }
     const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
-    ARM_COMPUTE_ERROR_ON(src->data_layout() != DataLayout::NCHW);
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
