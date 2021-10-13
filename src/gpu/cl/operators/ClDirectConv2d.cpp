@@ -25,7 +25,6 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClActivationKernel.h"
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
 

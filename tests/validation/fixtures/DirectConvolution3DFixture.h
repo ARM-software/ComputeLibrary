@@ -41,12 +41,12 @@ class DirectConvolution3DValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
-               unsigned int num_kernels, bool has_bias, ActivationLayerInfo act_info, DataType data_type, DataLayout data_layout)
+    void setup(const TensorShape &input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
+               unsigned int num_kernels, bool has_bias, const ActivationLayerInfo &act_info, const DataType &data_type, const DataLayout &data_layout)
     {
         ARM_COMPUTE_ERROR_ON(data_layout != DataLayout::NDHWC);
 
-        TensorShape       weights_shape(num_kernels, input_shape[0], kernel_width, kernel_height, kernel_depth);
+        const TensorShape weights_shape(num_kernels, input_shape[0], kernel_width, kernel_height, kernel_depth);
         const TensorShape bias_shape(num_kernels);
         const Conv3dInfo  conv3d_info(Size3D(stride_x, stride_y, stride_z), Padding3D(pad_x, pad_y, pad_z), act_info, Size3D(1U, 1U, 1U), DimensionRoundingType::FLOOR, false);
         const TensorShape output_shape = compute_conv3d_shape(input_shape, weights_shape, conv3d_info);
@@ -78,7 +78,7 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const Conv3dInfo &conv3d_info,
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const Conv3dInfo &conv3d_info,
                               bool has_bias, const DataType &data_type, const DataLayout &data_layout)
     {
         // Create tensors

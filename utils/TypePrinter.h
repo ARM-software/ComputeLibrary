@@ -1982,6 +1982,33 @@ inline std::string to_string(const Size2D &type)
     return str.str();
 }
 
+/** Formatted output of the Size3D type.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  size Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Size3D &size)
+{
+    os << size.width << "x" << size.height << "x" << size.depth;
+
+    return os;
+}
+
+/** Formatted output of the Size2D type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Size3D &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
 /** Formatted output of the ConvolutionMethod type.
  *
  * @param[out] os          Output stream
@@ -2916,6 +2943,107 @@ inline std::string to_string(const BoxNMSLimitInfo &info)
 {
     std::stringstream str;
     str << info;
+    return str.str();
+}
+
+/** Formatted output of the DimensionRoundingType type.
+ *
+ * @param[out] os            Output stream.
+ * @param[in]  rounding_type DimensionRoundingType to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DimensionRoundingType &rounding_type)
+{
+    switch(rounding_type)
+    {
+        case DimensionRoundingType::CEIL:
+            os << "CEIL";
+            break;
+        case DimensionRoundingType::FLOOR:
+            os << "FLOOR";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Converts a @ref DimensionRoundingType to string
+ *
+ * @param[in] rounding_type DimensionRoundingType value to be converted
+ *
+ * @return String representing the corresponding DimensionRoundingType
+ */
+inline std::string to_string(const DimensionRoundingType &rounding_type)
+{
+    std::stringstream str;
+    str << rounding_type;
+    return str.str();
+}
+
+/** Formatted output of the Padding3D type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  padding3d Padding3D to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Padding3D &padding3d)
+{
+    os << padding3d.left << "," << padding3d.right << ","
+       << padding3d.top << "," << padding3d.bottom << ","
+       << padding3d.front << "," << padding3d.back;
+    return os;
+}
+
+/** Converts a @ref Padding3D to string
+ *
+ * @param[in] padding3d Padding3D value to be converted
+ *
+ * @return String representing the corresponding Padding3D
+ */
+inline std::string to_string(const Padding3D &padding3d)
+{
+    std::stringstream str;
+    str << padding3d;
+    return str.str();
+}
+
+/** Formatted output of the Conv3dInfo type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  conv3d_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Conv3dInfo &conv3d_info)
+{
+    os << conv3d_info.stride;
+    os << ";";
+    os << conv3d_info.padding;
+    os << ";";
+    os << to_string(conv3d_info.act_info);
+    os << ";";
+    os << conv3d_info.dilation;
+    os << ";";
+    os << conv3d_info.round_type;
+    os << ";";
+    os << conv3d_info.enable_fast_math;
+
+    return os;
+}
+
+/** Formatted output of the Conv3dInfo type.
+ *
+ * @param[in] conv3d_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Conv3dInfo &conv3d_info)
+{
+    std::stringstream str;
+    str << conv3d_info;
     return str.str();
 }
 

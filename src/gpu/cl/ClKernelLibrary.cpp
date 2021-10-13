@@ -433,6 +433,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "dwc_native_fp_nhwc", "nhwc/dwc_native_fp_nhwc.cl" },
     { "dwc_native_quantized_nhwc", "nhwc/dwc_native_quantized_nhwc.cl" },
     { "direct_convolution_nhwc", "nhwc/direct_convolution.cl" },
+    { "direct_convolution3d_ndhwc", "nhwc/direct_convolution3d.cl" },
     { "im2col3x3_nhwc", "nhwc/im2col.cl" },
     { "im2col9x9_nhwc", "nhwc/im2col.cl" },
     { "im2col_generic_nhwc", "nhwc/im2col.cl" },
@@ -856,6 +857,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/direct_convolution.cl",
 #include "./cl_kernels/nhwc/direct_convolution.clembed"
+    },
+    {
+        "nhwc/direct_convolution3d.cl",
+#include "./cl_kernels/nhwc/direct_convolution3d.clembed"
     },
     {
         "nhwc/dwc_native_fp_nhwc.cl",

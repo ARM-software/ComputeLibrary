@@ -38,6 +38,7 @@
 #include "arm_compute/runtime/CL/functions/CLChannelShuffleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLComparison.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+#include "arm_compute/runtime/CL/functions/CLConv3D.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLCopy.h"

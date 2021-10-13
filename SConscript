@@ -356,6 +356,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/batchnormalization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/channel_shuffle.cl',
                     'src/core/CL/cl_kernels/nhwc/direct_convolution.cl',
+                    'src/core/CL/cl_kernels/nhwc/direct_convolution3d.cl',
                     'src/core/CL/cl_kernels/nhwc/depth_to_space.cl',
                     'src/core/CL/cl_kernels/nhwc/dequantization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/dwc_native_fp_nhwc.cl',

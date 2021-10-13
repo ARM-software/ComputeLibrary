@@ -284,6 +284,7 @@
       "files": {
         "common": [
           "src/gpu/cl/kernels/ClDirectConv2dKernel.cpp",
+          "src/gpu/cl/kernels/ClDirectConv3dKernel.cpp",
           "src/gpu/cl/kernels/ClWinogradFilterTransformKernel.cpp",
           "src/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
           "src/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp",
@@ -291,10 +292,12 @@
           "src/gpu/cl/kernels/ClCol2ImKernel.cpp",
           "src/gpu/cl/operators/ClConv2d.cpp",
           "src/gpu/cl/operators/ClDirectConv2d.cpp",
+          "src/gpu/cl/operators/ClDirectConv3d.cpp",
           "src/gpu/cl/operators/ClGemmConv2d.cpp",
           "src/gpu/cl/operators/ClWinogradConv2d.cpp",
           "src/gpu/cl/kernels/ClWeightsReshapeKernel.cpp",
           "src/runtime/CL/functions/CLConvolutionLayer.cpp",
+          "src/runtime/CL/functions/CLConv3D.cpp",
           "src/runtime/CL/functions/CLDirectConvolutionLayer.cpp",
           "src/runtime/CL/functions/CLFFTConvolutionLayer.cpp",
           "src/runtime/CL/functions/CLGEMMConvolutionLayer.cpp",

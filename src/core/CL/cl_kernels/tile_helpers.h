@@ -542,8 +542,8 @@
  * @param[in]  Y             Starting Y index
  * @param[in]  X             Starting X index
  * @param[in]  C             Starting C index
- * @param[in]  TENSOR_HEIGHT Number of elements to load from Y (height) dimension
  * @param[in]  TENSOR_WIDTH  Number of elements to load from X (width) dimension
+ * @param[in]  TENSOR_HEIGHT Number of elements to load from Y (height) dimension
  * @param[in]  STRIDE_Y      Stride Y (in bytes)
  * @param[out] xi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect X coordinate
  * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
@@ -556,6 +556,43 @@
             int _src_y = (X) + xi[_i].v + ((Y) + yi[_i].v) * (TENSOR_WIDTH);                                                                                          \
             _src_y += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT);                                                                                               \
             int _src_valid_y = (((X) + xi[_i].v) >= 0 && ((X) + xi[_i].v) < (int)(TENSOR_WIDTH) && ((Y) + yi[_i].v) >= 0 && ((Y) + yi[_i].v) < (int)(TENSOR_HEIGHT)); \
+            if(_src_valid_y != 0)                                                                                                                                     \
+            {                                                                                                                                                         \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y);                                                               \
+            }                                                                                                                                                         \
+        })                                                                                                                                                            \
+    })
+
+/** Load a tile from global memory (tensor) when the tensor is stored using a NDHWC layout using indirect X, Y and Z coordinates
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  TILE_AREA     Number of elements to load from Y (height) dimension * Number of elements to load from X (width) dimension
+ * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
+ *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  B             Starting batch index
+ * @param[in]  Z             Starting Z index
+ * @param[in]  Y             Starting Y index
+ * @param[in]  X             Starting X index
+ * @param[in]  C             Starting C index
+ * @param[in]  TENSOR_WIDTH  Number of elements to load from X (width) dimension
+ * @param[in]  TENSOR_HEIGHT Number of elements to load from Y (height) dimension
+ * @param[in]  TENSOR_DEPTH  Number of elements to load from Z (depth) dimension
+ * @param[in]  STRIDE_Y      Stride Y (in bytes)
+ * @param[out] xi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect X coordinate
+ * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
+ * @param[out] zi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Z coordinate
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD_NDHWC_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Z, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, TENSOR_DEPTH, STRIDE_Y, xi, yi, zi, dst) \
+    ({                                                                                                                                                                \
+        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA,                                                                                                                      \
+        {                                                                                                                                                             \
+            int _src_y = (X) + xi[_i].v + ((Y) + yi[_i].v) * (TENSOR_WIDTH) + ((Z) + zi[_i].v) * (TENSOR_WIDTH * TENSOR_HEIGHT);                                      \
+            _src_y += (B) * (int)(TENSOR_WIDTH) * (int)(TENSOR_HEIGHT) * (int)(TENSOR_DEPTH);                                                                         \
+            int _src_valid_y = (((X) + xi[_i].v) >= 0 && ((X) + xi[_i].v) < (int)(TENSOR_WIDTH) && ((Y) + yi[_i].v) >= 0 && ((Y) + yi[_i].v) < (int)(TENSOR_HEIGHT)   \
+                             && ((Z) + zi[_i].v) >= 0 && ((Z) + zi[_i].v) < (int)(TENSOR_DEPTH));                                                                     \
             if(_src_valid_y != 0)                                                                                                                                     \
             {                                                                                                                                                         \
                 dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, _src_y, STRIDE_Y);                                                               \
@@ -588,7 +625,7 @@
             LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
             {                                                                                                                                                                                      \
                 VSTORE_PARTIAL(WIDTH0, WIDTH1)                                                                                                                                                     \
-                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
+                (CONVERT(src[HEIGHT - 1 - _i].v, VEC_DATA_TYPE(DATA_TYPE, WIDTH0)), 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
             })                                                                                                                                                                                     \
         }                                                                                                                                                                                          \
         else                                                                                                                                                                                       \
@@ -596,7 +633,7 @@
             LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
             {                                                                                                                                                                                      \
                 VSTORE(WIDTH0)                                                                                                                                                                     \
-                (src[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
+                (CONVERT(src[HEIGHT - 1 - _i].v, VEC_DATA_TYPE(DATA_TYPE, WIDTH0)), 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y)); \
             })                                                                                                                                                                                     \
         }                                                                                                                                                                                          \
     })
@@ -892,18 +929,18 @@
  * @note Performs: LHS + RHS[broadcasted] = DST
  * @note Both tiles must have same data type
  *
- * @param[in]  DATA_TYPE LHS/RHS/DST data type
- * @param[in]  M0        Number of LHS rows
- * @param[in]  N0        Number of LHS columns
- * @param[in]  lhs       LHS tile
- * @param[in]  rhs       RHS tile
- * @param[out] dst       DST tile
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of LHS rows
+ * @param[in]  N0            Number of LHS columns
+ * @param[in]  lhs           LHS tile
+ * @param[in]  rhs           RHS tile
+ * @param[out] dst           DST tile
  */
-#define T_ADD_BROADCAST_X(DATA_TYPE, M0, N0, lhs, rhs, dst) \
+#define T_ADD_BROADCAST_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
     ({                                                      \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
-            dst[_m0].v = lhs[_m0].v + rhs[0].v;             \
+            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
         })                                                  \
     })
 
@@ -926,6 +963,7 @@
 #define T_MMUL(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, LHS_LAYOUT, RHS_LAYOUT, lhs, rhs, dst) T_MMUL_##LHS_LAYOUT##_##RHS_LAYOUT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_T_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T_char_char_int(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T_uchar_uchar_uint(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
@@ -938,7 +976,7 @@
             {                                                                             \
                 LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
                 {                                                                         \
-                    dst[_m].s[_n] = fma((lhs[_m].s[_k]), (rhs[_n].s[_k]), dst[_m].s[_n]); \
+                    dst[_m].s[_n] = fma((DST_DATA_TYPE)(lhs[_m].s[_k]), (DST_DATA_TYPE)(rhs[_n].s[_k]), dst[_m].s[_n]); \
                 })                                                                        \
             })                                                                            \
         })                                                                                \

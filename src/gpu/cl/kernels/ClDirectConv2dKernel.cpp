@@ -60,19 +60,17 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
     const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != weights->dimension(height_idx), "Weights should have same width and height");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != src->dimension(channel_idx),
-                                    "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != src->dimension(channel_idx), "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5 || weights->dimension(width_idx) == 9)
-                                    && std::get<0>(conv_info.stride()) > 2,
-                                    "Strides larger than 2 not supported for 3x3, 5x5, 9x9 convolution.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(data_layout != DataLayout::NHWC && !is_data_type_float(src->data_type()) && act_info.enabled(),
-                                    "Activation supported only for floating point and NHWC.");
 
     if(data_layout == DataLayout::NCHW)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != weights->dimension(height_idx), "Weights should have same width and height");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5 || weights->dimension(width_idx) == 9) && std::get<0>(conv_info.stride()) > 2,
+                                        "Strides larger than 2 not supported for 3x3, 5x5, 9x9 convolution.");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_data_type_float(src->data_type()) && act_info.enabled(), "Activation supported only for floating point and NHWC.");
+
         if(is_data_type_quantized(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5 && weights->dimension(width_idx) != 9,
@@ -96,7 +94,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->dimension(0) != weights->dimension(3),
-                                        "Biases size and number of src feature maps should match");
+                                        "Biases size and number of dst feature maps should match");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1,
                                         "Biases should be one dimensional");
     }

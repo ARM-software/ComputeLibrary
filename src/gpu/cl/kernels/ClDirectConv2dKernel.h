@@ -42,9 +42,9 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClDirectConv2dKernel);
     /** Set the src, weights, biases and dst tensors info.
      *
-     * @note: Due to set_valid_region(), thus src/weights/biases cannot be const. Need to change this once the set_valid_region() is removed.
+     * @note: Due to set_valid_region() in NCHW, src/weights/biases cannot be const. Need to change this once the set_valid_region() is removed.
      *
-     * @note: DirectConvolution only works in the following configurations:
+     * @note: DirectConvolution only works in the following configurations for the NCHW data layout:
      *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
      *        3x3 convolution with stride_x = 1/2, stride_y = 1/2
      *        5x5 convolution with stride_x = 1/2, stride_y = 1/2
