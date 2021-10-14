@@ -26,7 +26,7 @@
 #include "tile_helpers.h"
 
 //! @cond Doxygen_Suppress
-/** OpenCL kernel to compute the direct convolution.
+/** OpenCL kernel to compute the direct convolution 3d.
  *
  * @note Data layout supported: NDHWC
  * @note Data type supported: F32/F16
@@ -37,7 +37,9 @@
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH, -DSRC_HEIGHT and -DSRC_DEPTH (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64, -DSRC_DEPTH=32)
  * @note The spatial dimensions of the destination tensor must be passed at compile time using -DDST_WIDTH, -DDST_HEIGHT and -DDST_DEPTH (e.g. -DDST_WIDTH=96, -DDST_HEIGHT=64, -DDST_DEPTH=32)
  * @note The channels of the source tensor must be passed at compile time using -DSRC_CHANNELS (e.g. -DSRC_CHANNELS=64)
- * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
+ * @note The channels of the destination tensor must be passed at compile time using -DDST_CHANNELS (e.g. -DDST_CHANNELS=64)
+ * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
+ * @note The data type of the accumulators must be passed at compile time using -DACC_DATA_TYPE (e.g. -DACC_DATA_TYPE=float)
  * @note The number of M0 rows (width*height) to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of N0 output channels to process must be passed at compile time using -DN0 (e.g. -DN0=2)
  * @note The number of K0 inner accumulations must be passed at compile time using -DK0 (e.g. -DK0=2)
@@ -142,8 +144,6 @@ __kernel void direct_convolution3d_ndhwc(
         int xk = i % _IWEI_WIDTH;
         int yk = (i / _IWEI_WIDTH) % _IWEI_HEIGHT;
         int zk = i / (_IWEI_WIDTH * _IWEI_HEIGHT);
-
-        __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes;
 
         int k = 0;
         for(; k <= (_ISRC_CHANNELS - K0); k += K0)
