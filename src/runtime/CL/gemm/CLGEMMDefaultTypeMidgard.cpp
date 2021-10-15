@@ -73,7 +73,7 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f32(unsigned int m, unsigned 
     ARM_COMPUTE_UNUSED(n, k, b);
 
     // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
-    return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
+    return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED : CLGEMMKernelType::NATIVE;
 }
 
 CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
@@ -81,7 +81,7 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f16(unsigned int m, unsigned 
     ARM_COMPUTE_UNUSED(n, k, b);
 
     // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
-    return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
+    return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED : CLGEMMKernelType::NATIVE;
 }
 
 CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)

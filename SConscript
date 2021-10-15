@@ -308,7 +308,6 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/gather.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
                        'src/core/CL/cl_kernels/common/gemv.cl',
-                       'src/core/CL/cl_kernels/common/gemm_v1.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',

@@ -108,21 +108,21 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f32(unsigned int m, unsigned 
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
-    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE_V1;
+    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
 CLGEMMKernelType CLGEMMDefaultTypeValhall::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
-    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE_V1;
+    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
 CLGEMMKernelType CLGEMMDefaultTypeValhall::g77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     if(m == 1)
@@ -242,7 +242,7 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f32(unsigned int m, unsigned int 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     if(m == 1)
@@ -301,7 +301,7 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g78_f16(unsigned int m, unsigned int 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     return CLGEMMKernelType::RESHAPED_ONLY_RHS;

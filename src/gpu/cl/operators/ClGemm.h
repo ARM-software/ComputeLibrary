@@ -31,7 +31,6 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
 #include "src/gpu/cl/IClOperator.h"
-#include "src/gpu/cl/kernels/ClGemmMatrixMultiplyKernel.h"
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyNativeKernel.h"
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.h"
@@ -46,10 +45,10 @@ namespace opencl
 {
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref kernels::ClGemmReshapeLhsMatrixKernel (only if the RESHAPED_V1 is selected by the heuristic model)
- *  -# @ref kernels::ClGemmReshapeRhsMatrixKernel (only if either the RESHAPED_V1 or RESHAPED_ONLY_RHS is selected by the select_gemm_kernel method())
- *  -# @ref kernels::ClGemmMatrixMultiplyKernel (only if either the NATIVE or RESHAPED_V1 is selected by the select_gemm_kernel method())
- *  -# @ref kernels::ClGemmMatrixMultiplyReshapedKernel (only if RESHAPED_V1 is selected by the select_gemm_kernel method())
+ *  -# @ref kernels::ClGemmReshapeLhsMatrixKernel (only if the RESHAPED is selected by the heuristic model)
+ *  -# @ref kernels::ClGemmReshapeRhsMatrixKernel (only if either the RESHAPED or RESHAPED_ONLY_RHS is selected by the select_gemm_kernel method())
+ *  -# @ref kernels::ClGemmMatrixMultiplyNativeKernel (only if NATIVE is selected by the select_gemm_kernel method())
+ *  -# @ref kernels::ClGemmMatrixMultiplyReshapedKernel (only if RESHAPED is selected by the select_gemm_kernel method())
  *  -# @ref kernels::ClGemmMatrixMultiplyReshapedOnlyRhsKernel (only if RESHAPED_ONLY_RHS is selected by the select_gemm_kernel method())
  */
 class ClGemm : public IClOperator
@@ -100,13 +99,11 @@ public:
     experimental::MemoryRequirements workspace() const override;
 
 private:
-    void configure_native_v1(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    void configure_reshaped_v1(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    void configure_reshaped_v2(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_native(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_reshaped(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     void configure_reshaped_only_rhs(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
 
-    static Status validate_native_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    static Status validate_reshaped_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    static Status validate_native(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     static Status validate_reshaped(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     static Status validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
 
@@ -119,9 +116,9 @@ private:
     };
 
 private:
-    std::unique_ptr<kernels::ClGemmMatrixMultiplyKernel>                _mm_kernel;
     std::unique_ptr<kernels::ClGemmReshapeLhsMatrixKernel>              _reshape_lhs_kernel;
     std::unique_ptr<kernels::ClGemmReshapeRhsMatrixKernel>              _reshape_rhs_kernel;
+    std::unique_ptr<kernels::ClGemmMatrixMultiplyNativeKernel>          _mm_native_kernel;
     std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedKernel>        _mm_reshaped_kernel;
     std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_kernel;
     std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_fallback_kernel;

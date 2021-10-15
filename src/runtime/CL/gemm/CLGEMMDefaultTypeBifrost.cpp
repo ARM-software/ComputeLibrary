@@ -125,13 +125,13 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_f32(unsigned int m, unsigned 
 {
     ARM_COMPUTE_UNUSED(b);
 
-    CLGEMMKernelType gemm_type = CLGEMMKernelType::NATIVE_V1;
+    CLGEMMKernelType gemm_type = CLGEMMKernelType::NATIVE;
 
     if(is_rhs_constant)
     {
         if((m > 1) && (n < 16))
         {
-            gemm_type = CLGEMMKernelType::RESHAPED_V1;
+            gemm_type = CLGEMMKernelType::RESHAPED;
         }
         else if(m == 1)
         {
@@ -146,17 +146,17 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_f32(unsigned int m, unsigned 
                 constexpr float fact1 = 1.66f;
                 constexpr float ops   = 12.0f;
                 const float     scale = k > 1024 ? 1.07f : 1.0f;
-                gemm_type             = (alpha + ((n * fact0) / ops) < ((fact1 * n * scale) / ops)) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
+                gemm_type             = (alpha + ((n * fact0) / ops) < ((fact1 * n * scale) / ops)) ? CLGEMMKernelType::RESHAPED : CLGEMMKernelType::RESHAPED_ONLY_RHS;
             }
             else
             {
-                gemm_type = CLGEMMKernelType::NATIVE_V1;
+                gemm_type = CLGEMMKernelType::RESHAPED_ONLY_RHS;
             }
         }
 
         const auto workload = static_cast<float>((m * n) / 20.0f);
 
-        gemm_type = ((workload > 1600.0f) && (gemm_type == CLGEMMKernelType::RESHAPED_V1)) ? CLGEMMKernelType::RESHAPED : gemm_type;
+        gemm_type = ((workload > 1600.0f) && (gemm_type == CLGEMMKernelType::RESHAPED)) ? CLGEMMKernelType::RESHAPED : gemm_type;
     }
 
     return gemm_type;
@@ -179,7 +179,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::default_f16(unsigned int m, unsigned 
     }
     else
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 }
 
@@ -203,7 +203,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g76_f32(unsigned int m, unsigned int 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
     if(m == 1)
     {
@@ -260,7 +260,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g52_f32(unsigned int m, unsigned int 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     if(m == 1)
@@ -387,7 +387,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g76_f16(unsigned int m, unsigned int 
 
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     if(m == 1)
@@ -447,7 +447,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g52_f16(unsigned int m, unsigned int 
 {
     if(!is_rhs_constant)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     if(m == 1)
@@ -559,19 +559,14 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g52_f16(unsigned int m, unsigned int 
 CLGEMMKernelType CLGEMMDefaultTypeBifrost::g71_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(b);
+    ARM_COMPUTE_UNUSED(n);
+    ARM_COMPUTE_UNUSED(k);
 
     if(is_rhs_constant)
     {
         if(m == 1)
         {
-            if(n > k)
-            {
-                return CLGEMMKernelType::NATIVE_V1;
-            }
-            else
-            {
-                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-            }
+            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
         }
         else
         {
@@ -580,7 +575,7 @@ CLGEMMKernelType CLGEMMDefaultTypeBifrost::g71_f16(unsigned int m, unsigned int 
     }
     else
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 }
 } // namespace cl_gemm

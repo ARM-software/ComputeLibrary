@@ -101,7 +101,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 5, 4, 2, 1, 1, false, false, false, false);
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 1, false, false, false, false);
     }
 }
 

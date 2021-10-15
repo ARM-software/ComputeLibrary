@@ -271,16 +271,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_ma_f32", "common/gemm.cl" },
     { "gemm_mv", "common/gemv.cl" },
     { "gemm_mv_quantized", "common/gemv.cl" },
-    { "gemm_mm_interleaved_transposed_f16", "common/gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f16_acc32", "common/gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f16_bifrost", "common/gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f32", "common/gemm_v1.cl" },
-    { "gemm_mm_interleaved_transposed_f32_bifrost", "common/gemm_v1.cl" },
-    { "gemm_mm_floating_point", "common/gemm_v1.cl" },
-    { "gemm_mm_floating_point_f16_bifrost", "common/gemm_v1.cl" },
-    { "gemm_mm_floating_point_f16_bifrost_acc32", "common/gemm_v1.cl" },
-    { "gemm_mm_floating_point_f32_bifrost", "common/gemm_v1.cl" },
-    { "gemm_mm_floating_point_f32_bifrost_1000", "common/gemm_v1.cl" },
     { "gemm_mm_native", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "common/gemm.cl" },
@@ -589,10 +579,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemm.cl",
 #include "./cl_kernels/common/gemm.clembed"
-    },
-    {
-        "common/gemm_v1.cl",
-#include "./cl_kernels/common/gemm_v1.clembed"
     },
     {
         "common/gemmlowp.cl",

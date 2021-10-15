@@ -4141,6 +4141,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
 
     int i = 0;
+#if K0 > 1
     for(; i <= (K - K0); i += K0)
     {
         // Supported cases (M0, K0):
@@ -4186,7 +4187,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
         lhs_offset += K0 * sizeof(DATA_TYPE);
         rhs_offset += K0 * rhs_stride_y;
     }
-
+#endif // K0 > 1
     // Left-over accumulations
     for(; i < K; ++i)
     {
@@ -4292,10 +4293,6 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
-
-#undef RHS_BLOCK_SIZE
-#undef RHS_OFFSET_X
-#undef RHS_STEP_X
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE)
 

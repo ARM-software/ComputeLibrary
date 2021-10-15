@@ -2360,14 +2360,6 @@ inline std::string to_string(CLGEMMKernelType val)
 {
     switch(val)
     {
-        case CLGEMMKernelType::NATIVE_V1:
-        {
-            return "Native_V1";
-        }
-        case CLGEMMKernelType::RESHAPED_V1:
-        {
-            return "Reshaped_V1";
-        }
         case CLGEMMKernelType::NATIVE:
         {
             return "Native";

@@ -44,7 +44,7 @@ public:
     /** Initialise the kernel's input and dst.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src0            Input tensor for the LHS matrix. Data type supported: F32. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @param[in]  src0            Input tensor for the LHS matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in]  src1            Input tensor for the RHS matrix. Data type supported: same as @p src0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in]  src2            Input tensor containing the bias matrix. Data type supported: same as @p src0.
      * @param[out] dst             dst tensor info. Data type supported: same as @p src0

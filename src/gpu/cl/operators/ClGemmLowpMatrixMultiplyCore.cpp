@@ -239,7 +239,6 @@ void ClGemmLowpMatrixMultiplyCore::configure(const CLCompileContext &compile_con
     GEMMLHSMatrixInfo lhs_info;
 
     // Arguments used by GEMMReshapeInfo
-    // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
     // in order to know how the matrices have been reshaped
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);

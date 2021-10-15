@@ -64,27 +64,14 @@ namespace
 {
 inline bool validate_gemm_kernel(CLGEMMKernelType kernel_type)
 {
-    switch(kernel_type)
-    {
-        case CLGEMMKernelType::NATIVE_V1:
-        case CLGEMMKernelType::RESHAPED_ONLY_RHS:
-        case CLGEMMKernelType::RESHAPED_V1:
-        case CLGEMMKernelType::RESHAPED:
-        {
-            return true;
-        }
-        default:
-        {
-            return false;
-        }
-    }
+    return kernel_type == CLGEMMKernelType::NATIVE? false : true;
 }
 //Automatically select between mlgo (prioritized) and default heuristics for gemm kernel type
 inline CLGEMMKernelType auto_select_gemm_kernel(auto_heuristics::CommonQuery query, bool reshape_b_only_on_first_run, bool constant_weights)
 {
     if(!constant_weights)
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 
     auto gemm_kernel = auto_heuristics::select_mlgo_gemm_kernel(query, reshape_b_only_on_first_run);
@@ -198,97 +185,54 @@ inline std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> auto_select_gemm_config_r
 } // namespace
 
 ClGemm::ClGemm()
-    : _mm_kernel(std::make_unique<ClGemmMatrixMultiplyKernel>()),
-      _reshape_lhs_kernel(std::make_unique<ClGemmReshapeLhsMatrixKernel>()),
+    : _reshape_lhs_kernel(std::make_unique<ClGemmReshapeLhsMatrixKernel>()),
       _reshape_rhs_kernel(std::make_unique<ClGemmReshapeRhsMatrixKernel>()),
+      _mm_native_kernel(std::make_unique<ClGemmMatrixMultiplyNativeKernel>()),
       _mm_reshaped_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedKernel>()),
       _mm_reshaped_only_rhs_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedOnlyRhsKernel>()),
       _mm_reshaped_only_rhs_fallback_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedOnlyRhsKernel>()),
       _tmp_a(),
       _tmp_b(),
       _reshape_b_only_on_first_run(false),
-      _gemm_kernel_type(CLGEMMKernelType::NATIVE_V1),
+      _gemm_kernel_type(CLGEMMKernelType::NATIVE),
       _is_prepared(false),
       _aux_mem(AuxTensorIdx::Count)
 {
 }
 
-void ClGemm::configure_native_v1(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
-                                 const GEMMInfo &gemm_info)
+void ClGemm::configure_native(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
+                              const GEMMInfo &gemm_info)
 {
-    const unsigned int m          = gemm_info.reinterpret_input_as_3d() ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
-    const unsigned int n          = b->dimension(0);
-    const unsigned int k          = a->dimension(0);
-    const GPUTarget    gpu_target = CLScheduler::get().target();
+    DataType           data_type               = a->data_type();
+    bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
+    const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
+    const unsigned int n                       = b->dimension(0);
+    const unsigned int k                       = a->dimension(0);
+    const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
+    const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
+    const GPUTarget    gpu_target              = CLScheduler::get().target();
+    bool               broadcast_bias          = gemm_info.broadcast_bias();
+
+    GEMMKernelInfo kernel_info;
+    kernel_info.m                       = m;
+    kernel_info.n                       = n;
+    kernel_info.k                       = k;
+    kernel_info.depth_output_gemm3d     = depth_output_gemm3d;
+    kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
+    kernel_info.broadcast_bias          = broadcast_bias;
+    kernel_info.activation_info         = gemm_info.activation_info();
 
     // Set the target for the kernels
-    _mm_kernel->set_target(gpu_target);
+    _mm_native_kernel->set_target(gpu_target);
 
-    GEMMReshapeInfo reshape_info(m, n, k, 1, 1, gemm_info.depth_output_gemm3d(), gemm_info.reinterpret_input_as_3d(), gemm_info.broadcast_bias());
-
-    // Configure and tune matrix multiply kernel
-    _mm_kernel->configure(compile_context, a, b, c, output, alpha, beta, false, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
-
-    // Tune kernel statically
-    CLScheduler::get().tune_kernel_static(*_mm_kernel);
-}
-
-void ClGemm::configure_reshaped_v1(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
-                                   const GEMMInfo &gemm_info)
-{
-    bool               reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
-    const unsigned int m                         = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
-    const unsigned int n                         = b->dimension(0);
-    const unsigned int k                         = a->dimension(0);
-    const int          depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
-    const GPUTarget    gpu_target                = CLScheduler::get().target();
-    int                mult_transpose1xW_width   = 1;
-    int                mult_interleave4x4_height = 1;
-
-    // Set the target for the kernels
-    _reshape_lhs_kernel->set_target(gpu_target);
-    _mm_kernel->set_target(gpu_target);
-
-    if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
-    {
-        mult_transpose1xW_width   = 4;
-        mult_interleave4x4_height = 2;
-    }
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = 16 / b->element_size();
-    rhs_info.k0         = 1;
-    rhs_info.h0         = mult_transpose1xW_width;
-    rhs_info.interleave = false;
-    rhs_info.transpose  = false;
-
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = 4;
-    lhs_info.k0         = 4;
-    lhs_info.v0         = mult_interleave4x4_height;
-    lhs_info.interleave = true;
-    lhs_info.transpose  = true;
-
-    GEMMReshapeInfo reshape_info(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d, false, gemm_info.broadcast_bias());
-
-    // Configure interleave kernel
-    _reshape_lhs_kernel->configure(compile_context, a, &_tmp_a, lhs_info, reinterpret_input_as_3d);
-
-    // Configure transpose kernel
-    _reshape_rhs_kernel->configure(compile_context, b, &_tmp_b, rhs_info);
+    auto config = auto_heuristics::select_mlgo_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, data_type, m, n, k, batch_size });
 
     // Configure and tune matrix multiply kernel
-    _mm_kernel->configure(compile_context, &_tmp_a, &_tmp_b, c, output, alpha, beta, true, reshape_info, gemm_info.fp_mixed_precision(), gemm_info.activation_info());
-
-    CLScheduler::get().tune_kernel_static(*_mm_kernel);
-
-    // Request memory for LHS and RHS reshape matrix
-    _aux_mem[LhsReshape] = MemoryInfo(offset_int_vec(LhsReshape), MemoryLifetime::Temporary, _tmp_a.total_size());
-    _aux_mem[RhsReshape] = MemoryInfo(offset_int_vec(RhsReshape), _reshape_b_only_on_first_run ? MemoryLifetime::Persistent : MemoryLifetime::Temporary, _tmp_b.total_size());
+    _mm_native_kernel->configure(compile_context, a, b, c, output, alpha, beta, config.lhs_info, config.rhs_info, kernel_info);
 }
 
-void ClGemm::configure_reshaped_v2(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
-                                   const GEMMInfo &gemm_info)
+void ClGemm::configure_reshaped(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
+                                const GEMMInfo &gemm_info)
 {
     DataType           data_type               = a->data_type();
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
@@ -311,7 +255,7 @@ void ClGemm::configure_reshaped_v2(const CLCompileContext &compile_context, ITen
 
     // Set the target for the kernels
     _reshape_lhs_kernel->set_target(gpu_target);
-    _mm_kernel->set_target(gpu_target);
+    _mm_reshaped_kernel->set_target(gpu_target);
 
     GEMMLHSMatrixInfo lhs_info{};
     GEMMRHSMatrixInfo rhs_info{};
@@ -354,7 +298,8 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     kernel_info.activation_info         = gemm_info.activation_info();
 
     // Set the target for the kernels
-    _mm_kernel->set_target(gpu_target);
+    _mm_reshaped_only_rhs_kernel->set_target(gpu_target);
+    _mm_reshaped_only_rhs_fallback_kernel->set_target(gpu_target);
 
     GEMMLHSMatrixInfo lhs_info{};
     GEMMRHSMatrixInfo rhs_info{};
@@ -381,78 +326,35 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     _aux_mem[RhsReshape] = MemoryInfo(offset_int_vec(RhsReshape), _reshape_b_only_on_first_run ? MemoryLifetime::Persistent : MemoryLifetime::Temporary, _tmp_b.total_size());
 }
 
-Status ClGemm::validate_native_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
+Status ClGemm::validate_native(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_UNUSED(output);
 
     // Get the GPU target
     const GPUTarget    gpu_target              = CLScheduler::get().target();
+    DataType           data_type               = a->data_type();
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
     const unsigned int n                       = b->dimension(0);
     const unsigned int k                       = a->dimension(0);
+    const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
     const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
+    const bool         broadcast_bias          = gemm_info.broadcast_bias();
 
-    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d, gemm_info.broadcast_bias());
+    GEMMKernelInfo kernel_info;
+    kernel_info.m                       = m;
+    kernel_info.n                       = n;
+    kernel_info.k                       = k;
+    kernel_info.depth_output_gemm3d     = depth_output_gemm3d;
+    kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
+    kernel_info.broadcast_bias          = broadcast_bias;
+    kernel_info.activation_info         = gemm_info.activation_info();
 
-    // Validate matrix multiply
-    ARM_COMPUTE_RETURN_ON_ERROR(ClGemmMatrixMultiplyKernel::validate(a, b, c, output, alpha, beta,
-                                                                     false, reshape_info, gpu_target, gemm_info.fp_mixed_precision(), gemm_info.activation_info()));
-
-    return Status{};
-}
-
-Status ClGemm::validate_reshaped_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
-{
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(output);
-
-    TensorInfo tmp_a_info{};
-    TensorInfo tmp_b_info{};
-
-    // Get the GPU target
-    const GPUTarget    gpu_target                = CLScheduler::get().target();
-    const unsigned int m                         = gemm_info.reinterpret_input_as_3d() ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
-    const unsigned int n                         = b->dimension(0);
-    const unsigned int k                         = a->dimension(0);
-    int                mult_transpose1xW_width   = 1;
-    int                mult_interleave4x4_height = 1;
-    const int          depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
-
-    if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
-    {
-        mult_transpose1xW_width   = 4;
-        mult_interleave4x4_height = 2;
-    }
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = 16 / b->element_size();
-    rhs_info.k0         = 1;
-    rhs_info.h0         = mult_transpose1xW_width;
-    rhs_info.interleave = false;
-    rhs_info.transpose  = false;
-
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = 4;
-    lhs_info.k0         = 4;
-    lhs_info.v0         = mult_interleave4x4_height;
-    lhs_info.interleave = true;
-    lhs_info.transpose  = true;
-
-    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d, false, gemm_info.broadcast_bias());
-
-    // Validate interleave kernel
-    auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_lhs_reshaped_shape(*a, lhs_info, gemm_info.reinterpret_input_as_3d())));
-    ARM_COMPUTE_RETURN_ON_ERROR(ClGemmReshapeLhsMatrixKernel::validate(a, &tmp_a_info, lhs_info, gemm_info.reinterpret_input_as_3d()));
-
-    // Validate transpose kernel
-    auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*b, rhs_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR(ClGemmReshapeRhsMatrixKernel::validate(b, &tmp_b_info, rhs_info));
+    auto config = auto_heuristics::select_mlgo_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, data_type, m, n, k, batch_size });
 
     // Validate matrix multiply
-    ARM_COMPUTE_RETURN_ON_ERROR(ClGemmMatrixMultiplyKernel::validate(&tmp_a_info, &tmp_b_info, c, output, alpha, beta,
-                                                                     true, reshape_info, gpu_target, gemm_info.fp_mixed_precision(), gemm_info.activation_info()));
+    ARM_COMPUTE_RETURN_ON_ERROR(ClGemmMatrixMultiplyNativeKernel::validate(a, b, c, output, alpha, beta, config.lhs_info, config.rhs_info, kernel_info));
 
     return Status{};
 }
@@ -583,19 +485,14 @@ void ClGemm::configure(const CLCompileContext &compile_context, ITensorInfo *a, 
 
     switch(_gemm_kernel_type)
     {
-        case CLGEMMKernelType::NATIVE_V1:
+        case CLGEMMKernelType::NATIVE:
         {
-            configure_native_v1(compile_context, a, b, c_to_use, output, alpha, beta, gemm_info);
-            break;
-        }
-        case CLGEMMKernelType::RESHAPED_V1:
-        {
-            configure_reshaped_v1(compile_context, a, b, c_to_use, output, alpha, beta, gemm_info);
+            configure_native(compile_context, a, b, c_to_use, output, alpha, beta, gemm_info);
             break;
         }
         case CLGEMMKernelType::RESHAPED:
         {
-            configure_reshaped_v2(compile_context, a, b, c_to_use, output, alpha, beta, gemm_info);
+            configure_reshaped(compile_context, a, b, c_to_use, output, alpha, beta, gemm_info);
             break;
         }
         case CLGEMMKernelType::RESHAPED_ONLY_RHS:
@@ -632,14 +529,9 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     switch(gemm_kernel_type)
     {
-        case CLGEMMKernelType::NATIVE_V1:
+        case CLGEMMKernelType::NATIVE:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(validate_native_v1(a, b, c_to_use, output, alpha, beta, gemm_info));
-            break;
-        }
-        case CLGEMMKernelType::RESHAPED_V1:
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(validate_reshaped_v1(a, b, c_to_use, output, alpha, beta, gemm_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(validate_native(a, b, c_to_use, output, alpha, beta, gemm_info));
             break;
         }
         case CLGEMMKernelType::RESHAPED:
@@ -679,12 +571,11 @@ void ClGemm::run(ITensorPack &tensors)
     // Run matrix multiply kernel
     switch(_gemm_kernel_type)
     {
-        case CLGEMMKernelType::NATIVE_V1:
+        case CLGEMMKernelType::NATIVE:
         {
-            CLScheduler::get().enqueue_op(*_mm_kernel, tensors, true);
+            CLScheduler::get().enqueue_op(*_mm_native_kernel, tensors, true);
             break;
         }
-        case CLGEMMKernelType::RESHAPED_V1:
         case CLGEMMKernelType::RESHAPED:
         {
             // Run interleave kernel
@@ -703,10 +594,6 @@ void ClGemm::run(ITensorPack &tensors)
             if(_gemm_kernel_type == CLGEMMKernelType::RESHAPED)
             {
                 CLScheduler::get().enqueue_op(*_mm_reshaped_kernel, gemm_reshaped_pack, true);
-            }
-            else
-            {
-                CLScheduler::get().enqueue_op(*_mm_kernel, gemm_reshaped_pack, true);
             }
             break;
         }

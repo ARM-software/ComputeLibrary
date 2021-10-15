@@ -30,18 +30,8 @@ namespace arm_compute
 /** OpenCL GEMM kernel types */
 enum class CLGEMMKernelType
 {
-    /** Native GEMM kernel with fixed block size.
-     * @note Temporary variant to keep compatibility with the old implementation.
-     * @note This variant will be deprecated in favor of a new and configurable NATIVE variant
-     */
-    NATIVE_V1,
     /** Native GEMM kernel with configurable block size.*/
     NATIVE,
-    /** Reshaped GEMM kernel where both lhs and rhs matrices are reshaped. Fixed block size fixed.
-     * @note Temporary variant to keep compatibility with the old implementation.
-     * @note This variant will be deprecated in favor of RESHAPED
-     */
-    RESHAPED_V1,
     /** Reshaped GEMM kernel where both lhs and rhs matrices are reshaped. Configurable reshape and block size */
     RESHAPED,
     /** Reshaped GEMM kernel where only the rhs matrix is reshaped. Configurable reshape and block size */
