@@ -711,17 +711,6 @@ public:
     }
 };
 
-float vreduce(const float32x4_t &v)
-{
-    auto v0    = wrapper::vgethigh(v);
-    auto v1    = wrapper::vgetlow(v);
-    auto v_out = wrapper::vadd(v0, v1);
-
-    float a = wrapper::vgetlane(v_out, 0);
-    float b = wrapper::vgetlane(v_out, 1);
-    return a + b;
-}
-
 template <typename T1, typename T2>
 inline void convolve_1x1(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
                          const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)

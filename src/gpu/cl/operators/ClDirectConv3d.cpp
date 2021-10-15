@@ -30,19 +30,19 @@ namespace arm_compute
 {
 namespace opencl
 {
-void ClDirectConv3d::configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+void ClDirectConv3d::configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo &conv3d_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0);
 
     // Configure direct convolution 3d kernel
     auto k = std::make_unique<kernels::ClDirectConv3dKernel>();
-    k->configure(compile_context, src, weights, biases, dst, conv3d_info);
+    k->configure(compile_context, src0, src1, src2, dst, conv3d_info);
     _direct_conv3d_kernel = std::move(k);
 }
 
-Status ClDirectConv3d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status ClDirectConv3d::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv3dKernel::validate(src, weights, biases, dst, conv3d_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv3dKernel::validate(src0, src1, src2, dst, conv3d_info));
     return Status{};
 }
 

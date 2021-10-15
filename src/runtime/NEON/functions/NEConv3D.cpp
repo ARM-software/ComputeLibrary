@@ -27,7 +27,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "src/common/utils/Log.h"
-#include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuDirectConv3d.h"
 
 namespace arm_compute
@@ -58,7 +57,7 @@ void NEConv3D::configure(ITensor *input, const ITensor *weights, const ITensor *
     f->configure(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info);
     _impl->op = std::move(f);
 
-    if(_impl->op)
+    if(_impl->op != nullptr)
     {
         _impl->run_pack = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
     }
@@ -73,7 +72,7 @@ Status NEConv3D::validate(const ITensorInfo *input, const ITensorInfo *weights, 
 
 void NEConv3D::run()
 {
-    if(_impl->op)
+    if(_impl->op != nullptr)
     {
         _impl->op->run(_impl->run_pack);
     }

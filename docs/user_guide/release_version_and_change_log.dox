@@ -40,6 +40,14 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v21.11 Public major release
+ - Various bug fixes.
+ - Various optimizations.
+ - New OpenCL kernels / functions:
+   - @ref CLConv3D
+ - New Arm® Neon™ kernels / functions:
+   - @ref NEConv3D
+
 v21.08 Public major release
  - Various bug fixes.
  - Various optimizations:

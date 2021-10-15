@@ -37,36 +37,36 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
 {
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, weights, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(src0, src1, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv3d_info.act_info.enabled(), "Fused activation not supported");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src0);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(1) != src->dimension(0), "Weights feature map dimension should match the respective src's one");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 5, "Weights can be at most 5 dimensional");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->dimension(1) != src0->dimension(0), "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 5, "Weights can be at most 5 dimensional");
 
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) > (src->dimension(1) + conv3d_info.padding.left + conv3d_info.padding.right));
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(3) > (src->dimension(2) + conv3d_info.padding.top + conv3d_info.padding.bottom));
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(4) > (src->dimension(3) + conv3d_info.padding.front + conv3d_info.padding.back));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(2) > (src0->dimension(1) + conv3d_info.padding.left + conv3d_info.padding.right));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(3) > (src0->dimension(2) + conv3d_info.padding.top + conv3d_info.padding.bottom));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(4) > (src0->dimension(3) + conv3d_info.padding.front + conv3d_info.padding.back));
 
-    if(biases != nullptr)
+    if(src2 != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->dimension(0) != weights->dimension(0), "Biases size and number of dst feature maps should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1, "Biases should be one dimensional");
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->dimension(0) != src1->dimension(0), "Biases size and number of dst feature maps should match");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
     // Checks performed when dst is configured
     if(dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != weights->dimension(0), "Weights and dst OFMs should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), misc::shape_calculator::compute_conv3d_shape(src->tensor_shape(), weights->tensor_shape(), conv3d_info));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src1->dimension(0), "Weights and dst OFMs should match");
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), misc::shape_calculator::compute_conv3d_shape(src0->tensor_shape(), src1->tensor_shape(), conv3d_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
     }
 
     return Status{};
@@ -78,27 +78,27 @@ ClDirectConv3dKernel::ClDirectConv3dKernel()
     _type = CLKernelType::DIRECT;
 }
 
-void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst,
+void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst,
                                      const Conv3dInfo &conv3d_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
     // Perform validation
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, dst, conv3d_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, conv3d_info));
 
     // Create window and update padding
-    const DataType data_type      = src->data_type();
-    const size_t   src_width      = src->dimension(1);
-    const size_t   src_height     = src->dimension(2);
-    const size_t   src_depth      = src->dimension(3);
-    const size_t   src_channels   = src->dimension(0);
+    const DataType data_type      = src0->data_type();
+    const size_t   src_width      = src0->dimension(1);
+    const size_t   src_height     = src0->dimension(2);
+    const size_t   src_depth      = src0->dimension(3);
+    const size_t   src_channels   = src0->dimension(0);
     const size_t   dst_width      = dst->dimension(1);
     const size_t   dst_height     = dst->dimension(2);
     const size_t   dst_depth      = dst->dimension(3);
     const size_t   dst_channels   = dst->dimension(0);
-    const size_t   weights_width  = weights->dimension(2);
-    const size_t   weights_height = weights->dimension(3);
-    const size_t   weights_depth  = weights->dimension(4);
+    const size_t   weights_width  = src1->dimension(2);
+    const size_t   weights_height = src1->dimension(3);
+    const size_t   weights_depth  = src1->dimension(4);
     const size_t   pad_left       = conv3d_info.padding.left;
     const size_t   pad_top        = conv3d_info.padding.top;
     const size_t   pad_front      = conv3d_info.padding.front;
@@ -108,7 +108,7 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
 
     const size_t n0               = std::min(dst->dimension(0), static_cast<size_t>(4u));
     const size_t m0               = (dst->tensor_shape()[0] > 16) ? ((data_type == DataType::F32) ? 2U : 4U) : 1U;
-    const size_t k0               = adjust_vec_size(8u, src->dimension(0));
+    const size_t k0               = adjust_vec_size(8u, src0->dimension(0));
     const size_t partial_store_n0 = dst->dimension(0) % n0;
 
     CLBuildOptions build_options;
@@ -136,7 +136,7 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     build_options.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
     build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
-    build_options.add_option_if(biases != nullptr, std::string("-DHAS_BIAS"));
+    build_options.add_option_if(src2 != nullptr, std::string("-DHAS_BIAS"));
 
     std::string kernel_name = "direct_convolution3d_ndhwc";
     _kernel                 = create_kernel(compile_context, kernel_name, build_options.options());
@@ -169,9 +169,9 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     _config_id += support::cpp11::to_string(dst_channels);
 }
 
-Status ClDirectConv3dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status ClDirectConv3dKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv3d_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, src2, dst, conv3d_info));
     return Status{};
 }
 

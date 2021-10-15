@@ -61,21 +61,21 @@ public:
      * |F32            |F32            |F32    |F32            |
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             Source tensor. 4 lower dimensions represent a single src [IFM, width, height, depth],
+     * @param[in]  src0            Source tensor. 4 lower dimensions represent a single src [IFM, width, height, depth],
      *                             while every optional dimension from 5 and above represent a batch of srcs.
-     * @param[in]  weights         Weights tensor. Weights are 5D tensor with dimensions [OFM, IFM, kernel_w, kernel_h, kernel_d].
-     * @param[in]  biases          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     * @param[in]  src1            Weights tensor. Weights are 5D tensor with dimensions [OFM, IFM, kernel_w, kernel_h, kernel_d].
+     * @param[in]  src2            Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      * @param[out] dst             Destination tensor. 4 lower dimensions represent a single dst [OFM, width, height, depth], while the rest represent batch of dsts.
      * @param[in]  conv3d_info     Contains strides, padding, rounding, activation, dilation and fast math information. Activation and fast math are currently unused.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo &conv3d_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClDirectConv3dKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

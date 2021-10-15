@@ -52,9 +52,10 @@ Compute Library supports the following data layouts (fast changing dimension fro
   <ul>
     <li>NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
     <li>NCHW: Legacy layout where width is in the fastest changing dimension
+    <li>NDHWC: New data layout for supporting 3D operators
     <li>All: Agnostic to any specific data layout
   </ul>
-where N = batches, C = channels, H = height, W = width
+where N = batches, C = channels, H = height, W = width, D = depth
 
 <table>
 <caption id="multi_row"></caption>
