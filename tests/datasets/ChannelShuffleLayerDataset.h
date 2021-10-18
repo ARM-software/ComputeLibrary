@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,7 @@ class SmallRandomChannelShuffleLayerDataset final : public ChannelShuffleLayerDa
 public:
     SmallRandomChannelShuffleLayerDataset()
     {
+        add_config(TensorShape(1U, 1U, 605U, 16U), 5);
         add_config(TensorShape(15U, 16U, 4U, 12U), 2);
         add_config(TensorShape(21U, 11U, 12U, 7U), 4);
         add_config(TensorShape(21U, 11U, 12U, 7U), 6);
