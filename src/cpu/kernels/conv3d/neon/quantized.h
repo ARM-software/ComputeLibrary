@@ -21,22 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
-#define SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
+#ifndef SRC_CORE_NEON_KERNELS_CONV3D_QUANTIZED_H
+#define SRC_CORE_NEON_KERNELS_CONV3D_QUANTIZED_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/cpu/kernels/conv3d/neon/quantized.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
 template <typename T>
-void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, const ITensor *src2, ITensor *dst, const Conv3dInfo &conv_info, const Window &window)
+void directconv3d_quantized_neon_ndhwc(const ITensor *src0, const ITensor *src1, const ITensor *src2, ITensor *dst, const Conv3dInfo &conv_info, const Window &window)
 {
     const ITensor *src     = src0;
     const ITensor *weights = src1;
@@ -46,6 +47,21 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
     using vector_type                          = typename vtype::type;
     using tag_type                             = typename vtype::tag_type;
     constexpr int num_elems_read_per_iteration = 16 / sizeof(T);
+    using q16_t                                = typename wrapper::traits::promote_t<T>;
+    using q32_t                                = typename wrapper::traits::promote_t<q16_t>;
+    using q32x4_t                              = typename wrapper::traits::neon_vector<q32_t, 4>::type;
+
+    const int32_t input_offset   = -src->info()->quantization_info().uniform().offset;
+    const float   input_scale    = src->info()->quantization_info().uniform().scale;
+    const int32_t weights_offset = -weights->info()->quantization_info().uniform().offset;
+    const float   weights_scale  = weights->info()->quantization_info().uniform().scale;
+    const int32_t output_offset  = dst->info()->quantization_info().uniform().offset;
+    const float   output_scale   = dst->info()->quantization_info().uniform().scale;
+
+    int32_t     output_multiplier = 0;
+    int32_t     output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
+    arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     // Scalar quantities (N D H W Cin)
     const int element_size   = src->info()->element_size();
@@ -87,10 +103,10 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
     Iterator out(dst, window_out);
     Iterator wei(weights, window_w);
 
-    const T *biases_ptr = nullptr;
+    const int32_t *biases_ptr = nullptr;
     if(biases != nullptr)
     {
-        biases_ptr = reinterpret_cast<T *>(biases->buffer() + biases->info()->offset_first_element_in_bytes());
+        biases_ptr = reinterpret_cast<int32_t *>(biases->buffer() + biases->info()->offset_first_element_in_bytes());
     }
     execute_window_loop(window_out, [&](const Coordinates & id)
     {
@@ -128,7 +144,7 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
             * This is the loop in the weights, and it goes along OFM (output feature map)
             */
             const auto weights_ptr_start = reinterpret_cast<const T *>(wei.ptr());
-            T          out_temp          = static_cast<T>(0);
+            int32_t    acc               = static_cast<int32_t>(0);
             T         *out_ptr           = reinterpret_cast<T *>(out.ptr());
             for(int index_wei_d = wei_d_start, index_in_d = in_d_start; index_wei_d < wei_d_end; ++index_wei_d, ++index_in_d)
             {
@@ -143,8 +159,13 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
                         const T    *in_ptr_mover      = in_ptr_row + index_in_w * input_stride_w;
                         const T    *weights_ptr_mover = weights_ptr_row + index_wei_w * kernel_stride_w;
                         int         index_c_in        = 0;
-                        vector_type out_temp_vec      = wrapper::vdup_n(static_cast<T>(0), tag_type());
                         vector_type w_vec             = wrapper::vdup_n(static_cast<T>(0), tag_type());
+
+                        q32x4_t acc_q32_0 = wrapper::vdup_n(static_cast<q32_t>(0), tag_type());
+                        q32x4_t acc_q32_1 = wrapper::vdup_n(static_cast<q32_t>(0), tag_type());
+                        q32x4_t acc_q32_2 = wrapper::vdup_n(static_cast<q32_t>(0), tag_type());
+                        q32x4_t acc_q32_3 = wrapper::vdup_n(static_cast<q32_t>(0), tag_type());
+
                         for(; index_c_in <= index_c_in_end - num_elems_read_per_iteration;
                             index_c_in += num_elems_read_per_iteration, in_ptr_mover += num_elems_read_per_iteration)
                         {
@@ -154,25 +175,82 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
                             {
                                 w_vec = wrapper::vsetlane(*weights_ptr_mover, w_vec, k);
                             }
-                            out_temp_vec = wrapper::vmla(out_temp_vec, w_vec, src_vec);
+                            q32x4_t src_q32_0 = wrapper::vdup_n(static_cast<q32_t>(input_offset), tag_type());
+                            q32x4_t src_q32_1 = wrapper::vdup_n(static_cast<q32_t>(input_offset), tag_type());
+                            q32x4_t src_q32_2 = wrapper::vdup_n(static_cast<q32_t>(input_offset), tag_type());
+                            q32x4_t src_q32_3 = wrapper::vdup_n(static_cast<q32_t>(input_offset), tag_type());
+
+                            q32x4_t wei_q32_0 = wrapper::vdup_n(static_cast<q32_t>(weights_offset), tag_type());
+                            q32x4_t wei_q32_1 = wrapper::vdup_n(static_cast<q32_t>(weights_offset), tag_type());
+                            q32x4_t wei_q32_2 = wrapper::vdup_n(static_cast<q32_t>(weights_offset), tag_type());
+                            q32x4_t wei_q32_3 = wrapper::vdup_n(static_cast<q32_t>(weights_offset), tag_type());
+
+                            const auto src_q16_0 = wrapper::vmovl(wrapper::vgetlow(src_vec));
+                            const auto src_q16_1 = wrapper::vmovl(wrapper::vgetlow(src_vec));
+                            const auto wei_q16_0 = wrapper::vmovl(wrapper::vgetlow(w_vec));
+                            const auto wei_q16_1 = wrapper::vmovl(wrapper::vgetlow(w_vec));
+
+                            src_q32_0 = wrapper::vadd(src_q32_0, wrapper::vmovl(wrapper::vgetlow(src_q16_0)));
+                            src_q32_1 = wrapper::vadd(src_q32_1, wrapper::vmovl(wrapper::vgetlow(src_q16_0)));
+                            src_q32_2 = wrapper::vadd(src_q32_2, wrapper::vmovl(wrapper::vgethigh(src_q16_1)));
+                            src_q32_3 = wrapper::vadd(src_q32_3, wrapper::vmovl(wrapper::vgethigh(src_q16_1)));
+
+                            wei_q32_0 = wrapper::vadd(wei_q32_0, wrapper::vmovl(wrapper::vgetlow(wei_q16_0)));
+                            wei_q32_1 = wrapper::vadd(wei_q32_1, wrapper::vmovl(wrapper::vgetlow(wei_q16_0)));
+                            wei_q32_2 = wrapper::vadd(wei_q32_2, wrapper::vmovl(wrapper::vgethigh(wei_q16_1)));
+                            wei_q32_3 = wrapper::vadd(wei_q32_3, wrapper::vmovl(wrapper::vgethigh(wei_q16_1)));
+
+                            acc_q32_0 = wrapper::vmla(acc_q32_0, wei_q32_0, src_q32_0);
+                            acc_q32_1 = wrapper::vmla(acc_q32_1, wei_q32_1, src_q32_1);
+                            acc_q32_2 = wrapper::vmla(acc_q32_2, wei_q32_2, src_q32_2);
+                            acc_q32_3 = wrapper::vmla(acc_q32_3, wei_q32_3, src_q32_3);
                         }
-                        out_temp += vreduce(out_temp_vec);
+#if defined(__aarch64__)
+                        acc += wrapper::vaddv(acc_q32_0);
+                        acc += wrapper::vaddv(acc_q32_1);
+                        acc += wrapper::vaddv(acc_q32_2);
+                        acc += wrapper::vaddv(acc_q32_3);
+#else // __aarch64__
+                        auto temp = wrapper::vpadd(wrapper::vgethigh(acc_q32_0), wrapper::vgetlow(acc_q32_0));
+                        temp      = wrapper::vpadd(temp, temp);
+                        acc       += wrapper::vgetlane(temp, 0);
+
+                        temp      = wrapper::vpadd(wrapper::vgethigh(acc_q32_1), wrapper::vgetlow(acc_q32_1));
+                        temp      = wrapper::vpadd(temp, temp);
+                        acc       += wrapper::vgetlane(temp, 0);
+
+                        temp      = wrapper::vpadd(wrapper::vgethigh(acc_q32_2), wrapper::vgetlow(acc_q32_2));
+                        temp      = wrapper::vpadd(temp, temp);
+                        acc       += wrapper::vgetlane(temp, 0);
+
+                        temp      = wrapper::vpadd(wrapper::vgethigh(acc_q32_3), wrapper::vgetlow(acc_q32_3));
+                        temp      = wrapper::vpadd(temp, temp);
+                        acc       += wrapper::vgetlane(temp, 0);
+
+#endif // __aarch64__
+
                         for(; index_c_in < index_c_in_end; ++index_c_in, ++in_ptr_mover, weights_ptr_mover += index_c_out_end)
                         {
-                            const auto src_val = *(in_ptr_mover);
-                            const auto w_val   = *(weights_ptr_mover);
-                            out_temp += src_val * w_val;
+                            const auto src_val = *(in_ptr_mover) + input_offset;
+                            const auto w_val   = *(weights_ptr_mover) + weights_offset;
+                            acc += src_val * w_val;
                         }
                     }
                 }
             }
-            *(reinterpret_cast<T *>(out_ptr + id_w[0])) = (biases_ptr != nullptr) ? out_temp + biases_ptr[id_w[0]] : out_temp;
+
+            if(biases)
+            {
+                acc += *reinterpret_cast<const int32_t *>(biases_ptr + id_w[0]);
+            }
+
+            T out_val                                   = finalize_quantization(acc, output_multiplier, output_shift, output_offset, T(0), T(0), false);
+            *(reinterpret_cast<T *>(out_ptr + id_w[0])) = out_val;
         },
         wei);
     },
     out);
 }
-
 } // namespace cpu
 } // namespace arm_compute
-#endif // SRC_CORE_NEON_KERNELS_CONV3D_LIST_H
+#endif // SRC_CORE_NEON_KERNELS_CONV3D_QUANTIZED_H

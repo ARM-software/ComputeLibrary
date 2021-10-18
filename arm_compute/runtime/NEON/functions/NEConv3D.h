@@ -66,6 +66,8 @@ public:
      * |:--------------|:------------------|:------|:--------------|
      * |F16            |F16                |F16    |F16            |
      * |F32            |F32                |F32    |F32            |
+     * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  input     Source tensor. 4 lower dimensions represent a single input [IFM, width, height, depth],
      *                       while every optional dimension from 5 and above represent a batch of inputs.
