@@ -50,17 +50,6 @@ constexpr float                           tolerance_num = 0.07f;                
 #endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);                           /**< Tolerance for floating point tests */
 
-/* The following tests are from real use-case that made DirectConvolution
- * overflows in terms of its tensor indexing. This test case is using
- * a separate tolerance due to the following reason.
- * - It has shown that it requires generally larger absolute tolerance
- *   for large numbers or larger relative tolerance for small numbers.
- * - With the first reason, since it is mainly testing index overflow,
- *   a value with a margin is used to avoid uninteded test failures
- *   during nightly.
- */
-constexpr AbsoluteTolerance<float> usecase_tolerance_fp32(0.05f);
-
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
