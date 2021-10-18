@@ -92,6 +92,7 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         case ConvolutionMethod::WINOGRAD:
         {
             ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
+            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
             auto f = std::make_unique<ClWinogradConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info, conv2d_info.enable_fast_math);
             _operator = std::move(f);
@@ -100,6 +101,7 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         case ConvolutionMethod::DIRECT:
         {
             ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
+            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
             auto f = std::make_unique<ClDirectConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info);
             _operator = std::move(f);
@@ -133,6 +135,7 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             //Validate Winograd
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClWinogradConv2d is not supported");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClWinogradConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClWinogradConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info, conv2d_info.enable_fast_math));
             break;
         }
@@ -140,6 +143,7 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             // Validate direct convolution layer
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClDirectConv2d is not supported");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClDirectConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClDirectConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info));
             break;
         }

@@ -363,18 +363,18 @@ inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm_info)
 {
-    os << "( m= " << gemm_info.m;
-    os << " n= " << gemm_info.n;
-    os << " k= " << gemm_info.k;
-    os << " depth_output_gemm3d= " << gemm_info.depth_output_gemm3d;
-    os << " reinterpret_input_as_3d= " << gemm_info.reinterpret_input_as_3d;
-    os << " broadcast_bias= " << gemm_info.broadcast_bias;
-    os << " fp_mixed_precision= " << gemm_info.fp_mixed_precision;
-    os << " mult_transpose1xW_width= " << gemm_info.mult_transpose1xW_width;
-    os << " mult_interleave4x4_height= " << gemm_info.mult_interleave4x4_height;
-    os << " a_offset= " << gemm_info.a_offset;
-    os << " b_offset= " << gemm_info.b_offset;
-    os << "post_ops= " << gemm_info.post_ops;
+    os << "( m=" << gemm_info.m;
+    os << " n=" << gemm_info.n;
+    os << " k=" << gemm_info.k;
+    os << " depth_output_gemm3d=" << gemm_info.depth_output_gemm3d;
+    os << " reinterpret_input_as_3d=" << gemm_info.reinterpret_input_as_3d;
+    os << " broadcast_bias=" << gemm_info.broadcast_bias;
+    os << " fp_mixed_precision=" << gemm_info.fp_mixed_precision;
+    os << " mult_transpose1xW_width=" << gemm_info.mult_transpose1xW_width;
+    os << " mult_interleave4x4_height=" << gemm_info.mult_interleave4x4_height;
+    os << " a_offset=" << gemm_info.a_offset;
+    os << " b_offset=" << gemm_info.b_offset;
+    os << "post_ops=" << gemm_info.post_ops;
     os << ")";
     return os;
 }
@@ -388,7 +388,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &gemm_info)
 {
-    os << "( m0= " << (unsigned int)gemm_info.m0 << " k0= " << gemm_info.k0 << "  v0= " << gemm_info.v0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    os << "( m0=" << (unsigned int)gemm_info.m0 << " k0=" << gemm_info.k0 << "  v0=" << gemm_info.v0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << "})";
     return os;
 }
 
@@ -401,7 +401,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0= " << (unsigned int)gemm_info.n0 << " k0= " << gemm_info.k0 << "  h0= " << gemm_info.h0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << " exp_img=" <<
+    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" <<
        gemm_info.export_to_cl_image << "})";
     return os;
 }
@@ -455,7 +455,7 @@ inline std::string to_string(const GEMMKernelInfo &gemm_info)
 inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
 {
     auto weights = bbox_info.weights();
-    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights = {" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
        "})";
     return os;
 }
@@ -1495,6 +1495,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
     os << "broadcast_bias=" << info.broadcast_bias() << ",";
     os << "pretranspose_B=" << info.pretranspose_B() << ",";
+    os << "post_ops=" << info.post_ops() << "}";
 
     return os;
 }
@@ -2540,10 +2541,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const CLTunerMode &val)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionInfo &conv_info)
 {
-    os << "{PadStrideInfo = " << conv_info.pad_stride_info << ", "
-       << "depth_multiplier = " << conv_info.depth_multiplier << ", "
-       << "act_info = " << to_string(conv_info.act_info) << ", "
-       << "dilation = " << conv_info.dilation << "}";
+    os << "{PadStrideInfo=" << conv_info.pad_stride_info << ", "
+       << "depth_multiplier=" << conv_info.depth_multiplier << ", "
+       << "act_info=" << to_string(conv_info.act_info) << ", "
+       << "dilation=" << conv_info.dilation << "}";
     return os;
 }
 
@@ -2569,13 +2570,13 @@ inline std::string to_string(const ConvolutionInfo &info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FullyConnectedLayerInfo &layer_info)
 {
-    os << "{activation_info = " << to_string(layer_info.activation_info) << ", "
-       << "weights_trained_layout = " << layer_info.weights_trained_layout << ", "
-       << "transpose_weights = " << layer_info.transpose_weights << ", "
-       << "are_weights_reshaped = " << layer_info.are_weights_reshaped << ", "
-       << "retain_internal_weights = " << layer_info.retain_internal_weights << ", "
-       << "constant_weights = " << layer_info.transpose_weights << ", "
-       << "fp_mixed_precision = " << layer_info.fp_mixed_precision << "}";
+    os << "{activation_info=" << to_string(layer_info.activation_info) << ", "
+       << "weights_trained_layout=" << layer_info.weights_trained_layout << ", "
+       << "transpose_weights=" << layer_info.transpose_weights << ", "
+       << "are_weights_reshaped=" << layer_info.are_weights_reshaped << ", "
+       << "retain_internal_weights=" << layer_info.retain_internal_weights << ", "
+       << "constant_weights=" << layer_info.transpose_weights << ", "
+       << "fp_mixed_precision=" << layer_info.fp_mixed_precision << "}";
     return os;
 }
 
@@ -2643,17 +2644,17 @@ inline std::string to_string(const GEMMLowpOutputStageType &gemm_type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageInfo &gemm_info)
 {
-    os << "{type = " << gemm_info.type << ", "
-       << "gemlowp_offset = " << gemm_info.gemmlowp_offset << ", "
-       << "gemmlowp_multiplier" << gemm_info.gemmlowp_multiplier << ", "
-       << "gemmlowp_shift = " << gemm_info.gemmlowp_shift << ", "
-       << "gemmlowp_min_bound = " << gemm_info.gemmlowp_min_bound << ", "
-       << "gemmlowp_max_bound = " << gemm_info.gemmlowp_max_bound << ", "
-       << "gemmlowp_multipliers = " << gemm_info.gemmlowp_multiplier << ", "
-       << "gemmlowp_shifts = " << gemm_info.gemmlowp_shift << ", "
-       << "gemmlowp_real_multiplier = " << gemm_info.gemmlowp_real_multiplier << ", "
-       << "is_quantized_per_channel = " << gemm_info.is_quantized_per_channel << ", "
-       << "output_data_type = " << gemm_info.output_data_type << "}";
+    os << "{type=" << gemm_info.type << ", "
+       << "gemlowp_offset=" << gemm_info.gemmlowp_offset << ", "
+       << "gemmlowp_multiplier=" << gemm_info.gemmlowp_multiplier << ", "
+       << "gemmlowp_shift=" << gemm_info.gemmlowp_shift << ", "
+       << "gemmlowp_min_bound=" << gemm_info.gemmlowp_min_bound << ", "
+       << "gemmlowp_max_bound=" << gemm_info.gemmlowp_max_bound << ", "
+       << "gemmlowp_multipliers=" << gemm_info.gemmlowp_multiplier << ", "
+       << "gemmlowp_shifts=" << gemm_info.gemmlowp_shift << ", "
+       << "gemmlowp_real_multiplier=" << gemm_info.gemmlowp_real_multiplier << ", "
+       << "is_quantized_per_channel=" << gemm_info.is_quantized_per_channel << ", "
+       << "output_data_type=" << gemm_info.output_data_type << "}";
     return os;
 }
 
@@ -2679,11 +2680,12 @@ inline std::string to_string(const GEMMLowpOutputStageInfo &gemm_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Conv2dInfo &conv_info)
 {
-    os << "{conv_info = " << conv_info.conv_info << ", "
-       << "dilation = " << conv_info.dilation << ", "
-       << "act_info = " << to_string(conv_info.act_info) << ", "
-       << "enable_fast_math = " << conv_info.enable_fast_math << ", "
-       << "num_groups = " << conv_info.num_groups << "}";
+    os << "{conv_info=" << conv_info.conv_info << ", "
+       << "dilation=" << conv_info.dilation << ", "
+       << "act_info=" << to_string(conv_info.act_info) << ", "
+       << "enable_fast_math=" << conv_info.enable_fast_math << ", "
+       << "num_groups=" << conv_info.num_groups << ","
+       << "post_ops=" << conv_info.post_ops << "}";
     return os;
 }
 
@@ -2709,7 +2711,7 @@ inline std::string to_string(const Conv2dInfo &conv_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PixelValue &pixel_value)
 {
-    os << "{value.u64= " << pixel_value.get<uint64_t>() << "}";
+    os << "{value.u64=" << pixel_value.get<uint64_t>() << "}";
     return os;
 }
 
@@ -2735,13 +2737,13 @@ inline std::string to_string(const PixelValue &pixel_value)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ScaleKernelInfo &scale_info)
 {
-    os << "{interpolation_policy = " << scale_info.interpolation_policy << ", "
-       << "BorderMode = " << scale_info.border_mode << ", "
-       << "PixelValue = " << scale_info.constant_border_value << ", "
-       << "SamplingPolicy = " << scale_info.sampling_policy << ", "
-       << "use_padding = " << scale_info.use_padding << ", "
-       << "align_corners = " << scale_info.align_corners << ", "
-       << "data_layout = " << scale_info.data_layout << "}";
+    os << "{interpolation_policy=" << scale_info.interpolation_policy << ", "
+       << "BorderMode=" << scale_info.border_mode << ", "
+       << "PixelValue=" << scale_info.constant_border_value << ", "
+       << "SamplingPolicy=" << scale_info.sampling_policy << ", "
+       << "use_padding=" << scale_info.use_padding << ", "
+       << "align_corners=" << scale_info.align_corners << ", "
+       << "data_layout=" << scale_info.data_layout << "}";
     return os;
 }
 
@@ -2803,8 +2805,8 @@ inline std::string to_string(const FFTDirection &fft_dir)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FFT1DInfo &fft1d_info)
 {
-    os << "{axis = " << fft1d_info.axis << ", "
-       << "direction = " << fft1d_info.direction << "}";
+    os << "{axis=" << fft1d_info.axis << ", "
+       << "direction=" << fft1d_info.direction << "}";
     return os;
 }
 
@@ -2830,9 +2832,9 @@ inline std::string to_string(const FFT1DInfo &fft1d_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FFT2DInfo &fft2d_info)
 {
-    os << "{axis = " << fft2d_info.axis0 << ", "
-       << "axis = " << fft2d_info.axis1 << ", "
-       << "direction = " << fft2d_info.direction << "}";
+    os << "{axis=" << fft2d_info.axis0 << ", "
+       << "axis=" << fft2d_info.axis1 << ", "
+       << "direction=" << fft2d_info.direction << "}";
     return os;
 }
 
@@ -2858,8 +2860,8 @@ inline std::string to_string(const FFT2DInfo &fft2d_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Coordinates2D &coord_2d)
 {
-    os << "{x = " << coord_2d.x << ", "
-       << "y = " << coord_2d.y << "}";
+    os << "{x=" << coord_2d.x << ", "
+       << "y=" << coord_2d.y << "}";
     return os;
 }
 
@@ -2921,10 +2923,10 @@ inline std::string to_string(const FuseBatchNormalizationType &fuse_type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const SoftmaxKernelInfo &info)
 {
-    os << "{beta = " << info.beta << ", "
-       << "is_log = " << info.is_log << ", "
-       << "input_data_type = " << info.input_data_type << ", "
-       << "axis = " << info.axis << "}";
+    os << "{beta=" << info.beta << ", "
+       << "is_log=" << info.is_log << ", "
+       << "input_data_type=" << info.input_data_type << ", "
+       << "axis=" << info.axis << "}";
     return os;
 }
 
@@ -3052,15 +3054,15 @@ inline std::string to_string(const NMSType nms_type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const BoxNMSLimitInfo &info)
 {
-    os << "{score_thresh = " << info.score_thresh() << ", "
-       << "nms = " << info.nms() << ", "
-       << "detections_per_im = " << info.detections_per_im() << ", "
-       << "soft_nms_enabled = " << info.soft_nms_enabled() << ", "
-       << "soft_nms_min_score_thres = " << info.soft_nms_min_score_thres() << ", "
-       << "suppress_size = " << info.suppress_size() << ", "
-       << "min_size = " << info.min_size() << ", "
-       << "im_width = " << info.im_width() << ", "
-       << "im_height = " << info.im_height() << "}";
+    os << "{score_thresh=" << info.score_thresh() << ", "
+       << "nms=" << info.nms() << ", "
+       << "detections_per_im=" << info.detections_per_im() << ", "
+       << "soft_nms_enabled=" << info.soft_nms_enabled() << ", "
+       << "soft_nms_min_score_thres=" << info.soft_nms_min_score_thres() << ", "
+       << "suppress_size=" << info.suppress_size() << ", "
+       << "min_size=" << info.min_size() << ", "
+       << "im_width=" << info.im_width() << ", "
+       << "im_height=" << info.im_height() << "}";
     return os;
 }
 

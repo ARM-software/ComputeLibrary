@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
@@ -132,7 +133,7 @@ private:
      */
     void configure_mm(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
                       const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                      int gemm_3d_depth, const ActivationLayerInfo &act_info);
+                      int gemm_3d_depth, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {});
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
      * @param[in] src                   Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -149,7 +150,7 @@ private:
      * @return a status
      */
     static Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                              int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info);
+                              int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {});
 
     enum AuxTensorIdx
     {
@@ -177,6 +178,7 @@ private:
     bool _fuse_activation;
     bool _append_bias;
     bool _is_prepared;
+    bool _use_post_ops;
 
     experimental::MemoryRequirements _aux_mem;
 };

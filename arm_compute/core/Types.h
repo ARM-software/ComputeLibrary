@@ -30,6 +30,7 @@
 #include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/utils/misc/Macros.h"
 #include "support/Bfloat16.h"
 #include "support/Half.h"
@@ -1963,6 +1964,7 @@ struct GEMMRHSMatrixInfo
     bool         export_to_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
+class ITensorInfo;
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped
@@ -1984,7 +1986,8 @@ public:
           _fp_mixed_precision(false),
           _broadcast_bias(false),
           _pretranspose_B(true),
-          _activation_info()
+          _activation_info(),
+          _post_ops()
     {
     }
     /** Constructor
@@ -2002,10 +2005,11 @@ public:
      * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
+     * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo()) noexcept
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>()) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -2017,7 +2021,8 @@ public:
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
           _pretranspose_B(reshape_b_only_on_first_run),
-          _activation_info(activation_info)
+          _activation_info(activation_info),
+          _post_ops(post_ops)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2142,20 +2147,37 @@ public:
     {
         _activation_info = activation_info;
     }
+    /** Post operations to apply after the matrix multiplication
+     *
+     * @return experimental::PostOpList object
+     */
+    const experimental::PostOpList<ITensorInfo *> &post_ops() const
+    {
+        return _post_ops;
+    }
+    /** Set post ops
+     *
+     * @param[in] post_ops experimental::PostOpList object to set
+     */
+    void set_post_ops(const experimental::PostOpList<ITensorInfo *> &post_ops)
+    {
+        _post_ops = post_ops;
+    }
 
 private:
-    bool                    _is_a_reshaped;
-    bool                    _is_b_reshaped;
-    bool                    _reshape_b_only_on_first_run;
-    int                     _depth_output_gemm3d;
-    bool                    _reinterpret_input_as_3d;
-    bool                    _retain_internal_weights;
-    GEMMLowpOutputStageInfo _gemmlowp_output_stage;
-    bool                    _fast_math;
-    bool                    _fp_mixed_precision;
-    bool                    _broadcast_bias;
-    bool                    _pretranspose_B;
-    ActivationLayerInfo     _activation_info;
+    bool                                    _is_a_reshaped;
+    bool                                    _is_b_reshaped;
+    bool                                    _reshape_b_only_on_first_run;
+    int                                     _depth_output_gemm3d;
+    bool                                    _reinterpret_input_as_3d;
+    bool                                    _retain_internal_weights;
+    GEMMLowpOutputStageInfo                 _gemmlowp_output_stage;
+    bool                                    _fast_math;
+    bool                                    _fp_mixed_precision;
+    bool                                    _broadcast_bias;
+    bool                                    _pretranspose_B;
+    ActivationLayerInfo                     _activation_info;
+    experimental::PostOpList<ITensorInfo *> _post_ops;
 };
 
 /** Winograd information */

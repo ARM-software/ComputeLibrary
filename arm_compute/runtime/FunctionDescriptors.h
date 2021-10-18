@@ -57,20 +57,22 @@ struct Conv2dInfo
 {
     Conv2dInfo() = default;
 
-    Conv2dInfo(const PadStrideInfo       &conv_info,
-               const Size2D              &dilation,
-               const ActivationLayerInfo &act_info,
-               bool                       enable_fast_math,
-               unsigned int               num_groups)
-        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups)
+    Conv2dInfo(const PadStrideInfo                           &conv_info,
+               const Size2D                                  &dilation,
+               const ActivationLayerInfo                     &act_info,
+               bool                                           enable_fast_math,
+               unsigned int                                   num_groups,
+               const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {})
+        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), post_ops(post_ops)
     {
     }
 
-    PadStrideInfo       conv_info{};
-    Size2D              dilation{ 1U, 1U };
-    ActivationLayerInfo act_info{};
-    bool                enable_fast_math{ false };
-    unsigned int        num_groups{ 1 };
+    PadStrideInfo                           conv_info{};
+    Size2D                                  dilation{ 1U, 1U };
+    ActivationLayerInfo                     act_info{};
+    bool                                    enable_fast_math{ false };
+    unsigned int                            num_groups{ 1 };
+    experimental::PostOpList<ITensorInfo *> post_ops{};
 };
 
 /** Descriptor used by the 3d Convolution function */
