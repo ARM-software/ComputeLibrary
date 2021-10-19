@@ -29,7 +29,7 @@
 /** OpenCL kernel to compute the direct convolution 3d.
  *
  * @note Data layout supported: NDHWC
- * @note Data type supported: F32/F16
+ * @note Data type supported: F32/F16/QASYMM8/QASYMM8_SIGNED
  * @note The accumulation data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE_PROMOTED=half)
  * @note The convolution padding (left, top and front) must be passed at compile time using -DPAD_LEFT, -DPAD_TOP and -DPAD_FRONT (e.g. -DPAD_LEFT=2, -DPAD_TOP=2, -DPAD_FRONT=2)
  * @note The convolution strides must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y and -DSTRIDE_Z (e.g. -DSTRIDE_X=2, -DSTRIDE_Y=2, -DSTRIDE_Z=2)
@@ -44,12 +44,22 @@
  * @note The number of N0 output channels to process must be passed at compile time using -DN0 (e.g. -DN0=2)
  * @note The number of K0 inner accumulations must be passed at compile time using -DK0 (e.g. -DK0=2)
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
+ * @note The zero value must be passed at compile time using -DZERO_VALUE (e.g. -DZERO_VALUE=0)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, .... n
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
  *
- * @note If biases are used then -DHAS_BIAS has to be passed at compile time
+ * @note In case of QASYMM8/QASYMM8_SIGNED, the following extra information must be passed at compile time:
+ *  - -DIS_QUANTIZED
+ *  - The destination quantization multiplier e.g. -DDST_MULTIPLIER=1234
+ *  - The destination quantization shift e.g. -DDST_SHIFT=4
+ *  - The destination offset e.g. -DDST_OFFSET=4
+ *  - The source offset e.g. -DSRC_OFFSET=4
+ *  - The weights offset e.g. -DWEI_OFFSET=4
+ *  - The quantized zero value e.g. -DZERO_VALUE=4
+ *
+ * @note If biases are used then -DHAS_BIAS has to be passed at compile time along with its tensor type by using -DBIA_DATA_TYPE (e.g. -DBIA_DATA_TYPE=int).
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -110,6 +120,13 @@ __kernel void direct_convolution3d_ndhwc(
 #define _IDST_CHANNELS DST_CHANNELS
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT * _IWEI_DEPTH)
 
+    // If quantized, the output tile has to be quantized first before being stored to global memory
+#if defined(IS_QUANTIZED)
+#define _IOUTPUT_TILE cq
+#else // defined(IS_QUANTIZED)
+#define _IOUTPUT_TILE c
+#endif // defined(IS_QUANTIZED)
+
     const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
     const int mout = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH x HEIGHT x DEPTH
     const int bout = GET_SPATIAL_IDX(2, 1, 0);           // BATCH SIZE IDX
@@ -153,7 +170,7 @@ __kernel void direct_convolution3d_ndhwc(
 
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
-                a[i].v = (DATA_TYPE)0;
+                a[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
@@ -175,6 +192,10 @@ __kernel void direct_convolution3d_ndhwc(
             // Compute the matrix multiplication between two tiles
             T_MMUL(DATA_TYPE, DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
 
+            // Apply the offset correction (correction usually needed for asymmetric quantized computation)
+            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
+
             ck += K0;
         }
 
@@ -187,7 +208,7 @@ __kernel void direct_convolution3d_ndhwc(
 
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
-                a[i].v = (DATA_TYPE)0;
+                a[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
@@ -206,22 +227,30 @@ __kernel void direct_convolution3d_ndhwc(
             // // Compute the matrix multiplication between two tiles
             T_MMUL(DATA_TYPE, DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
 
+            // Apply the offset correction (operation usually needed for asymmetric quantized computation)
+            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
+
             ++ck;
         }
 #endif // ((_ISRC_CHANNELS % K0) != 0)
     }
 
+    // Offset correction required for the quantized asymmetric computation
+    // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+    T_ADD_CONSTANT(ACC_DATA_TYPE, M0, N0, c, (_IWEI_WIDTH * _IWEI_HEIGHT * _IWEI_DEPTH * _ISRC_CHANNELS * SRC_OFFSET * WEI_OFFSET), c);
+
 #if defined(HAS_BIAS)
-    TILE(DATA_TYPE, 1, N0, bias0);
+    TILE(BIA_DATA_TYPE, 1, N0, bias0);
 
     if((cout + N0) <= _IDST_CHANNELS)
     {
-        bias0[0].v = VLOAD(N0)(0, (__global DATA_TYPE *)(bia_ptr + bia_offset_first_element_in_bytes + cout * sizeof(DATA_TYPE)));
+        bias0[0].v = VLOAD(N0)(0, (__global BIA_DATA_TYPE *)(bia_ptr + bia_offset_first_element_in_bytes + cout * sizeof(BIA_DATA_TYPE)));
     }
     else
     {
         VLOAD_PARTIAL(N0, PARTIAL_N0)
-        (bias0[0].v, 0, (__global DATA_TYPE *)(bia_ptr + bia_offset_first_element_in_bytes + cout * sizeof(DATA_TYPE)));
+        (bias0[0].v, 0, (__global BIA_DATA_TYPE *)(bia_ptr + bia_offset_first_element_in_bytes + cout * sizeof(BIA_DATA_TYPE)));
     }
 
     // c = c + bias[broadcasted]
@@ -238,8 +267,15 @@ __kernel void direct_convolution3d_ndhwc(
         dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH *_IDST_HEIGHT * _IDST_DEPTH);
     })
 
+#if defined(IS_QUANTIZED)
+    TILE(DATA_TYPE, M0, N0, cq);
+
+    // Quantize the tile
+    T_QUANTIZE8_ASYMMETRIC(ACC_DATA_TYPE, DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, c, cq);
+#endif // defined(IS_QUANTIZED)
+
     bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
-    T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_N0, BUFFER, dst, cout, dst_stride_y, x_cond, c, dst_indirect_y);
+    T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_N0, BUFFER, dst, cout, dst_stride_y, x_cond, _IOUTPUT_TILE, dst_indirect_y);
 }

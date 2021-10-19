@@ -38,10 +38,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half>  tolerance_fp16(half(0.2));  /**< Tolerance for floating point tests */
-RelativeTolerance<float> tolerance_fp32(0.05f);      /**< Tolerance for floating point tests */
-constexpr float          abs_tolerance_f32(0.0001f); /**< Absolute tolerance for FP32 tests*/
-constexpr float          tolerance_num = 0.07f;      /**< Tolerance number */
+RelativeTolerance<half>              tolerance_fp16(half(0.2));  /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.05f);      /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);       /**< Tolerance for quantized tests */
+constexpr float                      abs_tolerance_f32(0.0001f); /**< Absolute tolerance for FP32 tests*/
+constexpr float                      tolerance_num = 0.07f;      /**< Tolerance number */
 } // namespace
 
 TEST_SUITE(CL)
@@ -165,6 +166,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
 
 template <typename T>
 using CLDirectConvolution3DFixture = DirectConvolution3DValidationFixture<CLTensor, CLAccessor, CLConv3D, T>;
+template <typename T>
+using CLDirectConvolution3DQuantizedFixture = DirectConvolution3DValidationQuantizedFixture<CLTensor, CLAccessor, CLConv3D, T>;
 
 TEST_SUITE(NDHWC)
 TEST_SUITE(FP16)
@@ -266,6 +269,117 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolution3DFixture<float>, framework:
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE_END() // FP32
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                                                                                                                   framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
+                                                                                                                           TensorShape(15U, 7U, 11U, 7U),
+                                                                                                                           TensorShape(19U, 5U, 16U, 4U),
+                                                                                                                           TensorShape(13U, 5U, 17U, 2U)
+                                                                                                                                                          }),
+                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 })),
+                                                                                                               framework::dataset::make("StrideY", { 2, 1, 3, 1 })),
+                                                                                                           framework::dataset::make("StrideZ", { 3, 2, 1, 1 })),
+                                                                                                       framework::dataset::make("PadX", { 0, 2, 1, 0 })),
+                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 })),
+                                                                                               framework::dataset::make("PadZ", { 2, 1, 0, 0 })),
+                                                                                           framework::dataset::make("KernelWidth", { 3, 7, 5, 1 })),
+                                                                                       framework::dataset::make("KernelHeight", { 5, 3, 7, 1 })),
+                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
+                                                                               framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
+                                                                           framework::dataset::make("HasBias", { true, true, true, false })),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                               framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolution3DQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                                                                                                                   framework::dataset::make("InputShape", { TensorShape(400U, 400U, 200U, 11U) }),
+                                                                                                                   framework::dataset::make("StrideX", { 1 })),
+                                                                                                               framework::dataset::make("StrideY", { 1 })),
+                                                                                                           framework::dataset::make("StrideZ", { 1 })),
+                                                                                                       framework::dataset::make("PadX", { 1 })),
+                                                                                                   framework::dataset::make("PadY", { 1 })),
+                                                                                               framework::dataset::make("PadZ", { 1 })),
+                                                                                           framework::dataset::make("KernelWidth", { 9 })),
+                                                                                       framework::dataset::make("KernelHeight", { 9 })),
+                                                                                   framework::dataset::make("KernelDepth", { 9 })),
+                                                                               framework::dataset::make("NumKernels", { 300 })),
+                                                                           framework::dataset::make("HasBias", { true })),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                               framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                                                                                                                   framework::dataset::make("InputShape", { TensorShape(7U, 5U, 3U, 13U, 3U),
+                                                                                                                           TensorShape(15U, 7U, 11U, 7U),
+                                                                                                                           TensorShape(19U, 5U, 16U, 4U),
+                                                                                                                           TensorShape(13U, 5U, 17U, 2U)
+                                                                                                                                                          }),
+                                                                                                                   framework::dataset::make("StrideX", { 1, 3, 2, 1 })),
+                                                                                                               framework::dataset::make("StrideY", { 2, 1, 3, 1 })),
+                                                                                                           framework::dataset::make("StrideZ", { 3, 2, 1, 1 })),
+                                                                                                       framework::dataset::make("PadX", { 0, 2, 1, 0 })),
+                                                                                                   framework::dataset::make("PadY", { 1, 0, 2, 0 })),
+                                                                                               framework::dataset::make("PadZ", { 2, 1, 0, 0 })),
+                                                                                           framework::dataset::make("KernelWidth", { 3, 7, 5, 1 })),
+                                                                                       framework::dataset::make("KernelHeight", { 5, 3, 7, 1 })),
+                                                                                   framework::dataset::make("KernelDepth", { 7, 5, 3, 1 })),
+                                                                               framework::dataset::make("NumKernels", { 5, 3, 1, 11 })),
+                                                                           framework::dataset::make("HasBias", { true, true, true, false })),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                               framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolution3DQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+                                                                                                                   framework::dataset::make("InputShape", { TensorShape(400U, 400U, 200U, 11U) }),
+                                                                                                                   framework::dataset::make("StrideX", { 1 })),
+                                                                                                               framework::dataset::make("StrideY", { 1 })),
+                                                                                                           framework::dataset::make("StrideZ", { 1 })),
+                                                                                                       framework::dataset::make("PadX", { 1 })),
+                                                                                                   framework::dataset::make("PadY", { 1 })),
+                                                                                               framework::dataset::make("PadZ", { 1 })),
+                                                                                           framework::dataset::make("KernelWidth", { 9 })),
+                                                                                       framework::dataset::make("KernelHeight", { 9 })),
+                                                                                   framework::dataset::make("KernelDepth", { 9 })),
+                                                                               framework::dataset::make("NumKernels", { 300 })),
+                                                                           framework::dataset::make("HasBias", { true })),
+                                                                       framework::dataset::make("Activation", ActivationLayerInfo())),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("DataLayout", DataLayout::NDHWC)),
+                                               framework::dataset::make("SrcQuantizationInfo", QuantizationInfo(0.1f, 10))),
+                                       framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
+                               framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE_END() // NDHWC
 TEST_SUITE_END() // DirectConvolution3D
 TEST_SUITE_END() // CL

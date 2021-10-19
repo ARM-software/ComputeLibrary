@@ -22,7 +22,11 @@
  * SOFTWARE.
  */
 #include "Conv3D.h"
+
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "support/Requires.h"
+#include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 // Source/Destination Tensor shape indices (N D H W C)
 constexpr unsigned int batch_dim   = 4u;
@@ -52,11 +56,14 @@ inline bool is_valid_pixel(int i, int min, int max)
 {
     return (i >= min && i < max);
 }
+
 // Evaluate the weights against an element in a given tensor.
-template <typename T>
-T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const Size3D &dilation, int batch,
-                   int z_start, int y_start, int x_start, int ch_out)
+template < typename T, typename TB, typename std::enable_if < validation::is_floating_point<T>::value &&validation::is_floating_point<TB>::value, int >::type = 0 >
+T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const Size3D &dilation, int batch,
+                   int z_start, int y_start, int x_start, int ch_out, UniformQuantizationInfo oq_info)
 {
+    ARM_COMPUTE_UNUSED(oq_info);
+
     const unsigned int weights_width  = weights.shape()[weights_width_dim];
     const unsigned int weights_height = weights.shape()[weights_height_dim];
     const unsigned int weights_depth  = weights.shape()[weights_depth_dim];
@@ -101,12 +108,89 @@ T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, c
             }
         }
     }
-    return total;
-}
+
+    const TB *b_ptr      = bias.data();
+    TB        bias_value = b_ptr[ch_out];
+
+    return total + bias_value;
 }
 
-template <typename T>
-SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &dst, const Conv3dInfo &conv3d_info)
+template < typename T, typename TB, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+T calculate_conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const Size3D &dilation, int batch,
+                   int z_start, int y_start, int x_start, int ch_out, UniformQuantizationInfo oq_info)
+{
+    const unsigned int weights_width  = weights.shape()[weights_width_dim];
+    const unsigned int weights_height = weights.shape()[weights_height_dim];
+    const unsigned int weights_depth  = weights.shape()[weights_depth_dim];
+
+    const unsigned int src_channels = src.shape()[channel_dim];
+    const unsigned int src_width    = src.shape()[width_dim];
+    const unsigned int src_height   = src.shape()[height_dim];
+    const unsigned int src_depth    = src.shape()[depth_dim];
+
+    const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
+    const UniformQuantizationInfo wq_info = weights.quantization_info().uniform();
+
+    const int   input_offset   = -iq_info.offset;
+    const float input_scale    = iq_info.scale;
+    int         weights_offset = -wq_info.offset;
+    float       weights_scale  = wq_info.scale;
+    const int   output_offset  = oq_info.offset;
+    const float output_scale   = oq_info.scale;
+
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
+    arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+
+    int32_t total(0);
+    for(unsigned int weight_d = 0; weight_d < weights_depth; ++weight_d)
+    {
+        const int idx_z = z_start + dilation.depth * weight_d;
+        for(unsigned int weight_y = 0; weight_y < weights_height; ++weight_y)
+        {
+            const int idx_y = y_start + dilation.height * weight_y;
+            for(unsigned int weight_x = 0; weight_x < weights_width; ++weight_x)
+            {
+                const int idx_x = x_start + dilation.width * weight_x;
+
+                //Check if the point is within padding
+                const bool is_x_valid       = is_valid_pixel(idx_x, 0, src_width);
+                const bool is_y_valid       = is_valid_pixel(idx_y, 0, src_height);
+                const bool is_z_valid       = is_valid_pixel(idx_z, 0, src_depth);
+                const bool is_invalid_pixel = !(is_x_valid && is_y_valid && is_z_valid);
+                if(is_invalid_pixel)
+                {
+                    continue;
+                }
+
+                for(unsigned int ch_in = 0; ch_in < src_channels; ++ch_in)
+                {
+                    const T *in_ptr = src.data();
+                    const T *w_ptr  = weights.data();
+
+                    const int in_offset     = coord2index(src.shape(), Coordinates{ ch_in, idx_x, idx_y, idx_z, batch });
+                    const int weight_offset = coord2index(weights.shape(), Coordinates{ ch_out, ch_in, weight_x, weight_y, weight_d });
+                    T         input_value   = in_ptr[in_offset];
+                    T         weight_value  = w_ptr[weight_offset];
+                    total += ((input_value + input_offset) * (weight_value + weights_offset));
+                }
+            }
+        }
+    }
+
+    const TB *b_ptr      = bias.data();
+    TB        bias_value = b_ptr[ch_out];
+
+    total += bias_value;
+
+    return validation::quantize_down_scale_by_fixedpoint(total, output_multiplier, output_shift, output_offset,
+                                                         std::numeric_limits<T>::lowest(), std::numeric_limits<T>::max());
+}
+} // namespace
+
+template <typename T, typename TB>
+SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, const Conv3dInfo &conv3d_info)
 {
     // Compute reference
     const unsigned int batch_size     = src.shape()[batch_dim];
@@ -150,14 +234,10 @@ SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weight
                     const int x_start = (x_out * stride_x) - pad_left;
                     for(unsigned int ch_out = 0; ch_out < dst_channels; ++ch_out)
                     {
-                        T weighted_value = calculate_conv3d<T>(src, weights, conv3d_info.dilation, batch, z_start,
-                                                               y_start, x_start, ch_out);
-                        T        *out_ptr = dst.data();
-                        const T *b_ptr   = bias.data();
-                        T         bias_value(0);
+                        T *out_ptr = dst.data();
+
                         const int out_offset = coord2index(dst.shape(), Coordinates{ ch_out, x_out, y_out, z_out, batch });
-                        bias_value           = b_ptr[ch_out];
-                        out_ptr[out_offset]  = weighted_value + bias_value;
+                        out_ptr[out_offset]  = calculate_conv3d<T, TB>(src, weights, bias, conv3d_info.dilation, batch, z_start, y_start, x_start, ch_out, dst.quantization_info().uniform());
                     }
                 }
             }
@@ -170,6 +250,10 @@ template SimpleTensor<float> conv3d(const SimpleTensor<float> &src, const Simple
                                     const Conv3dInfo &conv3d_info);
 template SimpleTensor<half> conv3d(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, SimpleTensor<half> &dst,
                                    const Conv3dInfo &conv3d_info);
+template SimpleTensor<uint8_t> conv3d(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &dst,
+                                      const Conv3dInfo &conv3d_info);
+template SimpleTensor<int8_t> conv3d(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<int8_t> &dst,
+                                     const Conv3dInfo &conv3d_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

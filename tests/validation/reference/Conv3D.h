@@ -37,8 +37,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &dst,
+template <typename T, typename TB>
+SimpleTensor<T> conv3d(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst,
                        const Conv3dInfo &conv3d_info);
 } // namespace reference
 } // namespace validation

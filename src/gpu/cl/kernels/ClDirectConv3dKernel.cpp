@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -44,7 +45,7 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv3d_info.act_info.enabled(), "Fused activation not supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->dimension(1) != src0->dimension(0), "Weights feature map dimension should match the respective src's one");
@@ -56,7 +57,14 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
 
     if(src2 != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
+        if(is_data_type_quantized(src0->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
+        }
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->dimension(0) != src1->dimension(0), "Biases size and number of dst feature maps should match");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->num_dimensions() > 1, "Biases should be one dimensional");
     }
@@ -114,7 +122,6 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     CLBuildOptions build_options;
     build_options.add_option("-cl-fast-relaxed-math");
     build_options.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
-    build_options.add_option("-DACC_DATA_TYPE=float");
     build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
     build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
     build_options.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(src_depth));
@@ -136,7 +143,44 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     build_options.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
     build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
-    build_options.add_option_if(src2 != nullptr, std::string("-DHAS_BIAS"));
+
+    if(src2 != nullptr)
+    {
+        build_options.add_option(std::string("-DHAS_BIAS"));
+        build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(src2->data_type())));
+    }
+
+    if(is_data_type_quantized(data_type))
+    {
+        const UniformQuantizationInfo iqinfo = src0->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = src1->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = dst->quantization_info().uniform();
+
+        PixelValue zero_value = PixelValue(0, src0->data_type(), src0->quantization_info());
+        int        zero_value_s32;
+        zero_value.get(zero_value_s32);
+
+        float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        build_options.add_option("-DIS_QUANTIZED");
+        build_options.add_option("-DDST_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_options.add_option("-DDST_SHIFT=" + support::cpp11::to_string(output_shift));
+        build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(-iqinfo.offset));
+        build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(-wqinfo.offset));
+        build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(oqinfo.offset));
+        build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(zero_value_s32));
+        build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(DataType::S32));
+    }
+    else
+    {
+        build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(DataType::F32));
+        build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(0));
+        build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(0));
+        build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(0));
+        build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(0));
+    }
 
     std::string kernel_name = "direct_convolution3d_ndhwc";
     _kernel                 = create_kernel(compile_context, kernel_name, build_options.options());

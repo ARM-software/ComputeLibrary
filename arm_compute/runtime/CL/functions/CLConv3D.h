@@ -65,6 +65,8 @@ public:
      * |:--------------|:--------------|:------|:--------------|
      * |F16            |F16            |F16    |F16            |
      * |F32            |F32            |F32    |F32            |
+     * |QASYMM8        |QASYMM8        |S32    |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |S32    |QASYMM8_SIGNED |
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  src             Source tensor. 4 lower dimensions represent a single src [IFM, width, height, depth],
