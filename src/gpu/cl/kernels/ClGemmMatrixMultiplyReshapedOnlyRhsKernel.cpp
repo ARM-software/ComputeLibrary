@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/experimental/PostOp.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"
@@ -43,6 +44,17 @@ namespace kernels
 namespace
 {
 using ElementsProcessed = Steps;
+
+const auto post_op_utils = experimental::PostOpCLKernelUtils(
+{
+    //  PostOp sequence                   -> {Kernel Postfix, PostOp Slots}
+    { {}, { "", {} } },
+    { { experimental::PostOpType::Activation }, { "", { 1 } } },
+    { { experimental::PostOpType::Eltwise_Add }, { "_post_act_eltwise_op_act", { 2 } } },
+    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_Add }, { "_post_act_eltwise_op_act", { 1, 2 } } },
+    { { experimental::PostOpType::Eltwise_Add, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 2, 3 } } },
+    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_Add, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 1, 2, 3 } } }
+});
 
 Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta,
                           const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
@@ -64,6 +76,7 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
                                     "Bias addition only supported with broadcast mode in case the input or dst has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision, "Mixed precision not supported");
     ARM_COMPUTE_RETURN_ON_ERROR(gemm::validate_image2d_support_on_rhs(*src1, rhs_info));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!post_op_utils.is_post_op_sequence_supported(gemm_info.post_ops), "The sequence of Post Ops is not supported");
 
     const unsigned int m = gemm_info.m;
     const unsigned int n = gemm_info.n;
@@ -109,6 +122,7 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
         const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!post_op_utils.are_post_op_shapes_compliant(dst, gemm_info.post_ops), "The Post Op shapes are not compliant");
     }
 
     return Status{};
@@ -168,6 +182,9 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileContext
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
+    // dst tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
+
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
 
     _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d;
@@ -176,9 +193,7 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileContext
     _add_bias                 = src2 != nullptr;
     _export_to_cl_image       = rhs_info.export_to_cl_image;
     _has_pad_y                = gemm_info.has_pad_y;
-
-    // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
+    _num_post_op_args         = gemm_info.post_ops.total_num_arguments();
 
     auto padding_info = get_padding_info({ src0, src1, src2, dst });
 
@@ -239,9 +254,6 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileContext
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));
     build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
     build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
-    build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
-    build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
-    build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));
     if(_has_pad_y)
     {
         build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
@@ -249,10 +261,22 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileContext
         build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(h_gemm_3d));
         build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(d_gemm_3d));
     }
+    // If post_ops are used, then we disable the use of gemm_info.activation_info
+    if(gemm_info.post_ops.size() > 0)
+    {
+        post_op_utils.set_post_ops_cl_build_options(build_opts, gemm_info.post_ops);
+    }
+    else
+    {
+        build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
+        build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
+        build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));
+    }
 
     std::string kernel_name("gemm_mm_reshaped_only_rhs_");
     kernel_name += rhs_info.transpose ? "t" : "nt";
     kernel_name += rhs_info.export_to_cl_image ? "_texture" : "";
+    post_op_utils.set_post_ops_cl_kernel_name(kernel_name, gemm_info.post_ops);
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
@@ -375,6 +399,13 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::run_op(ITensorPack &tensors, con
         // dst buffer
         add_2D_tensor_argument(idx, dst, slice);
 
+        // post op argument buffers
+        for(size_t i = 0; i < _num_post_op_args; ++i)
+        {
+            const auto post_op_arg = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(experimental::get_post_op_arg_type(i)));
+            add_2D_tensor_argument(idx, post_op_arg, slice);
+        }
+
         // LHS stride_z
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(src0->info()->strides_in_bytes()[lhs_idx_batch_size]));
 
@@ -389,6 +420,12 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsKernel::run_op(ITensorPack &tensors, con
 
         // dst stride_z
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(dst->info()->strides_in_bytes()[out_idx_batch_size]));
+        // post op argument stride_z
+        for(size_t i = 0; i < _num_post_op_args; ++i)
+        {
+            const auto post_op_arg = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(experimental::get_post_op_arg_type(i)));
+            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(post_op_arg->info()->strides_in_bytes()[2]));
+        }
 
         // Cross-plan padding (if _reinterpret_input_as_3d = true)
         if(_reinterpret_input_as_3d && _has_pad_y)

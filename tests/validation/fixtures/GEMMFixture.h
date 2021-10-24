@@ -1522,6 +1522,243 @@ protected:
     SimpleTensor<T> _reference{};
 };
 
+/** (EXPERIMENTAL_POST_OPS)*/
+template <typename TensorType, typename AccessorType, typename T, typename ReshapeRHSOperatorType, typename GEMMOperatorType>
+class GEMMMatrixMultiplyReshapedOnlyRHSWithPostOpsValidationFixture : public framework::Fixture
+{
+public:
+    using PostOpArgBroadcast = std::tuple<bool, bool, bool>; // Instruct fixture if we need broadcasting in dimension 0, 1, 2 of each PostOp argument
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
+               bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info,
+               const experimental::PostOpList<PostOpArgBroadcast> &post_ops)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0                 = n0;
+        rhs_info.k0                 = k0;
+        rhs_info.h0                 = h0;
+        rhs_info.interleave         = interleave_rhs;
+        rhs_info.transpose          = transpose_rhs;
+        rhs_info.export_to_cl_image = export_to_cl_image;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+        auto post_ops_with_shapes = experimental::transform_post_op_list_arguments<PostOpArgBroadcast, TensorShape>(post_ops,
+                                                                                                                    [ = ](auto broadcast)
+        {
+            return TensorShape
+            {
+                std::get<0>(broadcast) ? 1 : n,
+                std::get<1>(broadcast) ? 1 : m,
+                std::get<2>(broadcast) ? 1 : batch_size,
+            };
+        });
+
+        _target = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info, post_ops_with_shapes);
+        if(validate_result)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info, post_ops_with_shapes);
+        }
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        library->fill(tensor, distribution, i);
+
+        // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
+        library->fill_borders_with_garbage(tensor, distribution_inf, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info, const experimental::PostOpList<TensorShape> &post_ops)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType rhs_reshaped;
+        TensorType dst;
+        // Create post op tensors and populate post op with them
+        std::vector<TensorType> post_op_tensors_holder{};
+        auto                    populated_post_ops = experimental::transform_post_op_list_arguments<TensorShape, ITensorInfo *>(post_ops,
+                                                                                                                                [&post_op_tensors_holder, &data_type](auto shape)
+        {
+            auto t = create_tensor<TensorType>(shape, data_type, 1);
+            post_op_tensors_holder.push_back(std::move(t));
+            return post_op_tensors_holder.back().info();
+        });
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
+        kernel_info.post_ops                = populated_post_ops;
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeRHSOperatorType reshape_rhs;
+        GEMMOperatorType       gemm;
+
+        validate_result = bool(reshape_rhs.validate(rhs.info(), rhs_reshaped.info(), rhs_info));
+        validate_result = validate_result || !rhs_info.export_to_cl_image;
+        if(!validate_result)
+        {
+            return nullptr;
+        }
+
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+        gemm.configure(lhs.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        for(const auto &tensor : post_op_tensors_holder)
+        {
+            ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
+        }
+
+        // We do not pad when using image as it needs to comply to strict pitch alignment restrictions
+        if(!rhs_info.export_to_cl_image)
+        {
+            add_padding_x({ &lhs, &rhs, &rhs_reshaped, &bias, &dst });
+            for(auto &tensor : post_op_tensors_holder)
+            {
+                add_padding_x({ &tensor });
+            }
+        }
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+        for(auto &tensor : post_op_tensors_holder)
+        {
+            tensor.allocator()->allocate();
+        }
+
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        for(const auto &tensor : post_op_tensors_holder)
+        {
+            ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
+        }
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+        for(size_t i = 0; i < post_op_tensors_holder.size(); ++i)
+        {
+            fill(AccessorType(post_op_tensors_holder.at(i)), 3 + i);
+        }
+
+        // Compute GEMM
+        ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+        reshape_rhs.run(reshape_rhs_pack);
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs },
+            { ACL_SRC_1, &rhs_reshaped },
+            { ACL_SRC_2, &bias },
+            { ACL_DST, &dst }
+        });
+        for(size_t i = 0; i < post_op_tensors_holder.size(); ++i)
+        {
+            gemm_pack.add_tensor(experimental::get_post_op_arg_type(i), &post_op_tensors_holder.at(i));
+        }
+        gemm.run(gemm_pack);
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info, const experimental::PostOpList<TensorShape> &post_ops)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+        // Create post op tensors and populate post op with them
+        auto populated_post_ops = experimental::transform_post_op_list_arguments<TensorShape, SimpleTensor<T>>(post_ops, [&data_type](auto shape)
+        {
+            return SimpleTensor<T> { shape, data_type, 1 };
+        });
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        int tensor_idx = 0;
+        fill(lhs, tensor_idx++);
+        fill(rhs, tensor_idx++);
+        fill(bias, tensor_idx++);
+        for(auto &op : populated_post_ops.get_list())
+        {
+            for(auto tensor : op->arguments())
+            {
+                fill(*tensor, tensor_idx++);
+            }
+        }
+
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        SimpleTensor<T> out;
+        out = reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        // Ignore activation info if post ops are used instead
+        if(populated_post_ops.size() > 0)
+        {
+            out = reference::post_ops<T>(out, populated_post_ops);
+        }
+        else
+        {
+            out = reference::activation_layer(out, act_info);
+        }
+        return out;
+    }
+
+    bool            validate_result = true;
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
 template <typename TensorType, typename AccessorType, typename T, typename ReshapeRHSOperatorType, typename GEMMOperatorType>
 class GEMMMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::Fixture
 {
@@ -1823,6 +2060,213 @@ protected:
         }
 
         return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename GEMMOperatorType>
+class GEMMMatrixMultiplyNativeWithPostOpsValidationFixture : public framework::Fixture
+{
+public:
+    using PostOpArgBroadcast = std::tuple<bool, bool, bool>; // Instruct fixture if we need broadcasting in dimension 0, 1, 2 of each PostOp argument
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias,
+               const ActivationLayerInfo &act_info, const experimental::PostOpList<PostOpArgBroadcast> &post_ops)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0 = n0;
+        rhs_info.k0 = k0;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+        const auto post_ops_with_shapes = experimental::transform_post_op_list_arguments<PostOpArgBroadcast, TensorShape>(post_ops,
+                                                                                                                          [ = ](auto broadcast)
+        {
+            return TensorShape
+            {
+                std::get<0>(broadcast) ? 1 : n,
+                std::get<1>(broadcast) ? 1 : m,
+                std::get<2>(broadcast) ? 1 : batch_size,
+            };
+        });
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info, post_ops_with_shapes);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info, post_ops_with_shapes);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+
+        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        library->fill(tensor, distribution, i);
+
+        // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
+        DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
+        library->fill_borders_with_garbage(tensor, distribution_inf, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info, const experimental::PostOpList<TensorShape> &post_ops)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst;
+        // Create post op tensors and populate post op with them
+        std::vector<TensorType> post_op_tensors_holder{};
+        auto                    populated_post_ops = experimental::transform_post_op_list_arguments<TensorShape, ITensorInfo *>(post_ops,
+                                                                                                                                [&post_op_tensors_holder, &data_type](auto shape)
+        {
+            auto t = create_tensor<TensorType>(shape, data_type, 1);
+            post_op_tensors_holder.push_back(std::move(t));
+            return post_op_tensors_holder.back().info();
+        });
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
+        kernel_info.post_ops                = populated_post_ops;
+
+        // Create and configure function
+        GEMMOperatorType gemm;
+        gemm.configure(lhs.info(), rhs.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+
+        ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+        for(const auto &tensor : post_op_tensors_holder)
+        {
+            ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
+        }
+
+        add_padding_x({ &lhs, &rhs, &bias, &dst });
+        for(auto &tensor : post_op_tensors_holder)
+        {
+            add_padding_x({ &tensor });
+        }
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+        for(auto &tensor : post_op_tensors_holder)
+        {
+            tensor.allocator()->allocate();
+        }
+
+        ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+        ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+        for(const auto &tensor : post_op_tensors_holder)
+        {
+            ARM_COMPUTE_ASSERT(!tensor.info()->is_resizable());
+        }
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+        for(size_t i = 0; i < post_op_tensors_holder.size(); ++i)
+        {
+            fill(AccessorType(post_op_tensors_holder.at(i)), 3 + i);
+        }
+
+        // Compute GEMM
+        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs },
+            { ACL_SRC_1, &rhs },
+            { ACL_SRC_2, &bias },
+            { ACL_DST, &dst }
+        });
+        for(size_t i = 0; i < post_op_tensors_holder.size(); ++i)
+        {
+            gemm_pack.add_tensor(experimental::get_post_op_arg_type(i), &post_op_tensors_holder.at(i));
+        }
+        gemm.run(gemm_pack);
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info, const experimental::PostOpList<TensorShape> &post_ops)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+        // Create post op tensors and populate post op with them
+        auto populated_post_ops = experimental::transform_post_op_list_arguments<TensorShape, SimpleTensor<T>>(post_ops, [&data_type](auto shape)
+        {
+            return SimpleTensor<T> { shape, data_type, 1 };
+        });
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        int tensor_idx = 0;
+        fill(lhs, tensor_idx++);
+        fill(rhs, tensor_idx++);
+        fill(bias, tensor_idx++);
+        for(auto &op : populated_post_ops.get_list())
+        {
+            for(auto tensor : op->arguments())
+            {
+                fill(*tensor, tensor_idx++);
+            }
+        }
+
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        SimpleTensor<T> out;
+        out = reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        // Ignore activation info if post ops are used instead
+        if(populated_post_ops.size() > 0)
+        {
+            out = reference::post_ops<T>(out, populated_post_ops);
+        }
+        else
+        {
+            out = reference::activation_layer(out, act_info);
+        }
+        return out;
     }
 
     TensorType      _target{};

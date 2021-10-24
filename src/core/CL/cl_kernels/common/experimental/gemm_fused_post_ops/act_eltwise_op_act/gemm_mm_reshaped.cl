@@ -352,6 +352,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_post_act_eltwise_op_act(IMAGE_DECLAR
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    // Boundary conditions: detect if current block is at the "bottom" or "right" boundary
     const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
     const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
@@ -568,6 +569,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture_post_act_eltwise_op_act(IMAG
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    // Boundary conditions: detect if current block is at the "bottom" or "right" boundary
     const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
     const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
@@ -824,6 +826,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLAR
     const uint y = get_global_id(1);
     const uint z = get_global_id(2);
 
+    // Boundary conditions: detect if current block is at the "bottom" or "right" boundary
     const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
     const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
@@ -1326,6 +1329,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture_post_act_eltwise_op_act(IMAG
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    // Boundary conditions: detect if current block is at the "bottom" or "right" boundary
     const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
     const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 

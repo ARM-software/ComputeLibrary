@@ -204,7 +204,6 @@ ClGemm::ClGemm()
 void ClGemm::configure_native(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
                               const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(gemm_info.post_ops().size() > 0, "PostOps are not supported in this kernel");
     DataType           data_type               = a->data_type();
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
@@ -223,6 +222,7 @@ void ClGemm::configure_native(const CLCompileContext &compile_context, ITensorIn
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _mm_native_kernel->set_target(gpu_target);
@@ -281,7 +281,6 @@ void ClGemm::configure_reshaped(const CLCompileContext &compile_context, ITensor
 void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context, ITensorInfo *a, ITensorInfo *b, ITensorInfo *c, ITensorInfo *output, float alpha, float beta,
                                          const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(gemm_info.post_ops().size() > 0, "PostOps are not supported in this kernel");
     DataType           data_type               = a->data_type();
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
@@ -300,6 +299,7 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _mm_reshaped_only_rhs_kernel->set_target(gpu_target);
@@ -334,7 +334,6 @@ Status ClGemm::validate_native(const ITensorInfo *a, const ITensorInfo *b, const
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.post_ops().size() > 0, "PostOps are not supported in this kernel");
 
     // Get the GPU target
     const GPUTarget    gpu_target              = CLScheduler::get().target();
@@ -355,6 +354,7 @@ Status ClGemm::validate_native(const ITensorInfo *a, const ITensorInfo *b, const
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.post_ops                = gemm_info.post_ops();
 
     auto config = auto_heuristics::select_mlgo_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, data_type, m, n, k, batch_size });
 
@@ -418,7 +418,6 @@ Status ClGemm::validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInf
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.post_ops().size() > 0, "PostOps are not supported in this kernel");
 
     TensorInfo tmp_b_info{};
 
@@ -441,6 +440,7 @@ Status ClGemm::validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInf
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.post_ops                = gemm_info.post_ops();
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
@@ -562,10 +562,9 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
 void ClGemm::run(ITensorPack &tensors)
 {
-    const ITensor *lhs  = tensors.get_const_tensor(ACL_SRC_0);
-    const ITensor *rhs  = tensors.get_const_tensor(ACL_SRC_1);
-    const ITensor *src2 = tensors.get_const_tensor(ACL_SRC_2);
-    ITensor       *dst  = tensors.get_tensor(ACL_DST);
+    const ITensor *lhs = tensors.get_const_tensor(ACL_SRC_0);
+    const ITensor *rhs = tensors.get_const_tensor(ACL_SRC_1);
+    ITensor       *dst = tensors.get_tensor(ACL_DST);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, dst);
 
@@ -620,7 +619,10 @@ void ClGemm::run(ITensorPack &tensors)
             const unsigned int cross_plane_pad_dst = dst->info()->padding().top + dst->info()->padding().bottom;
             bool               has_pad_y           = (cross_plane_pad_lhs != 0) || (cross_plane_pad_dst != 0);
 
-            ITensorPack gemm_reshaped_onlyrhs_pack{ { ACL_SRC_0, lhs }, { ACL_SRC_1, rhs_reshaped.get() }, { ACL_SRC_2, src2 }, { ACL_DST, dst } };
+            // Copy original tensor pack and overwrite rhs with reshaped counterpart
+            ITensorPack gemm_reshaped_onlyrhs_pack(tensors);
+            gemm_reshaped_onlyrhs_pack.add_const_tensor(ACL_SRC_1, rhs_reshaped.get());
+
             if(has_pad_y)
             {
                 CLScheduler::get().enqueue_op(*_mm_reshaped_only_rhs_fallback_kernel, gemm_reshaped_onlyrhs_pack, true);
