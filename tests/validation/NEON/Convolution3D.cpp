@@ -87,6 +87,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Invalid biases size
                                                 TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Invalid biases dimensions
                                                 TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::F32, DataLayout::NDHWC), // Invalid output size
+                                                TensorInfo(TensorShape(27U, 13U, 2U, 4U), 1U, DataType::U32, DataLayout::NDHWC), // Invalid data type
                                               }),
         framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F16),
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 3U), 1U, DataType::F32),
@@ -95,6 +96,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F32),
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F32),
                                                  TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::F32),
+                                                 TensorInfo(TensorShape(4U, 3U, 3U, 3U, 2U), 1U, DataType::U32),
                                               })),
         framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
@@ -102,6 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(3U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 2U), 1U, DataType::F32),
+                                                TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(4U), 1U, DataType::F32),
                                               })),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
@@ -111,8 +114,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::F32),
                                                 TensorInfo(TensorShape(26U, 11U, 4U), 1U, DataType::F32),
+                                                TensorInfo(TensorShape(25U, 11U, 4U), 1U, DataType::U32),
                                               })),
-        framework::dataset::make("Expected", { false, false, false, false, false, false, false })),
+        framework::dataset::make("Expected", { false, false, false, false, false, false, false, false})),
         input_info, weights_info, biases_info, output_info, expected)
 {
         const Conv3dInfo  conv3d_info(Size3D(1, 1, 1), Padding3D(0, 0, 0), ActivationLayerInfo(), Size3D(1U, 1U, 1U), DimensionRoundingType::FLOOR, false);

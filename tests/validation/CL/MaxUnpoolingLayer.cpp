@@ -57,7 +57,6 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framewor
 
                                                                                                                   ))
 {
-    printf("validate\n");
     // Validate output
     validate(CLAccessor(_target), _reference);
 }

@@ -30,14 +30,4 @@ std::string Size3D::to_string() const
 {
     return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height) + std::string("x") + support::cpp11::to_string(depth);
 }
-
-bool operator!=(const Size3D &lhs, const Size3D &rhs)
-{
-    return !(lhs == rhs);
-}
-
-bool operator==(const Size3D &lhs, const Size3D &rhs)
-{
-    return (lhs.width == rhs.width) && (lhs.height == rhs.height) && (lhs.depth == rhs.depth);
-}
 }

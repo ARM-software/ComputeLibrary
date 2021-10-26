@@ -78,29 +78,21 @@ public:
         return depth;
     }
 
+    bool operator!=(const Size3D &other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator==(const Size3D &other) const
+    {
+        return (width == other.width) && (height == other.height) && (depth == other.depth);
+    }
+
 public:
     size_t width  = {}; /**< Width of the 3D shape or object */
     size_t height = {}; /**< Height of the 3D shape or object */
     size_t depth  = {}; /**< Depth of the 3D shape or object */
 };
-
-/** Operator to compare two Size3D objects to be equal
- *
- * @param[in] lhs Left-hand side Size3D object.
- * @param[in] rhs Right-hand side Size3D object.
- *
- * @return True if two instances have the same width, height and depth
- */
-bool operator==(const Size3D &lhs, const Size3D &rhs);
-
-/** Operator to compare two Size3D objects to be different
- *
- * @param[in] lhs Left-hand side Size3D object.
- * @param[in] rhs Right-hand side Size3D object.
- *
- * @return True if two instances have a difference in width, height or depth
- */
-bool operator!=(const Size3D &lhs, const Size3D &rhs);
 
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_SIZE3D_H */
