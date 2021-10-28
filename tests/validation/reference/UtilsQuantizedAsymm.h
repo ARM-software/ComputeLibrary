@@ -32,6 +32,22 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+#if __clang__
+// This has been tested on clang 7.0.2 (__clang_major__ == 7 && __clang_minor__ == 0 && __clang_patchlevel__ == 2)
+inline int64_t to_int64(int32_t val)
+{
+    return static_cast<int64_t>(val) | ((val < 0) ? (((1ll << 32) - 1) << 32) : 0);
+}
+#else  // __clang__
+inline int64_t to_int64(int32_t val)
+{
+    return static_cast<int64_t>(val);
+}
+#endif // __clang__
+} // namespace
+
 /** Rounded to nearest division by a power-of-two. */
 inline int32_t asymm_rounding_divide_by_pow2(int32_t x, int exponent)
 {
@@ -43,12 +59,12 @@ inline int32_t asymm_rounding_divide_by_pow2(int32_t x, int exponent)
 /** Multiplication of two integers. The same as ARMv7 Arm® Neon™ VQRDMULH instruction. */
 inline int32_t asymm_int_mult(int32_t a, int32_t b)
 {
-    bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();
-    int64_t a_64(a);
-    int64_t b_64(b);
-    int64_t ab_64        = a_64 * b_64;
-    int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
-    int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
+    const bool    overflow     = a == b && a == std::numeric_limits<int32_t>::min();
+    const int64_t a_64         = to_int64(a);
+    const int64_t b_64         = to_int64(b);
+    const int64_t ab_64        = a_64 * b_64;
+    const int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
+    const int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
     return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
 }
 
