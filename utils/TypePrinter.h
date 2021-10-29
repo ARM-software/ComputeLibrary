@@ -161,6 +161,11 @@ inline ::std::ostream &operator<<(::std::ostream &os, experimental::PostOpType p
             os << "Eltwise_Add";
             break;
         }
+        case experimental::PostOpType::Eltwise_PRelu:
+        {
+            os << "Eltwise_PRelu";
+            break;
+        }
         default:
         {
             ARM_COMPUTE_ERROR("Unsupported PostOpType");
@@ -205,6 +210,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::IPostO
         case experimental::PostOpType::Eltwise_Add:
         {
             const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpEltwiseAdd<T> *>(&post_op);
+            os << "convert_policy=" << _post_op->_policy;
+            break;
+        }
+        case experimental::PostOpType::Eltwise_PRelu:
+        {
+            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpEltwisePRelu<T> *>(&post_op);
             os << "convert_policy=" << _post_op->_policy;
             break;
         }

@@ -56,10 +56,18 @@ const auto post_op_utils = experimental::PostOpCLKernelUtils(
     //  PostOp sequence                   -> {Kernel Postfix, PostOp Slots}
     { {}, { "", {} } },
     { { experimental::PostOpType::Activation }, { "", { 1 } } },
+
     { { experimental::PostOpType::Eltwise_Add }, { "_post_act_eltwise_op_act", { 2 } } },
+    { { experimental::PostOpType::Eltwise_PRelu }, { "_post_act_eltwise_op_act", { 2 } } },
+
     { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_Add }, { "_post_act_eltwise_op_act", { 1, 2 } } },
+    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_PRelu }, { "_post_act_eltwise_op_act", { 1, 2 } } },
+
     { { experimental::PostOpType::Eltwise_Add, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 2, 3 } } },
-    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_Add, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 1, 2, 3 } } }
+    { { experimental::PostOpType::Eltwise_PRelu, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 2, 3 } } },
+
+    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_Add, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 1, 2, 3 } } },
+    { { experimental::PostOpType::Activation, experimental::PostOpType::Eltwise_PRelu, experimental::PostOpType::Activation }, { "_post_act_eltwise_op_act", { 1, 2, 3 } } }
 });
 
 Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,

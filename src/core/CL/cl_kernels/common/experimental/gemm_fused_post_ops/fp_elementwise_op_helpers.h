@@ -45,7 +45,13 @@
 #if VEC_SIZE == 1
 #define PRELU_X_POS_0(x, y) (x > 0 ? x : x * y)
 #else // VEC_SIZE == 1
+
+#if defined(MIXED_PRECISION)
+#define PRELU_X_POS_0(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE_ACCUMULATOR)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, VEC_SIZE))))
+#else // MIXED_PRECISION
 #define PRELU_X_POS_0(x, y) (select(y * x, x, CONVERT((x > (DATA_TYPE)0), SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))))
+#endif // MIXED_PRECISION
+
 #endif // VEC_SIZE == 1
 #define DIV_X_POS_0(x, y) (x / y)
 #define AND_X_POS_0(x, y) (CONVERT((x && y), VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)) & ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))1))
@@ -60,7 +66,13 @@
 #if VEC_SIZE == 1
 #define PRELU_X_POS_1(x, y) (y > 0 ? y : y * x)
 #else // VEC_SIZE == 1
+
+#if defined(MIXED_PRECISION)
+#define PRELU_X_POS_1(x, y) (select(x * y, y, CONVERT((y > (DATA_TYPE_ACCUMULATOR)0), SELECT_VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, VEC_SIZE))))
+#else // MIXED_PRECISION
 #define PRELU_X_POS_1(x, y) (select(x * y, y, CONVERT((y > (DATA_TYPE)0), SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))))
+#endif // MIXED_PRECISION
+
 #endif // VEC_SIZE == 1
 #define DIV_X_POS_1(x, y) (y / x)
 #define AND_X_POS_1(x, y) AND_X_POS_0(x, y)

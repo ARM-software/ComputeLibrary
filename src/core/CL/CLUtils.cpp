@@ -151,6 +151,20 @@ void PostOpCLKernelUtils::set_post_ops_cl_build_options(CLBuildOptions &build_op
                 ++arg_id;
             }
         }
+        else if(post_op->type() == experimental::PostOpType::Eltwise_PRelu)
+        {
+            size_t     arg_id     = 1;
+            const auto eltwise_op = slot_prefix + "_ELTWISE_OP=PRELU" + "_X_POS_" + support::cpp11::to_string(post_op->prev_dst_pos());
+            build_opts.add_option(eltwise_op);
+            for(const auto &tensor : post_op->arguments())
+            {
+                const auto height = slot_prefix + "_ELTWISE_ARG" + support::cpp11::to_string(arg_id) + "_HEIGHT=" + support::cpp11::to_string((*tensor)->dimension(1));
+                const auto width  = slot_prefix + "_ELTWISE_ARG" + support::cpp11::to_string(arg_id) + "_WIDTH=" + support::cpp11::to_string((*tensor)->dimension(0));
+                build_opts.add_option(height);
+                build_opts.add_option(width);
+                ++arg_id;
+            }
+        }
     }
 }
 

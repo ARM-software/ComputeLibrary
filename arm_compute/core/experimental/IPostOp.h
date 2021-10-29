@@ -37,6 +37,7 @@ enum class PostOpType
 {
     Activation,
     Eltwise_Add,
+    Eltwise_PRelu
 };
 /** An ordered sequence of type of Post Ops */
 using PostOpTypeSequence = std::vector<PostOpType>;
