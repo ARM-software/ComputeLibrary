@@ -79,9 +79,9 @@ template <typename TensorRelatedT>
 struct PostOpEltwiseAdd : public IPostOp<TensorRelatedT>
 {
 public:
-    PostOpEltwiseAdd(TensorRelatedT addend, int prev_op_arg_pos, ConvertPolicy policy)
+    PostOpEltwiseAdd(TensorRelatedT addend, int prev_dst_pos, ConvertPolicy policy)
         : _addend{ addend },
-          _prev_op_arg_pos{ prev_op_arg_pos },
+          _prev_dst_pos{ prev_dst_pos },
           _policy{ policy }
     {
     }
@@ -93,7 +93,7 @@ public:
     PostOpEltwiseAdd &operator=(PostOpEltwiseAdd &&) = default;
     int               prev_dst_pos() const override
     {
-        return _prev_op_arg_pos;
+        return _prev_dst_pos;
     }
     PostOpType type() const override
     {
@@ -112,7 +112,7 @@ public:
         return std::make_unique<PostOpEltwiseAdd<TensorRelatedT>>(*this);
     }
     TensorRelatedT _addend;
-    int            _prev_op_arg_pos;
+    int            _prev_dst_pos;
     ConvertPolicy  _policy;
 };
 
@@ -135,7 +135,7 @@ PostOpList<ToTensorT> transform_post_op_list_arguments(const PostOpList<FromTens
             case PostOpType::Eltwise_Add:
             {
                 const auto _post_op = utils::cast::polymorphic_downcast<const PostOpEltwiseAdd<FromTensorT> *>(post_op.get());
-                transformed_post_ops.template push_back_op<PostOpEltwiseAdd<ToTensorT>>(transform_arg(_post_op->_addend), _post_op->_prev_op_arg_pos, _post_op->_policy);
+                transformed_post_ops.template push_back_op<PostOpEltwiseAdd<ToTensorT>>(transform_arg(_post_op->_addend), _post_op->_prev_dst_pos, _post_op->_policy);
                 break;
             }
             default:

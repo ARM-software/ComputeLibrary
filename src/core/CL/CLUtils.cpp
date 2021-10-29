@@ -85,13 +85,21 @@ PostOpCLKernelUtils::PostOpCLKernelUtils(const Config &supported_config)
 
 bool PostOpCLKernelUtils::are_post_op_shapes_compliant(const ITensorInfo *dst, const experimental::PostOpList<ITensorInfo *> &post_ops)
 {
-    // All post ops must be elementwise and must not alter the shape of the original dst tensor after broadcasting
     for(const auto &op : post_ops.get_list())
     {
         for(const auto &tensor : op->arguments())
         {
             const TensorShape &out_shape = TensorShape::broadcast_shape(dst->tensor_shape(), (*tensor)->tensor_shape());
+            // All post ops must be elementwise and must not alter the shape of the original dst tensor after broadcasting
             if(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0))
+            {
+                return false;
+            }
+            // NOTE: Kernel limitation: currently only the following broadcasting types are supported:
+            //  1. Post op arg is scalar, broadcast in both X and Y
+            //  2. Post op arg is of shape: Y=1, X=N, broadcast only in Y
+            //  This means this case: Post op arg is of shape: Y=M, X=1, broadcast only in X, is NOT supported
+            if(dst->dimension(0) > 1 && dst->dimension(1) > 1 && (*tensor)->dimension(0) == 1 && (*tensor)->dimension(1) > 1)
             {
                 return false;
             }

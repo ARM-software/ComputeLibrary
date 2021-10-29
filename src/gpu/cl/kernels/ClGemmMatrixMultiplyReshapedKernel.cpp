@@ -182,10 +182,10 @@ void ClGemmMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
-
     // dst tensor auto initialization if not yet initialized
     auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
 
     auto padding_info         = get_padding_info({ src0, src1, src2, dst });
     _reinterpret_output_as_3d = gemm_info.depth_output_gemm3d != 0;

@@ -44,7 +44,7 @@ using PostOpTypeSequence = std::vector<PostOpType>;
  *  It contains:
  *      1. The attributes of the original operator.
  *      2. Any additional tensor argument.
- *      3. The postion of the previous op's dst tensor in its argument list ( @ref prev_dst_pos )
+ *      3. The position of the previous op's dst tensor in its argument list ( @ref prev_dst_pos )
  *
  *  For example, a series of chained ops:
  *
@@ -62,8 +62,16 @@ using PostOpTypeSequence = std::vector<PostOpType>;
  *          post op1: relu(act_info, prev_dst_pos = 0)
  *          post op2: div(div_info, src1, prev_dst_pos = 1)
  *
- *  NOTE: PostOps do not own any resources pointed to by TensorRelatedT if it's a pointer type
- *  NOTE: If TensorRelatedT points to a resource, IPostOp assumes that resource is valid throughout its lifetime
+ *  @note: On Broadcasting
+ *      For n-ary post ops, the tensor arguments must not "widen" the dst tensor of the main op
+ *      For example, for a dst of shape [14, 1, 34]:
+ *          * post_op_arg1 = [1, 1, 34] is allowed: broadcast in dim 0
+ *          * post_op_arg1 = [14, 1, 34] is allowed: no broadcast
+ *          * post_op_arg1 = [1, 1, 34] is allowed: broadcast in dims 0 and 1
+ *          * post_op_arg1 = [14, 15, 34] is NOT allowed: broadcast widens the dst tensor
+ *
+ *  @note: PostOps do not own any resources pointed to by TensorRelatedT if it's a pointer type
+ *  @note: If TensorRelatedT points to a resource, IPostOp assumes that resource is valid throughout its lifetime
  *        and the lifetime of its copies. This is almost guaranteed as IPostOp is only meant to be used at configure time
  *        after the ITensor or ITensorInfo objects are already constructed
  */
@@ -71,7 +79,7 @@ template <typename TensorRelatedT>
 struct IPostOp
 {
     /** Get the arity of the post op
-     * NOTE: that this is one fewer than the arity of the original op, because we implicitly pass the previous op's dst
+     * @note: that this is one fewer than the arity of the original op, because we implicitly pass the previous op's dst
      *       tensor as one of the arguments
      */
     size_t arity() const
@@ -88,7 +96,7 @@ struct IPostOp
     virtual std::vector<TensorRelatedT *>       arguments()       = 0;
     virtual std::vector<const TensorRelatedT *> arguments() const = 0;
     /** Clone method used in cases where PostOps are owned by unique_ptr
-     * NOTE: This performs a shallow copy of the TensorRelatedT if TensorRelatedT points to a resource
+     * @note: This performs a shallow copy of the TensorRelatedT if TensorRelatedT points to a resource
      */
     virtual std::unique_ptr<IPostOp<TensorRelatedT>> clone() const = 0;
     virtual ~IPostOp()

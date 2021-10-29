@@ -193,7 +193,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::IPostO
 {
     os << "<";
     os << post_op.type() << ",";
-    os << "prev_op_arg_pos=" << post_op.prev_dst_pos() << ",";
+    os << "prev_dst_pos=" << post_op.prev_dst_pos() << ",";
     switch(post_op.type())
     {
         case experimental::PostOpType::Activation:
