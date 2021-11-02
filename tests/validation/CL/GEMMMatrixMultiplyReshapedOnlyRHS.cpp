@@ -672,7 +672,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSWithPost
                                                                    framework::dataset::make("H0", {1})),
                                                                    framework::dataset::make("interleave_rhs", { true })),
                                                                    t_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false, true)),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", {false, true})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
