@@ -85,6 +85,14 @@ void DotGraphVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
     _info = ss.str();
 }
 
+void DotGraphVisitor::visit(FusedConvolutionWithPostOpNode &n)
+{
+    ARM_COMPUTE_UNUSED(n);
+    std::stringstream ss;
+    ss << "FusedConvolutionWithPostOpNode";
+    _info = ss.str();
+}
+
 void DotGraphVisitor::visit(FusedDepthwiseConvolutionBatchNormalizationNode &n)
 {
     ARM_COMPUTE_UNUSED(n);

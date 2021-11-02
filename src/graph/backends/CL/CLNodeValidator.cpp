@@ -76,6 +76,8 @@ Status CLNodeValidator::validate(INode *node)
                    CLDirectConvolutionLayer,
                    CLGEMMConvolutionLayer,
                    CLWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
+        case NodeType::FusedConvolutionWithPostOp:
+            return detail::validate_fused_convolution_with_post_op<CLGEMMConvolutionLayer>(*polymorphic_downcast<FusedConvolutionWithPostOpNode *>(node));
         case NodeType::DepthToSpaceLayer:
             return detail::validate_depth_to_space_layer<CLDepthToSpaceLayer>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:

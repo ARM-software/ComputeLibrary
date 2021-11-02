@@ -81,6 +81,7 @@ struct CLFusedLayerTypes
     using ConvolutionLayer          = CLConvolutionLayer;
     using DepthwiseConvolutionLayer = CLDepthwiseConvolutionLayer;
     using FuseBatchNormalization    = CLFuseBatchNormalization;
+    using GEMMConvolutionLayer      = CLGEMMConvolutionLayer;
 };
 
 /** Wrapper for the CPP Function in the OpenCL backend **/
@@ -273,6 +274,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<CLFullyConnectedLayer, CLTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             return detail::create_fused_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node), ctx);
+        case NodeType::FusedConvolutionWithPostOp:
+            return detail::create_fused_convolution_with_post_op<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedConvolutionWithPostOpNode *>(node), ctx);
         case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
             return detail::create_fused_depthwise_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node), ctx);
         case NodeType::GenerateProposalsLayer:

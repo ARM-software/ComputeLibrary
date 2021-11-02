@@ -116,6 +116,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             os << "FusedConvolutionBatchNormalizationLayer";
             break;
+        case NodeType::FusedConvolutionWithPostOp:
+            os << "FusedConvolutionWithPostOp";
+            break;
         case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
             os << "FusedDepthwiseConvolutionBatchNormalizationLayer";
             break;

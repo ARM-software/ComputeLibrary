@@ -62,6 +62,7 @@ using arm_compute::PoolingType;
 using arm_compute::PriorBoxLayerInfo;
 using arm_compute::DimensionRoundingType;
 using arm_compute::InterpolationPolicy;
+using arm_compute::experimental::PostOpType;
 
 using GraphID    = unsigned int;
 using TensorID   = unsigned int;
@@ -145,6 +146,55 @@ enum class FastMathHint
     Disabled, /**< Fast math disabled for Convolution layer */
 };
 
+/** Convolution post operator info */
+class ConvPostOpInfo
+{
+public:
+    /** Returns post op type
+     *
+     * @return Post op type
+     */
+    virtual PostOpType type() const = 0;
+    virtual ~ConvPostOpInfo()
+    {
+    }
+};
+
+class ConvPostOpInfoActivation : public ConvPostOpInfo
+{
+public:
+    ConvPostOpInfoActivation(const ActivationLayerInfo &act)
+        : _act(act)
+    {
+    }
+    ~ConvPostOpInfoActivation() override
+    {
+    }
+    PostOpType type() const override
+    {
+        return PostOpType::Activation;
+    }
+    ActivationLayerInfo _act;
+};
+
+class ConvPostOpInfoEltwiseAdd : public ConvPostOpInfo
+{
+public:
+    ConvPostOpInfoEltwiseAdd(int arg_pos, const ConvertPolicy &policy)
+        : _prev_op_dst_pos(arg_pos), _policy(policy)
+    {
+    }
+    PostOpType type() const override
+    {
+        return PostOpType::Eltwise_Add;
+    }
+    ~ConvPostOpInfoEltwiseAdd() override
+    {
+    }
+    int           _prev_op_dst_pos;
+    ConvertPolicy _policy;
+};
+
 /** Supported nodes */
 enum class NodeType
 {
@@ -165,6 +215,7 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     FusedConvolutionBatchNormalizationLayer,
+    FusedConvolutionWithPostOp,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     L2NormalizeLayer,
