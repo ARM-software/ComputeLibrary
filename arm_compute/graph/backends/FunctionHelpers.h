@@ -602,6 +602,7 @@ std::unique_ptr<IFunction> create_fused_convolution_with_post_op(FusedConvolutio
     std::unique_ptr<IFunction>      func;
     std::string                     func_name;
 
+    // Fuse convolution with post ops is only supported for conv1x1, which is only implemented as gemmconv2d
     std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::GEMMConvolutionLayer>(
                                     std::string("GEMMConvolutionLayer"), mm,
                                     input, weights, biases, output, conv_info,

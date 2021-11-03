@@ -72,16 +72,6 @@ public:
      * @return Fast math hint to be used by the node
      */
     FastMathHint fast_math_hint() const;
-    /** Post operator info list
-     *
-     * @return Post operator info list
-     */
-    const std::list<std::unique_ptr<ConvPostOpInfo>> &post_op_info_list() const;
-    /** Post operator info list
-     *
-     * @return Post operator info list
-     */
-    std::list<std::unique_ptr<ConvPostOpInfo>> &post_op_info_list();
     /** Convolution metadata accessor
      *
      * @return Convolution information
@@ -129,13 +119,12 @@ public:
     static constexpr NodeType node_type = NodeType::FusedConvolutionWithPostOp;
 
 private:
-    PadStrideInfo                              _info;
-    unsigned int                               _num_groups;
-    ConvolutionMethod                          _method;
-    FastMathHint                               _fast_math_hint;
-    QuantizationInfo                           _out_quant_info;
-    ActivationLayerInfo                        _fused_activation;
-    std::list<std::unique_ptr<ConvPostOpInfo>> _post_op_info_list;
+    PadStrideInfo       _info;
+    unsigned int        _num_groups;
+    ConvolutionMethod   _method;
+    FastMathHint        _fast_math_hint;
+    QuantizationInfo    _out_quant_info;
+    ActivationLayerInfo _fused_activation;
 };
 } // namespace graph
 } // namespace arm_compute

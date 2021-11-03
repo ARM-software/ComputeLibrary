@@ -37,8 +37,7 @@ FusedConvolutionWithPostOpNode::FusedConvolutionWithPostOpNode(PadStrideInfo    
                                                                ConvolutionMethod method,
                                                                FastMathHint      fast_math_hint,
                                                                QuantizationInfo  out_quant_info)
-    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(std::move(out_quant_info)), _fused_activation(),
-      _post_op_info_list(std::list<std::unique_ptr<ConvPostOpInfo>> {})
+    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(std::move(out_quant_info)), _fused_activation()
 {
     _input_edges.resize(4, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -62,16 +61,6 @@ void FusedConvolutionWithPostOpNode::set_fast_math_hint(FastMathHint hint)
 FastMathHint FusedConvolutionWithPostOpNode::fast_math_hint() const
 {
     return _fast_math_hint;
-}
-
-const std::list<std::unique_ptr<ConvPostOpInfo>> &FusedConvolutionWithPostOpNode::post_op_info_list() const
-{
-    return _post_op_info_list;
-}
-
-std::list<std::unique_ptr<ConvPostOpInfo>> &FusedConvolutionWithPostOpNode::post_op_info_list()
-{
-    return _post_op_info_list;
 }
 
 PadStrideInfo FusedConvolutionWithPostOpNode::convolution_info() const
