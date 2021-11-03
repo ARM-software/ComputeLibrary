@@ -409,7 +409,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_post_act_eltwise_op_act(IMAGE_DECLAR
     // c = act(c)
     POST_OP1_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
     // c = c + eltwise_operand (mix-precision, broadcast, boundary aware)
-    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, get_global_id(1) * (uint)M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
     // c = act(c)
     POST_OP3_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
 
@@ -626,7 +626,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture_post_act_eltwise_op_act(IMAG
     // c = act(c)
     POST_OP1_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
     // c = c + eltwise_operand (mix-precision, broadcast, boundary aware)
-    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, get_global_id(1) * (uint)M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
     // c = act(c)
     POST_OP3_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
 
@@ -1069,7 +1069,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLAR
     // c = act(c)
     POST_OP1_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
     // c = c + eltwise_operand (mix-precision, broadcast, boundary aware)
-    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, get_global_id(1) * (uint)M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
     // c = act(c)
     POST_OP3_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
 
@@ -1384,7 +1384,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture_post_act_eltwise_op_act(IMAG
     // c = act(c)
     POST_OP1_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
     // c = c + eltwise_operand (mix-precision, broadcast, boundary aware)
-    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
+    POST_OP2_ELTWISE_OP(P2_ELTWISE_OP, M0, N0, c, eltwise_operand, get_global_id(1) * (uint)M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
     // c = act(c)
     POST_OP3_ACTIVATION_OPTIONAL(M0, DATA_TYPE, DATA_TYPE_ACCUMULATOR, N0, c);
 

@@ -54,6 +54,9 @@
  * @param[in] N0                     The number of consecutive columns
  * @param[in] BASENAME               The basename of the result variables
  * @param[in] ELTWISE_OPERAND_NAME   The basename of the other operand variables
+ * @param[in] ELTWISE_OPERAND_ROW    The starting row of the other operand variables. Required as different boundary handling strategies are used by different kernels
+ *                                   E.g. reshaped_only_rhs and native kernels shifts rows (by using COMPUTE_M0_START_ROW) to handle boundary rows,
+ *                                   whereas reshaped kernels do not shift rows
  * @param[in] DATA_TYPE              Data type of the result variables
  * @param[in] DATA_TYPE_ACCUMULATR   Higher-precision accumulator data type in case of mixed-precision op
  * @param[in] ZERO                   Zero vector for z offset
@@ -66,26 +69,25 @@
 #if defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
 #if P2_ELTWISE_ARG1_HEIGHT == 1
 #if P2_ELTWISE_ARG1_WIDTH == 1 // Case 1: Broadcasting in both X and Y; op2 arg tile shape[YxX] == [1x1]
-#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X)         \
-    __global uchar *ELTWISE_OPERAND_NAME##_addr = ELTWISE_OPERAND_NAME##_ptr + ELTWISE_OPERAND_NAME##_offset_first_element_in_bytes + get_global_id(2) * ELTWISE_OPERAND_NAME##_stride_z; \
-    VEC_DATA_TYPE(DATA_TYPE, 1)                                                                                                                                                           \
-    ELTWISE_OPERAND_NAME##0 = VLOAD(1)(0, (__global DATA_TYPE *)ELTWISE_OPERAND_NAME##_addr);                                                                                             \
+#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_ROW, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
+    __global uchar *ELTWISE_OPERAND_NAME##_addr = ELTWISE_OPERAND_NAME##_ptr + ELTWISE_OPERAND_NAME##_offset_first_element_in_bytes + get_global_id(2) * ELTWISE_OPERAND_NAME##_stride_z;              \
+    VEC_DATA_TYPE(DATA_TYPE, 1)                                                                                                                                                                        \
+    ELTWISE_OPERAND_NAME##0 = VLOAD(1)(0, (__global DATA_TYPE *)ELTWISE_OPERAND_NAME##_addr);                                                                                                          \
     MIXED_PRECISION_ELTWISE_OP_BLOCK_BROADCAST(OP, M0, 1, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE_ACCUMULATOR, ELTWISE_OPERAND_NAME##_hp);
 #else // P2_ELTWISE_ARG1_WIDTH == 1; Case 2: Broadcasting in only Y; op2 arg tile shape[YxX] == [1xN0]
-#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                                                             \
+#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_ROW, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                                        \
     __global uchar *ELTWISE_OPERAND_NAME##_addr = ELTWISE_OPERAND_NAME##_ptr + ELTWISE_OPERAND_NAME##_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + get_global_id(2) * ELTWISE_OPERAND_NAME##_stride_z; \
     LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_NAME##_addr, 0, ELTWISE_OPERAND_NAME##_stride_y, ZERO, 1, PARTIAL_LOAD_N0, false, PARTIAL_COND_X);                                                      \
     MIXED_PRECISION_ELTWISE_OP_BLOCK_BROADCAST(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE_ACCUMULATOR, ELTWISE_OPERAND_NAME##_hp);
 #endif // P2_ELTWISE_ARG1_WIDTH == 1
 #else  // P2_ELTWISE_ARG1_HEIGHT == 1; Case 3: No broadcasting; op2 arg tile shape[YxX] == [M0xN0]
-#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                                                                                                                               \
-    __global uchar *ELTWISE_OPERAND_NAME##_addr = ELTWISE_OPERAND_NAME##_ptr + ELTWISE_OPERAND_NAME##_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * ELTWISE_OPERAND_NAME##_stride_y) + get_global_id(2) * ELTWISE_OPERAND_NAME##_stride_z; \
-    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_NAME##_addr, 0, ELTWISE_OPERAND_NAME##_stride_y, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X);                                                                                                \
+#define POST_OP2_ELTWISE_OP(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_ROW, DATA_TYPE, DATA_TYPE_ACCUMULATOR, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                                                                                                  \
+    __global uchar *ELTWISE_OPERAND_NAME##_addr = ELTWISE_OPERAND_NAME##_ptr + ELTWISE_OPERAND_NAME##_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (ELTWISE_OPERAND_ROW * ELTWISE_OPERAND_NAME##_stride_y) + get_global_id(2) * ELTWISE_OPERAND_NAME##_stride_z; \
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, ELTWISE_OPERAND_NAME, ELTWISE_OPERAND_NAME##_addr, 0, ELTWISE_OPERAND_NAME##_stride_y, ZERO, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X);                                                                                        \
     MIXED_PRECISION_ELTWISE_OP_BLOCK(OP, M0, N0, BASENAME, ELTWISE_OPERAND_NAME, DATA_TYPE_ACCUMULATOR, ELTWISE_OPERAND_NAME##_hp);
 #endif    // P2_ELTWISE_ARG1_HEIGHT == 1
 #endif    // defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
 /** @} */ // end of group POST_OP2_ELTWISE_OP
-
 /** Post Op 3: Activation Block (Optional)
  * @name POST_OP3_ACTIVATION_OPTIONAL
  * Toggled by -DP3_ACTIVATION_TYPE
