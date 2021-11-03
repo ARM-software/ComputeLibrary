@@ -71,6 +71,15 @@ using PostOpTypeSequence = std::vector<PostOpType>;
  *          * post_op_arg1 = [1, 1, 34] is allowed: broadcast in dims 0 and 1
  *          * post_op_arg1 = [14, 15, 34] is NOT allowed: broadcast widens the dst tensor
  *
+ * @note: On Data layout
+ *      All post ops are data layout agnostic. This means post ops do not have an inherent idea of "width", "height" and so on.
+ *      Should we want to perform a post op with 2 tensors of different data layouts (where data layouts are significant to both),
+ *      then we need to perform necessary permutation op beforehand to unify their data layout before they can be fused with a post op
+ *
+ *      Note although post ops themselves should be able to support any data layout, the main op they fuse to may impose
+ *      additional restrictions in the presence of post ops. For example, the implementation of a gemm op may only allow
+ *      NHWC data layout if post ops are provided. Such restrictions are main op implementation specific.
+ *
  *  @note: PostOps do not own any resources pointed to by TensorRelatedT if it's a pointer type
  *  @note: If TensorRelatedT points to a resource, IPostOp assumes that resource is valid throughout its lifetime
  *        and the lifetime of its copies. This is almost guaranteed as IPostOp is only meant to be used at configure time

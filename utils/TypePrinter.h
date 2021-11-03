@@ -2180,6 +2180,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &c
         case ConvolutionMethod::WINOGRAD:
             os << "WINOGRAD";
             break;
+        case ConvolutionMethod::FFT:
+            os << "FFT";
+            break;
+        case ConvolutionMethod::GEMM_CONV2D:
+            os << "GEMM_CONV2D";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

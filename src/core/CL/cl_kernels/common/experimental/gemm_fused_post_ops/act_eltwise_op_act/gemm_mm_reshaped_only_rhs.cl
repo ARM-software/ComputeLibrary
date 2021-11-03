@@ -177,7 +177,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act(IMAGE_DECLARAT
                                                                   IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                                   IMAGE_DECLARATION(dst),
-                                                                  // Post-Op arguments
+                                                                  // Post Op arguments
                                                                   IMAGE_DECLARATION(eltwise_operand),
                                                                   uint lhs_stride_z,
                                                                   uint rhs_stride_z,
@@ -437,7 +437,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
                                                                           IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                                           IMAGE_DECLARATION(dst),
-                                                                          // Post-Op arguments
+                                                                          // Post Op arguments
                                                                           IMAGE_DECLARATION(eltwise_operand),
                                                                           uint lhs_stride_z,
                                                                           uint rhs_stride_z,
@@ -831,7 +831,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLARA
                                                                    IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                                    IMAGE_DECLARATION(dst),
-                                                                   // Post-Op arguments
+                                                                   // Post Op arguments
                                                                    IMAGE_DECLARATION(eltwise_operand),
                                                                    uint lhs_stride_z,
                                                                    uint rhs_stride_z,
@@ -1116,7 +1116,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act(IMAGE
                                                                            IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                                            IMAGE_DECLARATION(dst),
-                                                                           // Post-Op arguments
+                                                                           // Post Op arguments
                                                                            IMAGE_DECLARATION(eltwise_operand),
                                                                            uint lhs_stride_z,
                                                                            uint rhs_stride_z,

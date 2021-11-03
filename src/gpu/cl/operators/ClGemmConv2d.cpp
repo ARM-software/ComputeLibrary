@@ -389,6 +389,9 @@ Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * conv2d_info.num_groups) != src->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!skip_im2col
+                                    && conv2d_info.post_ops.size() > 0,
+                                    "ClGemmConv2d does not support post ops with col2im or im2col operation"); // Post ops must be performed after every other op
 
     // Validate biases
     if(biases != nullptr)
@@ -523,7 +526,6 @@ Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights
     // Validate Col2Im
     if(!skip_col2im)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClGemmConv2d does not support post ops with col2im operation"); // Post ops must be performed after every other op
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClCol2ImKernel::validate(gemm_output_to_use, dst, Size2D(conv_w, conv_h), conv2d_info.num_groups));
     }
 

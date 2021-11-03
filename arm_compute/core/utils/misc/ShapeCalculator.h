@@ -703,20 +703,18 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
 
 /** Calculate the deep convolution shape output shape of a tensor
  *
- * @param[in] input     Input tensor info
- * @param[in] weights   Weights tensor info
- * @param[in] conv_info Contains padding and stride information
+ * @param[in] input_shape       Input tensor shape
+ * @param[in] input_data_layout Input data layout
+ * @param[in] weights_shape     Weights tensor shape
+ * @param[in] conv_info         Contains padding and stride information
  *
  * @return the calculated shape
  */
-inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
+inline TensorShape compute_deep_convolution_shape(const TensorShape &input_shape, DataLayout input_data_layout, const TensorShape &weights_shape, const PadStrideInfo &conv_info)
 {
-    const TensorShape input_shape{ input.tensor_shape() };
-    const TensorShape weights_shape{ weights.tensor_shape() };
-
-    const size_t idx_width   = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height  = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t idx_channel = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
+    const size_t idx_width   = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_height  = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_channel = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::CHANNEL);
 
     const unsigned int input_width         = input_shape[idx_width];
     const unsigned int input_height        = input_shape[idx_height];
@@ -733,6 +731,19 @@ inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, cons
     output_shape.set(idx_channel, weights_out_channel);
 
     return output_shape;
+}
+
+/** Calculate the deep convolution shape output shape of a tensor
+ *
+ * @param[in] input     Input tensor info
+ * @param[in] weights   Weights tensor info
+ * @param[in] conv_info Contains padding and stride information
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, const PadStrideInfo &conv_info)
+{
+    return compute_deep_convolution_shape(input.tensor_shape(), input.data_layout(), weights.tensor_shape(), conv_info);
 }
 
 /** Calculate the min/max shape output shape of a tensor

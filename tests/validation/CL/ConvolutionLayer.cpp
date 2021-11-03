@@ -22,10 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
+#include "src/core/experimental/PostOp.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
@@ -88,6 +90,29 @@ const auto ActivationFunctionsSmallDataset = framework::dataset::make("Activatio
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
 });
+
+bool is_post_op_list_valid_in_gemmconv(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &output_shape, DataType data_type, DataLayout data_layout,
+                                       const PadStrideInfo &conv_info, const experimental::PostOpList<ITensorInfo *> &post_ops)
+{
+    const int idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int idx_kernels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+
+    const auto         dilation   = Size2D(1U, 1U);
+    const unsigned int num_groups = 1U;
+
+    TensorInfo input_info(input_shape, 1, data_type, data_layout);
+    TensorInfo weights_info(weights_shape, 1, data_type, data_layout);
+
+    TensorInfo output_info(output_shape, 1, data_type, data_layout);
+
+    WeightsInfo w_info(false, weights_info.dimension(idx_width), weights_info.dimension(idx_height), weights_info.dimension(idx_kernels));
+
+    const auto status = CLGEMMConvolutionLayer::validate(&input_info.clone()->set_is_resizable(true),
+                                                         &weights_info.clone()->set_is_resizable(true), nullptr, &output_info.clone()->set_is_resizable(true),
+                                                         conv_info, w_info, dilation, ActivationLayerInfo(), num_groups, post_ops);
+    return bool(status);
+}
 } // namespace
 
 TEST_SUITE(CL)
@@ -179,6 +204,72 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                             enable_fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
+DATA_TEST_CASE(ValidatePostOpSupportInConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+                                          framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 17U, 31U), 1, DataType::F32, DataLayout::NHWC),            // Select GEMM
+                                                                                  TensorInfo(TensorShape(17U, 31U, 32U), 1, DataType::F32, DataLayout::NCHW),           // Select WINOGRAD
+                                                                                  TensorInfo(TensorShape(27U, 27U, 48U), 1, DataType::F32, DataLayout::NCHW),           // Select Direct
+                                                                                  TensorInfo(TensorShape(27U, 27U, 48U), 1, DataType::F32, DataLayout::NCHW),           // Select FFT
+                                          }),
+                                          framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(2U, 1U, 1U, 19U), 1, DataType::F32, DataLayout::NHWC),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 32U, 19U), 1, DataType::F32, DataLayout::NCHW),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 48U, 128U), 1, DataType::F32, DataLayout::NCHW),
+                                                                                    TensorInfo(TensorShape(11U, 11U, 48U, 24), 1, DataType::F32, DataLayout::NCHW),
+                                          })),
+                                          framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(19U, 17U, 31U), 1, DataType::F32, DataLayout::NHWC),
+                                                                                   TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32, DataLayout::NCHW),
+                                                                                   TensorInfo(TensorShape(27U, 27U, 128U), 1, DataType::F32, DataLayout::NCHW),
+                                                                                   TensorInfo(TensorShape(27U, 27U, 24U), 1, DataType::F32, DataLayout::NCHW),
+                                          })),
+                                          framework::dataset::make("ConvInfo", { PadStrideInfo(1U, 1U, 0U, 0U),
+                                                                                 PadStrideInfo(1U, 1U, 2U, 2U),
+                                                                                 PadStrideInfo(1U, 1U, 2U, 2U),
+                                                                                 PadStrideInfo(1U, 1U, 5U, 5U),
+                                          })),
+                                         framework::dataset::make("EnableFastMath", { false, true, false, false})),
+                                         framework::dataset::make("ExpectedMethod",{ ConvolutionMethod::GEMM,
+                                                                                     ConvolutionMethod::WINOGRAD,
+                                                                                     ConvolutionMethod::DIRECT,
+                                                                                     ConvolutionMethod::FFT,
+                                         })),
+                                         framework::dataset::make("PostOpSupported",{ true, false, false, false
+                                         })),
+                                         input_info, weights_info, output_info, conv_info, enable_fast_math, expected_method, post_op_supported)
+{
+    const int idx_width  = get_data_layout_dimension_index(input_info.data_layout(), DataLayoutDimension::WIDTH);
+    const int idx_height = get_data_layout_dimension_index(input_info.data_layout(), DataLayoutDimension::HEIGHT);
+    const int idx_kernels = get_data_layout_dimension_index(input_info.data_layout(), DataLayoutDimension::BATCHES);
+
+    const auto dilation = Size2D(1U, 1U);
+    const unsigned int num_groups = 1U;
+
+    WeightsInfo w_info(false, weights_info.dimension(idx_width), weights_info.dimension(idx_height), weights_info.dimension(idx_kernels));
+
+    experimental::PostOpList<ITensorInfo*> post_ops{};
+    post_ops.push_back_op<experimental::PostOpAct<ITensorInfo*>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
+
+    ConvolutionMethod actual_method = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            &output_info.clone()->set_is_resizable(true), conv_info,
+                                                                            WeightsInfo(),
+                                                                            ActivationLayerInfo(),
+                                                                            GPUTarget::BIFROST,
+                                                                            dilation,
+                                                                            enable_fast_math);
+    ARM_COMPUTE_EXPECT(actual_method == expected_method, framework::LogLevel::ERRORS);
+    const auto is_valid = CLConvolutionLayer::validate(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            nullptr,
+                                                                            &output_info.clone()->set_is_resizable(true),
+                                                                            conv_info,
+                                                                            w_info,
+                                                                            dilation,
+                                                                            ActivationLayerInfo(),
+                                                                            enable_fast_math,
+                                                                            num_groups,
+                                                                            post_ops);
+    ARM_COMPUTE_EXPECT( bool(is_valid) == post_op_supported, framework::LogLevel::ERRORS);
+}
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE_END() // ConvolutionLayer
@@ -191,6 +282,159 @@ using CLGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixtur
 template <typename T>
 using CLConvolutionValidationWithPaddingFixture = ConvolutionValidationWithPaddingFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
+TEST_SUITE(ValidateFusedPostOpsConfigs)
+TEST_SUITE(Invalid)
+TEST_CASE(UnsupportedPostOpSequence, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 1U, 1U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    const TensorShape post_op_arg0_shape(output_shape);
+    TensorInfo        post_op_arg_info(post_op_arg0_shape, 1, data_type);
+    auto              post_op_arg1_info = post_op_arg_info.clone();
+
+    // Unsupported sequence of post ops
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          post_op_arg1_info.get(),
+                                                                          0,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == false, framework::LogLevel::ERRORS);
+}
+TEST_CASE(OnlyNHWCIsSupported, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NCHW;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(14U, 12U, 16U, 2U);
+    const auto weights_shape = TensorShape(1U, 1U, 16U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    const TensorShape post_op_arg0_shape(output_shape);
+    TensorInfo        post_op_arg_info(post_op_arg0_shape, 1, data_type);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == false, framework::LogLevel::ERRORS);
+}
+TEST_CASE(OnlyFloatingTypeIsSupported, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::QASYMM8;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 1U, 1U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    const TensorShape post_op_arg0_shape(output_shape);
+    TensorInfo        post_op_arg_info(post_op_arg0_shape, 1, data_type);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == false, framework::LogLevel::ERRORS);
+}
+TEST_CASE(OnlyConv1x1Stride1IsSupported_UnsupportedKernelSize, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 3U, 3U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    const TensorShape post_op_arg0_shape(output_shape);
+    TensorInfo        post_op_arg_info(post_op_arg0_shape, 1, data_type);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == false, framework::LogLevel::ERRORS);
+}
+TEST_CASE(OnlyConv1x1Stride1IsSupported_UnsupportedStride, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(3, 3, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 1U, 1U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    const TensorShape post_op_arg0_shape(output_shape);
+    TensorInfo        post_op_arg_info(post_op_arg0_shape, 1, data_type);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == false, framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END() // Invalid
+TEST_SUITE(Valid)
+TEST_CASE(EmptyPostOpList, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 1U, 1U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == true, framework::LogLevel::ERRORS);
+}
+TEST_CASE(SupportedPostOps, framework::DatasetMode::ALL)
+{
+    const auto data_type     = DataType::F32;
+    const auto data_layout   = DataLayout::NHWC;
+    const auto conv_info     = PadStrideInfo(1, 1, 0, 0);
+    const auto input_shape   = TensorShape(16U, 14U, 12U, 2U);
+    const auto weights_shape = TensorShape(16U, 1U, 1U, 24U);
+
+    const auto output_shape = misc::shape_calculator::compute_deep_convolution_shape(input_shape, data_layout, weights_shape, conv_info);
+
+    TensorShape post_op_arg0_shape(output_shape);
+    post_op_arg0_shape[1] = 1; // Broadcast in "Y" (second) dimension
+    TensorInfo post_op_arg_info(post_op_arg0_shape, 1, data_type);
+
+    experimental::PostOpList<ITensorInfo *> post_ops{};
+    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo *>>(
+                                                                          &post_op_arg_info,
+                                                                          1,
+                                                                          ConvertPolicy::SATURATE);
+
+    ARM_COMPUTE_EXPECT(is_post_op_list_valid_in_gemmconv(input_shape, weights_shape, output_shape, data_type, data_layout, conv_info, post_ops) == true, framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END() // Valid
+TEST_SUITE_END() // ValidateFusedPostOps
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 

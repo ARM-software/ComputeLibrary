@@ -96,9 +96,9 @@ bool PostOpCLKernelUtils::are_post_op_shapes_compliant(const ITensorInfo *dst, c
                 return false;
             }
             // NOTE: Kernel limitation: currently only the following broadcasting types are supported:
-            //  1. Post op arg is scalar, broadcast in both X and Y
-            //  2. Post op arg is of shape: Y=1, X=N, broadcast only in Y
-            //  This means this case: Post op arg is of shape: Y=M, X=1, broadcast only in X, is NOT supported
+            //  1. Post op arg is scalar, broadcast in both first and second dims
+            //  2. Post op arg is of shape: second dim=1, first dim=N, broadcast only in second dim
+            //  This means this case: Post op arg is of shape: second dim=M, first dim=1, broadcast only in first dim, is NOT supported
             if(dst->dimension(0) > 1 && dst->dimension(1) > 1 && (*tensor)->dimension(0) == 1 && (*tensor)->dimension(1) > 1)
             {
                 return false;
