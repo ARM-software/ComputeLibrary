@@ -186,18 +186,18 @@ void directconv3d_quantized_neon_ndhwc(const ITensor *src0, const ITensor *src1,
                             q32x4_t wei_q32_3 = wrapper::vdup_n(static_cast<q32_t>(weights_offset), tag_type());
 
                             const auto src_q16_0 = wrapper::vmovl(wrapper::vgetlow(src_vec));
-                            const auto src_q16_1 = wrapper::vmovl(wrapper::vgetlow(src_vec));
+                            const auto src_q16_1 = wrapper::vmovl(wrapper::vgethigh(src_vec));
                             const auto wei_q16_0 = wrapper::vmovl(wrapper::vgetlow(w_vec));
-                            const auto wei_q16_1 = wrapper::vmovl(wrapper::vgetlow(w_vec));
+                            const auto wei_q16_1 = wrapper::vmovl(wrapper::vgethigh(w_vec));
 
                             src_q32_0 = wrapper::vadd(src_q32_0, wrapper::vmovl(wrapper::vgetlow(src_q16_0)));
-                            src_q32_1 = wrapper::vadd(src_q32_1, wrapper::vmovl(wrapper::vgetlow(src_q16_0)));
-                            src_q32_2 = wrapper::vadd(src_q32_2, wrapper::vmovl(wrapper::vgethigh(src_q16_1)));
+                            src_q32_1 = wrapper::vadd(src_q32_1, wrapper::vmovl(wrapper::vgethigh(src_q16_0)));
+                            src_q32_2 = wrapper::vadd(src_q32_2, wrapper::vmovl(wrapper::vgetlow(src_q16_1)));
                             src_q32_3 = wrapper::vadd(src_q32_3, wrapper::vmovl(wrapper::vgethigh(src_q16_1)));
 
                             wei_q32_0 = wrapper::vadd(wei_q32_0, wrapper::vmovl(wrapper::vgetlow(wei_q16_0)));
-                            wei_q32_1 = wrapper::vadd(wei_q32_1, wrapper::vmovl(wrapper::vgetlow(wei_q16_0)));
-                            wei_q32_2 = wrapper::vadd(wei_q32_2, wrapper::vmovl(wrapper::vgethigh(wei_q16_1)));
+                            wei_q32_1 = wrapper::vadd(wei_q32_1, wrapper::vmovl(wrapper::vgethigh(wei_q16_0)));
+                            wei_q32_2 = wrapper::vadd(wei_q32_2, wrapper::vmovl(wrapper::vgetlow(wei_q16_1)));
                             wei_q32_3 = wrapper::vadd(wei_q32_3, wrapper::vmovl(wrapper::vgethigh(wei_q16_1)));
 
                             acc_q32_0 = wrapper::vmla(acc_q32_0, wei_q32_0, src_q32_0);
