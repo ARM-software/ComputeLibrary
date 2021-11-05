@@ -75,6 +75,8 @@ public:
 
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
+                case CPUModel::V1:
+                    return { 15.15, 9.24, 6.42 };
                 default:
                     return { 7.2307, 3.876, 2.932 };
             }

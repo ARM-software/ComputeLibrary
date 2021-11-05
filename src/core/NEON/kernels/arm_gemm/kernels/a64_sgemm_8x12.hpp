@@ -83,6 +83,9 @@ public:
                 case CPUModel::A73:
                     return { 2.885, 1.429, 1.163 };
 
+                case CPUModel::V1:
+                    return { 14.95, 9.95, 5.28 };
+
                 default:
                     return { 7.2307, 3.876, 2.932 };
             }
