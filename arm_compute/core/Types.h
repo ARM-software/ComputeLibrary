@@ -1578,6 +1578,7 @@ struct FullyConnectedLayerInfo
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
     bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+    bool       enable_fast_math{ false };                  /**<  Enable fast math computation. */
     /* Other parameters */
     bool fp_mixed_precision{ false }; /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
 
@@ -2107,6 +2108,14 @@ public:
     {
         return _fast_math;
     };
+    /** Set fast math flag
+     *
+     * @param[in] fast_math Flag to set
+     */
+    void set_fast_math(bool fast_math)
+    {
+        _fast_math = fast_math;
+    }
     /** Flag which specifies whether to broadcast the shape of the bias tensor.
      *
      * @return True if the shape of the bias tensor is to be broadcasted.

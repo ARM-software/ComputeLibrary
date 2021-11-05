@@ -1096,7 +1096,8 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-    const FullyConnectedLayerInfo    fc_info = node.info();
+    FullyConnectedLayerInfo          fc_info = node.info();
+    fc_info.enable_fast_math                 = (node.fast_math_hint() == FastMathHint::Enabled);
 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(weights == nullptr);

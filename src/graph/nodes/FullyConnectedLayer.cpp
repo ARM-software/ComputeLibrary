@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,11 +31,20 @@ namespace arm_compute
 {
 namespace graph
 {
-FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, QuantizationInfo out_quant_info, FullyConnectedLayerInfo fc_info)
-    : _num_outputs(num_outputs), _out_quant_info(std::move(out_quant_info)), _info(fc_info)
+FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, QuantizationInfo out_quant_info, FullyConnectedLayerInfo fc_info, FastMathHint fast_math_hint)
+    : _num_outputs(num_outputs), _out_quant_info(std::move(out_quant_info)), _info(fc_info), _fast_math_hint(fast_math_hint)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
+}
+void FullyConnectedLayerNode::set_fast_math_hint(FastMathHint hint)
+{
+    _fast_math_hint = hint;
+}
+
+FastMathHint FullyConnectedLayerNode::fast_math_hint() const
+{
+    return _fast_math_hint;
 }
 
 void FullyConnectedLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)

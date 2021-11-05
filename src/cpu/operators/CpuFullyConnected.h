@@ -141,6 +141,7 @@ private:
     bool _is_fc_after_conv;
     bool _is_quantized_asymmetric;
     bool _is_prepared;
+    bool _enable_fast_math;
 };
 } // namespace cpu
 } // namespace arm_compute

@@ -467,7 +467,7 @@ NodeID GraphBuilder::add_flatten_node(Graph &g, NodeParams params, NodeIdxPair i
 
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                                NodeID weights_nid, NodeID bias_nid,
-                                               const FullyConnectedLayerInfo fc_info, const QuantizationInfo &out_quant_info)
+                                               const FullyConnectedLayerInfo fc_info, const QuantizationInfo &out_quant_info, FastMathHint fast_math_hint)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -479,7 +479,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create fully connected node and connect
-    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info);
+    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info, fast_math_hint);
     g.add_connection(input.node_id, input.index, fc_nid, 0);
     g.add_connection(weights_nid, 0, fc_nid, 1);
     if(has_bias)
@@ -495,7 +495,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                                ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
                                                const FullyConnectedLayerInfo fc_info,
-                                               const QuantizationInfo &weights_quant_info, const QuantizationInfo &out_quant_info)
+                                               const QuantizationInfo &weights_quant_info, const QuantizationInfo &out_quant_info, FastMathHint fast_math_hint)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -523,7 +523,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     }
 
     // Create fully connected node and connect
-    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info);
+    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info, fast_math_hint);
     g.add_connection(input.node_id, input.index, fc_nid, 0);
     g.add_connection(w_nid, 0, fc_nid, 1);
     if(has_bias)

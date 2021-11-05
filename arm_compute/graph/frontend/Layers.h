@@ -776,7 +776,7 @@ public:
         {
             return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
                                                            std::move(_weights), std::move(_bias), _fc_info,
-                                                           std::move(_weights_quant_info), std::move(_out_quant_info));
+                                                           std::move(_weights_quant_info), std::move(_out_quant_info), s.hints().fast_math_hint);
         }
         else
         {
@@ -785,7 +785,7 @@ public:
             NodeID bias_nid = (_bias_ss == nullptr) ? EmptyNodeID : _bias_ss->tail_node();
             return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
                                                            _weights_ss->tail_node(), bias_nid, _fc_info,
-                                                           std::move(_out_quant_info));
+                                                           std::move(_out_quant_info), s.hints().fast_math_hint);
         }
     }
 

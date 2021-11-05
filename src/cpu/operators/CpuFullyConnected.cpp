@@ -109,7 +109,7 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
     return Status{};
 }
 
-Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act)
+Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act, bool enable_fast_math)
 {
     if(is_data_type_quantized_asymmetric(src->data_type()))
     {
@@ -123,6 +123,7 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
 
         GEMMInfo gemm_info;
         gemm_info.set_gemmlowp_output_stage(gemmlowp_output_stage_info);
+        gemm_info.set_fast_math(enable_fast_math);
 
         // Validate gemmlowp function
         TensorInfo src_info     = src->clone()->set_quantization_info(src_quantization_info);
@@ -135,7 +136,9 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuGemm::validate(src, weights, biases, dst, 1.f, 1.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */)));
+        GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+        gemm_info.set_fast_math(enable_fast_math);
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuGemm::validate(src, weights, biases, dst, 1.f, 1.0f, gemm_info));
     }
 
     return Status{};
@@ -158,7 +161,8 @@ CpuFullyConnected::CpuFullyConnected()
       _needs_weights_reshape(false),
       _is_fc_after_conv(false),
       _is_quantized_asymmetric(false),
-      _is_prepared(false)
+      _is_prepared(false),
+      _enable_fast_math(false)
 
 {
 }
@@ -185,6 +189,7 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
         GEMMInfo gemm_info;
         gemm_info.set_gemmlowp_output_stage(gemmlowp_output_stage_info);
         gemm_info.set_activation_info(act);
+        gemm_info.set_fast_math(_enable_fast_math);
         _mm_gemmlowp = std::make_unique<CpuGemmLowpMatrixMultiplyCore>();
         _mm_gemmlowp->configure(&src_info, &weights_info, biases, dst, gemm_info);
     }
@@ -193,6 +198,7 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
         // Configure matrix multiply kernel
         GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
         gemm_info.set_activation_info(act);
+        gemm_info.set_fast_math(_enable_fast_math);
         _mm_gemm = std::make_unique<CpuGemm>();
         _mm_gemm->configure(src, weights, biases, dst, 1.f, 1.0f, gemm_info);
     }
@@ -241,6 +247,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     _is_quantized_asymmetric  = is_data_type_quantized_asymmetric(src->data_type());
     _is_prepared              = false;
     _trans_weights_idx        = AuxTensorIdx::Count;
+    _enable_fast_math         = fc_info.enable_fast_math;
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -418,7 +425,7 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != weights_to_use->dimension(1));
     }
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info, fc_info.enable_fast_math));
 
     return Status{};
 }
