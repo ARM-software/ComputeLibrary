@@ -84,9 +84,12 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux arm64-v8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux arm64-v8.2-a (fat binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
             - Linux armv8.2a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
-            - Android armv7a: clang++ / libc++ NDK r18b
+            - Android armv7a: clang++ / libc++ NDK r20b
             - Android am64-v8a: clang++ / libc++ NDK r20b
+            - Android arm64-v8.2-a: clang++ / libc++ NDK r20b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
