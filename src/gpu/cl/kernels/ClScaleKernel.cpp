@@ -117,9 +117,7 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     const int          idx_channel       = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
     const unsigned int src_width         = src->dimension(idx_width);
     const unsigned int src_height        = src->dimension(idx_height);
-    const unsigned int src_channel       = src->dimension(idx_channel);
     const unsigned int dst_width         = dst->dimension(idx_width);
-    const unsigned int dst_height        = dst->dimension(idx_height);
     const unsigned int dst_channels      = dst->dimension(idx_channel);
     unsigned int       vec_size          = 0;
     unsigned int       vec_size_leftover = 0;
@@ -130,20 +128,13 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
         vec_size          = adjust_vec_size(src->data_type() == DataType::F32 ? 4 : 8, dst_channels);
         vec_size_leftover = dst_channels % vec_size;
         build_opts.add_option("-DSRC_TENSOR_TYPE=BUFFER");
-        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src_width));
-        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src_height));
-        build_opts.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src_channel));
         build_opts.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_opts.add_option("-DDST_TENSOR_TYPE=BUFFER");
-        build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst_width));
-        build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst_height));
-        build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst_channels));
         build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
         build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(info.constant_border_value, src->data_type()));
-        build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
-        build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
         build_opts.add_option("-DN0=" + support::cpp11::to_string(vec_size));
         build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(vec_size_leftover));
+        build_opts.add_option("-DSCALE_" + string_from_interpolation_policy(interpolation_policy_to_use));
         build_opts.add_option_if(src->num_dimensions() > 3, "-DBATCHED_EXECUTION");
         build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
         build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
@@ -203,6 +194,13 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 
+    // Pass scale kernel arguments
+    if(is_nhwc)
+    {
+        unsigned int idx = 2 * num_arguments_per_4d_tensor_nhwc();
+        _kernel.setArg<cl_float>(idx++, scale_x);
+        _kernel.setArg<cl_float>(idx++, scale_y);
+    }
     // Set config_id for enabling LWS tuning
     _config_id = "scale_";
     _config_id += (info.border_mode == BorderMode::REPLICATE ? "Bord_rep" : "");
@@ -248,8 +246,8 @@ void ClScaleKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comma
             Window slice     = collapsed.first_slice_window_4D();
 
             unsigned int idx = 0;
-            add_4D_tensor_argument(idx, src, slice);
-            add_4D_tensor_argument(idx, dst, slice);
+            add_4d_tensor_nhwc_argument(idx, src);
+            add_4d_tensor_nhwc_argument(idx, dst);
             enqueue(queue, *this, slice, lws_hint());
             break;
         }

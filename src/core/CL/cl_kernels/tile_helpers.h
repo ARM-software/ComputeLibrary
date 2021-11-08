@@ -104,6 +104,32 @@
 #define TENSOR4D_STR(name, type) TENSOR4D_##type(name)
 #define TENSOR4D(name, type) TENSOR4D_STR(name, type)
 
+#define TENSOR4D_T_IMAGE(name)          \
+    __read_only image2d_t name##_img, \
+    __global uchar *name##_ptr,       \
+    uint        name##_stride_y, \
+    uint        name##_stride_z, \
+    uint        name##_stride_w, \
+    uint        name##_c,   \
+    uint        name##_w,   \
+    uint        name##_h,   \
+    uint        name##_n,   \
+    uint        name##_offset_first_element_in_bytes
+
+#define TENSOR4D_T_BUFFER(name)    \
+    __global uchar *name##_ptr,  \
+    uint        name##_stride_y, \
+    uint        name##_stride_z, \
+    uint        name##_stride_w, \
+    uint        name##_c,   \
+    uint        name##_w,   \
+    uint        name##_h,   \
+    uint        name##_n,   \
+    uint        name##_offset_first_element_in_bytes
+
+#define TENSOR4D_T_STR(name, type) TENSOR4D_T_##type(name)
+#define TENSOR4D_T(name, type) TENSOR4D_T_STR(name, type)
+
 #if !defined(UNROLL_WITH_PRAGMA)
 #define UNROLL_INCR(idx, step, macro) idx += (step); (macro)
 
