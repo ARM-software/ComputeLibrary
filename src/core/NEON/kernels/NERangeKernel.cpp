@@ -30,68 +30,96 @@
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
-#include "arm_compute/core/Utils.h"
+#include "src/cpu/kernels/range/list.h"
 
 namespace arm_compute
 {
 namespace
 {
-template <typename T>
-void range_function(ITensor *output, float start, float step, const Window &window)
+struct RangeSelectorData
 {
-    /** SIMD vector tag type. */
-    using ExactTagType = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::tag_type;
+    DataType dt;
+};
 
-    const auto step_vec  = wrapper::vdup_n(static_cast<T>(step), ExactTagType{});
-    const auto start_vec = wrapper::vdup_n(static_cast<T>(start), ExactTagType{});
-    auto       id_vec    = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+using RangeSelectorPtr = std::add_pointer<bool(const RangeSelectorData &data)>::type;
+using RangeUKernelPtr  = std::add_pointer<void(ITensor *, float, float, const Window &)>::type;
 
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-    const int  window_step_x  = 16 / sizeof(T);
+struct RangeUKernel
+{
+    const char            *name;
+    const RangeSelectorPtr is_selected;
+    RangeUKernelPtr        ukernel;
+};
 
-    Window win{ window };
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-    Iterator output_it(output, win);
-
-    execute_window_loop(win, [&](const Coordinates &)
+static const RangeUKernel available_kernels[] =
+{
     {
-        int        x       = window_start_x;
-        const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            for(int count = 0; count < window_step_x; ++count)
-            {
-                id_vec = wrapper::vsetlane(static_cast<T>(x + count), id_vec, count);
-            }
-
-            // start + step * id
-            const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
-            wrapper::vstore(out_ptr + x, res_vec);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const auto res = start + x * step;
-            *(out_ptr + x) = res;
-        }
-
+        "fp16_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_range_function)
     },
-    output_it);
+    {
+        "f32_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_range_function)
+    },
+    {
+        "u8_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::U8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_neon_range_function)
+    },
+    {
+        "u16_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::U16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u16_neon_range_function)
+    },
+    {
+        "u32_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::U32; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u32_neon_range_function)
+    },
+    {
+        "s8_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::S8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s8_neon_range_function)
+    },
+    {
+        "s16_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::S16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_range_function)
+    },
+    {
+        "s32_neon_range",
+        [](const RangeSelectorData & data) { return data.dt == DataType::S32; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s32_neon_range_function)
+    },
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const RangeUKernel *get_implementation(const RangeSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
 }
 
 Status validate_arguments(const ITensorInfo &output, const float start, const float end, const float step)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output,
-                                                         1,
-                                                         DataType::U8, DataType::S8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    const auto *uk = get_implementation(RangeSelectorData{ output.data_type() });
+    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((start == end), "start of the requested sequence must not be equal to the end");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start < end) && (step <= 0)), "step must be greater than 0 when start < end");
@@ -111,7 +139,7 @@ Status validate_arguments(const ITensorInfo &output, const float start, const fl
 } // namespace
 
 NERangeKernel::NERangeKernel()
-    : _func(nullptr), _start(0), _end(1), _step(1), _output(nullptr)
+    : _start(0), _end(1), _step(1), _output(nullptr)
 {
 }
 
@@ -131,38 +159,6 @@ void NERangeKernel::configure(ITensor *output, float start, float end, float ste
     _end    = end;
     _step   = step;
     _output = output;
-    switch(_output->info()->data_type())
-    {
-        case DataType::U8:
-            _func = &range_function<uint8_t>;
-            break;
-        case DataType::U16:
-            _func = &range_function<uint16_t>;
-            break;
-        case DataType::U32:
-            _func = &range_function<uint32_t>;
-            break;
-        case DataType::S8:
-            _func = &range_function<int8_t>;
-            break;
-        case DataType::S16:
-            _func = &range_function<int16_t>;
-            break;
-        case DataType::S32:
-            _func = &range_function<int32_t>;
-            break;
-        case DataType::F32:
-            _func = &range_function<float>;
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = &range_function<float16_t>;
-            break;
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data type.");
-            break;
-    }
 
     INEKernel::configure(win);
 }
@@ -181,8 +177,8 @@ void NERangeKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
+    const auto *uk = get_implementation(RangeSelectorData{ _output->info()->data_type() });
 
-    (*_func)(_output, _start, _step, window);
+    uk->ukernel(_output, _start, _step, window);
 }
 } // namespace arm_compute

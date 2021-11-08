@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,11 +80,10 @@ public:
 private:
     using RangeFunction = void(ITensor *output, float start, float step, const Window &window);
 
-    RangeFunction *_func;   /**< Range function to be called */
-    float          _start;  /**< Start of sequence */
-    float          _end;    /**< End of sequence */
-    float          _step;   /**< Increment/step value */
-    ITensor       *_output; /**< Destination tensor */
+    float    _start;  /**< Start of sequence */
+    float    _end;    /**< End of sequence */
+    float    _step;   /**< Increment/step value */
+    ITensor *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NERANGEKERNEL_H */

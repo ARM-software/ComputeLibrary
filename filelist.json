@@ -1697,7 +1697,13 @@
           "common": [
             "src/core/NEON/kernels/NERangeKernel.cpp",
             "src/runtime/NEON/functions/NERange.cpp"
-          ]
+          ],
+          "neon": {
+            "common":  [ "src/cpu/kernels/range/generic/neon/impl.cpp" ],
+            "fp32":    [ "src/cpu/kernels/range/generic/neon/fp32.cpp" ],
+            "fp16":    [ "src/cpu/kernels/range/generic/neon/fp16.cpp" ],
+            "integer": [ "src/cpu/kernels/range/generic/neon/integer.cpp"   ]
+          }
         }
       },
       "Reduction":{
