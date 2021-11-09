@@ -99,7 +99,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
-    BoolVariable("fat_binary", "Build fat binary version of library. Note works only for armv8.2-a", False),
+    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Note works only for armv8.2-a", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -250,40 +250,63 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
 
 # Add architecture specific flags
 prefix = ""
-if 'v7a' in env['arch']:
-    env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-    if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
-        env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
-    else:
-        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
-elif 'v8' in env['arch']:
-    if 'sve2' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
-    elif 'sve' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
-    elif 'armv8r64' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.4-a'])
-    elif 'v8.' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-    else:
-        env.Append(CXXFLAGS = ['-march=armv8-a'])
+if env['multi_isa']:
+    # assert arch version is v8
+    if 'v8' not in env['arch']:
+        print("Currently Multi ISA binary is only supported for arm v8 family")
+        Exit(1)
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
-    if 'v8.' in env['arch']:
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
 
-elif 'x86' in env['arch']:
-    if env['estate'] == '32':
-        env.Append(CCFLAGS = ['-m32'])
-        env.Append(LINKFLAGS = ['-m32'])
+else: # NONE "multi_isa" builds
+
+    if 'sve' in env['arch']:
+        env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
+        if 'sve2' in env['arch']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
     else:
-        env.Append(CXXFLAGS = ['-fPIC'])
-        env.Append(CCFLAGS = ['-m64'])
-        env.Append(LINKFLAGS = ['-m64'])
+        # FIXME: The NEON flags should be always defined for CPU.
+        #        however, build fails when SVE/SVE2 & NEON flags
+        #        defined together.
+        env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
+    
+
+    if 'v7a' in env['arch']:
+        env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
+        if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
+            env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
+        else:
+            env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif 'v8' in env['arch']:
+        # Preserve the V8 archs for non-multi-ISA variants
+        if 'sve2' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+        elif 'sve' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+        elif 'armv8r64' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.4-a'])
+        elif 'v8.' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        else:
+            env.Append(CXXFLAGS = ['-march=armv8-a'])
+
+        if 'v8.6-a' in env['arch']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
+            if "disable_mmla_fp" not in env['custom_options']:
+                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+        if 'v8.' in env['arch']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+
+    elif 'x86' in env['arch']:
+        if env['estate'] == '32':
+            env.Append(CCFLAGS = ['-m32'])
+            env.Append(LINKFLAGS = ['-m32'])
+        else:
+            env.Append(CXXFLAGS = ['-fPIC'])
+            env.Append(CCFLAGS = ['-m64'])
+            env.Append(LINKFLAGS = ['-m64'])
 
 # Define toolchain
 prefix = ""
@@ -306,11 +329,6 @@ if 'x86' not in env['arch']:
             prefix = "aarch64-linux-android-"
         elif env['os'] == 'tizen':
             prefix = "aarch64-tizen-linux-gnu-"
-
-if 'sve' in env['arch']:
-    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE'])
-else:
-    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON'])
 
 if env['build'] == 'native':
     prefix = ""
@@ -354,15 +372,6 @@ if not GetOption("help"):
 
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
-
-if env['fat_binary']:
-    if env['arch'] != 'armv8.2-a':
-        print("Currently fat binary is only supported with armv8.2-a")
-        Exit(1)
-    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON',
-                           '-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
-                           '-DARM_COMPUTE_ENABLE_FP16', '-DARM_COMPUTE_ENABLE_BF16',
-                           '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
 
 if env['high_priority'] and env['build_config']:
     print("The high priority library cannot be built in conjuction with a user-specified build configuration")

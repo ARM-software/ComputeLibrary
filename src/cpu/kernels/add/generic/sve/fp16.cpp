@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
 #include "src/cpu/kernels/add/generic/sve/impl.h"
@@ -36,3 +37,4 @@ void add_fp16_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const 
 }
 } // namespace arm_compute
 #endif /* (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+#endif /* #if defined(ARM_COMPUTE_ENABLE_SVE) */

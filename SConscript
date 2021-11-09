@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import collections
 import os.path
 import re
@@ -44,11 +45,42 @@ def build_bootcode_objs(sources):
     Default(obj)
     return obj
 
+# @brief Generates SVE/SVE2 shared object files for a specific V8 architechture.
+#
+# @param  sources    The target source files
+# @param  arch_info  A Tuple represents the architecture info
+#                    such as the compiler flags and defines.
+#
+# @return A list of objects for the corresponding architecture.
+def build_multi_isa_objs(sources, arch_v8_info):
 
-def build_sve_objs(sources):
+    arch_v8 = arch_v8_info[0]
+
+    # Create a temp environment
     tmp_env = arm_compute_env.Clone()
-    tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
-    obj = tmp_env.SharedObject(sources)
+
+    if 'cxxflags' in arch_v8_info[1] and len(arch_v8_info[1]['cxxflags']) > 0:
+        tmp_env.Append(CXXFLAGS = arch_v8_info[1]['cxxflags'])
+    if 'cppdefines' in arch_v8_info[1] and len(arch_v8_info[1]['cppdefines']) > 0:
+        tmp_env.Append(CPPDEFINES = arch_v8_info[1]['cppdefines'])
+
+    if 'sve' in arch_v8:
+        # Toggle SVE/SVE2 specific extensions
+        tmp_env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
+        if 'sve2' in arch_v8:
+            tmp_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
+    else:
+        # FIXME: The NEON flags should be always defined for CPU.
+        #        however, build fails when SVE/SVE2 & NEON flags
+        #        defined together.
+        tmp_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
+
+    # we must differentiate the file object names
+    # as we accumulate the set.
+    obj = []
+    for src in sources:
+        obj += tmp_env.SharedObject(target='{}-{}'.format(src, arch_v8), source=src)
+
     Default(obj)
     return obj
 
@@ -422,6 +454,11 @@ arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 arm_compute_env.Append(LIBS = ['dl'])
 
+# Load build definitions file
+with (open(Dir('#').path + '/filedefs.json')) as fd:
+    filedefs = json.load(fd)
+
+
 with (open(Dir('#').path + '/filelist.json')) as fp:
     filelist = json.load(fp)
 
@@ -472,8 +509,9 @@ if env['opencl']:
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
-sve_o = []
+multi_isa_objs_list = []
 lib_files_sve = []
+
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
@@ -481,14 +519,14 @@ if env['neon']:
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/cpu/kernels/assembly/",])
+                                      "src/cpu/kernels/assembly/"])
 
     lib_files += filelist['cpu']['common']
 
     # Setup SIMD file list to include
     simd = []
-    if 'sve' in env['arch'] or env['fat_binary']: simd += ['sve']
-    if 'sve' not in env['arch'] or env['fat_binary']: simd += ['neon']
+    if 'sve' in env['arch'] or env['multi_isa']: simd += ['sve']
+    if 'sve' not in env['arch'] or env['multi_isa']: simd += ['neon']
 
     # Get attributes
     if(use_custom_ops):
@@ -501,6 +539,7 @@ if env['neon']:
     cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
 
     cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+
     lib_files += cpu_files.get('common', [])
     lib_files += cpu_files.get('neon', [])
     lib_files_sve += cpu_files.get('sve', [])
@@ -520,17 +559,21 @@ if env['os'] == 'bare_metal':
 Export('bootcode_o')
 
 # Build static libraries
-if (env['fat_binary']):
-    sve_o = build_sve_objs(lib_files_sve)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + sve_o, static=True)
+if (env['multi_isa']):
+    # Available architecture
+    arch_v8s = filedefs['cpu']['arch']
+    for arch_v8_info in arch_v8s.items():
+        multi_isa_objs_list += build_multi_isa_objs(lib_files_sve, arch_v8_info)
+
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + multi_isa_objs_list, static=True)
 else:
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + lib_files_sve, static=True)
 Export('arm_compute_a')
 
 # Build shared libraries
 if env['os'] != 'bare_metal' and not env['standalone']:
-    if (env['fat_binary']):
-        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + sve_o, static=False)
+    if (env['multi_isa']):
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + multi_isa_objs_list, static=False)
     else:
         arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + lib_files_sve, static=False)
 
