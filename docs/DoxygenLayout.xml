@@ -3,7 +3,7 @@
   <!-- Navigation index tabs for HTML output -->
   <navindex>
     <tab type="mainpage" url="@ref introduction" title="Introduction"/>
-    <tab type="usergroup" title="User Guide" url="[none]">
+    <tab type="usergroup" title="User Guide">
         <tab type="user" url="@ref how_to_build" title="How to Build and Run Examples"/>
         <tab type="user" url="@ref architecture" title="Library Architecture"/>
         <tab type="user" url="@ref data_type_support" title="Data Type Support"/>
@@ -14,7 +14,7 @@
         <tab type="user" url="@ref versions_changelogs" title="Release Versions and Changelog"/>
         <tab type="user" url="@ref errata" title="Errata"/>
     </tab>
-    <tab type="usergroup" title="Contributor Guide" url="[none]"> 
+    <tab type="usergroup" title="Contributor Guide">
         <tab type="user" url="@ref contribution_guidelines" title="Contribution Guidelines"/>
         <tab type="user" url="@ref adding_operator" title="How to Add a New Operator"/>
         <tab type="user" url="@ref implementation_topic" title="Implementation Topics"/>
