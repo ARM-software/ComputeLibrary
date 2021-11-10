@@ -120,13 +120,20 @@ public:
      * @param[in] platform     The CPU platform used to create the context.
      * @param[in] thread_count Number of threads in the execution.
      *
-     * @return[out] small_network_mws         Minimum workload size for requsted configuration.
+     * @return[out] small_network_mws         Minimum workload size for requested configuration.
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override
     {
-        ARM_COMPUTE_UNUSED(platform, thread_count);
-
-        return ICPPKernel::small_network_mws;
+        ARM_COMPUTE_UNUSED(thread_count);
+        // Tuning results that gave optimized results in performance investigation 
+        if (platform.get_cpu_model() == CPUModel::A73 ) 
+        {
+            return 3072;
+        }
+        else 
+        {
+            return 4096;
+        }
     }
 
 private:

@@ -38,8 +38,7 @@ class ITensor;
 class ICPPKernel : public IKernel
 {
 public:
-    static constexpr size_t default_mws       = 128; /* Default minimum workload size value */
-    static constexpr size_t small_network_mws = 256; /* Default Minimum workload size value for small networks */
+    static constexpr size_t default_mws       = 1; /* Default minimum workload size value  - no impact */
 
     /** Default destructor */
     virtual ~ICPPKernel() = default;

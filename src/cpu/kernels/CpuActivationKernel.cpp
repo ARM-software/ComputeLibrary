@@ -232,9 +232,16 @@ Status CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *
 
 size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
-    ARM_COMPUTE_UNUSED(platform, thread_count);
-
-    return ICPPKernel::small_network_mws;
+    ARM_COMPUTE_UNUSED(thread_count);
+    // Tuning results that gave optimized results in performance investigation 
+    if (platform.get_cpu_model() == CPUModel::A73 ) 
+    {
+        return 10240;
+    }
+    else 
+    {
+        return 9216;
+    }
 }
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
