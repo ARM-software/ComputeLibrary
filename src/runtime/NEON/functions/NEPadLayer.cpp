@@ -153,6 +153,11 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
             }
             // Concatenate the padding before and after with the input.
             ITensor *out = (i == _num_dimensions - 1) ? output : &_concat_results[i];
+            out->info()->set_quantization_info(output->info()->quantization_info());
+            for(auto &v : concat_vector)
+            {
+                v->info()->set_quantization_info(input->info()->quantization_info());
+            }
             _concat_functions[i].configure(concat_vector, out, i);
             if(i != _num_dimensions - 1)
             {
