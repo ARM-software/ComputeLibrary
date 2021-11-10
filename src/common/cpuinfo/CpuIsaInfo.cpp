@@ -125,10 +125,6 @@ void allowlisted_model_features(CpuIsaInfo &isa, CpuModel model)
     {
         isa.fp16 = model_supports_fp16(model);
     }
-    if(isa.sve == false)
-    {
-        isa.sve = model_supports_sve(model);
-    }
 }
 } // namespace
 

@@ -59,14 +59,6 @@ CpuModel midr_to_model(uint32_t midr);
  */
 bool model_supports_fp16(CpuModel model);
 
-/** Check if a model supports SVE
- *
- * @note This is used in case of old kernel configurations where some capabilities are not exposed.
- *
- * @param[in] model Model to check for whitelisted capabilities
- */
-bool model_supports_sve(CpuModel model);
-
 /** Check if a model supports dot product
  *
  * @note This is used in case of old kernel configurations where some capabilities are not exposed.

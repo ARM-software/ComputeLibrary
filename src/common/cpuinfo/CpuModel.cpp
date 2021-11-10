@@ -75,19 +75,6 @@ bool model_supports_dot(CpuModel model)
     }
 }
 
-bool model_supports_sve(CpuModel model)
-{
-    switch(model)
-    {
-        case CpuModel::A510:
-        case CpuModel::V1:
-        case CpuModel::A64FX:
-            return true;
-        default:
-            return false;
-    }
-}
-
 CpuModel midr_to_model(uint32_t midr)
 {
     CpuModel model = CpuModel::GENERIC;
