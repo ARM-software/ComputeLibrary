@@ -26,7 +26,7 @@
 #include "repeat.h"
 
 /** (EXPERIMENTAL_POST_OPS) gemm_mm_reshaped_only_rhs kernel */
-#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N) && defined(K)
+#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE)
 #if defined(P2_ELTWISE_OP) && defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
 
 #define CONCAT(a, b) a##b
@@ -151,6 +151,7 @@
 #error "N0 value not supported"
 #endif // N0 conditions
 
+#if defined(GEMM_MM_RESHAPED_ONLY_RHS_T_POST_ACT_ELTWISE_OP_ACT)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices plus 3 post ops:
  * Post op 1: activation (optional)
  * Post op 2: elementwise op
@@ -194,7 +195,10 @@ __kernel void gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act(IMAGE_DECLARAT
                                                                   ,
                                                                   uint dst_cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
-                                                                 )
+                                                                  ,
+                                                                  const int M,
+                                                                  const int N,
+                                                                  const int K)
 {
     // Block size
 #define RHS_BLOCK_SIZE ((K0) * (N0))
@@ -409,8 +413,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act(IMAGE_DECLARAT
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
+#endif // defined(GEMM_MM_RESHAPED_ONLY_RHS_T_POST_ACT_ELTWISE_OP_ACT)
 
-#if defined(OPENCL_IMAGE_SUPPORT)
+#if defined(OPENCL_IMAGE_SUPPORT) && defined(GEMM_MM_RESHAPED_ONLY_RHS_T_TEXTURE_POST_ACT_ELTWISE_OP_ACT)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices plus 3 post ops. The RHS matrix is stored in OpenCL image object.
  * Post op 1: activation (optional)
  * Post op 2: elementwise op
@@ -430,6 +435,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act(IMAGE_DECLARAT
  * @param[in] eltwise_operand_stride_y Stride of the eltwise operand matrix in Y dimension (in bytes)
  * @param[in] eltwise_operand_step_y   eltwise_operand_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] eltwise_operand_stride_z Stride of the eltwise operand tensor in Z dimension (in bytes)
+ * @param[in] M                        Number of rows in LHS matrix not reshaped.
+ * @param[in] N                        Number of columns in RHS matrix not reshaped.
+ * @param[in] K                        Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  */
 __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_DECLARATION(lhs),
                                                                           __read_only image2d_t rhs_img,
@@ -454,12 +462,15 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
                                                                           ,
                                                                           uint dst_cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
-                                                                         )
+                                                                          ,
+                                                                          const int M,
+                                                                          const int N,
+                                                                          const int K)
 {
     // Pixel unit
 #define PIXEL_UNIT CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(K0)
 
-#define LEFTOVER_K (K % K0)
+    const uint LEFTOVER_K = K % K0;
 
     // Block size
 #define RHS_BLOCK_SIZE (PIXEL_UNIT * (N0))
@@ -562,99 +573,99 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
         x_rhs += N0 * RHS_STEP_X * RHS_STEP_LOOP;
     }
 
-#if LEFTOVER_K != 0
-    // Note: We cannot read out-of-bound elements from the RHS matrix because
-    // the RHS width is always multiple of K0. This is not be true for the LHS matrix
-
-    union UNION_VEC_TYPE
+    if(LEFTOVER_K != 0)
     {
-        DATA_TYPE s[K0];
-        VEC_DATA_TYPE(DATA_TYPE, K0)
-        v;
-    };
+        // Note: We cannot read out-of-bound elements from the RHS matrix because
+        // the RHS width is always multiple of K0. This is not be true for the LHS matrix
 
-    union UNION_VEC_TYPE a0 = {.v = 0 };
+        union UNION_VEC_TYPE
+        {
+            DATA_TYPE s[K0];
+            VEC_DATA_TYPE(DATA_TYPE, K0)
+            v;
+        };
+
+        union UNION_VEC_TYPE a0 = {.v = 0 };
 #if M0 > 1
-    union UNION_VEC_TYPE a1 = {.v = 0 };
+        union UNION_VEC_TYPE a1 = {.v = 0 };
 #endif // M0 > 1
 #if M0 > 2
-    union UNION_VEC_TYPE a2 = {.v = 0 };
+        union UNION_VEC_TYPE a2 = {.v = 0 };
 #endif // M0 > 2
 #if M0 > 3
-    union UNION_VEC_TYPE a3 = {.v = 0 };
+        union UNION_VEC_TYPE a3 = {.v = 0 };
 #endif // M0 > 3
 #if M0 > 4
-    union UNION_VEC_TYPE a4 = {.v = 0 };
+        union UNION_VEC_TYPE a4 = {.v = 0 };
 #endif // M0 > 4
 #if M0 > 5
-    union UNION_VEC_TYPE a5 = {.v = 0 };
+        union UNION_VEC_TYPE a5 = {.v = 0 };
 #endif // M0 > 5
 #if M0 > 6
-    union UNION_VEC_TYPE a6 = {.v = 0 };
+        union UNION_VEC_TYPE a6 = {.v = 0 };
 #endif // M0 > 6
 #if M0 > 7
-    union UNION_VEC_TYPE a7 = {.v = 0 };
+        union UNION_VEC_TYPE a7 = {.v = 0 };
 #endif // M0 > 7
 
-    REPEAT_VAR_INIT_TO_CONST(N0, VEC_DATA_TYPE(DATA_TYPE, K0), b, 0);
+        REPEAT_VAR_INIT_TO_CONST(N0, VEC_DATA_TYPE(DATA_TYPE, K0), b, 0);
 
-    // Load from RHS matrix
-    LOAD_TEXTURE2D(N0, PIXEL_UNIT, DATA_TYPE, b, rhs_img, x_rhs, y_rhs, RHS_STEP_X, 0);
+        // Load from RHS matrix
+        LOAD_TEXTURE2D(N0, PIXEL_UNIT, DATA_TYPE, b, rhs_img, x_rhs, y_rhs, RHS_STEP_X, 0);
 
-    // Load from LHS matrix
-    for(int k = 0; k < LEFTOVER_K; ++k)
-    {
-        a0.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 0 * lhs_stride_y + zlhs0);
+        // Load from LHS matrix
+        for(int k = 0; k < LEFTOVER_K; ++k)
+        {
+            a0.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 0 * lhs_stride_y + zlhs0);
 #if M0 > 1
-        a1.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 1 * lhs_stride_y + zlhs1);
+            a1.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 1 * lhs_stride_y + zlhs1);
 #endif // M0 > 1
 #if M0 > 2
-        a2.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 2 * lhs_stride_y + zlhs2);
+            a2.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 2 * lhs_stride_y + zlhs2);
 #endif // M0 > 2
 #if M0 > 3
-        a3.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 3 * lhs_stride_y + zlhs3);
+            a3.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 3 * lhs_stride_y + zlhs3);
 #endif // M0 > 3
 #if M0 > 4
-        a4.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 4 * lhs_stride_y + zlhs4);
+            a4.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 4 * lhs_stride_y + zlhs4);
 #endif // M0 > 4
 #if M0 > 5
-        a5.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 5 * lhs_stride_y + zlhs5);
+            a5.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 5 * lhs_stride_y + zlhs5);
 #endif // M0 > 5
 #if M0 > 6
-        a6.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 6 * lhs_stride_y + zlhs6);
+            a6.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 6 * lhs_stride_y + zlhs6);
 #endif // M0 > 6
 #if M0 > 7
-        a7.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 7 * lhs_stride_y + zlhs7);
+            a7.s[k] = *(__global DATA_TYPE *)(lhs_ptr + lhs_offset + 7 * lhs_stride_y + zlhs7);
 #endif // M0 > 7
 
-        lhs_offset += sizeof(DATA_TYPE);
+            lhs_offset += sizeof(DATA_TYPE);
+        }
+
+        // Accumulate
+        ARM_DOT_K0XN0(K0, a0.v, b, c0);
+#if M0 > 1
+        ARM_DOT_K0XN0(K0, a1.v, b, c1);
+#endif // M0 > 1
+#if M0 > 2
+        ARM_DOT_K0XN0(K0, a2.v, b, c2);
+#endif // M0 > 2
+#if M0 > 3
+        ARM_DOT_K0XN0(K0, a3.v, b, c3);
+#endif // M0 > 3
+#if M0 > 4
+        ARM_DOT_K0XN0(K0, a4.v, b, c4);
+#endif // M0 > 4
+#if M0 > 5
+        ARM_DOT_K0XN0(K0, a5.v, b, c5);
+#endif // M0 > 5
+#if M0 > 6
+        ARM_DOT_K0XN0(K0, a6.v, b, c6);
+#endif // M0 > 6
+#if M0 > 7
+        ARM_DOT_K0XN0(K0, a7.v, b, c7);
+#endif // M0 > 7
     }
-
-    // Accumulate
-    ARM_DOT_K0XN0(K0, a0.v, b, c0);
-#if M0 > 1
-    ARM_DOT_K0XN0(K0, a1.v, b, c1);
-#endif // M0 > 1
-#if M0 > 2
-    ARM_DOT_K0XN0(K0, a2.v, b, c2);
-#endif // M0 > 2
-#if M0 > 3
-    ARM_DOT_K0XN0(K0, a3.v, b, c3);
-#endif // M0 > 3
-#if M0 > 4
-    ARM_DOT_K0XN0(K0, a4.v, b, c4);
-#endif // M0 > 4
-#if M0 > 5
-    ARM_DOT_K0XN0(K0, a5.v, b, c5);
-#endif // M0 > 5
-#if M0 > 6
-    ARM_DOT_K0XN0(K0, a6.v, b, c6);
-#endif // M0 > 6
-#if M0 > 7
-    ARM_DOT_K0XN0(K0, a7.v, b, c7);
-#endif // M0 > 7
-
-#endif // LEFTOVER_K != 0
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * dst_stride_y);
 
@@ -723,10 +734,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
-#undef LEFTOVER_K
 #undef PIXEL_UNIT
 }
-#endif // defined(OPENCL_IMAGE_SUPPORT)
+#endif // defined(OPENCL_IMAGE_SUPPORT) && defined(GEMM_MM_RESHAPED_ONLY_RHS_T_TEXTURE_POST_ACT_ELTWISE_OP_ACT)
 
 #define VFMA(a, b, c)     \
     ({                    \
@@ -805,6 +815,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
 #error "M0 not supported"
 #endif // M0 not supported
 
+#if defined(GEMM_MM_RESHAPED_ONLY_RHS_NT_POST_ACT_ELTWISE_OP_ACT)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices plus 3 post ops:
  * Post op 1: activation (optional)
  * Post op 2: elementwise op
@@ -824,6 +835,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act(IMAGE_
  * @param[in] eltwise_operand_stride_y Stride of the eltwise operand matrix in Y dimension (in bytes)
  * @param[in] eltwise_operand_step_y   eltwise_operand_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] eltwise_operand_stride_z Stride of the eltwise operand tensor in Z dimension (in bytes)
+ * @param[in] M                        Number of rows in LHS matrix not reshaped.
+ * @param[in] N                        Number of columns in RHS matrix not reshaped.
+ * @param[in] K                        Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  */
 __kernel void gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLARATION(lhs),
                                                                    IMAGE_DECLARATION(rhs),
@@ -848,7 +862,10 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLARA
                                                                    ,
                                                                    uint dst_cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
-                                                                  )
+                                                                   ,
+                                                                   const int M,
+                                                                   const int N,
+                                                                   const int K)
 {
     // Block size
 #define RHS_BLOCK_SIZE ((K0) * (N0))
@@ -1087,9 +1104,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLARA
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
+#undef RHS_STEP_LOOP
 }
+#endif // defined(GEMM_MM_RESHAPED_ONLY_RHS_NT_POST_ACT_ELTWISE_OP_ACT)
 
-#if defined(OPENCL_IMAGE_SUPPORT)
+#if defined(OPENCL_IMAGE_SUPPORT) && defined(GEMM_MM_RESHAPED_ONLY_RHS_NT_TEXTURE_POST_ACT_ELTWISE_OP_ACT)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices plus 3 post ops. The RHS matrix is stored in OpenCL image object.
  * Post op 1: activation (optional)
  * Post op 2: elementwise op
@@ -1109,6 +1128,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act(IMAGE_DECLARA
  * @param[in] eltwise_operand_stride_y Stride of the eltwise operand matrix in Y dimension (in bytes)
  * @param[in] eltwise_operand_step_y   eltwise_operand_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] eltwise_operand_stride_z Stride of the eltwise operand tensor in Z dimension (in bytes)
+ * @param[in] M                        Number of rows in LHS matrix not reshaped.
+ * @param[in] N                        Number of columns in RHS matrix not reshaped.
+ * @param[in] K                        Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  */
 __kernel void gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act(IMAGE_DECLARATION(lhs),
                                                                            __read_only image2d_t rhs_img,
@@ -1133,7 +1155,10 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act(IMAGE
                                                                            ,
                                                                            uint dst_cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
-                                                                          )
+                                                                           ,
+                                                                           const int M,
+                                                                           const int N,
+                                                                           const int K)
 {
     // Pixel unit
 #define PIXEL_UNIT CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(N0)
@@ -1145,9 +1170,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act(IMAGE
 #if defined(RHS_INTERLEAVE)
 #define RHS_OFFSET_X (PIXEL_UNIT)
 #define RHS_STEP_X ((PIXEL_UNIT) * (H0))
+#define RHS_STEP_LOOP (1)
 #else // defined(RHS_INTERLEAVE)
 #define RHS_OFFSET_X (RHS_BLOCK_SIZE)
 #define RHS_STEP_X (PIXEL_UNIT)
+#define RHS_STEP_LOOP (H0)
 #endif // defined(RHS_INTERLEAVE)
 
     uint x = get_global_id(0);
@@ -1365,7 +1392,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act(IMAGE
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
+#undef RHS_STEP_LOOP
 }
-#endif // defined(OPENCL_IMAGE_SUPPORT)
+#endif // defined(OPENCL_IMAGE_SUPPORT) && defined(GEMM_MM_RESHAPED_ONLY_RHS_NT_TEXTURE_POST_ACT_ELTWISE_OP_ACT)
 #endif // defined(P2_ELTWISE_OP) && defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE)

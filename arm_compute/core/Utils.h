@@ -952,6 +952,14 @@ inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
  */
 std::string lower_string(const std::string &val);
 
+/** Raise a given string to upper case
+ *
+ * @param[in] val Given string to lower.
+ *
+ * @return The upper case string
+ */
+std::string upper_string(const std::string &val);
+
 /** Check if a given data type is of floating point type
  *
  * @param[in] dt Input data type.

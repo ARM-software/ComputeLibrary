@@ -330,6 +330,13 @@ std::string lower_string(const std::string &val)
     return res;
 }
 
+std::string upper_string(const std::string &val)
+{
+    std::string res = val;
+    std::transform(res.begin(), res.end(), res.begin(), ::toupper);
+    return res;
+}
+
 PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
                                  const DimensionRoundingType &rounding_type)
 {

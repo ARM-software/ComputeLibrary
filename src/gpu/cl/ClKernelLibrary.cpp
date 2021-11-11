@@ -290,10 +290,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
     { "gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
     { "gemm_lc_vm_f32", "common/gemm.cl" },
-    { "gemm_reshape_lhs_matrix_nt", "common/gemm.cl" },
-    { "gemm_reshape_lhs_matrix_t", "common/gemm.cl" },
-    { "gemm_reshape_rhs_matrix_nt", "common/gemm.cl" },
-    { "gemm_reshape_rhs_matrix_t", "common/gemm.cl" },
+    { "gemm_reshape_lhs_matrix_nt", "common/gemm_utils.cl" },
+    { "gemm_reshape_lhs_matrix_t", "common/gemm_utils.cl" },
+    { "gemm_reshape_rhs_matrix_nt", "common/gemm_utils.cl" },
+    { "gemm_reshape_rhs_matrix_t", "common/gemm_utils.cl" },
     { "gemmlowp_matrix_a_reduction", "common/gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "common/gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "common/gemmlowp.cl" },
@@ -588,6 +588,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemm.cl",
 #include "./cl_kernels/common/gemm.clembed"
+    },
+    {
+        "common/gemm_utils.cl",
+#include "./cl_kernels/common/gemm_utils.clembed"
     },
     {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",

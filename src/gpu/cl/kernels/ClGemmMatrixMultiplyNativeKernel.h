@@ -81,6 +81,9 @@ private:
     bool         _reinterpret_output_as_3d{ false };
     bool         _use_dummy_work_items{ false };
     bool         _add_bias{ false };
+    signed int   _m{ 1 };
+    signed int   _n{ 1 };
+    signed int   _k{ 1 };
     unsigned int _num_post_op_args{ 0 }; // (EXPERIMENTAL_POST_OPS) total number of post op arguments
 };
 } // namespace kernels
