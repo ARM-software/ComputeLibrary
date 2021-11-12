@@ -23,10 +23,10 @@
  */
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "src/core/experimental/PostOp.h"
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"

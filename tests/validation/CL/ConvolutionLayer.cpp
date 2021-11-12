@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
-#include "src/core/experimental/PostOp.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"

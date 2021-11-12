@@ -28,7 +28,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/IPostOp.h"
-#include "src/core/experimental/PostOp.h"
+#include "src/core/experimental/PostOpUtils.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"

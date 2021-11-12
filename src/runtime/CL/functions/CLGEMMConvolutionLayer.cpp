@@ -31,7 +31,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/experimental/PostOp.h"
+#include "src/core/experimental/PostOpUtils.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClGemmConv2d.h"
 #include "support/Cast.h"

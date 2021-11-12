@@ -37,11 +37,12 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
-#include "src/core/experimental/PostOp.h"
+#include "support/Cast.h"
 #include "support/StringSupport.h"
 #include <ostream>
 #include <sstream>

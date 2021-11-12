@@ -29,6 +29,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "src/core/CL/ICLKernel.h"
+#include "src/core/experimental/PostOpUtils.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClConv2d.h"
 

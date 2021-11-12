@@ -34,7 +34,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
-#include "src/core/experimental/PostOp.h"
+#include "src/core/experimental/PostOpUtils.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"

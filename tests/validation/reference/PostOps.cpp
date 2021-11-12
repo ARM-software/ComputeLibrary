@@ -25,7 +25,8 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/experimental/PostOp.h"
+#include "arm_compute/core/experimental/PostOps.h"
+#include "support/Cast.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ElementwiseOperations.h"
 

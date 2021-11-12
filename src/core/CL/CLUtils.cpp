@@ -28,7 +28,7 @@
 #include "support/StringSupport.h"
 
 #include "src/core/CL/CLUtils.h"
-#include "src/core/experimental/PostOp.h"
+#include "src/core/experimental/PostOpUtils.h"
 
 namespace arm_compute
 {

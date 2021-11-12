@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 #define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 
+#include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/TypePrinter.h"
