@@ -1,0 +1,10 @@
+var structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst =
+[
+    [ "bias_type", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#a5a3ac386a379ce59d74763068156dd82", null ],
+    [ "input_type", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#a0de22e9d25493f76fd2a4c0e1976c18b", null ],
+    [ "kern_type", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#afeef214a2c15a263ebdcf319b5c1b4a8", null ],
+    [ "return_type", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#a939cc04a88913455efd7cc8fc15f80cf", null ],
+    [ "weight_type", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#ae47ffcae2f4ed7cc70e36171b02c9533", null ],
+    [ "a64_u8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#ad29d78640f72fbc10d67f22ffaf3a74c", null ],
+    [ "kernel", "structarm__conv_1_1depthwise_1_1a64__u8q__packed__to__nhwc__3x3__s2__with__multiplier__output2x4__dot__depthfirst.xhtml#a24b082c1c5fd10ee6d270d4854df51c5", null ]
+];

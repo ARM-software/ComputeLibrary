@@ -1,0 +1,14 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__gemm_1_1_i_gemm_common.xhtml" title="IGemmCommon" alt="" coords="5,327,135,354"/>
+<area shape="rect" id="node2" href="$classarm__gemm_1_1_gemm_common.xhtml" title="GemmCommon\&lt; To, Tr \&gt;" alt="" coords="192,298,380,325"/>
+<area shape="rect" id="node12" href="$classarm__gemm_1_1_gemm_common.xhtml" title="GemmCommon\&lt; TypeInput,\l TypeOutput \&gt;" alt="" coords="183,349,389,391"/>
+<area shape="rect" id="node3" href="$classarm__gemm_1_1_gemm_hybrid.xhtml" title="GemmHybrid\&lt; strategy,\l To, Tr \&gt;" alt="" coords="471,5,653,47"/>
+<area shape="rect" id="node4" href="$classarm__gemm_1_1_gemm_hybrid_indirect.xhtml" title="GemmHybridIndirect\l\&lt; strategy, To, Tr,\l OutputStage, SeparateQuantize \&gt;" alt="" coords="439,71,685,127"/>
+<area shape="rect" id="node5" href="$classarm__gemm_1_1_gemm_hybrid_quantized.xhtml" title="GemmHybridQuantized\l\&lt; strategy, To, Tr \&gt;" alt="" coords="475,152,649,193"/>
+<area shape="rect" id="node6" href="$classarm__gemm_1_1_gemm_hybrid_quantized_inline.xhtml" title="GemmHybridQuantizedInline\l\&lt; strategy, To, Tr \&gt;" alt="" coords="457,217,667,259"/>
+<area shape="rect" id="node7" href="$classarm__gemm_1_1_gemm_interleaved.xhtml" title="GemmInterleaved\&lt; strategy,\l To, Tr, OutputStage, MergeStep,\l ForceThreadColumns \&gt;" alt="" coords="447,283,677,339"/>
+<area shape="rect" id="node8" href="$classarm__gemm_1_1_gemm_interleaved_pretransposed2d.xhtml" title="GemmInterleavedPretransposed2d\l\&lt; strategy, To, Tr \&gt;" alt="" coords="437,364,687,405"/>
+<area shape="rect" id="node9" href="$classarm__gemm_1_1_gemv_batched.xhtml" title="GemvBatched\&lt; To, Tr \&gt;" alt="" coords="473,430,651,457"/>
+<area shape="rect" id="node10" href="$classarm__gemm_1_1_gemv_pretransposed.xhtml" title="GemvPretransposed\&lt;\l strategy, To, Tr, OutputStage \&gt;" alt="" coords="449,481,675,523"/>
+<area shape="rect" id="node11" href="$classarm__gemm_1_1_quantize_wrapper.xhtml" title="QuantizeWrapper\&lt; To,\l Tr, Tgemm \&gt;" alt="" coords="479,547,645,588"/>
+</map>

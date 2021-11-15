@@ -1,0 +1,11 @@
+<map id="src/cpu/kernels/add" name="src/cpu/kernels/add">
+<area shape="rect" id="node2" href="dir_ddc4008b1fee14f37f229e6899d8f6c6.xhtml" title="neon" alt="" coords="133,63,205,111"/>
+<area shape="rect" id="node4" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="112,255,224,303"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000276_000000.xhtml" title="14" alt="" coords="160,228,178,242"/>
+<area shape="rect" id="node5" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="169,159,241,207"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000276_000020.xhtml" title="7" alt="" coords="193,131,202,146"/>
+<area shape="rect" id="node3" href="dir_82c95e891f4f6cb143d59bacb5289f7d.xhtml" title="sve" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000020_000000.xhtml" title="623" alt="" coords="179,233,205,248"/>
+<area shape="rect" id="clust2" href="dir_7f0c74cf3e327840dbe789f241faca2d.xhtml" alt="" coords="27,52,312,121"/>
+<area shape="rect" id="clust1" href="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml" title="kernels" alt="" coords="16,16,323,132"/>
+</map>

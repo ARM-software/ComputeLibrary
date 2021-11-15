@@ -1,0 +1,9 @@
+<map id="src/core/NEON/kernels/arm_conv/depthwise/interleaves" name="src/core/NEON/kernels/arm_conv/depthwise/interleaves">
+<area shape="rect" id="node1" href="dir_b7f97eccce2eea27364902fe679cf4c6.xhtml" title="interleaves" alt="" coords="27,52,122,100"/>
+<area shape="rect" id="node2" href="dir_2c61f424fd391396db977702a2beee9a.xhtml" title="cpu" alt="" coords="37,244,109,292"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000087_000272.xhtml" title="1" alt="" coords="66,217,75,231"/>
+<area shape="rect" id="node3" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml" title="arm_gemm" alt="" coords="69,148,166,196"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000087_000088.xhtml" title="1" alt="" coords="102,120,111,135"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000088_000272.xhtml" title="25" alt="" coords="91,223,108,238"/>
+<area shape="rect" id="clust1" href="dir_abb214ad2a926c78a0f27cabc6cb4a00.xhtml" title="depthwise" alt="" coords="16,16,133,111"/>
+</map>

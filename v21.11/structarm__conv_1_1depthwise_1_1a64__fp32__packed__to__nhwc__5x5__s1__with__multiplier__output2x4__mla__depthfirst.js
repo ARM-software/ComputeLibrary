@@ -1,0 +1,10 @@
+var structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst =
+[
+    [ "bias_type", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a575538c81209fa609c353a81b308b5bb", null ],
+    [ "input_type", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a51add0f315e0f1c696e0058a61023e0b", null ],
+    [ "kern_type", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a512c4ad5372a5bc42ad6bf1598583dae", null ],
+    [ "return_type", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#ab88322c724d49fe17e1538d95a8cf52f", null ],
+    [ "weight_type", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a8a8e4b25ae76a5aef6f492d555240164", null ],
+    [ "a64_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a9197a16a30f27b65092095eb00269fba", null ],
+    [ "kernel", "structarm__conv_1_1depthwise_1_1a64__fp32__packed__to__nhwc__5x5__s1__with__multiplier__output2x4__mla__depthfirst.xhtml#a24b082c1c5fd10ee6d270d4854df51c5", null ]
+];

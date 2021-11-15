@@ -1,0 +1,5 @@
+<map id="CpuWinogradConv2dTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;" name="CpuWinogradConv2dTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;">
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_winograd_conv2d_transform_weights_kernel.xhtml" title="Interface for the kernel to perform Winograd weights transform. " alt="" coords="18,155,245,196"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="85,80,177,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="98,5,165,32"/>
+</map>
