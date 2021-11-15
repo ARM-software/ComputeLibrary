@@ -85,6 +85,10 @@ void DefaultNodeVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
 {
     default_visit(n);
 }
+void DefaultNodeVisitor::visit(FusedConvolutionWithPostOpNode &n)
+{
+    default_visit(n);
+}
 void DefaultNodeVisitor::visit(FusedDepthwiseConvolutionBatchNormalizationNode &n)
 {
     default_visit(n);

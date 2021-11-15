@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLStackLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLStackLayer::CLStackLayer() // NOLINT
@@ -52,6 +54,7 @@ void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, IC
 
 void CLStackLayer::configure(const CLCompileContext &compile_context, const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, axis, output);
     _num_inputs = input.size();
     _stack_kernels.reserve(_num_inputs);
 

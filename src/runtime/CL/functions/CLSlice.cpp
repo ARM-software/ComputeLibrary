@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace experimental
@@ -35,6 +37,7 @@ namespace experimental
 void CLSlice::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends);
 
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);

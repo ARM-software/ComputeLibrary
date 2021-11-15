@@ -258,4 +258,12 @@ void NEPadLayerKernel::run(const Window &window, const ThreadInfo &info)
         (this->*_func)(window);
     }
 }
+
+size_t NEPadLayerKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    return ICPPKernel::small_network_mws;
+}
+
 } // namespace arm_compute

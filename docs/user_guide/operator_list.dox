@@ -52,9 +52,10 @@ Compute Library supports the following data layouts (fast changing dimension fro
   <ul>
     <li>NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
     <li>NCHW: Legacy layout where width is in the fastest changing dimension
+    <li>NDHWC: New data layout for supporting 3D operators
     <li>All: Agnostic to any specific data layout
   </ul>
-where N = batches, C = channels, H = height, W = width
+where N = batches, C = channels, H = height, W = width, D = depth
 
 <table>
 <caption id="multi_row"></caption>
@@ -454,6 +455,7 @@ where N = batches, C = channels, H = height, W = width
   <td>
       <ul>
        <li>NCHW
+       <li>NHWC
       </ul>
   <td>
     <table>
@@ -465,6 +467,7 @@ where N = batches, C = channels, H = height, W = width
   <td>
       <ul>
        <li>NCHW
+       <li>NHWC
       </ul>
   <td>
     <table>
@@ -596,6 +599,40 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>QASYMM8<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     <tr><td>QASYMM8_SIGNED<td>QSYMM8_PER_CHANNEL<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td rowspan="2">Conv3D
+  <td rowspan="2" style="width:200px;"> Function to compute a 3d convolution layer.
+  <td rowspan="2">
+      <ul>
+       <li>ANEURALNETWORKS_CONV_3D
+      </ul>
+  <td>NEConv3D
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLConv3D
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src0<th>src1<th>src2<th>dst
+    <tr><td>F16<td>F16<td>F16<td>F16
+    <tr><td>F32<td>F32<td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8<td>S32<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED<td>S32<td>QASYMM8_SIGNED
     </table>
 <tr>
   <td rowspan="2">Copy
@@ -1402,24 +1439,13 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>All<td>All
     </table>
 <tr>
-  <td rowspan="2">FillBorder
-  <td rowspan="2" style="width:200px;"> Function to fill the borders within the XY-planes.
-  <td rowspan="2">
+  <td rowspan="1">FillBorder
+  <td rowspan="1" style="width:200px;"> Function to fill the borders within the XY-planes.
+  <td rowspan="1">
       <ul>
        <li>n/a
       </ul>
   <td>NEFillBorder
-  <td>
-      <ul>
-       <li>All
-      </ul>
-  <td>
-    <table>
-    <tr><th>src<th>dst
-    <tr><td>All<td>All
-    </table>
-<tr>
-  <td>CLFillBorder
   <td>
       <ul>
        <li>All
@@ -3094,13 +3120,6 @@ where N = batches, C = channels, H = height, W = width
     <tr><td>F16<td>F16<td>F16<td>F16
     <tr><td>F32<td>F32<td>F32<td>F32
     </table>
-<tr>
-  <td rowspan="1">WinogradInputTransform
-  <td rowspan="1" style="width:200px;"> Function to perform a Winograd transform on the input tensor.
-  <td rowspan="1">
-      <ul>
-       <li>n/a
-      </ul>
 </table>
 
 */

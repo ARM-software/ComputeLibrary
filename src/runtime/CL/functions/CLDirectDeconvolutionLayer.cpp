@@ -33,6 +33,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
+#include "src/common/utils/Log.h"
+
 #include <memory>
 #include <tuple>
 
@@ -120,6 +122,7 @@ void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_conte
                                            const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, info, weights_info);
 
     const unsigned int pad_left   = info.pad_left();
     const unsigned int pad_right  = info.pad_right();

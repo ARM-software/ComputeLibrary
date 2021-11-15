@@ -1000,6 +1000,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl
  *
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
  * @note The GEMM's dimensions (M,N and K) must be passed at compile time using -DM, -DN and and -DK (e.g. -DM=52, -DN=30 and -DK=90)
@@ -1095,6 +1096,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -1250,7 +1254,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -1262,7 +1266,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -1278,9 +1282,6 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
-
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
@@ -1293,6 +1294,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
@@ -1391,6 +1393,9 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -1596,7 +1601,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -1608,7 +1613,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -1623,9 +1628,6 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
@@ -1718,6 +1720,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl
  *
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
  * @note The GEMM's dimensions (M,N and K) must be passed at compile time using -DM, -DN and and -DK (e.g. -DM=52, -DN=30 and -DK=90).
@@ -1812,6 +1815,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -1992,7 +1998,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2004,7 +2010,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2020,9 +2026,6 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
-
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
@@ -2035,6 +2038,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
@@ -2129,6 +2133,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+    const bool cond_y = y == 0;
+    const bool cond_x = ((x + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -2301,7 +2308,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2313,7 +2320,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2328,9 +2335,6 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(ACTIVATION_TYPE)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = y == 0;
-    const bool cond_x = ((x + 1) * N0 >= N);
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
@@ -2524,6 +2528,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The data type used for the accumulators must be passed at compile time using -DDATA_TYPE_ACCUMULATOR (e.g. -DDATA_TYPE_ACCUMULATOR=float)
@@ -2705,6 +2710,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -2730,7 +2738,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -2748,7 +2756,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -2773,9 +2781,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
-
     // Store output block
 #if defined(MIXED_PRECISION)
     CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
@@ -2798,6 +2803,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
@@ -2975,6 +2981,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -3000,7 +3009,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3018,7 +3027,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3042,9 +3051,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
-
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
     // Store output block
 #if defined(MIXED_PRECISION)
@@ -3179,6 +3185,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
@@ -3283,6 +3290,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     const uint x = get_global_id(0);
     const uint y = get_global_id(1);
     const uint z = get_global_id(2);
+
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
 
 #if defined(DUMMY_WORK_ITEMS)
     if((x * N0 >= N) || (y * M0 >= M))
@@ -3495,7 +3505,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3513,7 +3523,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
                                     2) * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3537,9 +3547,6 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
-
     // Store output block
 #if defined(MIXED_PRECISION)
     CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
@@ -3560,6 +3567,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be NOT transposed
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl
  *
  * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
  * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
@@ -3838,6 +3846,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
 
+    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
+    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
 
     // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
@@ -3863,7 +3874,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #if defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE));
 
-    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, 1, PARTIAL_STORE_N0, false, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
@@ -3880,7 +3891,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * bias_stride_y) + z * bias_stride_z;
 
-    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+    LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 
 #ifndef UNIT_BETA
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
@@ -3904,9 +3915,6 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
-    const bool cond_y = ((get_global_id(1) + 1) * M0 >= M);
-    const bool cond_x = ((get_global_id(0) + 1) * N0 >= N);
-
     // Store output block
 #if defined(MIXED_PRECISION)
     CONVERT_BLOCK(M0, N0, DATA_TYPE, c, c_lp);
@@ -3929,7 +3937,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
 #endif // defined(LHS_TRANSPOSE)
 
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(K) && defined(DATA_TYPE)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE) && defined(DATA_TYPE_ACCUMULATOR) && defined(M) && defined(N)
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE)
 
@@ -4013,6 +4021,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
  *  The RHS matrix is NOT reshaped
+ * @note This kernel is duplicated in /experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl
  *
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
  * @note The GEMM's dimensions (M,N and K) must be passed at compile time using -DM, -DN and and -DK (e.g. -DM=52, -DN=30 and -DK=90)
@@ -4141,6 +4150,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
 
     int i = 0;
+#if K0 > 1
     for(; i <= (K - K0); i += K0)
     {
         // Supported cases (M0, K0):
@@ -4186,7 +4196,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
         lhs_offset += K0 * sizeof(DATA_TYPE);
         rhs_offset += K0 * rhs_stride_y;
     }
-
+#endif // K0 > 1
     // Left-over accumulations
     for(; i < K; ++i)
     {
@@ -4292,10 +4302,6 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
-
-#undef RHS_BLOCK_SIZE
-#undef RHS_OFFSET_X
-#undef RHS_STEP_X
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE)
 

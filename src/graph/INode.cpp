@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@ namespace graph
 INode::INode()
     : _graph(nullptr), _id(EmptyNodeID), _common_params({ "", Target::UNSPECIFIED}),
       _outputs(), _input_edges(), _output_edges(), _assigned_target(Target::UNSPECIFIED)
+      ,_post_op_info_list(std::list<std::unique_ptr<ConvPostOpInfo>> {})
 {
 }
 // clang-format on
@@ -198,6 +199,16 @@ Target INode::requested_target() const
 Target INode::assigned_target() const
 {
     return _assigned_target;
+}
+
+const std::list<std::unique_ptr<ConvPostOpInfo>> &INode::post_op_info_list() const
+{
+    return _post_op_info_list;
+}
+
+std::list<std::unique_ptr<ConvPostOpInfo>> &INode::post_op_info_list()
+{
+    return _post_op_info_list;
 }
 } // namespace graph
 } // namespace arm_compute

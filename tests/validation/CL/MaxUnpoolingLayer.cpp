@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,20 +51,19 @@ const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(framework::datase
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                    framework::dataset::make("DataType", DataType::F32))),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                   ))
 {
-    printf("validate\n");
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
+FIXTURE_DATA_TEST_CASE(MaxUnpooling, CLMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                   framework::dataset::make("DataType", DataType::F16))),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "arm_gemm.hpp"
 
 #include <cstddef>
 #include <cstdint>

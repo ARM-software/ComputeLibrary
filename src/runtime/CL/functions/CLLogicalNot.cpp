@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClLogicalNot.h"
+#include "src/gpu/cl/operators/ClLogicalNot.h"
 
 namespace arm_compute
 {

@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 using namespace arm_compute::misc::shape_calculator;
@@ -157,6 +158,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), (bias == nullptr) ? nullptr : bias->info(), output->info(), info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, info);
 
     const DataLayout   data_layout = input->info()->data_layout();
     const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);

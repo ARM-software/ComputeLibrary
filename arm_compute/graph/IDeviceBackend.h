@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,6 +118,8 @@ public:
      * @return Weights manager
      */
     virtual std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() = 0;
+    /** Synchronize kernels execution on the backend. On GPU, this results in a blocking call waiting for all kernels to be completed. */
+    virtual void sync() = 0;
 };
 } // namespace backends
 } // namespace graph

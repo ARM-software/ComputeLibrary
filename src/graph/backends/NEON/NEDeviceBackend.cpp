@@ -175,6 +175,11 @@ std::shared_ptr<arm_compute::IWeightsManager> NEDeviceBackend::create_weights_ma
     auto weights_mgr = std::make_shared<IWeightsManager>();
     return weights_mgr;
 }
+
+void NEDeviceBackend::sync()
+{
+    // nop
+}
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute

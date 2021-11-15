@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #include "src/core/CL/kernels/CLComparisonKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 void CLComparison::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
@@ -37,6 +39,7 @@ void CLComparison::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *ou
 
 void CLComparison::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
 {
+    ARM_COMPUTE_LOG_PARAMS(input2, input2, output, operation);
     auto k = std::make_unique<CLComparisonKernel>();
     k->configure(compile_context, input1, input2, output, operation);
     _kernel = std::move(k);

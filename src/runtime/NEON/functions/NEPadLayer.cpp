@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
@@ -167,6 +168,7 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
 void NEPadLayer::configure(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value, const PaddingMode mode)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
+    ARM_COMPUTE_LOG_PARAMS(input, output, padding, constant_value, mode);
 
     _padding = padding;
     _mode    = mode;

@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuReshape.h"
+#include "src/cpu/operators/CpuReshape.h"
 
 #include <utility>
 

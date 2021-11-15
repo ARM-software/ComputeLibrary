@@ -29,9 +29,9 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuGemmConvolution.h"
-#include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
-#include "src/runtime/cpu/operators/CpuWinogradConv2d.h"
+#include "src/cpu/operators/CpuGemmConv2d.h"
+#include "src/cpu/operators/CpuGemmDirectConv2d.h"
+#include "src/cpu/operators/CpuWinogradConv2d.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
@@ -510,7 +510,7 @@ using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Acces
 template <typename T>
 using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
-/** Test case for memory injection in @ref cpu::CpuGemmConvolution.
+/** Test case for memory injection in @ref cpu::CpuGemmConv2d.
  *
  * Configure the operator once and inject memory at run-time in multiple executions.
  *
@@ -519,7 +519,7 @@ using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixtur
  */
 TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
 {
-    auto        conv        = std::make_unique<cpu::CpuGemmConvolution>();
+    auto        conv        = std::make_unique<cpu::CpuGemmConv2d>();
     const auto  src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, DataType::F32, DataLayout::NCHW);
     const auto  weight_info = TensorInfo(TensorShape(1U, 3U, 2U, 3U), 1, DataType::F32, DataLayout::NCHW);
     const auto  bias_info   = TensorInfo(TensorShape(3U), 1, DataType::F32, DataLayout::NCHW);

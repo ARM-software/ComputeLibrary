@@ -27,8 +27,10 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/utils/misc/Macros.h"
 #include "support/Bfloat16.h"
 #include "support/Half.h"
@@ -112,7 +114,9 @@ enum class DataLayout
 {
     UNKNOWN, /**< Unknown data layout */
     NCHW,    /**< Num samples, channels, height, width */
-    NHWC     /**< Num samples, height, width, channels */
+    NHWC,    /**< Num samples, height, width, channels */
+    NCDHW,   /**< Num samples, channels, depth, height, width */
+    NDHWC    /**< Num samples, depth, height, width, channels */
 };
 /** [DataLayout enum definition] **/
 
@@ -122,6 +126,7 @@ enum class DataLayoutDimension
     CHANNEL, /**< channel */
     HEIGHT,  /**< height */
     WIDTH,   /**< width */
+    DEPTH,   /**< depth */
     BATCHES  /**< batches */
 };
 
@@ -378,7 +383,11 @@ struct BorderSize
 /** Container for 2D padding size */
 using PaddingSize = BorderSize;
 
-/** Policy to handle overflow */
+/** Policy to handle integer overflow
+ *  @note: This is ignored by floating point operations where the overflow behavior adheres to the IEEE-754 standard
+ *         which states that in case of overflow ±infinity is returned for the round-to-nearest modes (and follows the
+ *         rounding rules for the directed rounding modes) by default.
+ */
 enum class ConvertPolicy
 {
     WRAP,    /**< Wrap around */
@@ -671,8 +680,8 @@ public:
      * @param[in] stride_x   Stride, in elements, across x.
      * @param[in] stride_y   Stride, in elements, across y.
      * @param[in] pad_left   Padding across x on the left, in elements.
-     * @param[in] pad_top    Padding across y on the top, in elements.
      * @param[in] pad_right  Padding across x on the right, in elements.
+     * @param[in] pad_top    Padding across y on the top, in elements.
      * @param[in] pad_bottom Padding across y on the bottom, in elements.
      * @param[in] round      Dimensions rounding.
      */
@@ -758,6 +767,31 @@ private:
     unsigned int _pad_bottom;
 
     DimensionRoundingType _round_type;
+};
+
+/** Padding information for 3D operations like Conv3d */
+struct Padding3D
+{
+    Padding3D()
+    {
+    }
+
+    Padding3D(size_t pad_x, size_t pad_y, size_t pad_z)
+        : left(pad_x), right(pad_x), top(pad_y), bottom(pad_y), front(pad_z), back(pad_z)
+    {
+    }
+
+    Padding3D(size_t left, size_t right, size_t top, size_t bottom, size_t front, size_t back)
+        : left(left), right(right), top(top), bottom(bottom), front(front), back(back)
+    {
+    }
+
+    size_t left   = { 0 }; /**<  Padding across the width dimenstion on the left, in elements. */
+    size_t right  = { 0 }; /**<  Padding across the width dimenstion on the right, in elements. */
+    size_t top    = { 0 }; /**<  Padding across the height dimenstion  on the top, in elements. */
+    size_t bottom = { 0 }; /**<  Padding across the height dimenstion on the bottom, in elements. */
+    size_t front  = { 0 }; /**<  Padding across the depth dimenstion on the front, in elements. */
+    size_t back   = { 0 }; /**<  Padding across the depth dimenstion on the back, in elements. */
 };
 
 /** PriorBox layer info */
@@ -1544,7 +1578,7 @@ struct FullyConnectedLayerInfo
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
     bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
-    bool       constant_weights{ true };                   /**<  If false, weights can vary between runs. */
+    bool       enable_fast_math{ false };                  /**<  Enable fast math computation. */
     /* Other parameters */
     bool fp_mixed_precision{ false }; /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
 
@@ -1931,6 +1965,7 @@ struct GEMMRHSMatrixInfo
     bool         export_to_cl_image{ false }; /**< True if the reshaped rhs has to be exported to cl_image. n0 must be equal to 4 */
 };
 
+class ITensorInfo;
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped
@@ -1951,9 +1986,9 @@ public:
           _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranpose_B(true),
+          _pretranspose_B(true),
           _activation_info(),
-          _constant_weights(true)
+          _post_ops()
     {
     }
     /** Constructor
@@ -1971,11 +2006,11 @@ public:
      * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
-     * @param[in] constant_weights            (Optional) Weights have constant values throughout multiple executions
+     * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), bool constant_weights = true) noexcept
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>()) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -1986,9 +2021,9 @@ public:
           _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranpose_B(reshape_b_only_on_first_run),
+          _pretranspose_B(reshape_b_only_on_first_run),
           _activation_info(activation_info),
-          _constant_weights(constant_weights)
+          _post_ops(post_ops)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2073,6 +2108,14 @@ public:
     {
         return _fast_math;
     };
+    /** Set fast math flag
+     *
+     * @param[in] fast_math Flag to set
+     */
+    void set_fast_math(bool fast_math)
+    {
+        _fast_math = fast_math;
+    }
     /** Flag which specifies whether to broadcast the shape of the bias tensor.
      *
      * @return True if the shape of the bias tensor is to be broadcasted.
@@ -2085,17 +2128,17 @@ public:
      *
      * @return True if b should be pre-transposed else false.
      */
-    bool pretranpose_B() const
+    bool pretranspose_B() const
     {
-        return _pretranpose_B;
+        return _pretranspose_B;
     };
     /** Set pre-transpose b flag
      *
      * @param[in] flag Flag to set
      */
-    void set_pretranpose_B(bool flag)
+    void set_pretranspose_B(bool flag)
     {
-        _pretranpose_B = flag;
+        _pretranspose_B = flag;
     }
     /** Activation layer to apply after the matrix multiplication
      *
@@ -2113,29 +2156,37 @@ public:
     {
         _activation_info = activation_info;
     }
-    /** Flag which specifies if the values of the weights tensor are constant throughout multiple executions or not
+    /** Post operations to apply after the matrix multiplication
      *
-     * @return True if the weights tensor is constant
+     * @return experimental::PostOpList object
      */
-    bool constant_weights() const
+    const experimental::PostOpList<ITensorInfo *> &post_ops() const
     {
-        return _constant_weights;
-    };
+        return _post_ops;
+    }
+    /** Set post ops
+     *
+     * @param[in] post_ops experimental::PostOpList object to set
+     */
+    void set_post_ops(const experimental::PostOpList<ITensorInfo *> &post_ops)
+    {
+        _post_ops = post_ops;
+    }
 
 private:
-    bool                    _is_a_reshaped;
-    bool                    _is_b_reshaped;
-    bool                    _reshape_b_only_on_first_run;
-    int                     _depth_output_gemm3d;
-    bool                    _reinterpret_input_as_3d;
-    bool                    _retain_internal_weights;
-    GEMMLowpOutputStageInfo _gemmlowp_output_stage;
-    bool                    _fast_math;
-    bool                    _fp_mixed_precision;
-    bool                    _broadcast_bias;
-    bool                    _pretranpose_B;
-    ActivationLayerInfo     _activation_info;
-    bool                    _constant_weights;
+    bool                                    _is_a_reshaped;
+    bool                                    _is_b_reshaped;
+    bool                                    _reshape_b_only_on_first_run;
+    int                                     _depth_output_gemm3d;
+    bool                                    _reinterpret_input_as_3d;
+    bool                                    _retain_internal_weights;
+    GEMMLowpOutputStageInfo                 _gemmlowp_output_stage;
+    bool                                    _fast_math;
+    bool                                    _fp_mixed_precision;
+    bool                                    _broadcast_bias;
+    bool                                    _pretranspose_B;
+    ActivationLayerInfo                     _activation_info;
+    experimental::PostOpList<ITensorInfo *> _post_ops;
 };
 
 /** Winograd information */

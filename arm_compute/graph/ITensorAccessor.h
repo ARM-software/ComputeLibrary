@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,14 @@ public:
      * @return True if access is successful else false
      */
     virtual bool access_tensor(ITensor &tensor) = 0;
+    /** Returns true if the tensor data is being accessed
+     *
+     * @return True if the tensor data is being accessed by the accessor. False otherwise
+     */
+    virtual bool access_tensor_data()
+    {
+        return true;
+    }
 };
 
 using ITensorAccessorUPtr = std::unique_ptr<ITensorAccessor>;

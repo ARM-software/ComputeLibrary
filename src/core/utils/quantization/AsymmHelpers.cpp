@@ -61,12 +61,6 @@ Status calculate_quantized_multiplier_less_than_one(float    multiplier,
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier < -internal_epsilon);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f + internal_epsilon);
-    if(std::fabs(0.0f - multiplier) < internal_epsilon)
-    {
-        *quant_multiplier = 0;
-        *right_shift      = 0;
-        return Status{};
-    }
 
     int          shift_exp = 0;
     const double q         = std::frexp(multiplier, &shift_exp);

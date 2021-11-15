@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "src/core/gpu/cl/kernels/ClWeightsReshapeKernel.h"
+#include "src/gpu/cl/kernels/ClWeightsReshapeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"

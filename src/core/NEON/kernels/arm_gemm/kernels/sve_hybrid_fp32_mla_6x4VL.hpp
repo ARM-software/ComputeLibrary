@@ -78,6 +78,8 @@ public:
 
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
+                case CPUModel::V1:
+                    return { 15.65 };
                 default:
                     return { 6.667 };
             }

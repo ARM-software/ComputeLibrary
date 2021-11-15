@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,7 @@ class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
 class FusedConvolutionBatchNormalizationNode;
+class FusedConvolutionWithPostOpNode;
 class FusedDepthwiseConvolutionBatchNormalizationNode;
 class GenerateProposalsLayerNode;
 class InputNode;

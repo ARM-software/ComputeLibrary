@@ -28,7 +28,7 @@
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClWinogradConv2d.h"
+#include "src/gpu/cl/operators/ClWinogradConv2d.h"
 #include "support/Cast.h"
 
 namespace arm_compute

@@ -30,7 +30,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/runtime/gpu/cl/operators/ClFlatten.h"
+#include "src/gpu/cl/operators/ClFlatten.h"
 
 namespace arm_compute
 {

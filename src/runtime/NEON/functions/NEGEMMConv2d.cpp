@@ -26,7 +26,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuGemmDirectConv2d.h"
+#include "src/cpu/operators/CpuGemmDirectConv2d.h"
 
 namespace arm_compute
 {

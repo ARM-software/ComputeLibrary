@@ -295,13 +295,15 @@ public:
      * @param[in] bias_nid       (Optional) Node ID of the bias node data. Defaults to EmptyNodeID
      * @param[in] fc_info        (Optional) Fully connected layer metadata
      * @param[in] out_quant_info (Optional) Output quantization info
+     * @param[in] fast_math_hint (Optional) Fast math hint
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                             NodeID weights_nid, NodeID bias_nid = EmptyNodeID,
                                             const FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo(),
-                                            const QuantizationInfo       &out_quant_info = QuantizationInfo());
+                                            const QuantizationInfo       &out_quant_info = QuantizationInfo(),
+                                            FastMathHint                  fast_math_hint = FastMathHint::Disabled);
     /** Adds a fully connected layer node to the graph
      *
      * @param[in] g                  Graph to add the layer to
@@ -313,6 +315,7 @@ public:
      * @param[in] fc_info            (Optional) Fully connected layer metadata
      * @param[in] weights_quant_info (Optional) Weights quantization info
      * @param[in] out_quant_info     (Optional) Output quantization info
+     * @param[in] fast_math_hint     (Optional) Fast math hint
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
@@ -320,7 +323,8 @@ public:
                                             ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
                                             const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
                                             const QuantizationInfo       &weights_quant_info = QuantizationInfo(),
-                                            const QuantizationInfo       &out_quant_info     = QuantizationInfo());
+                                            const QuantizationInfo       &out_quant_info     = QuantizationInfo(),
+                                            FastMathHint                  fast_math_hint     = FastMathHint::Disabled);
     /** Adds a generate proposals layer node to the graph
      *
      * @param[in] g       Graph to add the layer to

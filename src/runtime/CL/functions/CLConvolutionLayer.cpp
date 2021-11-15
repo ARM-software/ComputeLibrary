@@ -29,8 +29,11 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "src/core/CL/ICLKernel.h"
+#include "src/core/experimental/PostOpUtils.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/gpu/cl/operators/ClConv2d.h"
+#include "src/gpu/cl/operators/ClConv2d.h"
+
+#include "src/common/utils/Log.h"
 #include "support/Cast.h"
 
 namespace arm_compute
@@ -58,20 +61,26 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 CLConvolutionLayer::~CLConvolutionLayer() = default;
 
 void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups, const experimental::PostOpList<ICLTensor *> &post_ops)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups, post_ops);
 }
 
 void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                                    const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups, const experimental::PostOpList<ICLTensor *> &post_ops)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math, num_groups));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups, post_ops);
 
-    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, enable_fast_math, num_groups);
+    // Convert post op arguments to ITensorInfo
+    auto transformed_post_ops = experimental::transform_post_op_list_arguments<ICLTensor *, ITensorInfo *>(post_ops, [](auto tensor)
+    {
+        return tensor->info();
+    });
+    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, enable_fast_math, num_groups, transformed_post_ops);
 
     switch(opencl::ClConv2d::get_convolution_method(input->info(), weights->info(), output->info(), conv2d_info,
                                                     weights_info, CLScheduler::get().target()))
@@ -87,6 +96,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
         }
         case ConvolutionMethod::FFT:
         {
+            ARM_COMPUTE_ERROR_ON_MSG(post_ops.size() > 0, "CLFFTConvolutionLayer does not support post ops");
             auto f = std::make_unique<CLFFTConvolutionLayer>(_impl->memory_manager);
             f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _impl->func = std::move(f);
@@ -99,22 +109,30 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
 
     if(_impl->op)
     {
-        _impl->memory_group = MemoryGroup(std::move(_impl->memory_manager));
-        _impl->aux_mem_req  = _impl->op->workspace();
-        _impl->run_pack     = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
-        _impl->prep_pack    = { { ACL_SRC_1, weights }, { ACL_SRC_2, biases } };
-        _impl->workspace    = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+        _impl->memory_group         = MemoryGroup(std::move(_impl->memory_manager));
+        _impl->aux_mem_req          = _impl->op->workspace();
+        _impl->run_pack             = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
+        size_t post_op_tensor_index = 0;
+        for(const auto &op : post_ops.get_list())
+        {
+            for(auto &tensor : op->arguments())
+            {
+                _impl->run_pack.add_const_tensor(experimental::get_post_op_arg_type(post_op_tensor_index++), *tensor);
+            }
+        }
+        _impl->prep_pack = { { ACL_SRC_1, weights }, { ACL_SRC_2, biases } };
+        _impl->workspace = manage_workspace<CLTensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
     }
 }
 
 Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups, const experimental::PostOpList<ITensorInfo *> &post_ops)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_layout() != DataLayout::NCHW), "Grouping (num_groups != 1) with NHWC data layout is not supported");
 
     const GPUTarget  gpu_target  = CLScheduler::get().target();
-    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, enable_fast_math, num_groups);
+    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, enable_fast_math, num_groups, post_ops);
 
     switch(opencl::ClConv2d::get_convolution_method(input, weights, output, conv2d_info, weights_info, gpu_target))
     {
@@ -128,6 +146,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::FFT:
         {
             // Validate FFT-based convolution layer
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(post_ops.size() > 0, "CLFFTConvolutionLayer does not support post ops");
             ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math));
             break;
         }

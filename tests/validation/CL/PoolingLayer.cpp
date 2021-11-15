@@ -153,7 +153,7 @@ FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPoolingLayerFixture<float>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPSmall,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerDatasetFPSmall,
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::F32))),
                                                                                                           pool_data_layout_dataset))
@@ -161,7 +161,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::Datase
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(),
                        combine(combine(combine(combine(datasets::PoolingTypes(),
                                                        framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
                                                framework::dataset::make("PadStride", { PadStrideInfo(2, 1, 0, 0) })),
@@ -181,9 +181,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::Datase
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPIndicesSmall,
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::F32))),
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                        combine(PoolingLayerDatasetFPIndicesSmall,
+                                                                                                                                framework::dataset::make("DataType",
+                                                                                                                                        DataType::F32))),
                                                                                                                         pool_data_layout_dataset))
 {
     // Validate output
@@ -232,8 +233,9 @@ TEST_SUITE_END() // GlobalPooling
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMixedPrecesionPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPSmall,
-                                                                                                                       framework::dataset::make("DataType", DataType::F16))),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMixedPrecesionPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                       combine(PoolingLayerDatasetFPSmall,
+                                                                                                                               framework::dataset::make("DataType", DataType::F16))),
                                                                                                                        pool_data_layout_dataset),
                                                                                                                        pool_fp_mixed_precision_dataset))
 {
@@ -248,9 +250,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMixedPrecesionPoolingLayerFixture<half>, fram
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPIndicesSmall,
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::F16))),
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                       combine(PoolingLayerDatasetFPIndicesSmall,
+                                                                                                                               framework::dataset::make("DataType",
+                                                                                                                                       DataType::F16))),
                                                                                                                        pool_data_layout_dataset))
 {
     // Validate output
@@ -307,7 +310,7 @@ template <typename T>
 using CLPoolingLayerQuantizedMixedDataLayoutFixture = PoolingLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLPoolingLayer, T, true>;
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallNoneUnitShapes(),
                                                                                                                      combine(PoolingLayerDatasetQASYMM8Small,
                                                                                                                              framework::dataset::make("DataType", DataType::QASYMM8))),
                                                                                                                      pool_data_layout_dataset),
@@ -317,7 +320,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallNoneUnitShapes(),
                        combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
                                                        framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
                                                framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
@@ -333,7 +336,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayou
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallNoneUnitShapes(),
                                                                                                                     combine(PoolingLayerDatasetQASYMM8Small,
                                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
                                                                                                                     pool_data_layout_dataset),
@@ -343,7 +346,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framewo
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLPoolingLayerQuantizedMixedDataLayoutFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallNoneUnitShapes(),
                        combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
                                                        framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
                                                framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),

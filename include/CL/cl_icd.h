@@ -1,29 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2019 The Khronos Group Inc.
+ * Copyright (c) 2019-2020 The Khronos Group Inc.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and/or associated documentation files (the
- * "Materials"), to deal in the Materials without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Materials, and to
- * permit persons to whom the Materials are furnished to do so, subject to
- * the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Materials.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
- * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
- * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
- *    https://www.khronos.org/registry/
- *
- * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 
 #ifndef OPENCL_CL_ICD_H
@@ -33,6 +21,12 @@
 #include <CL/cl_egl.h>
 #include <CL/cl_ext.h>
 #include <CL/cl_gl.h>
+
+#if defined(_WIN32)
+#include <CL/cl_d3d11.h>
+#include <CL/cl_d3d10.h>
+#include <CL/cl_dx9_media_sharing.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -154,6 +148,31 @@ typedef CL_API_ENTRY cl_mem(CL_API_CALL *cl_api_clCreateImage)(
 #else
 
 typedef void *cl_api_clCreateImage;
+
+#endif
+
+#ifdef CL_VERSION_3_0
+
+typedef CL_API_ENTRY cl_mem(CL_API_CALL *cl_api_clCreateBufferWithProperties)(
+    cl_context context, const cl_mem_properties *properties, cl_mem_flags flags,
+    size_t size, void *host_ptr,
+    cl_int *errcode_ret) CL_API_SUFFIX__VERSION_3_0;
+
+typedef CL_API_ENTRY cl_mem(CL_API_CALL *cl_api_clCreateImageWithProperties)(
+    cl_context context, const cl_mem_properties *properties, cl_mem_flags flags,
+    const cl_image_format *image_format, const cl_image_desc *image_desc,
+    void *host_ptr, cl_int *errcode_ret) CL_API_SUFFIX__VERSION_3_0;
+
+typedef CL_API_ENTRY cl_int(CL_API_CALL* cl_api_clSetContextDestructorCallback)(
+    cl_context context,
+    void(CL_CALLBACK* pfn_notify)(cl_context context, void* user_data),
+    void* user_data) CL_API_SUFFIX__VERSION_3_0;
+
+#else
+
+typedef void *cl_api_clCreateBufferWithProperties;
+typedef void *cl_api_clCreateImageWithProperties;
+typedef void *cl_api_clSetContextDestructorCallback;
 
 #endif
 
@@ -1260,6 +1279,12 @@ typedef struct _cl_icd_dispatch {
   /* OpenCL 2.2 */
   cl_api_clSetProgramReleaseCallback clSetProgramReleaseCallback;
   cl_api_clSetProgramSpecializationConstant clSetProgramSpecializationConstant;
+
+  /* OpenCL 3.0 */
+  cl_api_clCreateBufferWithProperties clCreateBufferWithProperties;
+  cl_api_clCreateImageWithProperties clCreateImageWithProperties;
+  cl_api_clSetContextDestructorCallback clSetContextDestructorCallback;
+
 } cl_icd_dispatch;
 
 #ifdef __cplusplus

@@ -107,6 +107,8 @@ void setup_requested_backend_context(GraphContext &ctx, Target target);
  * @param[in,out] ctx Graph Context
  */
 void release_default_graph_context(GraphContext &ctx);
+/** Synchronize kernels execution on the backends. On GPU, this results in a blocking call waiting for all kernels to be completed. */
+void sync_backends();
 /** Get size of a tensor's given dimension depending on its layout
  *
  * @param[in] descriptor            Descriptor
@@ -130,6 +132,13 @@ size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_
  * @return A list with the driving node of a given node
  */
 std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
+/** Get the list of driver nodes of a given node
+ *
+ * @param[in] node Node to find the driver node of
+ *
+ * @return A list with the driver node of a given node
+ */
+std::vector<NodeIdxPair> get_driver_nodes(const INode &node);
 /** Configures tensor
  *
  * @param[in, out] tensor Tensor to configure

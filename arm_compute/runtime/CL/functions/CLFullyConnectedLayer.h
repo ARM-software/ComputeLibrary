@@ -36,7 +36,7 @@ namespace arm_compute
  *
  *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref CLTranspose (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
- *  -# @ref opencl::kernels::ClGemmMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ *  -# @ref opencl::ClGemm or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */

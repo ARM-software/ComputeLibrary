@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
-#include "src/runtime/cpu/operators/CpuElementwiseUnary.h"
+#include "src/cpu/operators/CpuElementwiseUnary.h"
 #include <utility>
 
 namespace arm_compute

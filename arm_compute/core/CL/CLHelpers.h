@@ -31,11 +31,6 @@
 #include <set>
 #include <string>
 
-/* CL Device capabilities */
-#define ARM_COMPUTE_LIBRARY_OPENCL_DEVICE_CAPABILITIES_ARM 0x41E4
-/* Workgroup Batch Size Modifier */
-#define ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM 0x41E6
-
 namespace arm_compute
 {
 class CLCompileContext;

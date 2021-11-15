@@ -95,7 +95,8 @@ bool CLScheduler::is_initialised() const
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native), _job_chaining_enabled(false),
+      _job_chaining_size(), _job_chaining_count(0)
 {
 }
 
@@ -170,7 +171,15 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
     // Run kernel
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
 
-    if(flush)
+    if(_job_chaining_enabled)
+    {
+        if(++_job_chaining_count >= _job_chaining_size)
+        {
+            _job_chaining_count = 0;
+            _queue.flush();
+        }
+    }
+    else if(flush)
     {
         _queue.flush();
     }
@@ -185,5 +194,11 @@ void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush)
 {
     enqueue_common(kernel, tensors, flush);
+}
+
+void CLScheduler::enable_job_chaining(int job_chaining_size)
+{
+    _job_chaining_enabled = true;
+    _job_chaining_size    = job_chaining_size;
 }
 } // namespace arm_compute

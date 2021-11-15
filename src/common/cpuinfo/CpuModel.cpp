@@ -69,20 +69,6 @@ bool model_supports_dot(CpuModel model)
         case CpuModel::A510:
         case CpuModel::X1:
         case CpuModel::V1:
-        case CpuModel::A64FX:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool model_supports_sve(CpuModel model)
-{
-    switch(model)
-    {
-        case CpuModel::A510:
-        case CpuModel::V1:
-        case CpuModel::A64FX:
             return true;
         default:
             return false;

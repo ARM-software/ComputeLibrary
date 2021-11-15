@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
+#include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"

@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuPermute.h"
+#include "src/cpu/operators/CpuPermute.h"
 
 namespace arm_compute
 {

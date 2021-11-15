@@ -110,12 +110,12 @@ void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, co
     isa.svef32mm = is_supported(svefr0, 52);
 }
 
-/** Handle features from whitelisted models in case of problematic kernels
+/** Handle features from allow-listed models in case of problematic kernels
  *
  * @param[in, out] isa   ISA to update
  * @param[in]      model CPU model type
  */
-void whitelisted_model_features(CpuIsaInfo &isa, CpuModel model)
+void allowlisted_model_features(CpuIsaInfo &isa, CpuModel model)
 {
     if(isa.dot == false)
     {
@@ -124,10 +124,6 @@ void whitelisted_model_features(CpuIsaInfo &isa, CpuModel model)
     if(isa.fp16 == false)
     {
         isa.fp16 = model_supports_fp16(model);
-    }
-    if(isa.sve == false)
-    {
-        isa.sve = model_supports_sve(model);
     }
 }
 } // namespace
@@ -139,7 +135,7 @@ CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t 
     decode_hwcaps(isa, hwcaps, hwcaps2);
 
     const CpuModel model = midr_to_model(midr);
-    whitelisted_model_features(isa, model);
+    allowlisted_model_features(isa, model);
 
     return isa;
 }
@@ -151,7 +147,7 @@ CpuIsaInfo init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0,
     decode_regs(isa, isar0, isar1, pfr0, svefr0);
 
     const CpuModel model = midr_to_model(midr);
-    whitelisted_model_features(isa, model);
+    allowlisted_model_features(isa, model);
 
     return isa;
 }

@@ -31,6 +31,8 @@
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
+#include "src/common/utils/Log.h"
+
 #include <tuple>
 
 namespace arm_compute
@@ -228,6 +230,7 @@ void CLGEMMDeconvolutionLayer::configure(const CLCompileContext &compile_context
                                                                   bias != nullptr ? bias->info() : nullptr,
                                                                   output->info(),
                                                                   deconv_info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, deconv_info);
 
     _original_weights = weights;
     _padded_input     = deconv_info.pad_bottom() > 0 || deconv_info.pad_left() > 0 || deconv_info.pad_right() > 0 || deconv_info.pad_top() > 0;

@@ -22,13 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_gemm.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
-#include <cstdint>
-#include <cstring>
-
-using namespace arm_gemm;
+#include "8b_mla.hpp"
 
 size_t generic_get_packed_size(
   const VLType vec_type,
@@ -84,40 +78,8 @@ void generic_pack(
   }
 }
 
-
-#define ADD_IMPLEMENTATION(ARCH, TYPENAME, TYPE, VEC_TYPE, ACC_DEPTH, KERN_ROWS, KERN_COLS) \
-struct interleave_  ## ARCH ## _ ## TYPENAME ## _ ## KERN_ROWS ## x ## KERN_COLS ## _mla \
-{ \
-  static size_t get_packed_size(const DepthwiseArgs &args); \
-  static void pack_parameters( \
-    unsigned int n_channels, void *outptr, \
-    const TYPE *weights, size_t ld_weight_col, size_t ld_weight_row \
-  ); \
-}; \
-\
-size_t interleave_  ## ARCH ## _ ## TYPENAME ## _ ## KERN_ROWS ## x ## KERN_COLS ## _mla::get_packed_size(const DepthwiseArgs &args) \
-{ \
-  return generic_get_packed_size(VLType::VEC_TYPE, ACC_DEPTH, KERN_ROWS, KERN_COLS, args.input_channels); \
-} \
-\
-void interleave_  ## ARCH ## _ ## TYPENAME ## _ ## KERN_ROWS ## x ## KERN_COLS ## _mla::pack_parameters(unsigned int n_channels, void *outptr, \
-                            const TYPE *weights, size_t ld_weight_col, size_t ld_weight_row) \
-{ \
-  generic_pack(VLType::VEC_TYPE, ACC_DEPTH, KERN_ROWS, KERN_COLS, n_channels, outptr, weights, ld_weight_col, ld_weight_row); \
-}
-
-
 namespace arm_conv {
 namespace depthwise {
-
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-
-ADD_IMPLEMENTATION(sve, s8q, int8_t, SVE, 2, 3, 3)
-ADD_IMPLEMENTATION(sve, s8q, int8_t, SVE, 2, 5, 5)
-ADD_IMPLEMENTATION(sve, u8q, uint8_t, SVE, 2, 3, 3)
-ADD_IMPLEMENTATION(sve, u8q, uint8_t, SVE, 2, 5, 5)
-
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 
 ADD_IMPLEMENTATION(a64, s8q, int8_t, None, 2, 3, 3)
 ADD_IMPLEMENTATION(a64, s8q, int8_t, None, 2, 5, 5)

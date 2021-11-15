@@ -27,8 +27,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v21.08"
-LIBRARY_VERSION_MAJOR = 24
+VERSION = "v21.11"
+LIBRARY_VERSION_MAJOR = 25
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -38,26 +38,26 @@ Import('vars')
 Import('install_lib')
 
 def build_bootcode_objs(sources):
-
     arm_compute_env.Append(ASFLAGS = "-I bootcode/")
     obj = arm_compute_env.Object(sources)
     obj = install_lib(obj)
     Default(obj)
     return obj
 
-def build_sve_objs(sources):
 
+def build_sve_objs(sources):
     tmp_env = arm_compute_env.Clone()
     tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
     obj = tmp_env.SharedObject(sources)
     Default(obj)
     return obj
 
-def build_objs(sources):
 
+def build_objs(sources):
     obj = arm_compute_env.SharedObject(sources)
     Default(obj)
     return obj
+
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     if static:
@@ -72,6 +72,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     Default(obj)
     return obj
 
+
 def remove_incode_comments(code):
     def replace_with_empty(match):
         s = match.group(0)
@@ -82,6 +83,7 @@ def remove_incode_comments(code):
 
     comment_regex = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE)
     return re.sub(comment_regex, replace_with_empty, code)
+
 
 def resolve_includes(target, source, env):
     # File collection
@@ -142,6 +144,7 @@ def resolve_includes(target, source, env):
             file_to_write = "R\"(" + file_to_write + ")\""
             out_file.write(file_to_write)
 
+
 def create_version_file(target, source, env):
 # Generate string with build options library version to embed in the library:
     try:
@@ -153,72 +156,105 @@ def create_version_file(target, source, env):
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
-def get_cpu_runtime_files(operator):
-    file_list = []
-    operators = filelist['cpu']['operators']
 
-    if "operator" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["operator"]
-    return file_list
+def get_attrs_list(env, data_types, data_layouts):
+    attrs = []
 
-def get_gpu_runtime_files(operator):
-    file_list = []
-    operators = filelist['gpu']['operators']
+    # Manage data-types
+    if 'all' in data_types:
+        attrs += ['fp16', 'fp32', 'integer', 'qasymm8', 'qasymm8_signed', 'qsymm16']
+    else:
+        if 'fp16' in data_types: attrs += ['fp16']
+        if 'fp32' in data_types: attrs += ['fp32']
+        if 'integer' in data_types: attrs += ['integer']
+        if 'qasymm8' in data_types: attrs += ['qasymm8']
+        if 'qasymm8_signed' in data_types: attrs += ['qasymm8_signed']
+        if 'qsymm16' in data_types: attrs += ['qsymm16']
+    # Manage data-layouts
+    if 'all' in data_layouts:
+        attrs += ['nhwc', 'nchw']
+    else:
+        if 'nhwc' in data_layouts: attrs += ['nhwc']
+        if 'nchw' in data_layouts: attrs += ['nchw']
 
-    if "operator" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["operator"]
-    return file_list
+    # Manage execution state
+    attrs += ['estate32' if (env['estate'] == 'auto' and 'v7a' in env['arch']) or '32' in env['estate'] else 'estate64']
+    return attrs
 
-def get_cpu_kernel_files(operator):
 
-    file_list = []
-    file_list_sve = []
-    operators = filelist['cpu']['operators']
+def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[]):
+    files = { "common" : [] }
 
-    if env['estate'] == '64' and "neon" in operators[operator]['files'] and "estate64" in operators[operator]['files']['neon']:
-        file_list += operators[operator]['files']['neon']['estate64']
-    if env['estate'] == '32' and "neon" in operators[operator]['files'] and "estate32" in operators[operator]['files']['neon']:
-        file_list += operators[operator]['files']['neon']['estate32']
+    # Early return if filelist is empty
+    if backend not in filelist:
+        return files
 
-    if "kernel" in operators[operator]["files"]:
-        file_list += operators[operator]["files"]["kernel"]
+    # Iterate over operators and create the file lists to compiler
+    for operator in operators:
+        if operator in filelist[backend]['operators']:
+            files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
+            for tech in techs:
+                if tech in filelist[backend]['operators'][operator]["files"]:
+                    # Add tech as a key to dictionary if not there
+                    if tech not in files:
+                        files[tech] = []
 
-    if ("neon" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qasymm8"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qasymm8_signed"]
-        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["qsymm16"]
-        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["neon"]):
-                file_list += operators[operator]["files"]["neon"]["integer"]
+                    # Add tech files to the tech file list
+                    tech_files = filelist[backend]['operators'][operator]["files"][tech]
+                    files[tech] += tech_files.get('common', [])
+                    for attr in attrs:
+                        files[tech] += tech_files.get(attr, [])
 
-    if (not "sve" in env['arch'] or env['fat_binary']) and ("neon" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["fp16"]
-        if any(i in env['data_type_support'] for i in ['all', 'fp32']) and ("fp32" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["fp32"]
-        if any(i in env['data_layout_support'] for i in ['all', 'nchw']) and ("nchw" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]['files']['neon']['nchw']
-        if ("all" in operators[operator]["files"]["neon"]):
-            file_list += operators[operator]["files"]["neon"]["all"]
-    if ("sve" in env['arch'] or env['fat_binary']) and ("sve" in operators[operator]["files"]):
-        if any(i in env['data_type_support'] for i in ['all', 'fp16']) and ("fp16" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["fp16"]
-        if any(i in env['data_type_support'] for i in ['all', 'fp32'])  and ("fp32" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["fp32"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8']) and ("qasymm8" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qasymm8"]
-        if any(i in env['data_type_support'] for i in ['all', 'qasymm8_signed']) and ("qasymm8_signed" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qasymm8_signed"]
-        if any(i in env['data_type_support'] for i in ['all', 'qsymm16']) and ("qsymm16" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["qsymm16"]
-        if any(i in env['data_type_support'] for i in ['all', 'integer']) and ("integer" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["integer"]
-        if ("all" in operators[operator]["files"]["sve"]):
-            file_list_sve += operators[operator]["files"]["sve"]["all"]
+    # Remove duplicates if they exist
+    return {k: list(set(v)) for k,v in files.items()}
 
-    return file_list, file_list_sve
+def collect_operators(filelist, operators, backend=''):
+    ops = set()
+    for operator in operators:
+        if operator in filelist[backend]['operators']:
+            ops.add(operator)
+            if 'deps' in filelist[backend]['operators'][operator]:
+                ops.update(filelist[backend]['operators'][operator]['deps'])
+        else:
+            print("Operator {0} is unsupported on {1} backend!".format(operator, backend))
+
+    return ops
+
+
+def resolve_operator_dependencies(filelist, operators, backend=''):
+    resolved_operators = collect_operators(filelist, operators, backend)
+
+    are_ops_resolved = False
+    while not are_ops_resolved:
+        resolution_pass = collect_operators(filelist, resolved_operators, backend)
+        if len(resolution_pass) != len(resolved_operators):
+            resolved_operators.update(resolution_pass)
+        else:
+            are_ops_resolved = True
+
+    return resolved_operators
+
+def read_build_config_json(build_config):
+    build_config_contents = {}
+    custom_operators = []
+    custom_types = []
+    custom_layouts = []
+    if os.path.isfile(build_config):
+        with open(build_config) as f:
+            try:
+                build_config_contents = json.load(f)
+            except:
+                print("Warning: Build configuration file is of invalid JSON format!")
+    else:
+        try:
+            build_config_contents = json.loads(build_config)
+        except:
+            print("Warning: Build configuration string is of invalid JSON format!")
+    if build_config_contents:
+        custom_operators = build_config_contents.get("operators", [])
+        custom_types = build_config_contents.get("data_types", [])
+        custom_layouts = build_config_contents.get("data_layouts", [])
+    return custom_operators, custom_types, custom_layouts
 
 arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
@@ -241,8 +277,10 @@ if env['opencl'] and env['embed_kernels']:
                         'src/core/CL/cl_kernels/repeat.h',
                         'src/core/CL/cl_kernels/tile_helpers.h',
                         'src/core/CL/cl_kernels/types.h',
-                        'src/core/CL/cl_kernels/warp_helpers_quantized.h',
-                        'src/core/CL/cl_kernels/warp_helpers.h'
+                        'src/core/CL/cl_kernels/warp_helpers.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h',
+                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_elementwise_op_helpers.h',
                     ]
 
     # Common kernels
@@ -272,8 +310,10 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
                        'src/core/CL/cl_kernels/common/gemv.cl',
-                       'src/core/CL/cl_kernels/common/gemm_v1.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',
@@ -292,7 +332,6 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/quantization_layer.cl',
                        'src/core/CL/cl_kernels/common/range.cl',
                        'src/core/CL/cl_kernels/common/reduction_operation.cl',
-                       'src/core/CL/cl_kernels/common/pooling_layer.cl',
                        'src/core/CL/cl_kernels/common/reshape_layer.cl',
                        'src/core/CL/cl_kernels/common/convolution_layer.cl',
                        'src/core/CL/cl_kernels/common/reverse.cl',
@@ -323,12 +362,10 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nchw/normalize_planar_yuv_layer.cl',
                     'src/core/CL/cl_kernels/nchw/normalize_planar_yuv_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nchw/pooling_layer.cl',
-                    'src/core/CL/cl_kernels/nchw/pooling_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nchw/prior_box_layer.cl',
                     'src/core/CL/cl_kernels/nchw/remap.cl',
                     'src/core/CL/cl_kernels/nchw/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nchw/scale.cl',
-                    'src/core/CL/cl_kernels/nchw/scale_quantized.cl',
                     'src/core/CL/cl_kernels/nchw/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nchw/space_to_depth.cl',
                     'src/core/CL/cl_kernels/nchw/upsample_layer.cl',
@@ -342,6 +379,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/batchnormalization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/channel_shuffle.cl',
                     'src/core/CL/cl_kernels/nhwc/direct_convolution.cl',
+                    'src/core/CL/cl_kernels/nhwc/direct_convolution3d.cl',
                     'src/core/CL/cl_kernels/nhwc/depth_to_space.cl',
                     'src/core/CL/cl_kernels/nhwc/dequantization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/dwc_native_fp_nhwc.cl',
@@ -355,7 +393,6 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/remap.cl',
                     'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
-                    'src/core/CL/cl_kernels/nhwc/scale_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_depth.cl',
                     'src/core/CL/cl_kernels/nhwc/upsample_layer.cl',
@@ -390,129 +427,116 @@ arm_compute_env.Append(LIBS = ['dl'])
 with (open(Dir('#').path + '/filelist.json')) as fp:
     filelist = json.load(fp)
 
-core_files = Glob('src/core/*.cpp')
-core_files += Glob('src/core/CPP/*.cpp')
-core_files += Glob('src/core/CPP/kernels/*.cpp')
-core_files += Glob('src/core/helpers/*.cpp')
-core_files += Glob('src/core/utils/*.cpp')
-core_files += Glob('src/core/utils/helpers/*.cpp')
-core_files += Glob('src/core/utils/io/*.cpp')
-core_files += Glob('src/core/utils/quantization/*.cpp')
-core_files += Glob('src/core/utils/misc/*.cpp')
-if env["logging"]:
-    core_files += Glob('src/core/utils/logging/*.cpp')
+# Common backend files
+lib_files = filelist['common']
 
-runtime_files_hp = Glob('src/runtime/*.cpp')
-runtime_files_hp += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
-runtime_files = Glob('src/runtime/CPP/functions/*.cpp')
+# Logging files
+if env["logging"]:
+    lib_files += filelist['logging']
 
 # C API files
-runtime_files_hp += filelist['c_api']['common']
-runtime_files_hp += filelist['c_api']['operators']
+lib_files += filelist['c_api']['common']
+lib_files += filelist['c_api']['operators']
 
-if env['opencl']:
-    runtime_files_hp += filelist['c_api']['gpu']
+# Scheduler infrastructure
+lib_files += filelist['scheduler']['single']
+if env['cppthreads']:
+     lib_files += filelist['scheduler']['threads']
+if env['openmp']:
+     lib_files += filelist['scheduler']['omp']
 
-# Common backend files
-core_files += filelist['common']
-
-# Initialize high priority core files
-core_files_hp = core_files
-core_files_sve_hp = []
-core_files = []
-
-runtime_files_hp += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
-
+# Graph files
 graph_files = Glob('src/graph/*.cpp')
 graph_files += Glob('src/graph/*/*.cpp')
 
-if env['cppthreads']:
-     runtime_files_hp += Glob('src/runtime/CPP/CPPScheduler.cpp')
+# Specify user-defined priority operators
+custom_operators = []
+custom_types = []
+custom_layouts = []
 
-if env['openmp']:
-     runtime_files_hp += Glob('src/runtime/OMP/OMPScheduler.cpp')
+use_custom_ops = env['high_priority'] or env['build_config'];
+
+if env['high_priority']:
+    custom_operators = filelist['high_priority']
+    custom_types = ['all']
+    custom_layouts = ['all']
+
+if env['build_config']:
+    custom_operators, custom_types, custom_layouts = read_build_config_json(env['build_config'])
 
 if env['opencl']:
-    operators = filelist['gpu']['operators']
-    for operator in operators:
-        if operator in filelist['gpu']['high_priority']:
-            runtime_files_hp += get_gpu_runtime_files(operator)
-            if "kernel" in operators[operator]["files"]:
-                core_files_hp += operators[operator]["files"]["kernel"]
-        else:
-            runtime_files += get_gpu_runtime_files(operator)
-            if "kernel" in operators[operator]["files"]:
-                core_files += operators[operator]["files"]["kernel"]
+    lib_files += filelist['c_api']['gpu']
+    lib_files += filelist['gpu']['common']
 
-    runtime_files_hp += filelist['gpu']['common']
-    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
+    cl_operators = custom_operators if use_custom_ops else filelist['gpu']['operators'].keys()
+    cl_ops_to_build = resolve_operator_dependencies(filelist, cl_operators, 'gpu')
+    lib_files += get_operator_backend_files(filelist, cl_ops_to_build, 'gpu')['common']
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
 sve_o = []
-core_files_sve = []
+lib_files_sve = []
 if env['neon']:
-    core_files += Glob('src/core/NEON/*.cpp')
-
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/core/cpu/kernels/assembly/",])
+                                      "src/cpu/kernels/assembly/",])
 
-    # Load files based on user's options
-    operators = filelist['cpu']['operators']
-    for operator in operators:
-        if operator in filelist['cpu']['high_priority']:
-            runtime_files_hp += get_cpu_runtime_files(operator)
-            file_list, file_list_sve = get_cpu_kernel_files(operator)
-            core_files_hp += file_list
-            core_files_sve_hp += file_list_sve
-        else:
-            runtime_files += get_cpu_runtime_files(operator)
-            file_list, file_list_sve = get_cpu_kernel_files(operator)
-            core_files += file_list
-            core_files_sve += file_list_sve
+    lib_files += filelist['cpu']['common']
 
-    runtime_files_hp += filelist['cpu']['common']
-    runtime_files_hp += Glob('src/runtime/NEON/*.cpp')
-    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
+    # Setup SIMD file list to include
+    simd = []
+    if 'sve' in env['arch'] or env['fat_binary']: simd += ['sve']
+    if 'sve' not in env['arch'] or env['fat_binary']: simd += ['neon']
+
+    # Get attributes
+    if(use_custom_ops):
+        attrs = get_attrs_list(env, custom_types, custom_layouts)
+    else:
+        attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
+
+    # Setup data-type and data-layout files to include
+    cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()
+    cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
+
+    cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+    lib_files += cpu_files.get('common', [])
+    lib_files += cpu_files.get('neon', [])
+    lib_files_sve += cpu_files.get('sve', [])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
+# Restrict from building graph API if a reduced operator list has been provided
+if use_custom_ops:
+    print("WARNING: Graph library requires all operators to be built")
+    graph_files = []
+
+# Build bootcode in case of bare-metal
 bootcode_o = []
 if env['os'] == 'bare_metal':
     bootcode_files = Glob('bootcode/*.s')
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-high_priority_o = build_objs(core_files_hp + runtime_files_hp)
-high_priority_sve_o = []
+# Build static libraries
 if (env['fat_binary']):
-    sve_o = build_sve_objs(core_files_sve)
-    high_priority_sve_o = build_sve_objs(core_files_sve_hp)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + sve_o + high_priority_o + high_priority_sve_o + runtime_files, static=True)
+    sve_o = build_sve_objs(lib_files_sve)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + sve_o, static=True)
 else:
-    high_priority_o += build_objs(core_files_sve_hp)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files, static=True)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + lib_files_sve, static=True)
 Export('arm_compute_a')
-if env['high_priority']:
-    arm_compute_hp_a = build_library('arm_compute_hp-static', arm_compute_env, high_priority_o + high_priority_sve_o, static=True)
-    Export('arm_compute_hp_a')
 
+# Build shared libraries
 if env['os'] != 'bare_metal' and not env['standalone']:
     if (env['fat_binary']):
-        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + sve_o + high_priority_sve_o + high_priority_o + runtime_files, static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + sve_o, static=False)
     else:
-        arm_compute_so = build_library('arm_compute', arm_compute_env, core_files + core_files_sve + high_priority_o + runtime_files , static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + lib_files_sve, static=False)
 
     Export('arm_compute_so')
-
-    if env['high_priority']:
-        arm_compute_hp_so = build_library('arm_compute_hp', arm_compute_env, high_priority_sve_o + high_priority_o, static=False)
-        Export('arm_compute_hp_so')
 
 # Generate dummy core lib for backwards compatibility
 arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
@@ -524,6 +548,7 @@ if env['os'] != 'bare_metal' and not env['standalone']:
 
 arm_compute_graph_env = arm_compute_env.Clone()
 
+# Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
 arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])

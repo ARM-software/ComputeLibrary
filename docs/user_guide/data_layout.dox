@@ -34,8 +34,9 @@ the right-most letter represents the fastest changing dimension:
 
 - NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
 - NCHW: Legacy layout where width is in the fastest changing dimension
+- NDHWC: New data layout for supporting 3D operators
 
-, where N = batch, C = channel, H = height, W = width.
+, where N = batch, C = channel, H = height, W = width, D = depth.
 
 */
 } // namespace

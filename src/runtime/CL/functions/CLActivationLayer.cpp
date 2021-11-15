@@ -28,7 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClActivation.h"
+#include "src/gpu/cl/operators/ClActivation.h"
 
 namespace arm_compute
 {

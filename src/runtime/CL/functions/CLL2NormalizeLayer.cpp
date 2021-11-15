@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace
@@ -57,6 +59,8 @@ void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis
 
 void CLL2NormalizeLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, axis, epsilon);
+
     // Reset auxiliary tensor
     _sumsq.allocator()->init(TensorInfo());
 

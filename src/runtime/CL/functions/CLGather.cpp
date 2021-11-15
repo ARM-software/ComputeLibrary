@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/kernels/CLGatherKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 void CLGather::configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
@@ -35,6 +37,7 @@ void CLGather::configure(const ICLTensor *input, const ICLTensor *indices, ICLTe
 
 void CLGather::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, indices, output, axis);
     auto k = std::make_unique<CLGatherKernel>();
     k->configure(compile_context, input, indices, output, axis);
     _kernel = std::move(k);

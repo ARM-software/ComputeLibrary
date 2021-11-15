@@ -24,7 +24,6 @@
 
 #include "activation_float_helpers.h"
 #include "helpers.h"
-#include "helpers_asymm.h"
 #include "tile_helpers.h"
 
 #if defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_WIDTH) && defined(DST_HEIGHT) && defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
@@ -87,7 +86,7 @@
  * @param[in]  wei_stride_w                      Stride of the weights tensor in W dimension (in bytes)
  * @param[in]  wei_step_w                        wei_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the bias matrix
- * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr (if F32/F16) or S32 (if QASYMM8/QASYMM8_SIGNED)
+ * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr
  * @param[in]  bia_stride_x                      (Optional) Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bia_step_x                        (Optional) bia_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  bia_offset_first_element_in_bytes (Optional) The offset of the first element in the bias matrix

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
+
+#include "src/common/utils/Log.h"
 
 #include <list>
 
@@ -388,9 +390,12 @@ CPPDetectionOutputLayer::CPPDetectionOutputLayer()
 {
 }
 
-void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor *input_conf, const ITensor *input_priorbox, ITensor *output, DetectionOutputLayerInfo info)
+void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor *input_conf, const ITensor *input_priorbox,
+                                        ITensor *output, DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
+    ARM_COMPUTE_LOG_PARAMS(input_loc, input_conf, input_priorbox, output, info);
+
     // Output auto initialization if not yet initialized
     // Since the number of bboxes to kept is unknown before nms, the shape is set to the maximum
     // The maximum is keep_top_k * input_loc_size[1]

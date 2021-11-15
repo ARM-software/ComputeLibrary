@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 
 namespace arm_compute
@@ -36,6 +37,7 @@ namespace experimental
 void NESlice::configure(const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends);
 
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);

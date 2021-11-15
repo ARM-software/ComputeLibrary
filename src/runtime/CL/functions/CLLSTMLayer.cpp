@@ -30,7 +30,9 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/gpu/cl/kernels/ClTransposeKernel.h"
+#include "src/gpu/cl/kernels/ClTransposeKernel.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -82,6 +84,10 @@ void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTe
                                  forget_gate_bias, cell_bias, output_gate_bias,
                                  output_state_in, cell_state_in,
                                  scratch_buffer, output_state_out, cell_state_out, output);
+
+    ARM_COMPUTE_LOG_PARAMS(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights, recurrent_to_cell_weights,
+                           recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias, output_state_in, cell_state_in, scratch_buffer, output_state_out, cell_state_out,
+                           output, lstm_params, activation_info, cell_threshold, projection_threshold);
 
     _is_layer_norm_lstm = lstm_params.use_layer_norm();
 

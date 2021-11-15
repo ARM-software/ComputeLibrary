@@ -181,6 +181,17 @@ public:
     }
 };
 
+class SmallConvolutionLayerPrePaddingDataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallConvolutionLayerPrePaddingDataset()
+    {
+        // output shape is calculated by accounting pre-padding layer as well -- all the data is in nchw
+        add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 5U, 2U, 19U), TensorShape(19U), TensorShape(17U, 16U, 19U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(12U, 13U, 16U), PadStrideInfo(3, 2, 2, 0));
+    }
+};
+
 class SmallConvolutionLayerReducedDataset final : public ConvolutionLayerDataset
 {
 public:

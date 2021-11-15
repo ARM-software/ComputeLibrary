@@ -71,18 +71,29 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const DataLayout data_layout = input->data_layout();
     if(data_layout == DataLayout::NCHW)
     {
-        const unsigned int vec_size_x            = adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
-        const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
-        const bool         is_norm_accross_width = norm_idx == 0;
+        const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / input->element_size(), input->dimension(0));
+        const unsigned int norm_idx             = get_normalization_dimension_index(input->data_layout(), norm_info);
+        const bool         is_norm_across_width = norm_idx == 0;
 
-        const unsigned int border_width = is_norm_accross_width ? vec_size_x - 1 : 0;
-        const BorderSize   border_size  = BorderSize(0, border_width);
+        const unsigned int norm_radius = norm_info.norm_size() / 2;
+        // Border / padding calculation:
+        // For NCHW no border handling is impelmeneted in the kernel in the x axis.
+        // This means the x axis is fully-padded depending on vec_size_x and norm_size
+        // E.G. for input x dimension = 3, norm_size = 3 (radius = 1), vec_size_x = 2 ('#' is element 'p' is padding):
+        // In : |p|#|#|#|p|p|
+        // Out:   |#|#|#|p|
+        // The output has 1 right padding because of the vec_size_x.
+        // The input has 1 left padding because radius = 1.
+        // The input has 2 right padding because of radius = 1 AND because of the extra output padding
+        const unsigned int border_width_left  = is_norm_across_width ? norm_radius : 0;
+        const unsigned int border_width_right = is_norm_across_width ? norm_radius + (vec_size_x - input->dimension(0) % vec_size_x) : 0;
+        const BorderSize   border_size        = BorderSize(0, border_width_right, 0, border_width_left);
 
         win = calculate_max_window(*input, Steps(vec_size_x));
 
         // We do not use a Rectangle window for IN_MAP_2D as we clamp the top and bottom accesses inside the kernel, avoiding padding
         // Reads can occur within the valid region of the input
-        if(is_norm_accross_width)
+        if(is_norm_across_width)
         {
             AccessWindowStatic input_access(input, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
             window_changed = window_changed || update_window_and_padding(win, input_access);
@@ -150,10 +161,21 @@ void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_conte
 
     if(data_layout == DataLayout::NCHW)
     {
-        const unsigned int norm_idx     = get_normalization_dimension_index(data_layout, norm_info);
-        _is_norm_across_width           = norm_idx == 0;
-        const unsigned int border_width = _is_norm_across_width ? vec_size_x - 1 : 0;
-        _border_size                    = BorderSize(0, border_width);
+        const unsigned int norm_idx    = get_normalization_dimension_index(data_layout, norm_info);
+        _is_norm_across_width          = norm_idx == 0;
+        const unsigned int norm_radius = norm_info.norm_size() / 2;
+        // Border / padding calculation:
+        // For NCHW no border handling is impelmeneted in the kernel in the x axis.
+        // This means the x axis is fully-padded depending on vec_size_x and norm_size
+        // E.G. for input x dimension = 3, norm_size = 3 (radius = 1), vec_size_x = 2 ('#' is element 'p' is padding):
+        // In : |p|#|#|#|p|p|
+        // Out:   |#|#|#|p|
+        // The output has 1 right padding because of the vec_size_x.
+        // The input has 1 left padding because radius = 1.
+        // The input has 2 right padding because of radius = 1 AND the extra output padding
+        const unsigned int border_width_left  = _is_norm_across_width ? norm_radius : 0;
+        const unsigned int border_width_right = _is_norm_across_width ? norm_radius + (vec_size_x - input->info()->dimension(0) % vec_size_x) : 0;
+        _border_size                          = BorderSize(0, border_width_right, 0, border_width_left);
     }
 
     const bool is_in_map_2D = (norm_info.type() == NormType::IN_MAP_2D);

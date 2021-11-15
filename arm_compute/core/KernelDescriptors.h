@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/IPostOp.h"
 
 namespace arm_compute
 {
@@ -52,48 +53,52 @@ struct FFTRadixStageKernelInfo
     bool         is_first_stage{ false }; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */
 };
 
+class ITensorInfo;
 /** Descriptor used by the GEMM kernels */
 struct GEMMKernelInfo
 {
     GEMMKernelInfo() = default;
     GEMMKernelInfo(
-        unsigned int        im,
-        unsigned int        in,
-        unsigned int        ik,
-        unsigned int        idepth_output_gemm3d,
-        bool                ireinterpret_input_as_3d,
-        bool                ibroadcast_bias,
-        bool                ifp_mixed_precision,
-        bool                ihas_pad_y,
-        ActivationLayerInfo iactivation_info,
-        int                 inmult_transpose1xW_width,
-        int                 imult_interleave4x4_height,
-        GEMMLHSMatrixInfo   ilhs_info,
-        GEMMRHSMatrixInfo   irhs_info,
-        int32_t             ina_offset,
-        int32_t             inb_offset)
+        unsigned int                                   im,
+        unsigned int                                   in,
+        unsigned int                                   ik,
+        unsigned int                                   idepth_output_gemm3d,
+        bool                                           ireinterpret_input_as_3d,
+        bool                                           ibroadcast_bias,
+        bool                                           ifp_mixed_precision,
+        bool                                           ihas_pad_y,
+        ActivationLayerInfo                            iactivation_info,
+        int                                            inmult_transpose1xW_width,
+        int                                            imult_interleave4x4_height,
+        GEMMLHSMatrixInfo                              ilhs_info,
+        GEMMRHSMatrixInfo                              irhs_info,
+        int32_t                                        ina_offset,
+        int32_t                                        inb_offset,
+        const experimental::PostOpList<ITensorInfo *> &ipost_ops = experimental::PostOpList<ITensorInfo *> {})
         : m(im), n(in), k(ik), depth_output_gemm3d(idepth_output_gemm3d), reinterpret_input_as_3d(ireinterpret_input_as_3d), broadcast_bias(ibroadcast_bias), fp_mixed_precision(ifp_mixed_precision),
           has_pad_y(ihas_pad_y), activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info),
-          rhs_info(irhs_info), a_offset(ina_offset), b_offset(inb_offset)
+          rhs_info(irhs_info), a_offset(ina_offset), b_offset(inb_offset), post_ops(ipost_ops)
     {
     }
 
-    unsigned int            m{ 0 };                           /**< Number of LHS rows*/
-    unsigned int            n{ 0 };                           /**< Number of RHS columns*/
-    unsigned int            k{ 0 };                           /**< Number of LHS columns or RHS rows */
-    unsigned int            depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
-    bool                    reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
-    bool                    broadcast_bias{ false };          /**< Flag used to broadcast the bias addition */
-    bool                    fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
-    bool                    has_pad_y{ false };               /**< Flag used to indicate if the input/output tensors have internal pad on the y direction */
-    ActivationLayerInfo     activation_info{};                /**< Activation function to perform after the matrix multiplication */
-    int                     mult_transpose1xW_width{ 1 };     /**< Multiplication factor for the width of the 1xW transposed block */
-    int                     mult_interleave4x4_height{ 1 };   /**< Multiplication factor for the height of the 4x4 interleaved block */
-    GEMMLHSMatrixInfo       lhs_info{};                       /**< LHS matrix information used to retrieve the number of rows processed by each thread */
-    GEMMRHSMatrixInfo       rhs_info{};                       /**< RHS matrix information used for reshaping the RHS matrix */
-    int32_t                 a_offset{ 0 };                    /**< Offset to be added to each element of the matrix A */
-    int32_t                 b_offset{ 0 };                    /**< Offset to be added to each element of the matrix B */
-    GEMMLowpOutputStageInfo output_stage{};                   /**< GEMMLowp output stage information */
+    unsigned int                            m{ 0 };                           /**< Number of LHS rows*/
+    unsigned int                            n{ 0 };                           /**< Number of RHS columns*/
+    unsigned int                            k{ 0 };                           /**< Number of LHS columns or RHS rows */
+    unsigned int                            depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
+    bool                                    reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
+    bool                                    broadcast_bias{ false };          /**< Flag used to broadcast the bias addition */
+    bool                                    fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
+    bool                                    has_pad_y{ false };               /**< Flag used to indicate if the input/output tensors have internal pad on the y direction */
+    ActivationLayerInfo                     activation_info{};                /**< Activation function to perform after the matrix multiplication */
+    int                                     mult_transpose1xW_width{ 1 };     /**< Multiplication factor for the width of the 1xW transposed block */
+    int                                     mult_interleave4x4_height{ 1 };   /**< Multiplication factor for the height of the 4x4 interleaved block */
+    GEMMLHSMatrixInfo                       lhs_info{};                       /**< LHS matrix information used to retrieve the number of rows processed by each thread */
+    GEMMRHSMatrixInfo                       rhs_info{};                       /**< RHS matrix information used for reshaping the RHS matrix */
+    int32_t                                 a_offset{ 0 };                    /**< Offset to be added to each element of the matrix A */
+    int32_t                                 b_offset{ 0 };                    /**< Offset to be added to each element of the matrix B */
+    GEMMLowpOutputStageInfo                 output_stage{};                   /**< GEMMLowp output stage information */
+    experimental::PostOpList<ITensorInfo *> post_ops{};                       /**< (EXPERIMENTAL_POST_OPS) Specifies a list of post ops to be fused after the main op. Note unsupported post ops would not be executed.
+                                                          *   If specified, automatically disable the @ref activation_info */
 };
 
 /** Compute descriptor used by the depthwise convolution native kernel */

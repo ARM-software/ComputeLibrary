@@ -24,6 +24,8 @@
 #ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 #define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 
+#include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/TypePrinter.h"
@@ -450,7 +452,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
 /** Create a backend convolution layer function
  *
  * @tparam ConvolutionLayerFunctions Backend convolution functions
- * @tparam TargetInfo              Target-specific information
+ * @tparam TargetInfo                Target-specific information
  *
  * @param[in] node Node to create the backend function for
  * @param[in] ctx  Graph context
@@ -514,6 +516,99 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                         input, weights, biases, output, conv_info,
                                         WeightsInfo(), Size2D(1U, 1U), fused_act, fast_math, num_groups);
     }
+
+    // Log info
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Input QuantInfo: " << input->info()->quantization_info()
+            << " Weights QuantInfo: " << weights->info()->quantization_info()
+            << " Output QuantInfo: " << output->info()->quantization_info();
+    }
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Groups: " << num_groups
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Weights shape: " << weights->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << qss.str()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
+                               << std::endl);
+    return std::move(func);
+}
+
+/** Create a backend convolution layer function with post opreator
+ *
+ * @tparam ConvolutionLayerFunctions Backend convolution functions
+ * @tparam TargetInfo                Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend convolution layer function
+ */
+template <typename ConvolutionLayerFunctions, typename TargetInfo>
+std::unique_ptr<IFunction> create_fused_convolution_with_post_op(FusedConvolutionWithPostOpNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 4 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+
+    if(is_quantized)
+    {
+        biases->info()->set_data_type(DataType::S32);
+    }
+
+    const PadStrideInfo       conv_info  = node.convolution_info();
+    const unsigned int        num_groups = node.num_groups();
+    const ActivationLayerInfo fused_act  = node.fused_activation();
+
+    experimental::PostOpList<typename TargetInfo::TensorType *> post_ops;
+
+    auto &post_op_info_list = node.post_op_info_list();
+    for(const auto &post_op_info : post_op_info_list)
+    {
+        switch(post_op_info->type())
+        {
+            case PostOpType::Activation:
+            {
+                const auto act_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoActivation *>(post_op_info.get());
+                post_ops.template push_back_op<experimental::PostOpAct<typename TargetInfo::TensorType *>>(act_info->_act);
+                break;
+            }
+            case PostOpType::Eltwise_Add:
+            {
+                typename TargetInfo::TensorType *add_input    = get_backing_tensor<TargetInfo>(node.input(3));
+                const auto                       eltwise_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoEltwiseAdd *>(post_op_info.get());
+                post_ops.template push_back_op<experimental::PostOpEltwiseAdd<typename TargetInfo::TensorType *>>(add_input, eltwise_info->_prev_op_dst_pos, eltwise_info->_policy);
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Unsupported PostOpType");
+            }
+        }
+    }
+
+    // Create and configure function (we assume that functions have been validated before creation)
+    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
+    std::unique_ptr<IFunction>      func;
+    std::string                     func_name;
+
+    // Fuse convolution with post ops is only supported for conv1x1, which is only implemented as gemmconv2d
+    std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::GEMMConvolutionLayer>(
+                                    std::string("GEMMConvolutionLayer"), mm,
+                                    input, weights, biases, output, conv_info,
+                                    WeightsInfo(), Size2D(1U, 1U), fused_act, num_groups, post_ops);
 
     // Log info
     std::ostringstream qss;
@@ -1003,7 +1098,8 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-    const FullyConnectedLayerInfo    fc_info = node.info();
+    FullyConnectedLayerInfo          fc_info = node.info();
+    fc_info.enable_fast_math                 = (node.fast_math_hint() == FastMathHint::Enabled);
 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(weights == nullptr);

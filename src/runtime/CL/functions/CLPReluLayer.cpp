@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/gpu/cl/IClKernel.h"
-#include "src/runtime/gpu/cl/operators/ClPRelu.h"
+#include "src/gpu/cl/IClKernel.h"
+#include "src/gpu/cl/operators/ClPRelu.h"
 
 namespace arm_compute
 {

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "src/core/gpu/cl/kernels/ClCol2ImKernel.h"
+#include "src/gpu/cl/kernels/ClCol2ImKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"

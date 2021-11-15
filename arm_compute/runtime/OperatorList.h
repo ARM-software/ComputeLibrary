@@ -206,6 +206,16 @@
  *
  */
 
+/** Conv3D
+ *
+ * Description:
+ * Function to compute a 3d convolution layer.
+ *
+ * Equivalent Android NNAPI Op:
+ * ANEURALNETWORKS_CONV_3D
+ *
+ */
+
 /** Copy
  *
  * Description:
@@ -986,16 +996,6 @@
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_CONV_2D
- *
- */
-
-/** WinogradInputTransform
- *
- * Description:
- * Function to perform a Winograd transform on the input tensor.
- *
- * Equivalent Android NNAPI Op:
- * n/a
  *
  */
 

@@ -119,11 +119,11 @@ Each kernel will have to implement the method:
 
 The structure of the kernel .cpp file should be similar to the next ones.
 For OpenCL:
-@snippet src/core/gpu/cl/kernels/ClReshapeKernel.cpp ClReshapeKernel Kernel
+@snippet src/gpu/cl/kernels/ClReshapeKernel.cpp ClReshapeKernel Kernel
 The run will call the function defined in the .cl file.
 
 For the Arm® Neon™ backend case:
-@snippet src/core/cpu/kernels/CpuReshapeKernel.cpp NEReshapeLayerKernel Kernel
+@snippet src/cpu/kernels/CpuReshapeKernel.cpp NEReshapeLayerKernel Kernel
 
 In the Arm® Neon™ case, there is no need to add an extra file and we implement the kernel in the same NEReshapeLayerKernel.cpp file.
 If the tests are already in place, the new kernel can be tested using the existing tests by adding the configure and run of the kernel to the compute_target() in the fixture.

@@ -62,13 +62,13 @@ namespace depthwise {
 
 namespace
 {
-
+#if defined(__aarch64__)
 bool qp_weights_are_symmetric(const DepthwiseArgs &, const void *_qp)
 {
   const auto qp = static_cast<const arm_gemm::Requantize32 *>(_qp);
   return qp->b_offset == 0;
 }
-
+#endif // defined(__aarch64__)
 }
 
 static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depthwise_s8q_methods[] = {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019,2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/graph/TensorDescriptor.h"
 #include "arm_compute/graph/Types.h"
 
+#include <list>
 #include <set>
 
 namespace arm_compute
@@ -240,18 +241,29 @@ public:
      * @return Assigned target of this node
      */
     Target assigned_target() const;
+    /** Post operator info list
+     *
+     * @return Post operator info list
+     */
+    const std::list<std::unique_ptr<ConvPostOpInfo>> &post_op_info_list() const;
+    /** Post operator info list
+     *
+     * @return Post operator info list
+     */
+    std::list<std::unique_ptr<ConvPostOpInfo>> &post_op_info_list();
 
 protected:
     friend class Graph;
 
 protected:
-    Graph                *_graph;           /**< Backward reference to graph owning the node */
-    NodeID                _id;              /**< Node ID */
-    NodeParams            _common_params;   /**< Node common params */
-    std::vector<TensorID> _outputs;         /**< Output of the node */
-    std::vector<EdgeID>   _input_edges;     /**< Inputs edge set */
-    std::set<EdgeID>      _output_edges;    /**< Output edge set */
-    Target                _assigned_target; /**< Assigned target by the Graph executor */
+    Graph                                     *_graph;             /**< Backward reference to graph owning the node */
+    NodeID                                     _id;                /**< Node ID */
+    NodeParams                                 _common_params;     /**< Node common params */
+    std::vector<TensorID>                      _outputs;           /**< Output of the node */
+    std::vector<EdgeID>                        _input_edges;       /**< Inputs edge set */
+    std::set<EdgeID>                           _output_edges;      /**< Output edge set */
+    Target                                     _assigned_target;   /**< Assigned target by the Graph executor */
+    std::list<std::unique_ptr<ConvPostOpInfo>> _post_op_info_list; /**< Post operator info list */
 };
 } // namespace graph
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,11 @@ ActivationLayerInfo ConvolutionLayerNode::fused_activation() const
 void ConvolutionLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
 {
     _fused_activation = fused_activation;
+}
+
+void ConvolutionLayerNode::set_convolution_info(PadStrideInfo info)
+{
+    _info = info;
 }
 
 TensorDescriptor ConvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,

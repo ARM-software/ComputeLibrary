@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 
 namespace arm_compute
@@ -43,6 +44,7 @@ NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memor
 void NENormalizationLayer::configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output, norm_info);
 
     TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type());
     _input_squared.allocator()->init(tensor_info);

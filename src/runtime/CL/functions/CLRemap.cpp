@@ -30,6 +30,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLRemapKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 void CLRemap::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
@@ -51,6 +53,7 @@ void CLRemap::configure(ICLTensor *input, const ICLTensor *map_x, const ICLTenso
 void CLRemap::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
                         BorderMode border_mode, PixelValue constant_border_value)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, map_x, map_y, output, policy, border_mode, constant_border_value);
     auto k = std::make_unique<CLRemapKernel>();
     k->configure(compile_context, input, map_x, map_y, output, RemapInfo{ policy, border_mode, constant_border_value });
     _kernel = std::move(k);

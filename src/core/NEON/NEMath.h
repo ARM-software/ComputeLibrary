@@ -239,6 +239,14 @@ float32x4_t vsinq_f32(float32x4_t val);
  */
 float32x2_t vsin_f32(float32x2_t val);
 
+/** Reduce a vector to be a scalar by accumulating all lanes in the vector
+ *
+ * @param[in] v Vector to be reduced.
+ *
+ * @return the wrapped-around number.
+ */
+float vreduce(const float32x4_t &v);
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Calculate hyperbolic tangent.
  *
@@ -319,6 +327,13 @@ float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
  */
 float16x8_t vsinq_f16(float16x8_t val);
 
+/** Reduce a vector to be a scalar by accumulating all lanes in the vector
+ *
+ * @param[in] v Vector to be reduced.
+ *
+ * @return the wrapped-around number.
+ */
+float16_t vreduce(const float16x8_t &v);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "src/core/NEON/NEMath.inl"

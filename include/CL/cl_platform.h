@@ -1,30 +1,18 @@
-/**********************************************************************************
- * Copyright (c) 2008-2018 The Khronos Group Inc.
+/*******************************************************************************
+ * Copyright (c) 2008-2020 The Khronos Group Inc.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and/or associated documentation files (the
- * "Materials"), to deal in the Materials without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Materials, and to
- * permit persons to whom the Materials are furnished to do so, subject to
- * the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Materials.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
- * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
- * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
- *    https://www.khronos.org/registry/
- *
- * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
- **********************************************************************************/
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 
 #ifndef __CL_PLATFORM_H
 #define __CL_PLATFORM_H
@@ -66,6 +54,10 @@ extern "C" {
 #define CL_EXT_SUFFIX__VERSION_2_1
 #define CL_API_SUFFIX__VERSION_2_2
 #define CL_EXT_SUFFIX__VERSION_2_2
+#define CL_API_SUFFIX__VERSION_3_0
+#define CL_EXT_SUFFIX__VERSION_3_0
+#define CL_API_SUFFIX__EXPERIMENTAL
+#define CL_EXT_SUFFIX__EXPERIMENTAL
 
 
 #ifdef __GNUC__
@@ -117,6 +109,14 @@ extern "C" {
 #else
     #define CL_EXT_SUFFIX__VERSION_2_1_DEPRECATED CL_EXT_SUFFIX_DEPRECATED
     #define CL_EXT_PREFIX__VERSION_2_1_DEPRECATED CL_EXT_PREFIX_DEPRECATED
+#endif
+
+#ifdef CL_USE_DEPRECATED_OPENCL_2_2_APIS
+    #define CL_EXT_SUFFIX__VERSION_2_2_DEPRECATED
+    #define CL_EXT_PREFIX__VERSION_2_2_DEPRECATED
+#else
+    #define CL_EXT_SUFFIX__VERSION_2_2_DEPRECATED CL_EXT_SUFFIX_DEPRECATED
+    #define CL_EXT_PREFIX__VERSION_2_2_DEPRECATED CL_EXT_PREFIX_DEPRECATED
 #endif
 
 #if (defined (_WIN32) && defined(_MSC_VER))
@@ -355,7 +355,9 @@ typedef unsigned int cl_GLenum;
 
 /* Define basic vector types */
 #if defined( __VEC__ )
-   #include <altivec.h>   /* may be omitted depending on compiler. AltiVec spec provides no way to detect whether the header is required. */
+  #if !defined(__clang__)
+     #include <altivec.h>   /* may be omitted depending on compiler. AltiVec spec provides no way to detect whether the header is required. */
+  #endif
    typedef __vector unsigned char     __cl_uchar16;
    typedef __vector signed char       __cl_char16;
    typedef __vector unsigned short    __cl_ushort8;
@@ -482,7 +484,7 @@ typedef unsigned int cl_GLenum;
 #elif defined( __GNUC__) && ! defined( __STRICT_ANSI__ )
 #define  __CL_HAS_ANON_STRUCT__ 1
 #define  __CL_ANON_STRUCT__ __extension__
-#elif defined( _WIN32) && defined(_MSC_VER)
+#elif defined( _WIN32) && defined(_MSC_VER) && ! defined(__STDC__)
     #if _MSC_VER >= 1500
    /* Microsoft Developer Studio 2008 supports anonymous structs, but
     * complains by default. */
@@ -499,7 +501,7 @@ typedef unsigned int cl_GLenum;
 #endif
 
 /* Define alignment keys */
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) || defined(__INTEGRITY)
     #define CL_ALIGNED(_x)          __attribute__ ((aligned(_x)))
 #elif defined( _WIN32) && (_MSC_VER)
     /* Alignment keys neutered on windows because MSVC can't swallow function arguments with alignment requirements     */
@@ -1373,9 +1375,7 @@ typedef union
 }
 #endif
 
-#undef __CL_HAS_ANON_STRUCT__
-#undef __CL_ANON_STRUCT__
-#if defined( _WIN32) && defined(_MSC_VER)
+#if defined( _WIN32) && defined(_MSC_VER) && ! defined(__STDC__)
     #if _MSC_VER >=1500
     #pragma warning( pop )
     #endif

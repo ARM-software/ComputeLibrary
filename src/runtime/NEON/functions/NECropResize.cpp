@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NECropKernel.h"
 
 #include <cstddef>
@@ -60,6 +61,7 @@ void NECropResize::configure(const ITensor *input, const ITensor *boxes, const I
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NECropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(), crop_size, method, extrapolation_value));
+    ARM_COMPUTE_LOG_PARAMS(input, boxes, box_ind, output, crop_size, method, extrapolation_value);
 
     _num_boxes = boxes->info()->tensor_shape()[1];
     TensorShape out_shape(input->info()->tensor_shape()[0], crop_size.x, crop_size.y);

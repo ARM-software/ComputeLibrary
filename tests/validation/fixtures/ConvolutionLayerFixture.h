@@ -26,7 +26,9 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/graph/Utils.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/graph/mutators/MutatorUtils.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
@@ -35,6 +37,7 @@
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/reference/PadLayer.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 
@@ -70,7 +73,7 @@ public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
-               bool mixed_layout = false)
+               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}))
     {
         _mixed_layout             = mixed_layout;
         _data_type                = data_type;
@@ -83,8 +86,8 @@ public:
         _weight_quantization_info = weight_quantization_info;
         _data_layout              = data_layout;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info, pre_pad_layer);
     }
 
 protected:
@@ -179,8 +182,9 @@ protected:
         }
     }
 
+    // given input is IN nchw format
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info)
+                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -191,6 +195,18 @@ protected:
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
+
+            if(pre_pad_layer.size() > 0)
+            {
+                // make sure paddings exist for each c,h,w dimensions
+                for(unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
+                {
+                    pre_pad_layer.push_back({ 0, 0 });
+                }
+
+                // rotate padding info from nchw to nhwc
+                std::rotate(pre_pad_layer.begin(), pre_pad_layer.begin() + 2, pre_pad_layer.begin() + 3);
+            }
         }
 
         const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
@@ -207,7 +223,30 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
+
+        const unsigned int height_index = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
+        const unsigned int width_index  = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
+
+        const PaddingInfo pad_w = width_index < pre_pad_layer.size() ? pre_pad_layer[width_index] : PaddingInfo(0, 0);
+        const PaddingInfo pad_h = height_index < pre_pad_layer.size() ? pre_pad_layer[height_index] : PaddingInfo(0, 0);
+
+        if(pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
+        {
+            // this is the logic implemented in NodeFusionMutator -> fuse_pad_with_convolution
+            const PadStrideInfo new_conv_info(
+                info.stride().first,
+                info.stride().second,
+                info.pad_left() + pad_w.first,
+                info.pad_right() + pad_w.second,
+                info.pad_top() + pad_h.first,
+                info.pad_bottom() + pad_h.second,
+                info.round());
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation, act_info, num_groups);
+        }
+        else
+        {
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
+        }
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
@@ -246,7 +285,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      const Size2D &dilation, const ActivationLayerInfo act_info)
+                                      const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -271,6 +310,11 @@ protected:
         {
             regularize_values(static_cast<void *>(src.data()), src.num_elements());
             regularize_values(static_cast<void *>(weights.data()), weights.num_elements());
+        }
+
+        if(pre_pad_layer.size() > 0)
+        {
+            src = reference::pad_layer<T>(src, pre_pad_layer, PixelValue(0), PaddingMode::CONSTANT);
         }
 
         return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups),
@@ -303,6 +347,20 @@ public:
         ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
                                                                                                  data_type, data_type, data_layout,
                                                                                                  QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+class ConvolutionValidationWithPaddingFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
+               DataLayout data_layout, ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
+                                                                                                 data_type, data_type, data_layout,
+                                                                                                 QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout, pre_pad_layer);
     }
 };
 

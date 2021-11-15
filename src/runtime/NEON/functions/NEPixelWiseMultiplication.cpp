@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "src/runtime/cpu/operators/CpuMul.h"
+#include "src/cpu/operators/CpuMul.h"
 
 #include <utility>
 

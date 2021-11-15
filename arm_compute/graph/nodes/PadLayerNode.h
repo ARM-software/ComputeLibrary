@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,9 @@ public:
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
+
+public:
+    static constexpr NodeType node_type = NodeType::PadLayer;
 
 private:
     PaddingList _padding;

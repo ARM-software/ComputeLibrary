@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,15 @@
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 
 #include "arm_compute/core/Types.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"
 
 namespace arm_compute
 {
 void NESelect::configure(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(c, x, y, output);
+
     auto k = std::make_unique<NESelectKernel>();
     k->configure(c, x, y, output);
     _kernel = std::move(k);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
+
+#include "src/common/utils/Log.h"
 
 #include <cstddef>
 #include <ios>
@@ -213,10 +215,14 @@ CPPDetectionPostProcessLayer::CPPDetectionPostProcessLayer(std::shared_ptr<IMemo
 {
 }
 
-void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, const ITensor *input_scores, const ITensor *input_anchors,
-                                             ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info)
+void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, const ITensor *input_scores,
+                                             const ITensor *input_anchors, ITensor *output_boxes, ITensor *output_classes,
+                                             ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_box_encoding, input_scores, input_anchors, output_boxes, output_classes, output_scores);
+    ARM_COMPUTE_LOG_PARAMS(input_box_encoding, input_scores, input_anchors, output_boxes, output_classes, output_scores,
+                           num_detection, info);
+
     _num_max_detected_boxes = info.max_detections() * info.max_classes_per_detection();
 
     auto_init_if_empty(*output_boxes->info(), TensorInfo(TensorShape(_kNumCoordBox, _num_max_detected_boxes, _kBatchSize), 1, DataType::F32));

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 
 #include "arm_gemm.hpp"
 #include <cstddef>
@@ -622,3 +623,4 @@ void a64_u8q_nhwc_generic_output9_mla_depthfirst_impl(
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

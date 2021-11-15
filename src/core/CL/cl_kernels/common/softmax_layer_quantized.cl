@@ -27,6 +27,7 @@
 
 #define VEC_BASE VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VECTOR_SIZE)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VECTOR_SIZE)
 
 /** Divides all the values of the input tensor by the sum calculated from softmax_layer_shift_exp_sum kernel.
  *
@@ -76,37 +77,31 @@ __kernel void softmax_layer_norm_quantized(
 
     Image sum = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(sum);
 
+#ifdef BETA
+    // Initialize beta
+    VEC_FLOAT beta       = (VEC_FLOAT)BETA;
+    VEC_FLOAT scale_beta = -BETA * SCALE;
+#else  /* BETA */
+    VEC_FLOAT scale_beta = -SCALE;
+#endif /* BETA */
+
     // Load max value of 1D logits vector (row)
-    int sum_val = *((__global int *)offset(&sum, 0, get_global_id(1)));
+    float sum_val         = *((__global float *)offset(&sum, 0, get_global_id(1)));
+    float sum_val_inverse = 256.f / sum_val;
 
-    // It will be better to calculate this in prev layer and pass here as parameter
-    uint    sum_val_u               = convert_uint(sum_val);
-    int     headroom_plus_one       = clz(sum_val_u);
-    int     num_bits_over_unit      = EXP_ACCUMULATION_INT_BITS - headroom_plus_one;
-    int     shifted_sum_minus_one_1 = convert_int((sum_val_u << headroom_plus_one) - (1u << 31));
-    VEC_INT shifted_sum_minus_one   = shifted_sum_minus_one_1;
-    VEC_INT shifted_scale           = ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1(shifted_sum_minus_one, VECTOR_SIZE);
+    VEC_INT   data_diff   = VLOAD(VECTOR_SIZE)(0, (__global int *)src_addr);
+    VEC_FLOAT data_diff_f = CONVERT(data_diff, VEC_FLOAT);
 
-    // It was already calculated in prev layer, should be stored into tmp output and reused
-    VEC_INT data_diff      = VLOAD(VECTOR_SIZE)(0, (__global int *)src_addr);
-    VEC_INT data_diff_mult = data_diff;
-#if defined(INPUT_BETA_MULTIPLIER) && defined(INPUT_BETA_LEFT_SHIFT)
-    if(INPUT_BETA_MULTIPLIER > 1)
-    {
-        data_diff_mult = ASYMM_MULT(data_diff * (1 << INPUT_BETA_LEFT_SHIFT), INPUT_BETA_MULTIPLIER, VECTOR_SIZE);
-    }
-#endif /* defined(INPUT_BETA_MULTIPLIER) && defined(INPUT_BETA_LEFT_SHIFT) */
+    data_diff_f *= scale_beta;
+    data_diff_f = exp(data_diff_f);
+    data_diff_f *= sum_val_inverse;
 
-    VEC_INT data = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, VECTOR_SIZE);
-    data         = ASYMM_MULT(shifted_scale, data, VECTOR_SIZE);
-    data         = ASYMM_ROUNDING_DIVIDE_BY_POW2(data, num_bits_over_unit + 31 - 8, VECTOR_SIZE);
 #ifdef QASYMM8_SIGNED
-    data += (VEC_INT)(MIN_VALUE);
+    data_diff_f -= 128.f;
 #endif /* QASYMM8_SIGNED */
-    data           = select(MIN_VALUE, data, data_diff >= (VEC_INT)(DIFF_MIN));
+    VEC_INT  data  = CONVERT(data_diff_f, VEC_INT);
     VEC_BASE data0 = CONVERT_SAT(data, VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE));
-
-    STORE_VECTOR_SELECT(data, DATA_TYPE, dst_addr, VECTOR_SIZE, VECTOR_SIZE_LEFTOVER, VECTOR_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
+    STORE_VECTOR_SELECT(data, DATA_TYPE, dst_addr, VECTOR_SIZE, VECTOR_SIZE_LEFTOVER, VECTOR_SIZE_LEFTOVER != 0 && get_global_id(0) == 0);
 }
 
 #if defined(SRC_WIDTH) && defined(LOG_VECTOR_SIZE)
@@ -189,6 +184,14 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
 
     VEC_BASE max_val_vec = (VEC_BASE)(MIN_VALUE);
 
+#ifdef BETA
+    // Initialize beta
+    VEC_FLOAT beta       = (VEC_FLOAT)BETA;
+    VEC_FLOAT scale_beta = -BETA * SCALE;
+#else  /* BETA */
+    VEC_FLOAT scale_beta = -SCALE;
+#endif /* BETA */
+
     // Calculate max of row
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     VEC_BASE vec_min_val = (VEC_BASE)(MIN_VALUE);
@@ -210,39 +213,35 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     // Second part
 
     // Load max value of 1D logits vector (row)
-    int max_val = convert_int(max_local);
-
-    // Set sum vector, Q(EXP_ACCUMULATION_INT_BITS)
-    VEC_INT sum1D = 0;
-
+    int       max_val = convert_int(max_local);
+    VEC_FLOAT sum1D_f = 0.f;
+    // Start with the leftover items
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
-    VEC_INT data_fp        = CONVERT(data, VEC_INT);
-    VEC_INT data_diff      = data_fp - max_val;
-    VEC_INT data_diff_mult = mult_by_quantized_multiplier(data_diff);
-    data_fp                = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, VECTOR_SIZE);
-    data_fp                = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, VECTOR_SIZE);
+    VEC_INT   data_fp   = CONVERT(data, VEC_INT);
+    VEC_INT   data_diff = max_val - data_fp;
+    VEC_FLOAT data_fp_f = CONVERT(data_diff, VEC_FLOAT);
+    data_fp_f *= scale_beta;
+    data_fp_f = exp(data_fp_f);
+    data_fp_f = select(0, data_fp_f, widx);
     VSTORE_PARTIAL(VECTOR_SIZE, VECTOR_SIZE_LEFTOVER)
     (data_diff, 0, (__global int *)dst_addr);
-    data_fp = select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
-    sum1D += select(0, data_fp, widx);
+    sum1D_f += data_fp_f;
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
-
-    // Shift values, exp and sum
+    // Do the rest and compute exp and sum
     for(uint i = VECTOR_SIZE_LEFTOVER; i < SRC_WIDTH; i += VECTOR_SIZE)
     {
-        VEC_BASE data          = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(src_addr + i * sizeof(DATA_TYPE)));
-        VEC_INT data_fp        = CONVERT(data, VEC_INT);
-        VEC_INT data_diff      = data_fp - max_val;
-        VEC_INT data_diff_mult = mult_by_quantized_multiplier(data_diff);
-        data_fp                = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, VECTOR_SIZE);
-        data_fp                = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, VECTOR_SIZE);
+        VEC_BASE data       = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(src_addr + i * sizeof(DATA_TYPE)));
+        VEC_INT   data_fp   = CONVERT(data, VEC_INT);
+        VEC_INT   data_diff = max_val - data_fp;
+        VEC_FLOAT data_fp_f = CONVERT(data_diff, VEC_FLOAT);
+        data_fp_f *= scale_beta;
+        data_fp_f = exp(data_fp_f);
+        sum1D_f += data_fp_f;
         VSTORE(VECTOR_SIZE)
         (data_diff, 0, (__global int *)(dst_addr + i * sizeof(int)));
-        sum1D = sum1D + select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
     }
-
     // Perform sum reduction
-    *((__global int *)sum.ptr) = SUM_REDUCE(sum1D, VECTOR_SIZE);
+    *((__global float *)sum.ptr) = SUM_REDUCE(sum1D_f, VECTOR_SIZE);
 }
 
 /** Identifies the maximum value across the 1st dimension and shifts the values of the input tensor by this maximum value,

@@ -47,7 +47,6 @@
 #include "src/core/NEON/kernels/NELogicalKernel.h"
 #include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
-#include "src/core/NEON/kernels/NEMinMaxLayerKernel.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"

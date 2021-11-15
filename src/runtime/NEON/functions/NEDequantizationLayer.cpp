@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "src/runtime/cpu/operators/CpuDequantize.h"
+#include "src/cpu/operators/CpuDequantize.h"
 
 namespace arm_compute
 {

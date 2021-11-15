@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if defined(__aarch64__)
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -249,3 +250,4 @@ void a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
 
 }  // namespace pooling
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

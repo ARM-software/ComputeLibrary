@@ -27,8 +27,9 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/runtime/cpu/operators/CpuFullyConnected.h"
+#include "src/cpu/operators/CpuFullyConnected.h"
 
 namespace arm_compute
 {
@@ -69,6 +70,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                                biases != nullptr ? biases->info() : nullptr,
                                                                output->info(),
                                                                fc_info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, fc_info);
 
     _impl->op               = std::make_unique<cpu::CpuFullyConnected>();
     _impl->original_weights = weights;
@@ -78,7 +80,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
 
     if(_impl->weights_manager != nullptr)
     {
-        _impl->weights_manager->manage(weights);
+        _impl->weights_manager->manage(_impl->original_weights);
     }
 
     _impl->aux_mem_req = _impl->op->workspace();
@@ -113,11 +115,13 @@ void NEFullyConnectedLayer::prepare()
         // Handle weights managed infrastructure
         if(_impl->weights_manager != nullptr && _impl->weights_manager->are_weights_managed(_impl->original_weights))
         {
-            // If function marks b as unused ensure that all prepare stages are done before releasing
+            // Ensure that b gets marked as unused (memory released) only after the last function which uses b also finishes its prepare
+            // This is for cases where multiple functions share the same b (weights)
+            // Therefore when a function marks original b as unused, we pre-mark it in weights manager, and mark it back to used so that it doesn't get released before its last reference
             const ITensor *original_b = _impl->original_weights;
             if(!original_b->is_used())
             {
-                _impl->weights_manager->mark_as_unused(original_b);
+                _impl->weights_manager->pre_mark_as_unused(original_b);
             }
             _impl->original_weights->mark_as_used();
             _impl->weights_manager->release(_impl->original_weights);

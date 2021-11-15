@@ -68,7 +68,7 @@ void channel_shuffle_nhwc(const ITensor *input, ITensor *output, unsigned int nu
 
     const size_t       element_size = input->info()->element_size();
     const unsigned int K            = input->info()->dimension(channel_idx) / num_groups;
-    const float        rK           = 1.f / K;
+    const double       rK           = 1.0 / K;
 
     Iterator in(input, window);
 
@@ -103,7 +103,7 @@ void channel_shuffle_nchw(const ITensor *input, ITensor *output, unsigned int nu
     const size_t       row_size        = input->info()->dimension(width_idx) * input->info()->element_size();
 
     const unsigned int K  = input->info()->dimension(channel_idx) / num_groups;
-    const float        rK = 1.f / K;
+    const double       rK = 1.0 / K;
 
     Iterator in(input, win);
 

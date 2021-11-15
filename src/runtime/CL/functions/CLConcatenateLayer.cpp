@@ -25,7 +25,9 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClConcatenate.h"
+#include "src/gpu/cl/operators/ClConcatenate.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -57,6 +59,7 @@ void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector
 void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_LOG_PARAMS(inputs_vector, output, axis);
 
     _impl->srcs       = inputs_vector;
     _impl->dst        = output;

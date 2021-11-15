@@ -76,14 +76,14 @@ public:
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.
-     * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
+     * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
     void enqueue(ICLKernel &kernel, bool flush = true);
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel  Kernel to execute.
      * @param[in] tensors Vector containing the tensors to operate on.
-     * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel.
+     * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
     void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
 
@@ -163,6 +163,12 @@ public:
      */
     void tune_kernel_static(ICLKernel &kernel);
 
+    /** Enable job chaining. The command queue will only be flushed when @p job_chaining_size kernels have been enqueued.
+     *
+     * @param[in] job_chaining_size Kernels to enqueue before flushing
+     */
+    void enable_job_chaining(int job_chaining_size);
+
     bool is_initialised() const;
 
 private:
@@ -177,6 +183,9 @@ private:
     ICLTuner               *_cl_tuner;
     CLGEMMHeuristicsHandle *_gemm_heuristics;
     CLBackendType           _backend_type;
+    bool                    _job_chaining_enabled;
+    int                     _job_chaining_size;
+    int                     _job_chaining_count;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLSCHEDULER_H */

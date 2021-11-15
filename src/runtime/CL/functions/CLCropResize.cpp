@@ -29,6 +29,8 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
+#include "src/common/utils/Log.h"
+
 #include <cstddef>
 
 namespace arm_compute
@@ -92,6 +94,7 @@ void CLCropResize::configure(const CLCompileContext &compile_context, const ICLT
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, boxes, box_ind);
     ARM_COMPUTE_ERROR_THROW_ON(CLCropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(), crop_size, method, extrapolation_value));
+    ARM_COMPUTE_LOG_PARAMS(input, boxes, box_ind, output, crop_size, method, extrapolation_value);
 
     TensorShape output_shape = TensorShape(input->info()->tensor_shape()[0], crop_size.x, crop_size.y, boxes->info()->tensor_shape()[1]);
     auto_init_if_empty(*output->info(), output_shape, 1, DataType::F32);

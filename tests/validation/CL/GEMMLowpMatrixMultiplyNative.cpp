@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"

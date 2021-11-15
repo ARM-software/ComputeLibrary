@@ -29,7 +29,7 @@
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "src/runtime/cpu/ICpuOperator.h"
+#include "src/cpu/ICpuOperator.h"
 #include "tests/Globals.h"
 
 #include <algorithm>

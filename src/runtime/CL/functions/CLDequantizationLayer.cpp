@@ -27,7 +27,9 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClDequantize.h"
+#include "src/gpu/cl/operators/ClDequantize.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -51,6 +53,7 @@ void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLDequantizationLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output);
     _impl->src = input;
     _impl->dst = output;
 

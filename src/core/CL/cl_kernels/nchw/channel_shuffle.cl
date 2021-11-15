@@ -33,7 +33,7 @@
 
 #define DIV_MOD_UINT(x, y, div_res, mod_res)                \
     ({                                                      \
-        div_res = (uint)((x) * (float)(1.0f / (float)(y))); \
+        div_res = (uint)((x)/(y)); \
         uint r  = div_res * (y);                            \
         mod_res = (x)-r;                                    \
     })

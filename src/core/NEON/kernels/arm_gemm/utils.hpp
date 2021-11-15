@@ -27,8 +27,8 @@
 #include "arm_gemm.hpp"
 
 #include <cstddef>
-#include <tuple>
 #include <limits>
+#include <tuple>
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
 #define UNREACHABLE(why)  __builtin_unreachable()

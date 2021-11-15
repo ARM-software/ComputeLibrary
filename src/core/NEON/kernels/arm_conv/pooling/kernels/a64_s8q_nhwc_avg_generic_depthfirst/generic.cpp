@@ -86,12 +86,13 @@ void a64_s8q_nhwc_avg_generic_depthfirst_impl(
       f_rescale_value *= 2.0f;
     }
 
-    rescale_value = static_cast<int32_t>(round(f_rescale_value * static_cast<float>(1ll << 31)));
-    if (static_cast<int64_t>(rescale_value) == (1ll << 31))
+    int64_t large_rescale_value = round(f_rescale_value * static_cast<float>(1ll << 31));
+    if (large_rescale_value == (1ll << 31))
     {
       shift_value++;
-      rescale_value >>= 1;
+      large_rescale_value >>= 1;
     }
+    rescale_value = static_cast<int32_t>(large_rescale_value);
   }
 
   // Combine together the rescale value for the requantization and the scaling

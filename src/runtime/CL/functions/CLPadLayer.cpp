@@ -24,6 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLPadLayer::CLPadLayer()
@@ -43,6 +45,7 @@ void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingLis
 void CLPadLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
+    ARM_COMPUTE_LOG_PARAMS(input, output, padding, constant_value, mode);
 
     _perform_pad = std::any_of(padding.begin(), padding.end(), [](PaddingInfo info)
     {

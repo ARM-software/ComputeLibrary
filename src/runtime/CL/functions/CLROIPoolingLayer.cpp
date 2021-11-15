@@ -25,6 +25,8 @@
 #include "arm_compute/core/CL/ICLArray.h"
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 using namespace arm_compute;
 
 Status CLROIPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
@@ -39,6 +41,8 @@ void CLROIPoolingLayer::configure(const ICLTensor *input, const ICLTensor *rois,
 
 void CLROIPoolingLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, const ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
+
     // Configure ROI pooling kernel
     auto k = std::make_unique<CLROIPoolingLayerKernel>();
     k->configure(compile_context, input, rois, output, pool_info);

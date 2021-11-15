@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "src/core/NEON/kernels/assembly/common.hpp"
-#include "src/core/cpu/kernels/assembly/arm_gemm.hpp"
+#include "src/cpu/kernels/assembly/arm_gemm.hpp"
 
 namespace arm_compute
 {

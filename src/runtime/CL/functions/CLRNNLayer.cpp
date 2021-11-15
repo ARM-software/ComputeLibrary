@@ -30,6 +30,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
@@ -83,6 +85,7 @@ void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTen
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLRNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(), bias->info(), hidden_state->info(), output->info(), info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, recurrent_weights, bias, hidden_state, output, info);
 
     const int   idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
     TensorShape shape      = compute_rnn_shape(recurrent_weights->info(), hidden_state->info()->dimension(idx_height));

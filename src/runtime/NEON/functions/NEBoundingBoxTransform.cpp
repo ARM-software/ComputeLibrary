@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
 namespace arm_compute
 {
 void NEBoundingBoxTransform::configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(boxes, pred_boxes, deltas, info);
     // Configure Bounding Box kernel
     auto k = std::make_unique<NEBoundingBoxTransformKernel>();
     k->configure(boxes, pred_boxes, deltas, info);

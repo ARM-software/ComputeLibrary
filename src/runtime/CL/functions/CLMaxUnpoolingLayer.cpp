@@ -29,6 +29,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLMaxUnpoolingLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLMaxUnpoolingLayer::CLMaxUnpoolingLayer()
@@ -46,6 +48,7 @@ void CLMaxUnpoolingLayer::configure(ICLTensor *input, ICLTensor *indices, ICLTen
 
 void CLMaxUnpoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *indices, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, indices, output, pool_info);
     const PixelValue zero_value(0.f);
     _fill.configure(output, zero_value);
 

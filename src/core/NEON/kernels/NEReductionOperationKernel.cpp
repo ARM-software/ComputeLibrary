@@ -321,7 +321,7 @@ uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, float16x8_t vec_res_va
     res_idx_mask.val[1] = wrapper::vadd(res_idx_mask.val[1], mask_ones);
 
     uint32_t res  = 0xFFFFFFFF;
-    int      iter = 0;
+    uint32_t iter = 0;
     do
     {
         auto pmin = wrapper::vpmin(wrapper::vgethigh(res_idx_mask.val[iter]), wrapper::vgetlow(res_idx_mask.val[iter]));

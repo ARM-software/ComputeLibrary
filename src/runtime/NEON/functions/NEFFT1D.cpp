@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEFFTDigitReverseKernel.h"
 #include "src/core/NEON/kernels/NEFFTRadixStageKernel.h"
 #include "src/core/NEON/kernels/NEFFTScaleKernel.h"
@@ -44,6 +45,7 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFFT1D::validate(input->info(), output->info(), config));
+    ARM_COMPUTE_LOG_PARAMS(input, output, config);
 
     // Decompose size to radix factors
     const auto         supported_radix   = NEFFTRadixStageKernel::supported_radix();

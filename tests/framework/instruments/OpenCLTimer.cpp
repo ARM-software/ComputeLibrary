@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,13 @@ std::string    OpenCLClock<output_timestamps>::id() const
 
 template <bool output_timestamps>
 OpenCLClock<output_timestamps>::OpenCLClock(ScaleFactor scale_factor)
-    : _kernels(), _real_function(nullptr), _real_graph_function(nullptr), _prefix(), _timer_enabled(false)
+    : _kernels(),
+      _real_function(nullptr),
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
+      _real_graph_function(nullptr),
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
+      _prefix(),
+      _timer_enabled(false)
 {
     auto                        q     = CLScheduler::get().queue();
     cl_command_queue_properties props = q.getInfo<CL_QUEUE_PROPERTIES>();
@@ -91,19 +97,17 @@ void           OpenCLClock<output_timestamps>::test_start()
 {
     // Start intercepting enqueues:
     ARM_COMPUTE_ERROR_ON(_real_function != nullptr);
-    ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
-    _real_function       = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
-    _real_graph_function = graph::TaskExecutor::get().execute_function;
-    auto interceptor     = [this](
-                               cl_command_queue command_queue,
-                               cl_kernel        kernel,
-                               cl_uint          work_dim,
-                               const size_t    *gwo,
-                               const size_t    *gws,
-                               const size_t    *lws,
-                               cl_uint          num_events_in_wait_list,
-                               const cl_event * event_wait_list,
-                               cl_event *       event)
+    _real_function   = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
+    auto interceptor = [this](
+                           cl_command_queue command_queue,
+                           cl_kernel        kernel,
+                           cl_uint          work_dim,
+                           const size_t    *gwo,
+                           const size_t    *gws,
+                           const size_t    *lws,
+                           cl_uint          num_events_in_wait_list,
+                           const cl_event * event_wait_list,
+                           cl_event *       event)
     {
         if(this->_timer_enabled)
         {
@@ -138,7 +142,11 @@ void           OpenCLClock<output_timestamps>::test_start()
             return this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, event);
         }
     };
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
 
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
+    ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
+    _real_graph_function = graph::TaskExecutor::get().execute_function;
     // Start intercepting tasks:
     auto task_interceptor = [this](graph::ExecutionTask & task)
     {
@@ -153,9 +161,8 @@ void           OpenCLClock<output_timestamps>::test_start()
         this->_real_graph_function(task);
         this->_prefix = "";
     };
-
-    CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
     graph::TaskExecutor::get().execute_function = task_interceptor;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
 }
 
 template <bool output_timestamps>
@@ -175,9 +182,11 @@ void           OpenCLClock<output_timestamps>::test_stop()
 {
     // Restore real function
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = _real_function;
+    _real_function                              = nullptr;
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
     graph::TaskExecutor::get().execute_function = _real_graph_function;
     _real_graph_function                        = nullptr;
-    _real_function                              = nullptr;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
 }
 
 template <bool              output_timestamps>

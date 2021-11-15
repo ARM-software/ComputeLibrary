@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -70,6 +71,7 @@ void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &ou
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(NEUnstack::validate(input->info(), outputs_vector_info, axis));
+    ARM_COMPUTE_LOG_PARAMS(input, output_vector, axis);
 
     // Wrap around negative values
     const unsigned int axis_u = wrap_axis(axis, input->info());

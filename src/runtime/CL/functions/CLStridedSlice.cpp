@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 namespace experimental
@@ -35,6 +37,7 @@ void CLStridedSlice::configure(const CLCompileContext &compile_context, const IT
                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     auto k = std::make_unique<CLStridedSliceKernel>();
     k->configure(compile_context, input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     _kernel = std::move(k);

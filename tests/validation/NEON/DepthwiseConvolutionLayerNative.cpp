@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/core/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
+#include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/framework/Macros.h"

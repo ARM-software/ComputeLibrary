@@ -23,7 +23,9 @@
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/core/gpu/cl/kernels/ClElementwiseKernel.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
+
+#include "src/common/utils/Log.h"
 
 #include <utility>
 
@@ -33,6 +35,7 @@ namespace experimental
 {
 void CLLogicalOr::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
+    ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
     auto k = std::make_unique<arm_compute::opencl::kernels::ClLogicalBinaryKernel>();
     k->configure(compile_context, LogicalOperation::Or, input1, input2, output);
     _kernel = std::move(k);

@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,7 @@ void NEFFT2D::configure(const ITensor *input, ITensor *output, const FFT2DInfo &
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFFT2D::validate(input->info(), output->info(), config));
+    ARM_COMPUTE_LOG_PARAMS(input, output, config);
 
     // Setup first pass
     FFT1DInfo first_pass_config;

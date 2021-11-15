@@ -166,7 +166,7 @@ void IWeightsManager::release(const ITensor *weights)
     }
 }
 
-void IWeightsManager::mark_as_unused(const ITensor *weights)
+void IWeightsManager::pre_mark_as_unused(const ITensor *weights)
 {
     if(weights == nullptr || !are_weights_managed(weights))
     {

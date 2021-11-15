@@ -221,6 +221,11 @@ std::shared_ptr<arm_compute::IWeightsManager> CLDeviceBackend::create_weights_ma
     auto weights_mgr = std::make_shared<IWeightsManager>();
     return weights_mgr;
 }
+
+void CLDeviceBackend::sync()
+{
+    CLScheduler::get().sync();
+}
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute

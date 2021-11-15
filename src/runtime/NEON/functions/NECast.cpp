@@ -24,7 +24,8 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuCast.h"
+#include "src/common/utils/Log.h"
+#include "src/cpu/operators/CpuCast.h"
 
 namespace arm_compute
 {
@@ -49,7 +50,7 @@ void NECast::configure(ITensor *input, ITensor *output, ConvertPolicy policy)
     _impl->dst = output;
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->src, _impl->dst);
-
+    ARM_COMPUTE_LOG_PARAMS(input, output, policy);
     _impl->op = std::make_unique<cpu::CpuCast>();
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), policy);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -190,61 +190,20 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord)
     return index;
 }
 
-inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension)
+inline size_t get_data_layout_dimension_index(const DataLayout &data_layout, const DataLayoutDimension &data_layout_dimension)
 {
     ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
-
-    /* Return the index based on the data layout
-     * [N C H W]
-     * [3 2 1 0]
-     * [N H W C]
-    */
-    switch(data_layout_dimension)
-    {
-        case DataLayoutDimension::CHANNEL:
-            return (data_layout == DataLayout::NCHW) ? 2 : 0;
-            break;
-        case DataLayoutDimension::HEIGHT:
-            return (data_layout == DataLayout::NCHW) ? 1 : 2;
-            break;
-        case DataLayoutDimension::WIDTH:
-            return (data_layout == DataLayout::NCHW) ? 0 : 1;
-            break;
-        case DataLayoutDimension::BATCHES:
-            return 3;
-            break;
-        default:
-            break;
-    }
-    ARM_COMPUTE_ERROR("Data layout index not supported!");
+    const auto &dims = get_layout_map().at(data_layout);
+    const auto &it   = std::find(dims.cbegin(), dims.cend(), data_layout_dimension);
+    ARM_COMPUTE_ERROR_ON_MSG(it == dims.cend(), "Invalid dimension for the given layout.");
+    return it - dims.cbegin();
 }
 
-inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout data_layout, const size_t index)
+inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout &data_layout, const size_t index)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
-
-    /* Return the index based on the data layout
-    * [N C H W]
-    * [3 2 1 0]
-    * [N H W C]
-    */
-    switch(index)
-    {
-        case 0:
-            return (data_layout == DataLayout::NCHW) ? DataLayoutDimension::WIDTH : DataLayoutDimension::CHANNEL;
-            break;
-        case 1:
-            return (data_layout == DataLayout::NCHW) ? DataLayoutDimension::HEIGHT : DataLayoutDimension::WIDTH;
-            break;
-        case 2:
-            return (data_layout == DataLayout::NCHW) ? DataLayoutDimension::CHANNEL : DataLayoutDimension::HEIGHT;
-            break;
-        case 3:
-            return DataLayoutDimension::BATCHES;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Index value not supported!");
-            break;
-    }
+    ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the layout dimension for an unknown layout!");
+    const auto &dims = get_layout_map().at(data_layout);
+    ARM_COMPUTE_ERROR_ON_MSG(index >= dims.size(), "Invalid index for the given layout.");
+    return dims[index];
 }
 } // namespace arm_compute

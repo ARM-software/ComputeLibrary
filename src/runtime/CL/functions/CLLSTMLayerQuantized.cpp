@@ -30,6 +30,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
+#include "src/common/utils/Log.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -77,6 +79,10 @@ void CLLSTMLayerQuantized::configure(const CLCompileContext &compile_context, co
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
                                  input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out, output_state_out);
+
+    ARM_COMPUTE_LOG_PARAMS(input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_input_weights,
+                           recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights, input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out,
+                           output_state_out);
 
     ARM_COMPUTE_ERROR_THROW_ON(CLLSTMLayerQuantized::validate(input->info(), input_to_input_weights->info(), input_to_forget_weights->info(), input_to_cell_weights->info(),
                                                               input_to_output_weights->info(),

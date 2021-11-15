@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,14 @@
 
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 
+#include "src/common/utils/Log.h"
+
 using namespace arm_compute;
 
 void CPPUpsample::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, info);
+
     auto k = std::make_unique<CPPUpsampleKernel>();
     k->configure(input, output, info);
     _kernel = std::move(k);

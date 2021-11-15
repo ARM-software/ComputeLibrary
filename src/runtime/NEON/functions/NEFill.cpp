@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
 
 #include "arm_compute/core/Validate.h"
-#include "src/runtime/cpu/operators/CpuFill.h"
+#include "src/cpu/operators/CpuFill.h"
 
 #include <utility>
 

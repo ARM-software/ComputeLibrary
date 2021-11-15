@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if __aarch64__ && defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
@@ -114,22 +114,18 @@ void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(
     "ld1rw { z17.s }, p3/Z, [%x[params_struct], %[offsetof_args_max]]\n"
     "add x10, x20, x22, LSL #2\n"
     "ld1w { z16.s }, p3/Z, [x8]\n"
-    "mov z31.d, z16.d\n"
-    "ld1w { z0.s }, p3/Z, [x8, #1, MUL VL]\n"
     "add x9, x10, x22, LSL #2\n"
-    "mov z30.d, z16.d\n"
-    "ld1w { z1.s }, p3/Z, [x8, #2, MUL VL]\n"
+    "ld1w { z0.s }, p3/Z, [x8, #1, MUL VL]\n"
     "add x28, x9, x22, LSL #2\n"
-    "mov z29.d, z16.d\n"
-    "ld1w { z2.s }, p3/Z, [x8, #3, MUL VL]\n"
+    "ld1w { z1.s }, p3/Z, [x8, #2, MUL VL]\n"
     "add x27, x28, x22, LSL #2\n"
-    "mov z28.d, z16.d\n"
-    "ld1w { z3.s }, p3/Z, [x8, #4, MUL VL]\n"
+    "ld1w { z2.s }, p3/Z, [x8, #3, MUL VL]\n"
     "add x26, x15, x15\n"
-    "ld1w { z4.s }, p3/Z, [x8, #5, MUL VL]\n"
+    "ld1w { z3.s }, p3/Z, [x8, #4, MUL VL]\n"
     "add x25, x26, x15\n"
-    "mul x19, x5, x21\n" // offset = tile_i * ld_output_row
+    "ld1w { z4.s }, p3/Z, [x8, #5, MUL VL]\n"
     "add x24, x25, x15\n"
+    "mul x19, x5, x21\n" // offset = tile_i * ld_output_row
     "add x23, x24, x15\n"
     "madd x19, x6, x12, x19\n" // offset += tile_j * ld_output_col
     "mul x19, x19, x7\n" // offset *= output_tile_size
@@ -150,14 +146,14 @@ void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(
     "ld1w { z14.s }, p2/Z, [x10]\n"
     "bge 3f\n"
     "2:"  // Tile loop: Channel loop
-    "fmla z31.s, p3/M, z0.s, z5.s\n"
+    "movprfx z31, z16\n fmla z31.s, p3/M, z0.s, z5.s\n"
     "ld1w { z5.s }, p2/Z, [x20, x25, LSL #2]\n"
     "whilelt p1.s, x16, %x[n_channels]\n"
-    "fmla z30.s, p3/M, z0.s, z6.s\n"
+    "movprfx z30, z16\n fmla z30.s, p3/M, z0.s, z6.s\n"
     "incw x14\n"
-    "fmla z29.s, p3/M, z0.s, z7.s\n"
+    "movprfx z29, z16\n fmla z29.s, p3/M, z0.s, z7.s\n"
     "mov p0.b, p2.b\n"
-    "fmla z28.s, p3/M, z0.s, z8.s\n"
+    "movprfx z28, z16\n fmla z28.s, p3/M, z0.s, z8.s\n"
     "ld1w { z0.s }, p3/Z, [x8]\n"
     "incw x17\n"
     "fmla z31.s, p3/M, z1.s, z6.s\n"
@@ -334,29 +330,25 @@ void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(
     "fmax z28.s, p3/M, z28.s, z18.s\n"
     "fmin z31.s, p3/M, z31.s, z17.s\n"
     "st1w { z31.s }, p0, [x11]\n"
-    "mov z31.d, z16.d\n"
     "fmin z30.s, p3/M, z30.s, z17.s\n"
-    "st1w { z30.s }, p0, [x11, x12, LSL #2]\n"
-    "mov z30.d, z16.d\n"
-    "addvl x11, x11, #1\n"
     "fmin z29.s, p3/M, z29.s, z17.s\n"
-    "st1w { z29.s }, p0, [x22]\n"
-    "mov z29.d, z16.d\n"
+    "st1w { z30.s }, p0, [x11, x12, LSL #2]\n"
     "fmin z28.s, p3/M, z28.s, z17.s\n"
+    "addvl x11, x11, #1\n"
+    "st1w { z29.s }, p0, [x22]\n"
     "st1w { z28.s }, p0, [x22, x12, LSL #2]\n"
-    "mov z28.d, z16.d\n"
     "addvl x22, x22, #1\n"
     "blt 2b\n"
     "3:"  // Tile loop: Channel tail
-    "fmla z31.s, p3/M, z0.s, z5.s\n"
+    "movprfx z31, z16\n fmla z31.s, p3/M, z0.s, z5.s\n"
     "ld1w { z5.s }, p2/Z, [x20, x25, LSL #2]\n"
     "mov p0.b, p2.b\n"
-    "fmla z30.s, p3/M, z0.s, z6.s\n"
+    "movprfx z30, z16\n fmla z30.s, p3/M, z0.s, z6.s\n"
     "ldr x5, [%x[params_struct], %[offsetof_args_tile_i]]\n"
     "add x21, x5, #0x1\n"
-    "fmla z29.s, p3/M, z0.s, z7.s\n"
+    "movprfx z29, z16\n fmla z29.s, p3/M, z0.s, z7.s\n"
     "ldr x6, [%x[params_struct], %[offsetof_args_tile_j]]\n"
-    "fmla z28.s, p3/M, z0.s, z8.s\n"
+    "movprfx z28, z16\n fmla z28.s, p3/M, z0.s, z8.s\n"
     "ld1w { z0.s }, p3/Z, [x8]\n"
     "add x6, x6, #0x1\n"
     "fmla z31.s, p3/M, z1.s, z6.s\n"
@@ -528,4 +520,4 @@ void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
+#endif  // __aarch64__ && defined(ARM_COMPUTE_ENABLE_SVE)

@@ -30,6 +30,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 
 namespace arm_compute
@@ -44,6 +45,7 @@ NESpaceToBatchLayer::NESpaceToBatchLayer()
 void NESpaceToBatchLayer::configure(const ITensor *input, const ITensor *block_shape, const ITensor *paddings, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
+    ARM_COMPUTE_LOG_PARAMS(input, block_shape, paddings, output);
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {

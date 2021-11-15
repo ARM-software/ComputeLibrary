@@ -32,8 +32,10 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
-#include "src/core/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -180,6 +182,10 @@ void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLT
                                  forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in,
                                  cell_state_out, output_state_out, output);
 
+    ARM_COMPUTE_LOG_PARAMS(input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
+                           recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
+                           forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in,
+                           cell_state_out, output_state_out, output, lstm_params);
     // Set lstm parameters
     LSTMParams<ITensorInfo> lstm_params_info{};
     build_lstm_params_tensor_info(lstm_params, &lstm_params_info);

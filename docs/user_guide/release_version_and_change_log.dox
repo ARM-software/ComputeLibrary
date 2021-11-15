@@ -40,6 +40,29 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v21.11 Public major release
+ - Various bug fixes.
+ - Various optimizations:
+   - Improve performance of bilinear and nearest neighbor Scale on both CPU and GPU for FP32, FP16, Int8, Uint8 data types
+   - Improve performance of Softmax on GPU for Uint8/Int8 
+ - New OpenCL kernels / functions:
+   - @ref CLConv3D
+ - New Arm® Neon™ kernels / functions:
+   - @ref NEConv3D
+ - Support configurable build by a selected subset of operator list
+ - Support MobileBert on Neon™ backend
+ - Improve operator/function logging
+ - Remove padding from OpenCL kernels:
+   - ClPool2dKernel
+   - ClScaleKernel
+   - ClGemmMatrixMultiplyReshapedKernel
+ - Remove padding from Cpu kernels:
+   - CpuPool2dKernel
+ - Remove Y padding from OpenCL kernels:
+   - ClGemmMatrixMultiplyKernel
+   - ClGemmReshapedRHSMatrixKernel
+ - Remove legacy GeMM kernels in gemm_v1.cl
+
 v21.08 Public major release
  - Various bug fixes.
  - Various optimizations:
@@ -1315,7 +1338,7 @@ v17.09 Public major release
     - NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
-    - NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
+    - NEQuantizationLayerKernel NEMinMaxLayerKernel / @ref NEQuantizationLayer
     - @ref NEROIPoolingLayerKernel / @ref NEROIPoolingLayer
     - @ref NEReductionOperationKernel / @ref NEReductionOperation
     - NEReshapeLayerKernel / @ref NEReshapeLayer
@@ -1329,7 +1352,7 @@ v17.09 Public major release
     - CLGEMMTranspose1xW
     - CLGEMMMatrixVectorMultiplyKernel
     - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
-    - CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
+    - CLQuantizationLayerKernel CLMinMaxLayerKernel / @ref CLQuantizationLayer
     - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer
     - @ref CLReductionOperationKernel / @ref CLReductionOperation
     - CLReshapeLayerKernel / @ref CLReshapeLayer

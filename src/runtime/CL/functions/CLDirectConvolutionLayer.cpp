@@ -28,8 +28,10 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/runtime/gpu/cl/operators/ClActivation.h"
-#include "src/runtime/gpu/cl/operators/ClDirectConv2d.h"
+#include "src/gpu/cl/operators/ClActivation.h"
+#include "src/gpu/cl/operators/ClDirectConv2d.h"
+
+#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -59,6 +61,7 @@ void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context
                                          const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info);
 
     _impl->src     = input;
     _impl->weights = weights;

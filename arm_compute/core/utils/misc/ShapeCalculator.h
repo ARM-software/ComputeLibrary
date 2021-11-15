@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/FunctionDescriptors.h"
 
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 
@@ -702,20 +703,18 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
 
 /** Calculate the deep convolution shape output shape of a tensor
  *
- * @param[in] input     Input tensor info
- * @param[in] weights   Weights tensor info
- * @param[in] conv_info Contains padding and stride information
+ * @param[in] input_shape       Input tensor shape
+ * @param[in] input_data_layout Input data layout
+ * @param[in] weights_shape     Weights tensor shape
+ * @param[in] conv_info         Contains padding and stride information
  *
  * @return the calculated shape
  */
-inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
+inline TensorShape compute_deep_convolution_shape(const TensorShape &input_shape, DataLayout input_data_layout, const TensorShape &weights_shape, const PadStrideInfo &conv_info)
 {
-    const TensorShape input_shape{ input.tensor_shape() };
-    const TensorShape weights_shape{ weights.tensor_shape() };
-
-    const size_t idx_width   = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height  = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t idx_channel = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
+    const size_t idx_width   = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_height  = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_channel = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::CHANNEL);
 
     const unsigned int input_width         = input_shape[idx_width];
     const unsigned int input_height        = input_shape[idx_height];
@@ -732,6 +731,19 @@ inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, cons
     output_shape.set(idx_channel, weights_out_channel);
 
     return output_shape;
+}
+
+/** Calculate the deep convolution shape output shape of a tensor
+ *
+ * @param[in] input     Input tensor info
+ * @param[in] weights   Weights tensor info
+ * @param[in] conv_info Contains padding and stride information
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, const PadStrideInfo &conv_info)
+{
+    return compute_deep_convolution_shape(input.tensor_shape(), input.data_layout(), weights.tensor_shape(), conv_info);
 }
 
 /** Calculate the min/max shape output shape of a tensor
@@ -1381,6 +1393,71 @@ inline TensorShape compute_stack_shape(const ITensorInfo &a, unsigned int axis, 
         shape_out.set(i + i_shift, a.tensor_shape()[i]);
     }
     return shape_out;
+}
+
+/** Calculate the output shape of 3d Convolution
+ *
+ * @param[in] src         Input tensor shape
+ * @param[in] weights     Weights tensor shape
+ * @param[in] conv3d_info 3d Convolution Parameters object
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_conv3d_shape(const TensorShape &src, const TensorShape &weights, const Conv3dInfo &conv3d_info)
+{
+    // Weight tensor shape indices (D H W Cin Cout)
+    constexpr unsigned int weights_depth_dim  = 4u;
+    constexpr unsigned int weights_height_dim = 3u;
+    constexpr unsigned int weights_width_dim  = 2u;
+    constexpr unsigned int weights_CHout_dim  = 0u;
+
+    // Source/Destination Tensor shape indices (N D H W C)
+    constexpr unsigned int batch_dim   = 4u;
+    constexpr unsigned int depth_dim   = 3u;
+    constexpr unsigned int height_dim  = 2u;
+    constexpr unsigned int width_dim   = 1u;
+    constexpr unsigned int channel_dim = 0u;
+
+    TensorShape  output_shape{ src };
+    const size_t pad_left   = conv3d_info.padding.left;
+    const size_t pad_right  = conv3d_info.padding.right;
+    const size_t pad_top    = conv3d_info.padding.top;
+    const size_t pad_bottom = conv3d_info.padding.bottom;
+    const size_t pad_front  = conv3d_info.padding.front;
+    const size_t pad_back   = conv3d_info.padding.back;
+    const size_t dilation_x = conv3d_info.dilation.width;
+    const size_t dilation_y = conv3d_info.dilation.height;
+    const size_t dilation_z = conv3d_info.dilation.depth;
+    const size_t stride_x   = conv3d_info.stride.x();
+    const size_t stride_y   = conv3d_info.stride.y();
+    const size_t stride_z   = conv3d_info.stride.z();
+
+    int output_width_size  = 0;
+    int output_height_size = 0;
+    int output_depth_size  = 0;
+
+    switch(conv3d_info.round_type)
+    {
+        case DimensionRoundingType::FLOOR:
+            output_width_size  = static_cast<int>(std::floor((static_cast<float>(src[width_dim] + pad_left + pad_right - (dilation_x * (weights[weights_width_dim] - 1) + 1)) / stride_x) + 1));
+            output_height_size = static_cast<int>(std::floor((static_cast<float>(src[height_dim] + pad_top + pad_bottom - (dilation_y * (weights[weights_height_dim] - 1) + 1)) / stride_y) + 1));
+            output_depth_size  = static_cast<int>(std::floor((static_cast<float>(src[depth_dim] + pad_front + pad_back - (dilation_z * (weights[weights_depth_dim] - 1) + 1)) / stride_z) + 1));
+            break;
+        case DimensionRoundingType::CEIL:
+            output_width_size  = static_cast<int>(std::ceil((static_cast<float>(src[width_dim] + pad_left + pad_right - (dilation_x * (weights[weights_width_dim] - 1) + 1)) / stride_x) + 1));
+            output_height_size = static_cast<int>(std::ceil((static_cast<float>(src[height_dim] + pad_top + pad_bottom - (dilation_y * (weights[weights_height_dim] - 1) + 1)) / stride_y) + 1));
+            output_depth_size  = static_cast<int>(std::ceil((static_cast<float>(src[depth_dim] + pad_front + pad_back - (dilation_z * (weights[weights_depth_dim] - 1) + 1)) / stride_z) + 1));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported rounding type");
+    }
+
+    output_shape.set(batch_dim, src[batch_dim]);
+    output_shape.set(width_dim, output_width_size);
+    output_shape.set(height_dim, output_height_size);
+    output_shape.set(depth_dim, output_depth_size);
+    output_shape.set(channel_dim, weights[weights_CHout_dim]);
+    return output_shape;
 }
 
 inline TensorShape compute_gather_shape(const TensorShape &input_shape, const TensorShape &indices_shape, uint32_t actual_axis)

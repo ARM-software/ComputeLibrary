@@ -135,6 +135,7 @@ public:
     DummyAccessor(DummyAccessor &&) = default;
 
     // Inherited methods overriden:
+    bool access_tensor_data() override;
     bool access_tensor(ITensor &tensor) override;
 
 private:

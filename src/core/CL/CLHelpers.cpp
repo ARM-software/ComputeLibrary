@@ -27,9 +27,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/gpu/cl/ClCompileContext.h"
+#include "src/gpu/cl/ClCompileContext.h"
 
-#include "src/core/gpu/cl/ClKernelLibrary.h"
+#include "src/gpu/cl/ClKernelLibrary.h"
 
 #include <utility>
 #include <vector>
@@ -410,8 +410,8 @@ cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimensio
 bool get_wbsm_support_info(const cl::Device &device)
 {
     cl_bitfield capabilities = 0;
-    cl_int      err          = clGetDeviceInfo(device.get(), ARM_COMPUTE_LIBRARY_OPENCL_DEVICE_CAPABILITIES_ARM, sizeof(cl_bitfield), &capabilities, nullptr);
-    if((err == CL_SUCCESS) && (capabilities & ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM))
+    cl_int      err          = clGetDeviceInfo(device.get(), CL_DEVICE_SCHEDULING_CONTROLS_CAPABILITIES_ARM, sizeof(cl_bitfield), &capabilities, nullptr);
+    if((err == CL_SUCCESS) && (capabilities & CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM))
     {
         return true;
     }
@@ -421,7 +421,7 @@ bool get_wbsm_support_info(const cl::Device &device)
 void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
 {
     cl_int err = clSetKernelExecInfo(kernel.get(),
-                                     ARM_COMPUTE_LIBRARY_OPENCL_EXEC_WBSM_ARM,
+                                     CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM,
                                      sizeof(cl_int),
                                      &wbsm_hint);
     ARM_COMPUTE_UNUSED(err);

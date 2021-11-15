@@ -37,7 +37,7 @@
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "src/core/helpers/MemoryHelpers.h"
 
-#include "src/runtime/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.h"
+#include "src/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.h"
 
 namespace arm_compute
 {

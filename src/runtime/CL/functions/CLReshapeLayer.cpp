@@ -28,7 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/ICLKernel.h"
-#include "src/runtime/gpu/cl/operators/ClReshape.h"
+#include "src/gpu/cl/operators/ClReshape.h"
 
 /** [CLReshapeLayer snippet] **/
 namespace arm_compute

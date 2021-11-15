@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 
 namespace arm_compute
@@ -39,6 +40,8 @@ NEInstanceNormalizationLayer::NEInstanceNormalizationLayer(std::shared_ptr<IMemo
 
 void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, float gamma, float beta, float epsilon)
 {
+    ARM_COMPUTE_LOG_PARAMS(input, output, gamma, beta, epsilon);
+
     const DataLayout data_layout       = input->info()->data_layout();
     const auto       kernel_descriptor = InstanceNormalizationLayerKernelInfo{ gamma, beta, epsilon, true };
 

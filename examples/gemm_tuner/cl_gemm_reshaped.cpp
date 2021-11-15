@@ -33,8 +33,8 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "examples/gemm_tuner/CommonGemmExampleOptions.h"
 #include "examples/gemm_tuner/GemmTunerHelpers.h"
-#include "src/core/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
-#include "src/core/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
+#include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
+#include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "tests/CL/Helper.h"
 #include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
@@ -318,7 +318,7 @@ public:
             { ACL_SRC_2, &bias },
             { ACL_DST, &dst }
         });
-        reshape_lhs.run(gemm_pack);
+        gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:
         CLScheduler::get().sync();

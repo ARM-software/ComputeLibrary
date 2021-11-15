@@ -33,6 +33,8 @@
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLNormalizationLayerKernel.h"
 
+#include "src/common/utils/Log.h"
+
 namespace arm_compute
 {
 CLNormalizationLayer::CLNormalizationLayer()
@@ -51,6 +53,7 @@ void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const 
 void CLNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_LOG_PARAMS(input, output, norm_info);
 
     // Configure normalization kernel
     _norm_kernel->configure(compile_context, input, output, norm_info);

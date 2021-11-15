@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"
 
 namespace arm_compute
@@ -47,6 +48,7 @@ NELogicalAnd::~NELogicalAnd() = default;
 void NELogicalAnd::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
     _impl->kernel->configure(input1->info(), input2->info(), output->info(), LogicalOperation::And);
@@ -79,6 +81,7 @@ NELogicalOr::~NELogicalOr() = default;
 void NELogicalOr::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
     _impl->kernel->configure(input1->info(), input2->info(), output->info(), LogicalOperation::Or);
@@ -111,6 +114,7 @@ NELogicalNot::~NELogicalNot() = default;
 void NELogicalNot::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_LOG_PARAMS(input, output);
 
     _impl->kernel = std::make_unique<kernels::NELogicalKernel>();
     _impl->kernel->configure(input->info(), nullptr, output->info(), LogicalOperation::Not);

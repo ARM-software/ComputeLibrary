@@ -38,6 +38,7 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConv3D.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NECopy.h"

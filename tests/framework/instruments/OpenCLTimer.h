@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,9 +67,11 @@ private:
     };
     std::list<kernel_info>                          _kernels;
     std::function<decltype(clEnqueueNDRangeKernel)> _real_function;
-    std::function<decltype(graph::execute_task)>    _real_graph_function;
-    std::string                                     _prefix;
-    bool                                            _timer_enabled;
+#ifdef ARM_COMPUTE_GRAPH_ENABLED
+    std::function<decltype(graph::execute_task)> _real_graph_function;
+#endif /* ARM_COMPUTE_GRAPH_ENABLED */
+    std::string _prefix;
+    bool        _timer_enabled;
 #endif /* ARM_COMPUTE_CL */
 
 private:

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "src/core/cpu/kernels/CpuCol2ImKernel.h"
+#include "src/cpu/kernels/CpuCol2ImKernel.h"
 #include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"

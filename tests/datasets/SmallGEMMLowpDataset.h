@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,11 +58,10 @@ public:
     SmallGEMMLowpOutput3DDataset()
     {
         add_config(TensorShape(21U, 14U), TensorShape(34U, 21U), TensorShape(34U, 7U, 2U), 0, 0);
-        add_config(TensorShape(31U, 1U), TensorShape(23U, 31U), TensorShape(23U, 1U, 1U), -2, 13);
-        add_config(TensorShape(38U, 12U), TensorShape(21U, 38U), TensorShape(21U, 4U, 3U), 0, 4);
-        add_config(TensorShape(32U, 1U), TensorShape(17U, 32U), TensorShape(17U, 1U, 1U), -2, 1);
-        add_config(TensorShape(16U, 16U), TensorShape(8U, 16U), TensorShape(8U, 8U, 2U), 5, 9);
-        add_config(TensorShape(16U, 16U, 5U), TensorShape(8U, 16U, 5U), TensorShape(8U, 8U, 2U, 5U), -7, 2);
+        add_config(TensorShape(31U, 1U), TensorShape(3U, 31U), TensorShape(3U, 1U, 1U), -2, 13);
+        add_config(TensorShape(38U, 12U), TensorShape(1U, 38U), TensorShape(1U, 4U, 3U), 0, 4);
+        add_config(TensorShape(16U, 16U), TensorShape(11U, 16U), TensorShape(11U, 8U, 2U), 2, -1);
+        add_config(TensorShape(16U, 16U, 5U), TensorShape(13U, 16U, 5U), TensorShape(13U, 8U, 2U, 5U), -3, 2);
     }
 };
 class SmallGEMMLowpInputOutput3DDataset final : public GEMMLowpDataset
@@ -71,10 +70,9 @@ public:
     SmallGEMMLowpInputOutput3DDataset()
     {
         add_config(TensorShape(21U, 14U, 13U), TensorShape(34U, 21U), TensorShape(34U, 14U, 13U), 0, 0);
-        add_config(TensorShape(31U, 1U, 3U), TensorShape(23U, 31U), TensorShape(23U, 1U, 3U), 0, 0);
+        add_config(TensorShape(31U, 1U, 3U), TensorShape(1U, 31U), TensorShape(1U, 1U, 3U), 0, 0);
         add_config(TensorShape(38U, 12U, 2U), TensorShape(21U, 38U), TensorShape(21U, 12U, 2U), -2, 13);
-        add_config(TensorShape(32U, 1U, 4U, 3U), TensorShape(17U, 32U), TensorShape(17U, 1U, 4U, 3U), 0, 4);
-        add_config(TensorShape(16U, 16U, 3U, 2U), TensorShape(8U, 16U), TensorShape(8U, 16U, 3U, 2U), -2, 0);
+        add_config(TensorShape(16U, 16U, 3U, 2U), TensorShape(15U, 16U), TensorShape(15U, 16U, 3U, 2U), -2, 0);
         add_config(TensorShape(16U, 16U, 5U, 3U), TensorShape(8U, 16U), TensorShape(8U, 16U, 5U, 3U), -9, 1);
     }
 };

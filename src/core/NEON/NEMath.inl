@@ -193,7 +193,7 @@ inline float32x4_t vtanhq_f32(float32x4_t val)
     static const float32x4_t CONST_THR      = vdupq_n_f32(5.e-3);
     static const float32x4_t CONST_1_3      = vdupq_n_f32(0.3333333f);
 
-    float32x4_t x     = vminq_f32(vmaxq_f32(val, CONST_MIN_TANH), CONST_MAX_TANH);
+    float32x4_t x = vminq_f32(vmaxq_f32(val, CONST_MIN_TANH), CONST_MAX_TANH);
     // x * (1 - x^2/3) if |x| < 5.e-3 or (exp2x - 1) / (exp2x + 1) otherwise
     float32x4_t exp2x = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vexpq_f32(vmulq_f32(CONST_2, x)), vmulq_f32(x, x));
     float32x4_t num   = vbslq_f32(vcgtq_f32(vabsq_f32(x), CONST_THR), vsubq_f32(exp2x, CONST_1), vmulq_f32(CONST_1_3, exp2x));
@@ -418,6 +418,18 @@ inline float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x1
     return convert_int8x16_to_float32x4x4(in);
 }
 
+inline float vreduce(const float32x4_t &v)
+{
+    const float32x2_t v0    = vget_high_f32(v);
+    const float32x2_t v1    = vget_low_f32(v);
+    const float32x2_t v_out = vadd_f32(v0, v1);
+
+    const float a = vget_lane_f32(v_out, 0);
+    const float b = vget_lane_f32(v_out, 1);
+
+    return a + b;
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */
 /** Logarithm polynomial coefficients */
@@ -550,6 +562,19 @@ inline float16x4_t vsin_f16(float16x4_t val)
     return vcvt_f16_f32(vcombine_f32(res_low, res_high));
 }
 
+inline float16_t vreduce(const float16x8_t &v)
+{
+    const float16x4_t v0    = vget_high_f16(v);
+    const float16x4_t v1    = vget_low_f16(v);
+    const float16x4_t v_out = vadd_f16(v0, v1);
+
+    const float16_t a = vget_lane_f16(v_out, 0);
+    const float16_t b = vget_lane_f16(v_out, 1);
+    const float16_t c = vget_lane_f16(v_out, 2);
+    const float16_t d = vget_lane_f16(v_out, 3);
+
+    return a + b + c + d;
+}
 #endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

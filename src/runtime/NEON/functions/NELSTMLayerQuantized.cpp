@@ -26,6 +26,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 #include <cmath>
@@ -71,6 +72,10 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
                                                               input_to_output_weights->info(),
                                                               recurrent_to_input_weights->info(), recurrent_to_forget_weights->info(), recurrent_to_cell_weights->info(), recurrent_to_output_weights->info(),
                                                               input_gate_bias->info(), forget_gate_bias->info(), cell_bias->info(), output_gate_bias->info(), cell_state_in->info(), output_state_in->info(), cell_state_out->info(), output_state_out->info()));
+
+    ARM_COMPUTE_LOG_PARAMS(input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
+                           recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
+                           input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out, output_state_out);
 
     const int input_size  = input->info()->dimension(0);
     const int batch_size  = input->info()->dimension(1);
