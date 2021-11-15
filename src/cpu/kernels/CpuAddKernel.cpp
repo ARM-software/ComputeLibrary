@@ -30,9 +30,7 @@
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/cpu/kernels/add/neon/list.h"
-#include "src/cpu/kernels/add/sve/list.h"
-
+#include "src/cpu/kernels/add/list.h"
 #include <array>
 
 namespace arm_compute
@@ -67,7 +65,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::QASYMM8) && data.ci.has_sve2();
         },
-        REGISTER_QASYMM8_SVE(arm_compute::cpu::add_qasymm8_sve)
+        REGISTER_QASYMM8_SVE2(arm_compute::cpu::add_qasymm8_sve2)
     },
     {
         "sve2_qs8_add",
@@ -75,7 +73,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve2();
         },
-        REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::add_qasymm8_signed_sve)
+        REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::add_qasymm8_signed_sve2)
     },
     {
         "sve2_qs16_add",
@@ -83,7 +81,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::QSYMM16) && data.ci.has_sve2();
         },
-        REGISTER_QSYMM16_SVE(arm_compute::cpu::add_qsymm16_sve)
+        REGISTER_QSYMM16_SVE2(arm_compute::cpu::add_qsymm16_sve2)
     },
 #endif /* !defined(ARM_COMPUTE_ENABLE_SVE2) */
 #if defined(ARM_COMPUTE_ENABLE_SVE)
@@ -93,7 +91,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::F32) && data.ci.has_sve();
         },
-        REGISTER_FP32_SVE(arm_compute::cpu::add_same_sve<float>)
+        REGISTER_FP32_SVE(arm_compute::cpu::add_fp32_sve)
     },
     {
         "sve_fp16_add",
@@ -101,7 +99,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::F16) && data.ci.has_sve();
         },
-        REGISTER_FP16_SVE(arm_compute::cpu::add_same_sve<float16_t>)
+        REGISTER_FP16_SVE(arm_compute::cpu::add_fp16_sve)
     },
     {
         "sve_u8_add",
@@ -109,7 +107,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::U8) && data.ci.has_sve();
         },
-        REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<uint8_t>)
+        REGISTER_INTEGER_SVE(arm_compute::cpu::add_u8_sve)
     },
     {
         "sve_s16_add",
@@ -117,7 +115,7 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::S16) && data.ci.has_sve();
         },
-        REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<int16_t>)
+        REGISTER_INTEGER_SVE(arm_compute::cpu::add_s16_sve)
     },
     {
         "sve_s32_add",
@@ -125,14 +123,14 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::S32) && data.ci.has_sve();
         },
-        REGISTER_INTEGER_SVE(arm_compute::cpu::add_same_sve<int32_t>)
+        REGISTER_INTEGER_SVE(arm_compute::cpu::add_s32_sve)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp32_add",
         [](const AddSelectorData & data) { return (data.dt == DataType::F32); },
-        REGISTER_FP32_NEON(arm_compute::cpu::add_same_neon<float>)
+        REGISTER_FP32_NEON(arm_compute::cpu::add_fp32_neon)
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
@@ -141,23 +139,23 @@ static const AddKernel available_kernels[] =
         {
             return (data.dt == DataType::F16) && data.ci.has_fp16();
         },
-        REGISTER_FP16_NEON(arm_compute::cpu::add_same_neon<float16_t>)
+        REGISTER_FP16_NEON(arm_compute::cpu::add_fp16_neon)
     },
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_u8_add",
         [](const AddSelectorData & data) { return (data.dt == DataType::U8); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<uint8_t>)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::add_u8_neon)
     },
     {
         "neon_s16_add",
         [](const AddSelectorData & data) { return (data.dt == DataType::S16); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<int16_t>)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::add_s16_neon)
     },
     {
         "neon_s32_add",
         [](const AddSelectorData & data) { return (data.dt == DataType::S32); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::add_same_neon<int32_t>)
+        REGISTER_INTEGER_NEON(arm_compute::cpu::add_s32_neon)
     },
 #endif /*  defined(ARM_COMPUTE_ENABLE_NEON) */
 #if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
@@ -295,12 +293,12 @@ const char *CpuAddKernel::name() const
 size_t CpuAddKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation 
-    if (platform.get_cpu_model() == CPUModel::A73 ) 
+    // Tuning results that gave optimized results in performance investigation
+    if(platform.get_cpu_model() == CPUModel::A73)
     {
         return 10240;
     }
-    else 
+    else
     {
         return 9216;
     }

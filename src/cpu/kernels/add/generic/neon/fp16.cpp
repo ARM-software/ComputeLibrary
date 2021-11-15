@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_SVE_KERNELS_ADD_LIST_H
-#define SRC_CORE_SVE_KERNELS_ADD_LIST_H
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/SVEMath.h"
-#include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include "src/cpu/kernels/add/sve/impl.h"
-#include <arm_sve.h>
+#include "src/cpu/kernels/add/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ADD_KERNEL(func_name) \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-
-DECLARE_ADD_KERNEL(add_qasymm8_sve);
-DECLARE_ADD_KERNEL(add_qasymm8_signed_sve);
-DECLARE_ADD_KERNEL(add_qsymm16_sve);
-
-#undef DECLARE_ADD_KERNEL
-
-} // namespace cpu
+void add_fp16_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+{
+    return add_same_neon<float16_t>(src0, src1, dst, policy, window);
+}
+}
 } // namespace arm_compute
-#endif // defined(ARM_COMPUTE_ENABLE_SVE)
-#endif // SRC_CORE_SVE_KERNELS_ADD_LIST_H
+#endif /* (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -34,7 +35,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void add_qasymm8_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_qasymm8_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -179,4 +180,4 @@ void add_qasymm8_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, con
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
+#endif //ARM_COMPUTE_ENABLE_SVE2

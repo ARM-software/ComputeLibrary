@@ -874,15 +874,24 @@
             "src/cpu/operators/CpuAdd.cpp",
             "src/cpu/kernels/CpuAddKernel.cpp",
             "src/runtime/NEON/functions/NEArithmeticAddition.cpp",
-            "src/cpu/kernels/add/neon/qasymm8.cpp",
-            "src/cpu/kernels/add/neon/qasymm8_signed.cpp",
-            "src/cpu/kernels/add/neon/qsymm16.cpp"
+            "src/cpu/kernels/add/generic/neon/qasymm8.cpp",
+            "src/cpu/kernels/add/generic/neon/qasymm8_signed.cpp",
+            "src/cpu/kernels/add/generic/neon/qsymm16.cpp"
           ],
+          "neon": {
+            "common": [ "src/cpu/kernels/add/generic/neon/impl.cpp" ],
+            "fp32":["src/cpu/kernels/add/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/add/generic/neon/fp16.cpp"],
+            "integer":["src/cpu/kernels/add/generic/neon/integer.cpp"]
+          },
           "sve": {
-            "common": [ "src/cpu/kernels/add/sve/impl.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/add/sve/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/add/sve/qasymm8_signed.cpp" ],
-            "qsymm16": [ "src/cpu/kernels/add/sve/qsymm16.cpp" ]
+            "common": [ "src/cpu/kernels/add/generic/sve/impl.cpp" ],
+            "fp32":["src/cpu/kernels/add/generic/sve/fp32.cpp"],
+            "fp16":["src/cpu/kernels/add/generic/sve/fp16.cpp"],
+            "integer":["src/cpu/kernels/add/generic/sve/integer.cpp"],
+            "qasymm8": [ "src/cpu/kernels/add/generic/sve2/qasymm8.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/add/generic/sve2/qasymm8_signed.cpp" ],
+            "qsymm16": [ "src/cpu/kernels/add/generic/sve2/qsymm16.cpp" ]
           }
         }
       },
