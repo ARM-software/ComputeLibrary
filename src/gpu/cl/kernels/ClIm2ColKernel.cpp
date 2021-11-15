@@ -195,10 +195,16 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *src, const Size2D
         if(kernel_dims == Size2D(3U, 3U))
         {
             kernel_name = "im2col3x3_";
+            build_opts.add_option("-DIM2COL_3X3");
         }
         else if(kernel_dims == Size2D(9U, 9U))
         {
             kernel_name = "im2col9x9_";
+            build_opts.add_option("-DIM2COL_9X9");
+        }
+        else
+        {
+            build_opts.add_option("-DIM2COL_GENERIC");
         }
 
         // Get boundary vector (the first/last vector with potentially a partial vector size) size
