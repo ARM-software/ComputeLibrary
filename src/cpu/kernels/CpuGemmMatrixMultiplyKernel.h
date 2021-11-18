@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace kernels
  * @note If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor @p lhs is a vector and the second input tensor @p rhs a matrix. The implementation also assumes that both tensors have not been reshaped
  *
  */
-class CpuGemmMatrixMultiplyKernel : public ICpuKernel
+class CpuGemmMatrixMultiplyKernel : public NewICpuKernel<CpuGemmMatrixMultiplyKernel>
 {
 public:
     CpuGemmMatrixMultiplyKernel() = default;

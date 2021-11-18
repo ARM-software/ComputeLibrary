@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace kernels
  * @f[ dst(x,y) = OP(src0(x,y), src1(x,y))@f]
  *
  */
-class CpuElementwiseKernel : public ICpuKernel
+class CpuElementwiseKernel : public NewICpuKernel<CpuElementwiseKernel>
 {
 public:
     CpuElementwiseKernel() = default;

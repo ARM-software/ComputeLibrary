@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform multiplication between two tensors */
-class CpuMulKernel : public ICpuKernel
+class CpuMulKernel : public NewICpuKernel<CpuMulKernel>
 {
 public:
     CpuMulKernel() = default;
@@ -118,7 +118,7 @@ private:
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
-class CpuComplexMulKernel : public ICpuKernel
+class CpuComplexMulKernel : public NewICpuKernel<CpuComplexMulKernel>
 {
 public:
     CpuComplexMulKernel() = default;

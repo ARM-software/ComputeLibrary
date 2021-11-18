@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace kernels
 /** Interface for the height concatenate kernel.
  *  The source tensor will be concatenated into the destination tensor.
  */
-class CpuConcatenateHeightKernel : public ICpuKernel
+class CpuConcatenateHeightKernel : public NewICpuKernel<CpuConcatenateHeightKernel>
 {
 public:
     CpuConcatenateHeightKernel() = default;

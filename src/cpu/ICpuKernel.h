@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,50 @@
 #define ARM_COMPUTE_ICPUKERNEL_H
 
 #include "arm_compute/core/CPP/ICPPKernel.h"
+#include "src/cpu/kernels/CpuKernelSelectionTypes.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
+enum class KernelSelectionType
+{
+    Preferred, /**< Retrieve the best implementation available for the given Cpu ISA, ignoring the build flags */
+    Supported  /**< Retrieve the best implementation available for the given Cpu ISA that is supported by the current build */
+};
+
 using ICpuKernel = arm_compute::ICPPKernel;
+
+template <class Derived>
+/* This is a temp name for stage 1 process of adding UT for multi-ISA.
+In the next stage NewICpuKernel will be called ICpuKernel again */
+class NewICpuKernel : public ICPPKernel
+{
+public:
+    /** Micro-kernel selector
+     *
+     * @param[in] selector       Selection struct passed including information to help pick the appropriate micro-kernel
+     * @param[in] selection_type (Optional) Decides whether to get the best implementation for the given hardware or for the given build
+     *
+     * @return A matching micro-kernel else nullptr
+     */
+
+    template <typename SelectorType>
+    static const auto *get_implementation(const SelectorType &selector, KernelSelectionType selection_type = KernelSelectionType::Supported)
+    {
+        using kernel_type = typename std::remove_reference<decltype(Derived::get_available_kernels())>::type::value_type;
+
+        for(const auto &uk : Derived::get_available_kernels())
+        {
+            if(uk.is_selected(selector) && (selection_type == KernelSelectionType::Preferred || uk.ukernel != nullptr))
+            {
+                return &uk;
+            }
+        }
+
+        return static_cast<kernel_type *>(nullptr);
+    }
+};
 } // namespace cpu
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_ICPUKERNEL_H */

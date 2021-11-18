@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the identifying the max value of 1D Logits */
-class CpuLogits1DMaxKernel : public ICpuKernel
+class CpuLogits1DMaxKernel : public NewICpuKernel<CpuLogits1DMaxKernel>
 {
 public:
     CpuLogits1DMaxKernel() = default;
@@ -67,7 +67,7 @@ private:
 
 /** Interface for softmax computation for QASYMM8 with pre-computed max. */
 template <bool IS_LOG = false>
-class CpuLogits1DSoftmaxKernel : public ICpuKernel
+class CpuLogits1DSoftmaxKernel : public NewICpuKernel<CpuLogits1DSoftmaxKernel<IS_LOG>>
 {
 public:
     CpuLogits1DSoftmaxKernel() = default;

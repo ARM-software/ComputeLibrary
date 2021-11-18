@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,14 @@ namespace cpu
 namespace kernels
 {
 /** Arm(R) Neon(TM) kernel to perform scaling on a tensor */
-class CpuScaleKernel : public ICpuKernel
+class CpuScaleKernel : public NewICpuKernel<CpuScaleKernel>
 {
+private:
+    /** Scale function to use for the particular function to use */
+    using ScaleFunctionPtr = void (CpuScaleKernel::*)(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
+    using ScaleKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *,
+                                                   InterpolationPolicy, BorderMode, PixelValue, float, bool, const Window &)>::type;
+
 public:
     CpuScaleKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuScaleKernel);
@@ -67,6 +73,15 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
+    struct ScaleKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        ScaleKernelPtr               ukernel;
+    };
+
+    static const std::vector<ScaleKernel> &get_available_kernels();
+
 private:
 #ifdef ENABLE_NCHW_KERNELS
     /** function to perform scale using area interpolation on the given window
@@ -86,11 +101,6 @@ private:
     template <typename T>
     void scale_nearest_nchw(const ITensor *src, ITensor *dst, const ITensor *dx, const ITensor *dy, const ITensor *offsets, const Window &window);
 #endif // ENABLE_NCHW_KERNELS
-
-    /** Scale function to use for the particular function to use */
-    using ScaleFunctionPtr = void (CpuScaleKernel::*)(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
-    using ScaleKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *,
-                                                   InterpolationPolicy, BorderMode, PixelValue, float, bool, const Window &)>::type;
 
     ScaleFunctionPtr    _func{ nullptr };
     InterpolationPolicy _policy{};

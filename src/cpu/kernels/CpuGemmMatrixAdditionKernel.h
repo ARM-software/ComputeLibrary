@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ namespace kernels
  *        - MTX_0 = A * B * alpha, where MTX_0 is the output of @ref CpuGemmMatrixMultiplyKernel
  *        - MTX_1 = C
  */
-class CpuGemmMatrixAdditionKernel : public ICpuKernel
+class CpuGemmMatrixAdditionKernel : public NewICpuKernel<CpuGemmMatrixAdditionKernel>
 {
 public:
     CpuGemmMatrixAdditionKernel() = default;

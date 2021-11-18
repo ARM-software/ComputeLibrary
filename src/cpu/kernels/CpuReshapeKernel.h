@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform tensor reshaping */
-class CpuReshapeKernel : public ICpuKernel
+class CpuReshapeKernel : public NewICpuKernel<CpuReshapeKernel>
 {
 public:
     CpuReshapeKernel() = default;

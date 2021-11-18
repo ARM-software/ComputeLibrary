@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace kernels
  *
  * @note When casting between quantized types the scale and zeroPoint are ignored
  */
-class CpuCastKernel : public ICpuKernel
+class CpuCastKernel : public NewICpuKernel<CpuCastKernel>
 {
 public:
     CpuCastKernel() = default;

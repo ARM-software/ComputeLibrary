@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,58 +42,25 @@ namespace kernels
 {
 namespace
 {
-struct FloorSelectorData
-{
-    DataType dt;
-};
-
-using FloorSelectorPtr = std::add_pointer<bool(const FloorSelectorData &data)>::type;
-using FloorUKernelPtr  = std::add_pointer<void(const void *, void *, int)>::type;
-
-struct FloorUKernel
-{
-    const char            *name;
-    const FloorSelectorPtr is_selected;
-    FloorUKernelPtr        ukernel;
-};
-
-static const FloorUKernel available_kernels[] =
+static const std::vector<CpuFloorKernel::FloorKernel> available_kernels =
 {
     {
         "neon_fp16_floor",
-        [](const FloorSelectorData & data) { return data.dt == DataType::F16; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_floor)
     },
     {
         "neon_fp32_floor",
-        [](const FloorSelectorData & data) { return data.dt == DataType::F32; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_floor)
-    },
-};
-
-/** Micro-kernel selector
- *
- * @param[in] data Selection data passed to help pick the appropriate micro-kernel
- *
- * @return A matching micro-kernel else nullptr
- */
-const FloorUKernel *get_implementation(const FloorSelectorData &data)
-{
-    for(const auto &uk : available_kernels)
-    {
-        if(uk.is_selected(data))
-        {
-            return &uk;
-        }
     }
-    return nullptr;
-}
+};
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
-    const auto *uk = get_implementation(FloorSelectorData{ src->data_type() });
+    const auto *uk = CpuFloorKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     // Validate in case of configured output
@@ -114,7 +81,7 @@ void CpuFloorKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 
     auto_init_if_empty(*dst, src->tensor_shape(), 1, src->data_type());
 
-    const auto *uk = get_implementation(FloorSelectorData{ src->data_type() });
+    const auto *uk = CpuFloorKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;
@@ -172,6 +139,12 @@ const char *CpuFloorKernel::name() const
 {
     return _name.c_str();
 }
+
+const std::vector<CpuFloorKernel::FloorKernel> &CpuFloorKernel::get_available_kernels()
+{
+    return available_kernels;
+}
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

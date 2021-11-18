@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
+#include "src/cpu/kernels/CpuAddKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
@@ -84,6 +86,49 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                               &output_info.clone()->set_is_resizable(false),
                                               ConvertPolicy::WRAP);
     ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                       framework::dataset::make("DataType", { DataType::F32,
+                                                              DataType::F16,
+                                                              DataType::U8,
+                                                              DataType::S16,
+                                                              DataType::S32,
+                                                              DataType::QASYMM8,
+                                                              DataType::QASYMM8_SIGNED,
+                                                              DataType::QSYMM16
+                                                            })),
+                combine(framework::dataset::make("CpuExt", std::string("SVE")),
+                        framework::dataset::make("DataType", { DataType::F32,
+                                                               DataType::F16,
+                                                               DataType::U8,
+                                                               DataType::S16,
+                                                               DataType::S32
+                                                             }))),
+                combine(framework::dataset::make("CpuExt", std::string("SVE2")),
+                        framework::dataset::make("DataType", { DataType::QASYMM8,
+                                                               DataType::QASYMM8_SIGNED,
+                                                               DataType::QSYMM16
+                                                             }))),
+               cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.sve  = (cpu_ext == "SVE");
+    cpu_isa.sve2 = (cpu_ext == "SVE2");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+
+    const auto *selected_impl = CpuAddKernel::get_implementation(DataTypeISASelectorData{data_type, cpu_isa}, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_add";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

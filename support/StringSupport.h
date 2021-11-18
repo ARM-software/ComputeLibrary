@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,6 +131,12 @@ inline std::string to_string(T && value)
     return stream.str();
 }
 
+// Specialization for const std::string&
+inline std::string to_string(const std::string &value)
+{
+    return value;
+}
+
 /** Convert string values to float.
  *
  * @note This function implements the same behaviour as std::stof. The latter
@@ -162,6 +168,12 @@ template <typename T>
 inline std::string to_string(T &&value)
 {
     return ::std::to_string(std::forward<T>(value));
+}
+
+// Specialization for const std::string&
+inline std::string to_string(const std::string &value)
+{
+    return value;
 }
 
 /** Convert string values to float.

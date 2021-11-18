@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,93 +43,59 @@ namespace kernels
 {
 namespace
 {
-struct ActivationSelectorData
+static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
-    DataType       dt;
-    const CPUInfo &ci;
-};
-
-using ActivationSelectorPtr = std::add_pointer<bool(const ActivationSelectorData &data)>::type;
-using ActivationKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
-
-struct ActivationKernel
-{
-    const char                 *name;
-    const ActivationSelectorPtr is_selected;
-    ActivationKernelPtr         ukernel;
-};
-
-static const ActivationKernel available_kernels[] =
-{
-#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp16_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve; },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation)
     },
     {
         "sve_fp32_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32 && data.isa.sve; },
         REGISTER_FP32_SVE(arm_compute::cpu::sve_fp32_activation)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
-#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp16_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_activation)
     },
     {
         "neon_fp32_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_activation)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON)  */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
-        "sve_qu8_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
+        "sve2_qu8_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
         REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)
     },
     {
-        "sve_qs8_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
+        "sve2_qs8_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2; },
         REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)
     },
     {
-        "sve_qs16_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16 && data.ci.has_sve2(); },
+        "sve2_qs16_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16 && data.isa.sve2; },
         REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     {
         "neon_qu8_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)
     },
     {
         "neon_qs8_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_activation)
     },
     {
         "neon_qs16_activation",
-        [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qsymm16_activation)
     },
 };
-
-const ActivationKernel *get_implementation(const ActivationSelectorData &data)
-{
-    for(const auto &uk : available_kernels)
-    {
-        if(uk.is_selected(data))
-        {
-            return &uk;
-        }
-    }
-    return nullptr;
-}
 
 /* Supported activation in the 8-bit integer domain */
 static const std::array<ActivationLayerInfo::ActivationFunction, 7> qasymm8_activations =
@@ -155,7 +121,8 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = get_implementation(ActivationSelectorData{ src->data_type(), CPUInfo::get() });
+    const auto *uk = CpuActivationKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const DataType                                data_type = src->data_type();
@@ -208,7 +175,8 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
 
-    const auto uk = get_implementation(ActivationSelectorData{ src->data_type(), CPUInfo::get() });
+    const auto uk = CpuActivationKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _act_info   = activation_info;
@@ -268,6 +236,11 @@ void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, con
 const char *CpuActivationKernel::name() const
 {
     return _name.c_str();
+}
+
+const std::vector<CpuActivationKernel::ActivationKernel> &CpuActivationKernel::get_available_kernels()
+{
+    return available_kernels;
 }
 } // namespace kernels
 } // namespace cpu

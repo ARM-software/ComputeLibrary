@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,11 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform subtraction between two tensors */
-class CpuSubKernel : public ICpuKernel
+class CpuSubKernel : public NewICpuKernel<CpuSubKernel>
 {
+private:
+    using SubKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+
 public:
     CpuSubKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuSubKernel);
@@ -70,8 +73,14 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-private:
-    using SubKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    struct SubKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        SubKernelPtr                 ukernel;
+    };
+
+    static const std::vector<SubKernel> &get_available_kernels();
 
 private:
     ConvertPolicy _policy{};

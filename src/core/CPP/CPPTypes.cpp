@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "src/common/cpuinfo/CpuInfo.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
 
 namespace arm_compute
 {
@@ -108,6 +109,11 @@ CPUModel CPUInfo::get_cpu_model() const
 CPUModel CPUInfo::get_cpu_model(unsigned int cpuid) const
 {
     return _impl->info.cpu_model(cpuid);
+}
+
+cpuinfo::CpuIsaInfo CPUInfo::get_isa() const
+{
+    return _impl->info.isa();
 }
 
 unsigned int CPUInfo::get_L1_cache_size() const

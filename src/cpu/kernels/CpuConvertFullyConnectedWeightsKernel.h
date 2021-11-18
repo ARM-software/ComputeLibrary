@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ namespace kernels
  *
  * @note This function assumes the weights are already reshaped (transposed)
  */
-class CpuConvertFullyConnectedWeightsKernel : public ICpuKernel
+class CpuConvertFullyConnectedWeightsKernel : public NewICpuKernel<CpuConvertFullyConnectedWeightsKernel>
 {
 public:
     CpuConvertFullyConnectedWeightsKernel() = default;

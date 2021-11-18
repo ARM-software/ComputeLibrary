@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel to convert asymmetric signed to asymmetric signed and vice-versa */
-class CpuConvertQuantizedSignednessKernel : public ICpuKernel
+class CpuConvertQuantizedSignednessKernel : public NewICpuKernel<CpuConvertQuantizedSignednessKernel>
 {
 public:
     CpuConvertQuantizedSignednessKernel() = default;

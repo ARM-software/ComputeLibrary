@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 namespace cpu
 {
 /** Interface for the kernel to perform Winograd input transform. */
-class ICpuWinogradConv2dTransformInputKernel : public ICpuKernel
+class ICpuWinogradConv2dTransformInputKernel : public NewICpuKernel<ICpuWinogradConv2dTransformInputKernel>
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -216,7 +216,7 @@ private:
 };
 
 /** Interface for the kernel to perform Winograd output transform. */
-class ICpuWinogradConv2dTransformOutputKernel : public ICpuKernel
+class ICpuWinogradConv2dTransformOutputKernel : public NewICpuKernel<ICpuWinogradConv2dTransformOutputKernel>
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -418,7 +418,7 @@ private:
 };
 
 /** Interface for the kernel to perform Winograd weights transform. */
-class ICpuWinogradConv2dTransformWeightsKernel : public ICpuKernel
+class ICpuWinogradConv2dTransformWeightsKernel : public NewICpuKernel<ICpuWinogradConv2dTransformWeightsKernel>
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */

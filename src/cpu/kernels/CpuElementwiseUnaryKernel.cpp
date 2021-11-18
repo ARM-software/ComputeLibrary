@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,77 +43,58 @@ namespace kernels
 {
 namespace
 {
-struct ElementwiseUnarySelectorData
-{
-    DataType       dt;
-    const CPUInfo &ci;
-};
-using ElementwiseUnarySelector = std::add_pointer<bool(const ElementwiseUnarySelectorData &)>::type;
-
-struct ElementwiseUnaryKernel
-{
-    const char                                           *name;
-    const ElementwiseUnarySelector                        is_selected;
-    CpuElementwiseUnaryKernel::ElementwiseUnaryUkernelPtr ukernel;
-};
-
-static const ElementwiseUnaryKernel available_kernels[] =
+static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> available_kernels =
 {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
-        REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>),
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && data.isa.sve;
+        },
+        REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>)
     },
     {
         "sve_fp16_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
+        [](const DataTypeISASelectorData & data)
+        {
+            return (data.dt == DataType::F16) && data.isa.sve;
+        },
         REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<__fp16>),
     },
     {
         "sve_s32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32 && data.isa.sve; },
         REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F32; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<float>),
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<__fp16>),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_s32_elementwise_unary",
-        [](const ElementwiseUnarySelectorData & data) { return data.dt == DataType::S32; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<int32_t>),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_NEON)
 };
 
-const ElementwiseUnaryKernel *get_implementation(DataType dt)
-{
-    for(const auto &uk : available_kernels)
-    {
-        if(uk.is_selected({ dt, CPUInfo::get() }))
-        {
-            return &uk;
-        }
-    }
-    return nullptr;
-}
 } // namespace
 
 void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
-    const auto uk = get_implementation(src.data_type());
+    const auto uk = CpuElementwiseUnaryKernel::get_implementation(DataTypeISASelectorData{ src.data_type(), CPUInfo::get().get_isa() });
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     _op         = op;
@@ -128,14 +109,15 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
 
     auto shape_and_window = compute_output_shape_and_window(src.tensor_shape());
     auto_init_if_empty(dst, shape_and_window.first, 1, src.data_type());
-    ICpuKernel::configure(shape_and_window.second);
+    NewICpuKernel::configure(shape_and_window.second);
 }
 
 Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
 
-    const auto *uk = get_implementation(src.data_type());
+    const auto *uk = CpuElementwiseUnaryKernel::get_implementation(DataTypeISASelectorData{ src.data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     switch(op)
@@ -177,6 +159,12 @@ const char *CpuElementwiseUnaryKernel::name() const
 {
     return _name.c_str();
 }
+
+const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> &CpuElementwiseUnaryKernel::get_available_kernels()
+{
+    return available_kernels;
+}
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

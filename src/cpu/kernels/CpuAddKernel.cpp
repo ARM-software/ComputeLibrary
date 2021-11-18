@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,159 +41,116 @@ namespace kernels
 {
 namespace
 {
-struct AddSelectorData
+static const std::vector<CpuAddKernel::AddKernel> available_kernels =
 {
-    DataType       dt;
-    const CPUInfo &ci;
-};
-
-using AddSelectorPtr = std::add_pointer<bool(const AddSelectorData &data)>::type;
-using AddKernelPtr   = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
-struct AddKernel
-{
-    const char          *name;
-    const AddSelectorPtr is_selected;
-    AddKernelPtr         ukernel;
-};
-
-static const AddKernel available_kernels[] =
-{
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
         "sve2_qu8_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::QASYMM8) && data.ci.has_sve2();
+            return (data.dt == DataType::QASYMM8) && data.isa.sve2;
         },
         REGISTER_QASYMM8_SVE2(arm_compute::cpu::add_qasymm8_sve2)
     },
     {
         "sve2_qs8_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::QASYMM8_SIGNED) && data.ci.has_sve2();
+            return (data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve2;
         },
         REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::add_qasymm8_signed_sve2)
     },
     {
         "sve2_qs16_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::QSYMM16) && data.ci.has_sve2();
+            return (data.dt == DataType::QSYMM16) && data.isa.sve2;
         },
         REGISTER_QSYMM16_SVE2(arm_compute::cpu::add_qsymm16_sve2)
     },
-#endif /* !defined(ARM_COMPUTE_ENABLE_SVE2) */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp32_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::F32) && data.ci.has_sve();
+            return (data.dt == DataType::F32) && data.isa.sve;
         },
         REGISTER_FP32_SVE(arm_compute::cpu::add_fp32_sve)
     },
     {
         "sve_fp16_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::F16) && data.ci.has_sve();
+            return (data.dt == DataType::F16) && data.isa.sve;
         },
         REGISTER_FP16_SVE(arm_compute::cpu::add_fp16_sve)
     },
     {
         "sve_u8_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::U8) && data.ci.has_sve();
+            return (data.dt == DataType::U8) && data.isa.sve;
         },
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_u8_sve)
     },
     {
         "sve_s16_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::S16) && data.ci.has_sve();
+            return (data.dt == DataType::S16) && data.isa.sve;
         },
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_s16_sve)
     },
     {
         "sve_s32_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::S32) && data.ci.has_sve();
+            return (data.dt == DataType::S32) && data.isa.sve;
         },
         REGISTER_INTEGER_SVE(arm_compute::cpu::add_s32_sve)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp32_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::F32); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F32); },
         REGISTER_FP32_NEON(arm_compute::cpu::add_fp32_neon)
     },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_add",
-        [](const AddSelectorData & data)
+        [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::F16) && data.ci.has_fp16();
+            return (data.dt == DataType::F16) && data.isa.fp16;
         },
         REGISTER_FP16_NEON(arm_compute::cpu::add_fp16_neon)
     },
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_u8_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::U8); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::U8); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_u8_neon)
     },
     {
         "neon_s16_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::S16); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::S16); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_s16_neon)
     },
     {
         "neon_s32_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::S32); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::S32); },
         REGISTER_INTEGER_NEON(arm_compute::cpu::add_s32_neon)
     },
-#endif /*  defined(ARM_COMPUTE_ENABLE_NEON) */
-#if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "neon_qu8_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::QASYMM8); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8); },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::add_qasymm8_neon)
     },
     {
         "neon_qs8_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::add_qasymm8_signed_neon)
     },
     {
         "neon_qs16_add",
-        [](const AddSelectorData & data) { return (data.dt == DataType::QSYMM16); },
+        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QSYMM16); },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::add_qsymm16_neon)
-    },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE) */
-};
-
-/** Micro-kernel selector
- *
- * @param[in] data Selection data passed to help pick the appropriate micro-kernel
- *
- * @return A matching micro-kernel else nullptr
- */
-const AddKernel *get_implementation(const CPUInfo &cpuinfo, DataType dt)
-{
-    for(const auto &uk : available_kernels)
-    {
-        if(uk.is_selected({ dt, cpuinfo }))
-        {
-            return &uk;
-        }
     }
-    return nullptr;
-}
+};
 
 Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst, ConvertPolicy policy)
 {
@@ -220,7 +177,7 @@ Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, cons
                                         "Wrong shape for dst");
     }
 
-    const auto *uk = get_implementation(CPUInfo::get(), src0.data_type());
+    const auto *uk = CpuAddKernel::get_implementation(DataTypeISASelectorData{ src0.data_type(), CPUInfo::get().get_isa() });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
@@ -246,7 +203,8 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
-    const auto uk = get_implementation(CPUInfo::get(), src0->data_type());
+    const auto uk = CpuAddKernel::get_implementation(DataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _policy     = policy;
@@ -256,7 +214,7 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     // Configure kernel window
     auto win_config = validate_and_configure_window(*src0, *src1, *dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICpuKernel::configure(win_config.second);
+    NewICpuKernel::configure(win_config.second);
 }
 
 Status CpuAddKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy)
@@ -273,7 +231,7 @@ void CpuAddKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(NewICpuKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
@@ -290,6 +248,11 @@ const char *CpuAddKernel::name() const
     return _name.c_str();
 }
 
+const std::vector<CpuAddKernel::AddKernel> &CpuAddKernel::get_available_kernels()
+{
+    return available_kernels;
+}
+
 size_t CpuAddKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
@@ -298,7 +261,7 @@ size_t CpuAddKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
     {
         return 10240;
     }
-    else if (platform.get_cpu_model() == CPUModel::A76)
+    else if(platform.get_cpu_model() == CPUModel::A76)
     {
         return 9216;
     }

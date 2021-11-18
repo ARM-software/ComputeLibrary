@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ namespace kernels
  *
  * After this operation, the dst matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
  */
-class CpuGemmInterleave4x4Kernel : public ICpuKernel
+class CpuGemmInterleave4x4Kernel : public NewICpuKernel<CpuGemmInterleave4x4Kernel>
 {
 public:
     CpuGemmInterleave4x4Kernel() = default;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,11 @@
 
 namespace arm_compute
 {
+namespace cpuinfo
+{
+struct CpuIsaInfo;
+} // namespace cpuinfo
+
 #define ARM_COMPUTE_CPU_MODEL_LIST \
     X(GENERIC)                     \
     X(GENERIC_FP16)                \
@@ -134,6 +139,11 @@ public:
      * @return Current thread's @ref CPUModel
      */
     CPUModel get_cpu_model() const;
+    /** Gets the current cpu's ISA information
+     *
+     * @return Current cpu's ISA information
+     */
+    cpuinfo::CpuIsaInfo get_isa() const;
     /** Gets the L1 cache size
      *
      * @return the size of the L1 cache

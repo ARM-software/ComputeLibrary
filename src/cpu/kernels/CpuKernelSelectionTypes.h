@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FILL_KERNEL_H
-#define ARM_COMPUTE_CPU_FILL_KERNEL_H
+#ifndef ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
+#define ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H
 
-#include "arm_compute/core/PixelValue.h"
-#include "src/core/common/Macros.h"
-#include "src/cpu/ICpuKernel.h"
+#include "arm_compute/core/Types.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
 
 namespace arm_compute
 {
@@ -34,27 +33,28 @@ namespace cpu
 {
 namespace kernels
 {
-/** Kernel for filling a tensor with a given constant value */
-class CpuFillKernel : public NewICpuKernel<CpuFillKernel>
+// Selector data types
+struct DataTypeISASelectorData
 {
-public:
-    CpuFillKernel() = default;
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuFillKernel);
-    /** Configure kernel for a given list of arguments
-     *
-     * @param[in,out] tensor         Tensor to fill. Supported data types: All
-     * @param[in]     constant_value The value used to fill the planes of the tensor
-     */
-    void configure(const ITensorInfo *tensor, const PixelValue &constant_value);
-
-    // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
-    const char *name() const override;
-
-private:
-    PixelValue _constant_value{};
+    DataType                   dt;
+    const cpuinfo::CpuIsaInfo &isa;
 };
+
+struct PoolDataTypeISASelectorData
+{
+    DataType                   dt;
+    DataLayout                 dl;
+    int                        pool_stride_x;
+    Size2D                     pool_size;
+    const cpuinfo::CpuIsaInfo &isa;
+};
+
+// Selector pointer types
+using DataTypeISASelectorPtr     = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
+using PoolDataTypeISASelectorPtr = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FILL_KERNEL_H */
+
+#endif // ARM_COMPUTE_CPU_KERNEL_SELECTION_TYPES_H

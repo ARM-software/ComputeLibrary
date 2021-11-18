@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1198,6 +1198,49 @@ inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
     }
 
     return vec_size;
+}
+
+/** Returns the suffix string of CPU kernel implementation names based on the given data type
+ *
+ * @param[in] data_type The data type the CPU kernel implemetation uses
+ *
+ * @return the suffix string of CPU kernel implementations
+ */
+inline std::string cpu_impl_dt(const DataType &data_type)
+{
+    std::string ret = "";
+
+    switch(data_type)
+    {
+        case DataType::F32:
+            ret = "fp32";
+            break;
+        case DataType::F16:
+            ret = "fp16";
+            break;
+        case DataType::U8:
+            ret = "u8";
+            break;
+        case DataType::S16:
+            ret = "s16";
+            break;
+        case DataType::S32:
+            ret = "s32";
+            break;
+        case DataType::QASYMM8:
+            ret = "qu8";
+            break;
+        case DataType::QASYMM8_SIGNED:
+            ret = "qs8";
+            break;
+        case DataType::QSYMM16:
+            ret = "qs16";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported.");
+    }
+
+    return ret;
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
