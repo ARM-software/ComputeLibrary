@@ -540,7 +540,12 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Export('arm_compute_so')
 
 # Generate dummy core lib for backwards compatibility
-arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
+if env['os'] == 'macos':
+    # macos static library archiver fails if given an empty list of files
+    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [lib_files], static=True)
+else:
+    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
+
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
