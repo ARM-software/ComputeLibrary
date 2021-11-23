@@ -1,35 +1,23 @@
-/*******************************************************************************
- * Copyright (c) 2008-2016 The Khronos Group Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and/or associated documentation files (the
- * "Materials"), to deal in the Materials without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Materials, and to
- * permit persons to whom the Materials are furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Materials.
- *
- * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
- * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
- * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
- *    https://www.khronos.org/registry/
- *
- * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
- ******************************************************************************/
+//
+// Copyright (c) 2008-2020 The Khronos Group Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
 /*! \file
  *
- *   \brief C++ bindings for OpenCL 1.0 (rev 48), OpenCL 1.1 (rev 33),
- *       OpenCL 1.2 (rev 15) and OpenCL 2.0 (rev 29)
+ *   \brief C++ bindings for OpenCL 1.0, OpenCL 1.1, OpenCL 1.2,
+ *       OpenCL 2.0, OpenCL 2.1, OpenCL 2.2, and OpenCL 3.0.
  *   \author Lee Howes and Bruce Merry
  *
  *   Derived from the OpenCL 1.x C++ bindings written by
@@ -40,9 +28,8 @@
  *       Bruce Merry, February 2013.
  *       Tom Deakin and Simon McIntosh-Smith, July 2013
  *       James Price, 2015-
- *
- *   \version 2.0.10
- *   \date 2016-07-20
+ *   \version 2.2.0
+ *   \date 2019-09-18
  *
  *   Optional extension support
  *
@@ -52,6 +39,8 @@
  *         #define CL_HPP_USE_DX_INTEROP
  *         cl_khr_sub_groups
  *         #define CL_HPP_USE_CL_SUB_GROUPS_KHR
+ *         cl_khr_image2d_from_buffer
+ *         #define CL_HPP_USE_CL_IMAGE2D_FROM_BUFFER_KHR
  *
  *   Doxygen documentation for this header is available here:
  *
@@ -71,10 +60,10 @@
  * For many large applications C++ is the language of choice and so it seems
  * reasonable to define C++ bindings for OpenCL.
  *
- * The interface is contained with a single C++ header file \em cl2.hpp and all
+ * The interface is contained with a single C++ header file \em opencl.hpp and all
  * definitions are contained within the namespace \em cl. There is no additional
  * requirement to include \em cl.h and to use either the C++ or original C
- * bindings; it is enough to simply include \em cl2.hpp.
+ * bindings; it is enough to simply include \em opencl.hpp.
  *
  * The bindings themselves are lightweight and correspond closely to the
  * underlying C API. Using the C++ bindings introduces no additional execution
@@ -83,7 +72,7 @@
  * There are numerous compatibility, portability and memory management
  * fixes in the new header as well as additional OpenCL 2.0 features.
  * As a result the header is not directly backward compatible and for this
- * reason we release it as cl2.hpp rather than a new version of cl.hpp.
+ * reason we release it as opencl.hpp rather than a new version of cl.hpp.
  * 
  *
  * \section compatibility Compatibility
@@ -155,26 +144,26 @@
  * - CL_HPP_NO_STD_STRING
  *
  *   Do not use the standard library string class. cl::string is not
- *   defined and may be defined by the user before cl2.hpp is
+ *   defined and may be defined by the user before opencl.hpp is
  *   included.
  *
  * - CL_HPP_NO_STD_VECTOR
  *
  *   Do not use the standard library vector class. cl::vector is not
- *   defined and may be defined by the user before cl2.hpp is
+ *   defined and may be defined by the user before opencl.hpp is
  *   included.
  *
  * - CL_HPP_NO_STD_ARRAY
  *
  *   Do not use the standard library array class. cl::array is not
- *   defined and may be defined by the user before cl2.hpp is
+ *   defined and may be defined by the user before opencl.hpp is
  *   included.
  *
  * - CL_HPP_NO_STD_UNIQUE_PTR
  *
  *   Do not use the standard library unique_ptr class. cl::pointer and
  *   the cl::allocate_pointer functions are not defined and may be
- *   defined by the user before cl2.hpp is included.
+ *   defined by the user before opencl.hpp is included.
  *
  * - CL_HPP_ENABLE_DEVICE_FISSION
  *
@@ -205,6 +194,14 @@
  *   applies to use of cl::Program construction and other program
  *   build variants.
  *
+ * - CL_HPP_USE_CL_SUB_GROUPS_KHR
+ *
+ *   Enable the cl_khr_subgroups extension.
+ *
+ * - CL_HPP_USE_IL_KHR
+ *
+ *   Enable the cl_khr_il_program extension.
+ *
  *
  * \section example Example
  *
@@ -217,7 +214,7 @@
     #define CL_HPP_ENABLE_EXCEPTIONS
     #define CL_HPP_TARGET_OPENCL_VERSION 200
 
-    #include <CL/cl2.hpp>
+    #include <CL/opencl.hpp>
     #include <iostream>
     #include <vector>
     #include <memory>
@@ -396,61 +393,84 @@
  * both and hence work with either version of the bindings.
  */
 #if !defined(CL_HPP_USE_DX_INTEROP) && defined(USE_DX_INTEROP)
-# pragma message("cl2.hpp: USE_DX_INTEROP is deprecated. Define CL_HPP_USE_DX_INTEROP instead")
+# pragma message("opencl.hpp: USE_DX_INTEROP is deprecated. Define CL_HPP_USE_DX_INTEROP instead")
 # define CL_HPP_USE_DX_INTEROP
 #endif
 #if !defined(CL_HPP_USE_CL_DEVICE_FISSION) && defined(USE_CL_DEVICE_FISSION)
-# pragma message("cl2.hpp: USE_CL_DEVICE_FISSION is deprecated. Define CL_HPP_USE_CL_DEVICE_FISSION instead")
+# pragma message("opencl.hpp: USE_CL_DEVICE_FISSION is deprecated. Define CL_HPP_USE_CL_DEVICE_FISSION instead")
 # define CL_HPP_USE_CL_DEVICE_FISSION
 #endif
 #if !defined(CL_HPP_ENABLE_EXCEPTIONS) && defined(__CL_ENABLE_EXCEPTIONS)
-# pragma message("cl2.hpp: __CL_ENABLE_EXCEPTIONS is deprecated. Define CL_HPP_ENABLE_EXCEPTIONS instead")
+# pragma message("opencl.hpp: __CL_ENABLE_EXCEPTIONS is deprecated. Define CL_HPP_ENABLE_EXCEPTIONS instead")
 # define CL_HPP_ENABLE_EXCEPTIONS
 #endif
 #if !defined(CL_HPP_NO_STD_VECTOR) && defined(__NO_STD_VECTOR)
-# pragma message("cl2.hpp: __NO_STD_VECTOR is deprecated. Define CL_HPP_NO_STD_VECTOR instead")
+# pragma message("opencl.hpp: __NO_STD_VECTOR is deprecated. Define CL_HPP_NO_STD_VECTOR instead")
 # define CL_HPP_NO_STD_VECTOR
 #endif
 #if !defined(CL_HPP_NO_STD_STRING) && defined(__NO_STD_STRING)
-# pragma message("cl2.hpp: __NO_STD_STRING is deprecated. Define CL_HPP_NO_STD_STRING instead")
+# pragma message("opencl.hpp: __NO_STD_STRING is deprecated. Define CL_HPP_NO_STD_STRING instead")
 # define CL_HPP_NO_STD_STRING
 #endif
 #if defined(VECTOR_CLASS)
-# pragma message("cl2.hpp: VECTOR_CLASS is deprecated. Alias cl::vector instead")
+# pragma message("opencl.hpp: VECTOR_CLASS is deprecated. Alias cl::vector instead")
 #endif
 #if defined(STRING_CLASS)
-# pragma message("cl2.hpp: STRING_CLASS is deprecated. Alias cl::string instead.")
+# pragma message("opencl.hpp: STRING_CLASS is deprecated. Alias cl::string instead.")
 #endif
 #if !defined(CL_HPP_USER_OVERRIDE_ERROR_STRINGS) && defined(__CL_USER_OVERRIDE_ERROR_STRINGS)
-# pragma message("cl2.hpp: __CL_USER_OVERRIDE_ERROR_STRINGS is deprecated. Define CL_HPP_USER_OVERRIDE_ERROR_STRINGS instead")
+# pragma message("opencl.hpp: __CL_USER_OVERRIDE_ERROR_STRINGS is deprecated. Define CL_HPP_USER_OVERRIDE_ERROR_STRINGS instead")
 # define CL_HPP_USER_OVERRIDE_ERROR_STRINGS
 #endif
 
 /* Warn about features that are no longer supported
  */
 #if defined(__USE_DEV_VECTOR)
-# pragma message("cl2.hpp: __USE_DEV_VECTOR is no longer supported. Expect compilation errors")
+# pragma message("opencl.hpp: __USE_DEV_VECTOR is no longer supported. Expect compilation errors")
 #endif
 #if defined(__USE_DEV_STRING)
-# pragma message("cl2.hpp: __USE_DEV_STRING is no longer supported. Expect compilation errors")
+# pragma message("opencl.hpp: __USE_DEV_STRING is no longer supported. Expect compilation errors")
 #endif
 
 /* Detect which version to target */
 #if !defined(CL_HPP_TARGET_OPENCL_VERSION)
-# pragma message("cl2.hpp: CL_HPP_TARGET_OPENCL_VERSION is not defined. It will default to 200 (OpenCL 2.0)")
-# define CL_HPP_TARGET_OPENCL_VERSION 200
+# pragma message("opencl.hpp: CL_HPP_TARGET_OPENCL_VERSION is not defined. It will default to 300 (OpenCL 3.0)")
+# define CL_HPP_TARGET_OPENCL_VERSION 300
 #endif
-#if CL_HPP_TARGET_OPENCL_VERSION != 100 && CL_HPP_TARGET_OPENCL_VERSION != 110 && CL_HPP_TARGET_OPENCL_VERSION != 120 && CL_HPP_TARGET_OPENCL_VERSION != 200
-# pragma message("cl2.hpp: CL_HPP_TARGET_OPENCL_VERSION is not a valid value (100, 110, 120 or 200). It will be set to 200")
+#if CL_HPP_TARGET_OPENCL_VERSION != 100 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 110 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 120 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 200 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 210 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 220 && \
+    CL_HPP_TARGET_OPENCL_VERSION != 300
+# pragma message("opencl.hpp: CL_HPP_TARGET_OPENCL_VERSION is not a valid value (100, 110, 120, 200, 210, 220 or 300). It will be set to 300 (OpenCL 3.0).")
 # undef CL_HPP_TARGET_OPENCL_VERSION
-# define CL_HPP_TARGET_OPENCL_VERSION 200
+# define CL_HPP_TARGET_OPENCL_VERSION 300
+#endif
+
+/* Forward target OpenCL version to C headers if necessary */
+#if defined(CL_TARGET_OPENCL_VERSION)
+/* Warn if prior definition of CL_TARGET_OPENCL_VERSION is lower than
+ * requested C++ bindings version */
+#if CL_TARGET_OPENCL_VERSION < CL_HPP_TARGET_OPENCL_VERSION
+# pragma message("CL_TARGET_OPENCL_VERSION is already defined as is lower than CL_HPP_TARGET_OPENCL_VERSION")
+#endif
+#else
+# define CL_TARGET_OPENCL_VERSION CL_HPP_TARGET_OPENCL_VERSION
 #endif
 
 #if !defined(CL_HPP_MINIMUM_OPENCL_VERSION)
 # define CL_HPP_MINIMUM_OPENCL_VERSION 200
 #endif
-#if CL_HPP_MINIMUM_OPENCL_VERSION != 100 && CL_HPP_MINIMUM_OPENCL_VERSION != 110 && CL_HPP_MINIMUM_OPENCL_VERSION != 120 && CL_HPP_MINIMUM_OPENCL_VERSION != 200
-# pragma message("cl2.hpp: CL_HPP_MINIMUM_OPENCL_VERSION is not a valid value (100, 110, 120 or 200). It will be set to 100")
+#if CL_HPP_MINIMUM_OPENCL_VERSION != 100 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 110 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 120 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 200 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 210 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 220 && \
+    CL_HPP_MINIMUM_OPENCL_VERSION != 300
+# pragma message("opencl.hpp: CL_HPP_MINIMUM_OPENCL_VERSION is not a valid value (100, 110, 120, 200, 210, 220 or 300). It will be set to 100")
 # undef CL_HPP_MINIMUM_OPENCL_VERSION
 # define CL_HPP_MINIMUM_OPENCL_VERSION 100
 #endif
@@ -469,6 +489,12 @@
 #endif
 #if CL_HPP_MINIMUM_OPENCL_VERSION <= 200 && !defined(CL_USE_DEPRECATED_OPENCL_2_0_APIS)
 # define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+#endif
+#if CL_HPP_MINIMUM_OPENCL_VERSION <= 210 && !defined(CL_USE_DEPRECATED_OPENCL_2_1_APIS)
+# define CL_USE_DEPRECATED_OPENCL_2_1_APIS
+#endif
+#if CL_HPP_MINIMUM_OPENCL_VERSION <= 220 && !defined(CL_USE_DEPRECATED_OPENCL_2_2_APIS)
+# define CL_USE_DEPRECATED_OPENCL_2_2_APIS
 #endif
 
 #ifdef _WIN32
@@ -504,33 +530,37 @@
 #include <CL/opencl.h>
 #endif // !__APPLE__
 
-#if (__cplusplus >= 201103L)
+#if (__cplusplus >= 201103L || _MSVC_LANG >= 201103L )
 #define CL_HPP_NOEXCEPT_ noexcept
 #else
 #define CL_HPP_NOEXCEPT_
 #endif
 
-#if defined(_MSC_VER)
+#if __cplusplus >= 201703L
+# define CL_HPP_DEFINE_STATIC_MEMBER_ inline
+#elif defined(_MSC_VER)
 # define CL_HPP_DEFINE_STATIC_MEMBER_ __declspec(selectany)
+#elif defined(__MINGW32__)
+# define CL_HPP_DEFINE_STATIC_MEMBER_ __attribute__((selectany))
 #else
 # define CL_HPP_DEFINE_STATIC_MEMBER_ __attribute__((weak))
 #endif // !_MSC_VER
 
 // Define deprecated prefixes and suffixes to ensure compilation
 // in case they are not pre-defined
-#if !defined(CL_EXT_PREFIX__VERSION_1_1_DEPRECATED)
-#define CL_EXT_PREFIX__VERSION_1_1_DEPRECATED  
-#endif // #if !defined(CL_EXT_PREFIX__VERSION_1_1_DEPRECATED)
-#if !defined(CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED)
-#define CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
-#endif // #if !defined(CL_EXT_PREFIX__VERSION_1_1_DEPRECATED)
+#if !defined(CL_API_PREFIX__VERSION_1_1_DEPRECATED)
+#define CL_API_PREFIX__VERSION_1_1_DEPRECATED  
+#endif // #if !defined(CL_API_PREFIX__VERSION_1_1_DEPRECATED)
+#if !defined(CL_API_SUFFIX__VERSION_1_1_DEPRECATED)
+#define CL_API_SUFFIX__VERSION_1_1_DEPRECATED
+#endif // #if !defined(CL_API_PREFIX__VERSION_1_1_DEPRECATED)
 
-#if !defined(CL_EXT_PREFIX__VERSION_1_2_DEPRECATED)
-#define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED  
-#endif // #if !defined(CL_EXT_PREFIX__VERSION_1_2_DEPRECATED)
-#if !defined(CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED)
-#define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
-#endif // #if !defined(CL_EXT_PREFIX__VERSION_1_2_DEPRECATED)
+#if !defined(CL_API_PREFIX__VERSION_1_2_DEPRECATED)
+#define CL_API_PREFIX__VERSION_1_2_DEPRECATED  
+#endif // #if !defined(CL_API_PREFIX__VERSION_1_2_DEPRECATED)
+#if !defined(CL_API_SUFFIX__VERSION_1_2_DEPRECATED)
+#define CL_API_SUFFIX__VERSION_1_2_DEPRECATED
+#endif // #if !defined(CL_API_PREFIX__VERSION_1_2_DEPRECATED)
 
 #if !defined(CL_CALLBACK)
 #define CL_CALLBACK
@@ -790,6 +820,9 @@ static inline cl_int errHandler (cl_int err, const char * errStr = NULL)
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
 #define __GET_KERNEL_ARG_INFO_ERR           CL_HPP_ERR_STR_(clGetKernelArgInfo)
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+#define __GET_KERNEL_SUB_GROUP_INFO_ERR     CL_HPP_ERR_STR_(clGetKernelSubGroupInfo)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
 #define __GET_KERNEL_WORK_GROUP_INFO_ERR    CL_HPP_ERR_STR_(clGetKernelWorkGroupInfo)
 #define __GET_PROGRAM_INFO_ERR              CL_HPP_ERR_STR_(clGetProgramInfo)
 #define __GET_PROGRAM_BUILD_INFO_ERR        CL_HPP_ERR_STR_(clGetProgramBuildInfo)
@@ -820,7 +853,13 @@ static inline cl_int errHandler (cl_int err, const char * errStr = NULL)
 #define __CREATE_KERNEL_ERR                 CL_HPP_ERR_STR_(clCreateKernel)
 #define __SET_KERNEL_ARGS_ERR               CL_HPP_ERR_STR_(clSetKernelArg)
 #define __CREATE_PROGRAM_WITH_SOURCE_ERR    CL_HPP_ERR_STR_(clCreateProgramWithSource)
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+#define __CREATE_PROGRAM_WITH_IL_ERR        CL_HPP_ERR_STR_(clCreateProgramWithIL)
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 200
 #define __CREATE_PROGRAM_WITH_BINARY_ERR    CL_HPP_ERR_STR_(clCreateProgramWithBinary)
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+#define __CREATE_PROGRAM_WITH_IL_ERR        CL_HPP_ERR_STR_(clCreateProgramWithIL)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 210
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
 #define __CREATE_PROGRAM_WITH_BUILT_IN_KERNELS_ERR    CL_HPP_ERR_STR_(clCreateProgramWithBuiltInKernels)
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
@@ -857,6 +896,11 @@ static inline cl_int errHandler (cl_int err, const char * errStr = NULL)
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
 #define __ENQUEUE_MIGRATE_MEM_OBJECTS_ERR   CL_HPP_ERR_STR_(clEnqueueMigrateMemObjects)
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+#define __ENQUEUE_MIGRATE_SVM_ERR   CL_HPP_ERR_STR_(clEnqueueSVMMigrateMem)
+#define __SET_DEFAULT_DEVICE_COMMAND_QUEUE_ERR   CL_HPP_ERR_STR_(clSetDefaultDeviceCommandQueue)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 210
+
 
 #define __ENQUEUE_ACQUIRE_GL_ERR            CL_HPP_ERR_STR_(clEnqueueAcquireGLObjects)
 #define __ENQUEUE_RELEASE_GL_ERR            CL_HPP_ERR_STR_(clEnqueueReleaseGLObjects)
@@ -870,6 +914,16 @@ static inline cl_int errHandler (cl_int err, const char * errStr = NULL)
 #define __FLUSH_ERR                         CL_HPP_ERR_STR_(clFlush)
 #define __FINISH_ERR                        CL_HPP_ERR_STR_(clFinish)
 #define __VECTOR_CAPACITY_ERR               CL_HPP_ERR_STR_(Vector capacity error)
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+#define __GET_HOST_TIMER_ERR           CL_HPP_ERR_STR_(clGetHostTimer)
+#define __GET_DEVICE_AND_HOST_TIMER_ERR           CL_HPP_ERR_STR_(clGetDeviceAndHostTimer)
+#endif
+#if CL_HPP_TARGET_OPENCL_VERSION >= 220
+#define __SET_PROGRAM_RELEASE_CALLBACK_ERR          CL_HPP_ERR_STR_(clSetProgramReleaseCallback)
+#define __SET_PROGRAM_SPECIALIZATION_CONSTANT_ERR   CL_HPP_ERR_STR_(clSetProgramSpecializationConstant)
+#endif
+
 
 /**
  * CL 1.2 version that uses device fission.
@@ -910,6 +964,10 @@ static inline cl_int errHandler (cl_int err, const char * errStr = NULL)
 #define __ENQUEUE_MARKER_WAIT_LIST_ERR                CL_HPP_ERR_STR_(clEnqueueMarkerWithWaitList)
 #define __ENQUEUE_BARRIER_WAIT_LIST_ERR               CL_HPP_ERR_STR_(clEnqueueBarrierWithWaitList)
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+#define __CLONE_KERNEL_ERR     CL_HPP_ERR_STR_(clCloneKernel)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 210
 
 #endif // CL_HPP_USER_OVERRIDE_ERROR_STRINGS
 //! \endcond
@@ -1137,6 +1195,8 @@ inline cl_int getInfoHelper(Func f, cl_uint name, T* param, int, typename T::cl_
     F(cl_device_info, CL_DEVICE_MEM_BASE_ADDR_ALIGN, cl_uint) \
     F(cl_device_info, CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, cl_uint) \
     F(cl_device_info, CL_DEVICE_SINGLE_FP_CONFIG, cl_device_fp_config) \
+    F(cl_device_info, CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config) \
+    F(cl_device_info, CL_DEVICE_HALF_FP_CONFIG, cl_device_fp_config) \
     F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, cl_device_mem_cache_type) \
     F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, cl_uint)\
     F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, cl_ulong) \
@@ -1233,8 +1293,6 @@ inline cl_int getInfoHelper(Func f, cl_uint name, T* param, int, typename T::cl_
     F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, cl_uint) \
     F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, cl_uint) \
     F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, cl_uint) \
-    F(cl_device_info, CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config) \
-    F(cl_device_info, CL_DEVICE_HALF_FP_CONFIG, cl_device_fp_config) \
     F(cl_device_info, CL_DEVICE_OPENCL_C_VERSION, string) \
     \
     F(cl_mem_info, CL_MEM_ASSOCIATED_MEMOBJECT, cl::Memory) \
@@ -1259,13 +1317,20 @@ inline cl_int getInfoHelper(Func f, cl_uint name, T* param, int, typename T::cl_
     F(cl_kernel_arg_info, CL_KERNEL_ARG_NAME, string) \
     F(cl_kernel_arg_info, CL_KERNEL_ARG_TYPE_QUALIFIER, cl_kernel_arg_type_qualifier) \
     \
+    F(cl_kernel_work_group_info, CL_KERNEL_GLOBAL_WORK_SIZE, cl::detail::size_t_array) \
+    \
+    F(cl_device_info, CL_DEVICE_LINKER_AVAILABLE, cl_bool) \
+    F(cl_device_info, CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, size_type) \
+    F(cl_device_info, CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, size_type) \
     F(cl_device_info, CL_DEVICE_PARENT_DEVICE, cl::Device) \
+    F(cl_device_info, CL_DEVICE_PARTITION_MAX_SUB_DEVICES, cl_uint) \
     F(cl_device_info, CL_DEVICE_PARTITION_PROPERTIES, cl::vector<cl_device_partition_property>) \
     F(cl_device_info, CL_DEVICE_PARTITION_TYPE, cl::vector<cl_device_partition_property>)  \
     F(cl_device_info, CL_DEVICE_REFERENCE_COUNT, cl_uint) \
-    F(cl_device_info, CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, size_type) \
+    F(cl_device_info, CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, cl_bool) \
     F(cl_device_info, CL_DEVICE_PARTITION_AFFINITY_DOMAIN, cl_device_affinity_domain) \
     F(cl_device_info, CL_DEVICE_BUILT_IN_KERNELS, string) \
+    F(cl_device_info, CL_DEVICE_PRINTF_BUFFER_SIZE, size_type) \
     \
     F(cl_image_info, CL_IMAGE_ARRAY_SIZE, size_type) \
     F(cl_image_info, CL_IMAGE_NUM_MIP_LEVELS, cl_uint) \
@@ -1285,11 +1350,44 @@ inline cl_int getInfoHelper(Func f, cl_uint name, T* param, int, typename T::cl_
     F(cl_device_info, CL_DEVICE_PREFERRED_PLATFORM_ATOMIC_ALIGNMENT, cl_uint) \
     F(cl_device_info, CL_DEVICE_PREFERRED_GLOBAL_ATOMIC_ALIGNMENT, cl_uint) \
     F(cl_device_info, CL_DEVICE_PREFERRED_LOCAL_ATOMIC_ALIGNMENT, cl_uint) \
+    F(cl_device_info, CL_DEVICE_IMAGE_PITCH_ALIGNMENT, cl_uint) \
+    F(cl_device_info, CL_DEVICE_IMAGE_BASE_ADDRESS_ALIGNMENT, cl_uint) \
+    F(cl_device_info, CL_DEVICE_MAX_READ_WRITE_IMAGE_ARGS, cl_uint ) \
+    F(cl_device_info, CL_DEVICE_MAX_GLOBAL_VARIABLE_SIZE, size_type ) \
+    F(cl_device_info, CL_DEVICE_GLOBAL_VARIABLE_PREFERRED_TOTAL_SIZE, size_type ) \
+    F(cl_profiling_info, CL_PROFILING_COMMAND_COMPLETE, cl_ulong) \
+    F(cl_kernel_exec_info, CL_KERNEL_EXEC_INFO_SVM_FINE_GRAIN_SYSTEM, cl_bool) \
+    F(cl_kernel_exec_info, CL_KERNEL_EXEC_INFO_SVM_PTRS, void**) \
     F(cl_command_queue_info, CL_QUEUE_SIZE, cl_uint) \
     F(cl_mem_info, CL_MEM_USES_SVM_POINTER, cl_bool) \
     F(cl_program_build_info, CL_PROGRAM_BUILD_GLOBAL_VARIABLE_TOTAL_SIZE, size_type) \
     F(cl_pipe_info, CL_PIPE_PACKET_SIZE, cl_uint) \
     F(cl_pipe_info, CL_PIPE_MAX_PACKETS, cl_uint)
+
+#define CL_HPP_PARAM_NAME_INFO_SUBGROUP_KHR_(F) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_MAX_SUB_GROUP_SIZE_FOR_NDRANGE_KHR, size_type) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_SUB_GROUP_COUNT_FOR_NDRANGE_KHR, size_type)
+
+#define CL_HPP_PARAM_NAME_INFO_IL_KHR_(F) \
+    F(cl_device_info, CL_DEVICE_IL_VERSION_KHR, string) \
+    F(cl_program_info, CL_PROGRAM_IL_KHR, cl::vector<unsigned char>)
+
+#define CL_HPP_PARAM_NAME_INFO_2_1_(F) \
+    F(cl_platform_info, CL_PLATFORM_HOST_TIMER_RESOLUTION, cl_ulong) \
+    F(cl_program_info, CL_PROGRAM_IL, cl::vector<unsigned char>) \
+    F(cl_device_info, CL_DEVICE_MAX_NUM_SUB_GROUPS, cl_uint) \
+    F(cl_device_info, CL_DEVICE_IL_VERSION, string) \
+    F(cl_device_info, CL_DEVICE_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS, cl_bool) \
+    F(cl_command_queue_info, CL_QUEUE_DEVICE_DEFAULT, cl::DeviceCommandQueue) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_MAX_SUB_GROUP_SIZE_FOR_NDRANGE, size_type) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_SUB_GROUP_COUNT_FOR_NDRANGE, size_type) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_LOCAL_SIZE_FOR_SUB_GROUP_COUNT, cl::detail::size_t_array) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_MAX_NUM_SUB_GROUPS, size_type) \
+    F(cl_kernel_sub_group_info, CL_KERNEL_COMPILE_NUM_SUB_GROUPS, size_type)
+
+#define CL_HPP_PARAM_NAME_INFO_2_2_(F) \
+    F(cl_program_info, CL_PROGRAM_SCOPE_GLOBAL_CTORS_PRESENT, cl_bool) \
+    F(cl_program_info, CL_PROGRAM_SCOPE_GLOBAL_DTORS_PRESENT, cl_bool)
 
 #define CL_HPP_PARAM_NAME_DEVICE_FISSION_(F) \
     F(cl_device_info, CL_DEVICE_PARENT_DEVICE_EXT, cl_device_id) \
@@ -1297,6 +1395,43 @@ inline cl_int getInfoHelper(Func f, cl_uint name, T* param, int, typename T::cl_
     F(cl_device_info, CL_DEVICE_AFFINITY_DOMAINS_EXT, cl::vector<cl_device_partition_property_ext>) \
     F(cl_device_info, CL_DEVICE_REFERENCE_COUNT_EXT , cl_uint) \
     F(cl_device_info, CL_DEVICE_PARTITION_STYLE_EXT, cl::vector<cl_device_partition_property_ext>)
+
+#define CL_HPP_PARAM_NAME_CL_KHR_EXTENDED_VERSIONING_CL3_SHARED_(F) \
+    F(cl_platform_info, CL_PLATFORM_NUMERIC_VERSION_KHR, cl_version_khr) \
+    F(cl_platform_info, CL_PLATFORM_EXTENSIONS_WITH_VERSION_KHR, cl::vector<cl_name_version_khr>) \
+    \
+    F(cl_device_info, CL_DEVICE_NUMERIC_VERSION_KHR, cl_version_khr) \
+    F(cl_device_info, CL_DEVICE_EXTENSIONS_WITH_VERSION_KHR, cl::vector<cl_name_version_khr>) \
+    F(cl_device_info, CL_DEVICE_ILS_WITH_VERSION_KHR, cl::vector<cl_name_version_khr>) \
+    F(cl_device_info, CL_DEVICE_BUILT_IN_KERNELS_WITH_VERSION_KHR, cl::vector<cl_name_version_khr>)
+
+#define CL_HPP_PARAM_NAME_CL_KHR_EXTENDED_VERSIONING_KHRONLY_(F) \
+    F(cl_device_info, CL_DEVICE_OPENCL_C_NUMERIC_VERSION_KHR, cl_version_khr)
+
+#define CL_HPP_PARAM_NAME_INFO_3_0_(F) \
+    F(cl_platform_info, CL_PLATFORM_NUMERIC_VERSION, cl_version) \
+    F(cl_platform_info, CL_PLATFORM_EXTENSIONS_WITH_VERSION, cl::vector<cl_name_version>) \
+    \
+    F(cl_device_info, CL_DEVICE_NUMERIC_VERSION, cl_version) \
+    F(cl_device_info, CL_DEVICE_EXTENSIONS_WITH_VERSION, cl::vector<cl_name_version>) \
+    F(cl_device_info, CL_DEVICE_ILS_WITH_VERSION, cl::vector<cl_name_version>) \
+    F(cl_device_info, CL_DEVICE_BUILT_IN_KERNELS_WITH_VERSION, cl::vector<cl_name_version>) \
+    F(cl_device_info, CL_DEVICE_ATOMIC_MEMORY_CAPABILITIES, cl_device_atomic_capabilities) \
+    F(cl_device_info, CL_DEVICE_ATOMIC_FENCE_CAPABILITIES, cl_device_atomic_capabilities) \
+    F(cl_device_info, CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT, cl_bool) \
+    F(cl_device_info, CL_DEVICE_OPENCL_C_ALL_VERSIONS, cl::vector<cl_name_version>) \
+    F(cl_device_info, CL_DEVICE_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, size_type) \
+    F(cl_device_info, CL_DEVICE_WORK_GROUP_COLLECTIVE_FUNCTIONS_SUPPORT, cl_bool) \
+    F(cl_device_info, CL_DEVICE_GENERIC_ADDRESS_SPACE_SUPPORT, cl_bool) \
+    F(cl_device_info, CL_DEVICE_OPENCL_C_FEATURES, cl::vector<cl_name_version>) \
+    F(cl_device_info, CL_DEVICE_DEVICE_ENQUEUE_CAPABILITIES, cl_device_device_enqueue_capabilities) \
+    F(cl_device_info, CL_DEVICE_PIPE_SUPPORT, cl_bool) \
+    F(cl_device_info, CL_DEVICE_LATEST_CONFORMANCE_VERSION_PASSED, string) \
+    \
+    F(cl_command_queue_info, CL_QUEUE_PROPERTIES_ARRAY, cl::vector<cl_queue_properties>) \
+    F(cl_mem_info, CL_MEM_PROPERTIES, cl::vector<cl_mem_properties>) \
+    F(cl_pipe_info, CL_PIPE_PROPERTIES, cl::vector<cl_pipe_properties>) \
+    F(cl_sampler_info, CL_SAMPLER_PROPERTIES, cl::vector<cl_sampler_properties>)
 
 template <typename enum_type, cl_int Name>
 struct param_traits {};
@@ -1316,10 +1451,27 @@ CL_HPP_PARAM_NAME_INFO_1_1_(CL_HPP_DECLARE_PARAM_TRAITS_)
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 110
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
 CL_HPP_PARAM_NAME_INFO_1_2_(CL_HPP_DECLARE_PARAM_TRAITS_)
-#endif // CL_HPP_TARGET_OPENCL_VERSION >= 110
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
 CL_HPP_PARAM_NAME_INFO_2_0_(CL_HPP_DECLARE_PARAM_TRAITS_)
-#endif // CL_HPP_TARGET_OPENCL_VERSION >= 110
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+CL_HPP_PARAM_NAME_INFO_2_1_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 210
+#if CL_HPP_TARGET_OPENCL_VERSION >= 220
+CL_HPP_PARAM_NAME_INFO_2_2_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 220
+#if CL_HPP_TARGET_OPENCL_VERSION >= 300
+CL_HPP_PARAM_NAME_INFO_3_0_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 300
+
+#if defined(CL_HPP_USE_CL_SUB_GROUPS_KHR) && CL_HPP_TARGET_OPENCL_VERSION < 210
+CL_HPP_PARAM_NAME_INFO_SUBGROUP_KHR_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // #if defined(CL_HPP_USE_CL_SUB_GROUPS_KHR) && CL_HPP_TARGET_OPENCL_VERSION < 210
+
+#if defined(CL_HPP_USE_IL_KHR)
+CL_HPP_PARAM_NAME_INFO_IL_KHR_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // #if defined(CL_HPP_USE_IL_KHR)
 
 
 // Flags deprecated in OpenCL 2.0
@@ -1348,6 +1500,31 @@ CL_HPP_PARAM_NAME_INFO_1_2_DEPRECATED_IN_2_0_(CL_HPP_DECLARE_PARAM_TRAITS_)
 CL_HPP_PARAM_NAME_DEVICE_FISSION_(CL_HPP_DECLARE_PARAM_TRAITS_);
 #endif // CL_HPP_USE_CL_DEVICE_FISSION
 
+#if defined(cl_khr_extended_versioning)
+#if CL_HPP_TARGET_OPENCL_VERSION < 300
+CL_HPP_PARAM_NAME_CL_KHR_EXTENDED_VERSIONING_CL3_SHARED_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // CL_HPP_TARGET_OPENCL_VERSION < 300
+CL_HPP_PARAM_NAME_CL_KHR_EXTENDED_VERSIONING_KHRONLY_(CL_HPP_DECLARE_PARAM_TRAITS_)
+#endif // cl_khr_extended_versioning
+
+#if defined(cl_khr_device_uuid)
+using uuid_array = array<cl_uchar, CL_UUID_SIZE_KHR>;
+using luid_array = array<cl_uchar, CL_LUID_SIZE_KHR>;
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_UUID_KHR, uuid_array)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DRIVER_UUID_KHR, uuid_array)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_LUID_VALID_KHR, cl_bool)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_LUID_KHR, luid_array)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_NODE_MASK_KHR, cl_uint)
+#endif
+
+#if defined(cl_khr_pci_bus_info)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_PCI_BUS_INFO_KHR, cl_device_pci_bus_info_khr)
+#endif
+
+#if defined(cl_khr_integer_dot_product)
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_INTEGER_DOT_PRODUCT_CAPABILITIES_KHR, cl_device_integer_dot_product_capabilities_khr)
+#endif
+
 #ifdef CL_PLATFORM_ICD_SUFFIX_KHR
 CL_HPP_DECLARE_PARAM_TRAITS_(cl_platform_info, CL_PLATFORM_ICD_SUFFIX_KHR, string)
 #endif
@@ -1355,7 +1532,6 @@ CL_HPP_DECLARE_PARAM_TRAITS_(cl_platform_info, CL_PLATFORM_ICD_SUFFIX_KHR, strin
 #ifdef CL_DEVICE_PROFILING_TIMER_OFFSET_AMD
 CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_PROFILING_TIMER_OFFSET_AMD, cl_ulong)
 #endif
-
 #ifdef CL_DEVICE_GLOBAL_FREE_MEMORY_AMD
 CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_GLOBAL_FREE_MEMORY_AMD, vector<size_type>)
 #endif
@@ -1385,6 +1561,22 @@ CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUT
 #endif
 #ifdef CL_DEVICE_LOCAL_MEM_BANKS_AMD
 CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_LOCAL_MEM_BANKS_AMD, cl_uint)
+#endif
+
+#ifdef CL_DEVICE_COMPUTE_UNITS_BITFIELD_ARM
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_COMPUTE_UNITS_BITFIELD_ARM, cl_ulong)
+#endif
+#ifdef CL_DEVICE_JOB_SLOTS_ARM
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_JOB_SLOTS_ARM, cl_uint)
+#endif
+#ifdef CL_DEVICE_SCHEDULING_CONTROLS_CAPABILITIES_ARM
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_device_info, CL_DEVICE_SCHEDULING_CONTROLS_CAPABILITIES_ARM, cl_bitfield)
+#endif
+#ifdef CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_ARM
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_kernel_exec_info, CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_ARM, cl_uint)
+#endif
+#ifdef CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM
+CL_HPP_DECLARE_PARAM_TRAITS_(cl_kernel_exec_info, CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM, cl_int)
 #endif
 
 #ifdef CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV
@@ -1697,10 +1889,7 @@ public:
 
     cl_type& operator ()() { return object_; }
 
-    const cl_type get() const { return object_; }
-
-    cl_type get() { return object_; }
-
+    cl_type get() const { return object_; }
 
 protected:
     template<typename Func, typename U>
@@ -1826,9 +2015,7 @@ public:
 
     cl_type& operator ()() { return object_; }
 
-    const cl_type get() const { return object_; }
-
-    cl_type get() { return object_; }
+    cl_type get() const { return object_; }
 
 protected:
     template<typename Func, typename U>
@@ -1937,6 +2124,9 @@ struct ImageFormat : public cl_image_format
         image_channel_order = order;
         image_channel_data_type = type;
     }
+
+    //! \brief Copy constructor.
+    ImageFormat(const ImageFormat &other) { *this = other; }
 
     //! \brief Assignment operator.
     ImageFormat& operator = (const ImageFormat& rhs)
@@ -2079,7 +2269,7 @@ public:
     }
 
     //! \brief Wrapper for clGetDeviceInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_device_info name> typename
     detail::param_traits<detail::cl_device_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -2091,6 +2281,53 @@ public:
         }
         return param;
     }
+
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+    /**
+     * Return the current value of the host clock as seen by the device.
+     * The resolution of the device timer may be queried with the
+     * CL_DEVICE_PROFILING_TIMER_RESOLUTION query.
+     * @return The host timer value.
+     */
+    cl_ulong getHostTimer(cl_int *error = nullptr)
+    {
+        cl_ulong retVal = 0;
+        cl_int err = 
+            clGetHostTimer(this->get(), &retVal);
+        detail::errHandler(
+            err,
+            __GET_HOST_TIMER_ERR);
+        if (error) {
+            *error = err;
+        }
+        return retVal;
+    }
+
+    /**
+     * Return a synchronized pair of host and device timestamps as seen by device.
+     * Use to correlate the clocks and get the host timer only using getHostTimer
+     * as a lower cost mechanism in between calls.
+     * The resolution of the host timer may be queried with the 
+     * CL_PLATFORM_HOST_TIMER_RESOLUTION query.
+     * The resolution of the device timer may be queried with the
+     * CL_DEVICE_PROFILING_TIMER_RESOLUTION query.
+     * @return A pair of (device timer, host timer) timer values.
+     */
+    std::pair<cl_ulong, cl_ulong> getDeviceAndHostTimer(cl_int *error = nullptr)
+    {
+        std::pair<cl_ulong, cl_ulong> retVal;
+        cl_int err =
+            clGetDeviceAndHostTimer(this->get(), &(retVal.first), &(retVal.second));
+        detail::errHandler(
+            err,
+            __GET_DEVICE_AND_HOST_TIMER_ERR);
+        if (error) {
+            *error = err;
+        }
+        return retVal;
+    }
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
 
     /**
      * CL 1.2 version
@@ -2144,7 +2381,7 @@ public:
                 const cl_device_partition_property_ext * /* properties */,
                 cl_uint /*num_entries*/,
                 cl_device_id * /*out_devices*/,
-                cl_uint * /*num_devices*/ ) CL_EXT_SUFFIX__VERSION_1_1;
+                cl_uint * /*num_devices*/ ) CL_API_SUFFIX__VERSION_1_1;
 
         static PFN_clCreateSubDevicesEXT pfn_clCreateSubDevicesEXT = NULL;
         CL_HPP_INIT_CL_EXT_FCN_PTR_(clCreateSubDevicesEXT);
@@ -2310,7 +2547,8 @@ public:
     }
 
     //! \brief Wrapper for clGetPlatformInfo().
-    cl_int getInfo(cl_platform_info name, string* param) const
+    template <typename T>
+    cl_int getInfo(cl_platform_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetPlatformInfo, object_, name, param),
@@ -2318,7 +2556,7 @@ public:
     }
 
     //! \brief Wrapper for clGetPlatformInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_platform_info name> typename
     detail::param_traits<detail::cl_platform_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -2344,14 +2582,16 @@ public:
             return detail::errHandler(CL_INVALID_ARG_VALUE, __GET_DEVICE_IDS_ERR);
         }
         cl_int err = ::clGetDeviceIDs(object_, type, 0, NULL, &n);
-        if (err != CL_SUCCESS) {
+        if (err != CL_SUCCESS  && err != CL_DEVICE_NOT_FOUND) {
             return detail::errHandler(err, __GET_DEVICE_IDS_ERR);
         }
 
         vector<cl_device_id> ids(n);
-        err = ::clGetDeviceIDs(object_, type, n, ids.data(), NULL);
-        if (err != CL_SUCCESS) {
-            return detail::errHandler(err, __GET_DEVICE_IDS_ERR);
+        if (n>0) {
+            err = ::clGetDeviceIDs(object_, type, n, ids.data(), NULL);
+            if (err != CL_SUCCESS) {
+                return detail::errHandler(err, __GET_DEVICE_IDS_ERR);
+            }
         }
 
         // Cannot trivially assign because we need to capture intermediates 
@@ -2551,8 +2791,8 @@ CL_HPP_DEFINE_STATIC_MEMBER_ cl_int Platform::default_error_ = CL_SUCCESS;
  * Unload the OpenCL compiler.
  * \note Deprecated for OpenCL 1.2. Use Platform::unloadCompiler instead.
  */
-inline CL_EXT_PREFIX__VERSION_1_1_DEPRECATED cl_int
-UnloadCompiler() CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED;
+inline CL_API_PREFIX__VERSION_1_1_DEPRECATED cl_int
+UnloadCompiler() CL_API_SUFFIX__VERSION_1_1_DEPRECATED;
 inline cl_int
 UnloadCompiler()
 {
@@ -2642,7 +2882,7 @@ public:
      */
     Context(
         const vector<Device>& devices,
-        cl_context_properties* properties = NULL,
+        const cl_context_properties* properties = NULL,
         void (CL_CALLBACK * notifyFptr)(
             const char *,
             const void *,
@@ -2671,9 +2911,13 @@ public:
         }
     }
 
+    /*! \brief Constructs a context including a specific device.
+     *
+     *  Wraps clCreateContext().
+     */
     Context(
         const Device& device,
-        cl_context_properties* properties = NULL,
+        const cl_context_properties* properties = NULL,
         void (CL_CALLBACK * notifyFptr)(
             const char *,
             const void *,
@@ -2703,7 +2947,7 @@ public:
      */
     Context(
         cl_device_type type,
-        cl_context_properties* properties = NULL,
+        const cl_context_properties* properties = NULL,
         void (CL_CALLBACK * notifyFptr)(
             const char *,
             const void *,
@@ -2742,7 +2986,9 @@ public:
                     error = platforms[i].getDevices(type, &devices);
 
 #if defined(CL_HPP_ENABLE_EXCEPTIONS)
-                } catch (Error) {}
+                } catch (cl::Error& e) {
+                    error = e.err();
+                }
     // Catch if exceptions are enabled as we don't want to exit if first platform has no devices of type
     // We do error checking next anyway, and can throw there if needed
 #endif
@@ -2871,7 +3117,7 @@ public:
     }
 
     //! \brief Wrapper for clGetContextInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_context_info name> typename
     detail::param_traits<detail::cl_context_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -3013,7 +3259,7 @@ public:
     }
 
     //! \brief Wrapper for clGetEventInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_event_info name> typename
     detail::param_traits<detail::cl_event_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -3036,7 +3282,7 @@ public:
     }
 
     //! \brief Wrapper for clGetEventProfilingInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_profiling_info name> typename
     detail::param_traits<detail::cl_profiling_info, name>::param_type
     getProfilingInfo(cl_int* err = NULL) const
     {
@@ -3067,7 +3313,7 @@ public:
      */
     cl_int setCallback(
         cl_int type,
-        void (CL_CALLBACK * pfn_notify)(cl_event, cl_int, void *),		
+        void (CL_CALLBACK * pfn_notify)(cl_event, cl_int, void *),
         void * user_data = NULL)
     {
         return detail::errHandler(
@@ -3228,7 +3474,7 @@ public:
     }
 
     //! \brief Wrapper for clGetMemObjectInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_mem_info name> typename
     detail::param_traits<detail::cl_mem_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -3256,7 +3502,7 @@ public:
      *  value - not the Memory class instance.
      */
     cl_int setDestructorCallback(
-        void (CL_CALLBACK * pfn_notify)(cl_mem, void *),		
+        void (CL_CALLBACK * pfn_notify)(cl_mem, void *),
         void * user_data = NULL)
     {
         return detail::errHandler(
@@ -3494,7 +3740,7 @@ public:
     {
         size_type maxSize = std::numeric_limits<size_type>::max() / sizeof(T);
 
-        for (Device &d : context_.getInfo<CL_CONTEXT_DEVICES>()) {
+        for (const Device &d : context_.getInfo<CL_CONTEXT_DEVICES>()) {
             maxSize = std::min(
                 maxSize, 
                 static_cast<size_type>(d.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()));
@@ -3599,7 +3845,7 @@ cl::pointer<T, detail::Deleter<Alloc>> allocate_pointer(const Alloc &alloc_, Arg
 
         return cl::pointer<T, detail::Deleter<Alloc>>(tmp, detail::Deleter<Alloc>{alloc, copies});
     }
-    catch (std::bad_alloc b)
+    catch (std::bad_alloc& b)
     {
         std::allocator_traits<Alloc>::deallocate(alloc, tmp, copies);
         throw;
@@ -3847,7 +4093,7 @@ public:
         }
 
         return result;
-    }		
+    }
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 110
 };
 
@@ -4226,7 +4472,7 @@ public:
     }
     
     //! \brief Wrapper for clGetImageInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_image_info name> typename
     detail::param_traits<detail::cl_image_info, name>::param_type
     getImageInfo(cl_int* err = NULL) const
     {
@@ -4263,12 +4509,11 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE1D,
-            width,
-            0, 0, 0, 0, 0, 0, 0, 0
-        };
+
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE1D;
+        desc.image_width = width;
+
         object_ = ::clCreateImage(
             context(), 
             flags, 
@@ -4351,13 +4596,12 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE1D_BUFFER,
-            width,
-            0, 0, 0, 0, 0, 0, 0,
-            buffer()
-        };
+
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE1D_BUFFER;
+        desc.image_width = width;
+        desc.buffer = buffer();
+
         object_ = ::clCreateImage(
             context(), 
             flags, 
@@ -4437,15 +4681,13 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE1D_ARRAY,
-            width,
-            0, 0,  // height, depth (unused)
-            arraySize,
-            rowPitch,
-            0, 0, 0, 0
-        };
+
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE1D_ARRAY;
+        desc.image_width = width;
+        desc.image_array_size = arraySize;
+        desc.image_row_pitch = rowPitch;
+
         object_ = ::clCreateImage(
             context(), 
             flags, 
@@ -4552,15 +4794,12 @@ public:
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
         if (useCreateImage)
         {
-            cl_image_desc desc =
-            {
-                CL_MEM_OBJECT_IMAGE2D,
-                width,
-                height,
-                0, 0, // depth, array size (unused)
-                row_pitch,
-                0, 0, 0, 0
-            };
+            cl_image_desc desc = {0};
+            desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+            desc.image_width = width;
+            desc.image_height = height;
+            desc.image_row_pitch = row_pitch;
+
             object_ = ::clCreateImage(
                 context(),
                 flags,
@@ -4589,7 +4828,7 @@ public:
 #endif // CL_HPP_MINIMUM_OPENCL_VERSION < 120
     }
 
-#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 || defined(CL_HPP_USE_CL_IMAGE2D_FROM_BUFFER_KHR)
     /*! \brief Constructs a 2D Image from a buffer.
     * \note This will share storage with the underlying buffer.
     *
@@ -4606,17 +4845,13 @@ public:
     {
         cl_int error;
 
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE2D,
-            width,
-            height,
-            0, 0, // depth, array size (unused)
-            row_pitch,
-            0, 0, 0,
-            // Use buffer as input to image
-            sourceBuffer()
-        };
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+        desc.image_width = width;
+        desc.image_height = height;
+        desc.image_row_pitch = row_pitch;
+        desc.buffer = sourceBuffer();
+
         object_ = ::clCreateImage(
             context(),
             0, // flags inherited from buffer
@@ -4630,7 +4865,7 @@ public:
             *err = error;
         }
     }
-#endif //#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+#endif //#if CL_HPP_TARGET_OPENCL_VERSION >= 200 || defined(CL_HPP_USE_CL_IMAGE2D_FROM_BUFFER_KHR)
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
     /*! \brief Constructs a 2D Image from an image.
@@ -4670,19 +4905,16 @@ public:
         // Update only the channel order. 
         // Channel format inherited from source.
         sourceFormat.image_channel_order = order;
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE2D,
-            sourceWidth,
-            sourceHeight,
-            0, 0, // depth (unused), array size (unused)
-            sourceRowPitch,
-            0, // slice pitch (unused)
-            sourceNumMIPLevels,
-            sourceNumSamples,
-            // Use buffer as input to image
-            sourceImage()
-        };
+
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+        desc.image_width = sourceWidth;
+        desc.image_height = sourceHeight;
+        desc.image_row_pitch = sourceRowPitch;
+        desc.num_mip_levels = sourceNumMIPLevels;
+        desc.num_samples = sourceNumSamples;
+        desc.buffer = sourceImage();
+
         object_ = ::clCreateImage(
             context(),
             0, // flags should be inherited from mem_object
@@ -4762,7 +4994,7 @@ public:
  *  \see Memory
  *  \note Deprecated for OpenCL 1.2. Please use ImageGL instead.
  */
-class CL_EXT_PREFIX__VERSION_1_1_DEPRECATED Image2DGL : public Image2D 
+class CL_API_PREFIX__VERSION_1_1_DEPRECATED Image2DGL : public Image2D 
 {
 public:
     /*! \brief Constructs an Image2DGL in a specified context, from a given
@@ -4845,7 +5077,7 @@ public:
         return *this;
     }
 
-} CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED;
+} CL_API_SUFFIX__VERSION_1_1_DEPRECATED;
 #endif // CL_USE_DEPRECATED_OPENCL_1_1_APIS
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
@@ -4868,17 +5100,15 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
-        cl_image_desc desc =
-        {
-            CL_MEM_OBJECT_IMAGE2D_ARRAY,
-            width,
-            height,
-            0,       // depth (unused)
-            arraySize,
-            rowPitch,
-            slicePitch,
-            0, 0, 0
-        };
+
+        cl_image_desc desc = {0};
+        desc.image_type = CL_MEM_OBJECT_IMAGE2D_ARRAY;
+        desc.image_width = width;
+        desc.image_height = height;
+        desc.image_array_size = arraySize;
+        desc.image_row_pitch = rowPitch;
+        desc.image_slice_pitch = slicePitch;
+
         object_ = ::clCreateImage(
             context(), 
             flags, 
@@ -4983,17 +5213,14 @@ public:
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
         if (useCreateImage)
         {
-            cl_image_desc desc =
-            {
-                CL_MEM_OBJECT_IMAGE3D,
-                width,
-                height,
-                depth,
-                0,      // array size (unused)
-                row_pitch,
-                slice_pitch,
-                0, 0, 0
-            };
+            cl_image_desc desc = {0};
+            desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+            desc.image_width = width;
+            desc.image_height = height;
+            desc.image_depth = depth;
+            desc.image_row_pitch = row_pitch;
+            desc.image_slice_pitch = slice_pitch;
+
             object_ = ::clCreateImage(
                 context(), 
                 flags, 
@@ -5375,7 +5602,7 @@ public:
     }
 
     //! \brief Wrapper for clGetMemObjectInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_pipe_info name> typename
         detail::param_traits<detail::cl_pipe_info, name>::param_type
         getInfo(cl_int* err = NULL) const
     {
@@ -5508,7 +5735,7 @@ public:
     }
 
     //! \brief Wrapper for clGetSamplerInfo() that returns by value.
-    template <cl_int name> typename
+    template <cl_sampler_info name> typename
     detail::param_traits<detail::cl_sampler_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -5731,7 +5958,7 @@ public:
             __GET_KERNEL_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_kernel_info name> typename
     detail::param_traits<detail::cl_kernel_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -5753,7 +5980,7 @@ public:
             __GET_KERNEL_ARG_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_kernel_arg_info name> typename
     detail::param_traits<detail::cl_kernel_arg_info, name>::param_type
     getArgInfo(cl_uint argIndex, cl_int* err = NULL) const
     {
@@ -5777,7 +6004,7 @@ public:
                 __GET_KERNEL_WORK_GROUP_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_kernel_work_group_info name> typename
     detail::param_traits<detail::cl_kernel_work_group_info, name>::param_type
         getWorkGroupInfo(const Device& device, cl_int* err = NULL) const
     {
@@ -5790,20 +6017,29 @@ public:
         return param;
     }
     
-#if CL_HPP_TARGET_OPENCL_VERSION >= 200
-#if defined(CL_HPP_USE_CL_SUB_GROUPS_KHR)
+#if (CL_HPP_TARGET_OPENCL_VERSION >= 200 && defined(CL_HPP_USE_CL_SUB_GROUPS_KHR)) || CL_HPP_TARGET_OPENCL_VERSION >= 210
     cl_int getSubGroupInfo(const cl::Device &dev, cl_kernel_sub_group_info name, const cl::NDRange &range, size_type* param) const
     {
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        return detail::errHandler(
+            clGetKernelSubGroupInfo(object_, dev(), name, range.size(), range.get(), sizeof(size_type), param, nullptr),
+            __GET_KERNEL_SUB_GROUP_INFO_ERR);
+
+#else // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
         typedef clGetKernelSubGroupInfoKHR_fn PFN_clGetKernelSubGroupInfoKHR;
         static PFN_clGetKernelSubGroupInfoKHR pfn_clGetKernelSubGroupInfoKHR = NULL;
         CL_HPP_INIT_CL_EXT_FCN_PTR_(clGetKernelSubGroupInfoKHR);
 
         return detail::errHandler(
             pfn_clGetKernelSubGroupInfoKHR(object_, dev(), name, range.size(), range.get(), sizeof(size_type), param, nullptr),
-            __GET_KERNEL_ARG_INFO_ERR);
+            __GET_KERNEL_SUB_GROUP_INFO_ERR);
+
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
     }
 
-    template <cl_int name>
+    template <cl_kernel_sub_group_info name>
         size_type getSubGroupInfo(const cl::Device &dev, const cl::NDRange &range, cl_int* err = NULL) const
     {
         size_type param;
@@ -5813,7 +6049,6 @@ public:
         }
         return param;
     }
-#endif // #if defined(CL_HPP_USE_CL_SUB_GROUPS_KHR)
 #endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 200
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
@@ -5925,26 +6160,27 @@ public:
             );
     }
     
-    template<int index, int ArrayLength, class D, typename T0, typename... Ts>
-    void setSVMPointersHelper(std::array<void*, ArrayLength> &pointerList, const pointer<T0, D> &t0, Ts... ts)
+    template<int index, int ArrayLength, class D, typename T0, typename T1, typename... Ts>
+    void setSVMPointersHelper(std::array<void*, ArrayLength> &pointerList, const pointer<T0, D> &t0, const pointer<T1, D> &t1, Ts & ... ts)
     {
         pointerList[index] = static_cast<void*>(t0.get());
-        setSVMPointersHelper<index + 1, Ts...>(ts...);
+        setSVMPointersHelper<index + 1, ArrayLength>(pointerList, t1, ts...);
     }
 
-    template<int index, int ArrayLength, typename T0, typename... Ts>
+    template<int index, int ArrayLength, typename T0, typename T1, typename... Ts>
     typename std::enable_if<std::is_pointer<T0>::value, void>::type
-    setSVMPointersHelper(std::array<void*, ArrayLength> &pointerList, T0 t0, Ts... ts)
+    setSVMPointersHelper(std::array<void*, ArrayLength> &pointerList, T0 t0, T1 t1, Ts... ts)
     {
         pointerList[index] = static_cast<void*>(t0);
-        setSVMPointersHelper<index + 1, Ts...>(ts...);
+        setSVMPointersHelper<index + 1, ArrayLength>(pointerList, t1, ts...);
     }
-    
+
     template<int index, int ArrayLength, typename T0, class D>
     void setSVMPointersHelper(std::array<void*, ArrayLength> &pointerList, const pointer<T0, D> &t0)
     {
         pointerList[index] = static_cast<void*>(t0.get());
     }
+
 
     template<int index, int ArrayLength, typename T0>
     typename std::enable_if<std::is_pointer<T0>::value, void>::type
@@ -5954,7 +6190,7 @@ public:
     }
 
     template<typename T0, typename... Ts>
-    cl_int setSVMPointers(const T0 &t0, Ts... ts)
+    cl_int setSVMPointers(const T0 &t0, Ts & ... ts)
     {
         std::array<void*, 1 + sizeof...(Ts)> pointerList;
 
@@ -5966,7 +6202,40 @@ public:
             sizeof(void*)*(1 + sizeof...(Ts)),
             pointerList.data()));
     }
+
+    template<typename T>
+    cl_int setExecInfo(cl_kernel_exec_info param_name, const T& val)
+    {
+        return detail::errHandler(
+            ::clSetKernelExecInfo(
+            object_,
+            param_name,
+            sizeof(T),
+            &val));
+    }
+
+    template<cl_kernel_exec_info name>
+    cl_int setExecInfo(typename detail::param_traits<detail::cl_kernel_exec_info, name>::param_type& val)
+    {
+        return setExecInfo(name, val);
+    }
 #endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 200
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+    /**
+     * Make a deep copy of the kernel object including its arguments.
+     * @return A new kernel object with internal state entirely separate from that
+     *         of the original but with any arguments set on the original intact.
+     */
+    Kernel clone()
+    {
+        cl_int error;
+        Kernel retValue(clCloneKernel(this->get(), &error));
+
+        detail::errHandler(error, __CLONE_KERNEL_ERR);
+        return retValue;
+    }
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
 };
 
 /*! \class Program
@@ -6129,6 +6398,116 @@ public:
         }
     }
 
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210 || (CL_HPP_TARGET_OPENCL_VERSION==200 && defined(CL_HPP_USE_IL_KHR))
+    /**
+     * Program constructor to allow construction of program from SPIR-V or another IL.
+     * Valid for either OpenCL >= 2.1 or when CL_HPP_USE_IL_KHR is defined.
+     */
+    Program(
+        const vector<char>& IL,
+        bool build = false,
+        cl_int* err = NULL)
+    {
+        cl_int error;
+
+        Context context = Context::getDefault(err);
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        object_ = ::clCreateProgramWithIL(
+            context(), static_cast<const void*>(IL.data()), IL.size(), &error);
+
+#else // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        typedef clCreateProgramWithILKHR_fn PFN_clCreateProgramWithILKHR;
+        static PFN_clCreateProgramWithILKHR pfn_clCreateProgramWithILKHR = NULL;
+        CL_HPP_INIT_CL_EXT_FCN_PTR_(clCreateProgramWithILKHR);
+
+        return detail::errHandler(
+            pfn_clCreateProgramWithILKHR(
+                context(), static_cast<const void*>(IL.data()), IL.size(), &error);
+
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        detail::errHandler(error, __CREATE_PROGRAM_WITH_IL_ERR);
+
+        if (error == CL_SUCCESS && build) {
+
+            error = ::clBuildProgram(
+                object_,
+                0,
+                NULL,
+#if !defined(CL_HPP_CL_1_2_DEFAULT_BUILD)
+                "-cl-std=CL2.0",
+#else
+                "",
+#endif // #if !defined(CL_HPP_CL_1_2_DEFAULT_BUILD)
+                NULL,
+                NULL);
+
+            detail::buildErrHandler(error, __BUILD_PROGRAM_ERR, getBuildInfo<CL_PROGRAM_BUILD_LOG>());
+        }
+
+        if (err != NULL) {
+            *err = error;
+        }
+    }
+
+    /**
+     * Program constructor to allow construction of program from SPIR-V or another IL
+     * for a specific context.
+     * Valid for either OpenCL >= 2.1 or when CL_HPP_USE_IL_KHR is defined.
+     */
+    Program(
+        const Context& context,
+        const vector<char>& IL,
+        bool build = false,
+        cl_int* err = NULL)
+    {
+        cl_int error;
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        object_ = ::clCreateProgramWithIL(
+            context(), static_cast<const void*>(IL.data()), IL.size(), &error);
+
+#else // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        typedef clCreateProgramWithILKHR_fn PFN_clCreateProgramWithILKHR;
+        static PFN_clCreateProgramWithILKHR pfn_clCreateProgramWithILKHR = NULL;
+        CL_HPP_INIT_CL_EXT_FCN_PTR_(clCreateProgramWithILKHR);
+
+        return detail::errHandler(
+            pfn_clCreateProgramWithILKHR(
+            context(), static_cast<const void*>(IL.data()), IL.size(), &error);
+
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
+        detail::errHandler(error, __CREATE_PROGRAM_WITH_IL_ERR);
+
+        if (error == CL_SUCCESS && build) {
+            error = ::clBuildProgram(
+                object_,
+                0,
+                NULL,
+#if !defined(CL_HPP_CL_1_2_DEFAULT_BUILD)
+                "-cl-std=CL2.0",
+#else
+                "",
+#endif // #if !defined(CL_HPP_CL_1_2_DEFAULT_BUILD)
+                NULL,
+                NULL);
+
+            detail::buildErrHandler(error, __BUILD_PROGRAM_ERR, getBuildInfo<CL_PROGRAM_BUILD_LOG>());
+        }
+
+        if (err != NULL) {
+            *err = error;
+        }
+    }
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+
     /**
      * Construct a program object from a list of devices and a per-device list of binaries.
      * \param context A valid OpenCL context in which to construct the program.
@@ -6244,7 +6623,7 @@ public:
     Program() { }
     
 
-    /*! \brief Constructor from cl_mem - takes ownership.
+    /*! \brief Constructor from cl_program - takes ownership.
      *
      * \param retainObject will cause the constructor to retain its cl object.
      *                     Defaults to false to maintain compatibility with
@@ -6313,6 +6692,27 @@ public:
     }
 
     cl_int build(
+        const Device& device,
+        const char* options = NULL,
+        void (CL_CALLBACK * notifyFptr)(cl_program, void *) = NULL,
+        void* data = NULL) const
+    {
+        cl_device_id deviceID = device();
+
+        cl_int buildError = ::clBuildProgram(
+            object_,
+            1,
+            &deviceID,
+            options,
+            notifyFptr,
+            data);
+
+        BuildLogType buildLog(1);
+        buildLog.push_back(std::make_pair(device, getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)));
+        return detail::buildErrHandler(buildError, __BUILD_PROGRAM_ERR, buildLog);
+    }
+
+    cl_int build(
         const char* options = NULL,
         void (CL_CALLBACK * notifyFptr)(cl_program, void *) = NULL,
         void* data = NULL) const
@@ -6324,7 +6724,6 @@ public:
             options,
             notifyFptr,
             data);
-
 
         return detail::buildErrHandler(buildError, __BUILD_PROGRAM_ERR, getBuildInfo<CL_PROGRAM_BUILD_LOG>());
     }
@@ -6357,7 +6756,7 @@ public:
             __GET_PROGRAM_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_program_info name> typename
     detail::param_traits<detail::cl_program_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -6380,7 +6779,7 @@ public:
                 __GET_PROGRAM_BUILD_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_program_build_info name> typename
     detail::param_traits<detail::cl_program_build_info, name>::param_type
     getBuildInfo(const Device& device, cl_int* err = NULL) const
     {
@@ -6398,7 +6797,7 @@ public:
      * info type and for all devices in the program.
      * On an error reading the info for any device, an empty vector of info will be returned.
      */
-    template <cl_int name>
+    template <cl_program_build_info name>
     vector<std::pair<cl::Device, typename detail::param_traits<detail::cl_program_build_info, name>::param_type>>
         getBuildInfo(cl_int *err = NULL) const
     {
@@ -6416,7 +6815,7 @@ public:
             return devInfo;
         }
 
-        for (cl::Device d : devs) {
+        for (const cl::Device &d : devs) {
             typename detail::param_traits<
                 detail::cl_program_build_info, name>::param_type param;
             result = getBuildInfo(d, name, &param);
@@ -6466,6 +6865,64 @@ public:
         }
         return CL_SUCCESS;
     }
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 220
+#if defined(CL_USE_DEPRECATED_OPENCL_2_2_APIS)
+    /*! \brief Registers a callback function to be called when destructors for
+     *         program scope global variables are complete and before the
+     *         program is released.
+     *
+     *  Wraps clSetProgramReleaseCallback().
+     *
+     *  Each call to this function registers the specified user callback function
+     *  on a callback stack associated with program. The registered user callback
+     *  functions are called in the reverse order in which they were registered.
+     */
+    CL_API_PREFIX__VERSION_2_2_DEPRECATED cl_int setReleaseCallback(
+        void (CL_CALLBACK * pfn_notify)(cl_program program, void * user_data),
+        void * user_data = NULL) CL_API_SUFFIX__VERSION_2_2_DEPRECATED
+    {
+        return detail::errHandler(
+            ::clSetProgramReleaseCallback(
+                object_,
+                pfn_notify,
+                user_data),
+            __SET_PROGRAM_RELEASE_CALLBACK_ERR);
+    }
+#endif // #if defined(CL_USE_DEPRECATED_OPENCL_2_2_APIS)
+
+    /*! \brief Sets a SPIR-V specialization constant.
+     *
+     *  Wraps clSetProgramSpecializationConstant().
+     */
+    template <typename T>
+    typename std::enable_if<!std::is_pointer<T>::value, cl_int>::type
+        setSpecializationConstant(cl_uint index, const T &value)
+    {
+        return detail::errHandler(
+            ::clSetProgramSpecializationConstant(
+                object_,
+                index,
+                sizeof(value),
+                &value),
+            __SET_PROGRAM_SPECIALIZATION_CONSTANT_ERR);
+    }
+
+    /*! \brief Sets a SPIR-V specialization constant.
+     *
+     *  Wraps clSetProgramSpecializationConstant().
+     */
+    cl_int setSpecializationConstant(cl_uint index, size_type size, const void* value)
+    {
+        return detail::errHandler(
+            ::clSetProgramSpecializationConstant(
+                object_,
+                index,
+                size,
+                value),
+            __SET_PROGRAM_SPECIALIZATION_CONSTANT_ERR);
+    }
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 220
 };
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
@@ -6587,6 +7044,22 @@ inline vector<vector<unsigned char>> cl::Program::getInfo<CL_PROGRAM_BINARIES>(c
     return binariesVectors;
 }
 
+#if CL_HPP_TARGET_OPENCL_VERSION >= 220
+// Template specialization for clSetProgramSpecializationConstant
+template <>
+inline cl_int cl::Program::setSpecializationConstant(cl_uint index, const bool &value)
+{
+    cl_uchar ucValue = value ? CL_UCHAR_MAX : 0;
+    return detail::errHandler(
+        ::clSetProgramSpecializationConstant(
+            object_,
+            index,
+            sizeof(ucValue),
+            &ucValue),
+        __SET_PROGRAM_SPECIALIZATION_CONSTANT_ERR);
+}
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 220
+
 inline Kernel::Kernel(const Program& program, const char* name, cl_int* err)
 {
     cl_int error;
@@ -6697,31 +7170,49 @@ public:
         }
         else {
             Device device = context.getInfo<CL_CONTEXT_DEVICES>()[0];
+            bool useWithProperties;
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+            // Run-time decision based on the actual platform
+            {
+                cl_uint version = detail::getContextPlatformVersion(context());
+                useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
+            }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+            useWithProperties = true;
+#else
+            useWithProperties = false;
+#endif
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
-            cl_queue_properties queue_properties[] = {
-                CL_QUEUE_PROPERTIES, properties, 0 };
-            if ((properties & CL_QUEUE_ON_DEVICE) == 0) {
-                object_ = ::clCreateCommandQueueWithProperties(
-                    context(), device(), queue_properties, &error);
-            }
-            else {
-                error = CL_INVALID_QUEUE_PROPERTIES;
-            }
+            if (useWithProperties) {
+                cl_queue_properties queue_properties[] = {
+                    CL_QUEUE_PROPERTIES, properties, 0 };
+                if ((properties & CL_QUEUE_ON_DEVICE) == 0) {
+                    object_ = ::clCreateCommandQueueWithProperties(
+                        context(), device(), queue_properties, &error);
+                }
+                else {
+                    error = CL_INVALID_QUEUE_PROPERTIES;
+                }
 
-            detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
-            if (err != NULL) {
-                *err = error;
+                detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
+                if (err != NULL) {
+                    *err = error;
+                }
             }
-#else
-            object_ = ::clCreateCommandQueue(
-                context(), device(), properties, &error);
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+            if (!useWithProperties) {
+                object_ = ::clCreateCommandQueue(
+                    context(), device(), properties, &error);
 
-            detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
-            if (err != NULL) {
-                *err = error;
+                detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
+                if (err != NULL) {
+                    *err = error;
+                }
             }
-#endif
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
         }
     }
 
@@ -6745,28 +7236,46 @@ public:
        }
        else {
            Device device = context.getInfo<CL_CONTEXT_DEVICES>()[0];
+           bool useWithProperties;
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+           // Run-time decision based on the actual platform
+           {
+               cl_uint version = detail::getContextPlatformVersion(context());
+               useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
+           }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+           useWithProperties = true;
+#else
+           useWithProperties = false;
+#endif
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
-           cl_queue_properties queue_properties[] = {
-               CL_QUEUE_PROPERTIES, static_cast<cl_queue_properties>(properties), 0 };
+           if (useWithProperties) {
+               cl_queue_properties queue_properties[] = {
+                   CL_QUEUE_PROPERTIES, static_cast<cl_queue_properties>(properties), 0 };
 
-           object_ = ::clCreateCommandQueueWithProperties(
-               context(), device(), queue_properties, &error);
+               object_ = ::clCreateCommandQueueWithProperties(
+                   context(), device(), queue_properties, &error);
 
-
-           detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
-           if (err != NULL) {
-               *err = error;
+               detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
+               if (err != NULL) {
+                   *err = error;
+               }
            }
-#else
-           object_ = ::clCreateCommandQueue(
-               context(), device(), static_cast<cl_command_queue_properties>(properties), &error);
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+           if (!useWithProperties) {
+               object_ = ::clCreateCommandQueue(
+                   context(), device(), static_cast<cl_command_queue_properties>(properties), &error);
 
-           detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
-           if (err != NULL) {
-               *err = error;
+               detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
+               if (err != NULL) {
+                   *err = error;
+               }
            }
-#endif
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
+
        }
    }
 
@@ -6780,6 +7289,7 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
+        bool useWithProperties;
         vector<cl::Device> devices;
         error = context.getInfo(CL_CONTEXT_DEVICES, &devices);
 
@@ -6793,31 +7303,47 @@ public:
             return;
         }
 
-#if CL_HPP_TARGET_OPENCL_VERSION >= 200
-        cl_queue_properties queue_properties[] = {
-            CL_QUEUE_PROPERTIES, properties, 0 };
-        if ((properties & CL_QUEUE_ON_DEVICE) == 0) {
-            object_ = ::clCreateCommandQueueWithProperties(
-                context(), devices[0](), queue_properties, &error);
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        // Run-time decision based on the actual platform
+        {
+            cl_uint version = detail::getContextPlatformVersion(context());
+            useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
         }
-        else {
-            error = CL_INVALID_QUEUE_PROPERTIES;
-        }
-
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
-        if (err != NULL) {
-            *err = error;
-        }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+        useWithProperties = true;
 #else
-        object_ = ::clCreateCommandQueue(
-            context(), devices[0](), properties, &error);
-
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
-        if (err != NULL) {
-            *err = error;
-        }
+        useWithProperties = false;
 #endif
 
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+        if (useWithProperties) {
+            cl_queue_properties queue_properties[] = {
+                CL_QUEUE_PROPERTIES, properties, 0 };
+            if ((properties & CL_QUEUE_ON_DEVICE) == 0) {
+                object_ = ::clCreateCommandQueueWithProperties(
+                    context(), devices[0](), queue_properties, &error);
+            }
+            else {
+                error = CL_INVALID_QUEUE_PROPERTIES;
+            }
+
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
+        }
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        if (!useWithProperties) {
+            object_ = ::clCreateCommandQueue(
+                context(), devices[0](), properties, &error);
+
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
+        }
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
     }
 
     /*!
@@ -6830,6 +7356,7 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
+        bool useWithProperties;
         vector<cl::Device> devices;
         error = context.getInfo(CL_CONTEXT_DEVICES, &devices);
 
@@ -6843,26 +7370,42 @@ public:
             return;
         }
 
-#if CL_HPP_TARGET_OPENCL_VERSION >= 200
-        cl_queue_properties queue_properties[] = {
-            CL_QUEUE_PROPERTIES, static_cast<cl_queue_properties>(properties), 0 };
-        object_ = ::clCreateCommandQueueWithProperties(
-            context(), devices[0](), queue_properties, &error);
-       
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
-        if (err != NULL) {
-            *err = error;
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        // Run-time decision based on the actual platform
+        {
+            cl_uint version = detail::getContextPlatformVersion(context());
+            useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
         }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+        useWithProperties = true;
 #else
-        object_ = ::clCreateCommandQueue(
-            context(), devices[0](), static_cast<cl_command_queue_properties>(properties), &error);
-
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
-        if (err != NULL) {
-            *err = error;
-        }
+        useWithProperties = false;
 #endif
 
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200
+        if (useWithProperties) {
+            cl_queue_properties queue_properties[] = {
+                CL_QUEUE_PROPERTIES, static_cast<cl_queue_properties>(properties), 0 };
+            object_ = ::clCreateCommandQueueWithProperties(
+                context(), devices[0](), queue_properties, &error);
+
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
+        }
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        if (!useWithProperties) {
+            object_ = ::clCreateCommandQueue(
+                context(), devices[0](), static_cast<cl_command_queue_properties>(properties), &error);
+
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
+        }
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
     }
 
     /*!
@@ -6876,26 +7419,44 @@ public:
         cl_int* err = NULL)
     {
         cl_int error;
+        bool useWithProperties;
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        // Run-time decision based on the actual platform
+        {
+            cl_uint version = detail::getContextPlatformVersion(context());
+            useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
+        }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+        useWithProperties = true;
+#else
+        useWithProperties = false;
+#endif
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
-        cl_queue_properties queue_properties[] = {
-            CL_QUEUE_PROPERTIES, properties, 0 };
-        object_ = ::clCreateCommandQueueWithProperties(
-            context(), device(), queue_properties, &error);
-        
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
-        if (err != NULL) {
-            *err = error;
-        }
-#else
-        object_ = ::clCreateCommandQueue(
-            context(), device(), properties, &error);
+        if (useWithProperties) {
+            cl_queue_properties queue_properties[] = {
+                CL_QUEUE_PROPERTIES, properties, 0 };
+            object_ = ::clCreateCommandQueueWithProperties(
+                context(), device(), queue_properties, &error);
 
-        detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
-        if (err != NULL) {
-            *err = error;
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
         }
-#endif
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        if (!useWithProperties) {
+            object_ = ::clCreateCommandQueue(
+                context(), device(), properties, &error);
+
+            detail::errHandler(error, __CREATE_COMMAND_QUEUE_ERR);
+            if (err != NULL) {
+                *err = error;
+            }
+        }
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
     }
 
     /*!
@@ -6908,19 +7469,36 @@ public:
         QueueProperties properties,
         cl_int* err = NULL)
     {
-            cl_int error;
+        cl_int error;
+        bool useWithProperties;
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 200 && CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        // Run-time decision based on the actual platform
+        {
+            cl_uint version = detail::getContextPlatformVersion(context());
+            useWithProperties = (version >= 0x20000); // OpenCL 2.0 or above
+        }
+#elif CL_HPP_TARGET_OPENCL_VERSION >= 200
+        useWithProperties = true;
+#else
+        useWithProperties = false;
+#endif
 
 #if CL_HPP_TARGET_OPENCL_VERSION >= 200
+        if (useWithProperties) {
             cl_queue_properties queue_properties[] = {
                 CL_QUEUE_PROPERTIES, static_cast<cl_queue_properties>(properties), 0 };
             object_ = ::clCreateCommandQueueWithProperties(
                 context(), device(), queue_properties, &error);
-      
+
             detail::errHandler(error, __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR);
             if (err != NULL) {
                 *err = error;
             }
-#else
+        }
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 200
+#if CL_HPP_MINIMUM_OPENCL_VERSION < 200
+        if (!useWithProperties) {
             object_ = ::clCreateCommandQueue(
                 context(), device(), static_cast<cl_command_queue_properties>(properties), &error);
 
@@ -6928,8 +7506,9 @@ public:
             if (err != NULL) {
                 *err = error;
             }
-#endif
         }
+#endif // CL_HPP_MINIMUM_OPENCL_VERSION < 200
+    }
 
     static CommandQueue getDefault(cl_int * err = NULL) 
     {
@@ -6962,7 +7541,7 @@ public:
     CommandQueue() { }
 
 
-    /*! \brief Constructor from cl_mem - takes ownership.
+    /*! \brief Constructor from cl_command_queue - takes ownership.
      *
      * \param retainObject will cause the constructor to retain its cl object.
      *                     Defaults to false to maintain compatibility with
@@ -7014,7 +7593,7 @@ public:
                 __GET_COMMAND_QUEUE_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_command_queue_info name> typename
     detail::param_traits<detail::cl_command_queue_info, name>::param_type
     getInfo(cl_int* err = NULL) const
     {
@@ -7100,7 +7679,7 @@ public:
 
         return err;
     }
-
+#if CL_HPP_TARGET_OPENCL_VERSION >= 110
     cl_int enqueueReadBufferRect(
         const Buffer& buffer,
         cl_bool blocking,
@@ -7215,7 +7794,7 @@ public:
 
         return err;
     }
-
+#endif // CL_HPP_TARGET_OPENCL_VERSION >= 110
 #if CL_HPP_TARGET_OPENCL_VERSION >= 120
     /**
      * Enqueue a command to fill a buffer object with a pattern
@@ -7647,7 +8226,7 @@ public:
     {
         cl_event tmp;
         cl_int err = detail::errHandler(::clEnqueueSVMMap(
-            object_, blocking, flags, static_cast<void*>(container.data()), container.size(),
+            object_, blocking, flags, static_cast<void*>(container.data()), container.size()*sizeof(T),
             (events != NULL) ? (cl_uint)events->size() : 0,
             (events != NULL && events->size() > 0) ? (cl_event*)&events->front() : NULL,
             (event != NULL) ? &tmp : NULL),
@@ -7773,7 +8352,7 @@ public:
      */
     cl_int enqueueMarkerWithWaitList(
         const vector<Event> *events = 0,
-        Event *event = 0)
+        Event *event = 0) const
     {
         cl_event tmp;
         cl_int err = detail::errHandler(
@@ -7803,7 +8382,7 @@ public:
      */
     cl_int enqueueBarrierWithWaitList(
         const vector<Event> *events = 0,
-        Event *event = 0)
+        Event *event = 0) const
     {
         cl_event tmp;
         cl_int err = detail::errHandler(
@@ -7829,7 +8408,7 @@ public:
         cl_mem_migration_flags flags,
         const vector<Event>* events = NULL,
         Event* event = NULL
-        )
+        ) const
     {
         cl_event tmp;
         
@@ -7838,8 +8417,7 @@ public:
         for( int i = 0; i < (int)memObjects.size(); ++i ) {
             localMemObjects[i] = memObjects[i]();
         }
-
-
+        
         cl_int err = detail::errHandler(
             ::clEnqueueMigrateMemObjects(
                 object_, 
@@ -7858,6 +8436,128 @@ public:
     }
 #endif // CL_HPP_TARGET_OPENCL_VERSION >= 120
 
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+    /**
+     * Enqueues a command that will allow the host associate ranges within a set of
+     * SVM allocations with a device.
+     * @param sizes - The length from each pointer to migrate.
+     */
+    template<typename T>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<T*> &svmRawPointers,
+        const cl::vector<size_type> &sizes,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        cl_event tmp;
+        cl_int err = detail::errHandler(::clEnqueueSVMMigrateMem(
+            object_,
+            svmRawPointers.size(), static_cast<void**>(svmRawPointers.data()),
+            sizes.data(), // array of sizes not passed
+            flags,
+            (events != NULL) ? (cl_uint)events->size() : 0,
+            (events != NULL && events->size() > 0) ? (cl_event*)&events->front() : NULL,
+            (event != NULL) ? &tmp : NULL),
+            __ENQUEUE_MIGRATE_SVM_ERR);
+
+        if (event != NULL && err == CL_SUCCESS)
+            *event = tmp;
+
+        return err;
+    }
+
+    /**
+     * Enqueues a command that will allow the host associate a set of SVM allocations with
+     * a device.
+     */
+    template<typename T>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<T*> &svmRawPointers,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        return enqueueMigrateSVM(svmRawPointers, cl::vector<size_type>(svmRawPointers.size()), flags, events, event);
+    }
+
+
+    /**
+     * Enqueues a command that will allow the host associate ranges within a set of
+     * SVM allocations with a device.
+     * @param sizes - The length from each pointer to migrate.
+     */
+    template<typename T, class D>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<cl::pointer<T, D>> &svmPointers,
+        const cl::vector<size_type> &sizes,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        cl::vector<void*> svmRawPointers;
+        svmRawPointers.reserve(svmPointers.size());
+        for (auto p : svmPointers) {
+            svmRawPointers.push_back(static_cast<void*>(p.get()));
+        }
+
+        return enqueueMigrateSVM(svmRawPointers, sizes, flags, events, event);
+    }
+
+
+    /**
+     * Enqueues a command that will allow the host associate a set of SVM allocations with
+     * a device.
+     */
+    template<typename T, class D>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<cl::pointer<T, D>> &svmPointers,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        return enqueueMigrateSVM(svmPointers, cl::vector<size_type>(svmPointers.size()), flags, events, event);
+    }
+
+    /**
+     * Enqueues a command that will allow the host associate ranges within a set of
+     * SVM allocations with a device.
+     * @param sizes - The length from the beginning of each container to migrate.
+     */
+    template<typename T, class Alloc>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<cl::vector<T, Alloc>> &svmContainers,
+        const cl::vector<size_type> &sizes,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        cl::vector<void*> svmRawPointers;
+        svmRawPointers.reserve(svmContainers.size());
+        for (auto p : svmContainers) {
+            svmRawPointers.push_back(static_cast<void*>(p.data()));
+        }
+
+        return enqueueMigrateSVM(svmRawPointers, sizes, flags, events, event);
+    }
+
+    /**
+     * Enqueues a command that will allow the host associate a set of SVM allocations with
+     * a device.
+     */
+    template<typename T, class Alloc>
+    cl_int enqueueMigrateSVM(
+        const cl::vector<cl::vector<T, Alloc>> &svmContainers,
+        cl_mem_migration_flags flags = 0,
+        const vector<Event>* events = NULL,
+        Event* event = NULL) const
+    {
+        return enqueueMigrateSVM(svmContainers, cl::vector<size_type>(svmContainers.size()), flags, events, event);
+    }
+
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
+    
     cl_int enqueueNDRangeKernel(
         const Kernel& kernel,
         const NDRange& offset,
@@ -7885,10 +8585,10 @@ public:
     }
 
 #if defined(CL_USE_DEPRECATED_OPENCL_1_2_APIS)
-    CL_EXT_PREFIX__VERSION_1_2_DEPRECATED cl_int enqueueTask(
+    CL_API_PREFIX__VERSION_1_2_DEPRECATED cl_int enqueueTask(
         const Kernel& kernel,
         const vector<Event>* events = NULL,
-        Event* event = NULL) const CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
+        Event* event = NULL) const CL_API_SUFFIX__VERSION_1_2_DEPRECATED
     {
         cl_event tmp;
         cl_int err = detail::errHandler(
@@ -7945,8 +8645,8 @@ public:
  * Deprecated APIs for 1.2
  */
 #if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS)
-    CL_EXT_PREFIX__VERSION_1_1_DEPRECATED 
-    cl_int enqueueMarker(Event* event = NULL) const CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
+    CL_API_PREFIX__VERSION_1_1_DEPRECATED 
+    cl_int enqueueMarker(Event* event = NULL) const CL_API_SUFFIX__VERSION_1_1_DEPRECATED
     {
         cl_event tmp;
         cl_int err = detail::errHandler(
@@ -7961,8 +8661,8 @@ public:
         return err;
     }
 
-    CL_EXT_PREFIX__VERSION_1_1_DEPRECATED
-    cl_int enqueueWaitForEvents(const vector<Event>& events) const CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
+    CL_API_PREFIX__VERSION_1_1_DEPRECATED
+    cl_int enqueueWaitForEvents(const vector<Event>& events) const CL_API_SUFFIX__VERSION_1_1_DEPRECATED
     {
         return detail::errHandler(
             ::clEnqueueWaitForEvents(
@@ -8098,8 +8798,8 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *PFN_clEnqueueReleaseD3D10ObjectsKHR)(
  * Deprecated APIs for 1.2
  */
 #if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS)
-    CL_EXT_PREFIX__VERSION_1_1_DEPRECATED
-    cl_int enqueueBarrier() const CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
+    CL_API_PREFIX__VERSION_1_1_DEPRECATED
+    cl_int enqueueBarrier() const CL_API_SUFFIX__VERSION_1_1_DEPRECATED
     {
         return detail::errHandler(
             ::clEnqueueBarrier(object_),
@@ -8273,7 +8973,7 @@ public:
             __GET_COMMAND_QUEUE_INFO_ERR);
     }
 
-    template <cl_int name> typename
+    template <cl_command_queue_info name> typename
         detail::param_traits<detail::cl_command_queue_info, name>::param_type
         getInfo(cl_int* err = NULL) const
     {
@@ -8287,11 +8987,11 @@ public:
     }
 
     /*!
-    * Create a new default device command queue for the default device,
-    * in the default context and of the default size.
-    * If there is already a default queue for the specified device this
-    * function will return the pre-existing queue.
-    */
+     * Create a new default device command queue for the default device,
+     * in the default context and of the default size.
+     * If there is already a default queue for the specified device this
+     * function will return the pre-existing queue.
+     */
     static DeviceCommandQueue makeDefault(
         cl_int *err = nullptr)
     {
@@ -8317,11 +9017,11 @@ public:
     }
 
     /*!
-    * Create a new default device command queue for the specified device
-    * and of the default size.
-    * If there is already a default queue for the specified device this
-    * function will return the pre-existing queue.
-    */
+     * Create a new default device command queue for the specified device
+     * and of the default size.
+     * If there is already a default queue for the specified device this
+     * function will return the pre-existing queue.
+     */
     static DeviceCommandQueue makeDefault(
         const Context &context, const Device &device, cl_int *err = nullptr)
     {
@@ -8372,6 +9072,37 @@ public:
 
         return deviceQueue;
     }
+
+
+
+#if CL_HPP_TARGET_OPENCL_VERSION >= 210
+    /*!
+     * Modify the default device command queue to be used for subsequent kernels.
+     * This can update the default command queue for a device repeatedly to account
+     * for kernels that rely on the default.
+     * @return updated default device command queue.
+     */
+    static DeviceCommandQueue updateDefault(const Context &context, const Device &device, const DeviceCommandQueue &default_queue, cl_int *err = nullptr)
+    {
+        cl_int error;
+        error = clSetDefaultDeviceCommandQueue(context.get(), device.get(), default_queue.get());
+
+        detail::errHandler(error, __SET_DEFAULT_DEVICE_COMMAND_QUEUE_ERR);
+        if (err != NULL) {
+            *err = error;
+        }
+        return default_queue;
+    }
+
+    /*!
+     * Return the current default command queue for the specified command queue
+     */
+    static DeviceCommandQueue getDefault(const CommandQueue &queue, cl_int * err = NULL)
+    {
+        return queue.getInfo<CL_QUEUE_DEVICE_DEFAULT>(err);
+    }
+
+#endif // #if CL_HPP_TARGET_OPENCL_VERSION >= 210
 }; // DeviceCommandQueue
 
 namespace detail
@@ -9425,7 +10156,7 @@ public:
     }
 
     template<typename T0, typename... T1s>
-    cl_int setSVMPointers(const T0 &t0, T1s... ts)
+    cl_int setSVMPointers(const T0 &t0, T1s &... ts)
     {
         return kernel_.setSVMPointers(t0, ts...);
     }
@@ -9439,7 +10170,7 @@ public:
 
 namespace compatibility {
     /**
-     * Backward compatibility class to ensure that cl.hpp code works with cl2.hpp.
+     * Backward compatibility class to ensure that cl.hpp code works with opencl.hpp.
      * Please use KernelFunctor directly.
      */
     template<typename... Ts>
@@ -9484,73 +10215,101 @@ namespace compatibility {
 
 #undef CL_HPP_ERR_STR_
 #if !defined(CL_HPP_USER_OVERRIDE_ERROR_STRINGS)
-#undef __GET_DEVICE_INFO_ERR
-#undef __GET_PLATFORM_INFO_ERR
-#undef __GET_DEVICE_IDS_ERR
-#undef __GET_CONTEXT_INFO_ERR
-#undef __GET_EVENT_INFO_ERR
-#undef __GET_EVENT_PROFILE_INFO_ERR
-#undef __GET_MEM_OBJECT_INFO_ERR
-#undef __GET_IMAGE_INFO_ERR
-#undef __GET_SAMPLER_INFO_ERR
-#undef __GET_KERNEL_INFO_ERR
-#undef __GET_KERNEL_ARG_INFO_ERR
-#undef __GET_KERNEL_WORK_GROUP_INFO_ERR
-#undef __GET_PROGRAM_INFO_ERR
-#undef __GET_PROGRAM_BUILD_INFO_ERR
-#undef __GET_COMMAND_QUEUE_INFO_ERR
-
-#undef __CREATE_CONTEXT_ERR
-#undef __CREATE_CONTEXT_FROM_TYPE_ERR
-#undef __GET_SUPPORTED_IMAGE_FORMATS_ERR
-
-#undef __CREATE_BUFFER_ERR
-#undef __CREATE_SUBBUFFER_ERR
-#undef __CREATE_IMAGE2D_ERR
-#undef __CREATE_IMAGE3D_ERR
-#undef __CREATE_SAMPLER_ERR
-#undef __SET_MEM_OBJECT_DESTRUCTOR_CALLBACK_ERR
-
-#undef __CREATE_USER_EVENT_ERR
-#undef __SET_USER_EVENT_STATUS_ERR
-#undef __SET_EVENT_CALLBACK_ERR
-#undef __SET_PRINTF_CALLBACK_ERR
-
-#undef __WAIT_FOR_EVENTS_ERR
-
-#undef __CREATE_KERNEL_ERR
-#undef __SET_KERNEL_ARGS_ERR
-#undef __CREATE_PROGRAM_WITH_SOURCE_ERR
-#undef __CREATE_PROGRAM_WITH_BINARY_ERR
-#undef __CREATE_PROGRAM_WITH_BUILT_IN_KERNELS_ERR
-#undef __BUILD_PROGRAM_ERR
-#undef __CREATE_KERNELS_IN_PROGRAM_ERR
-
-#undef __CREATE_COMMAND_QUEUE_ERR
-#undef __SET_COMMAND_QUEUE_PROPERTY_ERR
-#undef __ENQUEUE_READ_BUFFER_ERR
-#undef __ENQUEUE_WRITE_BUFFER_ERR
-#undef __ENQUEUE_READ_BUFFER_RECT_ERR
-#undef __ENQUEUE_WRITE_BUFFER_RECT_ERR
-#undef __ENQEUE_COPY_BUFFER_ERR
-#undef __ENQEUE_COPY_BUFFER_RECT_ERR
-#undef __ENQUEUE_READ_IMAGE_ERR
-#undef __ENQUEUE_WRITE_IMAGE_ERR
-#undef __ENQUEUE_COPY_IMAGE_ERR
-#undef __ENQUEUE_COPY_IMAGE_TO_BUFFER_ERR
-#undef __ENQUEUE_COPY_BUFFER_TO_IMAGE_ERR
-#undef __ENQUEUE_MAP_BUFFER_ERR
-#undef __ENQUEUE_MAP_IMAGE_ERR
-#undef __ENQUEUE_UNMAP_MEM_OBJECT_ERR
-#undef __ENQUEUE_NDRANGE_KERNEL_ERR
-#undef __ENQUEUE_TASK_ERR
-#undef __ENQUEUE_NATIVE_KERNEL
-
-#undef __UNLOAD_COMPILER_ERR
-#undef __CREATE_SUB_DEVICES_ERR
-
-#undef __CREATE_PIPE_ERR
-#undef __GET_PIPE_INFO_ERR
+#undef __GET_DEVICE_INFO_ERR               
+#undef __GET_PLATFORM_INFO_ERR             
+#undef __GET_DEVICE_IDS_ERR                
+#undef __GET_PLATFORM_IDS_ERR              
+#undef __GET_CONTEXT_INFO_ERR              
+#undef __GET_EVENT_INFO_ERR                
+#undef __GET_EVENT_PROFILE_INFO_ERR        
+#undef __GET_MEM_OBJECT_INFO_ERR           
+#undef __GET_IMAGE_INFO_ERR                
+#undef __GET_SAMPLER_INFO_ERR              
+#undef __GET_KERNEL_INFO_ERR               
+#undef __GET_KERNEL_ARG_INFO_ERR           
+#undef __GET_KERNEL_SUB_GROUP_INFO_ERR     
+#undef __GET_KERNEL_WORK_GROUP_INFO_ERR    
+#undef __GET_PROGRAM_INFO_ERR              
+#undef __GET_PROGRAM_BUILD_INFO_ERR        
+#undef __GET_COMMAND_QUEUE_INFO_ERR        
+#undef __CREATE_CONTEXT_ERR                
+#undef __CREATE_CONTEXT_FROM_TYPE_ERR      
+#undef __GET_SUPPORTED_IMAGE_FORMATS_ERR   
+#undef __CREATE_BUFFER_ERR                 
+#undef __COPY_ERR                          
+#undef __CREATE_SUBBUFFER_ERR              
+#undef __CREATE_GL_BUFFER_ERR              
+#undef __CREATE_GL_RENDER_BUFFER_ERR       
+#undef __GET_GL_OBJECT_INFO_ERR            
+#undef __CREATE_IMAGE_ERR                  
+#undef __CREATE_GL_TEXTURE_ERR             
+#undef __IMAGE_DIMENSION_ERR               
+#undef __SET_MEM_OBJECT_DESTRUCTOR_CALLBACK_ERR 
+#undef __CREATE_USER_EVENT_ERR             
+#undef __SET_USER_EVENT_STATUS_ERR         
+#undef __SET_EVENT_CALLBACK_ERR            
+#undef __WAIT_FOR_EVENTS_ERR               
+#undef __CREATE_KERNEL_ERR                 
+#undef __SET_KERNEL_ARGS_ERR               
+#undef __CREATE_PROGRAM_WITH_SOURCE_ERR    
+#undef __CREATE_PROGRAM_WITH_IL_ERR        
+#undef __CREATE_PROGRAM_WITH_BINARY_ERR    
+#undef __CREATE_PROGRAM_WITH_IL_ERR        
+#undef __CREATE_PROGRAM_WITH_BUILT_IN_KERNELS_ERR    
+#undef __BUILD_PROGRAM_ERR                 
+#undef __COMPILE_PROGRAM_ERR               
+#undef __LINK_PROGRAM_ERR                  
+#undef __CREATE_KERNELS_IN_PROGRAM_ERR     
+#undef __CREATE_COMMAND_QUEUE_WITH_PROPERTIES_ERR          
+#undef __CREATE_SAMPLER_WITH_PROPERTIES_ERR                
+#undef __SET_COMMAND_QUEUE_PROPERTY_ERR    
+#undef __ENQUEUE_READ_BUFFER_ERR           
+#undef __ENQUEUE_READ_BUFFER_RECT_ERR      
+#undef __ENQUEUE_WRITE_BUFFER_ERR          
+#undef __ENQUEUE_WRITE_BUFFER_RECT_ERR     
+#undef __ENQEUE_COPY_BUFFER_ERR            
+#undef __ENQEUE_COPY_BUFFER_RECT_ERR       
+#undef __ENQUEUE_FILL_BUFFER_ERR           
+#undef __ENQUEUE_READ_IMAGE_ERR            
+#undef __ENQUEUE_WRITE_IMAGE_ERR           
+#undef __ENQUEUE_COPY_IMAGE_ERR            
+#undef __ENQUEUE_FILL_IMAGE_ERR            
+#undef __ENQUEUE_COPY_IMAGE_TO_BUFFER_ERR  
+#undef __ENQUEUE_COPY_BUFFER_TO_IMAGE_ERR  
+#undef __ENQUEUE_MAP_BUFFER_ERR            
+#undef __ENQUEUE_MAP_IMAGE_ERR             
+#undef __ENQUEUE_UNMAP_MEM_OBJECT_ERR      
+#undef __ENQUEUE_NDRANGE_KERNEL_ERR        
+#undef __ENQUEUE_NATIVE_KERNEL             
+#undef __ENQUEUE_MIGRATE_MEM_OBJECTS_ERR   
+#undef __ENQUEUE_MIGRATE_SVM_ERR
+#undef __ENQUEUE_ACQUIRE_GL_ERR            
+#undef __ENQUEUE_RELEASE_GL_ERR            
+#undef __CREATE_PIPE_ERR             
+#undef __GET_PIPE_INFO_ERR           
+#undef __RETAIN_ERR                        
+#undef __RELEASE_ERR                       
+#undef __FLUSH_ERR                         
+#undef __FINISH_ERR                        
+#undef __VECTOR_CAPACITY_ERR               
+#undef __CREATE_SUB_DEVICES_ERR            
+#undef __CREATE_SUB_DEVICES_ERR            
+#undef __ENQUEUE_MARKER_ERR                
+#undef __ENQUEUE_WAIT_FOR_EVENTS_ERR       
+#undef __ENQUEUE_BARRIER_ERR               
+#undef __UNLOAD_COMPILER_ERR               
+#undef __CREATE_GL_TEXTURE_2D_ERR          
+#undef __CREATE_GL_TEXTURE_3D_ERR          
+#undef __CREATE_IMAGE2D_ERR                
+#undef __CREATE_IMAGE3D_ERR                
+#undef __CREATE_COMMAND_QUEUE_ERR          
+#undef __ENQUEUE_TASK_ERR                  
+#undef __CREATE_SAMPLER_ERR                
+#undef __ENQUEUE_MARKER_WAIT_LIST_ERR                
+#undef __ENQUEUE_BARRIER_WAIT_LIST_ERR               
+#undef __CLONE_KERNEL_ERR     
+#undef __GET_HOST_TIMER_ERR
+#undef __GET_DEVICE_AND_HOST_TIMER_ERR
 
 #endif //CL_HPP_USER_OVERRIDE_ERROR_STRINGS
 
