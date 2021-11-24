@@ -1066,7 +1066,13 @@
           "common": [
             "src/core/NEON/kernels/NECropKernel.cpp",
             "src/runtime/NEON/functions/NECropResize.cpp"
-          ]
+          ],
+          "neon": {
+            "common":  [ "src/cpu/kernels/crop/generic/neon/impl.cpp" ],
+            "fp32":    [ "src/cpu/kernels/crop/generic/neon/fp32.cpp" ],
+            "fp16":    [ "src/cpu/kernels/crop/generic/neon/fp16.cpp" ],
+            "integer": [ "src/cpu/kernels/crop/generic/neon/integer.cpp"   ]
+          }  
         }
       },
       "Deconv2d": {

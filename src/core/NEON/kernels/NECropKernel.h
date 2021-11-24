@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,8 +107,6 @@ private:
     std::array<uint32_t, 2> _rows_out_of_bounds;
     /** The number of columns out of bounds at the start and end of output. */
     std::array<uint32_t, 2> _cols_out_of_bounds;
-
-    NECropKernel::InBoundsCropFunction *_in_bounds_crop_function;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEON_CROP_KERNEL_H */

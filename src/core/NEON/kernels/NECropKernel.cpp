@@ -31,136 +31,92 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/bit_ops.h"
+#include "src/cpu/kernels/crop/generic/neon/list.h"
 
 namespace arm_compute
 {
 namespace
 {
-template <typename T>
-inline float32x4_t load_as_f32(T *ptr)
+struct CropSelectorData
 {
-    ARM_COMPUTE_UNUSED(ptr);
-    ARM_COMPUTE_ERROR("Type not supported.");
-}
+    DataType dt;
+};
 
-template <>
-inline float32x4_t load_as_f32(float *ptr)
-{
-    return wrapper::vloadq(ptr);
-}
+using CropSelectorPtr = std::add_pointer<bool(const CropSelectorData &data)>::type;
+using CropUKernelPtr  = std::add_pointer<void(const ITensor *, const ITensor *, float *, Coordinates, int32_t, int32_t, int32_t, bool, bool)>::type;
 
-template <>
-inline float32x4_t load_as_f32(int32_t *ptr)
+struct CropUKernel
 {
-    return vcvtq_f32_s32(wrapper::vloadq(ptr));
-}
+    const char           *name;
+    const CropSelectorPtr is_selected;
+    CropUKernelPtr        ukernel;
+};
 
-template <>
-inline float32x4_t load_as_f32(uint32_t *ptr)
+static const CropUKernel available_kernels[] =
 {
-    return vcvtq_f32_u32(wrapper::vloadq(ptr));
-}
-
-template <>
-inline float32x4_t load_as_f32(int16_t *ptr)
-{
-    return vcvtq_f32_s32(vmovl_s16(wrapper::vload(ptr)));
-}
-
-template <>
-inline float32x4_t load_as_f32(uint16_t *ptr)
-{
-    return vcvtq_f32_u32(vmovl_u16(wrapper::vload(ptr)));
-}
-
-template <>
-inline float32x4_t load_as_f32(uint8_t *ptr)
-{
-    return vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8(wrapper::vload(ptr)))));
-}
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-template <>
-inline float32x4_t load_as_f32(float16_t *ptr)
-{
-    return vcvt_f32_f16(wrapper::vload(ptr));
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
-template <typename T>
-inline void in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                                  int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
-{
-    // Reverse elements if width flipped.
-    if(is_width_flipped)
     {
-        // Collapse first dimension if possible.
-        if(input_has_single_channel)
-        {
-            int32_t     x = output_width_start;
-            Coordinates negative_offset(input_offset);
-            negative_offset.set(1, negative_offset[1] - window_step_x + 1);
-            for(; x <= output_width_limit - window_step_x; x += window_step_x, negative_offset[1] -= window_step_x)
-            {
-                auto in = load_as_f32(reinterpret_cast<T *>(input->ptr_to_element(negative_offset)));
+        "fp16_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::fp16_in_bounds_crop_window)
+    },
+    {
+        "f32_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::fp32_in_bounds_crop_window)
+    },
+    {
+        "u8_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::U8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u8_in_bounds_crop_window)
+    },
+    {
+        "u16_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::U16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u16_in_bounds_crop_window)
+    },
+    {
+        "u32_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::U32; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::u32_in_bounds_crop_window)
+    },
+    {
+        "s8_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::S8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s8_in_bounds_crop_window)
+    },
+    {
+        "s16_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::S16; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s16_in_bounds_crop_window)
+    },
+    {
+        "s32_neon_crop",
+        [](const CropSelectorData & data) { return data.dt == DataType::S32; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s32_in_bounds_crop_window)
+    },
+};
 
-                in = wrapper::vrev64(in);
-                in = wrapper::vcombine(wrapper::vgethigh(in), wrapper::vgetlow(in));
-
-                wrapper::vstore(output_ptr + x, in);
-            }
-            input_offset[1] = negative_offset[1] + window_step_x - 1;
-            for(; x < output_width_limit; ++x, --input_offset[1])
-            {
-                *(output_ptr + x) = static_cast<float>(*reinterpret_cast<T *>(input->ptr_to_element(input_offset)));
-            }
-        }
-        else
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const CropUKernel *get_implementation(const CropSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
         {
-            for(int32_t x = output_width_start; x < output_width_limit; ++x, --input_offset[1])
-            {
-                input_offset.set(0, 0);
-                int32_t c = 0;
-                for(; c <= static_cast<int32_t>(input->info()->dimension(0)) - window_step_x; c += window_step_x, input_offset[0] += window_step_x)
-                {
-                    auto in = load_as_f32(reinterpret_cast<T *>(input->ptr_to_element(input_offset)));
-                    wrapper::vstore(output_ptr + x * output->info()->dimension(0) + c, in);
-                }
-                for(; c < static_cast<int32_t>(input->info()->dimension(0)); ++c, ++input_offset[0])
-                {
-                    *(output_ptr + x * output->info()->dimension(0) + c) = static_cast<float>(*reinterpret_cast<T *>(input->ptr_to_element(input_offset)));
-                }
-            }
+            return &uk;
         }
     }
-    else
-    {
-        // Use memcpy if the elements don't need converting to float.
-        if(std::is_same<T, float>::value)
-        {
-            memcpy(static_cast<void *>(output_ptr + output_width_start * output->info()->dimension(0)),
-                   reinterpret_cast<const void *>(input->ptr_to_element(input_offset)),
-                   (output_width_limit - output_width_start) * output->info()->dimension(0) * output->info()->element_size());
-        }
-        else
-        {
-            int32_t x                = 0;
-            int32_t limit            = (output_width_limit - output_width_start) * static_cast<int32_t>(output->info()->dimension(0));
-            float *output_start_ptr = output_ptr + output_width_start * output->info()->dimension(0);
-            for(; x <= limit - window_step_x; x += window_step_x, input_offset[0] += window_step_x)
-            {
-                auto in = load_as_f32(reinterpret_cast<T *>(input->ptr_to_element(input_offset)));
-                wrapper::vstore(output_start_ptr + x, in);
-            }
-            for(; x < limit; ++x, ++input_offset[0])
-            {
-                *(output_start_ptr + x) = static_cast<float>(*reinterpret_cast<T *>(input->ptr_to_element(input_offset)));
-            }
-        }
-    }
+
+    return nullptr;
 }
 
 inline void out_of_bounds_crop_window(const ITensor *output, float *output_ptr, float extrapolation_value,
@@ -234,8 +190,7 @@ inline void execute_window(const ITensor *input, const ITensor *output, Coordina
 } // namespace
 
 NECropKernel::NECropKernel()
-    : _input(nullptr), _crop_boxes(nullptr), _box_ind(nullptr), _output(nullptr), _start(), _end(), _crop_box_ind(0), _extrapolation_value(0), _rows_out_of_bounds(), _cols_out_of_bounds(),
-      _in_bounds_crop_function(nullptr)
+    : _input(nullptr), _crop_boxes(nullptr), _box_ind(nullptr), _output(nullptr), _start(), _end(), _crop_box_ind(0), _extrapolation_value(0), _rows_out_of_bounds(), _cols_out_of_bounds()
 {
 }
 
@@ -250,40 +205,14 @@ void NECropKernel::configure(const ITensor *input, const ITensor *crop_boxes, co
     _output              = output;
     _crop_box_ind        = crop_box_ind;
     _extrapolation_value = extrapolation_value;
-
-    switch(input->info()->data_type())
-    {
-        case DataType::F32:
-            _in_bounds_crop_function = &in_bounds_crop_window<float>;
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _in_bounds_crop_function = &in_bounds_crop_window<float16_t>;
-            break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        case DataType::U32:
-            _in_bounds_crop_function = &in_bounds_crop_window<uint32_t>;
-            break;
-        case DataType::S32:
-            _in_bounds_crop_function = &in_bounds_crop_window<int32_t>;
-            break;
-        case DataType::U16:
-            _in_bounds_crop_function = &in_bounds_crop_window<uint16_t>;
-            break;
-        case DataType::S16:
-            _in_bounds_crop_function = &in_bounds_crop_window<int16_t>;
-            break;
-        case DataType::U8:
-            _in_bounds_crop_function = &in_bounds_crop_window<uint8_t>;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Datatype not supported");
-    }
 }
 
 Status NECropKernel::validate(const ITensorInfo *input, const ITensorInfo *crop_boxes, const ITensorInfo *box_ind, const ITensorInfo *output, uint32_t crop_box_ind, float extrapolation_value)
 {
     ARM_COMPUTE_UNUSED(extrapolation_value);
+    const auto *uk = get_implementation(CropSelectorData{ input->data_type() });
+    ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::U16, DataType::S16, DataType::F16, DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
@@ -369,10 +298,12 @@ void NECropKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON(_input->info()->has_padding());
     ARM_COMPUTE_ERROR_ON(_output->info()->has_padding());
 
+    const auto *uk = get_implementation(CropSelectorData{ _input->info()->data_type() });
+
     uint32_t    batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
     Coordinates input_offset(0, _end[0] < _start[0] ? _start[0] - _cols_out_of_bounds[0] : _start[0] + _cols_out_of_bounds[0],
                              _end[1] < _start[1] ? _start[1] - _rows_out_of_bounds[0] : _start[1] + _rows_out_of_bounds[0], batch_index);
-    execute_window(_input, _output, input_offset, _extrapolation_value, _rows_out_of_bounds, _cols_out_of_bounds, _in_bounds_crop_function, _end[1] < _start[1],
+    execute_window(_input, _output, input_offset, _extrapolation_value, _rows_out_of_bounds, _cols_out_of_bounds, uk->ukernel, _end[1] < _start[1],
                    _cols_out_of_bounds[0] + _cols_out_of_bounds[1] < _output->info()->dimension(1), _cols_out_of_bounds[0] > 0, _cols_out_of_bounds[1] > 0,
                    _start[0] <= _end[0], _end[0] < _start[0]);
 }
