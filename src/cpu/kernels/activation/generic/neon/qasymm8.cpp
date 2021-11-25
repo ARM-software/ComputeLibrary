@@ -36,7 +36,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void qasymm8_neon_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
     constexpr int                                 window_step_x  = 16;
     const auto                                    window_start_x = static_cast<int>(window.x().start());

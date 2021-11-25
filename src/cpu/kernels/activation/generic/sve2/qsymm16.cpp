@@ -38,7 +38,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-void qsymm16_sve_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
     const auto                                    window_start_x = static_cast<int>(window.x().start());
     const auto                                    window_end_x   = static_cast<int>(window.x().end());

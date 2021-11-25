@@ -845,20 +845,20 @@
             "src/cpu/operators/CpuActivation.cpp",
             "src/cpu/kernels/CpuActivationKernel.cpp",
             "src/runtime/NEON/functions/NEActivationLayer.cpp",
-            "src/cpu/kernels/activation/neon/qasymm8.cpp",
-            "src/cpu/kernels/activation/neon/qasymm8_signed.cpp",
-            "src/cpu/kernels/activation/neon/qsymm16.cpp"
+            "src/cpu/kernels/activation/generic/neon/qasymm8.cpp",
+            "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp",
+            "src/cpu/kernels/activation/generic/neon/qsymm16.cpp"
           ],
           "neon": {
-            "fp16": [ "src/cpu/kernels/activation/neon/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/neon/fp32.cpp" ]
+            "fp16": [ "src/cpu/kernels/activation/generic/neon/fp16.cpp" ],
+            "fp32": [ "src/cpu/kernels/activation/generic/neon/fp32.cpp" ]
           },
           "sve": {
-            "fp16": [ "src/cpu/kernels/activation/sve/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/sve/fp32.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/activation/sve/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/activation/sve/qasymm8_signed.cpp" ],
-            "qsymm16": [ "src/cpu/kernels/activation/sve/qsymm16.cpp" ]
+            "fp16": [ "src/cpu/kernels/activation/generic/sve/fp16.cpp" ],
+            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ],
+            "qasymm8": [ "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp" ],
+            "qsymm16": [ "src/cpu/kernels/activation/generic/sve2/qsymm16.cpp" ]
           }
         }
       },

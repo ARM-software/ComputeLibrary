@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,29 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H
-#define SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+
+#include "src/cpu/kernels/activation/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ACTIVATION_KERNEL(func_name) \
-    void func_name(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+namespace
+{
+constexpr ActFpImplParams Fp16Params = { static_cast<float16_t>(1e-7), 8 };
+} // namespace
 
-DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation);
-DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_activation);
-DECLARE_ACTIVATION_KERNEL(neon_qasymm8_signed_activation);
-DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_signed_activation);
-DECLARE_ACTIVATION_KERNEL(neon_qsymm16_activation);
-DECLARE_ACTIVATION_KERNEL(sve2_qsymm16_activation);
-DECLARE_ACTIVATION_KERNEL(sve_fp16_activation);
-DECLARE_ACTIVATION_KERNEL(sve_fp32_activation);
-DECLARE_ACTIVATION_KERNEL(neon_fp16_activation);
-DECLARE_ACTIVATION_KERNEL(neon_fp32_activation);
-
-#undef DECLARE_ACTIVATION_KERNEL
+void neon_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+{
+    fp_neon_activation_impl<float16_t, Fp16Params>(src, dst, act_info, window);
+}
 } // namespace cpu
 } // namespace arm_compute
-
-#endif /* SRC_CORE_NEON_KERNELS_ACTIVATION_LIST_H */
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

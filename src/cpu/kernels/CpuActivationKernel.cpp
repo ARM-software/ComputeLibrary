@@ -65,57 +65,57 @@ static const ActivationKernel available_kernels[] =
     {
         "sve_fp16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
-        REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_activation)
+        REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation)
     },
     {
         "sve_fp32_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
-        REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_activation)
+        REGISTER_FP32_SVE(arm_compute::cpu::sve_fp32_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_activation)
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_activation)
     },
     {
         "neon_fp32_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_activation)
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_NEON)  */
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
     {
         "sve_qu8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
-        REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_activation)
+        REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)
     },
     {
         "sve_qs8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
-        REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_activation)
+        REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)
     },
     {
         "sve_qs16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16 && data.ci.has_sve2(); },
-        REGISTER_QSYMM16_SVE(arm_compute::cpu::qsymm16_sve_activation)
+        REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)
     },
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     {
         "neon_qu8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8; },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_neon_activation)
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)
     },
     {
         "neon_qs8_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_activation)
+        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_activation)
     },
     {
         "neon_qs16_activation",
         [](const ActivationSelectorData & data) { return data.dt == DataType::QSYMM16; },
-        REGISTER_QSYMM16_NEON(arm_compute::cpu::qsymm16_neon_activation)
+        REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qsymm16_activation)
     },
 };
 
@@ -233,18 +233,14 @@ Status CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *
 size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation 
-    if (platform.get_cpu_model() == CPUModel::A73 ) 
+    // Tuning results that gave optimized results in performance investigation
+    if(platform.get_cpu_model() == CPUModel::A73)
     {
         return 10240;
     }
-    else if (platform.get_cpu_model() == CPUModel::A76)
-    {
-        return 9216;
-    }
     else
     {
-        return ICPPKernel::default_mws;
+        return 9216;
     }
 }
 
