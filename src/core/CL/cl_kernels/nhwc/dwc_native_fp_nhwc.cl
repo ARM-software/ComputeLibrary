@@ -134,7 +134,7 @@ __kernel void dwc_native_fp_nhwc(
             c[i].v = 0;
         })
 
-#if _IWEI_HEIGHT <= 5
+#if _IWEI_HEIGHT < 5
         LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
 #else  // _IWEI_HEIGHT <= 5
         for(int yk = 0; yk < _IWEI_HEIGHT; yk++)
@@ -165,7 +165,7 @@ __kernel void dwc_native_fp_nhwc(
             })
         })
                        }
-#if _IWEI_HEIGHT <= 5
+#if _IWEI_HEIGHT < 5
                       )
 #endif // _IWEI_HEIGHT <= 5
 
