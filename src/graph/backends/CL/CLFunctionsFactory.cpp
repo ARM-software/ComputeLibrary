@@ -318,6 +318,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_stack_layer<CLStackLayer, CLTargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::StridedSliceLayer:
             return detail::create_strided_slice_layer<CLStridedSlice, CLTargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
+        case NodeType::FusedConvolutionBatchNormalizationLayerWithPostOpsLayer:
+            return detail::create_fused_convolution_batch_normalization_with_post_op<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationWithPostOpsNode *>(node), ctx);
         default:
             return nullptr;
     }

@@ -28,6 +28,7 @@
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationNode.h"
+#include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationWithPostOpsNode.h"
 #include "arm_compute/graph/nodes/FusedConvolutionWithPostOpNode.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
@@ -420,88 +421,91 @@ void fuse_convolution_with_post_op(Graph &g, INode *fused_node, std::list<INode 
     }
 }
 
-std::list<INode *> get_post_op_list(Graph &g, int &eltwise_operand_id, int &prev_op_dst_pos, int conv_node_id, const std::set<Activation> &supported_fused_activations)
+std::list<INode *> get_post_op_list(Graph &g, int &eltwise_operand_id, int &prev_op_dst_pos, unsigned int conv_node_id, const std::set<Activation> &supported_fused_activations)
 {
     std::list<INode *> post_op_node_list    = {};
     NodeID             prev_op_dst_id       = conv_node_id;
     NodeType           post_op_type_list[3] = { NodeType::Dummy, NodeType::Dummy, NodeType::Dummy };
     int                post_op_idx          = 0;
-    for(unsigned int i = conv_node_id + 1; i < g.nodes().size(); ++i)
+
+    // Get list of the connected nodes
+    auto current_node = g.node(conv_node_id);
+
+    while(post_op_node_list.size() < 3)
     {
-        auto post_op_node    = g.node(i);
+        // This convolution node must have only one output edge, otherwise this function would not have been called
+
+        auto current_output_edge_id = current_node->output_edges().begin();
+        auto current_output_edge    = g.edge(*current_output_edge_id);
+        auto post_op_node           = current_output_edge->consumer();
+
         bool fusable_post_op = false;
         if(post_op_node != nullptr && post_op_node->output_edges().size() > 0)
         {
-            const auto post_op_output_edge_id = *post_op_node->output_edges().begin();
-            const auto post_op_output_edge    = g.edge(post_op_output_edge_id);
-
-            if(post_op_output_edge != nullptr)
+            switch(post_op_node->type())
             {
-                switch(post_op_output_edge->producer()->type())
+                case EltwiseLayerNode::node_type:
                 {
-                    case EltwiseLayerNode::node_type:
+                    auto *eltwise_node = arm_compute::utils::cast::polymorphic_downcast<EltwiseLayerNode *>(post_op_node);
+                    ARM_COMPUTE_ERROR_ON(eltwise_node->output(0) == nullptr);
+                    if(eltwise_node->output(0)->accessor() == nullptr)
                     {
-                        auto *eltwise_node = arm_compute::utils::cast::polymorphic_downcast<EltwiseLayerNode *>(post_op_output_edge->producer());
-                        ARM_COMPUTE_ERROR_ON(eltwise_node->output(0) == nullptr);
-                        if(eltwise_node->output(0)->accessor() == nullptr)
-                        {
-                            post_op_node_list.push_back(post_op_output_edge->producer());
-                            fusable_post_op                  = true;
-                            post_op_type_list[post_op_idx++] = eltwise_node->type();
+                        post_op_node_list.push_back(post_op_node);
+                        fusable_post_op                  = true;
+                        post_op_type_list[post_op_idx++] = eltwise_node->type();
 
-                            // Extract elementwise inputs
-                            const auto eltwise_input_id_0 = eltwise_node->input_edge(0)->producer_id();
-                            const auto eltwise_input_id_1 = eltwise_node->input_edge(1)->producer_id();
-                            if(eltwise_input_id_0 == prev_op_dst_id)
-                            {
-                                eltwise_operand_id = eltwise_input_id_1;
-                                prev_op_dst_pos    = 0;
-                            }
-                            else if(eltwise_input_id_1 == prev_op_dst_id)
-                            {
-                                eltwise_operand_id = eltwise_input_id_0;
-                                prev_op_dst_pos    = 1;
-                            }
-                        }
-                        else
+                        // Extract elementwise inputs
+                        const auto eltwise_input_id_0 = eltwise_node->input_edge(0)->producer_id();
+                        const auto eltwise_input_id_1 = eltwise_node->input_edge(1)->producer_id();
+                        if(eltwise_input_id_0 == prev_op_dst_id)
                         {
-                            ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with elementwise due to the presence of an output accessor\n");
+                            eltwise_operand_id = eltwise_input_id_1;
+                            prev_op_dst_pos    = 0;
                         }
-                        break;
+                        else if(eltwise_input_id_1 == prev_op_dst_id)
+                        {
+                            eltwise_operand_id = eltwise_input_id_0;
+                            prev_op_dst_pos    = 1;
+                        }
                     }
-                    case ActivationLayerNode::node_type:
+                    else
                     {
-                        auto *act_node = arm_compute::utils::cast::polymorphic_downcast<ActivationLayerNode *>(post_op_output_edge->producer());
-                        ARM_COMPUTE_ERROR_ON(act_node->output(0) == nullptr);
-                        // Check if activation is supported for fusion
-                        if(supported_fused_activations.count(act_node->activation_info().activation()) == 0)
-                        {
-                            break;
-                        }
-                        if(act_node->output(0)->accessor() == nullptr)
-                        {
-                            post_op_node_list.push_back(post_op_output_edge->producer());
-                            fusable_post_op                  = true;
-                            post_op_type_list[post_op_idx++] = act_node->type();
-                            prev_op_dst_id                   = act_node->id();
-                        }
-                        else
-                        {
-                            ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with activation due to the presence of an output accessor\n");
-                        }
-                        break;
+                        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with elementwise due to the presence of an output accessor\n");
                     }
-                    default:
+                    break;
+                }
+                case ActivationLayerNode::node_type:
+                {
+                    auto *act_node = arm_compute::utils::cast::polymorphic_downcast<ActivationLayerNode *>(post_op_node);
+                    ARM_COMPUTE_ERROR_ON(act_node->output(0) == nullptr);
+                    // Check if activation is supported for fusion
+                    if(supported_fused_activations.count(act_node->activation_info().activation()) == 0)
                     {
                         break;
                     }
+                    if(act_node->output(0)->accessor() == nullptr)
+                    {
+                        post_op_node_list.push_back(post_op_node);
+                        fusable_post_op                  = true;
+                        post_op_type_list[post_op_idx++] = act_node->type();
+                        prev_op_dst_id                   = act_node->id();
+                    }
+                    else
+                    {
+                        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with post ops due to the presence of an output accessor\n");
+                    }
+                    break;
+                }
+                default:
+                {
+                    break;
                 }
             }
 
             // Check if the node is not a branching node and current node is fusable
-            if(post_op_node->output_edges().size() == 1 && fusable_post_op == true && post_op_node_list.size() < 3)
+            if(post_op_node->output_edges().size() == 1 && fusable_post_op == true)
             {
-                continue;
+                current_node = post_op_node;
             }
             else
             {
@@ -534,12 +538,11 @@ std::list<INode *> get_post_op_list(Graph &g, int &eltwise_operand_id, int &prev
  *
  * Notes: currently, only GEMM supports fusion with post operator
 */
-template <typename N>
-void fuse_convolution(Graph &g, const Edge *output_edge, int conv_node_id, const std::set<Activation> &supported_fused_activations)
+void fuse_convolution_with_post_ops(Graph &g, const Edge *output_edge, unsigned int conv_node_id, const std::set<Activation> &supported_fused_activations)
 {
     ARM_COMPUTE_ERROR_ON(output_edge == nullptr);
 
-    auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<N *>(output_edge->producer());
+    auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(output_edge->producer());
     ARM_COMPUTE_ERROR_ON(conv_node->output(0) == nullptr);
 
     const ConvolutionMethod conv_algorithm = conv_node->convolution_method();
@@ -552,14 +555,14 @@ void fuse_convolution(Graph &g, const Edge *output_edge, int conv_node_id, const
     // Prevent fusion if fused node has an output accessor
     if(conv_node->output(0)->accessor() == nullptr)
     {
-        // If data type is FP32/FP16, data layout is NHWC, and filter size if 1x1, fuse convolution with post op, as Conv1x1 always leads to GEMM.
+        // If data type is FP32/FP16, data layout is NHWC, and filter size is 1x1, fuse convolution with post op, as Conv1x1 always leads to GEMM.
         const Edge *input_edge = conv_node->input_edge(1);
         if(input_edge != nullptr && input_edge->tensor() != nullptr)
         {
             const DataLayout  data_layout  = input_edge->tensor()->desc().layout;
             const DataType    data_type    = input_edge->tensor()->desc().data_type;
             const TensorShape tensor_shape = input_edge->tensor()->desc().shape;
-            if(data_layout != DataLayout::NHWC || is_data_type_float(data_type) == false || tensor_shape.y() != 1 || tensor_shape.z() != 1)
+            if((data_layout != DataLayout::NHWC) || (is_data_type_float(data_type) == false) || (tensor_shape.y() != 1) || (tensor_shape.z() != 1))
             {
                 ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with post ops due to non GEMM convolution\n");
                 return;
@@ -603,7 +606,18 @@ void fuse_convolution(Graph &g, const Edge *output_edge, int conv_node_id, const
                 auto conv_bias_id = conv_node->input_edge(2)->producer_id();
                 g.add_connection(conv_bias_id, 0, fused_id, 2);
             }
-            g.add_connection(eltwise_operand_id, 0, fused_id, 3);
+            // Adding the Element wise operand in case the post op is element wise operation
+            auto it = std::find_if(post_op_node_list.begin(),
+                                   post_op_node_list.end(),
+                                   [&](const INode * nd)
+            {
+                return (nd->type() == graph::NodeType::EltwiseLayer);
+            });
+
+            if(it != post_op_node_list.end())
+            {
+                g.add_connection(eltwise_operand_id, 0, fused_id, 3);
+            }
             g.remove_node(conv_node->id());
 
             // Update fused node outputs
@@ -614,6 +628,136 @@ void fuse_convolution(Graph &g, const Edge *output_edge, int conv_node_id, const
             fuse_convolution_with_post_op(g, fused_node, post_op_node_list, prev_op_dst_pos);
 
             post_op_node_list.clear();
+            ARM_COMPUTE_LOG_GRAPH_VERBOSE(std::endl);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with post ops due to the presence of an output accessor\n");
+    }
+}
+
+void fuse_convolution_batch_normalization_with_post_ops(Graph &g, const Edge *output_edge, unsigned int conv_node_id, const std::set<Activation> &supported_fused_activations)
+{
+    ARM_COMPUTE_ERROR_ON(output_edge == nullptr);
+
+    auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(output_edge->producer());
+    ARM_COMPUTE_ERROR_ON(conv_node->output(0) == nullptr);
+    const ConvolutionMethod conv_algorithm = conv_node->convolution_method();
+    if(conv_algorithm != ConvolutionMethod::GEMM)
+    {
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with post ops due to non GEMM convolution\n");
+        return;
+    }
+
+    // Prevent fusion if fused node has an output accessor
+    if(conv_node->output(0)->accessor() == nullptr)
+    {
+        // If data type is FP32/FP16, data layout is NHWC, and filter size is 1x1, fuse convolution with post op, as Conv1x1 always leads to GEMM.
+        const Edge *input_edge = conv_node->input_edge(1);
+        if(input_edge != nullptr && input_edge->tensor() != nullptr)
+        {
+            const DataLayout  data_layout  = input_edge->tensor()->desc().layout;
+            const DataType    data_type    = input_edge->tensor()->desc().data_type;
+            const TensorShape tensor_shape = input_edge->tensor()->desc().shape;
+            if((data_layout != DataLayout::NHWC) || (is_data_type_float(data_type) == false) || (tensor_shape.y() != 1) || (tensor_shape.z() != 1))
+            {
+                ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution node with post ops due to non GEMM convolution\n");
+                return;
+            }
+        }
+        else
+        {
+            return;
+        }
+
+        // Get post op list
+        int                eltwise_operand_id = 0;
+        int                prev_op_dst_pos    = 0; // Previous operator dst's postion in current operator
+        std::list<INode *> post_op_node_list  = get_post_op_list(g, eltwise_operand_id, prev_op_dst_pos, conv_node_id, supported_fused_activations);
+
+        if(post_op_node_list.size() == 0)
+        {
+            return;
+        }
+        else // Do convolution fusion with post op if there're one(elementwise), two or more operators
+        {
+            const Target assigned_target = conv_node->assigned_target();
+
+            // Extract conv inputs
+            const auto   conv_input_id   = conv_node->input_edge(0)->producer_id();
+            const auto   conv_weights_id = conv_node->input_edge(1)->producer_id();
+            const auto   bn_mean_id      = conv_node->input_edge(3)->producer_id();
+            const auto   bn_var_id       = conv_node->input_edge(4)->producer_id();
+            const auto   conv_info       = conv_node->convolution_info();
+            const auto   conv_method     = conv_node->convolution_method();
+            const auto   num_groups      = conv_node->num_groups();
+            FastMathHint fast_math_hint  = conv_node->fast_math_hint();
+
+            // Create the fused node
+
+            const float  epsilon  = conv_node->epsilon();
+            const NodeID fused_id = g.add_node<FusedConvolutionBatchNormalizationWithPostOpsNode>(epsilon, conv_info, num_groups, conv_method, fast_math_hint);
+
+            ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing FusedConvolutionBatchNormalization node with ID : " << conv_node->id());
+
+            // Add connections from the conv inputs to the fused node
+            g.add_connection(conv_input_id, 0, fused_id, 0);
+            g.add_connection(conv_weights_id, 0, fused_id, 1);
+
+            if(conv_node->input_edge(2) != nullptr)
+            {
+                auto conv_bias_id = conv_node->input_edge(2)->producer_id();
+                g.add_connection(conv_bias_id, 0, fused_id, 2);
+            }
+            g.add_connection(bn_mean_id, 0, fused_id, 3);
+            g.add_connection(bn_var_id, 0, fused_id, 4);
+
+            // Move connections of old FusedConvolutionBatchNormalization to the fused node
+            if(conv_node->input_edge(5) != nullptr)
+            {
+                const auto bn_beta_id = conv_node->input_edge(5)->producer_id();
+                g.add_connection(bn_beta_id, 0, fused_id, 5);
+            }
+
+            if(conv_node->input_edge(6) != nullptr)
+            {
+                const auto bn_gamma_id = conv_node->input_edge(6)->producer_id();
+                g.add_connection(bn_gamma_id, 0, fused_id, 6);
+            }
+
+            // Adding the Element wise operand in case the post op is element wise operation
+            auto it = std::find_if(post_op_node_list.begin(),
+                                   post_op_node_list.end(),
+                                   [&](const INode * nd)
+            {
+                return (nd->type() == graph::NodeType::EltwiseLayer);
+            });
+
+            if(it != post_op_node_list.end())
+            {
+                g.add_connection(eltwise_operand_id, 0, fused_id, 7);
+            }
+
+            // Update fused node outputs
+            auto fused_node = g.node(fused_id);
+            fused_node->set_assigned_target(assigned_target);
+
+            auto conv_node_name = conv_node->name();
+
+            // collect the post ops names
+            std::string post_ops_name = "";
+            for(auto &post_op : post_op_node_list)
+            {
+                post_ops_name += post_op->name();
+            }
+            fused_node->set_common_node_parameters(NodeParams{ conv_node->name() + "+" + post_ops_name, assigned_target });
+
+            // Fuse convolution with post op
+            fuse_convolution_with_post_op(g, fused_node, post_op_node_list, prev_op_dst_pos);
+
+            post_op_node_list.clear();
+            g.remove_node(conv_node->id());
             ARM_COMPUTE_LOG_GRAPH_VERBOSE(std::endl);
         }
     }
@@ -697,7 +841,7 @@ void NodeFusionMutator::mutate(Graph &g)
     // The fusion of PostOps to ConvolutionLayer:
     // It must occur after the fusion of PadLayer into ConvolutionLayer
     // It must occur before the fusion of normal ActivationLayer into ConvolutionLayer as it takes precedence
-    detail::fuse_layer<ConvolutionLayerNode>(g, cl_target_prec, detail::fuse_convolution<ConvolutionLayerNode>, supported_fused_activations);
+    detail::fuse_layer<ConvolutionLayerNode>(g, cl_target_prec, detail::fuse_convolution_with_post_ops, supported_fused_activations);
     detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
@@ -706,6 +850,7 @@ void NodeFusionMutator::mutate(Graph &g)
     // The fusion of BatchNormalizationLayer must occur after the fusion of ActivationLayer. Because FusedConvolutionBatchNormalizationNode assumes the BatchNormalization is already fused with activation, if any
     detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
+    detail::fuse_layer<FusedConvolutionBatchNormalizationNode>(g, cl_target_prec, detail::fuse_convolution_batch_normalization_with_post_ops, supported_fused_activations);
 }
 } // namespace graph
 } // namespace arm_compute

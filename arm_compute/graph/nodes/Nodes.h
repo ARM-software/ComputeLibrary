@@ -43,6 +43,7 @@
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
 #include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationNode.h"
+#include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationWithPostOpsNode.h"
 #include "arm_compute/graph/nodes/FusedConvolutionWithPostOpNode.h"
 #include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"

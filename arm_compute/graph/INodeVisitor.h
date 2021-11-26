@@ -106,6 +106,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
+    /** Visit FusedConvolutionBatchNormalizationWithPostOpsNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) = 0;
     /** Visit FusedConvolutionWithPostOpNode.
      *
      * @param[in] n Node to visit.
@@ -210,6 +215,7 @@ public:
     virtual void visit(FlattenLayerNode &n) override;
     virtual void visit(FullyConnectedLayerNode &n) override;
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) override;
+    virtual void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) override;
     virtual void visit(FusedConvolutionWithPostOpNode &n) override;
     virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     virtual void visit(InputNode &n) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2021 Arm Limited.
+ * Copyright (c) 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H
-#define ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H
+#ifndef ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_WITH_POST_OPS_NODE_H
+#define ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_WITH_POST_OPS_NODE_H
 
 #include "arm_compute/graph/INode.h"
 
@@ -31,41 +31,27 @@ namespace arm_compute
 namespace graph
 {
 /** Batch Normalization node */
-class FusedConvolutionBatchNormalizationNode final : public INode
+class FusedConvolutionBatchNormalizationWithPostOpsNode final : public INode
 {
 public:
     /** Constructor
      *
-     * @param[in] epsilon          Epsilon parameter.
-     * @param[in] info             Convolution layer attributes.
-     * @param[in] num_groups       (Optional) Number of groups (Defaults to 1)
-     * @param[in] method           (Optional) Convolution method to use
-     * @param[in] fast_math_hint   (Optional) Fast math hint
-     * @param[in] fused_activation (Optional) Fused activation layer. Disabled if not specified
+     * @param[in] epsilon        Epsilon parameter.
+     * @param[in] info           Convolution layer attributes.
+     * @param[in] num_groups     (Optional) Number of groups (Defaults to 1)
+     * @param[in] method         (Optional) Convolution method to use
+     * @param[in] fast_math_hint (Optional) Fast math hint
      */
-    FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
-                                           unsigned int        num_groups       = 1,
-                                           ConvolutionMethod   method           = ConvolutionMethod::Default,
-                                           FastMathHint        fast_math_hint   = FastMathHint::Disabled,
-                                           ActivationLayerInfo fused_activation = ActivationLayerInfo());
+    FusedConvolutionBatchNormalizationWithPostOpsNode(float epsilon, PadStrideInfo info,
+                                                      unsigned int      num_groups     = 1,
+                                                      ConvolutionMethod method         = ConvolutionMethod::Default,
+                                                      FastMathHint      fast_math_hint = FastMathHint::Disabled);
 
     /** Epsilon parameter accessor
      *
      * @return Epsilon parameter
      */
     float epsilon() const;
-
-    /** Returns fused activation
-     *
-     * @return Fused activation
-     */
-    ActivationLayerInfo fused_activation() const;
-
-    /** Sets fused activation
-     *
-     * @param[in] fused_activation Fused activation to set
-     */
-    void set_fused_activation(ActivationLayerInfo fused_activation);
 
     /** Computes convolution output descriptor
      *
@@ -125,16 +111,15 @@ public:
     void accept(INodeVisitor &v) override;
 
 public:
-    static constexpr NodeType node_type = NodeType::FusedConvolutionBatchNormalizationLayer;
+    static constexpr NodeType node_type = NodeType::FusedConvolutionBatchNormalizationLayerWithPostOpsLayer;
 
 private:
     float _epsilon;
 
-    PadStrideInfo       _info;
-    unsigned int        _num_groups;
-    ConvolutionMethod   _method;
-    FastMathHint        _fast_math_hint;
-    ActivationLayerInfo _fused_activation;
+    PadStrideInfo     _info;
+    unsigned int      _num_groups;
+    ConvolutionMethod _method;
+    FastMathHint      _fast_math_hint;
 };
 
 } // namespace graph

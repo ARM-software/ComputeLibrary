@@ -131,6 +131,14 @@ void DataLayerVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
     add_convolution_layer_method<FusedConvolutionBatchNormalizationNode>(_layer_data, n);
 }
 
+void DataLayerVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
+{
+    _layer_data.clear();
+    add_generic_layer_data<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
+    add_convolution_layer_data<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
+    add_convolution_layer_method<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
+}
+
 void DataLayerVisitor::visit(FusedDepthwiseConvolutionBatchNormalizationNode &n)
 {
     _layer_data.clear();
