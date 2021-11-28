@@ -31,8 +31,7 @@
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/cpu/kernels/elementwise/neon/elementwise_unary_list.h"
-#include "src/cpu/kernels/elementwise/sve/elementwise_unary_list.h"
+#include "src/cpu/kernels/elementwise_unary/list.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
@@ -52,7 +51,7 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         {
             return data.dt == DataType::F32 && data.isa.sve;
         },
-        REGISTER_FP32_SVE(arm_compute::cpu::elementwise_sve_op<float>)
+        REGISTER_FP32_SVE(sve_fp32_elementwise_unary)
     },
     {
         "sve_fp16_elementwise_unary",
@@ -60,31 +59,31 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         {
             return (data.dt == DataType::F16) && data.isa.sve;
         },
-        REGISTER_FP16_SVE(arm_compute::cpu::elementwise_sve_op<__fp16>),
+        REGISTER_FP16_SVE(sve_fp16_elementwise_unary),
     },
     {
         "sve_s32_elementwise_unary",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32 && data.isa.sve; },
-        REGISTER_INTEGER_SVE(arm_compute::cpu::elementwise_sve_op<int32_t>),
+        REGISTER_INTEGER_SVE(sve_s32_elementwise_unary),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp32_elementwise_unary",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<float>),
+        REGISTER_FP32_NEON(neon_fp32_elementwise_unary),
     },
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_elementwise_unary",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
-        REGISTER_FP32_NEON(arm_compute::cpu::elementwise_op<__fp16>),
+        REGISTER_FP32_NEON(neon_fp16_elementwise_unary),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_s32_elementwise_unary",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32; },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::elementwise_op<int32_t>),
+        REGISTER_INTEGER_NEON(neon_s32_elementwise_unary),
     },
 #endif // defined(ARM_COMPUTE_ENABLE_NEON)
 };

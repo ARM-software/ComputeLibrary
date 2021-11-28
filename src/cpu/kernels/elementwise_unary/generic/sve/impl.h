@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,7 @@
  */
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_UNARY_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_UNARY_LIST_H
-
-#include "arm_compute/core/Types.h"
 #if defined(ARM_COMPUTE_ENABLE_SVE)
-
 namespace arm_compute
 {
 namespace cpu

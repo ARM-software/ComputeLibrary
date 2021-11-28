@@ -1259,10 +1259,22 @@
           "common": [
             "src/cpu/operators/CpuElementwise.cpp",
             "src/cpu/kernels/CpuElementwiseKernel.cpp",
-            "src/runtime/NEON/functions/NEElementwiseOperations.cpp"
+            "src/runtime/NEON/functions/NEElementwiseOperations.cpp",
+            "src/cpu/kernels/elementwise_binary/generic/neon/qasymm8.cpp",
+            "src/cpu/kernels/elementwise_binary/generic/neon/qasymm8_signed.cpp"
           ],
+          "neon":{
+            "fp32": ["src/cpu/kernels/elementwise_binary/generic/neon/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/elementwise_binary/generic/neon/fp16.cpp"],
+            "integer": ["src/cpu/kernels/elementwise_binary/generic/neon/integer.cpp"]
+          },
           "sve": {
-            "common": [ "src/cpu/kernels/elementwise/sve/elementwise.cpp" ]
+            "common": ["src/cpu/kernels/elementwise_binary/generic/sve/impl.cpp" ],
+            "integer": ["src/cpu/kernels/elementwise_binary/generic/sve/integer.cpp"],
+            "fp32": ["src/cpu/kernels/elementwise_binary/generic/sve/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/elementwise_binary/generic/sve/fp16.cpp"], 
+            "qasymm8": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8_signed.cpp"]
           }
         }
       },
@@ -1273,8 +1285,16 @@
             "src/cpu/kernels/CpuElementwiseUnaryKernel.cpp",
             "src/runtime/NEON/functions/NEElementwiseUnaryLayer.cpp"
           ],
+          "neon": {
+            "integer": ["src/cpu/kernels/elementwise_unary/generic/neon/integer.cpp"],
+            "fp32": ["src/cpu/kernels/elementwise_unary/generic/neon/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/elementwise_unary/generic/neon/fp16.cpp"]
+          },
           "sve": {
-            "common": [ "src/cpu/kernels/elementwise/sve/elementwise_unary.cpp" ]
+            "common": ["src/cpu/kernels/elementwise_unary/generic/sve/impl.cpp" ],
+            "integer": ["src/cpu/kernels/elementwise_unary/generic/sve/integer.cpp"],
+            "fp32": ["src/cpu/kernels/elementwise_unary/generic/sve/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/elementwise_unary/generic/sve/fp16.cpp"]
           }
         }
       },

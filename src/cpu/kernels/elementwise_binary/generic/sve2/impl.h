@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,7 @@
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
-
-#include "src/core/NEON/wrapper/svtraits.h"
-#include "src/cpu/kernels/elementwise/sve/elementwise_list.h"
-
+#include "src/cpu/kernels/elementwise_binary/generic/sve/impl.h"
 namespace arm_compute
 {
 namespace cpu
@@ -66,7 +63,7 @@ struct BroadcastQuantizedLoopArguments
     const svfloat32_t &out_scale;
 };
 
-svfloat32x4_t load_quantized(const int8_t *ptr, svbool_t pg, const svint32_t &offset, const svfloat32_t &scale)
+inline svfloat32x4_t load_quantized(const int8_t *ptr, svbool_t pg, const svint32_t &offset, const svfloat32_t &scale)
 {
     auto x = svld1(pg, ptr);
 
@@ -85,7 +82,7 @@ svfloat32x4_t load_quantized(const int8_t *ptr, svbool_t pg, const svint32_t &of
                svmul_z(pg, svcvt_f32_z(pg, svsub_z(pg, svget4(widened, 3), offset)), scale));
 }
 
-svfloat32x4_t load_quantized(const uint8_t *ptr, svbool_t pg, const svint32_t &offset, const svfloat32_t &scale)
+inline svfloat32x4_t load_quantized(const uint8_t *ptr, svbool_t pg, const svint32_t &offset, const svfloat32_t &scale)
 {
     auto x = svld1(pg, ptr);
 
@@ -106,7 +103,7 @@ svfloat32x4_t load_quantized(const uint8_t *ptr, svbool_t pg, const svint32_t &o
                svmul_z(pg, svcvt_f32_z(pg, svsub_z(pg, svreinterpret_s32(svget4(widened, 3)), offset)), scale));
 }
 
-void store_quantized(uint8_t *ptr, svbool_t pg, svfloat32x4_t data, const svint32_t &offset, const svfloat32_t &inv_scale)
+inline void store_quantized(uint8_t *ptr, svbool_t pg, svfloat32x4_t data, const svint32_t &offset, const svfloat32_t &inv_scale)
 {
     const auto quantized = svcreate4(
                                svadd_z(pg, svcvt_s32_z(pg, svrinta_z(pg, svmul_z(pg, svget4(data, 0), inv_scale))), offset),
@@ -120,7 +117,7 @@ void store_quantized(uint8_t *ptr, svbool_t pg, svfloat32x4_t data, const svint3
     svst1(pg, ptr, narrowed);
 }
 
-void store_quantized(int8_t *ptr, svbool_t pg, svfloat32x4_t data, const svint32_t &offset, const svfloat32_t &inv_scale)
+inline void store_quantized(int8_t *ptr, svbool_t pg, svfloat32x4_t data, const svint32_t &offset, const svfloat32_t &inv_scale)
 {
     const auto quantized = svcreate4(
                                svadd_z(pg, svcvt_s32_z(pg, svrinta_z(pg, svmul_z(pg, svget4(data, 0), inv_scale))), offset),

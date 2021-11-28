@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,16 +24,10 @@
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/NEON/wrapper/svtraits.h"
-#include "src/cpu/kernels/elementwise/sve/elementwise_list.h"
-#include <arm_sve.h>
 
 namespace arm_compute
 {

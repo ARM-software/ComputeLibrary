@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_SVE)
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
-#include "src/cpu/kernels/elementwise/sve/elementwise_list.h"
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+#include "src/cpu/kernels/elementwise_binary/generic/sve/impl.h"
+#include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -209,6 +208,41 @@ void elementwise_arithmetic_op(const ITensor *in1, const ITensor *in2, ITensor *
                                                                 &arithmetic_op_loop<ScalarType, ScalarType>,
                                                                 &arithmetic_op_broadcast_loop<ScalarType, ScalarType>);
 }
+template void elementwise_arithmetic_op<ArithmeticOperation::ADD, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SUB, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::DIV, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MIN, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MAX, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::POWER, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_arithmetic_op<ArithmeticOperation::ADD, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SUB, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::DIV, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MIN, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MAX, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::POWER, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_arithmetic_op<ArithmeticOperation::ADD, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SUB, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::DIV, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MIN, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MAX, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::POWER, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_arithmetic_op<ArithmeticOperation::ADD, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SUB, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::DIV, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MIN, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::MAX, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::POWER, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 
 template <ComparisonOperation op, typename InputScalarType, typename OutputScalarType = uint8_t>
 void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
@@ -221,6 +255,41 @@ void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *
                                                                            &comparison_op_loop<InputScalarType, OutputScalarType>,
                                                                            &comparison_op_broadcast_loop<InputScalarType, OutputScalarType>);
 }
+
+template void elementwise_comparison_op<ComparisonOperation::Equal, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::NotEqual, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Greater, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Less, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::LessEqual, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_comparison_op<ComparisonOperation::Equal, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::NotEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Greater, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Less, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::LessEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_comparison_op<ComparisonOperation::Equal, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::NotEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Greater, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Less, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::LessEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_comparison_op<ComparisonOperation::Equal, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::NotEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Greater, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Less, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::LessEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+
+template void elementwise_comparison_op<ComparisonOperation::Equal, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::NotEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Greater, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::Less, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template void elementwise_comparison_op<ComparisonOperation::LessEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 
 template <>
 svint32_t elementwise_pow<svint32_t>(svbool_t &pg, const svint32_t &a, const svint32_t &b)
@@ -241,71 +310,6 @@ svint16_t elementwise_div<svint16_t>(svbool_t &pg, const svint16_t &a, const svi
     ARM_COMPUTE_ERROR("Not supported");
 }
 
-template void elementwise_arithmetic_op<ArithmeticOperation::MAX, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MAX, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MAX, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MAX, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_arithmetic_op<ArithmeticOperation::MIN, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MIN, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MIN, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::MIN, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_arithmetic_op<ArithmeticOperation::DIV, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::DIV, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::DIV, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::DIV, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_arithmetic_op<ArithmeticOperation::POWER, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::POWER, float32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::POWER, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_arithmetic_op<ArithmeticOperation::POWER, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::Equal, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Equal, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Equal, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Equal, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Equal, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::NotEqual, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::NotEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::NotEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::NotEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::NotEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::Greater, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Greater, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Greater, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Greater, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Greater, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::GreaterEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::Less, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Less, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Less, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Less, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::Less, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-
-template void elementwise_comparison_op<ComparisonOperation::LessEqual, float>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::LessEqual, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::LessEqual, float16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::LessEqual, int16_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
-template void elementwise_comparison_op<ComparisonOperation::LessEqual, uint8_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_SVE) */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */

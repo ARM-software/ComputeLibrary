@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,68 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_ELEMENTWISE_UNARY_LIST_H
-#define SRC_CORE_NEON_KERNELS_ELEMENTWISE_UNARY_LIST_H
-
-#include "arm_compute/core/Types.h"
+#if defined(ARM_COMPUTE_ENABLE_SVE)
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-template <typename ScalarType>
-inline ScalarType elementwise_op_scalar_imp(ElementWiseUnary op, const ScalarType &a)
+template <typename ScalarType, typename VectorType>
+inline typename std::enable_if<utils::traits::is_floating_point<ScalarType>::value, VectorType>::type elementwise_op_sve_imp(svbool_t pg, ElementWiseUnary op, const VectorType &a)
 {
     switch(op)
     {
         case ElementWiseUnary::RSQRT:
-            return 1 / sqrt(a);
+            return svinvsqrt(pg, a);
         case ElementWiseUnary::EXP:
-            return std::exp(a);
+            return wrapper::svexp_z(pg, a);
         case ElementWiseUnary::NEG:
-            return -a;
+            return svneg_z(pg, a);
         case ElementWiseUnary::LOG:
-            return std::log(a);
+            return wrapper::svlog_z(pg, a);
         case ElementWiseUnary::ABS:
-            return std::abs(a);
+            return svabs_z(pg, a);
         case ElementWiseUnary::ROUND:
-            return support::cpp11::nearbyint(a);
+            return svrintn_z(pg, a);
         case ElementWiseUnary::SIN:
-            return std::sin(a);
+            return wrapper::svsin_z(pg, a);
         default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED");
     }
 }
 
 template <typename ScalarType, typename VectorType>
-inline VectorType elementwise_op_imp(ElementWiseUnary op, const VectorType &a)
+inline typename std::enable_if<std::is_integral<ScalarType>::value, VectorType>::type elementwise_op_sve_imp(svbool_t pg, ElementWiseUnary op, const VectorType &a)
 {
     switch(op)
     {
-        case ElementWiseUnary::RSQRT:
-            return wrapper::vinvsqrt(a);
-        case ElementWiseUnary::EXP:
-            return wrapper::vexpq(a);
         case ElementWiseUnary::NEG:
-            return wrapper::vneg(a);
-        case ElementWiseUnary::LOG:
-            return wrapper::vlog(a);
+            return svneg_z(pg, a);
         case ElementWiseUnary::ABS:
-            return wrapper::vabs(a);
-        case ElementWiseUnary::ROUND:
-            return wrapper::vround(a);
-        case ElementWiseUnary::SIN:
-            return wrapper::vsin(a);
+            return svabs_z(pg, a);
         default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED");
     }
 }
 
 template <typename ScalarType>
-void elementwise_op(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
+void elementwise_sve_op(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
 {
-    const int  window_step_x  = 16 / sizeof(ScalarType);
+    const auto all_true_pg    = wrapper::svptrue<ScalarType>();
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
@@ -96,21 +85,25 @@ void elementwise_op(const ITensor *in, ITensor *out, const Window &window, Eleme
     {
         auto       output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
         const auto input_ptr  = reinterpret_cast<const ScalarType *>(input.ptr());
+        int        x          = window_start_x;
 
-        int x = window_start_x;
-        for(; x <= window_end_x - window_step_x; x += window_step_x)
+        svbool_t pg = wrapper::svwhilelt<ScalarType>(x, window_end_x);
+        do
         {
-            wrapper::vstore(output_ptr + x, elementwise_op_imp<ScalarType>(op, wrapper::vloadq(input_ptr + x)));
+            const auto vin = svld1(pg, input_ptr + x);
+            svst1(pg, output_ptr + x, elementwise_op_sve_imp<ScalarType, decltype(vin)>(pg, op, vin));
+            x += wrapper::svcnt<ScalarType>();
+            pg = wrapper::svwhilelt<ScalarType>(x, window_end_x);
         }
-        for(; x < window_end_x; ++x)
-        {
-            *(output_ptr + x) = elementwise_op_scalar_imp(op, *(input_ptr + x));
-        }
+        while(svptest_any(all_true_pg, pg));
     },
     input, output);
 }
 
+template void elementwise_sve_op<float16_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
+template void elementwise_sve_op<float32_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
+template void elementwise_sve_op<int32_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
+
 } // namespace cpu
 } // namespace arm_compute
-
-#endif // SRC_CORE_NEON_KERNELS_ELEMENTWISE_UNARY_LIST_H
+#endif //defined(ARM_COMPUTE_ENABLE_SVE)
