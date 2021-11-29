@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -281,14 +281,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_mm_reshaped_lhs_nt_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
     { "gemm_mm_reshaped_lhs_t_rhs_nt_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
     { "gemm_mm_reshaped_lhs_t_rhs_nt_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt", "common/gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_texture", "common/gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_t", "common/gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_texture", "common/gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt", "common/gemm_reshaped_rhs_only.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt_texture", "common/gemm_reshaped_rhs_only.cl" },
+    { "gemm_mm_reshaped_only_rhs_t", "common/gemm_reshaped_rhs_only.cl" },
+    { "gemm_mm_reshaped_only_rhs_t_texture", "common/gemm_reshaped_rhs_only.cl" },
     { "gemm_lc_vm_f32", "common/gemm.cl" },
     { "gemm_reshape_lhs_matrix_nt", "common/gemm_utils.cl" },
     { "gemm_reshape_lhs_matrix_t", "common/gemm_utils.cl" },
@@ -590,16 +586,16 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/gemm_utils.clembed"
     },
     {
+        "common/gemm_reshaped_rhs_only.cl",
+#include "./cl_kernels/common/gemm_reshaped_rhs_only.clembed"
+    },
+    {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
 #include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.clembed"
     },
     {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl",
 #include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.clembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.clembed"
     },
     {
         "common/gemmlowp.cl",

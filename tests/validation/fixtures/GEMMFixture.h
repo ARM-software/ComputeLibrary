@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1551,6 +1551,7 @@ public:
         const TensorShape bias_shape(n,
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
+
         auto post_ops_with_shapes = experimental::transform_post_op_list_arguments<PostOpArgBroadcast, TensorShape>(post_ops,
                                                                                                                     [ = ](auto broadcast)
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,6 +107,12 @@ const auto act_values = framework::dataset::make("Activation",
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 10.f),
 });
 
+/** Activation values to test */
+const auto act_identity = framework::dataset::make("Activation",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::IDENTITY),
+});
+
 /** M0 values to test - precommit */
 const auto m0_values_precommit = framework::dataset::make("M0", { 4 });
 
@@ -158,8 +164,8 @@ const auto boundary_handling_cases = combine(combine(combine(combine(combine(com
                                     framework::dataset::make("export_to_cl_image_rhs", {true, false})),
                                     // Only need to test F32 as F16 shares identical boundary handling logics
                                     framework::dataset::make("DataType", DataType::F32)),
-                                    framework::dataset::make("alpha", -0.75f )),
-                                    framework::dataset::make("beta", -0.35f )),
+                                    framework::dataset::make("alpha", 1.0f )),
+                                    framework::dataset::make("beta", 0.0f )),
                                     broadcast_bias_values),
                                     framework::dataset::make("Activation", ActivationLayerInfo()));
 
@@ -170,7 +176,7 @@ experimental::PostOpList<PostOpArgBroadcast> post_ops_1()
     experimental::PostOpList<PostOpArgBroadcast> post_ops{};
     post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
     post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(true, true, false),   // If broadcast in dims 0, 1 and 2
+        std::make_tuple(false, false, false),
         0,
         ConvertPolicy::SATURATE);
     post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
@@ -180,7 +186,7 @@ experimental::PostOpList<PostOpArgBroadcast> post_ops_2()
 {
     experimental::PostOpList<PostOpArgBroadcast> post_ops{};
     post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(false, true, true),   // If broadcast in dims 0, 1 and 2
+        std::make_tuple(false, false, false),
         1,
         ConvertPolicy::SATURATE);
     post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
@@ -189,44 +195,18 @@ experimental::PostOpList<PostOpArgBroadcast> post_ops_2()
 experimental::PostOpList<PostOpArgBroadcast> post_ops_3()
 {
     experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
     post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, true),  // If broadcast in dims 0, 1 and 2
+        std::make_tuple(false, false, false),
         1,
         ConvertPolicy::SATURATE);
     return post_ops;
 }
-// To test that the output of the main op is the first parameter in prelu post op
-experimental::PostOpList<PostOpArgBroadcast> post_ops_4()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
-    post_ops.push_back_op<experimental::PostOpEltwisePRelu<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, true),   // If true, broadcast in corresponding dim: 0, 1 or 2
-        0,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
-// To test that the output of the main op is the second parameter in prelu post op i.e. it is the alpha_param
-experimental::PostOpList<PostOpArgBroadcast> post_ops_5()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
-    post_ops.push_back_op<experimental::PostOpEltwisePRelu<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, false),   // If true, broadcast in corresponding dim: 0, 1 or 2
-        1,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
+
 /** Different Post Op Lists */
 const auto post_op_lists = framework::dataset::make("post_op_lists", {
     post_ops_1(),
     post_ops_2(),
-    post_ops_3(),
-    post_ops_4(),
-    post_ops_5()
+    post_ops_3()
  } );
 
  bool is_post_op_list_valid(unsigned int m, unsigned int n, unsigned int k, unsigned int batch, DataType data_type, const experimental::PostOpList<ITensorInfo*>& post_ops)
@@ -466,20 +446,7 @@ TEST_CASE(BroadcastInBothXandYDims, framework::DatasetMode::ALL)
 
     ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
 }
-TEST_CASE(BroadcastInAllDims, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    TensorShape post_op_arg_shape(1, 1, 1);
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
 
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
-}
 TEST_SUITE_END() // Valid
 TEST_SUITE_END() // ValidateFusedPostOps
 TEST_SUITE(Float)
@@ -633,7 +600,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", {false, true})),
-                                                                   framework::dataset::make("has_pad_y", {false, true})),
+                                                                   framework::dataset::make("has_pad_y", {false})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -665,7 +632,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", {false, true})),
-                                                                   framework::dataset::make("has_pad_y", {false, true})),
+                                                                   framework::dataset::make("has_pad_y", {false})),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -702,7 +669,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSWithPost
                                                                    a_values),
                                                                    beta_values),
                                                                    framework::dataset::make("broadcast_bias", { false } )),
-                                                                   act_values),
+                                                                   act_identity),
                                                                    post_op_lists)
                                                                    )
 {
@@ -799,7 +766,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixt
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("has_pad_y", {false, true})),
+                                                                   framework::dataset::make("has_pad_y", {false})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),
@@ -831,7 +798,7 @@ FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixtur
                                                                    i_values_rhs),
                                                                    t_values_rhs),
                                                                    framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("has_pad_y", {false, true})),
+                                                                   framework::dataset::make("has_pad_y", {false})),
                                                                    framework::dataset::make("DataType", DataType::F16)),
                                                                    a_values),
                                                                    beta_values),
@@ -867,7 +834,7 @@ FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSWithPost
                                                                    a_values),
                                                                    beta_values),
                                                                    framework::dataset::make("broadcast_bias", { false } )),
-                                                                   act_values),
+                                                                   act_identity),
                                                                    post_op_lists)
                                                                    )
 {
