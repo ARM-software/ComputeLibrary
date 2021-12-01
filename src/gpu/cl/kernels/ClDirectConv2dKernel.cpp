@@ -438,14 +438,8 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 
         build_options.add_option("-cl-fast-relaxed-math");
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(width_idx)));
-        build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(height_idx)));
-        build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(channel_idx)));
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(width_idx)));
-        build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(height_idx)));
-        build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(channel_idx)));
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
         build_options.add_option_if_else(export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
@@ -613,13 +607,13 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
         }
 
         unsigned int idx = 0;
-        add_4D_tensor_argument(idx, src, slice);
-        add_4D_tensor_argument(idx, dst, slice);
+        add_4d_tensor_nhwc_argument(idx, src);
+        add_4d_tensor_nhwc_argument(idx, dst);
         if(export_to_cl_image)
         {
             _kernel.setArg(idx++, weights_cl_image);
         }
-        add_4D_tensor_argument(idx, weights, slice);
+        add_4d_tensor_nhwc_argument(idx, weights);
         if(biases != nullptr)
         {
             add_1D_tensor_argument(idx, biases, slice);

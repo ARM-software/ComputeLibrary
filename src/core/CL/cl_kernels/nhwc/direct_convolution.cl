@@ -103,9 +103,9 @@
  */
 //! @endcond
 __kernel void direct_convolution_nhwc(
-    TENSOR4D(src, SRC_TENSOR_TYPE),
-    TENSOR4D(dst, DST_TENSOR_TYPE),
-    TENSOR4D(wei, WEI_TENSOR_TYPE)
+    TENSOR4D_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_T(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bia)
@@ -116,12 +116,12 @@ __kernel void direct_convolution_nhwc(
     // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH WEI_WIDTH
 #define _IWEI_HEIGHT WEI_HEIGHT
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _ISRC_CHANNELS SRC_CHANNELS
-#define _IDST_WIDTH DST_WIDTH
-#define _IDST_HEIGHT DST_HEIGHT
-#define _IDST_CHANNELS DST_CHANNELS
+#define _ISRC_WIDTH src_w
+#define _ISRC_HEIGHT src_h
+#define _ISRC_CHANNELS src_c
+#define _IDST_WIDTH dst_w
+#define _IDST_HEIGHT dst_h
+#define _IDST_CHANNELS dst_c
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
     // If quantized, the output tile has to be quantized first before being stored to global memory
@@ -192,35 +192,36 @@ __kernel void direct_convolution_nhwc(
 
         // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
-#if((SRC_CHANNELS % K0) != 0)
-        // Left-over accumulations
-        for(; k < _ISRC_CHANNELS; ++k)
+        if((_ISRC_CHANNELS % K0) != 0)
         {
-            TILE(SRC_DATA_TYPE, M0, 1, a);
-            TILE(WEI_DATA_TYPE, N0, 1, b);
-
-            LOOP_UNROLLING(int, i, 0, 1, M0,
+            // Left-over accumulations
+            for(; k < _ISRC_CHANNELS; ++k)
             {
-                a[i].v = ZERO_VALUE;
-            })
+                TILE(SRC_DATA_TYPE, M0, 1, a);
+                TILE(WEI_DATA_TYPE, N0, 1, b);
 
-            // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+                LOOP_UNROLLING(int, i, 0, 1, M0,
+                {
+                    a[i].v = ZERO_VALUE;
+                })
 
-            // Load tile from the weights tensor
-            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
-            T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
+                // Load tile from the src tensor
+                T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
-            // Compute the matrix multiplication between two tiles
-            T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
+                // Load tile from the weights tensor
+                // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
+                T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
 
-            // Apply the offset correction (operation usually needed for asymmetric quantized computation)
-            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
-            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
+                // Compute the matrix multiplication between two tiles
+                T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
 
-            ++ck;
+                // Apply the offset correction (operation usually needed for asymmetric quantized computation)
+                // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+                T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
+
+                ++ck;
+            }
         }
-#endif // ((SRC_CHANNELS % K0) != 0)
     }
 
     // Offset correction required for the quantized asymmetric computation
