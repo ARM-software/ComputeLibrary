@@ -228,7 +228,7 @@ void poolingMxN_fp16_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
             }
             else
             {
-                vres = vdupq_n_f16(std::numeric_limits<float>::lowest());
+                vres = vdupq_n_f16(-std::numeric_limits<float>::infinity());
 
                 for(int y = pool_start_y; y < pool_end_y; ++y)
                 {
@@ -287,7 +287,7 @@ void poolingMxN_fp16_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
             }
             else
             {
-                res = std::numeric_limits<float>::lowest();
+                res = -std::numeric_limits<float>::infinity();
                 for(int y = pool_start_y; y < pool_end_y; ++y)
                 {
                     for(int x = pool_start_x; x < pool_end_x; ++x)
