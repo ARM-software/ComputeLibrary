@@ -363,12 +363,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "depth_to_space_nchw", "nchw/depth_to_space.cl" },
     { "dequantization_layer_per_channel_nchw", "nchw/dequantization_layer.cl" },
     { "direct_convolution1x1", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution1x1_f32_bifrost", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution3x3", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution3x3_f32_bifrost", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution5x5", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution5x5_f32_bifrost", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution_quantized", "nchw/direct_convolution_quantized.cl" },
+    { "direct_convolution_nchw", "nchw/direct_convolution.cl" },
+
     { "im2col1x1_stridex1_nchw", "nchw/im2col.cl" },
     { "im2col3x3_nchw", "nchw/im2col.cl" },
     { "im2col5x5_nchw", "nchw/im2col.cl" },
@@ -767,20 +763,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/nchw/dequantization_layer.clembed"
     },
     {
-        "nchw/direct_convolution1x1.cl",
-#include "./cl_kernels/nchw/direct_convolution1x1.clembed"
-    },
-    {
-        "nchw/direct_convolution3x3.cl",
-#include "./cl_kernels/nchw/direct_convolution3x3.clembed"
-    },
-    {
-        "nchw/direct_convolution5x5.cl",
-#include "./cl_kernels/nchw/direct_convolution5x5.clembed"
-    },
-    {
-        "nchw/direct_convolution_quantized.cl",
-#include "./cl_kernels/nchw/direct_convolution_quantized.clembed"
+        "nchw/direct_convolution.cl",
+#include "./cl_kernels/nchw/direct_convolution.clembed"
     },
     {
         "nchw/im2col.cl",

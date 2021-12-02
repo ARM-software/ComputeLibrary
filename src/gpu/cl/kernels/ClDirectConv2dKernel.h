@@ -72,15 +72,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const GPUTarget target);
+                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
 
 public:
     DataLayout    _data_layout{};
-    BorderSize    _border_size{};
     PadStrideInfo _conv_info{};
 };
 } // namespace kernels
