@@ -136,7 +136,14 @@ UniqueDepthwiseCommon<TInput, TWeight, TOutput> depthwise(const DepthwiseArgs &a
 {
   const DepthwiseImplementation<TInput, TWeight, TOutput, OutputStage> *impl = nullptr;
   const bool success = find_implementation<TInput, TWeight, TOutput, OutputStage>(args, os, impl);
-  return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(success ? impl->get_instance(args, os) : nullptr);
+
+  if(success)
+  {
+        auto i =  impl->get_instance(args, os);
+        i->set_name(impl->name);
+        return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(i);
+  }
+  return nullptr;
 }
 
 }  // namespace depthwise
