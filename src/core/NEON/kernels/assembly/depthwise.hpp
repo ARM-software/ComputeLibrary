@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,10 +78,20 @@ struct DepthwiseArgs
 template <typename TInput, typename TWeight, typename TOutput>
 class DepthwiseCommon : public IDepthwiseCommon
 {
+private:
+    std::string _name{};
+
 protected:
     const DepthwiseArgs m_args; // Copy of arguments
-
 public:
+    std::string name() const
+    {
+        return _name;
+    }
+    void set_name(const std::string &n)
+    {
+        _name = n;
+    }
     DepthwiseCommon(const DepthwiseArgs &args)
         : m_args(args) {};
     DepthwiseCommon(DepthwiseCommon &) = delete;

@@ -123,6 +123,7 @@ private:
     std::vector<int32_t>                                   _multipliers{};
     std::vector<int32_t>                                   _left_shifts{};
     std::vector<int32_t>                                   _right_shifts{};
+    std::string                                            _name{};
 };
 } // namespace kernels
 } // namespace cpu
