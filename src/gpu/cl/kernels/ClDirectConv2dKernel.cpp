@@ -453,6 +453,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         build_options.add_option("-DM0=" + support::cpp11::to_string(m0));
         build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
         build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
+        build_options.add_option_if((src->dimension(channel_idx) % k0) != 0, "-DLEFTOVER_LOOP");
         build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
 
         if(is_data_type_quantized(data_type))

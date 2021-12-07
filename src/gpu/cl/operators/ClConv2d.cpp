@@ -258,20 +258,15 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 const bool is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
                 const bool is_ifm_ge_16       = src->dimension(idx_c) >= 16;
                 const bool is_ifm_gt_ofm      = weights->dimension(0U) * weights->dimension(1U) * weights->dimension(2U) > weights->dimension(3U);
-                const bool is_ofm_le_4        = weights->dimension(3U) <= 4;
 
                 // Run Winograd if valid and IFM >= 16
                 if(is_wino_valid && is_ifm_ge_16)
                 {
                     return ConvolutionMethod::WINOGRAD;
                 }
-                // Run Direct for Large kernel size
-                if(is_large_kernel_sz && is_ifm_gt_ofm && is_direct_valid)
-                {
-                    return ConvolutionMethod::DIRECT;
-                }
 
-                if(is_ofm_le_4 && is_ifm_gt_ofm && is_direct_valid)
+                // Run Direct for Large kernel size
+                if(is_large_kernel_sz && is_ifm_ge_16 && is_direct_valid && is_ifm_gt_ofm)
                 {
                     return ConvolutionMethod::DIRECT;
                 }

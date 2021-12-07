@@ -192,36 +192,35 @@ __kernel void direct_convolution_nhwc(
 
         // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
-        if((_ISRC_CHANNELS % K0) != 0)
+#if defined(LEFTOVER_LOOP)
+        // Left-over accumulations
+        for(; k < _ISRC_CHANNELS; ++k)
         {
-            // Left-over accumulations
-            for(; k < _ISRC_CHANNELS; ++k)
+            TILE(SRC_DATA_TYPE, M0, 1, a);
+            TILE(WEI_DATA_TYPE, N0, 1, b);
+
+            LOOP_UNROLLING(int, i, 0, 1, M0,
             {
-                TILE(SRC_DATA_TYPE, M0, 1, a);
-                TILE(WEI_DATA_TYPE, N0, 1, b);
+                a[i].v = ZERO_VALUE;
+            })
 
-                LOOP_UNROLLING(int, i, 0, 1, M0,
-                {
-                    a[i].v = ZERO_VALUE;
-                })
+            // Load tile from the src tensor
+            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
 
-                // Load tile from the src tensor
-                T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            // Load tile from the weights tensor
+            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
+            T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
 
-                // Load tile from the weights tensor
-                // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
-                T_LOAD(WEI_DATA_TYPE, N0, 1, BUFFER, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
+            // Compute the matrix multiplication between two tiles
+            T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
 
-                // Compute the matrix multiplication between two tiles
-                T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
+            // Apply the offset correction (operation usually needed for asymmetric quantized computation)
+            // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+            T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
 
-                // Apply the offset correction (operation usually needed for asymmetric quantized computation)
-                // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
-                T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
-
-                ++ck;
-            }
+            ++ck;
         }
+#endif // defined(LEFTOVER_LOOP)
     }
 
     // Offset correction required for the quantized asymmetric computation
