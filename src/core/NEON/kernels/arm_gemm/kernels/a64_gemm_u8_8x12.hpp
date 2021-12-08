@@ -80,7 +80,7 @@ public:
                     return { 15.361, 0.9341, 0.1636 };
 
                 case CPUModel::V1:
-                    return { 62.40, 4.71, 0.67 };
+                    return { 51.14, 7.38, 0.65 };
 
                 default:
                     return { 29.0698, 3.9793, 0.4003 };
