@@ -39,6 +39,7 @@ namespace arm_compute
     X(A55r1)                       \
     X(A35)                         \
     X(A73)                         \
+    X(A76)                         \
     X(A510)                        \
     X(X1)                          \
     X(V1)                          \

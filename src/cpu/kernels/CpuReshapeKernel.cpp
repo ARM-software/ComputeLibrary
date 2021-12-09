@@ -143,9 +143,13 @@ size_t CpuReshapeKernel::get_mws(const CPUInfo &platform, size_t thread_count) c
     {
         return 10240;
     }
-    else 
+    else if (platform.get_cpu_model() == CPUModel::A76)
     {
         return 9216;
+    }
+    else
+    {
+        return ICPPKernel::default_mws;
     }
 }
 

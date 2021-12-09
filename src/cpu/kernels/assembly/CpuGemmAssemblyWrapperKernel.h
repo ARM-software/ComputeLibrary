@@ -130,9 +130,13 @@ public:
         {
             return 3072;
         }
-        else 
+        else if (platform.get_cpu_model() == CPUModel::A76)
         {
             return 4096;
+        }
+        else
+        {
+            return ICPPKernel::default_mws;
         }
     }
 
