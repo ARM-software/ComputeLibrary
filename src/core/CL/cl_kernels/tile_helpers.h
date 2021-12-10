@@ -970,8 +970,8 @@
 #define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 #define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 
-#define T_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
-#define T_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
+#define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
+#define V_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
 
 /** Element-wise activation for quantized types
  *
@@ -995,6 +995,25 @@
         })                                                                                          \
     })
 
+/** Element-wise addition between two tiles
+ *
+ * @note Performs: LHS + RHS = DST
+ *
+ * @param[in]  DATA_TYPE LHS/RHS/DST data type
+ * @param[in]  M0        Number of LHS rows
+ * @param[in]  N0        Number of LHS columns
+ * @param[in]  lhs       LHS tile
+ * @param[in]  rhs       Constant RHS tile
+ * @param[out] dst       DST tile
+ */
+#define T_ADD(DATA_TYPE, M0, N0, lhs, rhs, dst) \
+    ({                                                            \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
+        {                                                         \
+            dst[_m0].v = lhs[_m0].v + rhs[_m0].v; \
+        })                                                        \
+    })
+
 /** Element-wise addition with a constant value
  *
  * @note Performs: LHS + constant = DST
@@ -1010,15 +1029,31 @@
     ({                                                            \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
         {                                                         \
-            LOOP_UNROLLING(int, _n0, 0, 1, N0,                    \
-            {                                                     \
-                dst[_m0].s[_n0] = lhs[_m0].s[_n0] + rhs_constant; \
-            })                                                    \
+            dst[_m0].v = lhs[_m0].v + (DATA_TYPE)rhs_constant;               \
         })                                                        \
     })
 
-#define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(T_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
-#define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(T_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+/** Element-wise scale with a constant value
+ *
+ * @note Performs: LHS * constant = DST
+ *
+ * @param[in]  DATA_TYPE    LHS/RHS/DST data type
+ * @param[in]  M0           Number of LHS rows
+ * @param[in]  N0           Number of LHS columns
+ * @param[in]  lhs          LHS tile
+ * @param[in]  rhs_constant Constant value
+ * @param[out] dst          DST tile
+ */
+#define T_SCALE_CONSTANT(DATA_TYPE, M0, N0, lhs, rhs_constant, dst) \
+    ({                                                            \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
+        {                                                         \
+            dst[_m0].v = lhs[_m0].v * (DATA_TYPE)rhs_constant; \
+        })                                                        \
+    })
 
 /** Element-wise operation with RHS broadcasted (RHS has the X dimension only)
  *
@@ -1041,8 +1076,8 @@
         })                                                  \
     })
 
-#define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(T_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
-#define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(T_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 /** Element-wise operation between two tiles (LHS and RHS)
  *

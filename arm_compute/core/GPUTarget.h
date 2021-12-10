@@ -51,9 +51,11 @@ enum class GPUTarget
     G31           = 0x242,
     G76           = 0x250,
     G77           = 0x310,
+    G57           = 0x311,
     G78           = 0x320,
     G710          = 0x330,
-    G57           = 0x340,
+    G715          = 0x340,
+    G615          = 0x341
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClGemm.h"
 

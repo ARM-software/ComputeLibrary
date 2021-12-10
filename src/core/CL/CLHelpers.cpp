@@ -491,4 +491,8 @@ void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<in
     }
 }
 
+bool arm_matrix_multiply_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_arm_matrix_multiply");
+}
 } // namespace arm_compute

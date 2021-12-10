@@ -260,5 +260,12 @@ bool export_weights_to_cl_image(const ITensorInfo *tensor);
  */
 void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values);
 
+/** Helper function to check whether the cl_arm_matrix_multiply extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool arm_matrix_multiply_supported(const cl::Device &device);
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

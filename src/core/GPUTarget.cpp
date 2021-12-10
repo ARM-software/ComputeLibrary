@@ -47,6 +47,14 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G57;
     }
+    else if(version.find("G715") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G715;
+    }
+    else if(version.find("G615") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G615;
+    }
     else
     {
         return arm_compute::GPUTarget::UNKNOWN;
@@ -141,7 +149,9 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G77, "g77" },
         { GPUTarget::G78, "g78" },
         { GPUTarget::G710, "g710" },
-        { GPUTarget::G57, "g57" }
+        { GPUTarget::G57, "g57" },
+        { GPUTarget::G715, "g715" },
+        { GPUTarget::G615, "g615" }
     };
 
     return gpu_target_map[target];

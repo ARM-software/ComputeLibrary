@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,9 @@ enum class CLGEMMKernelType
     /** Reshaped GEMM kernel where both lhs and rhs matrices are reshaped. Configurable reshape and block size */
     RESHAPED,
     /** Reshaped GEMM kernel where only the rhs matrix is reshaped. Configurable reshape and block size */
-    RESHAPED_ONLY_RHS
+    RESHAPED_ONLY_RHS,
+    /** Reshaped GEMM kernel where only the rhs matrix is reshaped. Using MMUL with configurable block size. */
+    RESHAPED_ONLY_RHS_MMUL
 };
 
 /** OpenCL GEMM kernel selection parameters. These information are retrieved to select the GEMM kernel on OpenCL */

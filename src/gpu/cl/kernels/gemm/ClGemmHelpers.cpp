@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,6 +109,23 @@ Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, 
     }
 
     return Status{};
+}
+
+bool is_mmul_kernel_preferred(const unsigned int m, const unsigned int n, const unsigned int k, const unsigned int b,
+                              const DataType data_type, unsigned int &best_m0, unsigned int &best_n0)
+{
+    ARM_COMPUTE_UNUSED(n, k, b, data_type);
+
+    const unsigned int mmul_k0 = 4;
+    best_m0                    = 4;
+    best_n0                    = 4;
+
+    const unsigned int ceil_to_multiple_m_m0             = ceil_to_multiple(m, best_m0);
+    const unsigned int m_div_m0                          = ceil_to_multiple_m_m0 / best_m0;
+    const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
+    const unsigned int gws_y                             = ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0;
+
+    return ((k % mmul_k0) == 0) && (gws_y > 4);
 }
 } // namespace gemm
 } // namespace kernels
