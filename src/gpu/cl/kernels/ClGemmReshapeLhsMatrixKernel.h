@@ -68,9 +68,6 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    bool _reinterpret_input_as_3d{ false };
 };
 } // namespace kernels
 } // namespace opencl

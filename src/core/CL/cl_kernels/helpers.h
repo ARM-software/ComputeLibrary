@@ -392,18 +392,18 @@
 #define vload_partial_12(DATA, OFFSET, PTR)       \
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
     vload_partial_4(DATA.s89AB, OFFSET, PTR + 8);
-
+// For vload_partial_{13,14,15}, an 8-vector size has been passed, because vectors size of size 5,6,7 are not supported
 #define vload_partial_13(DATA, OFFSET, PTR)       \
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vload_partial_5(DATA.s89ABC, OFFSET, PTR + 8);
+    vload_partial_5(DATA.s89ABCDEF, OFFSET, PTR + 8);
 
 #define vload_partial_14(DATA, OFFSET, PTR)       \
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vload_partial_6(DATA.s89ABCD, OFFSET, PTR + 8);
+    vload_partial_6(DATA.s89ABCDEF, OFFSET, PTR + 8);
 
 #define vload_partial_15(DATA, OFFSET, PTR)       \
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
-    vload_partial_7(DATA.s89ABCDE, OFFSET, PTR + 8);
+    vload_partial_7(DATA.s89ABCDEF, OFFSET, PTR + 8);
 
 #define vload_partial_16(DATA, OFFSET, PTR) \
     DATA = vload16(OFFSET, PTR);

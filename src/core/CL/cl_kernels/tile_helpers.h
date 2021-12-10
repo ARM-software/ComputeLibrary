@@ -496,6 +496,42 @@
         })                                                                                              \
     })
 
+/** Load a tile from global memory (tensor) using an indirect Y index tile and conditionally use a different length for the load
+ *
+ * @note If WIDTH1_CONDITION is true, the load will use the WIDTH1 length for the store
+ * @note The vectors are stored in reverse order so the invalid rows are overwritten by the valid ones
+ *
+ * @param[in]  DATA_TYPE        Data type
+ * @param[in]  HEIGHT           Number of dst rows
+ * @param[in]  WIDTH0           Store width to use if WIDTH1_CONDITION = false
+ * @param[in]  WIDTH1           Store width to use if WIDTH1_CONDITION = true
+ * @param[in]  TENSOR_TYPE      Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
+ *                              In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR           Tensor basename
+ * @param[in]  X                Starting X position
+ * @param[in]  STRIDE_Y         Stride Y (in bytes) used to load each row.
+ * @param[in]  WIDTH1_CONDITION Condition to select the WIDTH1 store
+ * @param[out] dst              Output tile
+ * @param[out] indirect_y       Indirect Y index tile
+ */
+#define T_LOAD_INDIRECT_WIDTH_SELECT(DATA_TYPE, HEIGHT, WIDTH0, WIDTH1, TENSOR_TYPE, TENSOR, X, STRIDE_Y, WIDTH1_CONDITION, dst, indirect_y)                                                      \
+    ({                                                                                                                                                                                             \
+        if(WIDTH1_CONDITION)                                                                                                                                                                       \
+        {                                                                                                                                                                                          \
+            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
+            {                                                                                                                                                                                      \
+                VLOAD_PARTIAL(WIDTH0, WIDTH1)                                                         \
+                (dst[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y));               \
+            })                                                                                                                                                                                     \
+        }                                                                                                                                                                                          \
+        else                                                                                                                                                                                       \
+        {                                                                                                                                                                                          \
+            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
+            {                                                                                                                                                                                      \
+                dst[HEIGHT - 1 - _i].v = V_LOAD(DATA_TYPE, WIDTH0, TENSOR_TYPE, TENSOR, X, (indirect_y[HEIGHT - 1 - _i].v), STRIDE_Y); \
+            })                                                                                                                                                                                     \
+        }                                                                                                                                                                                          \
+    })
 /** Load a tile from global memory (tensor) when the tensor is stored using a NHWC layout
  *
  * @param[in]  DATA_TYPE     Data type
