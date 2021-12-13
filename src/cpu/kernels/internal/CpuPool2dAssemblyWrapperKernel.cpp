@@ -104,6 +104,11 @@ Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const IT
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((info.pool_type != PoolingType::AVG) && (info.pool_type != PoolingType::MAX),
                                     "Only AVG and MAX pooling are supported by assembly kernels");
 
+    const auto ps          = info.pad_stride_info;
+    const auto max_padding = std::max({ ps.pad_left(), ps.pad_right(), ps.pad_top(), ps.pad_bottom() });
+    const auto min_pool_sz = std::min(info.pool_size.x(), info.pool_size.y());
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(max_padding > min_pool_sz, "Convolution padding greater than pool size is unsupported by assembly kernels");
+
     if(dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
@@ -278,12 +283,12 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
 size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation 
-    if (platform.get_cpu_model() == CPUModel::A73 ) 
+    // Tuning results that gave optimized results in performance investigation
+    if(platform.get_cpu_model() == CPUModel::A73)
     {
         return 10240;
     }
-    else 
+    else
     {
         return 9216;
     }
