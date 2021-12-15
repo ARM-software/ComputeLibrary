@@ -630,7 +630,7 @@ std::unique_ptr<IFunction> create_fused_convolution_with_post_op(FusedConvolutio
                                << " Output shape: " << output->info()->tensor_shape()
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
-                               << " Post ops" << post_ops;
+                               << " Post ops" << post_ops
                                << std::endl);
     return std::move(func);
 }
@@ -713,8 +713,7 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_with_pos
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
-                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
-                               << " Post Ops:" << post_ops;
+                               << " Post Ops:" << post_ops
                                << std::endl);
     return std::move(func);
 }
