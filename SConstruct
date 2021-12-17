@@ -371,7 +371,7 @@ if not GetOption("help"):
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
 
 if env['high_priority'] and env['build_config']:
-    print("The high priority library cannot be built in conjuction with a user-specified build configuration")
+    print("The high priority library cannot be built in conjunction with a user-specified build configuration")
     Exit(1)
 
 if not env['high_priority'] and not env['build_config']:
