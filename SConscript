@@ -52,8 +52,10 @@ def build_bootcode_objs(sources):
 #                    such as the compiler flags and defines.
 #
 # @return A list of objects for the corresponding architecture.
+#
 def build_multi_isa_objs(sources, arch_v8_info):
 
+    # Get the march
     arch_v8 = arch_v8_info[0]
 
     # Create a temp environment
@@ -65,24 +67,20 @@ def build_multi_isa_objs(sources, arch_v8_info):
         tmp_env.Append(CPPDEFINES = arch_v8_info[1]['cppdefines'])
 
     if 'sve' in arch_v8:
-        # Toggle SVE/SVE2 specific extensions
         tmp_env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
         if 'sve2' in arch_v8:
             tmp_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
     else:
-        # FIXME: The NEON flags should be always defined for CPU.
-        #        however, build fails when SVE/SVE2 & NEON flags
-        #        defined together.
         tmp_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
 
     # we must differentiate the file object names
     # as we accumulate the set.
-    obj = []
+    objs = []
     for src in sources:
-        obj += tmp_env.SharedObject(target='{}-{}'.format(src, arch_v8), source=src)
+        objs += tmp_env.SharedObject('{}-{}.o'.format(src.replace('.cpp', ''), arch_v8), src)
 
-    Default(obj)
-    return obj
+    tmp_env.Default(objs)
+    return objs
 
 
 def build_objs(sources):
@@ -93,7 +91,7 @@ def build_objs(sources):
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     cloned_build_env = build_env.Clone()
-    if env['os'] == 'android' and static == False: 
+    if env['os'] == 'android' and static == False:
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
 
@@ -106,7 +104,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
             obj = cloned_build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     obj = install_lib(obj)
-    Default(obj)
+    build_env.Default(obj)
     return obj
 
 
@@ -563,22 +561,36 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-# Build static libraries
+# STATIC library build.
+#
+# Multi-ISA: We split the library into 2 static libs: arm_compute-static.a and arm_compute_multi_isa-static.a
+# to avoid 'argument list too long' error which being thrown due to OS string length limitation at link time.
+#
+# For single arch build: No change and we produce a single arm_compute-static.a
 if (env['multi_isa']):
-    # Available architecture
+    # Get v8 variants
     arch_v8s = filedefs['cpu']['arch']
     for arch_v8_info in arch_v8s.items():
         multi_isa_objs_list += build_multi_isa_objs(lib_files_sve, arch_v8_info)
 
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + multi_isa_objs_list, static=True)
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files, static=True)
+    arm_compute_multi_isa_a = build_library('arm_compute_multi_isa-static', arm_compute_env, multi_isa_objs_list, static=True)
+    Export('arm_compute_multi_isa_a')
 else:
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + lib_files_sve, static=True)
+    arm_compute_multi_isa_a = None
+
 Export('arm_compute_a')
 
-# Build shared libraries
+# SHARED library build.
+#
+# Multi-ISA: we leverage the prior static build such that the resulting
+# "libarm_compute.so" is combined from "arm_compute_multi_isa-static.a" and "lib_files" objects.
+#
+# For single arch build: No change.
 if env['os'] != 'bare_metal' and not env['standalone']:
     if (env['multi_isa']):
-        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + multi_isa_objs_list, static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files, static=False, libs=[arm_compute_multi_isa_a])
     else:
         arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + lib_files_sve, static=False)
 
@@ -602,7 +614,7 @@ arm_compute_graph_env = arm_compute_env.Clone()
 # Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a, arm_compute_multi_isa_a ])
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
@@ -611,7 +623,7 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Export('arm_compute_graph_so')
 
 if env['standalone']:
-    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])
+    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_multi_isa_a])
 else:
     alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
 

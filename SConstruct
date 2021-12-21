@@ -126,6 +126,7 @@ vars.AddVariables(
     ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
 )
 
+
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
 build_path = env['build_dir']
 # If build_dir is a relative path then add a #build/ prefix:
@@ -248,6 +249,13 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
     print("ERROR: armv7a architecture has only 32-bit execution state")
     Exit(1)
 
+if 'sve' in env['arch']:
+    env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
+    if 'sve2' in env['arch']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
+else:
+    env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
+
 # Add architecture specific flags
 prefix = ""
 if env['multi_isa']:
@@ -261,17 +269,6 @@ if env['multi_isa']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
 else: # NONE "multi_isa" builds
-
-    if 'sve' in env['arch']:
-        env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
-        if 'sve2' in env['arch']:
-            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
-    else:
-        # FIXME: The NEON flags should be always defined for CPU.
-        #        however, build fails when SVE/SVE2 & NEON flags
-        #        defined together.
-        env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
-    
 
     if 'v7a' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
@@ -483,3 +480,11 @@ if env['exceptions']:
         print("WARNING: Building tests for bare metal and armv7a is not supported")
         Return()
     SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)
+
+# Unknown variables are not allowed
+# Note: we must delay the call of UnknownVariables until after
+# we have applied the Variables object to the construction environment
+unknown = vars.UnknownVariables()
+if unknown:
+    print("Unknown variables: %s" % " ".join(unknown.keys()))
+    Exit(1)
