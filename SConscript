@@ -92,13 +92,18 @@ def build_objs(sources):
 
 
 def build_library(name, build_env, sources, static=False, libs=[]):
+    cloned_build_env = build_env.Clone()
+    if env['os'] == 'android' and static == False: 
+        cloned_build_env["LINKFLAGS"].remove('-pie')
+        cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
+
     if static:
-        obj = build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
     else:
         if env['set_soname']:
-            obj = build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
-            obj = build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = cloned_build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     obj = install_lib(obj)
     Default(obj)
