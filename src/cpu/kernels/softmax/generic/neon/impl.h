@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_SOFTMAX_LIST_H
-#define SRC_CORE_NEON_KERNELS_SOFTMAX_LIST_H
+#ifndef SRC_CORE_NEON_KERNELS_SOFTMAX_IMPL_H
+#define SRC_CORE_NEON_KERNELS_SOFTMAX_IMPL_H
 
-#include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "support/SaturateCast.h"
@@ -385,4 +384,4 @@ void neon_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *c
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_SOFTMAX_LIST_H */
+#endif /* SRC_CORE_NEON_KERNELS_SOFTMAX_IMPL_H */

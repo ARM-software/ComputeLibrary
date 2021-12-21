@@ -1872,8 +1872,18 @@
             "src/cpu/kernels/CpuSoftmaxKernel.cpp",
             "src/runtime/NEON/functions/NESoftmaxLayer.cpp"
           ],
+          "neon":{
+            "fp32": ["src/cpu/kernels/softmax/generic/neon/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"],
+            "qasymm8": ["src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
+          },
           "sve": {
-            "common": [ "src/cpu/kernels/softmax/impl/sve/impl.cpp" ]
+            "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ],
+            "fp32": ["src/cpu/kernels/softmax/generic/sve/fp32.cpp"],
+            "fp16": ["src/cpu/kernels/softmax/generic/sve/fp16.cpp"],
+            "qasymm8": ["src/cpu/kernels/softmax/generic/sve/qasymm8.cpp" ,"src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp" ],
+            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp", "src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
           }
         }
       },

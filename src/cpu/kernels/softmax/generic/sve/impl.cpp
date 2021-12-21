@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,8 @@
  * SOFTWARE.
  */
 #if defined(ARM_COMPUTE_ENABLE_SVE)
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
-#include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/SVEMath.h"
+#include "src/cpu/kernels/softmax/generic/sve/impl.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include <arm_sve.h>
 
 namespace arm_compute
 {

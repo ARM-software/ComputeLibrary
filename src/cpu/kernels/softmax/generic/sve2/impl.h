@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H
-#define SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H
+#ifndef SRC_CORE_SVE2_KERNELS_SOFTMAX_IMPL_H
+#define SRC_CORE_SVE2_KERNELS_SOFTMAX_IMPL_H
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
-#include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include <arm_sve.h>
 
 namespace arm_compute
 {
 namespace cpu
 {
 template <typename ScalarType>
-void sve_logits_1d_max(const ITensor *in, ITensor *out, const Window &window);
-
-template <typename ScalarType>
-void sve_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *const tmp,
-                                 ITensor *out, const float beta, bool is_log, const Window &window);
-
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-template <typename ScalarType>
-void sve_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void *const tmp,
-                                     ITensor *out, float beta, bool is_log, const Window &window)
+void sve2_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void *const tmp,
+                                      ITensor *out, float beta, bool is_log, const Window &window)
 {
     const int start_x     = in->info()->valid_region().anchor.x();
     const int input_width = in->info()->valid_region().shape.x();
@@ -215,9 +204,7 @@ void sve_softmax_logits_1d_quantized(const ITensor *in, const ITensor *max, void
     },
     in_it, max_it, out_it);
 }
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-
-#endif /* SRC_CORE_SVE_KERNELS_SOFTMAX_LIST_H */
+#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
+#endif /* SRC_CORE_SVE2_KERNELS_SOFTMAX_IMPL_H */
