@@ -232,6 +232,18 @@ const std::string &string_from_pooling_type(PoolingType type)
     return pool_type_map[type];
 }
 
+bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info)
+{
+    if(info.is_global_pooling || info.exclude_padding || info.pool_size.x() == 0 || info.pool_size.y() == 0)
+    {
+        return false;
+    }
+    const auto ps                = info.pad_stride_info;
+    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ ps.pad_left(), ps.pad_right() });
+    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ ps.pad_top(), ps.pad_bottom() });
+    return pool_le_padding_x || pool_le_padding_y;
+}
+
 const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
 {
     static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =

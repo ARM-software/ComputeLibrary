@@ -71,6 +71,8 @@ public:
      * |F32            |F32            |
      *
      * @note F16 is supported for pool sizes 2 and 3 only
+     * @note Source tensor is padded with -inf for MAX pooling and 0 otherwise
+     *       Cases where pooling region is completely outside input tensor are only supported for floating point data type
      *
      * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.

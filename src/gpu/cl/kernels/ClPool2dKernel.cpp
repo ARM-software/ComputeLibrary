@@ -57,6 +57,9 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     unsigned int pool_size_y       = is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
     int          output_width      = 0;
     int          output_height     = 0;
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_region_entirely_outside_input(pool_info), "Pooling region that is entirely outside input tensor is unsupported");
+
     std::tie(output_width, output_height) = scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
                                                                      pool_size_x, pool_size_y, pool_info.pad_stride_info);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1), "Calculated output dimension size is invalid");

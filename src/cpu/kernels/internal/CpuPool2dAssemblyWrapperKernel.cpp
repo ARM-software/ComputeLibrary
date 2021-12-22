@@ -104,10 +104,7 @@ Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const IT
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((info.pool_type != PoolingType::AVG) && (info.pool_type != PoolingType::MAX),
                                     "Only AVG and MAX pooling are supported by assembly kernels");
 
-    const auto ps          = info.pad_stride_info;
-    const auto max_padding = std::max({ ps.pad_left(), ps.pad_right(), ps.pad_top(), ps.pad_bottom() });
-    const auto min_pool_sz = std::min(info.pool_size.x(), info.pool_size.y());
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(max_padding > min_pool_sz, "Convolution padding greater than pool size is unsupported by assembly kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_region_entirely_outside_input(info), "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
 
     if(dst->total_size() > 0)
     {

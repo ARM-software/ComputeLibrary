@@ -49,10 +49,9 @@ namespace
 {
 // Compare if 2 values are both infinities and if they are "equal" (has the same sign)
 template <typename T>
-bool are_equal_infs(T val0, T val1)
+inline bool are_equal_infs(T val0, T val1)
 {
-    const auto same_sign = std::signbit(val0) == std::signbit(val1);
-    return (!support::cpp11::isfinite(val0)) && (!support::cpp11::isfinite(val1)) && same_sign;
+    return (!support::cpp11::isfinite(val0)) && (!support::cpp11::isfinite(val1)) && (std::signbit(val0) == std::signbit(val1));
 }
 } // namespace
 

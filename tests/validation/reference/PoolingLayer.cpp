@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const Pooling
                         int hend     = std::min(hstart + pool_size_y, h_src);
                         wstart       = std::max(wstart, 0);
                         hstart       = std::max(hstart, 0);
-                        auto max_val = std::numeric_limits<ACC_T>::lowest();
+                        auto max_val = -std::numeric_limits<ACC_T>::infinity();
                         int  max_index{ 0 };
                         for(int y = hstart; y < hend; ++y)
                         {

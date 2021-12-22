@@ -81,6 +81,14 @@ const auto qasymm8_signed_out_qinfo_dataset = framework::dataset::make("OutputQu
     QuantizationInfo(.1f, -5),  // Multiplier <= 1
     QuantizationInfo(2.f, -3)   // Multiplier > 1
 });
+
+// Cases where pooling region is completely outside the input tensor (excluding global pooling)
+const auto pool_outside_input_dataset = zip(zip(zip(zip(
+                                                        framework::dataset::make("Shape", { TensorShape{ 2U, 2U, 1U }, TensorShape{ 2U, 2U, 4U }, TensorShape{ 3U, 5U, 2U }, TensorShape{ 10U, 20U, 3U } }),
+                                                        framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG, PoolingType::L2, PoolingType::MAX })),
+                                                    framework::dataset::make("PoolingSize", { Size2D{ 2, 2 }, Size2D{ 3, 3 }, Size2D{ 2, 2 }, Size2D{ 3, 6 } })),
+                                                framework::dataset::make("PadStride", { PadStrideInfo{ 1, 1, 2, 2 }, PadStrideInfo{ 1, 1, 4, 4 }, PadStrideInfo{ 1, 1, 3, 3 }, PadStrideInfo{ 1, 1, 2, 5 } })),
+                                            framework::dataset::make("ExcludePadding", { false, false, false, false }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -186,6 +194,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<float>, framework::Datase
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
+TEST_SUITE(CornerCases)
+FIXTURE_DATA_TEST_CASE(PoolRegionCompletelyOutsideInput, NEPoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(pool_outside_input_dataset,
+                       framework::dataset::make("DataType",
+                                                DataType::F32)),
+                       pool_data_layout_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // CornerCases
 TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -213,6 +231,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half>, framework::Dataset
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
+TEST_SUITE(CornerCases)
+FIXTURE_DATA_TEST_CASE(PoolRegionCompletelyOutsideInput, NEPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(pool_outside_input_dataset,
+                       framework::dataset::make("DataType",
+                                                DataType::F16)),
+                       pool_data_layout_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // CornerCases
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END() // Float

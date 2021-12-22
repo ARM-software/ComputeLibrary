@@ -199,6 +199,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     const int           idx_width       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int           idx_height      = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type()))
+                                    && (is_pool_region_entirely_outside_input(pool_info)),
+                                    "Pooling region that is entirely outside input tensor is unsupported for non-float types");
+
     std::tie(output_width, output_height) = scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
                                                                      pool_size.x(), pool_size.y(), pool_info.pad_stride_info);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1), "Calculated output dimension size is invalid");

@@ -886,6 +886,13 @@ const std::string &string_from_norm_type(NormType type);
  * @return The string describing the pooling type.
  */
 const std::string &string_from_pooling_type(PoolingType type);
+/** Check if the pool region is entirely outside the input tensor
+ *
+ * @param[in] info @ref PoolingLayerInfo to be checked.
+ *
+ * @return True if the pool region is entirely outside the input tensor, False otherwise.
+ */
+bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info);
 /** Translates a given GEMMLowp output stage to a string.
  *
  * @param[in] output_stage @ref GEMMLowpOutputStageInfo to be translated to string.
