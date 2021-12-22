@@ -213,7 +213,7 @@ public:
     template <typename...>
     void setup(TensorShape src_shape, PoolingLayerInfo pool_info, DataType data_type)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, DataLayout::NCHW);
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, pool_info.data_layout);
     }
 };
 
