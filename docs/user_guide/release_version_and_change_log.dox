@@ -1365,7 +1365,7 @@ v17.06 Public major release
  - Added infrastructure to provide GPU specific optimisation for some OpenCL kernels.
  - Added @ref OMPScheduler (OpenMP) scheduler for Neon
  - Added @ref SingleThreadScheduler scheduler for Arm® Neon™ (For bare metal)
- - User can specify his own scheduler by implementing the @ref IScheduler interface.
+ - User can specify their own scheduler by implementing the @ref IScheduler interface.
  - New OpenCL kernels / functions:
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
     - CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer

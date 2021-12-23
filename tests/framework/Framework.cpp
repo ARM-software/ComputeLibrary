@@ -529,7 +529,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     {
         if(_stop_on_error)
         {
-            throw std::runtime_error("Abort on first error.");
+            throw std::runtime_error("Abandon on first error.");
         }
     }
 

@@ -152,7 +152,7 @@ public:
      */
     virtual void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func);
 
-    /** Returns the number of threads that the SingleThreadScheduler has in his pool.
+    /** Returns the number of threads that the SingleThreadScheduler has in its pool.
      *
      * @return Number of threads available in SingleThreadScheduler.
      */

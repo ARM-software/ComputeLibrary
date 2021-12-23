@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,7 +123,7 @@ SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTe
     // Create reference
     SimpleTensor<T> dst{ TensorShape{ dst_shape }, src.data_type(), 1, out_quant_info };
 
-    // Sanity checks
+    // Health checks
     const int          num_batch_dimensions = std::max(0, static_cast<int>(dst_shape.num_dimensions()) - 1);
     const int          num_input_dimensions = src.shape().num_dimensions() - num_batch_dimensions;
     const unsigned int linear_input_size    = src.shape().total_size_lower(num_input_dimensions);

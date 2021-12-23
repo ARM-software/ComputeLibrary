@@ -143,12 +143,12 @@ inline T fma(T x, T y, T z)
  *  and writes the result to a character string buffer.
  *
  * @param[in] s    Pointer to a character string to write to
- * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
- * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null ending character
+ * @param[in] fmt  Pointer to a null-ended multibyte string specifying how to interpret the data.
  * @param[in] args Arguments forwarded to snprintf.
  *
  * @return  Number of characters that would have been written for a sufficiently large buffer
- *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
 inline int snprintf(char *s, size_t n, const char *fmt, Ts &&... args)
@@ -258,12 +258,12 @@ inline T fma(T x, T y, T z)
  *  and writes the result to a character string buffer.
  *
  * @param[in] s    Pointer to a character string to write to
- * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
- * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null ending character
+ * @param[in] fmt  Pointer to a null-ended multibyte string specifying how to interpret the data.
  * @param[in] args Arguments forwarded to std::snprintf.
  *
  * @return  Number of characters that would have been written for a sufficiently large buffer
- *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
 inline int snprintf(char *s, std::size_t n, const char *fmt, Ts &&... args)

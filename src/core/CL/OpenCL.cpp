@@ -163,7 +163,7 @@ bool opencl_is_available()
     // hold their state, we call a harmless OpenCL function (clGetPlatformIDs
     // with invalid parameters must result in CL_INVALID_VALUE) to ensure the
     // runtimes have a chance to initialize their static objects first. Thanks
-    // to C++11 rules about normal program termination (cf [basic.start]), this
+    // to C++11 rules about normal program completion (cf [basic.start]), this
     // ensures their static objects are destroyed last, i.e. after the
     // singleton CLScheduler is destroyed.
     //

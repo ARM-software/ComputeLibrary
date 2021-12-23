@@ -230,13 +230,13 @@ public:
 
     /** Indicates if test execution is stopped after the first failed test.
      *
-     * @return True if the execution is going to be aborted after the first failed test.
+     * @return True if the execution is going to be stopped after the first failed test.
      */
     bool stop_on_error() const;
 
-    /** Set whether to abort execution after the first failed test.
+    /** Set whether to stop execution after the first failed test.
      *
-     * @param[in] stop_on_error True if execution is going to be aborted after first failed test.
+     * @param[in] stop_on_error True if execution is going to be stopped after first failed test.
      */
     void set_stop_on_error(bool stop_on_error);
 
