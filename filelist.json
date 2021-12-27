@@ -1607,7 +1607,12 @@
           "common": [
             "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.cpp",
             "src/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.cpp"
-          ]
+          ],
+        "neon":{
+          "common":["src/cpu/kernels/meanstddevnorm/generic/neon/impl.cpp"],
+          "fp32":["src/cpu/kernels/meanstddevnorm/generic/neon/fp32.cpp"],
+          "fp16":["src/cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp"]
+        }
         }
       },
       "Mul": {
