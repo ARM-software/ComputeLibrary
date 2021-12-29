@@ -1508,7 +1508,13 @@
           "common": [
             "src/core/NEON/kernels/NEGenerateProposalsLayerKernel.cpp",
             "src/runtime/NEON/functions/NEGenerateProposalsLayer.cpp"
-          ]
+          ],
+          "neon":{
+            "common":["src/cpu/kernels/genproposals/generic/neon/impl.cpp"],
+            "fp16":["src/cpu/kernels/genproposals/generic/neon/fp16.cpp"],
+            "fp32":["src/cpu/kernels/genproposals/generic/neon/fp32.cpp"],
+            "qsymm16":["src/cpu/kernels/genproposals/generic/neon/qsymm16.cpp"]
+          }
         }
       },
       "InstanceNormalize": {
