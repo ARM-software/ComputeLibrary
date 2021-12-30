@@ -1568,7 +1568,14 @@
           "common": [
             "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.cpp",
             "src/runtime/NEON/functions/NEMaxUnpoolingLayer.cpp"
-          ]
+          ],
+          "neon":{
+            "common":["src/cpu/kernels/maxunpool/generic/neon/impl.cpp"],
+            "fp32":["src/cpu/kernels/maxunpool/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/maxunpool/generic/neon/fp16.cpp"],
+            "qasymm8":["src/cpu/kernels/maxunpool/generic/neon/qasymm8.cpp"],
+            "qasymm8_signed":["src/cpu/kernels/maxunpool/generic/neon/qasymm8_signed.cpp"]
+          }
         }
       },
       "Mean": {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,10 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
+#include "src/cpu/kernels/maxunpool/list.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
@@ -39,6 +40,67 @@ using namespace misc::shape_calculator;
 
 namespace
 {
+struct MaxUnpoolingSelectorData
+{
+    DataType dt;
+};
+
+using MaxUnpoolingSelctorPtr = std::add_pointer<bool(const MaxUnpoolingSelectorData &data)>::type;
+using MaxUnpoolingUKernelPtr = std::add_pointer<void(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window)>::type;
+
+struct MaxUnpoolingKernel
+{
+    const char                  *name;
+    const MaxUnpoolingSelctorPtr is_selected;
+    MaxUnpoolingUKernelPtr       ukernel;
+};
+
+static const MaxUnpoolingKernel available_kernels[] =
+{
+    {
+        "fp32_neon_maxunpooling",
+        [](const MaxUnpoolingSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_maxunpooling)
+    },
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "fp16_neon_maxunpooling",
+        [](const MaxUnpoolingSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_maxunpooling)
+    },
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(ARM_COMPUTE_ENABLE_NEON)
+    {
+        "qs8_neon_maxunpooling",
+        [](const MaxUnpoolingSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qs8_maxunpooling)
+    },
+    {
+        "qu8_neon_maxunpooling",
+        [](const MaxUnpoolingSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qu8_maxunpooling)
+    },
+#endif //defined(ARM_COMPUTE_ENABLE_NEON)
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const MaxUnpoolingKernel *get_implementation(const MaxUnpoolingSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
+}
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
@@ -69,7 +131,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 } // namespace
 
 NEMaxUnpoolingLayerKernel::NEMaxUnpoolingLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _indices(nullptr)
+    : _input(nullptr), _output(nullptr), _indices(nullptr)
 {
 }
 
@@ -82,45 +144,11 @@ void NEMaxUnpoolingLayerKernel::configure(const ITensor *input, const ITensor *i
     _output  = output;
     _indices = indices;
 
-    switch(input->info()->data_type())
-    {
-        case DataType::F32:
-            _func = &NEMaxUnpoolingLayerKernel::unpooling2<float>;
-            break;
-        case DataType::QASYMM8:
-            _func = &NEMaxUnpoolingLayerKernel::unpooling2<uint8_t>;
-            break;
-        case DataType::QASYMM8_SIGNED:
-            _func = &NEMaxUnpoolingLayerKernel::unpooling2<int8_t>;
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = &NEMaxUnpoolingLayerKernel::unpooling2<float16_t>;
-            break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        default:
-            break;
-    }
     const TensorShape output_shape = compute_unpool_shape(*input->info(), pool_info);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     auto window = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(window);
-}
-template <typename T>
-void NEMaxUnpoolingLayerKernel::unpooling2(const Window &window)
-{
-    Iterator  input(_input, window);
-    Iterator  indices(_indices, window);
-    auto      out_ptr      = reinterpret_cast<T *>(_output->buffer());
-    const int out_stride_w = static_cast<int>(_output->info()->strides_in_bytes()[3]);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        auto vindices                                         = reinterpret_cast<uint32_t *>(indices.ptr());
-        auto vinput                                           = reinterpret_cast<T *>(input.ptr());
-        out_ptr[id[3] * out_stride_w / sizeof(T) + *vindices] = *vinput;
-    },
-    input, indices);
 }
 
 Status NEMaxUnpoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
@@ -135,8 +163,9 @@ void NEMaxUnpoolingLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
-    // Run function
-    (this->*_func)(window);
+    const auto *uk = get_implementation(MaxUnpoolingSelectorData{ _input->info()->data_type() });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    uk->ukernel(_input, _output, _indices, window);
 }
 } // namespace arm_compute
