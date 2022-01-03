@@ -958,7 +958,14 @@
           "common": [
             "src/core/NEON/kernels/NEBoundingBoxTransformKernel.cpp",
             "src/runtime/NEON/functions/NEBoundingBoxTransform.cpp"
-          ]
+          ],
+          "neon":{
+            "common":["src/cpu/kernels/boundingboxtransform/generic/neon/impl.cpp"],
+            "fp32":["src/cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/boundingboxtransform/generic/neon/fp16.cpp"],
+            "qsymm16":["src/cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp"]
+
+          }
         }
       },
       "Cast": {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,9 +83,6 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    template <typename T>
-    void internal_run(const Window &window);
-
     const ITensor           *_boxes;
     ITensor                 *_pred_boxes;
     const ITensor           *_deltas;
