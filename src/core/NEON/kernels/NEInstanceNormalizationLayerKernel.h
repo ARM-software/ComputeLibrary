@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,13 +84,12 @@ private:
      */
     using NormalizationFunction = void(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
 
-    NormalizationFunction *_func;
-    ITensor               *_input;
-    ITensor               *_output;
-    float                  _gamma;
-    float                  _beta;
-    float                  _epsilon;
-    bool                   _use_mixed_precision{ true };
+    ITensor *_input;
+    ITensor *_output;
+    float    _gamma;
+    float    _beta;
+    float    _epsilon;
+    bool     _use_mixed_precision{ true };
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYERKERNEL_H */

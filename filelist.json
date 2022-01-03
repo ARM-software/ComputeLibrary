@@ -1530,7 +1530,12 @@
           "common": [
             "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.cpp",
             "src/runtime/NEON/functions/NEInstanceNormalizationLayer.cpp"
-          ]
+          ], 
+          "neon":{
+            "common":["src/cpu/kernels/instancenorm/generic/neon/impl.cpp"],
+            "fp16":["src/cpu/kernels/instancenorm/generic/neon/fp16.cpp"],
+            "fp32":["src/cpu/kernels/instancenorm/generic/neon/fp32.cpp"]
+          }
         }
       },
       "L2Normalize": {
