@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,8 @@ namespace
 template <typename T>
 inline bool are_equal_infs(T val0, T val1)
 {
-    return (!support::cpp11::isfinite(val0)) && (!support::cpp11::isfinite(val1)) && (std::signbit(val0) == std::signbit(val1));
+    const auto same_sign = support::cpp11::signbit(val0) == support::cpp11::signbit(val1);
+    return (!support::cpp11::isfinite(val0)) && (!support::cpp11::isfinite(val1)) && same_sign;
 }
 } // namespace
 

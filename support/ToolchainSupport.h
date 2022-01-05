@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -308,6 +308,23 @@ inline bool isfinite(half_float::half value)
 inline bool isfinite(bfloat16 value)
 {
     return std::isfinite(float(value));
+}
+
+// std::signbit
+template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+inline bool signbit(T value)
+{
+    return std::signbit(value);
+}
+
+inline bool signbit(half_float::half value)
+{
+    return half_float::signbit(value);
+}
+
+inline bool signbit(bfloat16 value)
+{
+    return std::signbit(float(value));
 }
 } // namespace cpp11
 } // namespace support
