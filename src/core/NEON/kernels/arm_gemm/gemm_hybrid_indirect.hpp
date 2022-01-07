@@ -23,7 +23,9 @@
  */
 #pragma once
 
+#if !defined(__OpenBSD__)
 #include <alloca.h>
+#endif /* !defined(__OpenBSD__) */
 
 #include <algorithm>
 #include <cassert>

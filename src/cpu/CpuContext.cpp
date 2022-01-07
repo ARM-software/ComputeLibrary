@@ -28,9 +28,9 @@
 #include "src/cpu/CpuTensor.h"
 
 #include <cstdlib>
-#if !defined(__APPLE__)
+#if !defined(__APPLE__) && !defined(__OpenBSD__)
 #include <malloc.h>
-#endif // !defined(__APPLE__)
+#endif // !defined(__APPLE__) && !defined(__OpenBSD__)
 
 
 namespace arm_compute

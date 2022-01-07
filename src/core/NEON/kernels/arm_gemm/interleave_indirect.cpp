@@ -28,7 +28,9 @@
 #include "interleave_indirect.hpp"
 #include "bfloat.hpp"
 
+#if !defined(__OpenBSD__)
 #include <alloca.h>
+#endif /* !defined(__OpenBSD__) */
 
 #include <algorithm>
 #include <cstddef>

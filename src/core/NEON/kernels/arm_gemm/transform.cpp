@@ -25,7 +25,9 @@
 
 #include "bfloat.hpp"
 
+#if !defined(__OpenBSD__)
 #include <alloca.h>
+#endif /* !defined(__OpenBSD__) */
 
 namespace arm_gemm {
 
