@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
+#include "src/core/common/Registrars.h"
+
+#include "src/cpu/kernels/select/list.h"
+
 #include <arm_neon.h>
 #include <map>
 #include <string>
@@ -42,125 +46,123 @@ namespace arm_compute
 {
 namespace
 {
-template <typename ScalarType, typename VectorType>
-void select_op(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
-               const int window_step_x, const int window_start_x, const int window_end_x, const int limit, VectorType (*condition_conversion)(const uint8_t *))
+
+struct SelectKernelSelectorData
 {
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    DataType dt;
+    bool     is_same_rank;
+};
 
-    Iterator condition(cond, win);
-    Iterator input1(in1, win);
-    Iterator input2(in2, win);
-    Iterator output(out, win);
+using SelectorPtr = std::add_pointer<bool(const SelectKernelSelectorData &data)>::type;
+using KernelPtr   = std::add_pointer<void(const ITensor *, const ITensor *, const ITensor *, ITensor *, const Window &)>::type;
 
-    execute_window_loop(win, [&](const Coordinates &)
+struct SelectKernelSelector
+{
+    const char       *name;
+    const SelectorPtr is_selected;
+    KernelPtr         ukernel;
+};
+
+static const SelectKernelSelector available_kernels[] =
+{
     {
-        auto       output_ptr    = reinterpret_cast<ScalarType *>(output.ptr());
-        const auto condition_ptr = reinterpret_cast<const uint8_t *>(condition.ptr());
-        const auto input1_ptr    = reinterpret_cast<const ScalarType *>(input1.ptr());
-        const auto input2_ptr    = reinterpret_cast<const ScalarType *>(input2.ptr());
-
-        int x = window_start_x;
-        for(; x <= limit; x += window_step_x)
-        {
-            const auto c = (*condition_conversion)(condition_ptr + x);
-            const auto a = wrapper::vloadq(input1_ptr + x);
-            const auto b = wrapper::vloadq(input2_ptr + x);
-            wrapper::vstore(output_ptr + x, wrapper::vbsl(c, a, b));
-        }
-        for(; x < window_end_x; ++x)
-        {
-            const auto c      = *(condition_ptr + x);
-            const auto a      = *(input1_ptr + x);
-            const auto b      = *(input2_ptr + x);
-            *(output_ptr + x) = static_cast<bool>(c) ? a : b;
-        }
+        "neon_s8_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S8 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s8_select_same_rank)
     },
-    condition, input1, input2, output);
-}
-
-template <typename ScalarType, typename VectorType>
-void select_op_8(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    const auto window_step_x  = 16 / sizeof(ScalarType);
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
     {
-        static const auto zero = wrapper::vdup_n(static_cast<uint8_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vcgt(wrapper::vloadq(condition_ptr), zero);
-    });
-}
-
-template <typename ScalarType, typename VectorType>
-void select_op_16(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    const auto window_step_x  = 16 / sizeof(ScalarType);
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
+        "neon_s16_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S16 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s16_select_same_rank)
+    },
     {
-        static const auto zero = wrapper::vdup_n(static_cast<uint16_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vcgt(wrapper::vmovl(wrapper::vload(condition_ptr)), zero);
-    });
-}
-
-template <typename ScalarType, typename VectorType>
-void select_op_32(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    const auto window_step_x  = 16 / sizeof(ScalarType);
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
+        "neon_s32_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S32 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s32_select_same_rank)
+    },
     {
-        static const auto zero = wrapper::vdup_n(static_cast<uint32_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vcgt(wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vload(condition_ptr)))), zero);
-    });
-}
-
-template <typename ScalarType>
-void select_op_not_same_rank(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    ARM_COMPUTE_UNUSED(window);
-
-    auto       output_ptr    = reinterpret_cast<ScalarType *>(out->buffer());
-    const auto condition_ptr = reinterpret_cast<const uint8_t *>(cond->buffer());
-    const auto input1_ptr    = reinterpret_cast<const ScalarType *>(in1->buffer());
-    const auto input2_ptr    = reinterpret_cast<const ScalarType *>(in2->buffer());
-
-    const int outer_size = cond->info()->total_size() / cond->info()->element_size();
-    const int inner_size = (in1->info()->total_size() / in1->info()->element_size()) / outer_size;
-    int       offset     = 0;
-    const int step       = 16 / in1->info()->element_size();
-
-    for(int i = 0; i < outer_size; ++i)
+        "neon_u8_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U8 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u8_select_same_rank)
+    },
     {
-        int        x         = offset;
-        const auto input_ptr = static_cast<bool>(*(condition_ptr + i)) ? input1_ptr : input2_ptr;
-        for(; x <= offset + inner_size - step; x += step)
+        "neon_u16_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U16 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u16_select_same_rank)
+    },
+    {
+        "neon_u32_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U32 && data.is_same_rank == true; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u32_select_same_rank)
+    },
+    {
+        "neon_s8_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S8 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s8_select_not_same_rank)
+    },
+    {
+        "neon_s16_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S16 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s16_select_not_same_rank)
+    },
+    {
+        "neon_s32_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::S32 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s32_select_not_same_rank)
+    },
+    {
+        "neon_u8_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U8 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u8_select_not_same_rank)
+    },
+    {
+        "neon_u16_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U16 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u16_select_not_same_rank)
+    },
+    {
+        "neon_u32_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::U32 && data.is_same_rank == false; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u32_select_not_same_rank)
+    },
+    {
+        "neon_f16_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::F16 && data.is_same_rank == true; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_f16_select_same_rank)
+    },
+    {
+        "neon_f16_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::F16 && data.is_same_rank == false; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_f16_select_not_same_rank)
+    },
+    {
+        "neon_f32_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::F32 && data.is_same_rank == true; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_f32_select_same_rank)
+    },
+    {
+        "neon_f32_not_same_rank",
+        [](const SelectKernelSelectorData & data) { return data.dt == DataType::F32 && data.is_same_rank == false; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_f32_select_not_same_rank)
+    },
+};
+
+const SelectKernelSelector *get_implementation(const SelectKernelSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
         {
-            wrapper::vstore(output_ptr + x, wrapper::vloadq(input_ptr + x));
+            return &uk;
         }
-        if(x <= offset + inner_size - (step / 2))
-        {
-            wrapper::vstore(output_ptr + x, wrapper::vload(input_ptr + x));
-            x += step / 2;
-        }
-        for(; x < offset + inner_size; ++x)
-        {
-            *(output_ptr + x) = *(input_ptr + x);
-        }
-        offset += inner_size;
     }
+    return nullptr;
 }
+
 } // namespace
 
 NESelectKernel::NESelectKernel()
-    : _function(nullptr), _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
+    : /*_function(nullptr), */ _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
 {
 }
 
@@ -177,51 +179,6 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
     _y             = y;
     _output        = output;
     _has_same_rank = (c->info()->tensor_shape().num_dimensions() == x->info()->tensor_shape().num_dimensions());
-
-    std::string function_to_call("op_");
-    function_to_call += string_from_data_type(x->info()->data_type());
-
-    static std::map<std::string, SelectFunction *> map_function;
-
-    if(_has_same_rank)
-    {
-        map_function =
-        {
-            { "op_S8", &select_op_8<int8_t, uint8x16_t> },
-            { "op_S16", &select_op_16<int16_t, uint16x8_t> },
-            { "op_S32", &select_op_32<int32_t, uint32x4_t> },
-            { "op_U8", &select_op_8<uint8_t, uint8x16_t> },
-            { "op_U16", &select_op_16<uint16_t, uint16x8_t> },
-            { "op_U32", &select_op_32<uint32_t, uint32x4_t> },
-            { "op_F32", &select_op_32<float, uint32x4_t> }
-        };
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        map_function["op_F16"] = &select_op_16<float16_t, uint16x8_t>;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    }
-    else
-    {
-        map_function =
-        {
-            { "op_S8", &select_op_not_same_rank<int8_t> },
-            { "op_S16", &select_op_not_same_rank<int16_t> },
-            { "op_S32", &select_op_not_same_rank<int32_t> },
-            { "op_U8", &select_op_not_same_rank<uint8_t> },
-            { "op_U16", &select_op_not_same_rank<uint16_t> },
-            { "op_U32", &select_op_not_same_rank<uint32_t> },
-            { "op_F32", &select_op_not_same_rank<float> }
-        };
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        map_function["op_F16"] = &select_op_not_same_rank<float16_t>;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    }
-
-    auto it = map_function.find(function_to_call);
-
-    if(it != map_function.end())
-    {
-        _function = it->second;
-    }
 
     Window win = calculate_max_window(*x->info());
     INEKernel::configure(win);
@@ -254,7 +211,12 @@ void NESelectKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_function == nullptr);
-    _function(_c, _x, _y, _output, window);
+    ARM_COMPUTE_ERROR_ON(_output == nullptr);
+    ARM_COMPUTE_ERROR_ON(_output->info() == nullptr);
+
+    const auto *uk = get_implementation(SelectKernelSelectorData{ _output->info()->data_type(), _has_same_rank });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr);
+    ARM_COMPUTE_ERROR_ON(uk->ukernel == nullptr);
+    uk->ukernel(_c, _x, _y, _output, window);
 }
 } // namespace arm_compute

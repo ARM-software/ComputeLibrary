@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,22 +82,12 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Common signature for all the specialised select functions
-     *
-     * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: All.
-     * @param[in] y      Second input tensor. Data types supported: Same as @p x
-     * @param[in] output Output tensor. Data types supported: Same as @p x.
-     */
-    using SelectFunction = void(const ITensor *c, const ITensor *x, const ITensor *y, ITensor *output, const Window &window);
 
-    /** Select function to use for the particular tensor types passed to configure() */
-    SelectFunction *_function;
-    const ITensor *_c;              /**< Condition tensor */
-    const ITensor *_x;              /**< Source tensor 1 */
-    const ITensor *_y;              /**< Source tensor 2 */
-    ITensor        *_output;        /**< Destination tensor */
-    bool            _has_same_rank; /**< Flag that indicates if condition tensor and other inputs have the same rank */
+    const ITensor *_c;             /**< Condition tensor */
+    const ITensor *_x;             /**< Source tensor 1 */
+    const ITensor *_y;             /**< Source tensor 2 */
+    ITensor       *_output;        /**< Destination tensor */
+    bool           _has_same_rank; /**< Flag that indicates if condition tensor and other inputs have the same rank */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NESELECTKERNEL_H */
