@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,9 @@ constexpr AbsoluteTolerance<float> one_tolerance(1);
 constexpr AbsoluteTolerance<float> zero_tolerance(0);
 
 /** Input data sets **/
+// QASYMM8
+const auto CastQASYMM8toF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F32));
+
 // U8
 const auto CastU8toS8Dataset  = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S8));
 const auto CastU8toU16Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
@@ -148,6 +151,9 @@ using CLCastToF32Fixture = CastValidationFixture<CLTensor, CLAccessor, CLCast, T
         validate(CLAccessor(_target), _reference, tolerance);                                                                    \
     }                                                                                                                            \
     TEST_SUITE_END()
+
+// QASYMM8
+CAST_SUITE(QASYMM8_to_F32, DataType::QASYMM8, DataType::F32, CLCastToF32Fixture<uint8_t>, CastQASYMM8toF32Dataset, zero_tolerance)
 
 // U8
 CAST_SUITE(U8_to_S8, DataType::U8, DataType::S8, CLCastToS8Fixture<uint8_t>, CastU8toS8Dataset, zero_tolerance)
