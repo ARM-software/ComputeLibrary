@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel which transposes the elements of a matrix */
-class CpuTransposeKernel : public NewICpuKernel<CpuTransposeKernel>
+class CpuTransposeKernel : public ICpuKernel<CpuTransposeKernel>
 {
 public:
     CpuTransposeKernel() = default;

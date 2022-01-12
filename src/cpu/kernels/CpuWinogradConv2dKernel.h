@@ -35,7 +35,7 @@ namespace arm_compute
 namespace cpu
 {
 /** Interface for the kernel to perform Winograd input transform. */
-class ICpuWinogradConv2dTransformInputKernel : public NewICpuKernel<ICpuWinogradConv2dTransformInputKernel>
+class ICpuWinogradConv2dTransformInputKernel : public ICpuKernel<ICpuWinogradConv2dTransformInputKernel>
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -216,7 +216,7 @@ private:
 };
 
 /** Interface for the kernel to perform Winograd output transform. */
-class ICpuWinogradConv2dTransformOutputKernel : public NewICpuKernel<ICpuWinogradConv2dTransformOutputKernel>
+class ICpuWinogradConv2dTransformOutputKernel : public ICpuKernel<ICpuWinogradConv2dTransformOutputKernel>
 {
 public:
     /** Get the working space required to perform the transformation.
@@ -418,7 +418,7 @@ private:
 };
 
 /** Interface for the kernel to perform Winograd weights transform. */
-class ICpuWinogradConv2dTransformWeightsKernel : public NewICpuKernel<ICpuWinogradConv2dTransformWeightsKernel>
+class ICpuWinogradConv2dTransformWeightsKernel : public ICpuKernel<ICpuWinogradConv2dTransformWeightsKernel>
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */

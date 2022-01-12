@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the activation kernel */
-class CpuActivationKernel : public NewICpuKernel<CpuActivationKernel>
+class CpuActivationKernel : public ICpuKernel<CpuActivationKernel>
 {
 private:
     using ActivationKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;

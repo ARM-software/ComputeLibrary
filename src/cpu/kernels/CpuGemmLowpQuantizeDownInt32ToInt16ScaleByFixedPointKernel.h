@@ -48,7 +48,7 @@ namespace kernels
  *  -# Clamp the resulting int32 values to the [-32768, 32767] range and cast to QSYMM16.
  *
  */
-class CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel : public NewICpuKernel<CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>
+class CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>
 {
 public:
     CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel() = default;

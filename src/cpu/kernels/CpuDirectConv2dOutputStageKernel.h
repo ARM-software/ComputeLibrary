@@ -40,7 +40,7 @@ namespace kernels
  * @note For quantized computations (i.e. @p src of S32 type) the output data type for auto-initialization must be passed as part
  *       of the @ref DirectConvolutionLayerOutputStageKernelInfo.
  */
-class CpuDirectConv2dOutputStageKernel : public NewICpuKernel<CpuDirectConv2dOutputStageKernel>
+class CpuDirectConv2dOutputStageKernel : public ICpuKernel<CpuDirectConv2dOutputStageKernel>
 {
 public:
     CpuDirectConv2dOutputStageKernel() = default;

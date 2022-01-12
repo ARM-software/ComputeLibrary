@@ -40,7 +40,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to run a depthwise convolution native on a tensor. */
-class CpuDepthwiseConv2dNativeKernel : public NewICpuKernel<CpuDepthwiseConv2dNativeKernel>
+class CpuDepthwiseConv2dNativeKernel : public ICpuKernel<CpuDepthwiseConv2dNativeKernel>
 {
 public:
     CpuDepthwiseConv2dNativeKernel() = default;

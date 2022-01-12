@@ -37,7 +37,7 @@ namespace kernels
  *
  * @note The implementation supports only 3D input tensors
  */
-class CpuQuantizeKernel : public NewICpuKernel<CpuQuantizeKernel>
+class CpuQuantizeKernel : public ICpuKernel<CpuQuantizeKernel>
 {
 public:
     CpuQuantizeKernel() = default;

@@ -63,7 +63,7 @@ namespace kernels
  *                        (a_offset * b_offset * k)
  */
 
-class CpuGemmLowpOffsetContributionOutputStageKernel : public NewICpuKernel<CpuGemmLowpOffsetContributionOutputStageKernel>
+class CpuGemmLowpOffsetContributionOutputStageKernel : public ICpuKernel<CpuGemmLowpOffsetContributionOutputStageKernel>
 {
 public:
     /** Default constructor */

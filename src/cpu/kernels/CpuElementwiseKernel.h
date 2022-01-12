@@ -39,7 +39,7 @@ namespace kernels
  * @f[ dst(x,y) = OP(src0(x,y), src1(x,y))@f]
  *
  */
-class CpuElementwiseKernel : public NewICpuKernel<CpuElementwiseKernel>
+class CpuElementwiseKernel : public ICpuKernel<CpuElementwiseKernel>
 {
 public:
     CpuElementwiseKernel() = default;

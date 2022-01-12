@@ -56,7 +56,7 @@ namespace kernels
  * \end{array} \right)
  * @f]
  */
-class CpuWeightsReshapeKernel : public NewICpuKernel<CpuWeightsReshapeKernel>
+class CpuWeightsReshapeKernel : public ICpuKernel<CpuWeightsReshapeKernel>
 {
 public:
     /** Default constructor */

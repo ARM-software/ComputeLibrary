@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform addition between two tensors */
-class CpuAddKernel : public NewICpuKernel<CpuAddKernel>
+class CpuAddKernel : public ICpuKernel<CpuAddKernel>
 {
 private:
     using AddKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;

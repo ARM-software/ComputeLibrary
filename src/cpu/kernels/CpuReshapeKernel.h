@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform tensor reshaping */
-class CpuReshapeKernel : public NewICpuKernel<CpuReshapeKernel>
+class CpuReshapeKernel : public ICpuKernel<CpuReshapeKernel>
 {
 public:
     CpuReshapeKernel() = default;

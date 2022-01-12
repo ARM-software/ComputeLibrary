@@ -43,7 +43,7 @@ namespace kernels
  *  -# Compute the int32 matrix product of the resulting a * b and store the result as int32
  *
  */
-class CpuGemmLowpMatrixMultiplyKernel : public NewICpuKernel<CpuGemmLowpMatrixMultiplyKernel>
+class CpuGemmLowpMatrixMultiplyKernel : public ICpuKernel<CpuGemmLowpMatrixMultiplyKernel>
 {
 public:
     /** Default constructor */

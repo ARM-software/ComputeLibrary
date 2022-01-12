@@ -35,7 +35,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel for filling a tensor with a given constant value */
-class CpuFillKernel : public NewICpuKernel<CpuFillKernel>
+class CpuFillKernel : public ICpuKernel<CpuFillKernel>
 {
 public:
     CpuFillKernel() = default;

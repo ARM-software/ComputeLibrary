@@ -39,7 +39,7 @@ namespace kernels
  * @note If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor @p lhs is a vector and the second input tensor @p rhs a matrix. The implementation also assumes that both tensors have not been reshaped
  *
  */
-class CpuGemmMatrixMultiplyKernel : public NewICpuKernel<CpuGemmMatrixMultiplyKernel>
+class CpuGemmMatrixMultiplyKernel : public ICpuKernel<CpuGemmMatrixMultiplyKernel>
 {
 public:
     CpuGemmMatrixMultiplyKernel() = default;

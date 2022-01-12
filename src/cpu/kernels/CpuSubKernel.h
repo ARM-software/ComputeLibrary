@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform subtraction between two tensors */
-class CpuSubKernel : public NewICpuKernel<CpuSubKernel>
+class CpuSubKernel : public ICpuKernel<CpuSubKernel>
 {
 private:
     using SubKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;

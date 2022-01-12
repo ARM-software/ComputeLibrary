@@ -108,7 +108,7 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
 
     auto shape_and_window = compute_output_shape_and_window(src.tensor_shape());
     auto_init_if_empty(dst, shape_and_window.first, 1, src.data_type());
-    NewICpuKernel::configure(shape_and_window.second);
+    ICpuKernel::configure(shape_and_window.second);
 }
 
 Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)

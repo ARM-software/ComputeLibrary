@@ -35,7 +35,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the pooling layer kernel */
-class CpuPool2dKernel : public NewICpuKernel<CpuPool2dKernel>
+class CpuPool2dKernel : public ICpuKernel<CpuPool2dKernel>
 {
 private:
     using PoolingKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, ITensor *, PoolingLayerInfo &, const Window &, const Window &)>::type;

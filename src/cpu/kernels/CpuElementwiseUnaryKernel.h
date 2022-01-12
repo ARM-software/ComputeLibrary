@@ -39,7 +39,7 @@ namespace kernels
  * Element-wise operation is computed by:
  * @f[ dst(x) = OP(src(x))@f]
  */
-class CpuElementwiseUnaryKernel : public NewICpuKernel<CpuElementwiseUnaryKernel>
+class CpuElementwiseUnaryKernel : public ICpuKernel<CpuElementwiseUnaryKernel>
 {
 private:
     using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;

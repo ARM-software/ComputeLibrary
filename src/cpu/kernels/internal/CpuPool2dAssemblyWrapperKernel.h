@@ -46,7 +46,7 @@ namespace kernels
   * execute a single assembly kernel in the context of an NEFunction.
   *
   */
-class CpuPool2dAssemblyWrapperKernel final : public NewICpuKernel<CpuPool2dAssemblyWrapperKernel>
+class CpuPool2dAssemblyWrapperKernel final : public ICpuKernel<CpuPool2dAssemblyWrapperKernel>
 {
 public:
     /** Constructor

@@ -37,12 +37,8 @@ enum class KernelSelectionType
     Supported  /**< Retrieve the best implementation available for the given Cpu ISA that is supported by the current build */
 };
 
-using ICpuKernel = arm_compute::ICPPKernel;
-
 template <class Derived>
-/* This is a temp name for stage 1 process of adding UT for multi-ISA.
-In the next stage NewICpuKernel will be called ICpuKernel again */
-class NewICpuKernel : public ICPPKernel
+class ICpuKernel : public ICPPKernel
 {
 public:
     /** Micro-kernel selector

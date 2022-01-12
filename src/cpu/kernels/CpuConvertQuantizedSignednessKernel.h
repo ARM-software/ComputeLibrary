@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel to convert asymmetric signed to asymmetric signed and vice-versa */
-class CpuConvertQuantizedSignednessKernel : public NewICpuKernel<CpuConvertQuantizedSignednessKernel>
+class CpuConvertQuantizedSignednessKernel : public ICpuKernel<CpuConvertQuantizedSignednessKernel>
 {
 public:
     CpuConvertQuantizedSignednessKernel() = default;

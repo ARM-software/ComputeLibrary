@@ -214,7 +214,7 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     // Configure kernel window
     auto win_config = validate_and_configure_window(*src0, *src1, *dst);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    NewICpuKernel::configure(win_config.second);
+    ICpuKernel::configure(win_config.second);
 }
 
 Status CpuAddKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy)
@@ -231,7 +231,7 @@ void CpuAddKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(NewICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
 
     ARM_COMPUTE_ERROR_ON(tensors.empty());
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);

@@ -36,7 +36,7 @@ namespace kernels
 /** Interface for the batch concatenate kernel.
  *  The input tensor will be concatenated into the output tensor.
  */
-class CpuConcatenateBatchKernel : public NewICpuKernel<CpuConcatenateBatchKernel>
+class CpuConcatenateBatchKernel : public ICpuKernel<CpuConcatenateBatchKernel>
 {
 public:
     CpuConcatenateBatchKernel() = default;

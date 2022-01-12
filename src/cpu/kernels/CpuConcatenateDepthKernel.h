@@ -40,7 +40,7 @@ namespace kernels
 /** Interface for the depth concatenate kernel.
  *  The input tensor will be concatenated into the output tensor.
  */
-class CpuConcatenateDepthKernel : public NewICpuKernel<CpuConcatenateDepthKernel>
+class CpuConcatenateDepthKernel : public ICpuKernel<CpuConcatenateDepthKernel>
 {
 public:
     CpuConcatenateDepthKernel() = default;

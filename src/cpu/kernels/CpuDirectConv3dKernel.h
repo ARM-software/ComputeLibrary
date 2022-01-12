@@ -35,7 +35,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform 3D Direct Convolution Layer. */
-class CpuDirectConv3dKernel : public NewICpuKernel<CpuDirectConv3dKernel>
+class CpuDirectConv3dKernel : public ICpuKernel<CpuDirectConv3dKernel>
 {
 private:
     /* Template function for convolution 3d NDHWC */

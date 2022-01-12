@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform multiplication between two tensors */
-class CpuMulKernel : public NewICpuKernel<CpuMulKernel>
+class CpuMulKernel : public ICpuKernel<CpuMulKernel>
 {
 public:
     CpuMulKernel() = default;
@@ -118,7 +118,7 @@ private:
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
-class CpuComplexMulKernel : public NewICpuKernel<CpuComplexMulKernel>
+class CpuComplexMulKernel : public ICpuKernel<CpuComplexMulKernel>
 {
 public:
     CpuComplexMulKernel() = default;

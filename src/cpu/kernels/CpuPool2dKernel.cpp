@@ -315,7 +315,7 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     {
         // Configure kernel window
         Window win = calculate_max_window(*dst, Steps());
-        NewICpuKernel::configure(win);
+        ICpuKernel::configure(win);
     }
     else
     {
@@ -323,7 +323,7 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
         auto win_config = validate_and_configure_window(src, dst, indices, pool_info, _num_elems_processed_per_iteration,
                                                         pool_size.x(), pool_size.y());
         ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-        NewICpuKernel::configure(win_config.second);
+        ICpuKernel::configure(win_config.second);
     }
 }
 
@@ -356,7 +356,7 @@ void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const T
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(NewICpuKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
 
     const ITensor *src     = tensors.get_const_tensor(TensorType::ACL_SRC_0);

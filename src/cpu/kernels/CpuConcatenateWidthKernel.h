@@ -37,7 +37,7 @@ namespace kernels
 /** Interface for the width concatenate kernel.
  *  The source tensor will be concatenated into the destination tensor.
  */
-class CpuConcatenateWidthKernel : public NewICpuKernel<CpuConcatenateWidthKernel>
+class CpuConcatenateWidthKernel : public ICpuKernel<CpuConcatenateWidthKernel>
 {
 public:
     CpuConcatenateWidthKernel() = default;

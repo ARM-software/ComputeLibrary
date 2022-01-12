@@ -41,7 +41,7 @@ namespace kernels
  *        - MTX_0 = A * B * alpha, where MTX_0 is the output of @ref CpuGemmMatrixMultiplyKernel
  *        - MTX_1 = C
  */
-class CpuGemmMatrixAdditionKernel : public NewICpuKernel<CpuGemmMatrixAdditionKernel>
+class CpuGemmMatrixAdditionKernel : public ICpuKernel<CpuGemmMatrixAdditionKernel>
 {
 public:
     CpuGemmMatrixAdditionKernel() = default;

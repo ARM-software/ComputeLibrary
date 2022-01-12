@@ -49,7 +49,7 @@ namespace kernels
  *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
  *
  */
-class CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel : public NewICpuKernel<CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>
+class CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>
 {
 public:
     CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel() = default;

@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel to perform tensor permutation given a permutation vector */
-class CpuPermuteKernel : public NewICpuKernel<CpuPermuteKernel>
+class CpuPermuteKernel : public ICpuKernel<CpuPermuteKernel>
 {
 public:
     CpuPermuteKernel() = default;

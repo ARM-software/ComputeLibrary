@@ -35,7 +35,7 @@ namespace cpu
 namespace kernels
 {
 /** Arm(R) Neon(TM) kernel to perform scaling on a tensor */
-class CpuScaleKernel : public NewICpuKernel<CpuScaleKernel>
+class CpuScaleKernel : public ICpuKernel<CpuScaleKernel>
 {
 private:
     /** Scale function to use for the particular function to use */

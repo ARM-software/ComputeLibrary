@@ -36,7 +36,7 @@ namespace kernels
 /** Interface for the height concatenate kernel.
  *  The source tensor will be concatenated into the destination tensor.
  */
-class CpuConcatenateHeightKernel : public NewICpuKernel<CpuConcatenateHeightKernel>
+class CpuConcatenateHeightKernel : public ICpuKernel<CpuConcatenateHeightKernel>
 {
 public:
     CpuConcatenateHeightKernel() = default;

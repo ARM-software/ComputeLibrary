@@ -41,7 +41,7 @@ namespace kernels
  *
  * @note This function assumes the weights are already reshaped (transposed)
  */
-class CpuConvertFullyConnectedWeightsKernel : public NewICpuKernel<CpuConvertFullyConnectedWeightsKernel>
+class CpuConvertFullyConnectedWeightsKernel : public ICpuKernel<CpuConvertFullyConnectedWeightsKernel>
 {
 public:
     CpuConvertFullyConnectedWeightsKernel() = default;

@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Cpu accelarated kernel to perform a floor operation */
-class CpuFloorKernel : public NewICpuKernel<CpuFloorKernel>
+class CpuFloorKernel : public ICpuKernel<CpuFloorKernel>
 {
 private:
     using FloorKernelPtr = std::add_pointer<void(const void *, void *, int)>::type;

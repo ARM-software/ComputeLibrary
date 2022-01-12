@@ -52,7 +52,7 @@ namespace kernels
  *
  * After this operation, the dst matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
  */
-class CpuGemmInterleave4x4Kernel : public NewICpuKernel<CpuGemmInterleave4x4Kernel>
+class CpuGemmInterleave4x4Kernel : public ICpuKernel<CpuGemmInterleave4x4Kernel>
 {
 public:
     CpuGemmInterleave4x4Kernel() = default;

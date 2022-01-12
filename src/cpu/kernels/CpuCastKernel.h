@@ -37,7 +37,7 @@ namespace kernels
  *
  * @note When casting between quantized types the scale and zeroPoint are ignored
  */
-class CpuCastKernel : public NewICpuKernel<CpuCastKernel>
+class CpuCastKernel : public ICpuKernel<CpuCastKernel>
 {
 public:
     CpuCastKernel() = default;

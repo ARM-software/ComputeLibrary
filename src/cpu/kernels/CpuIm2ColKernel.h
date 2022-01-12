@@ -58,7 +58,7 @@ namespace kernels
  * \end{array} \right)
  * @f]
  */
-class CpuIm2ColKernel : public NewICpuKernel<CpuIm2ColKernel>
+class CpuIm2ColKernel : public ICpuKernel<CpuIm2ColKernel>
 {
 public:
     /** Default constructor */

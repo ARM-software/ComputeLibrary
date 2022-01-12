@@ -45,7 +45,7 @@ namespace cpu
 namespace kernels
 {
 /** This class is a wrapper for the depthwise convolution assembly kernels.  */
-class CpuDepthwiseConv2dAssemblyWrapperKernel final : public NewICpuKernel<CpuDepthwiseConv2dAssemblyWrapperKernel>
+class CpuDepthwiseConv2dAssemblyWrapperKernel final : public ICpuKernel<CpuDepthwiseConv2dAssemblyWrapperKernel>
 {
 public:
     /** Default constructor */

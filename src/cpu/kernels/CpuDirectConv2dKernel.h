@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform Direct Convolution Layer. */
-class CpuDirectConv2dKernel : public NewICpuKernel<CpuDirectConv2dKernel>
+class CpuDirectConv2dKernel : public ICpuKernel<CpuDirectConv2dKernel>
 {
 public:
     CpuDirectConv2dKernel() = default;

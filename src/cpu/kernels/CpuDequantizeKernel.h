@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the dequantization layer kernel. */
-class CpuDequantizeKernel : public NewICpuKernel<CpuDequantizeKernel>
+class CpuDequantizeKernel : public ICpuKernel<CpuDequantizeKernel>
 {
 public:
     CpuDequantizeKernel() = default;

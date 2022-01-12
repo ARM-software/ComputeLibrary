@@ -51,7 +51,7 @@ namespace kernels
  *  -#  -to the [-128..127] range and cast to QASYMM8_SIGNED.
  *
  */
-class CpuGemmLowpQuantizeDownInt32ScaleKernel : public NewICpuKernel<CpuGemmLowpQuantizeDownInt32ScaleKernel>
+class CpuGemmLowpQuantizeDownInt32ScaleKernel : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ScaleKernel>
 {
 public:
     CpuGemmLowpQuantizeDownInt32ScaleKernel() = default;

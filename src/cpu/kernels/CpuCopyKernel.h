@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel to perform a copy between two tensors */
-class CpuCopyKernel : public NewICpuKernel<CpuCopyKernel>
+class CpuCopyKernel : public ICpuKernel<CpuCopyKernel>
 {
 public:
     CpuCopyKernel() = default;
