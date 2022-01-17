@@ -1262,20 +1262,23 @@
           "common": [
             "src/cpu/operators/CpuElementwise.cpp",
             "src/cpu/kernels/CpuElementwiseKernel.cpp",
-            "src/runtime/NEON/functions/NEElementwiseOperations.cpp",
-            "src/cpu/kernels/elementwise_binary/generic/neon/qasymm8.cpp",
-            "src/cpu/kernels/elementwise_binary/generic/neon/qasymm8_signed.cpp"
+            "src/runtime/NEON/functions/NEElementwiseOperations.cpp"
           ],
           "neon":{
             "fp32": ["src/cpu/kernels/elementwise_binary/generic/neon/fp32.cpp"],
             "fp16": ["src/cpu/kernels/elementwise_binary/generic/neon/fp16.cpp"],
-            "integer": ["src/cpu/kernels/elementwise_binary/generic/neon/integer.cpp"]
+            "integer": ["src/cpu/kernels/elementwise_binary/generic/neon/integer.cpp"],
+            "qasymm8": ["src/cpu/kernels/elementwise_binary/generic/neon/qasymm8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/elementwise_binary/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
             "common": ["src/cpu/kernels/elementwise_binary/generic/sve/impl.cpp" ],
             "integer": ["src/cpu/kernels/elementwise_binary/generic/sve/integer.cpp"],
             "fp32": ["src/cpu/kernels/elementwise_binary/generic/sve/fp32.cpp"],
-            "fp16": ["src/cpu/kernels/elementwise_binary/generic/sve/fp16.cpp"], 
+            "fp16": ["src/cpu/kernels/elementwise_binary/generic/sve/fp16.cpp"]
+
+          }, 
+          "sve2":{
             "qasymm8": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8.cpp"],
             "qasymm8_signed": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8_signed.cpp"]
           }
@@ -1899,16 +1902,20 @@
           ],
           "neon":{
             "fp32": ["src/cpu/kernels/softmax/generic/neon/fp32.cpp"],
-            "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"],
-            "qasymm8": ["src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"],
-            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
+            "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"], 
+            "qasymm8":[ "src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"], 
+            "qasymm8_signed":["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
             "common": [ "src/cpu/kernels/softmax/generic/sve/impl.cpp" ],
             "fp32": ["src/cpu/kernels/softmax/generic/sve/fp32.cpp"],
             "fp16": ["src/cpu/kernels/softmax/generic/sve/fp16.cpp"],
-            "qasymm8": ["src/cpu/kernels/softmax/generic/sve/qasymm8.cpp" ,"src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp" ],
-            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp", "src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
+            "qasymm8": ["src/cpu/kernels/softmax/generic/sve/qasymm8.cpp" ],
+            "qasymm8_signed": ["src/cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp"]
+          },
+          "sve2":{
+            "qasymm8":[ "src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp"], 
+            "qasymm8_signed":["src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
           }
         }
       },

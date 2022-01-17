@@ -44,12 +44,11 @@ namespace
 {
 static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> available_kernels =
 {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp32_elementwise_unary",
         [](const DataTypeISASelectorData & data)
         {
-            return data.dt == DataType::F32 && data.isa.sve;
+            return (data.dt == DataType::F32 && data.isa.sve);
         },
         REGISTER_FP32_SVE(sve_fp32_elementwise_unary)
     },
@@ -57,35 +56,42 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         "sve_fp16_elementwise_unary",
         [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::F16) && data.isa.sve;
+            return (data.dt == DataType::F16 && data.isa.sve && data.isa.fp16);
         },
         REGISTER_FP16_SVE(sve_fp16_elementwise_unary),
     },
     {
         "sve_s32_elementwise_unary",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32 && data.isa.sve; },
+        [](const DataTypeISASelectorData & data)
+        {
+            return (data.dt == DataType::S32 && data.isa.sve);
+        },
         REGISTER_INTEGER_SVE(sve_s32_elementwise_unary),
     },
-#endif // defined(ARM_COMPUTE_ENABLE_SVE)
-#if defined(ARM_COMPUTE_ENABLE_NEON)
     {
         "neon_fp32_elementwise_unary",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32;
+        },
         REGISTER_FP32_NEON(neon_fp32_elementwise_unary),
     },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_elementwise_unary",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.fp16;
+        },
         REGISTER_FP16_NEON(neon_fp16_elementwise_unary),
     },
-#endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_s32_elementwise_unary",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S32; },
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S32;
+        },
         REGISTER_INTEGER_NEON(neon_s32_elementwise_unary),
     },
-#endif // defined(ARM_COMPUTE_ENABLE_NEON)
 };
 
 } // namespace

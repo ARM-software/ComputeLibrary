@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
+#include "src/cpu/kernels/CpuSoftmaxKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -33,7 +35,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/SoftmaxLayerFixture.h"
-
 namespace arm_compute
 {
 namespace test
@@ -62,7 +63,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 TEST_SUITE(NEON)
 TEST_SUITE(SoftmaxLayer)
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
@@ -120,6 +120,73 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 template <typename T>
 using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
+
+DATA_TEST_CASE(KernelSelection_max_logits, framework::DatasetMode::ALL, concat(
+                   combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                           framework::dataset::make("DataType", { DataType::F32,
+                                                                  DataType::F16,
+                                                                  DataType::QASYMM8,
+                                                                  DataType::QASYMM8_SIGNED
+                                                                })),
+                   combine(framework::dataset::make("CpuExt", std::string("SVE")),
+                           framework::dataset::make("DataType", { DataType::F32,
+                                                                  DataType::F16,
+                                                                  DataType::QASYMM8,
+                                                                  DataType::QASYMM8_SIGNED
+                                                                }))),
+               cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.sve  = (cpu_ext == "SVE");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+
+    const auto *selected_impl = CpuLogits1DMaxKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_logits_1d_max";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(KernelSelection_logits, framework::DatasetMode::ALL, concat(concat(
+                                                                               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                                                                                       framework::dataset::make("DataType", { DataType::F32,
+                                                                                                                DataType::F16,
+                                                                                                                DataType::QASYMM8,
+                                                                                                                DataType::QASYMM8_SIGNED
+                                                                                                                            })),
+                                                                               combine(framework::dataset::make("CpuExt", std::string("SVE")),
+                                                                                       framework::dataset::make("DataType", { DataType::F32,
+                                                                                                                DataType::F16
+                                                                                                                            }))),
+                                                                           combine(framework::dataset::make("CpuExt", std::string("SVE2")),
+                                                                                   framework::dataset::make("DataType", { DataType::QASYMM8,
+                                                                                                            DataType::QASYMM8_SIGNED
+                                                                                                                        }))),
+               cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.sve  = (cpu_ext == "SVE");
+    cpu_isa.sve2 = (cpu_ext == "SVE2");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+
+    const auto *selected_impl = CpuLogits1DSoftmaxKernel<false>::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_softmax_logits_1d";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

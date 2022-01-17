@@ -49,9 +49,17 @@ struct PoolDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
 };
 
+struct ElementwiseDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+    int                 op;
+};
+
 // Selector pointer types
-using DataTypeISASelectorPtr     = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
-using PoolDataTypeISASelectorPtr = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
+using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
+using PoolDataTypeISASelectorPtr        = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
+using ElementwiseDataTypeISASelectorPtr = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
 
 } // namespace kernels
 } // namespace cpu
