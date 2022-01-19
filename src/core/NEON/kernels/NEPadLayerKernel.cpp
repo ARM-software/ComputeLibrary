@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -262,19 +262,9 @@ void NEPadLayerKernel::run(const Window &window, const ThreadInfo &info)
 size_t NEPadLayerKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation 
-    if (platform.get_cpu_model() == CPUModel::A73 ) 
-    {
-        return 10240;
-    }
-    else if (platform.get_cpu_model() == CPUModel::A76)
-    {
-        return 9216;
-    }
-    else
-    {
-        return ICPPKernel::default_mws;
-    }
+    ARM_COMPUTE_UNUSED(platform);
+    
+    return ICPPKernel::default_mws;
 }
 
 } // namespace arm_compute
