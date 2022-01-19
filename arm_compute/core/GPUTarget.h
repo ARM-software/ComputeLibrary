@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ enum class GPUTarget
     G76           = 0x250,
     G77           = 0x310,
     G78           = 0x320,
-    TODX          = 0x330,
+    G710          = 0x330,
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */

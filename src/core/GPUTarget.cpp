@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,13 +39,13 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G78;
     }
-    else if(version.find("TODX") != std::string::npos)
+    else if(version.find("G710") != std::string::npos)
     {
-        return arm_compute::GPUTarget::TODX;
+        return arm_compute::GPUTarget::G710;
     }
     else
     {
-        return arm_compute::GPUTarget::VALHALL;
+        return arm_compute::GPUTarget::UNKNOWN;
     }
 }
 
@@ -136,7 +136,7 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G76, "g76" },
         { GPUTarget::G77, "g77" },
         { GPUTarget::G78, "g78" },
-        { GPUTarget::TODX, "todx" }
+        { GPUTarget::G710, "g710" }
     };
 
     return gpu_target_map[target];
@@ -164,11 +164,17 @@ GPUTarget get_target_from_name(const std::string &device_name)
     GPUTarget gpu_target;
     if(target == 'G' || is_future_gpu)
     {
-        // Check for Bifrost or Valhall
-        gpu_target = get_bifrost_target(version);
+        // Check for Valhall or Bifrost
+        gpu_target = get_valhall_target(version);
         if(gpu_target == GPUTarget::UNKNOWN)
         {
-            gpu_target = get_valhall_target(version);
+            gpu_target = get_bifrost_target(version);
+        }
+
+        // Default GPUTarget
+        if(gpu_target == GPUTarget::UNKNOWN)
+        {
+            gpu_target = GPUTarget::VALHALL;
         }
     }
     else if(target == 'T')

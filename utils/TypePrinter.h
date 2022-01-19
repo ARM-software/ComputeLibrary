@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -2266,8 +2266,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G31:
             os << "G31";
             break;
-        case GPUTarget::TODX:
-            os << "TODX";
+        case GPUTarget::G710:
+            os << "G710";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
