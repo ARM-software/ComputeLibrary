@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,9 @@
 #if !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__))
 #include <asm/hwcap.h> /* Get HWCAP bits from asm/hwcap.h */
 #include <sys/auxv.h>
+#elif defined(__APPLE__) && defined(__aarch64__)
+#include <sys/sysctl.h>
+#include <sys/types.h>
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID (1 << 11)
@@ -258,7 +261,19 @@ int get_max_cpus()
     }
     return max_cpus;
 }
-#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+#elif  defined(__aarch64__) && defined(__APPLE__) /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+/** Query features through sysctlbyname
+  *
+  * @return int value queried
+  */
+int get_hw_capability(const std::string& cap)
+{
+     int64_t result(0);
+     size_t size = sizeof(result);
+     sysctlbyname(cap.c_str(), &result, &size, NULL, 0);
+     return result;
+}
+#endif /* defined(__aarch64__) && defined(__APPLE__) */
 
 #if defined(BARE_METAL) && defined(__aarch64__)
 uint64_t get_sve_feature_reg()
@@ -330,10 +345,19 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
-#else                                     /* #elif(BARE_METAL) && defined(__aarch64__)  */
+#elif defined(__aarch64__) && defined(__APPLE__) /* #elif(BARE_METAL) && defined(__aarch64__) */
+    int ncpus = get_hw_capability("hw.logicalcpu");
+    CpuIsaInfo isainfo;
+    std::vector<CpuModel> cpus_model(ncpus);
+    isainfo.neon = get_hw_capability("hw.optional.neon");
+    isainfo.fp16 = get_hw_capability("hw.optional.neon_fp16");
+    isainfo.dot =  get_hw_capability("hw.optional.arm.FEAT_DotProd");
+    CpuInfo info(isainfo,cpus_model);
+    return info;
+#else  /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuInfo info(CpuIsaInfo(), { CpuModel::GENERIC });
     return info;
-#endif                                    /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 }
 
 CpuModel CpuInfo::cpu_model(uint32_t cpuid) const
