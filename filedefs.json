@@ -34,7 +34,6 @@
                 "cxxflags": ["-march=armv8.6-a+sve2+fp16+dotprod"],
                 "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
                                "ARM_COMPUTE_ENABLE_I8MM"]
-
             }
         }
     }

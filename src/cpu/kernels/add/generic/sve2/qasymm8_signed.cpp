@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -178,4 +178,4 @@ void add_qasymm8_signed_sve2(const ITensor *src0, const ITensor *src1, ITensor *
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif //ARM_COMPUTE_ENABLE_SVE2
+#endif //(ARM_COMPUTE_ENABLE_SVE2)

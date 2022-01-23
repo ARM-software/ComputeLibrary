@@ -249,12 +249,12 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
     print("ERROR: armv7a architecture has only 32-bit execution state")
     Exit(1)
 
+env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
+
 if 'sve' in env['arch']:
     env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
     if 'sve2' in env['arch']:
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
-else:
-    env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
 
 # Add architecture specific flags
 prefix = ""
