@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,8 +70,8 @@ const auto data_pad_f16 = concat(combine(framework::dataset::make("PadX", { 0, 1
                                                  framework::dataset::make("KernelSize", 1))));
 
 const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
-                              combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
-                                      combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
+                              combine(framework::dataset::make("StrideX", { 1, 2, 3, 4 }),
+                                      combine(framework::dataset::make("StrideY", { 1, 2, 3, 4 }),
                                               data_pad_f32)));
 
 const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),
@@ -87,29 +87,25 @@ const auto data_prec = combine(datasets::SmallDirectConvolutionShapes(),
                                                                framework::dataset::make("KernelSize", 3))))));
 
 const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),
-                             combine(framework::dataset::make("StrideX", { 1 }),
-                                     combine(framework::dataset::make("StrideY", { 1 }),
+                             combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
+                                     combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
                                              combine(framework::dataset::make("PadX", { 0, 2 }),
                                                      combine(framework::dataset::make("PadY", { 0, 3 }),
                                                              framework::dataset::make("KernelSize", 9))))));
 
-
 const auto data8x8 = combine(datasets::SmallDirectConvolutionShapes(),
-                             combine(framework::dataset::make("StrideX", { 1 }),
-                                     combine(framework::dataset::make("StrideY", { 1 }),
+                             combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
+                                     combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
                                              combine(framework::dataset::make("PadX", { 0 }),
                                                      combine(framework::dataset::make("PadY", { 0 }),
                                                              framework::dataset::make("KernelSize", 8))))));
 
-
-
-const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4 }));
-const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4, 5 }));
+const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4, 5 }));
 
 const auto data_precommit    = combine(data_prec, framework::dataset::make("NumKernels", { 1 }));
 const auto data_precommit9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 4 }));
 const auto data_precommit8x8 = combine(data8x8, framework::dataset::make("NumKernels", { 4 }));
-
 
 /* The following tests is from real use-case that made DirectConvolution
  * overflows in terms of its tensor indexing. This test case is using
@@ -331,9 +327,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framewo
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEDirectConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit,
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                    ActivationFunctionsDataset),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                       framework::dataset::make("DataType", DataType::F32)),
+                       ActivationFunctionsDataset),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
