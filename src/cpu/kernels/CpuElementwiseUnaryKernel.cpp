@@ -77,7 +77,7 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
     {
         "neon_fp16_elementwise_unary",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
-        REGISTER_FP32_NEON(neon_fp16_elementwise_unary),
+        REGISTER_FP16_NEON(neon_fp16_elementwise_unary),
     },
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
