@@ -612,7 +612,7 @@ v20.08 Public major release
  - New OpenCL kernels / functions:
    - @ref CLMaxUnpoolingLayerKernel
  - New Arm® Neon™ kernels / functions:
-   - @ref NEMaxUnpoolingLayerKernel
+   - NEMaxUnpoolingLayerKernel
  - New graph example:
    - graph_yolov3_output_detector
  - GEMMTuner improvements:

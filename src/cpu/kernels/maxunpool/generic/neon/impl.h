@@ -33,7 +33,7 @@ class Window;
 namespace cpu
 {
 template <typename T>
-void max_unpooling(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window);
+void max_unpooling(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif //define SRC_CORE_SVE_KERNELS_MAXUNPOOLING_IMPL_H

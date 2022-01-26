@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,12 +33,10 @@ namespace arm_compute
 class ITensor;
 class ITensorInfo;
 class NEFill;
-class NEMaxUnpoolingLayerKernel;
 
 /** Function to perform MaxUnpooling. This function calls the following kernels:
  *
  * -# @ref NEFill
- * -# @ref NEMaxUnpoolingLayerKernel
  */
 class NEMaxUnpoolingLayer : public IFunction
 {
@@ -94,8 +92,9 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEFill>                    _fill_func;
-    std::unique_ptr<NEMaxUnpoolingLayerKernel> _unpooling_layer_kernel;
+    std::unique_ptr<NEFill> _fill_func;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 #endif /* ARM_COMPUTE_NEMAXUNPOOLINGLAYER_H */

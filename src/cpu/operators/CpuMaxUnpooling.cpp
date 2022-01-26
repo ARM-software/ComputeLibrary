@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_MAXUNPOOL_LIST_H
-#define SRC_CORE_NEON_KERNELS_MAXUNPOOL_LIST_H
+#include "src/cpu/operators/CpuMaxUnpooling.h"
+#include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
+
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_MAXUNPOOL_KERNEL(func_name) \
-    void func_name(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)
-DECLARE_MAXUNPOOL_KERNEL(neon_fp32_maxunpooling);
-DECLARE_MAXUNPOOL_KERNEL(neon_fp16_maxunpooling);
-DECLARE_MAXUNPOOL_KERNEL(neon_qs8_maxunpooling);
-DECLARE_MAXUNPOOL_KERNEL(neon_qu8_maxunpooling);
-#undef DECLARE_MAXUNPOOL_KERNEL
-} // namespace cpu
+void CpuMaxUnpooling::configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_LOG_PARAMS(src, indices, dst, pool_info);
+    auto k = std::make_unique<kernels::CpuMaxUnpoolingLayerKernel>();
+    k->configure(src, indices, dst, pool_info);
+    _kernel = std::move(k);
+}
+
+Status CpuMaxUnpooling::validate(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+{
+    return kernels::CpuMaxUnpoolingLayerKernel::validate(src, indices, dst, pool_info);
+}
+} // namesapce cpu
 } // namespace arm_compute
-#endif //SRC_CORE_NEON_KERNELS_MAXUNPOOL_LIST_H
