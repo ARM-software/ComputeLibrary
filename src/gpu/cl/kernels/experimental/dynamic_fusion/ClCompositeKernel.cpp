@@ -21,13 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "src/core/CL/CLUtils.h"
+#include "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.h"
 #include "src/gpu/cl/ClKernelLibrary.h"
 
+#include "support/Cast.h"
 namespace arm_compute
 {
 namespace experimental
@@ -57,81 +62,88 @@ void ClCompositeKernel::configure(const ClCompileContext &compile_ctx, const ClK
     _arguments = cl_code.arguments;
 }
 
-inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKernelArgRuntimeDescriptor &arg, ICLTensor *tensor, const Window &arg_slice)
+inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKernelArgDescriptor &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images)
 {
     switch(arg.tensor_arg_type)
     {
-        case TensorArgType::Scalar:
+        case ClKernelTensorArgType::Scalar:
         {
             ARM_COMPUTE_ERROR("Unsupported yet");
             break;
         }
-        case TensorArgType::Vector:
+
+        case ClKernelTensorArgType::Vector:
         {
             add_1D_tensor_argument(idx, tensor, arg_slice);
             break;
         }
 
-        case TensorArgType::Image:
+        case ClKernelTensorArgType::Image:
         {
             add_2D_tensor_argument(idx, tensor, arg_slice);
             break;
         }
-        case TensorArgType::Image_Reinterpret_As_3D:
+        case ClKernelTensorArgType::Image_Reinterpret_As_3D:
         {
             add_2D_tensor_argument(idx, tensor, arg_slice);
             const unsigned int total_cross_plane_pad = tensor->info()->padding().top + tensor->info()->padding().bottom;
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(total_cross_plane_pad));
             break;
         }
-        case TensorArgType::Image_Export_To_ClImage2D:
+        case ClKernelTensorArgType::Image_Export_To_ClImage2D:
         {
             const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
             cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch);
+            cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             break;
         }
-        case TensorArgType::Image_3D:
+
+        case ClKernelTensorArgType::Image_3D:
         {
             add_2D_tensor_argument(idx, tensor, arg_slice);
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
             break;
         }
-        case TensorArgType::Image_3D_Export_To_ClImage2D:
+        case ClKernelTensorArgType::Image_3D_Export_To_ClImage2D:
         {
             const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
             cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch);
+            cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
             break;
         }
-        case TensorArgType::Tensor_3D:
+
+        case ClKernelTensorArgType::Tensor_3D:
         {
             add_3D_tensor_argument(idx, tensor, arg_slice);
             break;
         }
-        case TensorArgType::Tensor_4D:
+
+        case ClKernelTensorArgType::Tensor_4D:
         {
             add_4D_tensor_argument(idx, tensor, arg_slice);
             break;
         }
-        case TensorArgType::Tensor_4D_t_Buffer:
+        case ClKernelTensorArgType::Tensor_4D_t_Buffer:
         {
             add_4d_tensor_nhwc_argument(idx, tensor);
             break;
         }
-        case TensorArgType::Tensor_4D_t_Image:
+        case ClKernelTensorArgType::Tensor_4D_t_Image:
         {
             const size_t image_w        = tensor->info()->dimension(0) / 4;
             const size_t image_h        = tensor->info()->tensor_shape().total_size_upper(1);
             const size_t image_stride_y = tensor->info()->strides_in_bytes()[1];
 
-            cl::Image2D tensor_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(),
-                                                                     TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y);
+            cl::Image2D tensor_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(),
+                                                                    TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y);
+            cl_images.push_back(tensor_image2d);
 
-            _kernel.setArg(idx++, tensor_cl_image);
+            _kernel.setArg(idx++, tensor_image2d);
             add_4d_tensor_nhwc_argument(idx, tensor);
             break;
         }
@@ -142,7 +154,7 @@ inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKe
     }
 }
 
-void ClCompositeKernel::run_composite_op(TensorBinding &tensors, const Window &window, cl::CommandQueue &queue, const ClExecutionDescriptor &exec_desc)
+void ClCompositeKernel::run_composite_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue, const ClExecutionDescriptor &exec_desc)
 {
     ARM_COMPUTE_UNUSED(exec_desc);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -160,17 +172,21 @@ void ClCompositeKernel::run_composite_op(TensorBinding &tensors, const Window &w
     {
         // Set kernel arguments
         Window arg_slice = slice;
-        for(auto arg : _arguments)
+        // CLImages created from tensor arguments. Need to be retained until enqueue
+        std::vector<cl::Image2D> cl_images;
+        for(auto id_arg : _arguments)
         {
-            auto tensor = tensors._binding.at(arg.arg_id);
+            const auto arg    = id_arg.second;
+            auto       tensor = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(arg.arg_id));
             ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+            ARM_COMPUTE_ERROR_ON_NULLPTR(tensor->info());
             if(!arg.slide_along_dimz)
             {
                 // The stride_z for matrix must be zero if we do not slice
                 ARM_COMPUTE_ERROR_ON(tensor->info()->strides_in_bytes()[3] != 0);
                 arg_slice = slice_fixed_z;
             }
-            add_tensor_argument(idx, arg, tensor, arg_slice);
+            add_tensor_argument(idx, arg, tensor, arg_slice, cl_images);
         }
 
         // Dispatch kernel
@@ -180,12 +196,6 @@ void ClCompositeKernel::run_composite_op(TensorBinding &tensors, const Window &w
     while(!exec_desc.skip_sliding_window && window.slide_window_slice_3D(slice));
 }
 
-Status bind_arguments(ITensorPack &, const ClKernelCode &, const TensorBinding &)
-{
-    return Status{};
-}
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.h"
 #include "arm_compute/core/Validate.h"
@@ -41,7 +43,7 @@ ComponentType ClElementwiseAddKernelComponent::get_component_type() const
 
 std::set<std::string> ClElementwiseAddKernelComponent::get_headers_list() const
 {
-    return std::set<std::string> { "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h", "gemm_helpers.h", "repeat.h", "tile_helpers.h" };
+    return std::set<std::string> { "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h", "tile_helpers.h" };
 }
 
 Window ClElementwiseAddKernelComponent::get_window() const
@@ -67,63 +69,62 @@ Window ClElementwiseAddKernelComponent::get_window() const
 std::string ClElementwiseAddKernelComponent::get_component_code() const
 {
     std::string code;
-    return R"_(
-    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
-    // IN_0(Accumulator)   {{acc}}
-    // IN_1(Addend)                {{addend}}
+    const bool  is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
 
-    // c = addend + c (mix-precision, broadcast, boundary aware)
+    if(is_root)
     {
-        __global uchar *addend_addr = {{addend}}_ptr + {{addend}}_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (COMPUTE_M0_START_ROW(g_y, M0, PARTIAL_STORE_M0) * {{addend}}_stride_y) + get_global_id(2) * {{addend}}_stride_z; \
-        LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, addend, addend_addr, 0, {{addend}}_stride_y, g_zero, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X);                                                                                        \
-        MIXED_PRECISION_ELTWISE_OP_BLOCK(ADD_X_POS_0, M0, N0, {{acc}}, addend, DATA_TYPE_ACCUMULATOR, addend_hp);
+        return R"_(
+    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    // IN_0(LHS)            {{lhs}}
+    // IN_1(RHS)            {{rhs}}
+    // OUT(dst, accum)      {{dst}}
+
+    // dst = lhs + rhs (mix-precision, broadcast, boundary aware)
+    TILE({{DATA_TYPE}}, M0, N0, {{dst}});
+    {
+        TILE({{DATA_TYPE}}, M0, N0, lhs_tile);
+        TILE({{DATA_TYPE}}, M0, N0, rhs_tile);
+
+        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{lhs}}, cout, mout, 1, {{lhs}}_stride_y, lhs_tile);
+        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{rhs}}, cout, mout, 1, {{rhs}}_stride_y, rhs_tile);
+
+        T_ADD_BROADCAST_X({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
     }
-
-    // Workaround for the discrepancy between tiles and repeats
-#if defined(IS_TILED)
-    {{acc}}[0].v = {{acc}}0;
-#if M0 >= 2
-    {{acc}}[1].v = {{acc}}1;
-#endif // M0 >= 2
-#if M0 >= 3
-    {{acc}}[2].v = {{acc}}2;
-#endif // M0 >= 3
-#if M0 >= 4
-    {{acc}}[3].v = {{acc}}3;
-#endif // M0 >= 4
-#if M0 >= 8
-    {{acc}}[4].v = {{acc}}4;
-    {{acc}}[5].v = {{acc}}5;
-    {{acc}}[6].v = {{acc}}6;
-    {{acc}}[7].v = {{acc}}7;
-#endif // M0 >= 8
-#if M0 == 16
-    {{acc}}[8].v = {{acc}}8;
-    {{acc}}[9].v = {{acc}}9;
-    {{acc}}[10].v = {{acc}}A;
-    {{acc}}[11].v = {{acc}}B;
-    {{acc}}[12].v = {{acc}}C;
-    {{acc}}[13].v = {{acc}}D;
-    {{acc}}[14].v = {{acc}}E;
-    {{acc}}[15].v = {{acc}}F;
-#endif // M0 == 16
-#endif // defined(IS_TILED)
     //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
-
 )_";
+    }
+    else
+    {
+        return R"_(
+    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    // IN_0/Out(Accumulator)   {{acc}}
+    // IN_1(Addend)        {{addend}}
+
+    // acc = addend + acc (mix-precision, broadcast, boundary aware)
+    {
+        TILE({{DATA_TYPE}}, M0, N0, addend_tile);
+
+        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{addend}}, cout, mout, 1, {{addend}}_stride_y, addend_tile);
+
+        T_ADD_BROADCAST_X({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
+    }
+    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+)_";
+    }
 }
 
 CLBuildOptions ClElementwiseAddKernelComponent::generate_build_options() const
 {
-    auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
-    auto tile_info  = _blueprint->impl().get_tile_info();
+    const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
 
     CLBuildOptions build_opts{};
+    const auto     n0         = _blueprint->impl().get_execution_window().x().step();
+    const auto     m0         = _blueprint->impl().get_execution_window().y().step();
+    const auto     partial_m0 = t_dst_info->dimension(1) % m0;
 
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(t_dst_info->data_type()));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(tile_info.tile_dims.y()));
-    build_opts.add_option("-DN0=" + support::cpp11::to_string(tile_info.tile_dims.x()));
-    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(tile_info.boundaries.y() % tile_info.tile_dims.y()));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_m0));
 
     return build_opts;
 }
@@ -142,34 +143,56 @@ std::string ClElementwiseAddKernelComponent::generate_config_id() const
     return config_id;
 }
 
-ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::allocate_vars(SharedVarTable &vtable) const
+void ClElementwiseAddKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
 {
-    // Determine which argument is the accumulator
-    Link accumulator;
-    Link addend;
-    if(_lhs.group == SharedVarGroup::Automatic)
+    const bool is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
+    vtable.add(_lhs, _blueprint->impl().group(_lhs.arg_id), ClKernelArgDescriptor(_lhs.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "lhs");
+    vtable.add(_rhs, _blueprint->impl().group(_rhs.arg_id), ClKernelArgDescriptor(_rhs.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "rhs");
+    if(is_root)
     {
-        accumulator = _lhs;
-        addend      = _rhs;
+        vtable.add(_dst, _blueprint->impl().group(_dst.arg_id), ClKernelArgDescriptor(_dst.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "dst");
     }
-    else if(_rhs.group == SharedVarGroup::Automatic)
+}
+
+ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
+{
+    TagLUT     lut{};
+    const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    // Arguments and global shared variables
+    const bool is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
+    if(is_root)
     {
-        accumulator = _rhs;
-        addend      = _lhs;
+        lut["lhs"] = vtable.get(_lhs);
+        lut["rhs"] = vtable.get(_rhs);
+        lut["dst"] = vtable.get(_dst);
     }
     else
     {
-        ARM_COMPUTE_ERROR("Invalid elementwise component linking");
+        // Determine which link is the accumulator
+        Link accumulator;
+        Link addend;
+        if(_blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Automatic)
+        {
+            accumulator = _lhs;
+            addend      = _rhs;
+        }
+        else if(_blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Automatic)
+        {
+            accumulator = _rhs;
+            addend      = _lhs;
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Invalid elementwise component linking");
+        }
+        lut["acc"]    = vtable.get(accumulator);
+        lut["addend"] = vtable.get(addend);
     }
-    return {
-        { "meta_kernel_id", id() },
-        { "acc", vtable.add(accumulator, ClKernelArgRuntimeDescriptor(accumulator.arg_id, TensorArgType::Image_3D), "add_acc") },
-        { "addend", vtable.add(addend, ClKernelArgRuntimeDescriptor(addend.arg_id, TensorArgType::Image_3D), "add_addend") },
-        // {"dst", vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Image_3D), "dst")}, // dst is needed for the root version and/or non-inplace version should we need one
-    };
+    // Local build options
+    lut["meta_kernel_id"] = id();
+    lut["DATA_TYPE"]      = get_cl_type_from_data_type(t_dst_info->data_type());
+    return lut;
 }
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

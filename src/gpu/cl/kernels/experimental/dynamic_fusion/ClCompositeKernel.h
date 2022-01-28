@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_CLCOMPOSITEKERNEL_H
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_CLCOMPOSITEKERNEL_H
 
-#include "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.h"
-
+#include "arm_compute/core/experimental/ClWorkload.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
 
@@ -37,47 +38,40 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-struct TensorBinding
-{
-    TensorBinding(const std::map<ArgumentID, ICLTensor *> binding)
-        : _binding{ binding }
-    {
-    }
-    bool empty() const
-    {
-        return _binding.empty();
-    }
-    std::map<ArgumentID, ICLTensor *> _binding;
-};
-class ClCompositeKernel : public opencl::IClKernel
+struct ClExecutionDescriptor;
+struct ClKernelCode;
+
+class ClCompositeKernel final : public opencl::IClKernel
 {
 public:
     void configure(const opencl::ClCompileContext &, const ClKernelCode &);
 
     /** Run the composite kernel
+     * @note The slots / keys in ITensorPack are the argument Ids of the tensors in blueprint
      *
-     * @param tensors   TensorBinding object containing run-time tensors information
+     * @param tensors   ITensorPack object containing run-time tensor memories
      * @param window    Execution window
      * @param queue     OpenCL Command queue
      * @param exec_desc Descriptor containing execution information
      */
-    virtual void run_composite_op(TensorBinding &tensors, const Window &window, cl::CommandQueue &queue, const ClExecutionDescriptor &exec_desc) override;
+    virtual void run_composite_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue, const ClExecutionDescriptor &exec_desc) override;
 
 private:
-    inline void add_tensor_argument(unsigned int &idx, const ClKernelArgRuntimeDescriptor &arg, ICLTensor *tensor, const Window &arg_slice);
+    /** Set a kernel tensor argument
+     *
+     * @param[in,out] idx       Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     arg       Kernel argument descriptor accompanying @p tensor
+     * @param[in]     tensor    Tensor to set as an argument of the object's kernel.
+     * @param[in]     arg_slice Window the kernel will be run on.
+     * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
+     */
+    inline void add_tensor_argument(unsigned int &idx, const ClKernelArgDescriptor &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images);
 
 private:
     ClKernelArgList _arguments{}; /** All kernel arguments required by runtime */
 };
 
-/** Argument Binding.
- * Tensor Arguments to ICLKernel run_op method need to be passed via an ITensorPack. So the bind_arguments is essentially a converter from TensorBinding to ITensorPack
- */
-Status bind_arguments(ITensorPack &tensor_pack, const ClKernelCode &, const TensorBinding &);
-
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 #endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_CLCOMPOSITEKERNEL_H
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

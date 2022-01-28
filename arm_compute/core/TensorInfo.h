@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -297,6 +297,7 @@ public:
         _are_values_constant = are_values_constant;
         return *this;
     }
+    inline friend bool operator==(const TensorInfo &lhs, const TensorInfo &rhs);
 
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
@@ -320,5 +321,20 @@ private:
     DataLayout       _data_layout;
     bool             _are_values_constant;
 };
+
+/** Check whether two tensor info are equal.
+ *
+ * @param[in] lhs LHS tensor info.
+ * @param[in] rhs RHS tensor info.
+ *
+ * @return True if the given tensor infos are the same.
+ */
+inline bool operator==(const TensorInfo &lhs, const TensorInfo &rhs)
+{
+    return (lhs._total_size == rhs._total_size) && (lhs._offset_first_element_in_bytes == rhs._offset_first_element_in_bytes) && (lhs._strides_in_bytes == rhs._strides_in_bytes)
+           && (lhs._num_channels == rhs._num_channels) && (lhs._tensor_shape == rhs._tensor_shape) && (lhs._dims_state == rhs._dims_state) && (lhs._data_type == rhs._data_type) && (lhs._format == rhs._format)
+           && (lhs._is_resizable == rhs._is_resizable) && (lhs._valid_region == rhs._valid_region) && (lhs._padding == rhs._padding) && (lhs._quantization_info == rhs._quantization_info)
+           && (lhs._data_layout == rhs._data_layout) && (lhs._are_values_constant == rhs._are_values_constant);
+}
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSORINFO_H */

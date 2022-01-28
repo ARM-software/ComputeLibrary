@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_CLKERNELCOMPONENTS_H
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_CLKERNELCOMPONENTS_H
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.h"
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.h"
-#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClGemmNativeKernelComponent.h"
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.h"
 
 #endif //ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_CLKERNELCOMPONENTS_H
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

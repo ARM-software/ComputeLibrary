@@ -42,7 +42,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-struct TensorBinding;
 struct ClExecutionDescriptor;
 } // namespace dynamic_fusion
 } // namespace experimental
@@ -113,15 +112,13 @@ public:
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Schedule the execution of the passed kernel if possible.
-     * Use TensorBinding instead of ITensorPack for working with dynamic fusion
-     * @note Does not support dynamic tuning yet
      *
      * @param[in] kernel    Kernel to execute.
      * @param[in] tensors   Map containing the tensors to operate on.
      * @param[in] exec_desc Execution descriptor
      * @param[in] flush     (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
-    void enqueue_op(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush = true);
+    void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush = true);
 
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
@@ -218,7 +215,7 @@ private:
     void flush_queue(bool flush);
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-    void enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);
+    void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */

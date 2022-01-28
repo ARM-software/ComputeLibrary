@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
@@ -39,7 +41,7 @@ namespace dynamic_fusion
 class ClDirectConvolutionKernelComponent : public IClKernelComponent
 {
 public:
-    ClDirectConvolutionKernelComponent(const ClKernelBlueprint *blueprint, const DirectConvolutionDescriptor &desc,
+    ClDirectConvolutionKernelComponent(ClKernelBlueprint *blueprint, const ClDirectConv2dKernelDescriptor &desc,
                                        const Link &src, const Link &weight, const Link &dst, const Link &bias = Link{})
         : IClKernelComponent(blueprint), _desc{ desc }, _src{ src }, _weight{ weight }, _bias{ bias }, _dst{ dst }
     {
@@ -58,7 +60,8 @@ public:
         return { _src, _weight, _bias, _dst };
     }
 
-    virtual TagLUT allocate_vars(SharedVarTable &vtable) const override;
+    virtual TagLUT get_tag_lut(const SharedVarTable &vtable) const override;
+    virtual void allocate_shared_vars(SharedVarTable &vtable) const override;
 
     virtual std::string name() const override
     {
@@ -66,16 +69,14 @@ public:
     }
 
 private:
-    DirectConvolutionDescriptor _desc{};
-    Link                        _src{};
-    Link                        _weight{};
-    Link                        _bias{};
-    Link                        _dst{};
+    ClDirectConv2dKernelDescriptor _desc{};
+    Link                           _src{};
+    Link                           _weight{};
+    Link                           _bias{};
+    Link                           _dst{};
 };
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 #endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

@@ -191,7 +191,7 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
-void CLScheduler::enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
                              "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
@@ -246,7 +246,7 @@ void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
-void CLScheduler::enqueue_op(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
 {
     enqueue_common(kernel, tensors, exec_desc, flush);
 }

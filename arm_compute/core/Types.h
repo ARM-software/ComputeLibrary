@@ -253,9 +253,22 @@ struct ValidRegion
         return *this;
     }
 
+    /** Check whether two valid regions are equal.
+     *
+     * @param[in] lhs LHS valid region
+     * @param[in] rhs RHS valid region
+     *
+     * @return True if the valid regions are the same.
+     */
+    inline friend bool operator==(const ValidRegion &lhs, const ValidRegion &rhs);
+
     Coordinates anchor; /**< Anchor for the start of the valid region. */
     TensorShape shape;  /**< Shape of the valid region. */
 };
+inline bool operator==(const ValidRegion &lhs, const ValidRegion &rhs)
+{
+    return (lhs.anchor == rhs.anchor) && (lhs.shape == rhs.shape);
+}
 
 /** Methods available to handle borders */
 enum class BorderMode
@@ -346,7 +359,7 @@ struct BorderSize
      *
      * @return true if they are equal
      */
-    bool operator==(const BorderSize &rhs)
+    bool operator==(const BorderSize &rhs) const
     {
         return (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom) && (left == rhs.left);
     }
@@ -357,7 +370,7 @@ struct BorderSize
      *
      * @return true if they are different
      */
-    bool operator!=(const BorderSize &rhs)
+    bool operator!=(const BorderSize &rhs) const
     {
         return !(*this == rhs);
     }

@@ -35,7 +35,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-struct TensorBinding;
 struct ClExecutionDescriptor;
 } // namespace dynamic_fusion
 } // namespace experimental
@@ -74,7 +73,7 @@ public:
      * @param[in, out] tensors   Tensors for the kernel to use
      * @param[in]      exec_desc Execution descriptor
      */
-    virtual void tune_kernel_dynamic(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) = 0;
+    virtual void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) = 0;
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 };
 } // namespace arm_compute

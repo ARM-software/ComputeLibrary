@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,20 +41,22 @@ enum TensorType : int32_t
     ACL_SRC_DST = 0,
 
     // Src
-    ACL_SRC   = 0,
-    ACL_SRC_0 = 0,
-    ACL_SRC_1 = 1,
-    ACL_SRC_2 = 2,
-    ACL_SRC_3 = 3,
-    ACL_SRC_4 = 4,
-    ACL_SRC_5 = 5,
-    ACL_SRC_6 = 6,
+    ACL_SRC     = 0,
+    ACL_SRC_0   = 0,
+    ACL_SRC_1   = 1,
+    ACL_SRC_2   = 2,
+    ACL_SRC_3   = 3,
+    ACL_SRC_4   = 4,
+    ACL_SRC_5   = 5,
+    ACL_SRC_6   = 6,
+    ACL_SRC_END = 6,
 
     // Dst
-    ACL_DST   = 30,
-    ACL_DST_0 = 30,
-    ACL_DST_1 = 31,
-    ACL_DST_2 = 32,
+    ACL_DST     = 30,
+    ACL_DST_0   = 30,
+    ACL_DST_1   = 31,
+    ACL_DST_2   = 32,
+    ACL_DST_END = 32,
 
     // Aux
     ACL_INT     = 50,

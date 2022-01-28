@@ -349,7 +349,7 @@ public:
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
     /// The execution is carried out through run_op method. But the run_op method needs to be extended to include ClExecutionDescriptor as now LWS GWS tuning will be separated from the IKernel
-    virtual void run_composite_op(experimental::dynamic_fusion::TensorBinding &tensors, const Window &window, cl::CommandQueue &queue, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+    virtual void run_composite_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
     {
         ARM_COMPUTE_UNUSED(tensors, window, queue, exec_desc);
     }

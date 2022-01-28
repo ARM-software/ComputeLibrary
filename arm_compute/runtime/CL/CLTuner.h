@@ -125,7 +125,7 @@ public:
     void tune_kernel_dynamic(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-    void tune_kernel_dynamic(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) override;
+    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) override;
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Is the kernel_event set ?

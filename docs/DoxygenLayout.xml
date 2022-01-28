@@ -19,7 +19,7 @@
         <tab type="user" url="@ref adding_operator" title="How to Add a New Operator"/>
         <tab type="user" url="@ref implementation_topic" title="Implementation Topics"/>
     </tab>
-    <tab type="pages" visible="no" title="" intro=""/>
+    <tab type="pages" visible="yes" title="Pages" intro=""/>
     <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>

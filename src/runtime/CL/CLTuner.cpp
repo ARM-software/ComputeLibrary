@@ -68,7 +68,7 @@ private:
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 struct CompositeKernelData : public CLTuner::IKernelData
 {
-    CompositeKernelData(experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+    CompositeKernelData(ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
         : _tensors{ tensors }, _exec_desc{ exec_desc }
     {
     }
@@ -80,7 +80,7 @@ struct CompositeKernelData : public CLTuner::IKernelData
     }
 
 private:
-    experimental::dynamic_fusion::TensorBinding               &_tensors;
+    ITensorPack                                               &_tensors;
     const experimental::dynamic_fusion::ClExecutionDescriptor &_exec_desc;
 };
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
@@ -166,7 +166,7 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
 }
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
 {
     CompositeKernelData data{ tensors, exec_desc };
 

@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.h"
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/Common.h"
@@ -49,69 +51,46 @@ const ClKernelBlueprint::Implementation &ClKernelBlueprint::impl() const
     return *_impl;
 }
 
-Status add_tensor_argument(ClKernelBlueprint &kernel_blueprint, const ClTensorDescriptor &tensor_desc, ArgumentID &id)
+Status add_tensor(ClKernelBlueprint &kernel_blueprint, ITensorInfo *tensor_info, ArgumentID &id, ArgumentID merge_point)
 {
-    id = kernel_blueprint.impl().add_kernel_argument(tensor_desc);
+    id = kernel_blueprint.impl().add_kernel_tensor(tensor_info, merge_point);
     return Status{};
 }
 
-Status add_tensor_intermed(ClKernelBlueprint &kernel_blueprint, ArgumentID &id)
-{
-    id = kernel_blueprint.impl().add_intermediate_tensor();
-    return Status{};
-}
-
-Status add_kcomp_gemm_native(ClKernelBlueprint          &kernel_blueprint, const ClKernelComponentDescriptor &,
-                             const GemmNativeDescriptor &gemm_native_desc,
-                             ArgumentID lhs_id, ArgumentID rhs_id, ArgumentID bias_id, ArgumentID &dst_id)
-{
-    kernel_blueprint.impl().validate_arg_ids({ lhs_id, rhs_id, bias_id, dst_id });
-    kernel_blueprint.impl().add_component(
-        std::make_unique<ClGemmNativeKernelComponent>(
-            &kernel_blueprint,
-            gemm_native_desc,
-            SharedVarLink{ lhs_id, SharedVarIO::Input, kernel_blueprint.impl().group(lhs_id) },
-            SharedVarLink{ rhs_id, SharedVarIO::Input, kernel_blueprint.impl().group(rhs_id) },
-            SharedVarLink{ dst_id, SharedVarIO::Output, kernel_blueprint.impl().group(dst_id) },
-            SharedVarLink{ bias_id, SharedVarIO::Input, kernel_blueprint.impl().group(bias_id) }));
-
-    return Status{};
-}
-
-Status add_kcomp_eltwise_add(ClKernelBlueprint &kernel_blueprint, const ClKernelComponentDescriptor &, const EltwiseAddDescriptor &,
+Status add_kcomp_eltwise_add(ClKernelBlueprint &kernel_blueprint, const ClEltwiseAddKernelDescriptor &,
                              ArgumentID src0_id, ArgumentID src1_id, ArgumentID &dst_id)
 {
     kernel_blueprint.impl().add_component(
         std::make_unique<ClElementwiseAddKernelComponent>(
             &kernel_blueprint,
-            SharedVarLink{ src0_id, SharedVarIO::Input, kernel_blueprint.impl().group(src0_id) },
-            SharedVarLink{ src1_id, SharedVarIO::Input, kernel_blueprint.impl().group(src1_id) },
-            SharedVarLink{ dst_id, SharedVarIO::Output, kernel_blueprint.impl().group(dst_id) }));
+            SharedVarLink{ src0_id, SharedVarIO::Input },
+            SharedVarLink{ src1_id, SharedVarIO::Input },
+            SharedVarLink{ dst_id, SharedVarIO::Output }));
 
     return Status{};
 }
-Status add_kcomp_activation(ClKernelBlueprint &, const ClKernelComponentDescriptor &, const ActivationDescriptor &, ArgumentID, ArgumentID &)
+Status add_kcomp_activation(ClKernelBlueprint &, const ClActivationKernelDescriptor &, ArgumentID, ArgumentID &)
 {
     return Status{};
 }
 
-Status add_kcomp_direct_conv(ClKernelBlueprint                 &kernel_blueprint, const ClKernelComponentDescriptor &,
-                             const DirectConvolutionDescriptor &direct_conv2d_desc,
-                             ArgumentID src_id, ArgumentID weight_id, ArgumentID bias_id, ArgumentID &dst_id)
+Status add_kcomp_direct_conv2d(ClKernelBlueprint                    &kernel_blueprint,
+                               const ClDirectConv2dKernelDescriptor &direct_conv2d_desc,
+                               ArgumentID src_id, ArgumentID weight_id, ArgumentID bias_id, ArgumentID &dst_id)
 {
     kernel_blueprint.impl().add_component(
         std::make_unique<ClDirectConvolutionKernelComponent>(
             &kernel_blueprint,
             direct_conv2d_desc,
-            SharedVarLink{ src_id, SharedVarIO::Input, kernel_blueprint.impl().group(src_id) },
-            SharedVarLink{ weight_id, SharedVarIO::Input, kernel_blueprint.impl().group(weight_id) },
-            SharedVarLink{ dst_id, SharedVarIO::Output, kernel_blueprint.impl().group(dst_id) },
-            SharedVarLink{ bias_id, SharedVarIO::Input, kernel_blueprint.impl().group(bias_id) }));
+            SharedVarLink{ src_id, SharedVarIO::Input },
+            SharedVarLink{ weight_id, SharedVarIO::Input },
+            SharedVarLink{ dst_id, SharedVarIO::Output },
+            SharedVarLink{ bias_id, SharedVarIO::Input }));
 
     return Status{};
 }
 
-Status add_kcomp_store(ClKernelBlueprint &kernel_blueprint, const ClKernelComponentDescriptor &, ArgumentID src_tile, ArgumentID dst_tile, const StoreType &store_type)
+Status add_kcomp_store(ClKernelBlueprint &kernel_blueprint, const StoreType &store_type, ArgumentID src_tile, ArgumentID dst_tile)
 {
     switch(store_type)
     {
@@ -119,21 +98,26 @@ Status add_kcomp_store(ClKernelBlueprint &kernel_blueprint, const ClKernelCompon
             kernel_blueprint.impl().add_component(
                 std::make_unique<ClStoreBlockBoundaryAwareKernelComponent>(
                     &kernel_blueprint,
-                    SharedVarLink{ src_tile, SharedVarIO::Input, kernel_blueprint.impl().group(src_tile) },
-                    SharedVarLink{ dst_tile, SharedVarIO::Output, kernel_blueprint.impl().group(dst_tile) }));
+                    SharedVarLink{ src_tile, SharedVarIO::Input },
+                    SharedVarLink{ dst_tile, SharedVarIO::Output }));
             break;
         case StoreType::TStoreIndirectWidthSelect:
             kernel_blueprint.impl().add_component(
                 std::make_unique<ClStoreIndirectWidthSelectKernelComponent>(
                     &kernel_blueprint,
-                    SharedVarLink{ src_tile, SharedVarIO::Input, kernel_blueprint.impl().group(src_tile) },
-                    SharedVarLink{ dst_tile, SharedVarIO::Output, kernel_blueprint.impl().group(dst_tile) }));
+                    SharedVarLink{ src_tile, SharedVarIO::Input },
+                    SharedVarLink{ dst_tile, SharedVarIO::Output }));
             break;
         default:
             ARM_COMPUTE_ERROR("Store mode not yet supported.");
     }
 
     return Status{};
+}
+
+Status update_merge_point(ClKernelBlueprint &bp, ArgumentID t_id, ArgumentID merge_point)
+{
+    return bp.impl().update_merge_point(t_id, merge_point);
 }
 
 Status set_tile_info(ClKernelBlueprint &bp, const TileDescriptor &tile_info)
@@ -143,6 +127,7 @@ Status set_tile_info(ClKernelBlueprint &bp, const TileDescriptor &tile_info)
 }
 Status build(ClKernelCode &code, const ClCodeBuilderContext &, ClKernelBlueprint &kernel_blueprint)
 {
+    kernel_blueprint.impl().finalize();
     code.name = kernel_blueprint.impl().build_kernel_name();
     code.code = kernel_blueprint.impl().build_code();
 
@@ -153,6 +138,10 @@ Status build(ClKernelCode &code, const ClCodeBuilderContext &, ClKernelBlueprint
 
     return Status{};
 }
+DependencyGraph get_dependency_graph(const ClKernelBlueprint &blueprint)
+{
+    return blueprint.impl().get_graph();
+}
 Status tune_static(ClExecutionDescriptor &, const ClKernelCode &)
 {
     return Status{};
@@ -160,5 +149,3 @@ Status tune_static(ClExecutionDescriptor &, const ClKernelCode &)
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

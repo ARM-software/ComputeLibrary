@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
@@ -37,7 +39,7 @@ namespace dynamic_fusion
 class ClElementwiseAddKernelComponent : public IClKernelComponent
 {
 public:
-    ClElementwiseAddKernelComponent(const ClKernelBlueprint *blueprint, const Link &lhs, const Link &rhs, const Link &dst)
+    ClElementwiseAddKernelComponent(ClKernelBlueprint *blueprint, const Link &lhs, const Link &rhs, const Link &dst)
         : IClKernelComponent(blueprint), _lhs{ lhs }, _rhs{ rhs }, _dst{ dst }
     {
     }
@@ -54,7 +56,8 @@ public:
         return { _lhs, _rhs, _dst };
     }
 
-    virtual TagLUT allocate_vars(SharedVarTable &vtable) const override;
+    virtual TagLUT get_tag_lut(const SharedVarTable &vtable) const override;
+    virtual void allocate_shared_vars(SharedVarTable &vtable) const override;
 
     virtual std::string name() const override
     {
@@ -71,5 +74,3 @@ private:
 } // namespace experimental
 } // namespace arm_compute
 #endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

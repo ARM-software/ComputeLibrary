@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -304,5 +304,10 @@ inline size_t Window::num_iterations_total() const
 inline void swap(Window &lhs, Window &rhs)
 {
     lhs._dims.swap(rhs._dims);
+}
+
+inline bool operator==(const Window &lhs, const Window &rhs)
+{
+    return (lhs._dims == rhs._dims) && (lhs._is_broadcasted == rhs._is_broadcasted);
 }
 } // namespace arm_compute

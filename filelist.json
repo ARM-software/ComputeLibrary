@@ -2074,10 +2074,17 @@
     "dynamic_fusion": [
       "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.cpp",
       "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.cpp",
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClGemmNativeKernelComponent.cpp",
       "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.cpp",
       "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.cpp",
-      "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.cpp"
+      "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.cpp",
+
+      "src/core/experimental/dynamic_fusion/OperatorGraph.cpp",
+      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClWorkload.cpp",
+      "src/gpu/cl/operators/experimental/dynamic_fusion/ClCompositeOperator.cpp",
+      "src/core/experimental/dynamic_fusion/WorkloadImpl/OperatorGraphImpl.cpp",
+      "src/core/experimental/dynamic_fusion/WorkloadImpl/DependencyGraph.cpp",
+      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClKernelGraph.cpp",
+      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClFusedKernelGraph.cpp"
     ]
   }
 }

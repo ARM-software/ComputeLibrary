@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMMON_H
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMMON_H
@@ -36,6 +38,7 @@
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.h"
 
+#include <iostream>
 #include <queue>
 #include <stack>
 #include <string>
@@ -63,8 +66,8 @@ enum class SharedVarIO
 
 enum class SharedVarGroup
 {
-    Argument, // Parameters to a kernel function
-    Automatic // Automatic variables declared within the kernel body
+    Argument, // Parameters to a kernel function  == dst or src tensors of the whole blueprint graph
+    Automatic // Automatic variables declared within the kernel body == intermediate tensors of the whole blueprint graph
 };
 
 /** Specifies a shared variable link for a component.
@@ -74,85 +77,151 @@ enum class SharedVarGroup
  */
 struct SharedVarLink
 {
-    ArgumentID     arg_id{ g_arg_placeholder };
-    SharedVarIO    io{ SharedVarIO::Input };
-    SharedVarGroup group{ SharedVarGroup::Argument };
-    bool           is_empty() const
+    ArgumentID  arg_id{ g_arg_placeholder };
+    SharedVarIO io{ SharedVarIO::Input };
+    bool        is_empty() const
     {
         return arg_id == g_arg_placeholder;
     }
 };
 
 /** A table of all the variables used in the kernel / blueprint
+ * Because we limit the DependencyGraph in the blueprint to a Linear Sequence for now, we only allow ** a single global variable (the accumulator) **
+ *
  * NOTE: the order they appear in the table is the order of their "declaration" in the component code, and is also their ID
  * NOTE: the variables all have the scope of the full kernel function
  */
 class SharedVarTable
 {
 public:
+    /** A fully realized SharedVarLink
+     */
     struct SharedVar
     {
-        SharedVarGroup               group;
-        std::string                  uniq_name; // Unique name, also the final variable name used in the built code
-        ClKernelArgRuntimeDescriptor desc;      // Automatic variables can and should still be described using this struct
+        ArgumentID            arg_id{ g_arg_placeholder };
+        SharedVarIO           io{ SharedVarIO::Input };
+        SharedVarGroup        group{ SharedVarGroup::Argument };
+        std::string           uniq_name{}; // Unique name, also the final variable name used in the built code
+        ClKernelArgDescriptor desc{};      // Automatic variables can and should still be described using this struct
+        bool                  is_empty() const
+        {
+            return arg_id == g_arg_placeholder;
+        }
     };
 
-    using Arguments = std::vector<SharedVar>;
+    class Arguments
+    {
+    public:
+        Arguments() = default;
+        void add_var(const SharedVar &var)
+        {
+            ARM_COMPUTE_ERROR_ON(var.group != SharedVarGroup::Argument);
+            _vars.push_back(var);
+        }
+        std::vector<SharedVar> get_all_vars() const
+        {
+            return _vars;
+        }
+        std::vector<SharedVar> get_src_vars() const
+        {
+            std::vector<SharedVar> src_vars;
+            std::copy_if(_vars.begin(), _vars.end(), std::back_inserter(src_vars), [](const SharedVar & var)
+            {
+                return var.io == SharedVarIO::Input;
+            });
+            return src_vars;
+        }
+        SharedVar get_dst_var() const
+        {
+            std::vector<SharedVar> dst_vars;
+            std::copy_if(_vars.begin(), _vars.end(), std::back_inserter(dst_vars), [](const SharedVar & var)
+            {
+                return var.io == SharedVarIO::Output;
+            });
+            ARM_COMPUTE_ERROR_ON(dst_vars.size() != 1);
+            return dst_vars.at(0);
+        }
 
-    /** @note: The order of insertion is important. There is one precondition:
+    private:
+        std::vector<SharedVar> _vars{};
+    };
+
+    /** Create a SharedVar for a corresponding SharedVarLink (contains ArgumentID). If one has already been created for the SharedVarLink, simply return it instead of creating a new one
+     *
+     * @note: The order of insertion is important. There is one precondition:
      *        PRECOND: The components have been sorted topologically / is being traversed in topological order
      *                 This ensures that all the consumer var links (Output, Automatic Links) can consume (return) the producer var links when they're referred
      */
-    SharedVar add(SharedVarLink var_link, ClKernelArgRuntimeDescriptor runtime_desc, const std::string &name = "unnamed")
+    void add(SharedVarLink var_link, SharedVarGroup group, ClKernelArgDescriptor runtime_desc, const std::string &name = "unnamed")
     {
         ARM_COMPUTE_ERROR_ON_MSG(var_link.is_empty(), "Non-empty SharedVarLink expected");
+        if(!get(var_link).is_empty())
+        {
+            return;
+        }
+
         auto              var_id = _num_var;
         std::stringstream ss;
         ss << name << "_" << var_id;
         const auto uniq_name = ss.str();
-        SharedVar  var{ var_link.group, uniq_name, runtime_desc };
+        SharedVar  var{ var_link.arg_id, var_link.io, group, uniq_name, runtime_desc };
 
-        if(var_link.group == SharedVarGroup::Argument)
+        if(group == SharedVarGroup::Argument)
         {
             _arguments.emplace(var_id, var);
+            _arg_id_map.emplace(var_link.arg_id, var_id);
             _num_var++;
-            _var_id_lut[var_link.arg_id] = var_id;
         }
-        else if(var_link.group == SharedVarGroup::Automatic)
+        else if(group == SharedVarGroup::Automatic)
         {
-            if(var_link.io == SharedVarIO::Output)
+            if(_global_vars.empty())
             {
-                _global_vars.emplace(var_id, var);
-                _num_var++;
-                _var_id_lut[var_link.arg_id] = var_id;
+                if(var_link.io == SharedVarIO::Output)
+                {
+                    _global_vars.emplace(var_id, var);
+                    _arg_id_map.emplace(var_link.arg_id, var_id);
+                    _num_var++;
+                }
+                else
+                {
+                    ARM_COMPUTE_ERROR("Component likely not traversed in topological order");
+                }
             }
             else
             {
-                // For the input link, the var (and thus its arg_id) will always have been added by the time we get here if we traverse components in topological order
-                var = get_var(var_link.arg_id);
+                // Associate additional SharedVarLinks with the single global shared variable
+                const auto global_var_id     = _global_vars.begin()->first;
+                _arg_id_map[var_link.arg_id] = global_var_id;
             }
         }
         else
         {
             ARM_COMPUTE_ERROR("Unrecognised SharedVarGroup");
         }
-        return var;
     }
 
-    SharedVar get_var(ArgumentID arg_id) const
+    /** Get the SharedVar associated with @p var_link
+     *
+     * @param var_link
+     * @return SharedVar
+     */
+    SharedVar get(const SharedVarLink &var_link) const
     {
-        const auto var_id = _var_id_lut.at(arg_id); // arg_id has to exist in lut to begin with
-        auto       it     = _global_vars.find(var_id);
-        if(it != _global_vars.end())
+        const SharedVar empty_var{};
+        if(_arg_id_map.find(var_link.arg_id) != _arg_id_map.end())
         {
-            return it->second;
+            const auto var_id  = _arg_id_map.at(var_link.arg_id);
+            const auto arg_var = _arguments.find(var_id);
+            if(arg_var != _arguments.end())
+            {
+                return arg_var->second;
+            }
+            else
+            {
+                return _global_vars.at(var_id);
+            }
         }
-        it = _arguments.find(var_id);
-        if(it != _arguments.end())
-        {
-            return it->second;
-        }
-        ARM_COMPUTE_ERROR("Cannot find component variable");
+        return empty_var;
     }
 
     /** @note The arguments are returned in the order they are added
@@ -162,7 +231,7 @@ public:
         Arguments args{};
         for(const auto &a : _arguments)
         {
-            args.push_back(a.second);
+            args.add_var(a.second);
         }
         return args;
     }
@@ -171,9 +240,9 @@ private:
     using VarID = int32_t;
 
 private:
-    std::map<VarID, SharedVar>            _global_vars{};
-    std::map<VarID, SharedVar>            _arguments{};
-    std::unordered_map<ArgumentID, VarID> _var_id_lut{};
+    std::map<VarID, SharedVar>  _global_vars{}; // Shared, global variable
+    std::map<VarID, SharedVar>  _arguments{};
+    std::map<ArgumentID, VarID> _arg_id_map{}; // Track ArgumentIDs that have already been added
     VarID _num_var{ 0 };
 };
 
@@ -184,7 +253,7 @@ enum class ComponentType
     Store
 };
 
-using ComponentID   = int32_t;
+using ComponentID   = DependencyGraph::Id;
 using ComponentList = std::vector<ComponentID>;
 class IClKernelComponent
 {
@@ -224,7 +293,7 @@ public:
     };
     using TagLUT = std::unordered_map<Tag, TagVal>; // Used to instantiating a code template / replacing tags
 public:
-    IClKernelComponent(const ClKernelBlueprint *blueprint)
+    IClKernelComponent(ClKernelBlueprint *blueprint)
         : _blueprint(blueprint)
     {
     }
@@ -304,12 +373,18 @@ public:
     {
         return Window{};
     }
-    /** "Allocate" all shared variables used in a component to the @p vtable, and generate a TagLUT used to instantiate the component code
+    /** Get the tag look-up table used to instantiate the component code.
      *
      * @param vtable
      * @return TagLUT
      */
-    virtual TagLUT allocate_vars(SharedVarTable &vtable) const = 0;
+    virtual TagLUT get_tag_lut(const SharedVarTable &vtable) const = 0;
+
+    /** Allocate all shared variables used by the component in the @p vtable
+     *
+     * @param vtable
+     */
+    virtual void allocate_shared_vars(SharedVarTable &vtable) const = 0;
 
     virtual std::string get_dst_addr_calculation() const
     {
@@ -331,7 +406,7 @@ public:
     }
 
 protected:
-    const ClKernelBlueprint *_blueprint;
+    ClKernelBlueprint *_blueprint;
 
 private:
     ComponentID _id{};
@@ -348,18 +423,19 @@ public:
     ~Implementation() = default;
 
 public:
-    ArgumentID add_kernel_argument(const ClTensorDescriptor &tensor_desc)
+    Status update_merge_point(ArgumentID t_id, ArgumentID merge_point)
     {
-        _kernel_arguments.insert(std::make_pair(_num_args, tensor_desc));
-        _shared_var_group_lut[_num_args] = SharedVarGroup::Argument;
-        return _num_args++;
+        return _graph.update_merge_point(t_id, merge_point);
     }
 
-    ArgumentID add_intermediate_tensor()
+    ArgumentID add_kernel_tensor(ITensorInfo *tensor_info, ArgumentID merge_point = DependencyGraph::empty_id())
     {
-        _intermediate_tensors.insert(_num_args);
-        _shared_var_group_lut[_num_args] = SharedVarGroup::Automatic;
-        return _num_args++;
+        const auto id = _graph.add_tensor(merge_point);
+        if(_kernel_tensors.find(id) == _kernel_tensors.end())
+        {
+            _kernel_tensors.insert(std::make_pair(id, tensor_info));
+        }
+        return id;
     }
 
     void set_tile_info(const TileDescriptor &tile_info)
@@ -382,7 +458,7 @@ public:
         for(const auto arg_id : args)
         {
             ARM_COMPUTE_UNUSED(arg_id);
-            ARM_COMPUTE_ERROR_ON_MSG(_kernel_arguments.find(arg_id) == _kernel_arguments.end() && _intermediate_tensors.find(arg_id) == _intermediate_tensors.end() && arg_id != g_arg_placeholder,
+            ARM_COMPUTE_ERROR_ON_MSG(_kernel_tensors.find(arg_id) == _kernel_tensors.end() && arg_id != g_arg_placeholder,
                                      "Trying to use an argument that hasn't been added to the blueprint");
         }
     }
@@ -395,28 +471,35 @@ public:
             ARM_COMPUTE_ERROR_ON_MSG(_num_complex_components > 1, "Only one complex component per blueprint is supported.");
         }
 
-        // This flag specifies if the current component is the root of the component graph
-        // If the root is set to -1, it means that a root hasn't been added yet
-        bool is_graph_root = true;
-
         // Get an unique ID for the component that's being added
-        const ComponentID component_id = _num_components++;
+        std::vector<ArgumentID> src_tensors;
+        std::vector<ArgumentID> dst_tensors;
+        for(const auto &link : component->get_links())
+        {
+            if(link.is_empty())
+            {
+                continue;
+            }
+            if(link.io == SharedVarIO::Input)
+            {
+                src_tensors.push_back(link.arg_id);
+            }
+            else
+            {
+                dst_tensors.push_back(link.arg_id);
+            }
+        }
+        const ComponentID component_id = _graph.add_operator(src_tensors, dst_tensors).second;
         component->set_id(component_id);
 
         // Add this component to the component graph. Don't connect it to anything yet
         _component_graph.emplace(component_id, ComponentList{});
-
-        int32_t positional_arg = 0;
 
         // For every { arg_id, arg_io } passed along with this component...
         for(const auto &link : component->get_links())
         {
             const ArgumentID &arg_id = link.arg_id;
             const SharedVarIO &arg_io = link.io;
-
-            // A component is considered root only if all its input arguments are kernel arguments (or placeholders, which means nullptr)
-            // This performs a check on every argument, and if one of them doesn't respect the condition, the component is not considered root
-            is_graph_root &= (_kernel_arguments.find(arg_id) != _kernel_arguments.end()) || (arg_io == SharedVarIO::Output) || (arg_id == g_arg_placeholder);
 
             // Add the arg_id to the map describing the input/output relationship between an argument and the components that use it, if it doesn't yet exist there
             if(_outgoing_components.find(arg_id) == _outgoing_components.end())
@@ -454,15 +537,9 @@ public:
 
                 _incoming_components[arg_id].push_back(component_id);
             }
-
-            ++positional_arg;
         }
 
-        if(is_graph_root)
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(_graph_root >= 0, "Trying to add more than one root to the graph");
-            _graph_root = component_id;
-        }
+        ARM_COMPUTE_ERROR_ON_MSG(_graph.get_root_ops().size() != 1, "Trying to add more than one root to the graph");
 
         // Finally, add this component to the dictionary of components
         _components.insert(std::make_pair(component_id, std::move(component)));
@@ -489,8 +566,19 @@ public:
         std::set<std::string>    additional_macros{};
         std::vector<std::string> component_codes{}; // vector because order matters
 
-        // Go through the components graph (topological sort) and fill the data structures above
+        // Step 1: Allocate all kernel argument shared variables before generating the component code
         auto stack = topological_sort();
+        while(!stack.empty())
+        {
+            auto  curr_component_id = stack.top();
+            auto &curr_component    = _components.find(curr_component_id)->second;
+
+            curr_component->allocate_shared_vars(_vtable);
+
+            stack.pop();
+        }
+        // Step 2: Generate component codes
+        stack = topological_sort();
         while(!stack.empty())
         {
             auto  curr_component_id = stack.top();
@@ -499,7 +587,7 @@ public:
             auto       curr_headers_list      = curr_component->get_headers_list();
             auto       curr_additional_macros = curr_component->get_additional_macros();
             auto       curr_component_code    = curr_component->get_component_code();
-            const auto var_lut                = curr_component->allocate_vars(_vtable); // Ideally can be merged with get_component_code once we have finer-grained code generation technique
+            const auto var_lut                = curr_component->get_tag_lut(_vtable); // Ideally can be merged with get_component_code once we have finer-grained code generation technique
             component_codes.push_back(IClKernelComponent::replace_tags(curr_component_code, var_lut));
 
             headers_list.insert(curr_headers_list.begin(), curr_headers_list.end());
@@ -511,7 +599,7 @@ public:
             stack.pop();
         }
 
-        // This section assembles the data gathered by traversing the graph into the string "code"
+        // Step 3: Assemble the data gathered by traversing the graph into the string "code"
         std::string code = "";
 
         for(auto &header : headers_list)
@@ -596,34 +684,79 @@ public:
     ClKernelArgList get_arguments() const
     {
         ClKernelArgList arg_list{};
-        for(const auto &arg_var : _vtable.get_kernel_arguments())
+        for(const auto &arg_var : _vtable.get_kernel_arguments().get_all_vars())
         {
-            arg_list.push_back(arg_var.desc);
+            arg_list[arg_var.desc.arg_id] = arg_var.desc;
         }
         return arg_list;
     }
 
-    const ClTensorDescriptor *get_kernel_argument(const ArgumentID id) const
+    /** Get the arguments as shared vars from the vtable
+     *
+     * @return SharedVarTable::Arguments
+     */
+    SharedVarTable::Arguments get_argument_shared_vars() const
     {
-        auto it = _kernel_arguments.find(id);
-        if(it != _kernel_arguments.end())
+        return _vtable.get_kernel_arguments();
+    }
+
+    const ITensorInfo *get_kernel_argument_info(const ArgumentID id) const
+    {
+        auto it = _kernel_tensors.find(id);
+        if(it != _kernel_tensors.end())
         {
-            return &_kernel_arguments.find(id)->second;
+            return it->second;
         }
         return nullptr;
     }
 
-    ITensorInfo *get_kernel_argument_info(const ArgumentID id) const
+    ITensorInfo *get_kernel_argument_info(const ArgumentID id)
     {
-        const ClTensorDescriptor *arg_desc = get_kernel_argument(id);
-        if(arg_desc != nullptr)
+        auto it = _kernel_tensors.find(id);
+        if(it != _kernel_tensors.end())
         {
-            return arg_desc->tensor_info;
+            return it->second;
         }
         return nullptr;
+    }
+    /** Finalize graph construction. Graph is expected to not mutate after being finalized
+     */
+    void finalize()
+    {
+        cache_root_component();
+        assign_shared_var_group();
+    }
+
+    DependencyGraph get_graph() const
+    {
+        return _graph;
     }
 
 private:
+    void cache_root_component()
+    {
+        const auto roots = _graph.get_root_ops();
+        ARM_COMPUTE_ERROR_ON_MSG(roots.size() != 1, "Trying to add more than one root to the graph");
+        _graph_root = roots.at(0);
+    }
+    /** Assign the group for each shared var. Can only be performed at the end of the graph construction, before building
+     */
+    void assign_shared_var_group()
+    {
+        for(const auto &tensor : _kernel_tensors)
+        {
+            const auto tensor_id = tensor.first;
+            if(_graph.is_src_tensor(tensor_id) || _graph.is_dst_tensor(tensor_id))
+            {
+                _shared_var_group_lut[tensor_id] = SharedVarGroup::Argument;
+            }
+            else
+            {
+                _shared_var_group_lut[tensor_id] = SharedVarGroup::Automatic;
+            }
+        }
+    }
+
     void topological_sort_utility(ComponentID component_id, std::unordered_set<ComponentID> &visited, std::stack<ComponentID> &stack) const
     {
         visited.insert(component_id);
@@ -666,41 +799,41 @@ private:
         std::string code;
         switch(var.desc.tensor_arg_type)
         {
-            case TensorArgType::Vector:
+            case ClKernelTensorArgType::Vector:
             {
                 code += "\n    VECTOR_DECLARATION(" + var.uniq_name + ")";
                 break;
             }
-            case TensorArgType::Image:
+            case ClKernelTensorArgType::Image:
             {
                 code += "\n    IMAGE_DECLARATION(" + var.uniq_name + ")";
                 break;
             }
-            case TensorArgType::Image_3D:
+            case ClKernelTensorArgType::Image_3D:
             {
                 code += "\n    IMAGE_DECLARATION(" + var.uniq_name + "),";
                 code += "\n    uint " + var.uniq_name + "_stride_z";
                 break;
             }
-            case TensorArgType::Image_3D_Export_To_ClImage2D:
+            case ClKernelTensorArgType::Image_3D_Export_To_ClImage2D:
             {
                 code += "\n    __read_only image2d_t " + var.uniq_name + "_img,";
                 code += "\n    uint " + var.uniq_name + "_stride_z";
                 break;
             }
-            case TensorArgType::Tensor_4D_t_Buffer:
+            case ClKernelTensorArgType::Tensor_4D_t_Buffer:
             {
                 code += "\n    TENSOR4D_T(" + var.uniq_name + ", BUFFER)";
                 break;
             }
-            case TensorArgType::Tensor_4D_t_Image:
+            case ClKernelTensorArgType::Tensor_4D_t_Image:
             {
                 code += "\n    TENSOR4D_T(" + var.uniq_name + ", IMAGE)";
                 break;
             }
             default:
             {
-                ARM_COMPUTE_ERROR("Unsupported declaration generation for TensorArgType");
+                ARM_COMPUTE_ERROR("Unsupported declaration generation for ClKernelTensorArgType");
             }
         }
         return code;
@@ -710,7 +843,7 @@ private:
     {
         std::string code = "\n__kernel void " + build_kernel_name() + "(";
 
-        for(const auto &arg : argument_list)
+        for(const auto &arg : argument_list.get_all_vars())
         {
             code += generate_argument_declaration(arg) + ",";
         }
@@ -722,54 +855,55 @@ private:
 
     std::string generate_global_section() const
     {
-        std::string code = "";
-        code += "    uint g_x = get_global_id(0);\n";
-        code += "    uint g_y = get_global_id(1);\n";
-        code += "    uint g_z = get_global_id(2);\n\n";
+        auto       dst_info   = get_kernel_argument_info(_dst_id);
+        auto       dst_w      = dst_info->dimension(0);
+        auto       dst_h      = dst_info->dimension(1);
+        const auto tile_w     = std::max(1, get_execution_window().x().step());
+        const auto tile_h     = std::max(1, get_execution_window().y().step());
+        auto       leftover_w = dst_w % tile_w;
+        auto       leftover_h = dst_h % tile_h;
 
-        size_t tile_dim_x = _tile_info.empty() ? 1 : _tile_info.tile_dims.x();
-        size_t tile_dim_y = _tile_info.empty() ? 1 : _tile_info.tile_dims.y();
+        std::string code = "";
+        code += std::string("    int cout = GET_SPATIAL_IDX(0, ") + std::to_string(tile_w) + ", " + std::to_string(leftover_w) + ");\n";
+        code += std::string("    int mout = GET_SPATIAL_IDX(1, ") + std::to_string(tile_h) + ", " + std::to_string(leftover_h) + ");\n";
+        code += std::string("    int bout = GET_SPATIAL_IDX(2, 1, 0);\n\n");
 
         switch(_tile_info.clipping)
         {
             case ClippingStrategy::TOP_LEFT:
-                code += "    const bool g_cond_x = (g_x == 0);\n";
-                code += "    const bool g_cond_y = (g_y == 0);\n";
+                code += "    const bool g_cond_x = (cout == 0);\n";
+                code += "    const bool g_cond_y = (mout == 0);\n";
                 break;
             case ClippingStrategy::TOP_RIGHT:
-                code += "    const bool g_cond_x = ((g_x + 1) * " + std::to_string(tile_dim_x) + " >= " + std::to_string(_tile_info.boundaries.x()) + ");\n";
-                code += "    const bool g_cond_y = (g_y == 0);\n";
+                code += "    const bool g_cond_x = ((cout + 1) * " + std::to_string(tile_w) + " >= " + std::to_string(_tile_info.boundaries.x()) + ");\n";
+                code += "    const bool g_cond_y = (mout == 0);\n";
                 break;
             case ClippingStrategy::BOTTOM_LEFT:
-                code += "    const bool g_cond_x = (g_x == 0);\n";
-                code += "    const bool g_cond_y = ((g_y + 1) * " + std::to_string(tile_dim_y) + " >= " + std::to_string(_tile_info.boundaries.y()) + ");\n";
+                code += "    const bool g_cond_x = (cout == 0);\n";
+                code += "    const bool g_cond_y = ((mout + 1) * " + std::to_string(tile_h) + " >= " + std::to_string(_tile_info.boundaries.y()) + ");\n";
                 break;
             case ClippingStrategy::BOTTOM_RIGHT:
-                code += "    const bool g_cond_x = ((g_x + 1) * " + std::to_string(tile_dim_x) + " >= " + std::to_string(_tile_info.boundaries.x()) + ");\n";
-                code += "    const bool g_cond_y = ((g_y + 1) * " + std::to_string(tile_dim_y) + " >= " + std::to_string(_tile_info.boundaries.y()) + ");\n";
+                code += "    const bool g_cond_x = ((cout + 1) * " + std::to_string(tile_w) + " >= " + std::to_string(_tile_info.boundaries.x()) + ");\n";
+                code += "    const bool g_cond_y = ((mout + 1) * " + std::to_string(tile_h) + " >= " + std::to_string(_tile_info.boundaries.y()) + ");\n";
                 break;
             default:
                 ARM_COMPUTE_ERROR("Unsupported clipping strategy");
         }
-
-        code += "\n    REPEAT_VAR_INIT_TO_CONST(" + std::to_string(tile_dim_y) + ", uint, g_zout, 0);\n";
-        code += "    REPEAT_VAR_INIT_TO_CONST(16, uint, g_zero, 0);\n\n";
 
         return code;
     }
 
     TileDescriptor _tile_info{};
 
-    int32_t _num_args{};
-    int32_t _num_components{};
     int32_t _num_complex_components{};
 
     ArgumentID _dst_id{ -1 }; // Initially set to -1, which means the graph has no dst yet, since node IDs are positive numbers
 
-    // Argument, components and intermediate tensors IDs with corresponding ptrs (except intermediate)
+    DependencyGraph _graph{};
+
+    // Tensors, components and IDs with corresponding ptrs (except intermediate)
     std::unordered_map<ComponentID, ComponentUniquePtr> _components{};
-    std::unordered_map<ArgumentID, ClTensorDescriptor>  _kernel_arguments{};
-    std::unordered_set<ArgumentID> _intermediate_tensors{};
+    std::unordered_map<ArgumentID, ITensorInfo *>       _kernel_tensors{};
     // Argument group lookup. Can be replaced by extending the ArgumentID type to include group info
     std::unordered_map<ArgumentID, SharedVarGroup> _shared_var_group_lut{};
 
@@ -795,5 +929,3 @@ private:
 } // namespace experimental
 } // namespace arm_compute
 #endif //ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMMON_H
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

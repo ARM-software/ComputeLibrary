@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.h"
 
@@ -31,6 +33,7 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
+#include "arm_compute/runtime/CL/CLScheduler.h"
 namespace arm_compute
 {
 namespace experimental
@@ -44,7 +47,7 @@ ComponentType ClDirectConvolutionKernelComponent::get_component_type() const
 
 std::set<std::string> ClDirectConvolutionKernelComponent::get_headers_list() const
 {
-    return std::set<std::string> { "helpers.h", "tile_helpers.h", "repeat.h" };
+    return std::set<std::string> { "helpers.h", "tile_helpers.h" };
 }
 
 Window ClDirectConvolutionKernelComponent::get_window() const
@@ -54,7 +57,17 @@ Window ClDirectConvolutionKernelComponent::get_window() const
     auto       dst_info    = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
 
     // Get dst shape
-    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src_info, *weight_info, _desc.pad_stride_info);
+    PadStrideInfo pad_stride_info
+    {
+        static_cast<unsigned int>(_desc.conv2d.stride.x()),
+        static_cast<unsigned int>(_desc.conv2d.stride.y()),
+        static_cast<unsigned int>(_desc.conv2d.pad.left),
+        static_cast<unsigned int>(_desc.conv2d.pad.right),
+        static_cast<unsigned int>(_desc.conv2d.pad.top),
+        static_cast<unsigned int>(_desc.conv2d.pad.bottom),
+        DimensionRoundingType::FLOOR /*default rounding type*/
+    };
+    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src_info, *weight_info, pad_stride_info);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*dst_info, output_shape,
@@ -64,6 +77,9 @@ Window ClDirectConvolutionKernelComponent::get_window() const
 
     const unsigned int vec_size = std::min(static_cast<unsigned int>(dst_info->tensor_shape()[0]), 4u);
     const unsigned int num_rows = (dst_info->tensor_shape()[0] > 16) ? ((src_info->data_type() == DataType::F32) ? 2U : 4U) : 1U;
+    // const unsigned int num_rows = 1;
+    // const unsigned int vec_size = tile_info.tile_dims.x();
+    // const unsigned int num_rows = tile_info.tile_dims.y();
 
     // Create and configure kernel window
     Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
@@ -95,27 +111,30 @@ std::string ClDirectConvolutionKernelComponent::get_component_code() const
     //------------------ START KERNEL {{meta_kernel_id}} ---------------------
     // IN_0(src)            {{src}}
     // IN_1(wei)            {{weight}}
+    )_";
+    if(bias_info != nullptr)
+    {
+        code += R"_(
     // IN_1(bia)            {{bias}}
+    )_";
+    }
+    code += R"_(
     // OUT(dst, accum)      {{dst}}
-
-    const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
-    const int mout = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH x HEIGHT
-    const int bout = GET_SPATIAL_IDX(2, 1, 0);           // BATCH SIZE IDX
 
     // Initialize the accumulators
     TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
     {
         // All the tensor dimensions are passed at compile time.
         // In case of dynamic tensor support, the following dimensions should be passed as function argument.
-    #define _I{{WEI_WIDTH}} {{WEI_WIDTH}}
-    #define _I{{WEI_HEIGHT}} {{WEI_HEIGHT}}
+    #define _IWEI_WIDTH {{WEI_WIDTH}}
+    #define _IWEI_HEIGHT {{WEI_HEIGHT}}
     #define _ISRC_WIDTH {{src}}_w
     #define _ISRC_HEIGHT {{src}}_h
     #define _ISRC_CHANNELS {{src}}_c
-    #define _IDST_WIDTH {{dst_w}}
-    #define _IDST_HEIGHT {{dst_h}}
-    #define _IDST_CHANNELS {{dst_c}}
-    #define _IY_MULTIPLIER (_I{{WEI_WIDTH}} * _I{{WEI_HEIGHT}})
+    #define _IDST_WIDTH {{arg_dst}}_w
+    #define _IDST_HEIGHT {{arg_dst}}_h
+    #define _IDST_CHANNELS {{arg_dst}}_c
+    #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
         // .v    = access the whole vector (OpenCL vector)
         // .s[x] = access the vector element at position x (scalar access)
@@ -136,13 +155,11 @@ std::string ClDirectConvolutionKernelComponent::get_component_code() const
             {{dst}}[i].v = 0;
         })
 
-        uint cond = (get_global_id(0) == 0) && (get_global_id(1) == 0) && (get_global_id(2) == 0);
-
-        for(int i = 0; i < (_I{{WEI_WIDTH}} * _I{{WEI_HEIGHT}}); ++i)
+        for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
         {
             int ck = 0;
-            int xk = i % _I{{WEI_WIDTH}};
-            int yk = i / _I{{WEI_WIDTH}};
+            int xk = i % _IWEI_WIDTH;
+            int yk = i / _IWEI_HEIGHT;
 
             int k = 0;
             for(; k <= (_ISRC_CHANNELS - K0); k += K0)
@@ -201,6 +218,16 @@ std::string ClDirectConvolutionKernelComponent::get_component_code() const
     }
 
     code += R"_(
+    #undef _I_WEI_WIDTH
+    #undef _I_WEI_HEIGHT
+    #undef _ISRC_WIDTH
+    #undef _ISRC_HEIGHT
+    #undef _ISRC_CHANNELS
+    #undef _IDST_WIDTH
+    #undef _IDST_HEIGHT
+    #undef _IDST_CHANNELS
+    #undef _IY_MULTIPLIER
+
         }
     )_";
 
@@ -217,44 +244,7 @@ std::string ClDirectConvolutionKernelComponent::get_component_code() const
     }
 
     code += R"_(
-    #undef _I{{WEI_WIDTH}}
-    #undef _I{{WEI_HEIGHT}}
-    #undef _ISRC_WIDTH
-    #undef _ISRC_HEIGHT
-    #undef _ISRC_CHANNELS
-    #undef _IDST_WIDTH
-    #undef _IDST_HEIGHT
-    #undef _IDST_CHANNELS
-    #undef _IY_MULTIPLIER
     }
-
-    // Workaround for the discrepancy between tiles and repeats
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}0 = {{dst}}[0].v;
-#if M0 >= 2
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}1 = {{dst}}[1].v;
-#endif // M0 >= 2
-#if M0 >= 3
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}2 = {{dst}}[2].v;
-#endif // M0 >= 3
-#if M0 >= 4
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}3 = {{dst}}[3].v;
-#endif // M0 >= 4
-#if M0 >= 8
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}4 = {{dst}}[4].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}5 = {{dst}}[5].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}6 = {{dst}}[6].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}7 = {{dst}}[7].v;
-#endif // M0 >= 8
-#if M0 == 16
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}8 = {{dst}}[8].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}9 = {{dst}}[9].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}A = {{dst}}[10].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}B = {{dst}}[11].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}C = {{dst}}[12].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}D = {{dst}}[13].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}E = {{dst}}[14].v;
-    VEC_DATA_TYPE({{ACC_DATA_TYPE}}, N0) {{dst}}F = {{dst}}[15].v;
-#endif // M0 == 16
 //------------------ END KERNEL {{meta_kernel_id}} ---------------------
     )_";
     return code.c_str();
@@ -306,19 +296,18 @@ bool export_to_cl_image_support(const ITensorInfo *tensor, GPUTarget gpu_target,
 CLBuildOptions ClDirectConvolutionKernelComponent::generate_build_options() const
 {
     const auto src_info    = _blueprint->impl().get_kernel_argument_info(_src.arg_id);
-    const auto weight_info = _blueprint->impl().get_kernel_argument_info(_weight.arg_id);
+    auto       weight_info = _blueprint->impl().get_kernel_argument_info(_weight.arg_id);
     const auto dst_info    = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    // const auto tile_info  = _blueprint->impl().get_tile_info();
 
     const unsigned int channel_idx = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::CHANNEL);
     const DataType     data_type   = src_info->data_type();
-    const GPUTarget    gpu_target  = ICLKernel().get_target();
+    const GPUTarget    gpu_target  = CLScheduler::get().target();
 
-    Window win = get_window();
-
-    const unsigned int n0                 = win.x().step();
-    const unsigned int m0                 = win.y().step();
+    const unsigned int n0                 = _blueprint->impl().get_execution_window().x().step();
+    const unsigned int m0                 = _blueprint->impl().get_execution_window().y().step();
     const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, src_info->dimension(channel_idx));
-    const unsigned int partial_store_n0   = dst_info->dimension(channel_idx) % n0;
+    const unsigned int partial_store_n0   = dst_info->dimension(0) % n0;
     const bool         export_to_cl_image = export_to_cl_image_support(weight_info, gpu_target, src_info->data_layout());
 
     // Update the padding for the weights tensor if we can export to cl_image
@@ -338,54 +327,79 @@ CLBuildOptions ClDirectConvolutionKernelComponent::generate_build_options() cons
     return build_opts;
 }
 
-ClDirectConvolutionKernelComponent::TagLUT ClDirectConvolutionKernelComponent::allocate_vars(SharedVarTable &vtable) const
+void ClDirectConvolutionKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
+{
+    const auto src_info    = _blueprint->impl().get_kernel_argument_info(_src.arg_id);
+    const auto weight_info = _blueprint->impl().get_kernel_argument_info(_weight.arg_id);
+
+    vtable.add(_src, _blueprint->impl().group(_src.arg_id), ClKernelArgDescriptor(_src.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "src");
+
+    const GPUTarget             gpu_target         = CLScheduler::get().target();
+    const bool                  export_to_cl_image = export_to_cl_image_support(weight_info, gpu_target, src_info->data_layout());
+    const ClKernelTensorArgType weight_type        = export_to_cl_image ? ClKernelTensorArgType::Tensor_4D_t_Image : ClKernelTensorArgType::Tensor_4D_t_Buffer;
+    vtable.add(_weight, _blueprint->impl().group(_weight.arg_id), ClKernelArgDescriptor(_weight.arg_id, weight_type), "weight");
+
+    if(!_bias.is_empty()) // optional bias
+    {
+        vtable.add(_bias, _blueprint->impl().group(_bias.arg_id), ClKernelArgDescriptor(_bias.arg_id, ClKernelTensorArgType::Vector), "bias");
+    }
+    vtable.add(_dst, _blueprint->impl().group(_dst.arg_id), ClKernelArgDescriptor(_dst.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "dst");
+}
+
+ClDirectConvolutionKernelComponent::TagLUT ClDirectConvolutionKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
     TagLUT lut{};
 
     const auto src_info    = _blueprint->impl().get_kernel_argument_info(_src.arg_id);
     const auto weight_info = _blueprint->impl().get_kernel_argument_info(_weight.arg_id);
     const auto bias_info   = _blueprint->impl().get_kernel_argument_info(_bias.arg_id);
-    const auto dst_info    = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
 
-    const GPUTarget gpu_target         = ICLKernel().get_target();
-    const bool      export_to_cl_image = export_to_cl_image_support(weight_info, gpu_target, src_info->data_layout());
-
-    const TensorArgType weight_type = export_to_cl_image ? TensorArgType::Tensor_4D_t_Image : TensorArgType::Tensor_4D_t_Buffer;
-    lut["meta_kernel_id"]           = id();
-    lut["src"]                      = vtable.add(_src, ClKernelArgRuntimeDescriptor(_src.arg_id, TensorArgType::Tensor_4D_t_Buffer), "src");
-    lut["weight"]                   = vtable.add(_weight, ClKernelArgRuntimeDescriptor(_weight.arg_id, weight_type), "weight");
+    // Arguments and global shared variables
+    lut["src"]    = vtable.get(_src);
+    lut["weight"] = vtable.get(_weight);
 
     if(!_bias.is_empty()) // optional bias
     {
-        lut["bias"]          = vtable.add(_bias, ClKernelArgRuntimeDescriptor(_bias.arg_id, TensorArgType::Vector), "bias");
+        lut["bias"]          = vtable.get(_bias);
         lut["BIA_DATA_TYPE"] = get_cl_type_from_data_type(bias_info->data_type());
     }
-    lut["dst"] = vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Tensor_4D_t_Buffer), "dst");
+    lut["dst"] = vtable.get(_dst);
+
+    const auto dst_argument = _blueprint->impl().get_argument_shared_vars().get_dst_var();
+    lut["arg_dst"]          = dst_argument.uniq_name;
 
     // Local build options
-    const auto width_idx   = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::WIDTH);
-    const auto height_idx  = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::HEIGHT);
-    const auto channel_idx = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::CHANNEL);
-
-    lut["dst_w"] = dst_info->dimension(width_idx);
-    lut["dst_h"] = dst_info->dimension(height_idx);
-    lut["dst_c"] = dst_info->dimension(channel_idx);
-
-    lut["ACC_DATA_TYPE"] = src_info->data_type();
-    lut["SRC_DATA_TYPE"] = src_info->data_type();
-    lut["WEI_DATA_TYPE"] = weight_info->data_type();
+    lut["meta_kernel_id"] = id();
+    lut["ACC_DATA_TYPE"]  = src_info->data_type();
+    lut["SRC_DATA_TYPE"]  = src_info->data_type();
+    lut["WEI_DATA_TYPE"]  = weight_info->data_type();
 
     lut["SRC_TENSOR_TYPE"] = "BUFFER";
-    lut["WEI_TENSOR_TYPE"] = export_to_cl_image ? "IMAGE" : "BUFFER";
+    switch(vtable.get(_weight).desc.tensor_arg_type)
+    {
+        case ClKernelTensorArgType::Image_Export_To_ClImage2D:
+        case ClKernelTensorArgType::Image_3D_Export_To_ClImage2D:
+        case ClKernelTensorArgType::Tensor_4D_t_Image:
+        {
+            lut["WEI_TENSOR_TYPE"] = "IMAGE";
+            break;
+        }
+        default:
+        {
+            lut["WEI_TENSOR_TYPE"] = "BUFFER";
+            break;
+        }
+    }
+    const auto width_idx  = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::WIDTH);
+    const auto height_idx = get_data_layout_dimension_index(src_info->data_layout(), DataLayoutDimension::HEIGHT);
+    lut["WEI_WIDTH"]      = weight_info->dimension(width_idx);
+    lut["WEI_HEIGHT"]     = weight_info->dimension(height_idx);
 
-    lut["WEI_WIDTH"]  = weight_info->dimension(width_idx);
-    lut["WEI_HEIGHT"] = weight_info->dimension(height_idx);
+    lut["STRIDE_X"] = _desc.conv2d.stride.x();
+    lut["STRIDE_Y"] = _desc.conv2d.stride.y();
 
-    lut["STRIDE_X"] = std::get<0>(_desc.pad_stride_info.stride());
-    lut["STRIDE_Y"] = std::get<1>(_desc.pad_stride_info.stride());
-
-    lut["PAD_LEFT"] = _desc.pad_stride_info.pad_left();
-    lut["PAD_TOP"]  = _desc.pad_stride_info.pad_top();
+    lut["PAD_LEFT"] = _desc.conv2d.pad.left;
+    lut["PAD_TOP"]  = _desc.conv2d.pad.top;
 
     lut["ZERO_VALUE"] = 0;
 
@@ -394,5 +408,3 @@ ClDirectConvolutionKernelComponent::TagLUT ClDirectConvolutionKernelComponent::a
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

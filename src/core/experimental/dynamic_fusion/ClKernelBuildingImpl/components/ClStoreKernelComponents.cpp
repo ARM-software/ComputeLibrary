@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.h"
 
@@ -65,25 +67,36 @@ std::string ClStoreBlockBoundaryAwareKernelComponent::get_component_code() const
 CLBuildOptions ClStoreBlockBoundaryAwareKernelComponent::generate_build_options() const
 {
     auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
-    auto tile_info  = _blueprint->impl().get_tile_info();
+    // auto tile_info  = _blueprint->impl().get_tile_info();
 
     CLBuildOptions build_opts{};
 
+    const auto n0         = _blueprint->impl().get_execution_window().x().step();
+    const auto m0         = _blueprint->impl().get_execution_window().y().step();
+    const auto partial_m0 = t_dst_info->dimension(0) % m0;
+    const auto partial_n0 = t_dst_info->dimension(1) % n0;
+
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(t_dst_info->data_type()));
-    build_opts.add_option("-DM0=" + support::cpp11::to_string(tile_info.tile_dims.y()));
-    build_opts.add_option("-DN0=" + support::cpp11::to_string(tile_info.tile_dims.x()));
-    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(tile_info.boundaries.y() % tile_info.tile_dims.y()));
-    build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(tile_info.boundaries.x() % tile_info.tile_dims.x()));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_m0));
+    build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_n0));
 
     return build_opts;
 }
 
-ClStoreBlockBoundaryAwareKernelComponent::TagLUT ClStoreBlockBoundaryAwareKernelComponent::allocate_vars(SharedVarTable &vtable) const
+void ClStoreBlockBoundaryAwareKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
+{
+    vtable.add(_src, _blueprint->impl().group(_src.arg_id), ClKernelArgDescriptor(_src.arg_id, ClKernelTensorArgType::Image_3D), "src");
+    vtable.add(_dst, _blueprint->impl().group(_dst.arg_id), ClKernelArgDescriptor(_dst.arg_id, ClKernelTensorArgType::Image_3D), "dst");
+}
+
+ClStoreBlockBoundaryAwareKernelComponent::TagLUT ClStoreBlockBoundaryAwareKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
     return {
         { "meta_kernel_id", id() },
-        { "src", vtable.add(_src, ClKernelArgRuntimeDescriptor(_src.arg_id, TensorArgType::Image_3D), "src") },
-        { "dst", vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Image_3D), "dst") },
+        { "src", vtable.get(_src) },
+        { "dst", vtable.get(_dst) },
     };
 }
 
@@ -96,19 +109,26 @@ std::string ClStoreIndirectWidthSelectKernelComponent::get_component_code() cons
 {
     return R"_(
     //------------------ START KERNEL {{meta_kernel_id}} STORE ---------------------
-
-    TILE(uint, M0, 1, dst_indirect_y);
-
-    // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        dst_indirect_y[i].v = (uint)min(mout + i, (int)({{dst_w}} * {{dst_h}}) - 1);
-        dst_indirect_y[i].v += bout * (int)({{dst_w}} * {{dst_h}});
-    })
+    #define _IDST_WIDTH {{dst}}_w
+    #define _IDST_HEIGHT {{dst}}_h
+        TILE(uint, M0, 1, dst_indirect_y);
 
-    T_STORE_INDIRECT_WIDTH_SELECT({{DST_DATA_TYPE}}, M0, N0, PARTIAL_N0, {{DST_TENSOR_TYPE}}, {{dst}}, cout, {{dst}}_stride_y, PARTIAL_N0 != 0 && g_cond_x, {{src}}, dst_indirect_y);
+        // Calculate the destination indirect Y
+        LOOP_UNROLLING(int, i, 0, 1, M0,
+        {
+            dst_indirect_y[i].v = (uint)min(mout + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
+            dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
+        })
 
-    //------------------ END KERNEL {{meta_kernel_id}} STORE ---------------------
+        bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
+
+        T_STORE_INDIRECT_WIDTH_SELECT({{DST_DATA_TYPE}}, M0, N0, PARTIAL_N0, {{DST_TENSOR_TYPE}}, {{dst}}, cout, {{dst}}_stride_y, x_cond, {{src}}, dst_indirect_y);
+
+    #undef _IDST_WIDTH
+    #undef _IDST_HEIGHT
+        //------------------ END KERNEL {{meta_kernel_id}} STORE ---------------------
+    }
 
 )_";
 }
@@ -120,21 +140,24 @@ CLBuildOptions ClStoreIndirectWidthSelectKernelComponent::generate_build_options
     return build_opts;
 }
 
-ClStoreIndirectWidthSelectKernelComponent::TagLUT ClStoreIndirectWidthSelectKernelComponent::allocate_vars(SharedVarTable &vtable) const
+void ClStoreIndirectWidthSelectKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
+{
+    vtable.add(_src, _blueprint->impl().group(_src.arg_id), ClKernelArgDescriptor(_src.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "src");
+    vtable.add(_dst, _blueprint->impl().group(_dst.arg_id), ClKernelArgDescriptor(_dst.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "dst");
+}
+
+ClStoreIndirectWidthSelectKernelComponent::TagLUT ClStoreIndirectWidthSelectKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
     TagLUT lut{};
 
-    lut["meta_kernel_id"] = id();
-    lut["src"]            = vtable.add(_src, ClKernelArgRuntimeDescriptor(_src.arg_id, TensorArgType::Image_3D), "src");
-    lut["dst"]            = vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Tensor_4D_t_Buffer), "dst");
+    // Arguments and global shared variables
+    lut["src"] = vtable.get(_src);
+    lut["dst"] = vtable.get(_dst);
 
     // Local build options
-    auto dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
-
-    lut["dst_w"] = dst_info->dimension(1);
-    lut["dst_h"] = dst_info->dimension(2);
-
+    lut["meta_kernel_id"]  = id();
     lut["DST_TENSOR_TYPE"] = "BUFFER";
+    const auto dst_info    = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
     lut["DST_DATA_TYPE"]   = dst_info->data_type();
 
     return lut;
@@ -143,5 +166,3 @@ ClStoreIndirectWidthSelectKernelComponent::TagLUT ClStoreIndirectWidthSelectKern
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
