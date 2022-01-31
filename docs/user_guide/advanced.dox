@@ -110,5 +110,19 @@ After the first run, the CLTuner's results can be exported to a file using the m
 This file can be also imported using the method "load_from_file("results.csv")".
 - tuner.load_from_file("results.csv");
 
+@section Security Concerns
+Here are some security concerns that may affect Compute Library.
+
+@subsection A process running under the same uid could read another process memory
+
+Processes running under same user ID (UID) may be able to read each other memory and running state. Hence, This can
+lead to information disclosure and sensitive data can be leaked, such as the weights of the model currently executing.
+This mainly affects Linux systems and it's the responsibility of the system owner to make processes secure against
+this vulnerability. Moreover, the YAMA security kernel module can be used to detect and stop such a trial of hacking,
+it can be selected at the kernel compile time by CONFIG_SECURITY_YAMA and configured during runtime changing the
+ptrace_scope in /proc/sys/kernel/yama.
+
+Please refer to: https://www.kernel.org/doc/html/v4.15/admin-guide/LSM/Yama.html for more information on this regard.
+
 */
 } // namespace
