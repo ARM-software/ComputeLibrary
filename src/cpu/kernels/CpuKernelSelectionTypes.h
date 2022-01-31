@@ -40,6 +40,13 @@ struct DataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
 };
 
+struct DataTypeDataLayoutISASelectorData
+{
+    DataType                   dt;
+    DataLayout                 dl;
+    const cpuinfo::CpuIsaInfo &isa;
+};
+
 struct PoolDataTypeISASelectorData
 {
     DataType            dt;
@@ -63,6 +70,7 @@ struct DepthwiseConv2dNativeDataTypeISASelectorData
 };
 // Selector pointer types
 using DataTypeISASelectorPtr                      = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
+using DataTypeDataLayoutSelectorPtr               = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
 using PoolDataTypeISASelectorPtr                  = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
 using ElementwiseDataTypeISASelectorPtr           = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
 using DepthwiseConv2dNativeDataTypeISASelectorPtr = std::add_pointer<bool(const DepthwiseConv2dNativeDataTypeISASelectorData &data)>::type;

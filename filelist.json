@@ -848,7 +848,9 @@
           },
           "sve": {
             "fp16": [ "src/cpu/kernels/activation/generic/sve/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ],
+            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ]
+          }, 
+          "sve2":{
             "qasymm8": [ "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp" ],
             "qasymm8_signed": [ "src/cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp" ],
             "qsymm16": [ "src/cpu/kernels/activation/generic/sve2/qsymm16.cpp" ]
@@ -1052,7 +1054,12 @@
               "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4_5_fp32_fp32_integers.cpp",
               "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4x4_3x3_fp16_fp16_integers.cpp",
               "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_4x4_3x3_fp32_fp32_integers.cpp",
-              "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_6_3_fp32_fp32_integers.cpp" 
+              "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_6_3_fp32_fp32_integers.cpp",
+              "src/cpu/kernels/directconv2d/nhwc/neon/impl.cpp",
+              "src/cpu/kernels/directconv2d/nchw/all.cpp"
+            ],
+            "fp32": [
+              "src/cpu/kernels/directconv2d/nhwc/neon/fp32.cpp"
             ]
           }
         }
