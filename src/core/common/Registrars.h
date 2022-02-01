@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -166,5 +166,11 @@
 #define REGISTER_INTEGER_SVE(func_name) nullptr
 #define REGISTER_INTEGER_SVE2(func_name) nullptr
 #endif /* defined(ENABLE_INTEGER_KERNELS) */
+
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#define REGISTER_BF16_NEON(func_name) &(func_name)
+#else /* !(defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16))*/
+#define REGISTER_BF16_NEON(func_name) nullptr
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)*/
 
 #endif /* SRC_CORE_COMMON_REGISTRARS_H */

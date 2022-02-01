@@ -47,6 +47,13 @@ struct DataTypeDataLayoutISASelectorData
     const cpuinfo::CpuIsaInfo &isa;
 };
 
+struct CastDataTypeISASelectorData
+{
+    DataType                   src_dt;
+    DataType                   dst_dt;
+    const cpuinfo::CpuIsaInfo &isa;
+};
+
 struct PoolDataTypeISASelectorData
 {
     DataType            dt;
@@ -74,6 +81,7 @@ using DataTypeDataLayoutSelectorPtr               = std::add_pointer<bool(const 
 using PoolDataTypeISASelectorPtr                  = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
 using ElementwiseDataTypeISASelectorPtr           = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
 using DepthwiseConv2dNativeDataTypeISASelectorPtr = std::add_pointer<bool(const DepthwiseConv2dNativeDataTypeISASelectorData &data)>::type;
+using CastDataTypeISASelectorDataPtr              = std::add_pointer<bool(const CastDataTypeISASelectorData &data)>::type;
 
 } // namespace kernels
 } // namespace cpu

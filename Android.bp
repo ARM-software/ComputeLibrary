@@ -439,6 +439,8 @@ cc_library_static {
         "src/cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp",
         "src/cpu/kernels/boundingboxtransform/generic/neon/impl.cpp",
         "src/cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp",
+        "src/cpu/kernels/cast/generic/neon/bfloat16.cpp",
+        "src/cpu/kernels/cast/generic/neon/fp16.cpp",
         "src/cpu/kernels/crop/generic/neon/fp16.cpp",
         "src/cpu/kernels/crop/generic/neon/fp32.cpp",
         "src/cpu/kernels/crop/generic/neon/impl.cpp",
