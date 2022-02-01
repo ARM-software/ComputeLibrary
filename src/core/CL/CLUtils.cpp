@@ -127,7 +127,6 @@ void PostOpCLKernelUtils::set_post_ops_cl_build_options(CLBuildOptions &build_op
     {
         const auto &post_op     = post_ops.get_list().at(post_op_id);
         const auto  slot_prefix = "-DP" + support::cpp11::to_string(slots[post_op_id]);
-        build_opts.add_option("-DPOST_OP" + support::cpp11::to_string(slots[post_op_id]));
         if(post_op->type() == experimental::PostOpType::Activation)
         {
             const auto _post_op  = utils::cast::polymorphic_downcast<const experimental::PostOpAct<ITensorInfo *> *>(post_op.get());

@@ -1551,7 +1551,6 @@ public:
         const TensorShape bias_shape(n,
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
-
         auto post_ops_with_shapes = experimental::transform_post_op_list_arguments<PostOpArgBroadcast, TensorShape>(post_ops,
                                                                                                                     [ = ](auto broadcast)
         {

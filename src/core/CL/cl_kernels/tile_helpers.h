@@ -475,106 +475,6 @@
         })                                                                                                             \
     })
 
-/** Load a tile from global memory (tensor) and conditionally use a different length for the load
- *
- * @note If WIDTH1_CONDITION is true, the load will use the WIDTH1 length
- * @note The vectors are stored in reverse order so the invalid rows are overwritten by the valid ones
- *
- * @param[in]  DATA_TYPE        Data type
- * @param[in]  HEIGHT           Number of dst rows
- * @param[in]  WIDTH0           Load width to use if WIDTH1_CONDITION = false
- * @param[in]  WIDTH1           Load width to use if WIDTH1_CONDITION = true
- * @param[in]  TENSOR_TYPE      Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
- *                              In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
- * @param[in]  TENSOR           Tensor basename
- * @param[in]  X                Starting X position
- * @param[in]  Y                Starting Y position
- * @param[in]  STRIDE_Y         Stride Y (in bytes) used to load each row.
- * @param[in]  WIDTH1_CONDITION Condition to select the WIDTH1 store
- * @param[out] dst              Output tile
- */
-#define T_LOAD_WIDTH_SELECT(DATA_TYPE, HEIGHT, WIDTH0, WIDTH1, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y, WIDTH1_CONDITION, dst)                                                      \
-    ({                                                                                                                                                                                             \
-        if(WIDTH1_CONDITION)                                                                                                                                                                       \
-        {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
-            {                                                                                                                                                                                      \
-                VLOAD_PARTIAL(WIDTH0, WIDTH1)                                                         \
-                (dst[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y) * STRIDE_Y));               \
-            })                                                                                                                                                                                     \
-        }                                                                                                                                                                                          \
-        else                                                                                                                                                                                       \
-        {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
-            {                                                                                                                                                                                      \
-                dst[HEIGHT - 1 - _i].v = V_LOAD(DATA_TYPE, WIDTH0, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y); \
-            })                                                                                                                                                                                     \
-        }                                                                                                                                                                                          \
-    })
-
-/** Load a tile from global memory (tensor) using an indirect Y index tile and conditionally use a different length for the load
- *
- * @note If WIDTH1_CONDITION is true, the load will use the WIDTH1 length
- * @note The vectors are stored in reverse order so the invalid rows are overwritten by the valid ones
- *
- * @param[in]  DATA_TYPE        Data type
- * @param[in]  HEIGHT           Number of dst rows
- * @param[in]  WIDTH0           Load width to use if WIDTH1_CONDITION = false
- * @param[in]  WIDTH1           Load width to use if WIDTH1_CONDITION = true
- * @param[in]  TENSOR_TYPE      Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
- *                              In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
- * @param[in]  TENSOR           Tensor basename
- * @param[in]  X                Starting X position
- * @param[in]  STRIDE_Y         Stride Y (in bytes) used to load each row.
- * @param[in]  WIDTH1_CONDITION Condition to select the WIDTH1 store
- * @param[out] dst              Output tile
- * @param[in]  indirect_y       Indirect Y index tile
- */
-#define T_LOAD_INDIRECT_WIDTH_SELECT(DATA_TYPE, HEIGHT, WIDTH0, WIDTH1, TENSOR_TYPE, TENSOR, X, STRIDE_Y, WIDTH1_CONDITION, dst, indirect_y)                                                      \
-    ({                                                                                                                                                                                             \
-        if(WIDTH1_CONDITION)                                                                                                                                                                       \
-        {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
-            {                                                                                                                                                                                      \
-                VLOAD_PARTIAL(WIDTH0, WIDTH1)                                                         \
-                (dst[HEIGHT - 1 - _i].v, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (indirect_y[HEIGHT - 1 - _i].v) * STRIDE_Y));               \
-            })                                                                                                                                                                                     \
-        }                                                                                                                                                                                          \
-        else                                                                                                                                                                                       \
-        {                                                                                                                                                                                          \
-            LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                                                                                                  \
-            {                                                                                                                                                                                      \
-                dst[HEIGHT - 1 - _i].v = V_LOAD(DATA_TYPE, WIDTH0, TENSOR_TYPE, TENSOR, X, (indirect_y[HEIGHT - 1 - _i].v), STRIDE_Y); \
-            })                                                                                                                                                                                     \
-        }                                                                                                                                                                                          \
-    })
-
-/** Load a tile from global memory (tensor) with dilation for the X and Y direction
- *
- * @note If WIDTH1_CONDITION is true, the load will use the WIDTH1 length
- * @note The vectors are stored in reverse order so the invalid rows are overwritten by the valid ones
- *
- * @param[in]  DATA_TYPE     Data type
- * @param[in]  HEIGHT        Number of dst rows
- * @param[in]  WIDTH         Number of dst columns
- * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
- *                           In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
- * @param[in]  TENSOR        Tensor basename
- * @param[in]  X             Starting X position
- * @param[in]  Y             Starting Y position
- * @param[in]  XI_MULTIPLIER Dilation for the X increment
- * @param[in]  YI_MULTIPLIER Dilation for the Y increment
- * @param[in]  STRIDE_Y      Stride Y (in bytes) used to load each row.
- * @param[out] dst           Output tile
- */
-#define T_LOAD_DILATED(DATA_TYPE, HEIGHT, WIDTH, TENSOR_TYPE, TENSOR, X, Y, XI_MULTIPLIER, YI_MULTIPLIER, STRIDE_Y, dst)                      \
-    ({                                                                                                                 \
-        LOOP_UNROLLING(int, _i, 0, 1, HEIGHT,                                                                          \
-        {                                                                                                              \
-            dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, ((X) + _i * (int)(XI_MULTIPLIER)), ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
-        })                                                                                                             \
-    })
-
 /** Load a tile from global memory (tensor) using an indirect Y index tile
  *
  * @param[in]  DATA_TYPE   Data type
@@ -1086,25 +986,6 @@
         })                                                                                          \
     })
 
-/** Element-wise addition between two tiles
- *
- * @note Performs: LHS + RHS = DST
- *
- * @param[in]  DATA_TYPE LHS/RHS/DST data type
- * @param[in]  M0        Number of LHS rows
- * @param[in]  N0        Number of LHS columns
- * @param[in]  lhs       LHS tile
- * @param[in]  rhs       Constant LHS tile
- * @param[out] dst       DST tile
- */
-#define T_ADD(DATA_TYPE, M0, N0, lhs, rhs, dst) \
-    ({                                                            \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
-        {                                                         \
-            dst[_m0].v = lhs[_m0].v + rhs[_m0].v; \
-        })                                                        \
-    })
-
 /** Element-wise addition with a constant value
  *
  * @note Performs: LHS + constant = DST
@@ -1120,26 +1001,10 @@
     ({                                                            \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
         {                                                         \
-            dst[_m0].v = lhs[_m0].v + (DATA_TYPE)rhs_constant;               \
-        })                                                        \
-    })
-
-/** Element-wise scale with a constant value
- *
- * @note Performs: LHS * constant = DST
- *
- * @param[in]  DATA_TYPE    LHS/RHS/DST data type
- * @param[in]  M0           Number of LHS rows
- * @param[in]  N0           Number of LHS columns
- * @param[in]  lhs          LHS tile
- * @param[in]  rhs_constant Constant value
- * @param[out] dst          DST tile
- */
-#define T_SCALE_CONSTANT(DATA_TYPE, M0, N0, lhs, rhs_constant, dst) \
-    ({                                                            \
-        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
-        {                                                         \
-            dst[_m0].v = lhs[_m0].v * (DATA_TYPE)rhs_constant; \
+            LOOP_UNROLLING(int, _n0, 0, 1, N0,                    \
+            {                                                     \
+                dst[_m0].s[_n0] = lhs[_m0].s[_n0] + rhs_constant; \
+            })                                                    \
         })                                                        \
     })
 
@@ -1201,26 +1066,6 @@
         })                                                                                \
     }
 
-#define T_MMUL_NT_NT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_char_char_int(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_uchar_uchar_uint(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_uchar_uchar_int(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
-#define T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
-    {                                                                                     \
-        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
-        {                                                                                 \
-            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
-            {                                                                             \
-                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
-                {                                                                         \
-                    dst[_m].s[_n] = fma((lhs[_m].s[_k]), (rhs[_k].s[_n]), dst[_m].s[_n]); \
-                })                                                                        \
-            })                                                                            \
-        })                                                                                \
-    }
-
 #define T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
     ({ \
         LOOP_UNROLLING(int, _m, 0, 1, M0, \
@@ -1231,26 +1076,3 @@
             })                                                                                             \
         })                                                                                             \
     })
-
-/** Initialize indirect Y for avoiding out-of-bound reads/writes
- *
- * @param[in]  M0         Tile height to use if CONDITION = false
- * @param[in]  M1         Tile height to use if CONDITION = true
- * @param[in]  COND       Condition to select the M1 tile height
- * @param[out] indirect_y Indirect tile
- */
-#define INITIALIZE_INDIRECT_Y(M0, M1, COND, indirect_y)     \
-    if(COND)                                                \
-    {                                                       \
-        LOOP_UNROLLING(int, _i, 0, 1, M0,                    \
-        {                                                   \
-            indirect_y[_i].v = min(_i, (int)M1 - 1);          \
-        })                                                  \
-    }                                                       \
-    else                                                    \
-    {                                                       \
-        LOOP_UNROLLING(int, _i, 0, 1, M0,                    \
-        {                                                   \
-            indirect_y[_i].v = _i;                            \
-        })                                                  \
-    }
