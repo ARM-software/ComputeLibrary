@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -199,6 +199,40 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
         ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
+
+TEST_SUITE(KERNEL_SELECTION)
+DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                       framework::dataset::make("DataType", { DataType::F32,
+                                                              DataType::F16
+                                                            })),
+               cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+
+    const auto *selected_impl_mul = CpuGemmMatrixMultiplyKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl_mul);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_gemm_matrix_mul";
+    std::string actual   = selected_impl_mul->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+
+    const auto *selected_impl_add = CpuGemmMatrixAdditionKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl_add);
+
+    expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_gemm_matrix_add";
+    actual   = selected_impl_add->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END() // KERNEL_SELECTION
 
 TEST_SUITE(TRANSPOSE_1XW)
 using CpuGemmTranspose1xW = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuGemmTranspose1xWKernel>;
