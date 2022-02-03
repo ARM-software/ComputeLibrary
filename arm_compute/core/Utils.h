@@ -1238,6 +1238,9 @@ inline std::string cpu_impl_dt(const DataType &data_type)
         case DataType::QSYMM16:
             ret = "qs16";
             break;
+        case DataType::QSYMM8_PER_CHANNEL:
+            ret = "qp8";
+            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported.");
     }

@@ -55,11 +55,17 @@ struct ElementwiseDataTypeISASelectorData
     cpuinfo::CpuIsaInfo isa;
     int                 op;
 };
-
+struct DepthwiseConv2dNativeDataTypeISASelectorData
+{
+    DataType                   weights_dt;
+    DataType                   source_dt;
+    const cpuinfo::CpuIsaInfo &isa;
+};
 // Selector pointer types
-using DataTypeISASelectorPtr            = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
-using PoolDataTypeISASelectorPtr        = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
-using ElementwiseDataTypeISASelectorPtr = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
+using DataTypeISASelectorPtr                      = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
+using PoolDataTypeISASelectorPtr                  = std::add_pointer<bool(const PoolDataTypeISASelectorData &data)>::type;
+using ElementwiseDataTypeISASelectorPtr           = std::add_pointer<bool(const ElementwiseDataTypeISASelectorData &data)>::type;
+using DepthwiseConv2dNativeDataTypeISASelectorPtr = std::add_pointer<bool(const DepthwiseConv2dNativeDataTypeISASelectorData &data)>::type;
 
 } // namespace kernels
 } // namespace cpu
