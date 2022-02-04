@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,8 @@ private:
     int          _num_tiles_x{ 0 };
     int          _num_tiles_y{ 0 };
     unsigned int _step_z{ 1 };
+    int32_t      _src_width{ 0 };
+    int32_t      _src_height{ 0 };
 };
 } // namespace kernels
 } // namespace opencl

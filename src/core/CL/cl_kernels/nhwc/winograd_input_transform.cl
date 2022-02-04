@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,16 +62,16 @@
         out.s7       = -36.0f * tmp.s1 + 0.0f * tmp.s2 + 49.0f * tmp.s3 - 14.0f * tmp.s5 + tmp.s7; \
     })
 
-#if defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#if defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 
-#if defined(NHWC) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(NUM_TILES_X) && defined(NUM_TILES_Y)
+#if defined(NHWC)
+#if defined(WINOGRAD_INPUT_TRANSFORM_4X4_3X3_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_4X1_3X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X3_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the output tile is 4x4, 4x1 or 1x4, the filter size 3x3, 3x1 or 1x3 and the data layout is NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -99,22 +99,23 @@
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     const int cout = GET_SPATIAL_IDX(0, 1, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0); // NUM_TILES_X x NUM_TILES_Y
     const int bout = GET_SPATIAL_IDX(2, 1, 0); // BATCH SIZE IDX
-
-    // All the tensor dimensions are passed at compile time.
-    // In case of dynamic tensor support, the following dimensions should be passed as function argument.
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _INUM_TILES_X NUM_TILES_X
-#define _INUM_TILES_Y NUM_TILES_Y
 
     int x = (mout % _INUM_TILES_X) * OUTPUT_TILE_W;
     int y = (mout / _INUM_TILES_X) * OUTPUT_TILE_H;
@@ -234,14 +235,15 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 36, 1, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_4X4_3X3_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_4X1_3X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X3_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_4X4_5X5_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_4X1_5X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X5_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 5x5/5x1 or 1x5 and the output tile is 4x4/4x1 or 1x4 when the data layout is NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -269,22 +271,23 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     const int cout = GET_SPATIAL_IDX(0, 1, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0); // NUM_TILES_X x NUM_TILES_Y
     const int bout = GET_SPATIAL_IDX(2, 1, 0); // BATCH SIZE IDX
-
-    // All the tensor dimensions are passed at compile time.
-    // In case of dynamic tensor support, the following dimensions should be passed as function argument.
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _INUM_TILES_X NUM_TILES_X
-#define _INUM_TILES_Y NUM_TILES_Y
 
     int x = (mout % _INUM_TILES_X) * OUTPUT_TILE_W;
     int y = (mout / _INUM_TILES_X) * OUTPUT_TILE_H;
@@ -403,14 +406,15 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
 
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_4X4_5X5_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_4X1_5X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X5_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_2X2_7X7_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_2X1_7X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X2_1X7_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 7x7/7x1/1x7 and the output tile is 2x2/7x1/1x7 when the data layout is NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -438,22 +442,23 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     const int cout = GET_SPATIAL_IDX(0, 1, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0); // NUM_TILES_X x NUM_TILES_Y
     const int bout = GET_SPATIAL_IDX(2, 1, 0); // BATCH SIZE IDX
-
-    // All the tensor dimensions are passed at compile time.
-    // In case of dynamic tensor support, the following dimensions should be passed as function argument.
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _INUM_TILES_X NUM_TILES_X
-#define _INUM_TILES_Y NUM_TILES_Y
 
     int x = (mout % _INUM_TILES_X) * OUTPUT_TILE_W;
     int y = (mout / _INUM_TILES_X) * OUTPUT_TILE_H;
@@ -577,14 +582,15 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
 
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_2X2_7X7_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_2X1_7X1_STEPZ1_NHWC) || defined(WINOGRAD_INPUT_TRANSFORM_1X2_1X7_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_4X1_3X1_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 3x1 and the output tile is 4x1 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -612,11 +618,19 @@ __kernel void winograd_input_transform_2x2_7x7_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -637,16 +651,21 @@ __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_4X1_3X1_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_4X1_5X1_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 5x1 and the output tile is 4x1 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -674,11 +693,19 @@ __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_4x4_5x5_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -699,16 +726,21 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_4X1_5X1_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_2X1_7X1_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 7x1 and the output tile is 2x1 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -736,11 +768,19 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_2x1_7x1_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_2x2_7x7_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -761,16 +801,22 @@ __kernel void winograd_input_transform_2x1_7x1_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_2X1_7X1_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X3_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 1x3 and the output tile is 1x4 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
+ *
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -798,11 +844,19 @@ __kernel void winograd_input_transform_2x1_7x1_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -823,16 +877,21 @@ __kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X3_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X5_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 1x5 and the output tile is 1x4 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -860,11 +919,19 @@ __kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_4x4_5x5_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -885,16 +952,21 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_1X4_1X5_STEPZ1_NHWC)
 
+#if defined(WINOGRAD_INPUT_TRANSFORM_1X2_1X7_STEPZ1_NHWC)
 //! @cond Doxygen_Suppress
 /** This OpenCL kernel computes the input transform when the kernel size is 1x7 and the output tile is 1x2 for data layout NHWC
  *
  * @note Data layout supported: NHWC
  * @note Data type supported: F32/F16
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=half)
- * @note The number of tiles in the X and Y axes must be passed at compile time using -DNUM_TILES_X and -DNUM_TILES_Y (i.e.-DNUM_TILES_X=5, -DNUM_TILES_Y=3).
  * @note The convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
@@ -922,11 +994,19 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
  * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in] _ISRC_WIDTH                       The src tensor's width
+ * @param[in] _ISRC_HEIGHT                      The src tensor's height
+ * @param[in] _INUM_TILES_X                     The number of tiles in the X dimension
+ * @param[in] _INUM_TILES_Y                     The number of tiles in the Y dimension
  */
 //! @endcond
 __kernel void winograd_input_transform_1x2_1x7_stepz1_nhwc(
     TENSOR4D(src, BUFFER),
-    TENSOR4D(dst, BUFFER))
+    TENSOR4D(dst, BUFFER),
+    const int _ISRC_WIDTH,
+    const int _ISRC_HEIGHT,
+    const int _INUM_TILES_X,
+    const int _INUM_TILES_Y)
 {
     winograd_input_transform_2x2_7x7_stepz1_nhwc(src_ptr,
                                                  src_stride_x,
@@ -947,7 +1027,12 @@ __kernel void winograd_input_transform_1x2_1x7_stepz1_nhwc(
                                                  dst_step_z,
                                                  dst_stride_w,
                                                  dst_step_w,
-                                                 dst_offset_first_element_in_bytes);
+                                                 dst_offset_first_element_in_bytes,
+                                                 _ISRC_WIDTH,
+                                                 _ISRC_HEIGHT,
+                                                 _INUM_TILES_X,
+                                                 _INUM_TILES_Y);
 }
-#endif // defined(NHWC) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(NUM_TILES_X) && defined(NUM_TILES_Y)
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_1X2_1X7_STEPZ1_NHWC)
+#endif // defined(NHWC)
 #endif // defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
