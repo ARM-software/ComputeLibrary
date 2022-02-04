@@ -662,13 +662,6 @@
         ]
       }
     },
-    "Remap": {
-      "files": {
-        "common": [
-          "src/core/CL/kernels/CLRemapKernel.cpp",
-          "src/runtime/CL/functions/CLRemap.cpp"]
-      }
-    },
     "Reorg": {
       "files": {
         "common": [
@@ -1794,14 +1787,6 @@
           "common": [
             "src/core/NEON/kernels/NEReductionOperationKernel.cpp",
             "src/runtime/NEON/functions/NEReductionOperation.cpp"
-          ]
-        }
-      },
-      "Remap": {
-        "files": {
-          "common": [
-            "src/core/NEON/kernels/NERemapKernel.cpp",
-            "src/runtime/NEON/functions/NERemap.cpp"
           ]
         }
       },

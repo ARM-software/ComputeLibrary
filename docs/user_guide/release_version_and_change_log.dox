@@ -75,7 +75,7 @@ v21.08 Public major release
  - Support fat binary build for arm8.2-a via fat_binary build flag
  - Add CPU discovery capabilities
  - Add data type f16 support for:
-  - @ref CLRemapKernel
+  - CLRemapKernel
  - Port the following functions to stateless API:
    - @ref CLConvolutionLayer
    - @ref CLFlattenLayer
@@ -296,7 +296,7 @@ v20.11 Public major release
  - Removed padding from Arm® Neon™ kernels:
    - NEComplexPixelWiseMultiplicationKernel
    - NENonMaximaSuppression3x3Kernel
-   - @ref NERemapKernel
+   - NERemapKernel
    - NEGEMMInterleave4x4Kernel
    - NEDirectConvolutionLayerKernel
    - NEScaleKernel
@@ -1443,7 +1443,7 @@ v17.02.1 Sources preview
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
    - CLIm2ColKernel, CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
-   - @ref CLRemapKernel / @ref CLRemap
+   - CLRemapKernel / CLRemap
    - CLGaussianPyramidHorKernel, CLGaussianPyramidVertKernel / CLGaussianPyramid, CLGaussianPyramidHalf, CLGaussianPyramidOrb
    - CLMinMaxKernel, CLMinMaxLocationKernel / CLMinMaxLocation
    - CLNonLinearFilterKernel / CLNonLinearFilter

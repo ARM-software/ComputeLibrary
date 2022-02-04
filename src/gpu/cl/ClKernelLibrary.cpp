@@ -378,8 +378,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
     { "pooling_layer_2_nchw_indices", "nchw/pooling_layer.cl" },
     { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
-    { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
-    { "remap_bilinear_nchw", "nchw/remap.cl" },
     { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
     { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
     { "scale_bilinear_nchw", "nchw/scale.cl" },
@@ -439,8 +437,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
-    { "remap_nearest_neighbour_nhwc", "nhwc/remap.cl" },
-    { "remap_bilinear_nhwc", "nhwc/remap.cl" },
     { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
     { "scale_bilinear_nhwc", "nhwc/scale.cl" },
@@ -795,10 +791,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/nchw/prior_box_layer.clembed"
     },
     {
-        "nchw/remap.cl",
-#include "./cl_kernels/nchw/remap.clembed"
-    },
-    {
         "nchw/reorg_layer.cl",
 #include "./cl_kernels/nchw/reorg_layer.clembed"
     },
@@ -892,10 +884,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/pooling_layer_quantized.cl",
 #include "./cl_kernels/nhwc/pooling_layer_quantized.clembed"
-    },
-    {
-        "nhwc/remap.cl",
-#include "./cl_kernels/nhwc/remap.clembed"
     },
     {
         "nhwc/reorg_layer.cl",
