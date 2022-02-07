@@ -66,6 +66,10 @@ Several builds of the library are available using various configurations:
   <td>arm64-v8a
   <tr>
   <td>armv8.2-a
+<tr>
+  <td rowspan="1">macOS
+  <td>armv8.2-a
+  <td>Monterey (OS version): clang 13 (native)
 </table>
 
 @section S0_1_contact Contact / Support

@@ -41,6 +41,39 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v22.02 Public major release
+ - Various bug fixes.
+ - Various optimizations.
+ - Update A510 arm_gemm cpu Kernels.
+ - Inclusive language adjustment. Please refer to @ref S5_0_inc_lang for details.
+ - Improve the start-up time for the following OpenCL kernels:
+   - @ref CLScale
+   - @ref CLGEMM
+   - @ref CLDepthwiseConvolutionLayer
+   - \link opencl::kernels::ClIm2ColKernel ClIm2ColKernel \endlink
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv2dKernel \endlink
+ - Remove functions:
+   - CLRemap
+   - NERemap
+ - Remove padding from OpenCL kernels:
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv2dKernel \endlink
+ - Remove padding from Cpu kernels:
+   - \link cpu::kernels::CpuDirectConv2dKernel CpuDirectConv2dKernel \endlink
+ - Decouple the implementation of the following Cpu kernels into various data types (fp32, fp16, int):
+   - \link cpu::kernels::CpuActivationKernel CpuActivationKernel \endlink
+   - \link cpu::kernels::CpuAddKernel CpuAddKernel \endlink
+   - \link cpu::kernels::CpuElementwiseKernel CpuElementwiseKernel \endlink
+   - \link cpu::CpuSoftmaxGeneric CpuSoftmaxKernel \endlink
+   - @ref NEBoundingBoxTransformKernel
+   - @ref NECropKernel
+   - @ref NEComputeAllAnchorsKernel
+   - @ref NEInstanceNormalizationLayerKernel
+   - @ref NEMaxUnpoolingLayerKernel
+   - @ref NEMeanStdDevNormalizationKernel
+   - @ref NERangeKernel
+   - @ref NEROIAlignLayerKernel
+   - @ref NESelectKernel
+
 v21.11 Public major release
  - Various bug fixes.
  - Various optimizations:
