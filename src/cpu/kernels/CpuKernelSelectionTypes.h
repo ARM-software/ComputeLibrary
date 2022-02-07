@@ -36,17 +36,17 @@ namespace kernels
 // Selector data types
 struct DataTypeISASelectorData
 {
-    DataType                   dt;
-    const cpuinfo::CpuIsaInfo &isa;
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
 };
 
 struct PoolDataTypeISASelectorData
 {
-    DataType                   dt;
-    DataLayout                 dl;
-    int                        pool_stride_x;
-    Size2D                     pool_size;
-    const cpuinfo::CpuIsaInfo &isa;
+    DataType            dt;
+    DataLayout          dl;
+    int                 pool_stride_x;
+    Size2D              pool_size;
+    cpuinfo::CpuIsaInfo isa;
 };
 
 // Selector pointer types

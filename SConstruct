@@ -220,7 +220,7 @@ if 'clang++' in cpp_compiler:
 elif 'armclang' in cpp_compiler:
     pass
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-misleading-indentation'])
 
 if cpp_compiler == 'g++':
     # Don't strip comments that could include markers
