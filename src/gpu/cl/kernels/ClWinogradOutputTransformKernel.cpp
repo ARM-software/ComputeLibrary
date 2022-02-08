@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,23 +176,47 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
         build_opts.add_option("-DVEC_SIZE=4");
     }
 
-    build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
-    build_opts.add_option("-cl-fast-relaxed-math");
-    build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
-    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
-    build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
-    build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
-    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(1)));
-    build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(idx_width)));
-    build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(idx_height)));
-    build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
-    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
-    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
+    if(_is_nhwc)
+    {
+        build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
+        build_opts.add_option("-cl-fast-relaxed-math");
+        build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
+        build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+        build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
+        build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
+        build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
+    }
+    else
+    {
+        build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
+        build_opts.add_option("-cl-fast-relaxed-math");
+        build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
+        build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
+        build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+        build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(1)));
+        build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(idx_width)));
+        build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(idx_height)));
+        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
+        build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
+        build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
+    }
+
+    // Storing tensor dimensions to be sent later as kernel arguments
+    _src_height  = src->dimension(1);
+    _dst_width   = dst->dimension(idx_width);
+    _dst_height  = dst->dimension(idx_height);
+    _num_tiles_x = num_tiles.width;
 
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
-    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -251,7 +275,11 @@ void ClWinogradOutputTransformKernel::run_op(ITensorPack &tensors, const Window 
     if(_is_nhwc)
     {
         unsigned int idx2 = 2 * num_arguments_per_4D_tensor() + ((bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
-        _kernel.setArg(idx2, static_cast<int>(dst->info()->total_size() - dst->info()->strides_in_bytes().y()));
+        _kernel.setArg(idx2++, static_cast<int>(dst->info()->total_size() - dst->info()->strides_in_bytes().y()));
+        _kernel.setArg<cl_int>(idx2++, _src_height);
+        _kernel.setArg<cl_int>(idx2++, _dst_width);
+        _kernel.setArg<cl_int>(idx2++, _dst_height);
+        _kernel.setArg<cl_int>(idx2++, _num_tiles_x);
     }
 
     do
