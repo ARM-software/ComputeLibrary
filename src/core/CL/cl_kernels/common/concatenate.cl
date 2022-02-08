@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,19 +43,17 @@ inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, 
 #if defined(DATA_TYPE)
 #define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
-#if defined(DEPTH) && defined(ELEMENT_SIZE)
-#if defined(INPUT1_WIDTH)
+#if defined(ELEMENT_SIZE)
 
 #define SELECT_TYPE SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define SEQ VEC_OFFS(int, VEC_SIZE)
 
+#if defined(CONCATENATE_WIDTH_X2)
 /** This kernel concatenates two input tensors into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
- * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
- * @note First input tensor width should be given as a preprocessor argument using -DINPUT1_WIDTH=width. e.g. -DINPUT1_WIDTH=8
  *
  * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: All.
  * @param[in]  src1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -87,11 +85,15 @@ inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, 
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  DEPTH                              Tensor depth
+ * @param[in]  INPUT1_WIDTH                       First input tensor width
  */
 __kernel void concatenate_width_x2(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    const int DEPTH,
+    const int INPUT1_WIDTH)
 {
     // Calculate input indices
     const int x  = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
@@ -125,17 +127,15 @@ __kernel void concatenate_width_x2(
 
     STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
+#endif // defined(CONCATENATE_WIDTH_X2)
 
-#if defined(INPUT2_WIDTH) && defined(INPUT3_WIDTH)
+#if defined(CONCATENATE_WIDTH_X4)
 /** This kernel concatenates four input tensors into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
- * @note First input tensor width should be given as a preprocessor argument using -DINPUT1_WIDTH=width. e.g. -DINPUT1_WIDTH=8
- * @note Second input tensor width should be given as a preprocessor argument using -DINPUT2_WIDTH=width. e.g. -DINPUT2_WIDTH=8
- * @note Third input tensor width should be given as a preprocessor argument using -DINPUT3_WIDTH=width. e.g. -DINPUT3_WIDTH=8
  *
  * @param[in]  src1_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -187,13 +187,21 @@ __kernel void concatenate_width_x2(
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  DEPTH                              Tensor depth
+ * @param[in]  INPUT1_WIDTH                       First input tensor width
+ * @param[in]  INPUT2_WIDTH                       Second input tensor width
+ * @param[in]  INPUT3_WIDTH                       Third input tensor width
  */
 __kernel void concatenate_width_x4(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
     TENSOR4D_DECLARATION(src3),
     TENSOR4D_DECLARATION(src4),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    const int DEPTH,
+    const int INPUT1_WIDTH,
+    const int INPUT2_WIDTH,
+    const int INPUT3_WIDTH)
 {
     // Calculate input indices
     const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
@@ -251,18 +259,17 @@ __kernel void concatenate_width_x4(
 
     STORE_VECTOR_SELECT(values, DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif /* defined(INPUT2_WIDTH) && defined(INPUT3_WIDTH) */
-#endif /* defined(INPUT1_WIDTH) */
-#endif /* defined(DEPTH) && defined(ELEMENT_SIZE) */
+#endif /* defined(CONCATENATE_WIDTH_X4) */
+#endif /* defined(ELEMENT_SIZE) */
 
-#if defined(WIDTH_OFFSET) && defined(DEPTH) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+#if defined(WIDTH_OFFSET) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+#if defined(CONCATENATE_WIDTH)
 /** This kernel concatenates the input tensor into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The offset for the first spatial dimension has to be passed at compile time using -DWIDTH_OFFSET. i.e. -DWIDTH_OFFSET=128
- * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -284,11 +291,12 @@ __kernel void concatenate_width_x4(
  * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  DEPTH                             Tensor depth
  */
-
 __kernel void concatenate_width(
     TENSOR4D_DECLARATION(src),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    const int DEPTH)
 {
     // Calculate input indices
     const int x = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
@@ -308,19 +316,18 @@ __kernel void concatenate_width(
     STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + WIDTH_OFFSET * sizeof(DATA_TYPE), VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 }
-
-#endif /* defined(WIDTH_OFFSET) && defined(DEPTH) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)*/
+#endif /* defined(CONCATENATE_WIDTH) */
+#endif /* defined(WIDTH_OFFSET) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)*/
 
 #if defined(VEC_SIZE_LEFTOVER)
-
-#if defined(HEIGHT_OFFSET) && defined(DEPTH) && defined(VEC_SIZE)
+#if defined(CONCATENATE_HEIGHT)
+#if defined(HEIGHT_OFFSET) && defined(VEC_SIZE)
 /** This kernel concatenates the input tensor into the output tensor along the second dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
  * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  * @note Vector sizes supported are 2,4,8 and 16.
  * @note The offset for the second spatial dimension has to be passed at compile time using -DHEIGHT_OFFSET. i.e. -DHEIGHT_OFFSET=128
- * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
  * @note Leftover vector size has to be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
@@ -343,11 +350,12 @@ __kernel void concatenate_width(
  * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  DEPTH                             Tensor depth
  */
-
 __kernel void concatenate_height(
     TENSOR4D_DECLARATION(src),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    const int DEPTH)
 {
     const int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0) * sizeof(DATA_TYPE);
 
@@ -365,9 +373,10 @@ __kernel void concatenate_height(
     STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + HEIGHT_OFFSET * dst_stride_y, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 }
+#endif /* defined(CONCATENATE_HEIGHT) */
+#endif /* defined(HEIGHT_OFFSET) */
 
-#endif /* defined(HEIGHT_OFFSET) && defined(DEPTH) */
-
+#if defined(CONCATENATE)
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
@@ -410,6 +419,7 @@ __kernel void concatenate(
 
     STORE_VECTOR_SELECT(source_values, DATA_TYPE, dst_addr + offset, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
+#endif // defined(CONCATENATE)
 #endif /* defined(VEC_SIZE_LEFTOVER) */
 #endif /* defined(DATA_TYPE) */
 #endif /* defined(VEC_SIZE) */
