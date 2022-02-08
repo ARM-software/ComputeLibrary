@@ -271,7 +271,7 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 // Direct convolution case
                 if(is_direct_valid)
                 {
-                    if((is_large_kernel_sz && workload_gte_8192) || (is_ofm_lte_8 && is_ifm_ge_16))
+                    if((is_large_kernel_sz && workload_gte_8192 && is_ifm_ge_16) || (is_ofm_lte_8 && is_ifm_ge_16))
                     {
                         return ConvolutionMethod::DIRECT;
                     }
