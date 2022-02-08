@@ -1156,13 +1156,15 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
         }
         case DataType::U32:
         {
+            const auto val_d64 = static_cast<double>(val);
             const auto val_u32 = static_cast<uint32_t>(val);
-            return ((val_u32 == val) && val >= std::numeric_limits<uint32_t>::lowest() && val <= std::numeric_limits<uint32_t>::max());
+            return ((val_u32 == val_d64) && val_d64 >= std::numeric_limits<uint32_t>::lowest() && val_d64 <= std::numeric_limits<uint32_t>::max());
         }
         case DataType::S32:
         {
+            const auto val_d64 = static_cast<double>(val);
             const auto val_s32 = static_cast<int32_t>(val);
-            return ((val_s32 == val) && val >= std::numeric_limits<int32_t>::lowest() && val <= std::numeric_limits<int32_t>::max());
+            return ((val_s32 == val_d64) && val_d64 >= std::numeric_limits<int32_t>::lowest() && val_d64 <= std::numeric_limits<int32_t>::max());
         }
         case DataType::BFLOAT16:
             return (val >= bfloat16::lowest() && val <= bfloat16::max());
