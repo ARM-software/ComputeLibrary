@@ -1,4 +1,7 @@
 
+> **⚠ Important**
+> Starting from the next release (22.05): 'master' branch will be changed to 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+
 <br>
 <div align="center">
  <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"/><br><br>

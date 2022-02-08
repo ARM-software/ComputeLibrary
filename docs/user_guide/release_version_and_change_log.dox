@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -37,6 +37,7 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
+@note Starting from next release (22.05), 'master' branch will no longer be used, it will be replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
 
@@ -44,7 +45,7 @@ v21.11 Public major release
  - Various bug fixes.
  - Various optimizations:
    - Improve performance of bilinear and nearest neighbor Scale on both CPU and GPU for FP32, FP16, Int8, Uint8 data types
-   - Improve performance of Softmax on GPU for Uint8/Int8 
+   - Improve performance of Softmax on GPU for Uint8/Int8
  - New OpenCL kernels / functions:
    - @ref CLConv3D
  - New Arm® Neon™ kernels / functions:
