@@ -268,6 +268,8 @@ if env['multi_isa']:
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
+    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+
 else: # NONE "multi_isa" builds
 
     if 'v7a' in env['arch']:
