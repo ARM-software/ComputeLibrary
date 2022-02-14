@@ -68,7 +68,7 @@ v22.02 Public major release
    - @ref NECropKernel
    - @ref NEComputeAllAnchorsKernel
    - @ref NEInstanceNormalizationLayerKernel
-   - @ref NEMaxUnpoolingLayerKernel
+   - NEMaxUnpoolingLayerKernel
    - @ref NEMeanStdDevNormalizationKernel
    - @ref NERangeKernel
    - @ref NEROIAlignLayerKernel
