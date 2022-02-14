@@ -32,7 +32,7 @@
       <tab type="classmembers" visible="yes" title="" intro=""/>
     </tab>
     <tab type="files" visible="yes" title="">
-      <tab type="filelist" visible="yes" title="" intro=""/>
+      <tab type="filelist" visible="yes" title="" intro="Below is a list of files with brief descriptions. Please note that the descriptions of some miscellaneous files and directories (e.g. data/ and include/) are omitted because of Doxygen limitations."/>
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
     <tab type="examples" visible="yes" title="" intro=""/>  
