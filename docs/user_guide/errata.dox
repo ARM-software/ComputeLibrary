@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2021 Arm Limited.
+/// Copyright (c) 2019-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -30,20 +30,20 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
-- An issue has been identified when running the graph_deepspeech_v0_4_1 graph example.
+- (COMPMID-5134) An issue has been identified when running the graph_deepspeech_v0_4_1 graph example.
     - Versions Affected: >= v21.08
     - Conditions:
         - Data type input: F32
         - Backend: OpenCL
     - Result: The execution of the graph_deepspeech_v0_4_1 could fail on OpenCL backend for systems with a small RAM. The issue is due to the extra temporary memory required to reshape the network weights
 
-- Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
+- (COMPMID-4013) Experimented performance regressions for some networks on OpenCL when using Arm® Mali™ DDK r8p0
     - Versions Affected: v21.05
     - OSs Affected: All
     - Conditions:
         - Arm® Mali™ DDK r8p0
 
-- Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
+- (COMPMID-5146) Under certain conditions, CLFullyConnectedLayer quantized tests may fail due to an issue in the test framework.
     - Versions Affected: v21.02
     - OSs Affected: Linux
     - Conditions:
@@ -51,7 +51,7 @@ namespace arm_compute
         - release mode
         - asserts enabled
 
-- Performance regression in Convolution Layer OpenCL backend on Mali™ G77 when QSYMM8_PER_CHANNEL is used as weights' data type.
+- (COMPMID-4367) Performance regression in Convolution Layer OpenCL backend on Mali™ G77 when QSYMM8_PER_CHANNEL is used as weights' data type.
     - Versions Affected: >= v20.11 && < v21.08
     - OSs Affected: All
     - Conditions:
@@ -60,25 +60,25 @@ namespace arm_compute
         - OpenCL backend
         - Convolution Layer uses QSYMM8_PER_CHANNEL as the data type of its weight
 
-- A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
+- (COMPMID-4306) A wrong test configuration has been found in CLGEMMMatrixMultiplyReshapedOnlyRHS set of tests.
     - Versions Affected: >= v20.11 && < v21.05
     - Conditions:
         - Data type input: F32/F16
         - Fused bounded relu activation with coefficient 'a' being negative
 
-- Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
+- (COMPMID-5135) Under certain conditions, the validation test case 'CL/DirectConvolutionLayer/Float/FP32/RunSmall9x9\@InputShape=32x37x3x4:StrideX=1:StrideY=1:PadX=0:PadY=0:KernelSize=9:NumKernels=1:DataType=F32:ActivationInfo=LU_BOUNDED_RELU:DataLayout=NHWC' may fail.
     - Versions Affected: >= v20.08
     - Conditions:
         - The validation suite has to run in nightly mode and execute 40k+ test cases before the test mentioned above
 
-- Under certain conditions, benchmark examples can hang when OpenCL profiling queues are enabled.
+- (COMPMID-5136) Under certain conditions, benchmark examples can hang when OpenCL profiling queues are enabled.
     - Versions Affected: >= v19.11
     - OSs Affected: Linux
     - Conditions:
         - Arm® Mali™ DDK r1p0 - r8p0, and
         - Linux kernel >= 4.4
 
-- On Android with arm64-v8a/arm64-v8.2-a architecture, Arm® Neon™ validation tests can fail when compiled using Android Ndk
+- (COMPMID-5137) On Android with arm64-v8a/arm64-v8.2-a architecture, Arm® Neon™ validation tests can fail when compiled using Android Ndk
   >= r18b in debug mode (https://github.com/android/ndk/issues/1135).
     - Versions Affected: >= v19.11
     - OSs Affected: Android
@@ -86,7 +86,7 @@ namespace arm_compute
         - arm64-v8a/arm64-v8.2-a architecture, and
         - Compiled using Android NDK >= r18b in debug mode.
 
-- An issue has been identified with CLCast.
+- (COMPMID-4288) An issue has been identified with CLCast.
     - Versions Affected: >= v18.11 && < v21.05
     - Conditions:
         - Data type input: F32
