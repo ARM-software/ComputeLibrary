@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1305,6 +1305,42 @@ private:
     unsigned int _pooled_height;
     float        _spatial_scale;
     unsigned int _sampling_ratio;
+};
+
+struct Pool3DInfo
+{
+    Pool3DInfo() = default;
+
+    /** Constructor
+     *
+     * @param[in] pool_type         Pooling type @ref PoolingType.
+     * @param[in] pool_size         Pooling size, in elements, across  x, y and z @ref Size3D
+     * @param[in] padding           Paddings in x, y and z dimensions
+     * @param[in] strides           Strides in x, y and z dimensions @ref Size3D
+     * @param[in] round_type        Dimension rounding type (ceil or floor)
+     * @param[in] exclude_padding   Strategy when accounting padding in calculations.
+     *                              True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     * @param[in] is_global_pooling Sets the pool size to the input size if True
+     */
+    Pool3DInfo(const PoolingType           pool_type,
+               const Size3D                pool_size,
+               const Padding3D             padding,
+               const Size3D                strides,
+               const DimensionRoundingType round_type,
+               bool                        exclude_padding,
+               bool                        is_global_pooling)
+        : pool_type(pool_type), pool_size(pool_size), padding(padding), strides(strides), round_type(round_type), exclude_padding(exclude_padding), is_global_pooling(is_global_pooling)
+
+    {
+    }
+
+    PoolingType           pool_type{ PoolingType::MAX };
+    Size3D                pool_size{ 1U, 1U, 1U };
+    Padding3D             padding{};
+    Size3D                strides{ 1U, 1U, 1U };
+    DimensionRoundingType round_type{ DimensionRoundingType::FLOOR };
+    bool                  exclude_padding{ false };
+    bool                  is_global_pooling{ false };
 };
 
 /** Generate Proposals Information class */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1457,6 +1457,63 @@ inline TensorShape compute_conv3d_shape(const TensorShape &src, const TensorShap
     output_shape.set(height_dim, output_height_size);
     output_shape.set(depth_dim, output_depth_size);
     output_shape.set(channel_dim, weights[weights_CHout_dim]);
+    return output_shape;
+}
+
+/** Calculate the output pool3d shape of a tensor
+ *
+ * @param[in] src         Input tensor info
+ * @param[in] pool3d_info Pooling layer info
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_pool3d_shape(const TensorShape &src, Pool3DInfo pool3d_info)
+{
+    TensorShape output_shape{ src };
+
+    const int idx_width          = 1;
+    const int idx_height         = 2;
+    const int idx_depth          = 3;
+    const int pool_size_width    = pool3d_info.is_global_pooling ? src[idx_width] : pool3d_info.pool_size.width;
+    const int pool_size_height   = pool3d_info.is_global_pooling ? src[idx_height] : pool3d_info.pool_size.height;
+    const int pool_size_depth    = pool3d_info.is_global_pooling ? src[idx_depth] : pool3d_info.pool_size.depth;
+    const int pool_stride_width  = pool3d_info.strides.width;
+    const int pool_stride_height = pool3d_info.strides.height;
+    const int pool_stride_depth  = pool3d_info.strides.depth;
+
+    int output_width_size  = 0;
+    int output_height_size = 0;
+    int output_depth_size  = 0;
+
+    const size_t pad_left   = pool3d_info.padding.left;
+    const size_t pad_right  = pool3d_info.padding.right;
+    const size_t pad_top    = pool3d_info.padding.top;
+    const size_t pad_bottom = pool3d_info.padding.bottom;
+    const size_t pad_front  = pool3d_info.padding.front;
+    const size_t pad_back   = pool3d_info.padding.back;
+
+    switch(pool3d_info.round_type)
+    {
+        case DimensionRoundingType::FLOOR:
+            output_width_size  = static_cast<int>(std::floor((static_cast<float>(src[idx_width] + pad_left + pad_right - pool_size_width)) / pool_stride_width) + 1);
+            output_height_size = static_cast<int>(std::floor((static_cast<float>(src[idx_height] + pad_top + pad_bottom - pool_size_height)) / pool_stride_height) + 1);
+            output_depth_size  = static_cast<int>(std::floor((static_cast<float>(src[idx_depth] + pad_front + pad_back - pool_size_depth)) / pool_stride_depth) + 1);
+            break;
+        case DimensionRoundingType::CEIL:
+            output_width_size  = static_cast<int>(std::ceil((static_cast<float>(src[idx_width] + pad_left + pad_right - pool_size_width)) / pool_stride_width) + 1);
+            output_height_size = static_cast<int>(std::ceil((static_cast<float>(src[idx_height] + pad_top + pad_bottom - pool_size_height)) / pool_stride_height) + 1);
+            output_depth_size  = static_cast<int>(std::ceil((static_cast<float>(src[idx_depth] + pad_front + pad_back - pool_size_depth)) / pool_stride_depth) + 1);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported rounding type");
+    }
+
+    ARM_COMPUTE_ERROR_ON_MSG((output_width_size < 1 || output_height_size < 1 || output_depth_size < 1), "Calculated output dimension size is invalid");
+
+    output_shape.set(idx_width, static_cast<size_t>(output_width_size));
+    output_shape.set(idx_height, static_cast<size_t>(output_height_size));
+    output_shape.set(idx_depth, static_cast<size_t>(output_depth_size));
+
     return output_shape;
 }
 
