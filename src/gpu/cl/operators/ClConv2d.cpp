@@ -261,6 +261,7 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 const bool  is_ifm_ge_16       = src->dimension(idx_c) >= 16;
                 const bool  is_ofm_lte_8       = weights->dimension(3U) <= 8;
                 const bool  workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
+                const bool is_ifm_gt_ofm       = src->dimension(idx_c) > weights->dimension(3U);
 
                 // Run Winograd if valid and IFM >= 16
                 if(is_wino_valid && is_ifm_ge_16)
@@ -271,9 +272,21 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 // Direct convolution case
                 if(is_direct_valid)
                 {
-                    if((is_large_kernel_sz && workload_gte_8192 && is_ifm_ge_16) || (is_ofm_lte_8 && is_ifm_ge_16))
+                    if((gpu_target == arm_compute::GPUTarget::G71 ||
+                       gpu_target == arm_compute::GPUTarget::G72 ||
+                       gpu_target == arm_compute::GPUTarget::MIDGARD))
                     {
-                        return ConvolutionMethod::DIRECT;
+                        if(is_large_kernel_sz && is_ifm_ge_16 && is_ifm_gt_ofm)
+                        {
+                            return ConvolutionMethod::DIRECT;
+                        }
+                    }
+                    else
+                    {
+                        if((is_large_kernel_sz && workload_gte_8192 && is_ifm_ge_16) || (is_ofm_lte_8 && is_ifm_ge_16))
+                        {
+                            return ConvolutionMethod::DIRECT;
+                        }
                     }
                 }
 
