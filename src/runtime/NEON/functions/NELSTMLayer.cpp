@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -263,7 +263,7 @@ void NELSTMLayer::configure(const ITensor *input,
     if(cell_threshold != 0.f)
     {
         _perform_cell_clipping = true;
-        _cell_clip.configure(&_cell_state_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold, cell_threshold));
+        _cell_clip.configure(&_cell_state_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, cell_threshold, -cell_threshold));
     }
 
     // Configure block that calculates the output
@@ -542,8 +542,8 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp, &cell_state_tmp, &cell_state_tmp, ConvertPolicy::SATURATE));
     if(cell_threshold != 0.f)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold,
-                                                                                                              cell_threshold)));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, cell_threshold,
+                                                                                                              -cell_threshold)));
     }
 
     // Validate output gate tmp
@@ -665,6 +665,7 @@ void NELSTMLayer::run()
         _pixelwise_mul_cell_gate_coeff.run();
         _accum_cell_gate_bias.run();
     }
+
     _activation_cell_state.run();
     _pixelwise_mul_cell_state1.run();
     _pixelwise_mul_cell_state2.run();
