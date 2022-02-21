@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -284,6 +284,10 @@ size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t t
     if(platform.get_cpu_model() == CPUModel::A73)
     {
         return 10240;
+    }
+    else if(platform.get_cpu_model() == CPUModel::A53 || platform.get_cpu_model() == CPUModel::A55r0 || platform.get_cpu_model() == CPUModel::A55r1)
+    {
+        return 1;
     }
     else
     {
