@@ -46,13 +46,11 @@ static const std::vector<CpuSubKernel::SubKernel> available_kernels =
         [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F32); },
         REGISTER_FP32_NEON(arm_compute::cpu::sub_same_neon<float>)
     },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_sub",
         [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F16) && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::sub_same_neon<float16_t>)
     },
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_u8_sub",
         [](const DataTypeISASelectorData & data) { return (data.dt == DataType::U8); },

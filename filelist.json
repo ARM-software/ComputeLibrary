@@ -837,14 +837,14 @@
           "common": [
             "src/cpu/operators/CpuActivation.cpp",
             "src/cpu/kernels/CpuActivationKernel.cpp",
-            "src/runtime/NEON/functions/NEActivationLayer.cpp",
-            "src/cpu/kernels/activation/generic/neon/qasymm8.cpp",
-            "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp",
-            "src/cpu/kernels/activation/generic/neon/qsymm16.cpp"
+            "src/runtime/NEON/functions/NEActivationLayer.cpp"
           ],
           "neon": {
             "fp16": [ "src/cpu/kernels/activation/generic/neon/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/generic/neon/fp32.cpp" ]
+            "fp32": [ "src/cpu/kernels/activation/generic/neon/fp32.cpp" ], 
+            "qasymm8": [ "src/cpu/kernels/activation/generic/neon/qasymm8.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp" ],
+            "qsymm16": [ "src/cpu/kernels/activation/generic/neon/qsymm16.cpp" ]
           },
           "sve": {
             "fp16": [ "src/cpu/kernels/activation/generic/sve/fp16.cpp" ],
@@ -961,7 +961,6 @@
             "fp32":["src/cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp"],
             "fp16":["src/cpu/kernels/boundingboxtransform/generic/neon/fp16.cpp"],
             "qsymm16":["src/cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp"]
-
           }
         }
       },
@@ -1304,6 +1303,7 @@
             "src/runtime/NEON/functions/NEElementwiseUnaryLayer.cpp"
           ],
           "neon": {
+            "common":["src/cpu/kernels/elementwise_unary/generic/neon/impl.cpp"],
             "integer": ["src/cpu/kernels/elementwise_unary/generic/neon/integer.cpp"],
             "fp32": ["src/cpu/kernels/elementwise_unary/generic/neon/fp32.cpp"],
             "fp16": ["src/cpu/kernels/elementwise_unary/generic/neon/fp16.cpp"]
@@ -1709,8 +1709,6 @@
             "src/cpu/operators/CpuPool2d.cpp",
             "src/cpu/kernels/CpuPool2dKernel.cpp",
             "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp",
-            "src/cpu/kernels/pool2d/neon/qasymm8.cpp",
-            "src/cpu/kernels/pool2d/neon/qasymm8_signed.cpp",
             "src/runtime/NEON/functions/NEPoolingLayer.cpp"
           ],
           "neon": {
@@ -1743,7 +1741,9 @@
             ],
             "nchw": [ "src/cpu/kernels/pool2d/neon/nchw/all.cpp" ],
             "fp16": [ "src/cpu/kernels/pool2d/neon/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/pool2d/neon/fp32.cpp" ]
+            "fp32": [ "src/cpu/kernels/pool2d/neon/fp32.cpp" ], 
+            "qasymm8":[ "src/cpu/kernels/pool2d/neon/qasymm8.cpp" ], 
+            "qasymm8_signed":["src/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"]
           },
           "sve": {
             "common": [
@@ -1884,7 +1884,6 @@
             "integer": [ "src/cpu/kernels/scale/sve/integer.cpp" ],
             "qasymm8": [ "src/cpu/kernels/scale/sve/qasymm8.cpp" ],
             "qasymm8_signed": [ "src/cpu/kernels/scale/sve/qasymm8_signed.cpp" ]
-
           },
           "neon": {
             "fp16": [ "src/cpu/kernels/scale/neon/fp16.cpp" ],
@@ -1925,6 +1924,7 @@
             "src/runtime/NEON/functions/NESoftmaxLayer.cpp"
           ],
           "neon":{
+            "common":["src/cpu/kernels/softmax/generic/neon/impl.cpp"],
             "fp32": ["src/cpu/kernels/softmax/generic/neon/fp32.cpp"],
             "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"], 
             "qasymm8":[ "src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"], 
@@ -1938,6 +1938,7 @@
             "qasymm8_signed": ["src/cpu/kernels/softmax/generic/sve/qasymm8_signed.cpp"]
           },
           "sve2":{
+            "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
             "qasymm8":[ "src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp"], 
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
           }

@@ -64,13 +64,11 @@ static const std::vector<CpuPool2dKernel::PoolingKernel> available_kernels =
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8_SIGNED)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_qasymm8_signed_neon_nhwc)
     },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_f16_nhwc_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F16)); },
+        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F16)) && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nhwc)
     },
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_fp32_nhwc_poolMxN",
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F32)); },
@@ -107,7 +105,6 @@ static const std::vector<CpuPool2dKernel::PoolingKernel> available_kernels =
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED)); },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<int8_t>)
     },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_nchw_pool2",
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },
@@ -123,7 +120,6 @@ static const std::vector<CpuPool2dKernel::PoolingKernel> available_kernels =
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16)); },
         REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nchw)
     },
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_fp32_nchw_pool2",
         [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },

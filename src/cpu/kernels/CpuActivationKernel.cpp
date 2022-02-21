@@ -46,8 +46,23 @@ namespace
 static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
     {
+        "sve2_qu8_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
+        REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)
+    },
+    {
+        "sve2_qs8_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2; },
+        REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)
+    },
+    {
+        "sve2_qs16_activation",
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16 && data.isa.sve2; },
+        REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)
+    },
+    {
         "sve_fp16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16; },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation)
     },
     {
@@ -64,21 +79,6 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
         "neon_fp32_activation",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_activation)
-    },
-    {
-        "sve2_qu8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
-        REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)
-    },
-    {
-        "sve2_qs8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2; },
-        REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)
-    },
-    {
-        "sve2_qs16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16 && data.isa.sve2; },
-        REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)
     },
     {
         "neon_qu8_activation",

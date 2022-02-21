@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 
 #include "src/cpu/kernels/crop/generic/neon/impl.h"
-#include "src/cpu/kernels/crop/generic/neon/list.h"
+#include "src/cpu/kernels/crop/list.h"
 
 namespace arm_compute
 {

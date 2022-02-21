@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/bit_ops.h"
-#include "src/cpu/kernels/crop/generic/neon/list.h"
+#include "src/cpu/kernels/crop/list.h"
 
 namespace arm_compute
 {
