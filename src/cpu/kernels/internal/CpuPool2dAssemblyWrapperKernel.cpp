@@ -280,19 +280,9 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
 size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation
-    if(platform.get_cpu_model() == CPUModel::A73)
-    {
-        return 10240;
-    }
-    else if(platform.get_cpu_model() == CPUModel::A53 || platform.get_cpu_model() == CPUModel::A55r0 || platform.get_cpu_model() == CPUModel::A55r1)
-    {
-        return 1;
-    }
-    else
-    {
-        return 9216;
-    }
+    ARM_COMPUTE_UNUSED(platform);
+
+    return ICPPKernel::default_mws;
 }
 } // namespace kernels
 } // namespace cpu
