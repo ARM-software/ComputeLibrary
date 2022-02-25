@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -41,7 +41,7 @@ To see the build options available simply run ```scons -h```:
         logging: Logging (this flag is forced to 1 for debug=1) (yes|no)
             default: False
 
-        arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|arm64-v8.2-a-sve|arm64-v8.2-a-sve2|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|armv8r64|x86)
+        arch: Target Architecture (armv7a|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.2-a-sve2|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|armv8r64|x86)
             default: armv7a
 
         estate: Execution State (auto|32|64)
@@ -253,11 +253,11 @@ To cross-compile the library in debug mode, with Arm® Neon™ only support, for
 
 To cross-compile the library in asserts mode, with OpenCL only support, for Linux 64bit:
 
-	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
+	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=linux arch=armv8a
 
 You can also compile the library natively on an Arm device by using <b>build=native</b>:
 
-	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=arm64-v8a build=native
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv8a build=native
 	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a build=native
 
 @note g++ for Arm is mono-arch, therefore if you want to compile for Linux 32bit on a Linux 64bit platform you will have to use a cross compiler.
@@ -342,7 +342,7 @@ i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
 @note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
-@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L (e.g. -Llib/linux-arm64-v8a-neon-cl-asserts/)
+@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L (e.g. -Llib/linux-armv8a-neon-cl-asserts/)
 @note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
 
 To run the built executable simply run:
@@ -372,14 +372,14 @@ In order to build for SVE or SVE2 you need a compiler that supports them. You ca
 
 An example build command with SVE is:
 
-        scons arch=arm64-v8.2-a-sve os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
+        scons arch=armv8.2-a-sve os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
 
 @section S1_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
  - clang++ from NDK r18b for armv7a
- - clang++ from NDK r20b for arm64-v8a
- - clang++ from NDK r20b for arm64-v8.2-a with FP16 support
+ - clang++ from NDK r20b for armv8a
+ - clang++ from NDK r20b for armv8.2-a with FP16 support
 
 For NDK r18 or older, here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>:
 - Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK
@@ -406,7 +406,7 @@ To cross-compile the library in debug mode, with Arm® Neon™ only support, for
 
 To cross-compile the library in asserts mode, with OpenCL only support, for Android 64bit:
 
-	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=android arch=arm64-v8a
+	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=android arch=armv8a
 
 @subsection S1_3_2_examples How to manually build the examples ?
 
@@ -479,7 +479,7 @@ The library was successfully natively built for Apple Silicon under macOS 11.1 u
 
 To natively compile the library with accelerated CPU support:
 
-	scons Werror=1 -j8 neon=1 opencl=0 os=macos arch=arm64-v8a build=native
+	scons Werror=1 -j8 neon=1 opencl=0 os=macos arch=armv8a build=native
 
 @note Initial support disables feature discovery through HWCAPS and thread scheduling affinity controls
 
@@ -487,17 +487,17 @@ To natively compile the library with accelerated CPU support:
 
 For bare metal, the library was successfully built using linaro's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:
  - arm-eabi for armv7a
- - aarch64-elf for arm64-v8a
+ - aarch64-elf for armv8a
 
-Download linaro for <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/arm-eabi/">armv7a</a> and <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-elf/">arm64-v8a</a>.
+Download linaro for <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/arm-eabi/">armv7a</a> and <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-elf/">armv8a</a>.
 
 @note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-elf/bin:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_arm-eabi/bin
 
 @subsection S1_5_1_library How to build the library ?
 
-To cross-compile the library with Arm® Neon™ support for baremetal arm64-v8a:
+To cross-compile the library with Arm® Neon™ support for baremetal armv8a:
 
-	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=bare_metal arch=arm64-v8a build=cross_compile cppthreads=0 openmp=0 standalone=1
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=bare_metal arch=armv8a build=cross_compile cppthreads=0 openmp=0 standalone=1
 
 @subsection S1_5_2_examples How to manually build the examples ?
 

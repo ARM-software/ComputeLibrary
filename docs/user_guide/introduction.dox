@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -35,7 +35,7 @@ The Compute Library is a collection of low-level machine learning functions opti
 
 Several builds of the library are available using various configurations:
  - OS: Linux, Android, macOS or bare metal.
- - Architecture: armv7a (32bit) or arm64-v8a (64bit).
+ - Architecture: armv7a (32bit) or armv8a (64bit).
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
 
@@ -51,7 +51,7 @@ Several builds of the library are available using various configurations:
   <td>armv7a
   <td>gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
   <tr>
-  <td>arm64-v8a
+  <td>armv8a
   <td rowspan="2">gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
   <tr>
   <td>armv8.2-a
@@ -63,7 +63,7 @@ Several builds of the library are available using various configurations:
   <td>armv7a
   <td rowspan="3">NDK r18b
   <tr>
-  <td>arm64-v8a
+  <td>armv8a
   <tr>
   <td>armv8.2-a
 <tr>
@@ -87,13 +87,13 @@ For each release we provide some pre-built binaries of the library [here](https:
 
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
-            - Linux arm64-v8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
-            - Linux arm64-v8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
-            - Linux arm64-v8.2-a (multi-ISA binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
-            - Linux armv8.2a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
+            - Linux armv8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux armv8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux armv8.2-a (multi-ISA binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
+            - Linux armv8.2-a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
             - Android armv7a: clang++ / libc++ NDK r20b
-            - Android am64-v8a: clang++ / libc++ NDK r20b
-            - Android arm64-v8.2-a: clang++ / libc++ NDK r20b
+            - Android armv8a: clang++ / libc++ NDK r20b
+            - Android armv8.2-a: clang++ / libc++ NDK r20b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
