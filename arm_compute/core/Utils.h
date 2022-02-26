@@ -793,6 +793,23 @@ std::pair<int, int> scaled_dimensions_signed(int width, int height,
                                              int kernel_width, int kernel_height,
                                              const PadStrideInfo &pad_stride_info);
 
+/** Returns calculated width, height and depth of output scaled tensor depending on dimensions rounding mode.
+ *
+ * @param[in] width         Width of input tensor
+ * @param[in] height        Height of input tensor
+ * @param[in] depth         Depth of input tensor
+ * @param[in] kernel_width  Kernel width.
+ * @param[in] kernel_height Kernel height.
+ * @param[in] kernel_depth  Kernel depth.
+ * @param[in] pool3d_info   Pad and stride and round information for 3d pooling
+ *
+ * @return A tuple with the new width in the first position, the new height in the second, and the new depth in the third.
+ *         Returned values can be < 1
+ */
+std::tuple<int, int, int> scaled_3d_dimensions_signed(int width, int height, int depth,
+                                                      int kernel_width, int kernel_height, int kernel_depth,
+                                                      const Pooling3dLayerInfo &pool3d_info);
+
 /** Check if the given reduction operation should be handled in a serial way.
  *
  * @param[in] op   Reduction operation to perform
@@ -893,6 +910,23 @@ const std::string &string_from_pooling_type(PoolingType type);
  * @return True if the pool region is entirely outside the input tensor, False otherwise.
  */
 bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info);
+/** Check if the 3d pool region is entirely outside the input tensor
+ *
+ * @param[in] info @ref Pooling3dLayerInfo to be checked.
+ *
+ * @return True if the pool region is entirely outside the input tensor, False otherwise.
+ */
+bool is_pool_3d_region_entirely_outside_input(const Pooling3dLayerInfo &info);
+/** Check if the 3D padding is symmetric i.e. padding in each opposite sides are euqal (left=right, top=bottom and front=back)
+ *
+ * @param[in] info @ref Padding3D input 3D padding object to check if it is symmetric
+ *
+ * @return True if padding is symmetric
+ */
+inline bool is_symmetric(const Padding3D& info)
+{
+    return ((info.left == info.right) && (info.top == info.bottom) && (info.front == info.back));
+}
 /** Translates a given GEMMLowp output stage to a string.
  *
  * @param[in] output_stage @ref GEMMLowpOutputStageInfo to be translated to string.

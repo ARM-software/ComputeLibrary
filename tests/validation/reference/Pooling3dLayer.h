@@ -38,10 +38,11 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> pool3d_internal(const SimpleTensor<T> &src, const Pool3DInfo &pool3d_info, SimpleTensor<uint32_t> *indices);
+SimpleTensor<T> pooling_3d_layer_internal(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, SimpleTensor<uint32_t> *indices = nullptr);
 
 template <typename T>
-SimpleTensor<T> pool3d(const SimpleTensor<T> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
+SimpleTensor<T> pooling_3d_layer(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo = QuantizationInfo(),
+                                 SimpleTensor<uint32_t> *indices = nullptr);
 } // namespace reference
 } // namespace validation
 } // namespace test

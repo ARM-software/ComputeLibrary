@@ -619,6 +619,15 @@
         ]
       }
     },
+    "Pool3d": {
+      "files": {
+        "common": [
+          "src/gpu/cl/kernels/ClPool3dKernel.cpp",
+          "src/gpu/cl/operators/ClPool3d.cpp",
+          "src/runtime/CL/functions/CLPooling3dLayer.cpp"
+        ]
+      }
+    },
     "PRelu": {
       "deps": [ "ElementwiseBinary" ],
       "files": {

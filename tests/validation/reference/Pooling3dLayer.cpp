@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "Pool3D.h"
+#include "Pooling3dLayer.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/validation/Helpers.h"
 
@@ -37,7 +37,7 @@ namespace reference
 using namespace arm_compute::misc::shape_calculator;
 
 template <typename T>
-SimpleTensor<T> pool3d_internal(const SimpleTensor<T> &src, const Pool3DInfo &pool3d_info, SimpleTensor<uint32_t> *indices)
+SimpleTensor<T> pooling_3d_layer_internal(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, SimpleTensor<uint32_t> *indices)
 {
     TensorShape     pooled_shape = compute_pool3d_shape(src.shape(), pool3d_info);
     SimpleTensor<T> dst{ pooled_shape, src.data_type(), 1 };
@@ -57,9 +57,9 @@ SimpleTensor<T> pool3d_internal(const SimpleTensor<T> &src, const Pool3DInfo &po
     const int pool_size_height = pool3d_info.is_global_pooling ? src.shape()[idx_height] : pool3d_info.pool_size.height;
     const int pool_size_depth  = pool3d_info.is_global_pooling ? src.shape()[idx_depth] : pool3d_info.pool_size.depth;
 
-    const int pool_stride_width  = static_cast<int>(pool3d_info.strides.width);
-    const int pool_stride_height = static_cast<int>(pool3d_info.strides.height);
-    const int pool_stride_depth  = static_cast<int>(pool3d_info.strides.depth);
+    const int pool_stride_width  = static_cast<int>(pool3d_info.stride.width);
+    const int pool_stride_height = static_cast<int>(pool3d_info.stride.height);
+    const int pool_stride_depth  = static_cast<int>(pool3d_info.stride.depth);
 
     const int pad_left  = static_cast<int>(pool3d_info.padding.left);
     const int pad_top   = static_cast<int>(pool3d_info.padding.top);
@@ -144,7 +144,6 @@ SimpleTensor<T> pool3d_internal(const SimpleTensor<T> &src, const Pool3DInfo &po
                                 {
                                     const auto val = static_cast<T>(
                                                          src[batch_offset_src + depth_offset_src + height_offset_src + x * num_channels + c]);
-
                                     if(val > max_val)
                                     {
                                         max_val   = val;
@@ -189,29 +188,29 @@ SimpleTensor<T> pool3d_internal(const SimpleTensor<T> &src, const Pool3DInfo &po
     return dst;
 }
 
-template SimpleTensor<float> pool3d(const SimpleTensor<float> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
-template SimpleTensor<half> pool3d(const SimpleTensor<half> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
+template SimpleTensor<float> pooling_3d_layer(const SimpleTensor<float> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
+template SimpleTensor<half> pooling_3d_layer(const SimpleTensor<half> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
 
 template <typename T>
-SimpleTensor<T> pool3d(const SimpleTensor<T> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
+SimpleTensor<T> pooling_3d_layer(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
 {
     ARM_COMPUTE_UNUSED(output_qinfo);
-    return pool3d_internal<T>(src, pool3d_info, indices);
+    return pooling_3d_layer_internal<T>(src, pool3d_info, indices);
 }
 
 template <>
-SimpleTensor<int8_t> pool3d<int8_t>(const SimpleTensor<int8_t> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
+SimpleTensor<int8_t> pooling_3d_layer<int8_t>(const SimpleTensor<int8_t> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float> dst_tmp = pool3d_internal<float>(src_tmp, pool3d_info, indices);
+    SimpleTensor<float> dst_tmp = pooling_3d_layer_internal<float>(src_tmp, pool3d_info, indices);
     return convert_to_asymmetric<int8_t>(dst_tmp, output_qinfo);
 }
 
 template <>
-SimpleTensor<uint8_t> pool3d<uint8_t>(const SimpleTensor<uint8_t> &src, const Pool3DInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
+SimpleTensor<uint8_t> pooling_3d_layer<uint8_t>(const SimpleTensor<uint8_t> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices)
 {
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float> dst_tmp = pool3d_internal<float>(src_tmp, pool3d_info, indices);
+    SimpleTensor<float> dst_tmp = pooling_3d_layer_internal<float>(src_tmp, pool3d_info, indices);
     return convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
 }
 

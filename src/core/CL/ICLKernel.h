@@ -238,6 +238,16 @@ public:
     {
         add_tensor_argument<4>(idx, tensor, window);
     }
+    /** Add the passed 5D tensor's parameters to the object's kernel's arguments starting from the index idx.
+     *
+     * @param[in,out] idx    Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     tensor Tensor to set as an argument of the object's kernel.
+     * @param[in]     window Window the kernel will be executed on.
+     */
+    void add_5D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window)
+    {
+        add_tensor_argument<5>(idx, tensor, window);
+    }
 
     /** Add the passed NHW 3D tensor's parameters to the object's kernel's arguments by passing strides, dimensions and the offset to the first valid element in bytes.
      *

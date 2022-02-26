@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -244,6 +244,19 @@ bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info)
     return pool_le_padding_x || pool_le_padding_y;
 }
 
+bool is_pool_3d_region_entirely_outside_input(const Pooling3dLayerInfo &info)
+{
+    if(info.is_global_pooling || info.pool_size.x() == 0 || info.pool_size.y() == 0 || info.pool_size.z() == 0)
+    {
+        return false;
+    }
+    const auto ps                = info.padding;
+    const auto pool_le_padding_x = info.pool_size.x() <= std::max({ ps.left, ps.right });
+    const auto pool_le_padding_y = info.pool_size.y() <= std::max({ ps.top, ps.bottom });
+    const auto pool_le_padding_z = info.pool_size.z() <= std::max({ ps.front, ps.back });
+    return pool_le_padding_x || pool_le_padding_y || pool_le_padding_z;
+}
+
 const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
 {
     static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =
@@ -472,6 +485,42 @@ std::pair<int, int> scaled_dimensions_signed(int width, int height,
     }
 
     return std::make_pair(static_cast<int>(w), static_cast<int>(h));
+}
+
+std::tuple<int, int, int> scaled_3d_dimensions_signed(int width, int height, int depth,
+                                                      int kernel_width, int kernel_height, int kernel_depth,
+                                                      const Pooling3dLayerInfo &pool3d_info)
+{
+    const int pad_left   = pool3d_info.padding.left;
+    const int pad_top    = pool3d_info.padding.top;
+    const int pad_right  = pool3d_info.padding.right;
+    const int pad_bottom = pool3d_info.padding.bottom;
+    const int pad_front  = pool3d_info.padding.front;
+    const int pad_back   = pool3d_info.padding.back;
+    const int stride_x   = pool3d_info.stride.x();
+    const int stride_y   = pool3d_info.stride.y();
+    const int stride_z   = pool3d_info.stride.z();
+    int       w          = 0;
+    int       h          = 0;
+    int       d          = 0;
+
+    switch(pool3d_info.round_type)
+    {
+        case DimensionRoundingType::FLOOR:
+            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            d = static_cast<int>(std::floor((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
+            break;
+        case DimensionRoundingType::CEIL:
+            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
+            d = static_cast<int>(std::ceil((static_cast<float>(depth + pad_front + pad_back - kernel_depth) / stride_z) + 1));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported rounding type");
+    }
+
+    return std::make_tuple(static_cast<int>(w), static_cast<int>(h), static_cast<int>(d));
 }
 
 bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)

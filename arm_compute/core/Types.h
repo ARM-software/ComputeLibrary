@@ -1264,6 +1264,109 @@ struct PoolingLayerInfo
     bool          fp_mixed_precision;
 };
 
+/** Pooling Layer Information struct*/
+struct Pooling3dLayerInfo
+{
+    /** Default Constructor */
+    Pooling3dLayerInfo()
+        : pool_type(PoolingType::MAX),
+          pool_size(Size3D()),
+          stride(Size3D()),
+          padding(Padding3D()),
+          exclude_padding(false),
+          is_global_pooling(false),
+          fp_mixed_precision(false),
+          round_type(DimensionRoundingType::FLOOR)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across x, y and z.
+     * @param[in] stride             (Optional) stride information @ref Size3D
+     * @param[in] padding            (Optional) padding information @ref Padding3D
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     */
+    explicit Pooling3dLayerInfo(PoolingType           pool_type,
+                                unsigned int          pool_size,
+                                Size3D                stride             = Size3D(1U, 1U, 1U),
+                                Padding3D             padding            = Padding3D(),
+                                bool                  exclude_padding    = false,
+                                bool                  fp_mixed_precision = false,
+                                DimensionRoundingType round_type         = DimensionRoundingType::FLOOR)
+        : pool_type(pool_type),
+          pool_size(Size3D(pool_size, pool_size, pool_size)),
+          stride(stride),
+          padding(padding),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision),
+          round_type(round_type)
+    {
+    }
+
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x, y and z.
+     * @param[in] stride             (Optional) stride information @ref Size3D
+     * @param[in] padding            (Optional) padding information @ref Padding3D
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     */
+    explicit Pooling3dLayerInfo(PoolingType           pool_type,
+                                Size3D                pool_size,
+                                Size3D                stride             = Size3D(1U, 1U, 1U),
+                                Padding3D             padding            = Padding3D(),
+                                bool                  exclude_padding    = false,
+                                bool                  fp_mixed_precision = false,
+                                DimensionRoundingType round_type         = DimensionRoundingType::FLOOR)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          stride(stride),
+          padding(padding),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision),
+          round_type(round_type)
+    {
+    }
+
+    /** Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    explicit Pooling3dLayerInfo(PoolingType pool_type)
+        : pool_type(pool_type),
+          pool_size(Size3D()),
+          stride(Size3D(1U, 1U, 1U)),
+          padding(Padding3D(0, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false),
+          round_type(DimensionRoundingType::FLOOR)
+    {
+    }
+
+    PoolingType           pool_type;
+    Size3D                pool_size;
+    Size3D                stride;
+    Padding3D             padding;
+    bool                  exclude_padding;
+    bool                  is_global_pooling;
+    bool                  fp_mixed_precision;
+    DimensionRoundingType round_type;
+};
+
 /** ROI Pooling Layer Information class */
 class ROIPoolingLayerInfo final
 {
@@ -1305,42 +1408,6 @@ private:
     unsigned int _pooled_height;
     float        _spatial_scale;
     unsigned int _sampling_ratio;
-};
-
-struct Pool3DInfo
-{
-    Pool3DInfo() = default;
-
-    /** Constructor
-     *
-     * @param[in] pool_type         Pooling type @ref PoolingType.
-     * @param[in] pool_size         Pooling size, in elements, across  x, y and z @ref Size3D
-     * @param[in] padding           Paddings in x, y and z dimensions
-     * @param[in] strides           Strides in x, y and z dimensions @ref Size3D
-     * @param[in] round_type        Dimension rounding type (ceil or floor)
-     * @param[in] exclude_padding   Strategy when accounting padding in calculations.
-     *                              True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
-     * @param[in] is_global_pooling Sets the pool size to the input size if True
-     */
-    Pool3DInfo(const PoolingType           pool_type,
-               const Size3D                pool_size,
-               const Padding3D             padding,
-               const Size3D                strides,
-               const DimensionRoundingType round_type,
-               bool                        exclude_padding,
-               bool                        is_global_pooling)
-        : pool_type(pool_type), pool_size(pool_size), padding(padding), strides(strides), round_type(round_type), exclude_padding(exclude_padding), is_global_pooling(is_global_pooling)
-
-    {
-    }
-
-    PoolingType           pool_type{ PoolingType::MAX };
-    Size3D                pool_size{ 1U, 1U, 1U };
-    Padding3D             padding{};
-    Size3D                strides{ 1U, 1U, 1U };
-    DimensionRoundingType round_type{ DimensionRoundingType::FLOOR };
-    bool                  exclude_padding{ false };
-    bool                  is_global_pooling{ false };
 };
 
 /** Generate Proposals Information class */

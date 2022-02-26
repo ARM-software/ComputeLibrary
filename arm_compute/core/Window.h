@@ -47,6 +47,8 @@ public:
     static constexpr size_t DimZ = 2;
     /** Alias for dimension 3 also known as W dimension */
     static constexpr size_t DimW = 3;
+    /** Alias for dimension 4 also known as V dimension */
+    static constexpr size_t DimV = 4;
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()
@@ -348,7 +350,6 @@ public:
     {
         return slide_window_slice<4>(slice);
     }
-
     /** Collapse the dimensions between @p first and @p last if possible.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
