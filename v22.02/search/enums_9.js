@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['kernelselectiontype',['KernelSelectionType',['../namespacearm__compute_1_1cpu.xhtml#afa3ebf7e0ea95c0c9cadb30c62bad67a',1,'arm_compute::cpu']]]
+];

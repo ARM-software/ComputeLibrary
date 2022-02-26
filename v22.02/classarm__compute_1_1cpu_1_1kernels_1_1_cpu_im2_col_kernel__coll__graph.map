@@ -1,0 +1,6 @@
+<map id="CpuIm2ColKernel" name="CpuIm2ColKernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title="ICpuKernel\&lt; CpuIm2ColKernel \&gt;" alt="" coords="5,247,240,273"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="71,81,163,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title="ICpuKernel\&lt; Derived \&gt;" alt="" coords="139,157,312,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="84,5,151,32"/>
+</map>

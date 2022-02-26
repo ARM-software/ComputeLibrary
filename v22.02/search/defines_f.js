@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['partial_5fstore_5fm0',['PARTIAL_STORE_M0',['../transpose_8cl.xhtml#a202537333048b910de7fc7ad58567200',1,'transpose.cl']]],
+  ['partial_5fstore_5fn0',['PARTIAL_STORE_N0',['../transpose_8cl.xhtml#a384384e4aff4a5ab95d1e0f9e3808924',1,'transpose.cl']]],
+  ['perform_5factivation_5fquant',['PERFORM_ACTIVATION_QUANT',['../activation__quant__helpers_8h.xhtml#a66c59c0b2362216643d0e9db9a240013',1,'activation_quant_helpers.h']]],
+  ['perform_5freduction',['PERFORM_REDUCTION',['../qlstm__layer__normalization_8cl.xhtml#abea2ff77f3651af783350bd088fbc0d2',1,'qlstm_layer_normalization.cl']]],
+  ['perform_5freduction_5fimpl',['PERFORM_REDUCTION_IMPL',['../qlstm__layer__normalization_8cl.xhtml#ac3d15e2cfcadfc7f2ec843d1bb0f190c',1,'qlstm_layer_normalization.cl']]],
+  ['perform_5freduction_5fstr',['PERFORM_REDUCTION_STR',['../qlstm__layer__normalization_8cl.xhtml#af4d1bdad50c7cb172247cc7967e40bcd',1,'qlstm_layer_normalization.cl']]],
+  ['pixel_5funit16',['PIXEL_UNIT16',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a294d0636e640a664440f563ff8e2695f',1,'helpers.h']]],
+  ['pixel_5funit4',['PIXEL_UNIT4',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae98f415218d7e04c45177d7c4c81e31a',1,'helpers.h']]],
+  ['pixel_5funit8',['PIXEL_UNIT8',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a195a2c31ae5fa9fe59eceb948e42e4d4',1,'helpers.h']]],
+  ['pixel_5fwise_5fmultiplication_5ffixture_5fdata_5ftest_5fcase',['PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE',['../_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a4567b1c0ed4817ca030cb2cbd0a51d53',1,'PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE():&#160;PixelWiseMultiplication.cpp'],['../_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a3ab20dd587b94b23a3c206149820eafd',1,'PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE():&#160;PixelWiseMultiplication.cpp']]],
+  ['pool_5fop',['POOL_OP',['../nchw_2pooling__layer_8cl.xhtml#a482ef7d59a5f474ca126e737c7f0978a',1,'POOL_OP():&#160;pooling_layer.cl'],['../nhwc_2pooling__layer_8cl.xhtml#a482ef7d59a5f474ca126e737c7f0978a',1,'POOL_OP():&#160;pooling_layer.cl']]],
+  ['post_5fop1_5factivation_5foptional',['POST_OP1_ACTIVATION_OPTIONAL',['../fp__post__ops__act__eltwise__op__act_8h.xhtml#abdd7b3e5ebc76e20970d4c88ff351afc',1,'fp_post_ops_act_eltwise_op_act.h']]],
+  ['post_5fop3_5factivation_5foptional',['POST_OP3_ACTIVATION_OPTIONAL',['../fp__post__ops__act__eltwise__op__act_8h.xhtml#a7d18d99ed311abeaed6c54be9a892d7a',1,'fp_post_ops_act_eltwise_op_act.h']]],
+  ['pow2_5fop',['POW2_OP',['../nchw_2pooling__layer_8cl.xhtml#a03898439d164d74f8c35bafb67262d95',1,'POW2_OP():&#160;pooling_layer.cl'],['../nhwc_2pooling__layer_8cl.xhtml#a03898439d164d74f8c35bafb67262d95',1,'POW2_OP():&#160;pooling_layer.cl']]],
+  ['pow_5fop',['POW_OP',['../nchw_2normalization__layer_8cl.xhtml#a09724da1a9e5ba54260905829ec27db4',1,'POW_OP():&#160;normalization_layer.cl'],['../nhwc_2normalization__layer_8cl.xhtml#a09724da1a9e5ba54260905829ec27db4',1,'POW_OP():&#160;normalization_layer.cl']]],
+  ['prelu',['PRELU',['../elementwise__operation__quantized_8cl.xhtml#a01b6a20d51e2db6f1704f2315ead62d3',1,'elementwise_operation_quantized.cl']]],
+  ['prod_5freduce',['PROD_REDUCE',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a9d67c0d66bec25976b68ae38dbedf97d',1,'helpers.h']]],
+  ['prod_5freduce_5f1',['prod_reduce_1',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#abc99c3fb0af2d6aaf06b9d0115fd428d',1,'helpers.h']]],
+  ['prod_5freduce_5f16',['prod_reduce_16',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a62ae1e8fe3bfba0e252f64ebd15b8648',1,'helpers.h']]],
+  ['prod_5freduce_5f2',['prod_reduce_2',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6bcd4c7d33786a8568461269e24d81e6',1,'helpers.h']]],
+  ['prod_5freduce_5f3',['prod_reduce_3',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a544496d96351d237cabebde274af0f21',1,'helpers.h']]],
+  ['prod_5freduce_5f4',['prod_reduce_4',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a3f72cab98c68c081f09bb636d5524497',1,'helpers.h']]],
+  ['prod_5freduce_5f8',['prod_reduce_8',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#af97df431d95288738fd11ee2499690df',1,'helpers.h']]],
+  ['prod_5freduce_5fstr',['PROD_REDUCE_STR',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a7312ad9d1d2a1dd413d02f03cc094131',1,'helpers.h']]]
+];

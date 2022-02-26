@@ -1,0 +1,3 @@
+<map id="a64_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst" name="a64_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst">
+<area shape="rect" id="node2" href="$structarm__gemm_1_1_requantize32.xhtml" title="Requantize32" alt="" coords="46,5,157,32"/>
+</map>

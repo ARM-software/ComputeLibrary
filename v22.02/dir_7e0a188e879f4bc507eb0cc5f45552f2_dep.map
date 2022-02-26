@@ -1,0 +1,9 @@
+<map id="src/cpu/kernels/assembly" name="src/cpu/kernels/assembly">
+<area shape="rect" id="node1" href="dir_7e0a188e879f4bc507eb0cc5f45552f2.xhtml" title="assembly" alt="" coords="27,52,112,100"/>
+<area shape="rect" id="node2" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="12,244,124,292"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000347_000000.xhtml" title="5" alt="" coords="64,217,74,232"/>
+<area shape="rect" id="node3" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="69,148,141,196"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000347_000020.xhtml" title="1" alt="" coords="93,120,102,135"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000020_000000.xhtml" title="607" alt="" coords="79,222,105,237"/>
+<area shape="rect" id="clust1" href="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml" title="kernels" alt="" coords="16,16,123,111"/>
+</map>

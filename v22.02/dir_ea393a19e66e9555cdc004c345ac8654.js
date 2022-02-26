@@ -1,0 +1,26 @@
+var dir_ea393a19e66e9555cdc004c345ac8654 =
+[
+    [ "batch_to_space.cl", "nhwc_2batch__to__space_8cl.xhtml", null ],
+    [ "batchnormalization_layer.cl", "nhwc_2batchnormalization__layer_8cl.xhtml", "nhwc_2batchnormalization__layer_8cl" ],
+    [ "channel_shuffle.cl", "nhwc_2channel__shuffle_8cl.xhtml", null ],
+    [ "depth_to_space.cl", "nhwc_2depth__to__space_8cl.xhtml", null ],
+    [ "dequantization_layer.cl", "nhwc_2dequantization__layer_8cl.xhtml", null ],
+    [ "direct_convolution.cl", "nhwc_2direct__convolution_8cl.xhtml", "nhwc_2direct__convolution_8cl" ],
+    [ "direct_convolution3d.cl", "direct__convolution3d_8cl.xhtml", "direct__convolution3d_8cl" ],
+    [ "dwc_native_fp_nhwc.cl", "dwc__native__fp__nhwc_8cl.xhtml", null ],
+    [ "dwc_native_quantized_nhwc.cl", "dwc__native__quantized__nhwc_8cl.xhtml", "dwc__native__quantized__nhwc_8cl" ],
+    [ "im2col.cl", "nhwc_2im2col_8cl.xhtml", "nhwc_2im2col_8cl" ],
+    [ "normalization_layer.cl", "nhwc_2normalization__layer_8cl.xhtml", "nhwc_2normalization__layer_8cl" ],
+    [ "normalize_planar_yuv_layer.cl", "nhwc_2normalize__planar__yuv__layer_8cl.xhtml", null ],
+    [ "normalize_planar_yuv_layer_quantized.cl", "nhwc_2normalize__planar__yuv__layer__quantized_8cl.xhtml", null ],
+    [ "pooling_layer.cl", "nhwc_2pooling__layer_8cl.xhtml", "nhwc_2pooling__layer_8cl" ],
+    [ "pooling_layer_quantized.cl", "pooling__layer__quantized_8cl.xhtml", null ],
+    [ "reorg_layer.cl", "nhwc_2reorg__layer_8cl.xhtml", null ],
+    [ "scale.cl", "nhwc_2scale_8cl.xhtml", null ],
+    [ "space_to_batch.cl", "nhwc_2space__to__batch_8cl.xhtml", null ],
+    [ "space_to_depth.cl", "nhwc_2space__to__depth_8cl.xhtml", null ],
+    [ "upsample_layer.cl", "nhwc_2upsample__layer_8cl.xhtml", "nhwc_2upsample__layer_8cl" ],
+    [ "winograd_filter_transform.cl", "nhwc_2winograd__filter__transform_8cl.xhtml", null ],
+    [ "winograd_input_transform.cl", "nhwc_2winograd__input__transform_8cl.xhtml", "nhwc_2winograd__input__transform_8cl" ],
+    [ "winograd_output_transform.cl", "nhwc_2winograd__output__transform_8cl.xhtml", null ]
+];
