@@ -225,6 +225,41 @@ public:
     {
         add_tensor_argument<4>(idx, tensor, window);
     }
+
+    /** Add the passed NHW 3D tensor's parameters to the object's kernel's arguments by passing strides, dimensions and the offset to the first valid element in bytes.
+     *
+     * @param[in,out] idx    Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     tensor Tensor to set as an argument of the object's kernel.
+     */
+    void add_3d_tensor_nhw_argument(unsigned int &idx, const ICLTensor *tensor);
+
+    /** Returns the number of arguments enqueued per NHW 3D Tensor object.
+     *
+     * @return The number of arguments enqueued per NHW 3D Tensor object.
+     */
+    constexpr static unsigned int num_arguments_per_3d_tensor_nhw()
+    {
+        constexpr unsigned int no_args_per_3d_tensor_nhw = 7u;
+        return no_args_per_3d_tensor_nhw;
+    }
+
+    /** Add the passed NHWC 4D tensor's parameters to the object's kernel's arguments by passing strides, dimensions and the offset to the first valid element in bytes.
+     *
+     * @param[in,out] idx    Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     tensor Tensor to set as an argument of the object's kernel.
+     */
+    void add_4d_tensor_nhwc_argument(unsigned int &idx, const ICLTensor *tensor);
+
+    /** Returns the number of arguments enqueued per NHWC 4D Tensor object.
+     *
+     * @return The number of arguments enqueued per NHWC 4D Tensor object.
+     */
+    constexpr static unsigned int num_arguments_per_4d_tensor_nhwc()
+    {
+        constexpr unsigned int no_args_per_4d_tensor_nhwc = 9u;
+        return no_args_per_4d_tensor_nhwc;
+    }
+
     /** Returns the number of arguments enqueued per 1D array object.
      *
      * @return The number of arguments enqueues per 1D array object.

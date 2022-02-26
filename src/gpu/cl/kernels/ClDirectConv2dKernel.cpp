@@ -122,209 +122,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
     return Status{};
 }
 
-inline bool can_run_optimized_kernel_for_bifrost_nchw(GPUTarget gpu_target, unsigned int conv_stride_x, unsigned int conv_stride_y, unsigned int kernel_size,
-                                                      DataType data_type, DataLayout data_layout)
-{
-    return gpu_target_is_in(gpu_target,
-                            GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
-                            GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
-                            GPUTarget::G52, GPUTarget::G52LIT)
-           && (kernel_size <= 5)
-           && (conv_stride_x == 1) && (conv_stride_y == 1)
-           && (data_type == DataType::F32)
-           && (data_layout == DataLayout::NCHW);
-}
-
-inline void setup_num_elems_nchw(unsigned int &num_elems_read_per_iteration_x, unsigned int &num_elems_read_per_iteration_y,
-                                 unsigned int &num_elems_written_per_iteration_x, unsigned int &num_elems_written_per_iteration_y,
-                                 unsigned int kernel_size, const PadStrideInfo &conv_info, const GPUTarget target, ITensorInfo *src)
-{
-    const DataType   data_type     = src->data_type();
-    const DataLayout data_layout   = src->data_layout();
-    unsigned int     conv_stride_x = std::get<0>(conv_info.stride());
-    unsigned int     conv_stride_y = std::get<1>(conv_info.stride());
-
-    const bool run_optimized_bifrost = can_run_optimized_kernel_for_bifrost_nchw(target, conv_stride_x, conv_stride_y, kernel_size, data_type, data_layout);
-
-    if(run_optimized_bifrost)
-    {
-        // Configure kernel window
-        switch(kernel_size)
-        {
-            case 1:
-            {
-                num_elems_read_per_iteration_x    = 4;
-                num_elems_read_per_iteration_y    = 4;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 4;
-                break;
-            }
-            case 3:
-            {
-                num_elems_read_per_iteration_x    = 6;
-                num_elems_read_per_iteration_y    = 5;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 3;
-                break;
-            }
-            case 5:
-            {
-                num_elems_read_per_iteration_x    = 8;
-                num_elems_read_per_iteration_y    = 6;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 2;
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_ERROR("Kernel size not optimized for Bifrost");
-            }
-        }
-    }
-    else
-    {
-        num_elems_read_per_iteration_y    = kernel_size;
-        num_elems_written_per_iteration_x = 8;
-        num_elems_written_per_iteration_y = 1;
-        switch(kernel_size)
-        {
-            case 1:
-                switch(conv_stride_x)
-                {
-                    case 1:
-                        num_elems_read_per_iteration_x = 8;
-                        break;
-                    case 2:
-                        num_elems_read_per_iteration_x = 16;
-                        break;
-                    case 3:
-                        switch(src->element_size())
-                        {
-                            case 1:
-                                num_elems_read_per_iteration_x = 28;
-                                break;
-                            case 2:
-                                num_elems_read_per_iteration_x = 24;
-                                break;
-                            case 4:
-                                num_elems_read_per_iteration_x = 22;
-                                break;
-                            default:
-                                ARM_COMPUTE_ERROR("Invalid data size");
-                        }
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
-                }
-                break;
-            case 3:
-                switch(conv_stride_x)
-                {
-                    case 1:
-                        num_elems_read_per_iteration_x = 10;
-                        break;
-                    case 2:
-                        num_elems_read_per_iteration_x = 17;
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
-                }
-                break;
-            case 5:
-                switch(conv_stride_x)
-                {
-                    case 1:
-                        num_elems_read_per_iteration_x = 12;
-                        break;
-                    case 2:
-                        num_elems_read_per_iteration_x = 20;
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
-                }
-                break;
-            case 9:
-                switch(conv_stride_x)
-                {
-                    case 1:
-                        num_elems_read_per_iteration_x = 16;
-                        break;
-                    case 2:
-                        num_elems_read_per_iteration_x = 24;
-                        break;
-                    default:
-                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
-                }
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Invalid direct convolution size");
-        }
-    }
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info, const GPUTarget target)
-{
-    const DataLayout data_layout = src->data_layout();
-
-    // Get dst shape
-    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*dst, output_shape,
-                       1,
-                       src->data_type(),
-                       src->quantization_info());
-
-    if(data_layout == DataLayout::NHWC)
-    {
-        const unsigned int vec_size = std::min(static_cast<unsigned int>(dst->tensor_shape()[0]), 4u);
-        unsigned int       num_rows = 1U;
-        if(dst->tensor_shape()[0] > 16)
-        {
-            num_rows = src->data_type() == DataType::F32 ? 2U : 4U;
-        }
-
-        // Create window and update padding
-        Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
-        return std::make_pair(Status{}, win);
-    }
-    else if(data_layout == DataLayout::NCHW)
-    {
-        const int          width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-        const unsigned int kernel_size = weights->dimension(width_idx);
-
-        unsigned int num_elems_read_per_iteration_x    = 0;
-        unsigned int num_elems_read_per_iteration_y    = 0;
-        unsigned int num_elems_written_per_iteration_x = 0;
-        unsigned int num_elems_written_per_iteration_y = 0;
-
-        unsigned int conv_pad_left = conv_info.pad_left();
-        unsigned int conv_pad_top  = conv_info.pad_top();
-        unsigned int conv_stride_x = std::get<0>(conv_info.stride());
-        unsigned int conv_stride_y = std::get<1>(conv_info.stride());
-
-        setup_num_elems_nchw(num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
-                             num_elems_written_per_iteration_x, num_elems_written_per_iteration_y,
-                             kernel_size, conv_info, target, src);
-
-        // Create window and update padding
-        bool   window_changed = false;
-        Window win            = calculate_max_window(*dst, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
-
-        AccessWindowRectangle input_access(src, -conv_pad_left, -conv_pad_top, num_elems_read_per_iteration_x, num_elems_read_per_iteration_y, conv_stride_x, conv_stride_y);
-        AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
-        AccessWindowRectangle output_access(dst, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
-        window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), dst->tensor_shape()));
-        Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-        return std::make_pair(err, win);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not supported");
-    }
-}
-
 bool export_to_cl_image_support(ITensorInfo *tensor, GPUTarget gpu_target, DataLayout data_layout)
 {
     if(tensor->tensor_shape()[0] % 4 || (data_layout != DataLayout::NHWC))
@@ -370,11 +167,6 @@ bool export_to_cl_image_support(ITensorInfo *tensor, GPUTarget gpu_target, DataL
 
 } // namespace
 
-BorderSize ClDirectConv2dKernel::border_size() const
-{
-    return _border_size;
-}
-
 ClDirectConv2dKernel::ClDirectConv2dKernel()
 {
     _type = CLKernelType::DIRECT;
@@ -400,24 +192,49 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     const unsigned int kernel_size = weights->dimension(width_idx);
     const DataType     data_type   = src->data_type();
 
-    const GPUTarget gpu_target = get_target();
+    const GPUTarget gpu_target                         = get_target();
+    unsigned int    _num_elems_processed_per_iteration = 0;
+
+    // Get dst shape
+    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*dst, output_shape,
+                       1,
+                       src->data_type(),
+                       src->quantization_info());
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(src, weights, dst, conv_info, gpu_target);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
+    Window win;
+    if(_data_layout == DataLayout::NHWC)
+    {
+        const unsigned int vec_size = std::min(static_cast<unsigned int>(dst->tensor_shape()[0]), 4u);
+        unsigned int       num_rows = 1U;
+        if(dst->tensor_shape()[0] > 16)
+        {
+            num_rows = src->data_type() == DataType::F32 ? 2U : 4U;
+        }
+
+        // Create window and update padding
+        win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
+    }
+    else if(_data_layout == DataLayout::NCHW)
+    {
+        _num_elems_processed_per_iteration = 1u;
+        win                                = calculate_max_window(*dst, Steps(_num_elems_processed_per_iteration));
+    }
+
+    ICLKernel::configure_internal(win);
 
     std::stringstream kernel_name;
     CLBuildOptions    build_options;
 
     if(_data_layout == DataLayout::NHWC)
     {
-        _border_size = BorderSize();
-
         kernel_name << "direct_convolution_nhwc";
 
-        const unsigned int n0                 = win_config.second.x().step();
-        const unsigned int m0                 = win_config.second.y().step();
+        const unsigned int n0                 = win.x().step();
+        const unsigned int m0                 = win.y().step();
         const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, src->dimension(channel_idx));
         const unsigned int partial_store_n0   = dst->dimension(channel_idx) % n0;
         const unsigned int pad_left           = conv_info.pad_left();
@@ -438,14 +255,8 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 
         build_options.add_option("-cl-fast-relaxed-math");
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(width_idx)));
-        build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(height_idx)));
-        build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(channel_idx)));
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(width_idx)));
-        build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(height_idx)));
-        build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(channel_idx)));
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
         build_options.add_option_if_else(export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
@@ -459,6 +270,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         build_options.add_option("-DM0=" + support::cpp11::to_string(m0));
         build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
         build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
+        build_options.add_option_if((src->dimension(channel_idx) % k0) != 0, "-DLEFTOVER_LOOP");
         build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
 
         if(is_data_type_quantized(data_type))
@@ -497,47 +309,42 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     }
     else
     {
-        _border_size = BorderSize(src->padding());
-
-        kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
-
+        kernel_name << "direct_convolution_nchw";
         build_options.add_option_if(biases != nullptr, std::string("-DHAS_BIAS"));
+        build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(width_idx)));
+        build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(height_idx)));
+        build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(channel_idx)));
+        build_options.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+        build_options.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+        build_options.add_option("-DSTRIDE_X=" + support::cpp11::to_string(conv_stride_x));
+        build_options.add_option("-DSTRIDE_Y=" + support::cpp11::to_string(conv_stride_y));
+        build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
+        build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
+        build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
+        build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(weights->dimension(channel_idx))));
+        build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(conv_stride_x)));
+        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
+        build_options.add_option(std::string("-DVEC_SIZE=" + support::cpp11::to_string(_num_elems_processed_per_iteration)));
+        build_options.add_option(std::string("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % _num_elems_processed_per_iteration)));
 
-        const bool run_optimized_for_bifrost = can_run_optimized_kernel_for_bifrost_nchw(gpu_target, conv_stride_x, conv_stride_y, kernel_size, data_type, _data_layout);
-
-        if(run_optimized_for_bifrost)
+        if(is_data_type_quantized(data_type))
         {
-            build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(weights->dimension(channel_idx))));
+            const UniformQuantizationInfo iqinfo = src->quantization_info().uniform();
+            const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
+            const UniformQuantizationInfo oqinfo = dst->quantization_info().uniform();
 
-            kernel_name << "_f32_bifrost";
-        }
-        else
-        {
-            build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
-            build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
-            build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(weights->dimension(channel_idx))));
-            build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(conv_stride_x)));
-            build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
-
-            if(is_data_type_quantized(data_type))
-            {
-                const UniformQuantizationInfo iqinfo = src->quantization_info().uniform();
-                const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
-                const UniformQuantizationInfo oqinfo = dst->quantization_info().uniform();
-
-                float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
-                int   output_multiplier = 0;
-                int   output_shift      = 0;
-                quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
-                build_options.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
-                build_options.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
-                build_options.add_option("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size));
-                build_options.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iqinfo.offset));
-                build_options.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wqinfo.offset));
-                build_options.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oqinfo.offset));
-
-                kernel_name.str("direct_convolution_quantized");
-            }
+            float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
+            int   output_multiplier = 0;
+            int   output_shift      = 0;
+            quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+            build_options.add_option("-DIS_QUANTIZED");
+            build_options.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+            build_options.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+            build_options.add_option("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size));
+            build_options.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iqinfo.offset));
+            build_options.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wqinfo.offset));
+            build_options.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oqinfo.offset));
         }
     }
 
@@ -570,11 +377,9 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 }
 
 Status ClDirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                      const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const GPUTarget target)
+                                      const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), weights->clone().get(), dst->clone().get(), conv_info, target).first);
-
     return Status{};
 }
 
@@ -613,13 +418,13 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
         }
 
         unsigned int idx = 0;
-        add_4D_tensor_argument(idx, src, slice);
-        add_4D_tensor_argument(idx, dst, slice);
+        add_4d_tensor_nhwc_argument(idx, src);
+        add_4d_tensor_nhwc_argument(idx, dst);
         if(export_to_cl_image)
         {
             _kernel.setArg(idx++, weights_cl_image);
         }
-        add_4D_tensor_argument(idx, weights, slice);
+        add_4d_tensor_nhwc_argument(idx, weights);
         if(biases != nullptr)
         {
             add_1D_tensor_argument(idx, biases, slice);
@@ -628,22 +433,7 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
     }
     else
     {
-        Window win_in = window;
-
-        win_in.adjust(Window::DimX, -_conv_info.pad_left(), true);
-        win_in.adjust(Window::DimY, -_conv_info.pad_top(), true);
-
-        const int width_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-        const int height_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-
-        const int conv_stride_x = std::get<0>(_conv_info.stride());
-        const int conv_stride_y = std::get<1>(_conv_info.stride());
-
-        win_in.set_dimension_step(width_idx, window[width_idx].step() * conv_stride_x);
-        win_in.set_dimension_step(height_idx, window[height_idx].step() * conv_stride_y);
-
-        Window       slice_in = win_in.first_slice_window_3D();
-        unsigned int idx1     = 2 * num_arguments_per_3D_tensor();
+        unsigned int idx1 = 2 * num_arguments_per_3D_tensor();
         add_3D_tensor_argument(idx1, weights, slice);
 
         if(biases != nullptr)
@@ -658,11 +448,11 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
         do
         {
             unsigned int idx = 0;
-            add_3D_tensor_argument(idx, src, slice_in);
+            add_3D_tensor_argument(idx, src, slice);
             add_3D_tensor_argument(idx, dst, slice);
             enqueue(queue, *this, slice, lws_hint());
         }
-        while(window.slide_window_slice_3D(slice) && win_in.slide_window_slice_3D(slice_in));
+        while(window.slide_window_slice_3D(slice));
     }
 }
 } // namespace kernels

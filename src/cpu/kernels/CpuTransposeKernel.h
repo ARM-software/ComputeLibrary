@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel which transposes the elements of a matrix */
-class CpuTransposeKernel : public ICpuKernel
+class CpuTransposeKernel : public ICpuKernel<CpuTransposeKernel>
 {
 public:
     CpuTransposeKernel() = default;

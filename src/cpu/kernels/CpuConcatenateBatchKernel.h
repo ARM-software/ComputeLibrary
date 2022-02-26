@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace kernels
 /** Interface for the batch concatenate kernel.
  *  The input tensor will be concatenated into the output tensor.
  */
-class CpuConcatenateBatchKernel : public ICpuKernel
+class CpuConcatenateBatchKernel : public ICpuKernel<CpuConcatenateBatchKernel>
 {
 public:
     CpuConcatenateBatchKernel() = default;

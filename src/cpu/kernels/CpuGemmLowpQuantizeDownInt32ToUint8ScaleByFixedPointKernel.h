@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ namespace kernels
  *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
  *
  */
-class CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel : public ICpuKernel
+class CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>
 {
 public:
     CpuGemmLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel() = default;

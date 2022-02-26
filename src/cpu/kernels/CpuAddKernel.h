@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,9 +34,19 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform addition between two tensors */
-class CpuAddKernel : public ICpuKernel
+class CpuAddKernel : public ICpuKernel<CpuAddKernel>
 {
+private:
+    using AddKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+
 public:
+    struct AddKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        AddKernelPtr                 ukernel;
+    };
+
     CpuAddKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuAddKernel);
     /** Initialise the kernel's input, dst and border mode.
@@ -79,8 +89,7 @@ public:
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
-private:
-    using AddKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    static const std::vector<AddKernel> &get_available_kernels();
 
 private:
     ConvertPolicy _policy{};

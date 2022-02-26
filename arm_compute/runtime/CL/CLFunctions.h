@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,7 +94,6 @@
 #include "arm_compute/runtime/CL/functions/CLRange.h"
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
-#include "arm_compute/runtime/CL/functions/CLRemap.h"
 #include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReverse.h"

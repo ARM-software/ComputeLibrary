@@ -144,7 +144,7 @@ struct GemmImplementation<Top, Tret, Nothing> {
 
 /* "Master" function implemented for each valid combination of types.
  * Returns a list of GEMM implementation descriptors for processing by the
- * other functions, terminated by an implementation with
+ * other functions, ended by an implementation with
  * method==GemmMethod::DEFAULT.  */
 template<typename Top, typename Tret, class OutputStage = Nothing>
 const GemmImplementation<Top, Tret, OutputStage> *gemm_implementation_list();

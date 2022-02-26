@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel to perform tensor permutation given a permutation vector */
-class CpuPermuteKernel : public ICpuKernel
+class CpuPermuteKernel : public ICpuKernel<CpuPermuteKernel>
 {
 public:
     CpuPermuteKernel() = default;

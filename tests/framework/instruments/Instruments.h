@@ -24,12 +24,12 @@
 #ifndef ARM_COMPUTE_TEST_INSTRUMENTS
 #define ARM_COMPUTE_TEST_INSTRUMENTS
 
-#if !defined(BARE_METAL) && !defined(__APPLE__)
+#if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__)
 #include "MaliCounter.h"
 #include "OpenCLMemoryUsage.h"
 #include "OpenCLTimer.h"
 #include "PMUCounter.h"
-#endif /* !defined(BARE_METAL) && !defined(__APPLE__) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) */
 #include "SchedulerTimer.h"
 #include "WallClockTimer.h"
 

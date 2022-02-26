@@ -41,7 +41,7 @@
 #if defined(__GNUG__) && __GNUG__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
 #endif // defined(__GNUG__) && __GNUG__ >= 8
-#include <CL/cl2.hpp>
+#include <CL/opencl.hpp> // include new hpp header instead of cl2.hpp
 #pragma GCC diagnostic pop
 
 namespace cl

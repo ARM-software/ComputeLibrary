@@ -121,7 +121,6 @@ private:
     std::unique_ptr<kernels::ClGemmMatrixMultiplyNativeKernel>          _mm_native_kernel;
     std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedKernel>        _mm_reshaped_kernel;
     std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_kernel;
-    std::unique_ptr<kernels::ClGemmMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_fallback_kernel;
     TensorInfo                                                          _tmp_a;
     TensorInfo                                                          _tmp_b;
     bool                                                                _reshape_b_only_on_first_run;

@@ -62,7 +62,7 @@ TEST_SUITE(DepthConvertLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8), // Invalid data type combination
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8), // Support upcasting from QASYMM8 to S16
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Invalid shift
@@ -84,7 +84,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                    ConvertPolicy::WRAP,
                                                      })),
                framework::dataset::make("Shift",{ 0, 0, 0, 1, 1, 0, })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               framework::dataset::make("Expected", { true, false, false, false, false, true})),
                input_info, output_info, policy, shift, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLDepthConvertLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), policy, shift)) == expected, framework::LogLevel::ERRORS);

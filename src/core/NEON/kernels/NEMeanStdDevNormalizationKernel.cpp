@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,13 +31,64 @@
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/meanstddevnorm/list.h"
 
 namespace arm_compute
 {
 namespace
 {
+struct MeanStdDevNormSelectorData
+{
+    DataType dt;
+};
+
+using MeanStdDevNormSelctorPtr = std::add_pointer<bool(const MeanStdDevNormSelectorData &data)>::type;
+using MeanStdDevNormUKernelPtr = std::add_pointer<void(ITensor *input, ITensor *output, float epsilon, const Window &window)>::type;
+
+struct MeanStdDevNormKernel
+{
+    const char                    *name;
+    const MeanStdDevNormSelctorPtr is_selected;
+    MeanStdDevNormUKernelPtr       ukernel;
+};
+
+static const MeanStdDevNormKernel available_kernels[] =
+{
+    {
+        "fp32_neon_meanstddevnorm",
+        [](const MeanStdDevNormSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_meanstddevnorm)
+    },
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "fp16_neon_meanstddevnorm",
+        [](const MeanStdDevNormSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_meanstddevnorm)
+    },
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const MeanStdDevNormKernel *get_implementation(const MeanStdDevNormSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
+}
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
@@ -72,80 +123,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-template <typename ScalarType, int size>
-void NEMeanStdDevNormalizationKernel::mean_stddev_normalization(const Window &window)
-{
-    using ExactTagType = typename wrapper::traits::neon_vector<ScalarType, size>::tag_type;
-
-    // Set build options
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    const int  window_step_x  = size;
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    Iterator input(_input, win);
-    Iterator output(_output, win);
-
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        int  x       = window_start_x;
-        auto in_ptr  = reinterpret_cast<const ScalarType *>(input.ptr());
-        auto out_ptr = reinterpret_cast<ScalarType *>(output.ptr());
-
-        auto sum_vec    = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
-        auto sum_sq_vec = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
-
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            auto data  = wrapper::vloadq(in_ptr + x);
-            sum_vec    = wrapper::vadd(sum_vec, data);
-            sum_sq_vec = wrapper::vadd(sum_sq_vec, wrapper::vmul(data, data));
-        }
-
-        auto sum_carry_res    = wrapper::vpadd(wrapper::vgethigh(sum_vec), wrapper::vgetlow(sum_vec));
-        auto sum_sq_carry_res = wrapper::vpadd(wrapper::vgethigh(sum_sq_vec), wrapper::vgetlow(sum_sq_vec));
-        for(int i = 0; i < size / 4; ++i)
-        {
-            sum_carry_res    = wrapper::vpadd(sum_carry_res, sum_carry_res);
-            sum_sq_carry_res = wrapper::vpadd(sum_sq_carry_res, sum_sq_carry_res);
-        }
-
-        auto sum    = wrapper::vgetlane(sum_carry_res, 0);
-        auto sum_sq = wrapper::vgetlane(sum_sq_carry_res, 0);
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            ScalarType data = *(in_ptr + x);
-            sum += data;
-            sum_sq += data * data;
-        }
-
-        ScalarType mean       = sum / _input->info()->dimension(0);
-        ScalarType var        = (sum_sq / _input->info()->dimension(0)) - (mean * mean);
-        ScalarType stddev_inv = 1.f / sqrt(var + _epsilon);
-
-        auto mean_vec       = wrapper::vdup_n(mean, ExactTagType{});
-        auto stddev_inv_vec = wrapper::vdup_n(stddev_inv, ExactTagType{});
-        for(x = window_start_x; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            auto data = wrapper::vloadq(in_ptr + x);
-            auto res  = wrapper::vmul(wrapper::vsub(data, mean_vec), stddev_inv_vec);
-            // Store results
-            wrapper::vstore(out_ptr + x, res);
-        }
-        for(; x < window_end_x; ++x)
-        {
-            *(out_ptr + x) = (*(in_ptr + x) - mean) * stddev_inv;
-        }
-    },
-    input, output);
-}
-
 NEMeanStdDevNormalizationKernel::NEMeanStdDevNormalizationKernel()
-    : _input(nullptr), _output(nullptr), _epsilon(1e-8f), _func(nullptr)
+    : _input(nullptr), _output(nullptr), _epsilon(1e-8f)
 {
 }
 
@@ -163,23 +142,6 @@ void NEMeanStdDevNormalizationKernel::configure(ITensor *input, ITensor *output,
     auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICPPKernel::configure(win_config.second);
-
-    // Configure function to run based on different data types
-    const DataType data_type = input->info()->data_type();
-    switch(data_type)
-    {
-        case DataType::F32:
-            _func = &NEMeanStdDevNormalizationKernel::mean_stddev_normalization<float, 4>;
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = &NEMeanStdDevNormalizationKernel::mean_stddev_normalization<float16_t, 8>;
-            break;
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        default:
-            ARM_COMPUTE_ERROR("Not Supported");
-            break;
-    }
 }
 
 Status NEMeanStdDevNormalizationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float epsilon)
@@ -194,8 +156,10 @@ void NEMeanStdDevNormalizationKernel::run(const Window &window, const ThreadInfo
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (this->*_func)(window);
+    const auto *uk = get_implementation(MeanStdDevNormSelectorData{ _output->info()->data_type() });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    uk->ukernel(_input, _output, _epsilon, window);
 }
 } // namespace arm_compute

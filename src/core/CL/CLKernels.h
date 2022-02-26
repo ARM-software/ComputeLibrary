@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,6 @@
 #include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLRangeKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
-#include "src/core/CL/kernels/CLRemapKernel.h"
 #include "src/core/CL/kernels/CLReorgLayerKernel.h"
 #include "src/core/CL/kernels/CLReverseKernel.h"
 #include "src/core/CL/kernels/CLSelectKernel.h"

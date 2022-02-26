@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,10 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/boundingboxtransform/list.h"
 
 #include <arm_neon.h>
 
@@ -37,6 +39,62 @@ namespace arm_compute
 {
 namespace
 {
+struct BoundingBoxTransformSelectorData
+{
+    DataType dt;
+};
+
+using BoundingBoxTransformSelctorPtr = std::add_pointer<bool(const BoundingBoxTransformSelectorData &data)>::type;
+using BoundingBoxTransformUKernelPtr = std::add_pointer<void(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, BoundingBoxTransformInfo bbinfo, const Window &window)>::type;
+
+struct BoundingBoxTransformKernel
+{
+    const char                          *name;
+    const BoundingBoxTransformSelctorPtr is_selected;
+    BoundingBoxTransformUKernelPtr       ukernel;
+};
+
+static const BoundingBoxTransformKernel available_kernels[] =
+{
+    {
+        "fp32_neon_boundingboxtransform",
+        [](const BoundingBoxTransformSelectorData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_boundingboxtransform)
+    },
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "fp16_neon_boundingboxtransform",
+        [](const BoundingBoxTransformSelectorData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_boundingboxtransform)
+    },
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(ARM_COMPUTE_ENABLE_NEON)
+    {
+        "qu16_neon_boundingboxtransform",
+        [](const BoundingBoxTransformSelectorData & data) { return data.dt == DataType::QASYMM16; },
+        REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qu16_boundingboxtransform)
+    },
+#endif //defined(ARM_COMPUTE_ENABLE_NEON)
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const BoundingBoxTransformKernel *get_implementation(const BoundingBoxTransformSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
+}
+
 Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
@@ -112,145 +170,15 @@ Status NEBoundingBoxTransformKernel::validate(const ITensorInfo *boxes, const IT
     return Status{};
 }
 
-template <>
-void NEBoundingBoxTransformKernel::internal_run<uint16_t>(const Window &window)
-{
-    const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
-    const size_t deltas_width = _deltas->info()->tensor_shape()[0];
-    const int    img_h        = std::floor(_bbinfo.img_height() / _bbinfo.scale() + 0.5f);
-    const int    img_w        = std::floor(_bbinfo.img_width() / _bbinfo.scale() + 0.5f);
-
-    const auto scale_after  = (_bbinfo.apply_scale() ? _bbinfo.scale() : 1.f);
-    const auto scale_before = _bbinfo.scale();
-    const auto offset       = (_bbinfo.correct_transform_coords() ? 1.f : 0.f);
-
-    auto pred_ptr  = reinterpret_cast<uint16_t *>(_pred_boxes->buffer() + _pred_boxes->info()->offset_first_element_in_bytes());
-    auto delta_ptr = reinterpret_cast<uint8_t *>(_deltas->buffer() + _deltas->info()->offset_first_element_in_bytes());
-
-    const auto boxes_qinfo  = _boxes->info()->quantization_info().uniform();
-    const auto deltas_qinfo = _deltas->info()->quantization_info().uniform();
-    const auto pred_qinfo   = _pred_boxes->info()->quantization_info().uniform();
-
-    Iterator box_it(_boxes, window);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto  ptr    = reinterpret_cast<uint16_t *>(box_it.ptr());
-        const auto  b0     = dequantize_qasymm16(*ptr, boxes_qinfo);
-        const auto  b1     = dequantize_qasymm16(*(ptr + 1), boxes_qinfo);
-        const auto  b2     = dequantize_qasymm16(*(ptr + 2), boxes_qinfo);
-        const auto  b3     = dequantize_qasymm16(*(ptr + 3), boxes_qinfo);
-        const float width  = (b2 / scale_before) - (b0 / scale_before) + 1.f;
-        const float height = (b3 / scale_before) - (b1 / scale_before) + 1.f;
-        const float ctr_x  = (b0 / scale_before) + 0.5f * width;
-        const float ctr_y  = (b1 / scale_before) + 0.5f * height;
-        for(size_t j = 0; j < num_classes; ++j)
-        {
-            // Extract deltas
-            const size_t delta_id = id.y() * deltas_width + 4u * j;
-            const float  dx       = dequantize_qasymm8(delta_ptr[delta_id], deltas_qinfo) / _bbinfo.weights()[0];
-            const float  dy       = dequantize_qasymm8(delta_ptr[delta_id + 1], deltas_qinfo) / _bbinfo.weights()[1];
-            float        dw       = dequantize_qasymm8(delta_ptr[delta_id + 2], deltas_qinfo) / _bbinfo.weights()[2];
-            float        dh       = dequantize_qasymm8(delta_ptr[delta_id + 3], deltas_qinfo) / _bbinfo.weights()[3];
-            // Clip dw and dh
-            dw = std::min(dw, _bbinfo.bbox_xform_clip());
-            dh = std::min(dh, _bbinfo.bbox_xform_clip());
-            // Determine the predictions
-            const float pred_ctr_x = dx * width + ctr_x;
-            const float pred_ctr_y = dy * height + ctr_y;
-            const float pred_w     = std::exp(dw) * width;
-            const float pred_h     = std::exp(dh) * height;
-            // Store the prediction into the output tensor
-            pred_ptr[delta_id]     = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_x - 0.5f * pred_w, 0.f, img_w - 1.f), pred_qinfo);
-            pred_ptr[delta_id + 1] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_y - 0.5f * pred_h, 0.f, img_h - 1.f), pred_qinfo);
-            pred_ptr[delta_id + 2] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_x + 0.5f * pred_w - offset, 0.f, img_w - 1.f), pred_qinfo);
-            pred_ptr[delta_id + 3] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_y + 0.5f * pred_h - offset, 0.f, img_h - 1.f), pred_qinfo);
-        }
-    },
-    box_it);
-}
-
-template <typename T>
-void NEBoundingBoxTransformKernel::internal_run(const Window &window)
-{
-    const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
-    const size_t deltas_width = _deltas->info()->tensor_shape()[0];
-    const int    img_h        = std::floor(_bbinfo.img_height() / _bbinfo.scale() + 0.5f);
-    const int    img_w        = std::floor(_bbinfo.img_width() / _bbinfo.scale() + 0.5f);
-
-    const auto scale_after  = (_bbinfo.apply_scale() ? T(_bbinfo.scale()) : T(1));
-    const auto scale_before = T(_bbinfo.scale());
-    ARM_COMPUTE_ERROR_ON(scale_before <= 0);
-    const auto offset = (_bbinfo.correct_transform_coords() ? T(1.f) : T(0.f));
-
-    auto pred_ptr  = reinterpret_cast<T *>(_pred_boxes->buffer() + _pred_boxes->info()->offset_first_element_in_bytes());
-    auto delta_ptr = reinterpret_cast<T *>(_deltas->buffer() + _deltas->info()->offset_first_element_in_bytes());
-
-    Iterator box_it(_boxes, window);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto ptr    = reinterpret_cast<T *>(box_it.ptr());
-        const auto b0     = *ptr;
-        const auto b1     = *(ptr + 1);
-        const auto b2     = *(ptr + 2);
-        const auto b3     = *(ptr + 3);
-        const T    width  = (b2 / scale_before) - (b0 / scale_before) + T(1.f);
-        const T    height = (b3 / scale_before) - (b1 / scale_before) + T(1.f);
-        const T    ctr_x  = (b0 / scale_before) + T(0.5f) * width;
-        const T    ctr_y  = (b1 / scale_before) + T(0.5f) * height;
-        for(size_t j = 0; j < num_classes; ++j)
-        {
-            // Extract deltas
-            const size_t delta_id = id.y() * deltas_width + 4u * j;
-            const T      dx       = delta_ptr[delta_id] / T(_bbinfo.weights()[0]);
-            const T      dy       = delta_ptr[delta_id + 1] / T(_bbinfo.weights()[1]);
-            T            dw       = delta_ptr[delta_id + 2] / T(_bbinfo.weights()[2]);
-            T            dh       = delta_ptr[delta_id + 3] / T(_bbinfo.weights()[3]);
-            // Clip dw and dh
-            dw = std::min(dw, T(_bbinfo.bbox_xform_clip()));
-            dh = std::min(dh, T(_bbinfo.bbox_xform_clip()));
-            // Determine the predictions
-            const T pred_ctr_x = dx * width + ctr_x;
-            const T pred_ctr_y = dy * height + ctr_y;
-            const T pred_w     = std::exp(dw) * width;
-            const T pred_h     = std::exp(dh) * height;
-            // Store the prediction into the output tensor
-            pred_ptr[delta_id]     = scale_after * utility::clamp<T>(pred_ctr_x - T(0.5f) * pred_w, T(0), T(img_w - 1));
-            pred_ptr[delta_id + 1] = scale_after * utility::clamp<T>(pred_ctr_y - T(0.5f) * pred_h, T(0), T(img_h - 1));
-            pred_ptr[delta_id + 2] = scale_after * utility::clamp<T>(pred_ctr_x + T(0.5f) * pred_w - offset, T(0), T(img_w - 1));
-            pred_ptr[delta_id + 3] = scale_after * utility::clamp<T>(pred_ctr_y + T(0.5f) * pred_h - offset, T(0), T(img_h - 1));
-        }
-    },
-    box_it);
-}
-
 void NEBoundingBoxTransformKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    switch(_boxes->info()->data_type())
-    {
-        case DataType::F32:
-        {
-            internal_run<float>(window);
-            break;
-        }
-        case DataType::QASYMM16:
-        {
-            internal_run<uint16_t>(window);
-            break;
-        }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-        {
-            internal_run<float16_t>(window);
-            break;
-        }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        default:
-        {
-            ARM_COMPUTE_ERROR("Data type not supported");
-        }
-    }
+
+    const auto *uk = get_implementation(BoundingBoxTransformSelectorData{ _boxes->info()->data_type() });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    uk->ukernel(_boxes, _pred_boxes, _deltas, _bbinfo, window);
 }
 } // namespace arm_compute

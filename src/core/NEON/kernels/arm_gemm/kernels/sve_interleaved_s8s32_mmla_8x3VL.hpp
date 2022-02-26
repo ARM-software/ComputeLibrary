@@ -89,7 +89,7 @@ public:
                 default:
                     return { 61.97, 3.64, 0.50 };
                 case CPUModel::V1:
-                    return { 123.84, 4.93, 0.76 };
+                    return {  95.28, 7.99, 0.79 };
                 case CPUModel::A510:
                     return { 43.36, 1.86, 0.28 };
             }

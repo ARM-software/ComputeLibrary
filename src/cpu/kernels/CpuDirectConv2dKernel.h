@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the kernel to perform Direct Convolution Layer. */
-class CpuDirectConv2dKernel : public ICpuKernel
+class CpuDirectConv2dKernel : public ICpuKernel<CpuDirectConv2dKernel>
 {
 public:
     CpuDirectConv2dKernel() = default;
@@ -66,7 +66,6 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
-    BorderSize  border_size() const override;
 
 private:
     /* Template function for optimized convolution NHWC */
@@ -77,12 +76,12 @@ private:
     template <typename T>
     void convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst);
 
+    /* Template function for convolution NCHW */
+    template <typename T>
+    void convolve_nchw(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst);
+
     PadStrideInfo _conv_info{};
-    BorderSize    _border_size{};
     unsigned int  _kernel_size{ 0 };
-    unsigned int  _num_weight_elems_read_per_row{ 0 };
-    unsigned int  _num_elems_read_per_iteration{ 0 };
-    unsigned int  _num_elems_written_per_iteration{ 0 };
     DataLayout    _data_layout{ DataLayout::UNKNOWN };
 };
 } // namespace kernels

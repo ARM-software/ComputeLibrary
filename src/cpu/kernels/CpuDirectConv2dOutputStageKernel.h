@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace kernels
  * @note For quantized computations (i.e. @p src of S32 type) the output data type for auto-initialization must be passed as part
  *       of the @ref DirectConvolutionLayerOutputStageKernelInfo.
  */
-class CpuDirectConv2dOutputStageKernel : public ICpuKernel
+class CpuDirectConv2dOutputStageKernel : public ICpuKernel<CpuDirectConv2dOutputStageKernel>
 {
 public:
     CpuDirectConv2dOutputStageKernel() = default;

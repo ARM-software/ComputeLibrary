@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -37,14 +37,48 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
+@note Starting from next release (22.05), 'master' branch will no longer be used, it will be replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+
+v22.02 Public major release
+ - Various bug fixes.
+ - Various optimizations.
+ - Update A510 arm_gemm cpu Kernels.
+ - Inclusive language adjustment. Please refer to @ref S5_0_inc_lang for details.
+ - Improve the start-up time for the following OpenCL kernels:
+   - @ref CLScale
+   - @ref CLGEMM
+   - @ref CLDepthwiseConvolutionLayer
+   - \link opencl::kernels::ClIm2ColKernel ClIm2ColKernel \endlink
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv2dKernel \endlink
+ - Remove functions:
+   - CLRemap
+   - NERemap
+ - Remove padding from OpenCL kernels:
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv2dKernel \endlink
+ - Remove padding from Cpu kernels:
+   - \link cpu::kernels::CpuDirectConv2dKernel CpuDirectConv2dKernel \endlink
+ - Decouple the implementation of the following Cpu kernels into various data types (fp32, fp16, int):
+   - \link cpu::kernels::CpuActivationKernel CpuActivationKernel \endlink
+   - \link cpu::kernels::CpuAddKernel CpuAddKernel \endlink
+   - \link cpu::kernels::CpuElementwiseKernel CpuElementwiseKernel \endlink
+   - \link cpu::CpuSoftmaxGeneric CpuSoftmaxKernel \endlink
+   - @ref NEBoundingBoxTransformKernel
+   - @ref NECropKernel
+   - @ref NEComputeAllAnchorsKernel
+   - @ref NEInstanceNormalizationLayerKernel
+   - @ref NEMaxUnpoolingLayerKernel
+   - @ref NEMeanStdDevNormalizationKernel
+   - @ref NERangeKernel
+   - @ref NEROIAlignLayerKernel
+   - @ref NESelectKernel
 
 v21.11 Public major release
  - Various bug fixes.
  - Various optimizations:
    - Improve performance of bilinear and nearest neighbor Scale on both CPU and GPU for FP32, FP16, Int8, Uint8 data types
-   - Improve performance of Softmax on GPU for Uint8/Int8 
+   - Improve performance of Softmax on GPU for Uint8/Int8
  - New OpenCL kernels / functions:
    - @ref CLConv3D
  - New Arm® Neon™ kernels / functions:
@@ -75,7 +109,7 @@ v21.08 Public major release
  - Support fat binary build for arm8.2-a via fat_binary build flag
  - Add CPU discovery capabilities
  - Add data type f16 support for:
-  - @ref CLRemapKernel
+  - CLRemapKernel
  - Port the following functions to stateless API:
    - @ref CLConvolutionLayer
    - @ref CLFlattenLayer
@@ -296,7 +330,7 @@ v20.11 Public major release
  - Removed padding from Arm® Neon™ kernels:
    - NEComplexPixelWiseMultiplicationKernel
    - NENonMaximaSuppression3x3Kernel
-   - @ref NERemapKernel
+   - NERemapKernel
    - NEGEMMInterleave4x4Kernel
    - NEDirectConvolutionLayerKernel
    - NEScaleKernel
@@ -1365,7 +1399,7 @@ v17.06 Public major release
  - Added infrastructure to provide GPU specific optimisation for some OpenCL kernels.
  - Added @ref OMPScheduler (OpenMP) scheduler for Neon
  - Added @ref SingleThreadScheduler scheduler for Arm® Neon™ (For bare metal)
- - User can specify his own scheduler by implementing the @ref IScheduler interface.
+ - User can specify their own scheduler by implementing the @ref IScheduler interface.
  - New OpenCL kernels / functions:
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
     - CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
@@ -1443,7 +1477,7 @@ v17.02.1 Sources preview
    - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - CLPoolingLayerKernel / @ref CLPoolingLayer
    - CLIm2ColKernel, CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / CLConvolutionLayer
-   - @ref CLRemapKernel / @ref CLRemap
+   - CLRemapKernel / CLRemap
    - CLGaussianPyramidHorKernel, CLGaussianPyramidVertKernel / CLGaussianPyramid, CLGaussianPyramidHalf, CLGaussianPyramidOrb
    - CLMinMaxKernel, CLMinMaxLocationKernel / CLMinMaxLocation
    - CLNonLinearFilterKernel / CLNonLinearFilter

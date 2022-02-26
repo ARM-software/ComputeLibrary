@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace kernels
  *
  * @note The implementation supports only 3D input tensors
  */
-class CpuQuantizeKernel : public ICpuKernel
+class CpuQuantizeKernel : public ICpuKernel<CpuQuantizeKernel>
 {
 public:
     CpuQuantizeKernel() = default;

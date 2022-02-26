@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,63 +49,31 @@ namespace kernels
 {
 namespace
 {
-struct DirectConv3dSelectorData
-{
-    DataType       dt;
-    const CPUInfo &ci;
-};
-using DirectConv3dSelectorPtr = std::add_pointer<bool(const DirectConv3dSelectorData &data)>::type;
-using DirectConv3dKernelPtr   = std::add_pointer<void(const ITensor *, const ITensor *, const ITensor *, ITensor *, const Conv3dInfo &, const Window &)>::type;
-struct DirectConv3dKernel
-{
-    const char                   *name;
-    const DirectConv3dSelectorPtr is_selected;
-    DirectConv3dKernelPtr         ukernel;
-};
-
-static const DirectConv3dKernel available_kernels[] =
+static const std::vector<CpuDirectConv3dKernel::DirectConv3dKernel> available_kernels =
 {
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_directconv3d",
-        [](const DirectConv3dSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::directconv3d_float_neon_ndhwc<float16_t>)
     },
 #endif /* !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_fp32_directconv3d",
-        [](const DirectConv3dSelectorData & data) { return data.dt == DataType::F32; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::directconv3d_float_neon_ndhwc<float>)
     },
     {
         "neon_qasymm8_directconv3d",
-        [](const DirectConv3dSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::directconv3d_quantized_neon_ndhwc<uint8_t>)
     },
     {
         "neon_qasymm8_signed_directconv3d",
-        [](const DirectConv3dSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::directconv3d_quantized_neon_ndhwc<int8_t>)
     }
 };
-
-/** Micro-kernel selector
- *
- * @param[in] data Selection data passed to help pick the appropriate micro-kernel
- *
- * @return A matching micro-kernel else nullptr
- */
-const DirectConv3dKernel *get_implementation(const DirectConv3dSelectorData &data)
-{
-    for(const auto &uk : available_kernels)
-    {
-        if(uk.is_selected(data))
-        {
-            return &uk;
-        }
-    }
-    return nullptr;
-}
 
 Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv_info)
 {
@@ -117,7 +85,8 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.dilation != Size3D(1U, 1U, 1U));
 
-    const auto *uk = get_implementation(DirectConv3dSelectorData{ src0->data_type(), CPUInfo::get() });
+    const auto *uk = CpuDirectConv3dKernel::get_implementation(DataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const DataLayout data_layout = src0->data_layout();
@@ -161,7 +130,8 @@ void CpuDirectConv3dKernel::configure(const ITensorInfo *src0, const ITensorInfo
     ARM_COMPUTE_UNUSED(src2);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
-    const auto *uk = get_implementation(DirectConv3dSelectorData{ src0->data_type(), CPUInfo::get() });
+    const auto *uk = CpuDirectConv3dKernel::get_implementation(DataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa() });
+
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _conv_info  = conv_info;
@@ -210,6 +180,12 @@ const char *CpuDirectConv3dKernel::name() const
 {
     return _name.c_str();
 }
+
+const std::vector<CpuDirectConv3dKernel::DirectConv3dKernel> &CpuDirectConv3dKernel::get_available_kernels()
+{
+    return available_kernels;
+}
+
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute

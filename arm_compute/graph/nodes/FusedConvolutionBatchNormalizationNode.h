@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ public:
      */
     ConvolutionMethod convolution_method() const;
 
-    /** Sets the fast math fast hint
+    /** Sets the fast math hint
      *
      * @param[in] hint Hint to use for convolution
      */

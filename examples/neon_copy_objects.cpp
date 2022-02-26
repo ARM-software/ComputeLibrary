@@ -49,7 +49,7 @@ public:
         src_data = new float[width * height * batch];
         dst_data = new float[width * height * batch];
 
-        // Fill src_data with dummy values:
+        // Fill src_data with pseudo(meaningless) values:
         for(unsigned int b = 0; b < batch; b++)
         {
             for(unsigned int h = 0; h < height; h++)

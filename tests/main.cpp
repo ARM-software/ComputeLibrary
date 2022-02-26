@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     auto filter_id = parser.add_option<utils::SimpleOption<std::string>>("filter-id");
     filter_id->set_help("List of test ids. ... can be used to define a range.");
     auto stop_on_error = parser.add_option<utils::ToggleOption>("stop-on-error");
-    stop_on_error->set_help("Abort execution after the first failed test (useful for debugging)");
+    stop_on_error->set_help("Stop execution after the first failed test (useful for debugging)");
     auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
     auto list_tests = parser.add_option<utils::ToggleOption>("list-tests", false);

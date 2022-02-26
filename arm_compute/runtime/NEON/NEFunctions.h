@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,6 @@
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
-#include "arm_compute/runtime/NEON/functions/NERemap.h"
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"

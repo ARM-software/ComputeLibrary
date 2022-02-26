@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -290,10 +290,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
     { "gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
     { "gemm_lc_vm_f32", "common/gemm.cl" },
-    { "gemm_reshape_lhs_matrix_nt", "common/gemm.cl" },
-    { "gemm_reshape_lhs_matrix_t", "common/gemm.cl" },
-    { "gemm_reshape_rhs_matrix_nt", "common/gemm.cl" },
-    { "gemm_reshape_rhs_matrix_t", "common/gemm.cl" },
+    { "gemm_reshape_lhs_matrix_nt", "common/gemm_utils.cl" },
+    { "gemm_reshape_lhs_matrix_t", "common/gemm_utils.cl" },
+    { "gemm_reshape_rhs_matrix_nt", "common/gemm_utils.cl" },
+    { "gemm_reshape_rhs_matrix_t", "common/gemm_utils.cl" },
     { "gemmlowp_matrix_a_reduction", "common/gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "common/gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "common/gemmlowp.cl" },
@@ -363,12 +363,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "depth_to_space_nchw", "nchw/depth_to_space.cl" },
     { "dequantization_layer_per_channel_nchw", "nchw/dequantization_layer.cl" },
     { "direct_convolution1x1", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution1x1_f32_bifrost", "nchw/direct_convolution1x1.cl" },
-    { "direct_convolution3x3", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution3x3_f32_bifrost", "nchw/direct_convolution3x3.cl" },
-    { "direct_convolution5x5", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution5x5_f32_bifrost", "nchw/direct_convolution5x5.cl" },
-    { "direct_convolution_quantized", "nchw/direct_convolution_quantized.cl" },
+    { "direct_convolution_nchw", "nchw/direct_convolution.cl" },
+
     { "im2col1x1_stridex1_nchw", "nchw/im2col.cl" },
     { "im2col3x3_nchw", "nchw/im2col.cl" },
     { "im2col5x5_nchw", "nchw/im2col.cl" },
@@ -382,8 +378,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_nchw", "nchw/pooling_layer.cl" },
     { "pooling_layer_2_nchw_indices", "nchw/pooling_layer.cl" },
     { "prior_box_layer_nchw", "nchw/prior_box_layer.cl" },
-    { "remap_nearest_neighbour_nchw", "nchw/remap.cl" },
-    { "remap_bilinear_nchw", "nchw/remap.cl" },
     { "reorg_layer_nchw", "nchw/reorg_layer.cl" },
     { "scale_nearest_neighbour_nchw", "nchw/scale.cl" },
     { "scale_bilinear_nchw", "nchw/scale.cl" },
@@ -443,8 +437,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
-    { "remap_nearest_neighbour_nhwc", "nhwc/remap.cl" },
-    { "remap_bilinear_nhwc", "nhwc/remap.cl" },
     { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
     { "scale_bilinear_nhwc", "nhwc/scale.cl" },
@@ -588,6 +580,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemm.cl",
 #include "./cl_kernels/common/gemm.clembed"
+    },
+    {
+        "common/gemm_utils.cl",
+#include "./cl_kernels/common/gemm_utils.clembed"
     },
     {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
@@ -763,20 +759,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/nchw/dequantization_layer.clembed"
     },
     {
-        "nchw/direct_convolution1x1.cl",
-#include "./cl_kernels/nchw/direct_convolution1x1.clembed"
-    },
-    {
-        "nchw/direct_convolution3x3.cl",
-#include "./cl_kernels/nchw/direct_convolution3x3.clembed"
-    },
-    {
-        "nchw/direct_convolution5x5.cl",
-#include "./cl_kernels/nchw/direct_convolution5x5.clembed"
-    },
-    {
-        "nchw/direct_convolution_quantized.cl",
-#include "./cl_kernels/nchw/direct_convolution_quantized.clembed"
+        "nchw/direct_convolution.cl",
+#include "./cl_kernels/nchw/direct_convolution.clembed"
     },
     {
         "nchw/im2col.cl",
@@ -805,10 +789,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nchw/prior_box_layer.cl",
 #include "./cl_kernels/nchw/prior_box_layer.clembed"
-    },
-    {
-        "nchw/remap.cl",
-#include "./cl_kernels/nchw/remap.clembed"
     },
     {
         "nchw/reorg_layer.cl",
@@ -904,10 +884,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/pooling_layer_quantized.cl",
 #include "./cl_kernels/nhwc/pooling_layer_quantized.clembed"
-    },
-    {
-        "nhwc/remap.cl",
-#include "./cl_kernels/nhwc/remap.clembed"
     },
     {
         "nhwc/reorg_layer.cl",

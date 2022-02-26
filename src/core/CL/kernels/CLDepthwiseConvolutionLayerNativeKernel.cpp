@@ -215,15 +215,11 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(conv_info.act_info.activation())));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(conv_info.depth_multiplier));
     build_opts.add_option("-DSRC_TENSOR_TYPE=BUFFER");
-    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(_input->info()->dimension(1)));
-    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(_input->info()->dimension(2)));
     // Note: SRC_DATA_TYPE must have the same data type of WEI_DATA_TYPE. In quantized, we could
     // have a case where the data types for the activation and weights are different. However, since the implementation
     // only works when both have same data type, we have to change the offset to take into account this aspect
     build_opts.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     build_opts.add_option("-DDST_TENSOR_TYPE=BUFFER");
-    build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(1)));
-    build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(2)));
     build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(_output->info()->data_type()));
     build_opts.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
     build_opts.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(_weights->info()->dimension(1)));
@@ -290,7 +286,6 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     {
         kernel_name = "dwc_native_fp_nhwc";
         build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-        build_opts.add_option("-DZERO_VALUE=" + support::cpp11::to_string(0));
         build_opts.add_option_if(conv_info.act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(conv_info.act_info.a()));
         build_opts.add_option_if(conv_info.act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(conv_info.act_info.b()));
     }
@@ -358,8 +353,9 @@ void CLDepthwiseConvolutionLayerNativeKernel::run(const Window &window, cl::Comm
     }
 
     unsigned int idx = 0;
-    add_4D_tensor_argument(idx, _input, slice);
-    add_4D_tensor_argument(idx, _output, slice);
+    add_4d_tensor_nhwc_argument(idx, _input);
+    add_4d_tensor_nhwc_argument(idx, _output);
+
     if(_export_to_cl_image)
     {
         _kernel.setArg(idx++, weights_cl_image);

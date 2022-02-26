@@ -26,7 +26,7 @@
 #include "helpers.h"
 #include "tile_helpers.h"
 
-#if defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_WIDTH) && defined(DST_HEIGHT) && defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
+#if defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
 //! @cond Doxygen_Suppress
 /** OpenCL kernel to compute the depthwise convolution for floating-point data types (F32/F16)
  *
@@ -37,10 +37,6 @@
  * @note The convolution strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y (e.g. -DSTRIDE_X=2, -DSTRIDE_Y=2)
  * @note The convolution dilations must be passed at compile time using -DDILATION_X and -DDILATION_Y (e.g. -DDILATION_X=2, -DDILATION_Y=2)
  * @note The spatial dimensions of the weights must be passed at compile time using -DWEI_WIDTH and -DWEI_HEIGHT (e.g. -DWEI_WIDTH=9, -DWEI_HEIGHT=9)
- * @note The spatial dimensions of the source tensor must be passed at compile time using -DSRC_WIDTH and -DSRC_HEIGHT (e.g. -DSRC_WIDTH=96, -DSRC_HEIGHT=64)
- * @note The spatial dimensions of the destination tensor must be passed at compile time using -DDST_WIDTH and -DDST_HEIGHT (e.g. -DDST_WIDTH=96, -DDST_HEIGHT=64)
- * @note The channels of the source tensor must be passed at compile time using -DSRC_CHANNELS (e.g. -DSRC_CHANNELS=64)
- * @note The channels of the destination tensor must be passed at compile time using -DDST_CHANNELS (e.g. -DDDST_CHANNELS=64)
  * @note The tensor type ("BUFFER" or "IMAGE") of the source tensor must be passed at compile time using -DSRC_TENSOR_TYPE (e.g. -DSRC_TENSOR_TYPE=BUFFER)
  * @note The tensor type ("BUFFER" or "IMAGE") of the weights tensor must be passed at compile time using -DWEI_TENSOR_TYPE (e.g. -DWEI_TENSOR_TYPE=BUFFER)
  * @note The tensor type ("BUFFER" or "IMAGE") of the destination tensor must be passed at compile time using -DDST_TENSOR_TYPE (e.g. -DDST_TENSOR_TYPE=BUFFER)
@@ -57,24 +53,22 @@
  * @note The number of rows to read from the src tensor must be passed at compile time using -DM0_A (e.g., -DM0_A=3). M0_A must be equal to WEI_WIDTH + (M0 - 1)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
- * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  src_c                             The size of the channels dimension of the source tensor
+ * @param[in]  src_w                             The size of the width dimension of the source tensor
+ * @param[in]  src_h                             The size of the height dimension of the source tensor
+ * @param[in]  src_n                             The size of the batches dimension of the source tensor
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data type: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
- * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  dst_c                             The size of the channels dimension of the destination tensor
+ * @param[in]  dst_w                             The size of the width dimension of the destination tensor
+ * @param[in]  dst_h                             The size of the height dimension of the destination tensor
+ * @param[in]  dst_n                             The size of the batches dimension of the destination tensor
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  wei_ptr                           Pointer to the weights tensor. Supported data type: same as @p src_ptr
  * @param[in]  wei_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -93,8 +87,8 @@
  */
 //! @endcond
 __kernel void dwc_native_fp_nhwc(
-    TENSOR4D(src, SRC_TENSOR_TYPE),
-    TENSOR4D(dst, DST_TENSOR_TYPE),
+    TENSOR4D_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_T(dst, DST_TENSOR_TYPE),
     TENSOR4D(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
@@ -102,15 +96,10 @@ __kernel void dwc_native_fp_nhwc(
 #endif // defined(HAS_BIAS)
 )
 {
-    // All the tensor dimensions are passed at compile time.
+    // Only the weight tensor dimensions are passed at compile time.
     // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH WEI_WIDTH
 #define _IWEI_HEIGHT WEI_HEIGHT
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _IDST_WIDTH DST_WIDTH
-#define _IDST_HEIGHT DST_HEIGHT
-#define _IDST_CHANNELS DST_CHANNELS
 #define _IM0_A M0_A        // _IWEI_WIDTH + (M0 - 1) Rows tile A (If M0 != 1, the tiles overlap of 1 element on the X dimension)
 #define _IN0_A N0          // Cols tile A
 #define _IM0_B _IWEI_WIDTH // Rows tile B
@@ -120,12 +109,12 @@ __kernel void dwc_native_fp_nhwc(
     const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
     const int xo   = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH
 #if defined(BATCHED_EXECUTION)
-    const int yo   = GET_SPATIAL_IDX(2, 1, 0) % _IDST_HEIGHT; // HEIGHT
-    const int bout = GET_SPATIAL_IDX(2, 1, 0) / _IDST_HEIGHT; // BATCH SIZE IDX
-#else                                                         // defined(BATCHED_EXECUTION)
+    const int yo   = GET_SPATIAL_IDX(2, 1, 0) % dst_h; // HEIGHT
+    const int bout = GET_SPATIAL_IDX(2, 1, 0) / dst_h; // BATCH SIZE IDX
+#else                                                  // defined(BATCHED_EXECUTION)
     const int yo   = GET_SPATIAL_IDX(2, 1, 0); // HEIGHT
     const int bout = 0;                        // BATCH SIZE IDX
-#endif                                                        // defined(BATCHED_EXECUTION)
+#endif                                                 // defined(BATCHED_EXECUTION)
 
     int xi = xo * STRIDE_X;
     int yi = yo * STRIDE_Y;
@@ -145,7 +134,7 @@ __kernel void dwc_native_fp_nhwc(
             c[i].v = 0;
         })
 
-#if _IWEI_HEIGHT <= 5
+#if _IWEI_HEIGHT < 5
         LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
 #else  // _IWEI_HEIGHT <= 5
         for(int yk = 0; yk < _IWEI_HEIGHT; yk++)
@@ -159,7 +148,7 @@ __kernel void dwc_native_fp_nhwc(
         })
 
         // Load tile from the src tensor (TILE A)
-        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, cout, _ISRC_WIDTH, _ISRC_HEIGHT, DILATION_X, 1, _IBOUNDARY_CHECK, a);
+        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, cout, src_w, src_h, DILATION_X, 1, _IBOUNDARY_CHECK, a);
 
         TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 
@@ -176,7 +165,7 @@ __kernel void dwc_native_fp_nhwc(
             })
         })
                        }
-#if _IWEI_HEIGHT <= 5
+#if _IWEI_HEIGHT < 5
                       )
 #endif // _IWEI_HEIGHT <= 5
 
@@ -199,7 +188,7 @@ __kernel void dwc_native_fp_nhwc(
         {
             LOOP_UNROLLING(int, m0, 0, 1, M0,
             {
-                int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
+                int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
                 VSTORE_PARTIAL(N0, PARTIAL_N0)
                 (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
@@ -208,11 +197,11 @@ __kernel void dwc_native_fp_nhwc(
         {
             LOOP_UNROLLING(int, m0, 0, 1, M0,
             {
-                int xi_out = min(xo + M0 - 1 - m0, (int)(_IDST_WIDTH) - 1);
+                int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
                 VSTORE(N0)
                 (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
             })
         }
     }
 }
-#endif // defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DST_WIDTH) && defined(DST_HEIGHT) && defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
+#endif // defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)

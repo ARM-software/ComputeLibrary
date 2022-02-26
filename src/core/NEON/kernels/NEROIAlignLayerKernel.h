@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,9 +89,6 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    template <typename input_data_type, typename roi_data_type = input_data_type>
-    void internal_run(const Window &window, const ThreadInfo &info);
-
     const ITensor      *_input;
     ITensor            *_output;
     const ITensor      *_rois;

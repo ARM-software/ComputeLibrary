@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,11 @@ namespace cpu
 namespace kernels
 {
 /** Cpu accelarated kernel to perform a floor operation */
-class CpuFloorKernel : public ICpuKernel
+class CpuFloorKernel : public ICpuKernel<CpuFloorKernel>
 {
+private:
+    using FloorKernelPtr = std::add_pointer<void(const void *, void *, int)>::type;
+
 public:
     CpuFloorKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuFloorKernel);
@@ -65,12 +68,18 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-private:
-    using FloorUKernelPtr = std::add_pointer<void(const void *, void *, int)>::type;
+    struct FloorKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        FloorKernelPtr               ukernel;
+    };
+
+    static const std::vector<FloorKernel> &get_available_kernels();
 
 private:
-    FloorUKernelPtr _run_method{ nullptr };
-    std::string     _name{};
+    FloorKernelPtr _run_method{ nullptr };
+    std::string    _name{};
 };
 } // namespace kernels
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ namespace kernels
  * \end{array} \right)
  * @f]
  */
-class CpuIm2ColKernel : public ICpuKernel
+class CpuIm2ColKernel : public ICpuKernel<CpuIm2ColKernel>
 {
 public:
     /** Default constructor */

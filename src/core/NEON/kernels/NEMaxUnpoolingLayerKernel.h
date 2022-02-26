@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,10 +88,9 @@ private:
     using UnpoolingFunction = void (NEMaxUnpoolingLayerKernel::*)(const Window &window);
 
 private:
-    UnpoolingFunction _func;
-    const ITensor    *_input;
-    ITensor          *_output;
-    const ITensor    *_indices;
+    const ITensor *_input;
+    ITensor       *_output;
+    const ITensor *_indices;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEMAXUNPOOLINGLAYERKERNEL_H */

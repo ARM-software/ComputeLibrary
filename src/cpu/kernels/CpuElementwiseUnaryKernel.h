@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,8 +39,11 @@ namespace kernels
  * Element-wise operation is computed by:
  * @f[ dst(x) = OP(src(x))@f]
  */
-class CpuElementwiseUnaryKernel : public ICpuKernel
+class CpuElementwiseUnaryKernel : public ICpuKernel<CpuElementwiseUnaryKernel>
 {
+private:
+    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
+
 public:
     CpuElementwiseUnaryKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuElementwiseUnaryKernel);
@@ -64,11 +67,14 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-    /** Common signature for all the specialised elementwise unary micro-kernels
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
+    struct ElementwiseUnaryKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        ElementwiseUnaryUkernelPtr   ukernel;
+    };
+
+    static const std::vector<ElementwiseUnaryKernel> &get_available_kernels();
 
 private:
     ElementWiseUnary           _op{};

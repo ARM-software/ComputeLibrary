@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -191,7 +191,6 @@ ClGemm::ClGemm()
       _mm_native_kernel(std::make_unique<ClGemmMatrixMultiplyNativeKernel>()),
       _mm_reshaped_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedKernel>()),
       _mm_reshaped_only_rhs_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedOnlyRhsKernel>()),
-      _mm_reshaped_only_rhs_fallback_kernel(std::make_unique<ClGemmMatrixMultiplyReshapedOnlyRhsKernel>()),
       _tmp_a(),
       _tmp_b(),
       _reshape_b_only_on_first_run(false),
@@ -303,7 +302,6 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
 
     // Set the target for the kernels
     _mm_reshaped_only_rhs_kernel->set_target(gpu_target);
-    _mm_reshaped_only_rhs_fallback_kernel->set_target(gpu_target);
 
     GEMMLHSMatrixInfo lhs_info{};
     GEMMRHSMatrixInfo rhs_info{};
@@ -321,10 +319,6 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     // Configure matrix multiply kernel with no y padding support
     kernel_info.has_pad_y = false;
     _mm_reshaped_only_rhs_kernel->configure(compile_context, a, &_tmp_b, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
-
-    // Configure matrix multiply kernel with y padding support
-    kernel_info.has_pad_y = true;
-    _mm_reshaped_only_rhs_fallback_kernel->configure(compile_context, a, &_tmp_b, c, output, alpha, beta, lhs_info, rhs_info, kernel_info);
 
     // Request memory for RHS reshape matrix
     _aux_mem[RhsReshape] = MemoryInfo(offset_int_vec(RhsReshape), _reshape_b_only_on_first_run ? MemoryLifetime::Persistent : MemoryLifetime::Temporary, _tmp_b.total_size());
@@ -625,7 +619,7 @@ void ClGemm::run(ITensorPack &tensors)
 
             if(has_pad_y)
             {
-                CLScheduler::get().enqueue_op(*_mm_reshaped_only_rhs_fallback_kernel, gemm_reshaped_onlyrhs_pack, true);
+                ARM_COMPUTE_ERROR_ON(has_pad_y);
             }
             else
             {

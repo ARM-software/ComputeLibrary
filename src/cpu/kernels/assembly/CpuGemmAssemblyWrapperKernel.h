@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,13 +120,14 @@ public:
      * @param[in] platform     The CPU platform used to create the context.
      * @param[in] thread_count Number of threads in the execution.
      *
-     * @return[out] small_network_mws         Minimum workload size for requsted configuration.
+     * @return[out] small_network_mws         Minimum workload size for requested configuration.
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override
     {
-        ARM_COMPUTE_UNUSED(platform, thread_count);
+        ARM_COMPUTE_UNUSED(thread_count);
+        ARM_COMPUTE_UNUSED(platform);
 
-        return ICPPKernel::small_network_mws;
+        return ICPPKernel::default_mws;
     }
 
 private:

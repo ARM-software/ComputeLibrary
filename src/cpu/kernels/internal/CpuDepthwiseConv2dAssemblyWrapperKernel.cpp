@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ constexpr unsigned int idx_batches  = 3;
 template <typename TSrc, typename TWeights, typename TDst>
 void create_arm_dwc(const ITensorInfo *src, const ITensorInfo *weights, ITensorInfo *dst,
                     const ConvolutionInfo &info, const CPUInfo &cpu_info,
-                    std::unique_ptr<arm_conv::depthwise::IDepthwiseCommon> &kernel)
+                    std::unique_ptr<arm_conv::depthwise::IDepthwiseCommon> &kernel, std::string &_name)
 {
     unsigned int stride_cols{};
     unsigned int stride_rows{};
@@ -88,6 +88,7 @@ void create_arm_dwc(const ITensorInfo *src, const ITensorInfo *weights, ITensorI
         return;
     }
 
+    _name  = dwc_kernel_asm->name();
     kernel = std::move(dwc_kernel_asm);
 }
 
@@ -95,7 +96,8 @@ template <typename TSrc, typename TWeights, typename TDst>
 void create_arm_dwc_quant(const ITensorInfo *src, const ITensorInfo *weights, ITensorInfo *dst,
                           const ConvolutionInfo &info, const CPUInfo &cpu_info,
                           std::unique_ptr<arm_conv::depthwise::IDepthwiseCommon> &kernel,
-                          std::vector<int32_t> &multipliers, std::vector<int32_t> &right_shifts, std::vector<int32_t> &left_shifts)
+                          std::vector<int32_t> &multipliers, std::vector<int32_t> &right_shifts, std::vector<int32_t> &left_shifts,
+                          std::string &_name)
 {
     unsigned int stride_cols{};
     unsigned int stride_rows{};
@@ -189,7 +191,7 @@ void create_arm_dwc_quant(const ITensorInfo *src, const ITensorInfo *weights, IT
         // Configuration not supported: Leave function unconfigured:
         return;
     }
-
+    _name  = dwc_kernel_asm->name();
     kernel = std::move(dwc_kernel_asm);
 }
 } // namespace
@@ -198,7 +200,8 @@ CpuDepthwiseConv2dAssemblyWrapperKernel::CpuDepthwiseConv2dAssemblyWrapperKernel
     : _kernel_asm(nullptr),
       _multipliers(),
       _left_shifts(),
-      _right_shifts()
+      _right_shifts(),
+      _name()
 {
 }
 
@@ -213,30 +216,31 @@ void CpuDepthwiseConv2dAssemblyWrapperKernel::configure(const ITensorInfo *src, 
     // Destination initialization if not yet initialized
     const TensorShape dst_shape = compute_depthwise_convolution_shape(*src, *weights, info);
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
-
+    _name = "CpuDepthwiseConv2dAssemblyWrapperKernel";
+    std::string asm_kernel_name("");
 #if defined(__aarch64__)
     switch(src->data_type())
     {
         case DataType::QASYMM8:
             if(is_data_type_quantized_per_channel(weights->data_type()))
             {
-                create_arm_dwc_quant<uint8_t, int8_t, uint8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts);
+                create_arm_dwc_quant<uint8_t, int8_t, uint8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts, asm_kernel_name);
             }
             else
             {
-                create_arm_dwc_quant<uint8_t, uint8_t, uint8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts);
+                create_arm_dwc_quant<uint8_t, uint8_t, uint8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts, asm_kernel_name);
             }
             break;
         case DataType::QASYMM8_SIGNED:
-            create_arm_dwc_quant<int8_t, int8_t, int8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts);
+            create_arm_dwc_quant<int8_t, int8_t, int8_t>(src, weights, dst, info, cpu_info, _kernel_asm, _multipliers, _right_shifts, _left_shifts, asm_kernel_name);
             break;
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         case DataType::F16:
-            create_arm_dwc<float16_t, float16_t, float16_t>(src, weights, dst, info, cpu_info, _kernel_asm);
+            create_arm_dwc<float16_t, float16_t, float16_t>(src, weights, dst, info, cpu_info, _kernel_asm, asm_kernel_name);
             break;
 #endif // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
         case DataType::F32:
-            create_arm_dwc<float, float, float>(src, weights, dst, info, cpu_info, _kernel_asm);
+            create_arm_dwc<float, float, float>(src, weights, dst, info, cpu_info, _kernel_asm, asm_kernel_name);
             break;
         default:
             break;
@@ -245,6 +249,10 @@ void CpuDepthwiseConv2dAssemblyWrapperKernel::configure(const ITensorInfo *src, 
 
     Window win = calculate_max_window(*dst, Steps());
     ICpuKernel::configure(win);
+    if(_kernel_asm != nullptr)
+    {
+        _name += "/" + asm_kernel_name;
+    }
 }
 
 Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *dst, const ConvolutionInfo &info)
@@ -352,14 +360,15 @@ bool CpuDepthwiseConv2dAssemblyWrapperKernel::is_configured() const
 
 const char *CpuDepthwiseConv2dAssemblyWrapperKernel::name() const
 {
-    return "CpuDepthwiseConv2dAssemblyWrapperKernel";
+    return _name.c_str();
 }
 
 size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
-    ARM_COMPUTE_UNUSED(platform, thread_count);
+    ARM_COMPUTE_UNUSED(thread_count);
+    ARM_COMPUTE_UNUSED(platform);
 
-    return ICPPKernel::small_network_mws;
+    return ICPPKernel::default_mws;
 }
 } // namespace kernels
 } // namespace cpu

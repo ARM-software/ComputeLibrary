@@ -150,7 +150,7 @@ void directconv3d_float_neon_ndhwc(const ITensor *src0, const ITensor *src1, con
                         {
                             const auto src_vec = wrapper::vloadq(in_ptr_mover);
                             //Load Cin weights
-                            for(unsigned int k = 0; k < num_elems_read_per_iteration; ++k, weights_ptr_mover += index_c_out_end)
+                            for(int k = 0; k < num_elems_read_per_iteration; ++k, weights_ptr_mover += index_c_out_end)
                             {
                                 w_vec = wrapper::vsetlane(*weights_ptr_mover, w_vec, k);
                             }

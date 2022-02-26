@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,6 +103,8 @@ Status CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const IT
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((src->data_layout() != DataLayout::NHWC) || (info.data_layout != DataLayout::NHWC), "Only NHWC is supported by assembly kernels");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((info.pool_type != PoolingType::AVG) && (info.pool_type != PoolingType::MAX),
                                     "Only AVG and MAX pooling are supported by assembly kernels");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_region_entirely_outside_input(info), "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
 
     if(dst->total_size() > 0)
     {
@@ -277,9 +279,20 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
 
 size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
-    ARM_COMPUTE_UNUSED(platform, thread_count);
-
-    return ICPPKernel::small_network_mws;
+    ARM_COMPUTE_UNUSED(thread_count);
+    // Tuning results that gave optimized results in performance investigation
+    if(platform.get_cpu_model() == CPUModel::A73)
+    {
+        return 10240;
+    }
+    else if(platform.get_cpu_model() == CPUModel::A53 || platform.get_cpu_model() == CPUModel::A55r0 || platform.get_cpu_model() == CPUModel::A55r1)
+    {
+        return 1;
+    }
+    else
+    {
+        return 9216;
+    }
 }
 } // namespace kernels
 } // namespace cpu

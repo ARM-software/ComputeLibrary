@@ -55,7 +55,7 @@ CpuModel midr_to_model(uint32_t midr);
  *
  * @note This is used in case of old kernel configurations where some capabilities are not exposed.
  *
- * @param[in] model Model to check for whitelisted capabilities
+ * @param[in] model Model to check for allowlisted capabilities
  */
 bool model_supports_fp16(CpuModel model);
 
@@ -63,7 +63,7 @@ bool model_supports_fp16(CpuModel model);
  *
  * @note This is used in case of old kernel configurations where some capabilities are not exposed.
  *
- * @param[in] model Model to check for whitelisted capabilities
+ * @param[in] model Model to check for allowlisted capabilities
  */
 bool model_supports_dot(CpuModel model);
 } // namespace cpuinfo

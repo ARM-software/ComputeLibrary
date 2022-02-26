@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,15 +28,72 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
+#include "src/cpu/kernels/genproposals/list.h"
 #include <arm_neon.h>
 
 namespace arm_compute
 {
 namespace
 {
+struct ComputeAllAnchorsData
+{
+    DataType dt;
+};
+
+using ComputeAllAnchorsSelectorPtr = std::add_pointer<bool(const ComputeAllAnchorsData &data)>::type;
+using ComputeAllAnchorsUKernelPtr  = std::add_pointer<void(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)>::type;
+
+struct ComputeAllAnchorsKernel
+{
+    const char                        *name;
+    const ComputeAllAnchorsSelectorPtr is_selected;
+    ComputeAllAnchorsUKernelPtr        ukernel;
+};
+
+static const ComputeAllAnchorsKernel available_kernels[] =
+{
+#if defined(ARM_COMPUTE_ENABLE_NEON)
+    {
+        "neon_qu16_computeallanchors",
+        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::QSYMM16; },
+        REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qu16_computeallanchors)
+    },
+#endif //defined(ARM_COMPUTE_ENABLE_NEON)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "neon_fp16_computeallanchors",
+        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::F16; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_computeallanchors)
+    },
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "neon_fp32_computeallanchors",
+        [](const ComputeAllAnchorsData & data) { return data.dt == DataType::F32; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_computeallanchors)
+    },
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const ComputeAllAnchorsKernel *get_implementation(const ComputeAllAnchorsData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
+}
+
 Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(anchors, all_anchors);
@@ -100,100 +157,15 @@ Status NEComputeAllAnchorsKernel::validate(const ITensorInfo *anchors, const ITe
     return Status{};
 }
 
-template <>
-void NEComputeAllAnchorsKernel::internal_run<int16_t>(const Window &window)
-{
-    Iterator all_anchors_it(_all_anchors, window);
-    Iterator anchors_it(_all_anchors, window);
-
-    const size_t num_anchors = _anchors->info()->dimension(1);
-    const float  stride      = 1.f / _anchors_info.spatial_scale();
-    const size_t feat_width  = _anchors_info.feat_width();
-
-    const UniformQuantizationInfo qinfo = _anchors->info()->quantization_info().uniform();
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const size_t anchor_offset = id.y() % num_anchors;
-
-        const auto out_anchor_ptr = reinterpret_cast<int16_t *>(all_anchors_it.ptr());
-        const auto anchor_ptr     = reinterpret_cast<int16_t *>(_anchors->ptr_to_element(Coordinates(0, anchor_offset)));
-
-        const size_t shift_idy = id.y() / num_anchors;
-        const float  shiftx    = (shift_idy % feat_width) * stride;
-        const float  shifty    = (shift_idy / feat_width) * stride;
-
-        const float new_anchor_x1 = dequantize_qsymm16(*anchor_ptr, qinfo.scale) + shiftx;
-        const float new_anchor_y1 = dequantize_qsymm16(*(1 + anchor_ptr), qinfo.scale) + shifty;
-        const float new_anchor_x2 = dequantize_qsymm16(*(2 + anchor_ptr), qinfo.scale) + shiftx;
-        const float new_anchor_y2 = dequantize_qsymm16(*(3 + anchor_ptr), qinfo.scale) + shifty;
-
-        *out_anchor_ptr       = quantize_qsymm16(new_anchor_x1, qinfo.scale);
-        *(out_anchor_ptr + 1) = quantize_qsymm16(new_anchor_y1, qinfo.scale);
-        *(out_anchor_ptr + 2) = quantize_qsymm16(new_anchor_x2, qinfo.scale);
-        *(out_anchor_ptr + 3) = quantize_qsymm16(new_anchor_y2, qinfo.scale);
-    },
-    all_anchors_it);
-}
-
-template <typename T>
-void NEComputeAllAnchorsKernel::internal_run(const Window &window)
-{
-    Iterator all_anchors_it(_all_anchors, window);
-    Iterator anchors_it(_all_anchors, window);
-
-    const size_t num_anchors = _anchors->info()->dimension(1);
-    const T      stride      = 1.f / _anchors_info.spatial_scale();
-    const size_t feat_width  = _anchors_info.feat_width();
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const size_t anchor_offset = id.y() % num_anchors;
-
-        const auto out_anchor_ptr = reinterpret_cast<T *>(all_anchors_it.ptr());
-        const auto anchor_ptr     = reinterpret_cast<T *>(_anchors->ptr_to_element(Coordinates(0, anchor_offset)));
-
-        const size_t shift_idy = id.y() / num_anchors;
-        const T      shiftx    = (shift_idy % feat_width) * stride;
-        const T      shifty    = (shift_idy / feat_width) * stride;
-
-        *out_anchor_ptr       = *anchor_ptr + shiftx;
-        *(out_anchor_ptr + 1) = *(1 + anchor_ptr) + shifty;
-        *(out_anchor_ptr + 2) = *(2 + anchor_ptr) + shiftx;
-        *(out_anchor_ptr + 3) = *(3 + anchor_ptr) + shifty;
-    },
-    all_anchors_it);
-}
-
 void NEComputeAllAnchorsKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_anchors->info()->data_type())
-    {
-        case DataType::QSYMM16:
-        {
-            internal_run<int16_t>(window);
-            break;
-        }
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-        {
-            internal_run<float16_t>(window);
-            break;
-        }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F32:
-        {
-            internal_run<float>(window);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Data type not supported");
-        }
-    }
+    const auto *uk = get_implementation(ComputeAllAnchorsData{ _anchors->info()->data_type() });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    uk->ukernel(_anchors, _all_anchors, _anchors_info, window);
 }
 } // namespace arm_compute

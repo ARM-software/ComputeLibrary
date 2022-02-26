@@ -51,6 +51,7 @@ class FullyConnectedLayerNode;
 class FusedConvolutionBatchNormalizationNode;
 class FusedConvolutionWithPostOpNode;
 class FusedDepthwiseConvolutionBatchNormalizationNode;
+class FusedConvolutionBatchNormalizationWithPostOpsNode;
 class GenerateProposalsLayerNode;
 class InputNode;
 class L2NormalizeLayerNode;

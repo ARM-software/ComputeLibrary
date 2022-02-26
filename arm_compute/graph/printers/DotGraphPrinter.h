@@ -57,6 +57,7 @@ public:
     void visit(DepthwiseConvolutionLayerNode &n) override;
     void visit(EltwiseLayerNode &n) override;
     void visit(FusedConvolutionBatchNormalizationNode &n) override;
+    void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) override;
     void visit(FusedConvolutionWithPostOpNode &n) override;
     void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     void visit(NormalizationLayerNode &n) override;

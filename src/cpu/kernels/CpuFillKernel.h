@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace cpu
 namespace kernels
 {
 /** Kernel for filling a tensor with a given constant value */
-class CpuFillKernel : public ICpuKernel
+class CpuFillKernel : public ICpuKernel<CpuFillKernel>
 {
 public:
     CpuFillKernel() = default;

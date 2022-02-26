@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ namespace kernels
  *                   (a_offset * b_offset * k)
  *
  */
-class CpuGemmLowpOffsetContributionKernel : public ICpuKernel
+class CpuGemmLowpOffsetContributionKernel : public ICpuKernel<CpuGemmLowpOffsetContributionKernel>
 {
 public:
     /** Default constructor */

@@ -27,7 +27,7 @@
 #include "repeat.h"
 
 /** (EXPERIMENTAL_POST_OPS) gemm_mm_native kernel */
-#if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#if defined(M0) && defined(N0) && defined(K0) && defined(DATA_TYPE) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 #if defined(P2_ELTWISE_OP) && defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
 
 #define VFMA(a, b, c)     \
@@ -107,6 +107,7 @@
 #error "M0 not supported"
 #endif // M0 not supported
 
+#if defined(GEMM_MM_NATIVE_POST_ACT_ELTWISE_OP_ACT)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices plus 3 post ops:
  * Post op 1: activation (optional)
  * Post op 2: elementwise op
@@ -140,8 +141,11 @@ __kernel void gemm_mm_native_post_act_eltwise_op_act(IMAGE_DECLARATION(lhs),
 #if defined(BETA)
                                                      uint bias_stride_z,
 #endif //defined(BETA)
-                                                     uint dst_stride_z,
-                                                     uint eltwise_operand_stride_z
+                                                     uint      dst_stride_z,
+                                                     uint      eltwise_operand_stride_z,
+                                                     const int M,
+                                                     const int N,
+                                                     const int K
 #if defined(REINTERPRET_INPUT_AS_3D)
                                                      ,
                                                      uint lhs_cross_plane_pad
@@ -360,5 +364,6 @@ __kernel void gemm_mm_native_post_act_eltwise_op_act(IMAGE_DECLARATION(lhs),
     // Store output block
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
+#endif // defined(GEMM_MM_NATIVE_POST_ACT_ELTWISE_OP_ACT)
 #endif // defined(P2_ELTWISE_OP) && defined(P2_ELTWISE_ARG1_HEIGHT) && defined(P2_ELTWISE_ARG1_WIDTH)
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(DATA_TYPE) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(DATA_TYPE) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)

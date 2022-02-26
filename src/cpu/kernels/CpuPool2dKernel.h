@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,11 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the pooling layer kernel */
-class CpuPool2dKernel : public ICpuKernel
+class CpuPool2dKernel : public ICpuKernel<CpuPool2dKernel>
 {
+private:
+    using PoolingKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, ITensor *, PoolingLayerInfo &, const Window &, const Window &)>::type;
+
 public:
     CpuPool2dKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuPool2dKernel);
@@ -62,8 +65,14 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-private:
-    using PoolingKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, ITensor *, PoolingLayerInfo &, const Window &, const Window &)>::type;
+    struct PoolingKernel
+    {
+        const char                      *name;
+        const PoolDataTypeISASelectorPtr is_selected;
+        PoolingKernelPtr                 ukernel;
+    };
+
+    static const std::vector<PoolingKernel> &get_available_kernels();
 
 private:
     PoolingLayerInfo _pool_info{};

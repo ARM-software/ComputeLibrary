@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -210,18 +210,6 @@ struct ScaleKernelInfo
     bool                use_padding;           /**< Indication of using padding */
     bool                align_corners;         /**< Align corners of input and output */
     DataLayout          data_layout;           /**< Data layout to use */
-};
-
-struct RemapInfo
-{
-    RemapInfo() = default;
-    RemapInfo(InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
-        : policy(policy), border_mode(border_mode), constant_border_value(constant_border_value)
-    {
-    }
-    InterpolationPolicy policy;
-    BorderMode          border_mode;
-    PixelValue          constant_border_value;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

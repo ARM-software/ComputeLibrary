@@ -1,0 +1,40 @@
+{
+    "cpu": {
+        "arch" : {
+            "armv8-a": {
+                "cxxflags": ["-march=armv8.2-a"]
+            },
+            "armv8.2-a": {
+                "cxxflags": ["-march=armv8.2-a+fp16"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16"]
+            },
+            "armv8.2-a-sve": {
+                "cxxflags": ["-march=armv8.2-a+sve+fp16+dotprod"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
+                               "ARM_COMPUTE_ENABLE_I8MM", "ARM_COMPUTE_ENABLE_SVEF32MM"]
+            },
+            "armv8.2-a-sve2": {
+                "cxxflags": ["-march=armv8.2-a+sve2+fp16+dotprod"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
+                               "ARM_COMPUTE_ENABLE_I8MM", "ARM_COMPUTE_ENABLE_SVEF32MM"]
+            },
+            "armv8r64": {
+                "cxxflags": ["-march=armv8.4-a"]
+            },
+            "armv8.6-a": {
+                "cxxflags": ["-march=armv8.6-a+fp16"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16"]
+            },
+            "armv8.6-a-sve": {
+                "cxxflags": ["-march=armv8.6-a+sve+fp16+dotprod"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
+                               "ARM_COMPUTE_ENABLE_I8MM"]
+            },
+            "armv8.6-a-sve2": {
+                "cxxflags": ["-march=armv8.6-a+sve2+fp16+dotprod"],
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
+                               "ARM_COMPUTE_ENABLE_I8MM"]
+            }
+        }
+    }
+}

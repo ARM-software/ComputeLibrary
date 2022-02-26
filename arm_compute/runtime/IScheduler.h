@@ -152,7 +152,7 @@ public:
      */
     virtual void set_num_threads_with_affinity(unsigned int num_threads, BindFunc func);
 
-    /** Returns the number of threads that the SingleThreadScheduler has in his pool.
+    /** Returns the number of threads that the SingleThreadScheduler has in its pool.
      *
      * @return Number of threads available in SingleThreadScheduler.
      */
@@ -214,6 +214,19 @@ protected:
      * @param[in] tensors Vector containing the tensors to operate on.
      */
     void schedule_common(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors);
+
+    /** Adjust the number of windows to the optimize performance
+     * (used for small workloads where smaller number of threads might improve the performance)
+     *
+     * @param[in] window           Window to use for kernel execution
+     * @param[in] split_dimension  Axis of dimension to split
+     * @param[in] init_num_windows Initial number of sub-windows to split
+     * @param[in] kernel           Kernel to execute
+     * @param[in] cpu_info         The CPU platform used to create the context.
+     *
+     * @return Adjusted number of windows
+     */
+    std::size_t adjust_num_of_windows(const Window &window, std::size_t split_dimension, std::size_t init_num_windows, const ICPPKernel &kernel, const CPUInfo &cpu_info);
 
 private:
     unsigned int _num_threads_hint = {};

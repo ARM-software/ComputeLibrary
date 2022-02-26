@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2020 Arm Limited.
+/// Copyright (c) 2019-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -35,6 +35,13 @@ The development is structured in the following way:
 - Development repository: https://review.mlplatform.org/#/admin/projects/ml/ComputeLibrary
 - Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
+@section S5_0_inc_lang Inclusive language guideline
+As part of the initiative to use inclusive language, there are certain phrases and words that were removed or replaced by more inclusive ones. Examples include but not limited to:
+\includedoc non_inclusive_language_examples.dox
+
+Please also follow this guideline when committing changes to Compute Library.
+
+Futhermore, starting from next release (22.05), 'master' branch will no longer be used, it will be replaced by 'main'. Please update your clone jobs accordingly.
 @section S5_1_coding_standards Coding standards and guidelines
 
 Best practices (as suggested by clang-tidy):
@@ -444,7 +451,7 @@ Once a patch is uploaded for review, there is a pre-commit test that runs on a J
 - get a "+1 Comments-Addressed", in case of comments from reviewers the committer has to address them all. A comment is considered addressed when the first line of the reply contains the word "Done"
 - get a "+2" from a reviewer, that means the patch has the final approval
 
-At the moment, the Jenkins server is not publicly accessible and for security reasons patches submitted by non-whitelisted committers do not trigger the pre-commit tests. For this reason, one of the maintainers has to manually trigger the job.
+At the moment, the Jenkins server is not publicly accessible and for security reasons patches submitted by non-allowlisted committers do not trigger the pre-commit tests. For this reason, one of the maintainers has to manually trigger the job.
 
 If the pre-commit test fails, the Jenkins job will post a comment on Gerrit with the details about the failure so that the committer will be able to reproduce the error and fix the issue, if any (sometimes there can be infrastructure issues, a test platform disconnecting for example, where the job needs to be retriggered).
 

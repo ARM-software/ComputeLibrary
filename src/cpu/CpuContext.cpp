@@ -28,7 +28,10 @@
 #include "src/cpu/CpuTensor.h"
 
 #include <cstdlib>
+#if !defined(__APPLE__) && !defined(__OpenBSD__)
 #include <malloc.h>
+#endif // !defined(__APPLE__) && !defined(__OpenBSD__)
+
 
 namespace arm_compute
 {
@@ -50,11 +53,11 @@ void *default_aligned_allocate(void *user_data, size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(user_data);
     void *ptr = nullptr;
-#if defined(BARE_METAL) || defined(__APPLE__)
+#if defined(BARE_METAL)
     size_t rem       = size % alignment;
     size_t real_size = (rem) ? (size + alignment - rem) : size;
     ptr              = memalign(alignment, real_size);
-#else  /* defined(BARE_METAL) || defined(__APPLE__) */
+#else  /* defined(BARE_METAL) */
     if(posix_memalign(&ptr, alignment, size) != 0)
     {
         // posix_memalign returns non-zero on failures, the return values will be
@@ -62,7 +65,7 @@ void *default_aligned_allocate(void *user_data, size_t size, size_t alignment)
         // - ENOMEM: insufficient memory
         ARM_COMPUTE_LOG_ERROR_ACL("posix_memalign failed, the returned pointer will be invalid");
     }
-#endif /* defined(BARE_METAL) || defined(__APPLE__) */
+#endif /* defined(BARE_METAL) */
     return ptr;
 }
 void default_aligned_free(void *user_data, void *ptr)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "src/core/NEON/kernels/assembly/pooling.hpp"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
+#include "src/cpu/kernels/CpuKernelSelectionTypes.h"
 
 #include "pool_common.hpp"
 
@@ -45,7 +46,7 @@ namespace kernels
   * execute a single assembly kernel in the context of an NEFunction.
   *
   */
-class CpuPool2dAssemblyWrapperKernel final : public ICpuKernel
+class CpuPool2dAssemblyWrapperKernel final : public ICpuKernel<CpuPool2dAssemblyWrapperKernel>
 {
 public:
     /** Constructor

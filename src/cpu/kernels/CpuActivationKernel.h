@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,11 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the activation kernel */
-class CpuActivationKernel : public ICpuKernel
+class CpuActivationKernel : public ICpuKernel<CpuActivationKernel>
 {
+private:
+    using ActivationKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
+
 public:
     CpuActivationKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuActivationKernel);
@@ -70,8 +73,14 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
-private:
-    using ActivationKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
+    struct ActivationKernel
+    {
+        const char                  *name;
+        const DataTypeISASelectorPtr is_selected;
+        ActivationKernelPtr          ukernel;
+    };
+
+    static const std::vector<ActivationKernel> &get_available_kernels();
 
 private:
     ActivationLayerInfo _act_info{};

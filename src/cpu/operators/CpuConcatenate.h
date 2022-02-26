@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::vector<std::unique_ptr<ICpuKernel>> _concat_kernels{};
+    std::vector<std::unique_ptr<ICPPKernel>> _concat_kernels{};
     unsigned int                             _num_srcs{ 0 };
     unsigned int                             _axis{ 0 };
 };

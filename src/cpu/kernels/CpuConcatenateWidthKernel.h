@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace kernels
 /** Interface for the width concatenate kernel.
  *  The source tensor will be concatenated into the destination tensor.
  */
-class CpuConcatenateWidthKernel : public ICPPKernel
+class CpuConcatenateWidthKernel : public ICpuKernel<CpuConcatenateWidthKernel>
 {
 public:
     CpuConcatenateWidthKernel() = default;

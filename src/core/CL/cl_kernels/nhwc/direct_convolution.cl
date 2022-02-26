@@ -103,9 +103,9 @@
  */
 //! @endcond
 __kernel void direct_convolution_nhwc(
-    TENSOR4D(src, SRC_TENSOR_TYPE),
-    TENSOR4D(dst, DST_TENSOR_TYPE),
-    TENSOR4D(wei, WEI_TENSOR_TYPE)
+    TENSOR4D_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_T(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bia)
@@ -116,12 +116,12 @@ __kernel void direct_convolution_nhwc(
     // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH WEI_WIDTH
 #define _IWEI_HEIGHT WEI_HEIGHT
-#define _ISRC_WIDTH SRC_WIDTH
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _ISRC_CHANNELS SRC_CHANNELS
-#define _IDST_WIDTH DST_WIDTH
-#define _IDST_HEIGHT DST_HEIGHT
-#define _IDST_CHANNELS DST_CHANNELS
+#define _ISRC_WIDTH src_w
+#define _ISRC_HEIGHT src_h
+#define _ISRC_CHANNELS src_c
+#define _IDST_WIDTH dst_w
+#define _IDST_HEIGHT dst_h
+#define _IDST_CHANNELS dst_c
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
     // If quantized, the output tile has to be quantized first before being stored to global memory
@@ -192,7 +192,7 @@ __kernel void direct_convolution_nhwc(
 
         // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
-#if((SRC_CHANNELS % K0) != 0)
+#if defined(LEFTOVER_LOOP)
         // Left-over accumulations
         for(; k < _ISRC_CHANNELS; ++k)
         {
@@ -220,7 +220,7 @@ __kernel void direct_convolution_nhwc(
 
             ++ck;
         }
-#endif // ((SRC_CHANNELS % K0) != 0)
+#endif // defined(LEFTOVER_LOOP)
     }
 
     // Offset correction required for the quantized asymmetric computation

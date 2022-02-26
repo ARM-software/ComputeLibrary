@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
+#include "src/cpu/kernels/CpuKernelSelectionTypes.h"
 
 namespace arm_conv
 {
@@ -44,7 +45,7 @@ namespace cpu
 namespace kernels
 {
 /** This class is a wrapper for the depthwise convolution assembly kernels.  */
-class CpuDepthwiseConv2dAssemblyWrapperKernel final : public ICpuKernel
+class CpuDepthwiseConv2dAssemblyWrapperKernel final : public ICpuKernel<CpuDepthwiseConv2dAssemblyWrapperKernel>
 {
 public:
     /** Default constructor */
@@ -122,6 +123,7 @@ private:
     std::vector<int32_t>                                   _multipliers{};
     std::vector<int32_t>                                   _left_shifts{};
     std::vector<int32_t>                                   _right_shifts{};
+    std::string                                            _name{};
 };
 } // namespace kernels
 } // namespace cpu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -143,12 +143,12 @@ inline T fma(T x, T y, T z)
  *  and writes the result to a character string buffer.
  *
  * @param[in] s    Pointer to a character string to write to
- * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
- * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null ending character
+ * @param[in] fmt  Pointer to a null-ended multibyte string specifying how to interpret the data.
  * @param[in] args Arguments forwarded to snprintf.
  *
  * @return  Number of characters that would have been written for a sufficiently large buffer
- *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
 inline int snprintf(char *s, size_t n, const char *fmt, Ts &&... args)
@@ -258,12 +258,12 @@ inline T fma(T x, T y, T z)
  *  and writes the result to a character string buffer.
  *
  * @param[in] s    Pointer to a character string to write to
- * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
- * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null ending character
+ * @param[in] fmt  Pointer to a null-ended multibyte string specifying how to interpret the data.
  * @param[in] args Arguments forwarded to std::snprintf.
  *
  * @return  Number of characters that would have been written for a sufficiently large buffer
- *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
 inline int snprintf(char *s, std::size_t n, const char *fmt, Ts &&... args)
@@ -308,6 +308,23 @@ inline bool isfinite(half_float::half value)
 inline bool isfinite(bfloat16 value)
 {
     return std::isfinite(float(value));
+}
+
+// std::signbit
+template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+inline bool signbit(T value)
+{
+    return std::signbit(value);
+}
+
+inline bool signbit(half_float::half value)
+{
+    return half_float::signbit(value);
+}
+
+inline bool signbit(bfloat16 value)
+{
+    return std::signbit(float(value));
 }
 } // namespace cpp11
 } // namespace support

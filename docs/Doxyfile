@@ -38,7 +38,7 @@ PROJECT_NAME           = "Compute Library"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 21.11
+PROJECT_NUMBER         = 22.02
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -364,7 +364,7 @@ SUBGROUPING            = YES
 
 # When the INLINE_GROUPED_CLASSES tag is set to YES, classes, structs and unions
 # are shown inside the group in which they are included (e.g. using \ingroup)
-# instead of on a separate page (for HTML and Man pages) or section (for LaTeX
+# instead of on a separate page (for HTML and Manual pages) or section (for LaTeX
 # and RTF).
 #
 # Note that this feature does not work in combination with
@@ -378,7 +378,7 @@ INLINE_GROUPED_CLASSES = NO
 # the documentation of the scope in which they are defined (i.e. file,
 # namespace, or group documentation), provided this scope is documented. If set
 # to NO, structs, classes, and unions are shown on a separate page (for HTML and
-# Man pages) or section (for LaTeX and RTF).
+# Manual pages) or section (for LaTeX and RTF).
 # The default value is: NO.
 
 INLINE_SIMPLE_STRUCTS  = NO
@@ -1882,16 +1882,16 @@ RTF_EXTENSIONS_FILE    =
 #RTF_SOURCE_CODE        = NO
 
 #---------------------------------------------------------------------------
-# Configuration options related to the man page output
+# Configuration options related to the manual page output
 #---------------------------------------------------------------------------
 
-# If the GENERATE_MAN tag is set to YES, doxygen will generate man pages for
+# If the GENERATE_MAN tag is set to YES, doxygen will generate manual pages for
 # classes and files.
 # The default value is: NO.
 
 GENERATE_MAN           = NO
 
-# The MAN_OUTPUT tag is used to specify where the man pages will be put. If a
+# The MAN_OUTPUT tag is used to specify where the manual pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
 # it. A directory man3 will be created inside the directory specified by
 # MAN_OUTPUT.
@@ -1901,7 +1901,7 @@ GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 
 # The MAN_EXTENSION tag determines the extension that is added to the generated
-# man pages. In case the manual section does not start with a number, the number
+# manual pages. In case the manual section does not start with a number, the number
 # 3 is prepended. The dot (.) at the beginning of the MAN_EXTENSION tag is
 # optional.
 # The default value is: .3.
@@ -1910,15 +1910,15 @@ MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 
 # The MAN_SUBDIR tag determines the name of the directory created within
-# MAN_OUTPUT in which the man pages are placed. If defaults to man followed by
+# MAN_OUTPUT in which the manual pages are placed. If defaults to man followed by
 # MAN_EXTENSION with the initial . removed.
 # This tag requires that the tag GENERATE_MAN is set to YES.
 
 #MAN_SUBDIR             = 
 
 # If the MAN_LINKS tag is set to YES and doxygen generates man output, then it
-# will generate one additional man file for each entity documented in the real
-# man page(s). These additional files only source the real man page, but without
+# will generate one additional manual file for each entity documented in the real
+# manual page(s). These additional files only source the real manual page, but without
 # them the man command would be unable to find the correct page.
 # The default value is: NO.
 # This tag requires that the tag GENERATE_MAN is set to YES.

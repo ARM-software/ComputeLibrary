@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ namespace kernels
  * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
  *
  */
-class CpuGemmTranspose1xWKernel : public ICpuKernel
+class CpuGemmTranspose1xWKernel : public ICpuKernel<CpuGemmTranspose1xWKernel>
 {
 public:
     CpuGemmTranspose1xWKernel() = default;

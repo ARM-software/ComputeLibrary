@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,8 +92,8 @@ private:
 
     CpuPermute                  _permute_input;
     CpuPermute                  _permute_output;
-    std::unique_ptr<ICpuKernel> _max_kernel;
-    std::unique_ptr<ICpuKernel> _softmax_kernel;
+    std::unique_ptr<ICPPKernel> _max_kernel;
+    std::unique_ptr<ICPPKernel> _softmax_kernel;
 
     TensorInfo _max;
     TensorInfo _tmp;

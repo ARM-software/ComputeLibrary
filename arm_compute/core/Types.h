@@ -772,7 +772,7 @@ private:
 /** Padding information for 3D operations like Conv3d */
 struct Padding3D
 {
-    Padding3D()
+    Padding3D() noexcept
     {
     }
 

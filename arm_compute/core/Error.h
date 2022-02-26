@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2019, 2021 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -119,7 +119,7 @@ private:
 /** Creates an error containing the error message
  *
  * @param[in] error_code Error code
- * @param[in] msg        Message to display before aborting.
+ * @param[in] msg        Message to display before abandoning.
  *
  * @return status containing the error
  */
@@ -131,7 +131,7 @@ Status create_error(ErrorCode error_code, std::string msg);
  * @param[in] func       Function in which the error occurred.
  * @param[in] file       File in which the error occurred.
  * @param[in] line       Line in which the error occurred.
- * @param[in] msg        Message to display before aborting.
+ * @param[in] msg        Message to display before abandoning.
  *
  * @return status containing the error
  */
@@ -164,7 +164,7 @@ Status create_error_msg(ErrorCode error_code, const char *func, const char *file
  * @param[in] func       Function in which the error occurred.
  * @param[in] file       File in which the error occurred.
  * @param[in] line       Line in which the error occurred.
- * @param[in] msg        Message to display before aborting.
+ * @param[in] msg        Message to display before abandoning.
  */
 #define ARM_COMPUTE_CREATE_ERROR_LOC(error_code, func, file, line, msg) arm_compute::create_error_msg(error_code, func, file, line, msg)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -446,9 +446,10 @@ const char *CpuIm2ColKernel::name() const
 
 size_t CpuIm2ColKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
-    ARM_COMPUTE_UNUSED(platform, thread_count);
+    ARM_COMPUTE_UNUSED(thread_count);
+    ARM_COMPUTE_UNUSED(platform);
 
-    return ICPPKernel::small_network_mws;
+    return ICPPKernel::default_mws;
 }
 } // namespace kernels
 } // namespace cpu

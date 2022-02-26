@@ -31,16 +31,16 @@ namespace cpu
 #define DECLARE_ACTIVATION_KERNEL(func_name) \
     void func_name(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 
-DECLARE_ACTIVATION_KERNEL(qasymm8_neon_activation);
-DECLARE_ACTIVATION_KERNEL(qasymm8_sve_activation);
-DECLARE_ACTIVATION_KERNEL(qasymm8_signed_neon_activation);
-DECLARE_ACTIVATION_KERNEL(qasymm8_signed_sve_activation);
-DECLARE_ACTIVATION_KERNEL(qsymm16_neon_activation);
-DECLARE_ACTIVATION_KERNEL(qsymm16_sve_activation);
-DECLARE_ACTIVATION_KERNEL(fp16_neon_activation);
-DECLARE_ACTIVATION_KERNEL(fp16_sve_activation);
-DECLARE_ACTIVATION_KERNEL(fp32_neon_activation);
-DECLARE_ACTIVATION_KERNEL(fp32_sve_activation);
+DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation);
+DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_activation);
+DECLARE_ACTIVATION_KERNEL(neon_qasymm8_signed_activation);
+DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_signed_activation);
+DECLARE_ACTIVATION_KERNEL(neon_qsymm16_activation);
+DECLARE_ACTIVATION_KERNEL(sve2_qsymm16_activation);
+DECLARE_ACTIVATION_KERNEL(sve_fp16_activation);
+DECLARE_ACTIVATION_KERNEL(sve_fp32_activation);
+DECLARE_ACTIVATION_KERNEL(neon_fp16_activation);
+DECLARE_ACTIVATION_KERNEL(neon_fp32_activation);
 
 #undef DECLARE_ACTIVATION_KERNEL
 } // namespace cpu

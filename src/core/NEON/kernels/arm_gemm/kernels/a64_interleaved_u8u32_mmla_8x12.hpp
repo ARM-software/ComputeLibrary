@@ -35,6 +35,7 @@ namespace arm_gemm
 {
 // Actual kernel implementations
 void a64_interleaved_u8u32_mmla_8x12( ARGLIST );
+void a64_interleaved_u8u32_mmla_8x12_a510( ARGLIST );
 
 class cls_a64_interleaved_u8u32_mmla_8x12
 {
@@ -91,7 +92,7 @@ public:
                 case CPUModel::A510:
                     return { 47.66, 2.47, 0.29 };
                 case CPUModel::V1:
-                    return { 111.60, 4.95, 0.66 };
+                    return { 75.54, 8.06, 0.63 };
             }
         }
 
@@ -100,8 +101,15 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=a64_interleaved_u8u32_mmla_8x12;
-    cls_a64_interleaved_u8u32_mmla_8x12(const CPUInfo *)
+    cls_a64_interleaved_u8u32_mmla_8x12(const CPUInfo *ci)
     {
+        switch(ci->get_cpu_model()) {
+            default:
+                break;
+            case CPUModel::A510:
+                kernel=a64_interleaved_u8u32_mmla_8x12_a510;
+                break;
+        }
     }
 };
 

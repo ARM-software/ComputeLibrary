@@ -22,23 +22,11 @@
  * SOFTWARE.
  */
 #include "helpers.h"
-#if defined(DATA_TYPE) && defined(ELEMENT_SIZE)
-
-#if ELEMENT_SIZE == 1
-#define COND_DATA_TYPE char
-#elif ELEMENT_SIZE == 2
-#define COND_DATA_TYPE short
-#elif ELEMENT_SIZE == 4
-#define COND_DATA_TYPE int
-#else // ELEMENT_SIZE
-#error "Element size not support"
-#endif // ELEMENT_SIZE
-
-#if defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE)
 
 #define VECTOR_N VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
-#define COND_N VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE)
+#define COND_N SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
 
+#if defined(IM2COL_3X3) || defined(IM2COL_9X9)
 /** Store a 1x9 row or a 3x3 block in a boundary-aware manner to avoid paddings in the channel dimension
  *  @name IM2COL1X9_NHWC_STORE
  *
@@ -109,7 +97,9 @@
     VSTORE_PARTIAL(VECTOR_SIZE, BOUNDARY_VECTOR_SIZE)                                                                \
     (DATA##8, 0, (__global DATA_TYPE *)(OUTPUT_PTR) + (8 + ROW * 9) * SRC_DEPTH);
 /** @}*/
+#endif // defined(IM2COL_3X3) || defined(IM2COL_9X9)
 
+#if defined(IM2COL_3X3)
 /** This kernel performs im2col when the kernel size is 3x3 and the data layout is NHWC
  *
  * @note This kernel computes VECTOR_SIZE elements
@@ -269,7 +259,9 @@ __kernel void im2col3x3_nhwc(
     }
 #endif // HAS_BIAS
 }
+#endif // defined(IM2COL_3X3)
 
+#if defined(IM2COL_9X9)
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
 #define IM2COL1x9(i)                                                                                         \
     ({                                                                                                       \
@@ -416,7 +408,9 @@ __kernel void im2col9x9_nhwc(
     }
 #endif // HAS_BIAS
 }
+#endif // defined(IM2COL_9X9)
 
+#if defined(IM2COL_GENERIC)
 /** This opencl kernel performs a generic im2col implementation when the data layout is NHWC
  *
  * @note This kernel computes VECTOR_SIZE elements
@@ -463,19 +457,20 @@ __kernel void im2col_generic_nhwc(
     const int batch        = get_global_id(2); // batch size
 
     // Calculate input indices
-    const int xi = (get_global_id(1) % CONVOLVED_WIDTH) * STRIDE_X;
-    const int yi = (get_global_id(1) / (int)CONVOLVED_WIDTH) * STRIDE_Y;
+    const int xi = (yo % CONVOLVED_WIDTH) * STRIDE_X;
+    const int yi = (yo / (int)CONVOLVED_WIDTH) * STRIDE_Y;
 
     // Get input and output address
-    __global uchar *input_ptr  = src_ptr + src_offset_first_element_in_bytes + ch * sizeof(DATA_TYPE) + batch * (int)src_stride_w;
-    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + ch * sizeof(DATA_TYPE) + yo * (int)dst_stride_y + batch * (int)dst_stride_w;
+    const int stride_x         = ch * sizeof(DATA_TYPE);
+    __global uchar *input_ptr  = src_ptr + src_offset_first_element_in_bytes + stride_x + batch * (int)src_stride_w;
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + stride_x + yo * (int)dst_stride_y + batch * (int)dst_stride_w;
 
     int i = 0;
     for(int yk = 0; yk < KERNEL_HEIGHT; ++yk)
     {
         // Clamp yi_coord
         int yi_coord = yi + yk * DILATION_Y - (int)PAD_TOP;
-        yi_coord     = CLAMP(yi_coord, (int)0, (int)(SRC_HEIGHT - 1));
+        yi_coord     = clamp(yi_coord, (int)0, (int)(SRC_HEIGHT - 1));
 
         // Out-of-bound condition for Y
         int y_border_condition = ((yi + yk * DILATION_Y - (int)PAD_TOP) < (int)0) || ((yi + yk * DILATION_Y - (int)PAD_TOP) >= (int)SRC_HEIGHT);
@@ -484,7 +479,7 @@ __kernel void im2col_generic_nhwc(
         {
             // Clamp xi_coord
             int xi_coord = (xi + xk * DILATION_X - (int)PAD_LEFT);
-            xi_coord     = CLAMP(xi_coord, (int)0, (int)(SRC_WIDTH - 1));
+            xi_coord     = clamp(xi_coord, (int)0, (int)(SRC_WIDTH - 1));
 
             // Out-of-bound condition for X
             int x_border_condition = ((xi + xk * DILATION_X - (int)PAD_LEFT) < (int)0) || ((xi + xk * DILATION_X - (int)PAD_LEFT) >= (int)SRC_WIDTH);
@@ -528,5 +523,4 @@ __kernel void im2col_generic_nhwc(
     }
 #endif // HAS_BIAS
 }
-#endif // defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE) && defined(VECTOR_SIZE) && defined(BOUNDARY_VECTOR_SIZE)
-#endif // defined(DATA_TYPE) && defined(ELEMENT_SIZE)
+#endif // defined(IM2COL_GENERIC)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace kernels
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
  */
-class CpuGemmLowpMatrixAReductionKernel : public ICpuKernel
+class CpuGemmLowpMatrixAReductionKernel : public ICpuKernel<CpuGemmLowpMatrixAReductionKernel>
 {
 public:
     /** Default constructor */
@@ -98,7 +98,7 @@ private:
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
  */
-class CpuGemmLowpMatrixBReductionKernel : public ICpuKernel
+class CpuGemmLowpMatrixBReductionKernel : public ICpuKernel<CpuGemmLowpMatrixBReductionKernel>
 {
 public:
     /** Default constructor */

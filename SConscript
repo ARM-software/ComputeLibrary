@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2016-2021 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
@@ -19,6 +22,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import collections
 import os.path
 import re
@@ -27,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v21.11"
-LIBRARY_VERSION_MAJOR = 25
+VERSION = "v22.02"
+LIBRARY_VERSION_MAJOR = 26
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -45,31 +49,83 @@ def build_bootcode_objs(sources):
     return obj
 
 
-def build_sve_objs(sources):
+
+
+# @brief Create a list of object from a given file list.
+#
+# @param  arch_info      A dictionary represents the architecture info such as the
+#                        compiler flags and defines (filedefs.json).
+#
+# @param  sources        A list of files to build
+#
+# @return A list of objects for the corresponding architecture.
+
+def build_obj_list(arch_info, sources, static=False):
+
+    # Clone environment
     tmp_env = arm_compute_env.Clone()
-    tmp_env.Append(CXXFLAGS = "-march=armv8.2-a+sve+fp16")
-    obj = tmp_env.SharedObject(sources)
-    Default(obj)
-    return obj
 
+    # Append architecture spec
+    if 'cxxflags' in arch_info and len(arch_info['cxxflags']) > 0:
+        tmp_env.Append(CXXFLAGS = arch_info['cxxflags'])
 
-def build_objs(sources):
-    obj = arm_compute_env.SharedObject(sources)
-    Default(obj)
-    return obj
+    # Build and return objects
+    if static:
+        objs = tmp_env.StaticObject(sources)
+    else:
+        objs = tmp_env.SharedObject(sources)
+    
+    tmp_env.Default(objs)
+    return objs
+
+# @brief Build multi-ISA files with the respective architecture.
+#
+# @return Two distinct lists:
+#         A list of static objects
+#         A list of shared objects
+
+def build_lib_objects():
+    lib_static_objs = [] # static objects
+    lib_shared_objs = [] # shared objects
+
+    arm_compute_env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON',
+                           'ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE',
+                           'ARM_COMPUTE_ENABLE_FP16', 'ARM_COMPUTE_ENABLE_BF16',
+                           'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
+
+    # Build all the common files for the base architecture
+    lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
+    
+    # Build the SVE specific files
+    lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=False)
+
+    # Build the SVE2 specific files
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
+    lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], lib_files_sve2, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], lib_files_sve2, static=False)
+
+    return lib_static_objs, lib_shared_objs
+
 
 
 def build_library(name, build_env, sources, static=False, libs=[]):
+    cloned_build_env = build_env.Clone()
+    if env['os'] == 'android' and static == False:
+        cloned_build_env["LINKFLAGS"].remove('-pie')
+        cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
+
     if static:
-        obj = build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
     else:
         if env['set_soname']:
-            obj = build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
-            obj = build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+            obj = cloned_build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     obj = install_lib(obj)
-    Default(obj)
+    build_env.Default(obj)
     return obj
 
 
@@ -179,6 +235,7 @@ def get_attrs_list(env, data_types, data_layouts):
 
     # Manage execution state
     attrs += ['estate32' if (env['estate'] == 'auto' and 'v7a' in env['arch']) or '32' in env['estate'] else 'estate64']
+
     return attrs
 
 
@@ -260,7 +317,7 @@ arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
 
-default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang++'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
@@ -310,6 +367,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
+                       'src/core/CL/cl_kernels/common/gemm_utils.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
@@ -352,10 +410,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nchw/batchnormalization_layer.cl',
                     'src/core/CL/cl_kernels/nchw/channel_shuffle.cl',
                     'src/core/CL/cl_kernels/nchw/depth_to_space.cl',
-                    'src/core/CL/cl_kernels/nchw/direct_convolution_quantized.cl',
-                    'src/core/CL/cl_kernels/nchw/direct_convolution1x1.cl',
-                    'src/core/CL/cl_kernels/nchw/direct_convolution3x3.cl',
-                    'src/core/CL/cl_kernels/nchw/direct_convolution5x5.cl',
+                    'src/core/CL/cl_kernels/nchw/direct_convolution.cl',
                     'src/core/CL/cl_kernels/nchw/dequantization_layer.cl',
                     'src/core/CL/cl_kernels/nchw/im2col.cl',
                     'src/core/CL/cl_kernels/nchw/normalization_layer.cl',
@@ -363,7 +418,6 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nchw/normalize_planar_yuv_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nchw/pooling_layer.cl',
                     'src/core/CL/cl_kernels/nchw/prior_box_layer.cl',
-                    'src/core/CL/cl_kernels/nchw/remap.cl',
                     'src/core/CL/cl_kernels/nchw/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nchw/scale.cl',
                     'src/core/CL/cl_kernels/nchw/space_to_batch.cl',
@@ -390,7 +444,6 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer_quantized.cl',
-                    'src/core/CL/cl_kernels/nhwc/remap.cl',
                     'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
@@ -422,7 +475,14 @@ undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else
 arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
-arm_compute_env.Append(LIBS = ['dl'])
+if env['os'] != 'openbsd':
+    arm_compute_env.Append(LIBS = ['dl'])
+
+# Load build definitions file
+with (open(Dir('#').path + '/filedefs.json')) as fd:
+    filedefs = json.load(fd)
+    filedefs = filedefs['cpu']['arch']
+
 
 with (open(Dir('#').path + '/filelist.json')) as fp:
     filelist = json.load(fp)
@@ -474,8 +534,10 @@ if env['opencl']:
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 
-sve_o = []
+
 lib_files_sve = []
+lib_files_sve2 = []
+
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
@@ -483,14 +545,17 @@ if env['neon']:
                                       "src/core/NEON/kernels/convolution/depthwise/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
-                                      "src/cpu/kernels/assembly/",])
+                                      "src/cpu/kernels/assembly/"])
 
     lib_files += filelist['cpu']['common']
 
     # Setup SIMD file list to include
-    simd = []
-    if 'sve' in env['arch'] or env['fat_binary']: simd += ['sve']
-    if 'sve' not in env['arch'] or env['fat_binary']: simd += ['neon']
+    simd = ['neon']
+    if env['multi_isa']:
+        simd += ['sve', 'sve2']
+    else:
+        if 'sve' in env['arch']: simd += ['sve']
+        if 'sve2' in env['arch']: simd += ['sve2']
 
     # Get attributes
     if(use_custom_ops):
@@ -503,9 +568,18 @@ if env['neon']:
     cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
 
     cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+
+    # Shared among ALL CPU files
     lib_files += cpu_files.get('common', [])
+
+    # Arm® Neon™ specific files
     lib_files += cpu_files.get('neon', [])
-    lib_files_sve += cpu_files.get('sve', [])
+
+    # SVE files only
+    lib_files_sve = cpu_files.get('sve', [])
+
+    # SVE2 files only
+    lib_files_sve2 = cpu_files.get('sve2', [])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
@@ -521,25 +595,42 @@ if env['os'] == 'bare_metal':
     bootcode_o = build_bootcode_objs(bootcode_files)
 Export('bootcode_o')
 
-# Build static libraries
-if (env['fat_binary']):
-    sve_o = build_sve_objs(lib_files_sve)
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + sve_o, static=True)
+
+if (env['multi_isa']):
+    lib_static_objs, lib_shared_objs = build_lib_objects()
+
+
+# STATIC library build.
+if (env['multi_isa']):
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_static_objs, static=True)
 else:
-    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files + lib_files_sve, static=True)
+    if 'sve2' in env['arch']:
+        lib_files += lib_files_sve
+        lib_files += lib_files_sve2
+    elif 'sve' in env['arch']:
+        lib_files += lib_files_sve
+
+    arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files, static=True)
+
 Export('arm_compute_a')
 
-# Build shared libraries
+# SHARED library build.
 if env['os'] != 'bare_metal' and not env['standalone']:
-    if (env['fat_binary']):
-        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + sve_o, static=False)
+    if (env['multi_isa']):
+
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_shared_objs, static=False)
     else:
-        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files + lib_files_sve, static=False)
+        arm_compute_so = build_library('arm_compute', arm_compute_env, lib_files, static=False)
 
     Export('arm_compute_so')
 
 # Generate dummy core lib for backwards compatibility
-arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
+if env['os'] == 'macos':
+    # macos static library archiver fails if given an empty list of files
+    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, lib_files, static=True)
+else:
+    arm_compute_core_a = build_library('arm_compute_core-static', arm_compute_env, [], static=True)
+
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
@@ -551,7 +642,7 @@ arm_compute_graph_env = arm_compute_env.Clone()
 # Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a])
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a ])
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:

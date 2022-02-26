@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,19 +255,39 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
             // Floating-point case: GeMM/Direct/Winograd
             if(is_data_type_float(src->data_type()))
             {
-                const bool is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
-                const bool is_ifm_ge_16       = src->dimension(idx_c) >= 16;
-                const bool is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
+                // Get dst shape
+                TensorShape output_shape       = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
+                const bool  is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
+                const bool  is_ifm_ge_16       = src->dimension(idx_c) >= 16;
+                const bool  is_ofm_lte_8       = weights->dimension(3U) <= 8;
+                const bool  workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
+                const bool is_ifm_gt_ofm       = src->dimension(idx_c) > weights->dimension(3U);
 
                 // Run Winograd if valid and IFM >= 16
                 if(is_wino_valid && is_ifm_ge_16)
                 {
                     return ConvolutionMethod::WINOGRAD;
                 }
-                // Run Direct for Large kernel size
-                if(is_large_kernel_sz && is_ifm_ge_16 && is_direct_valid && is_ifm_gt_ofm)
+
+                // Direct convolution case
+                if(is_direct_valid)
                 {
-                    return ConvolutionMethod::DIRECT;
+                    if((gpu_target == arm_compute::GPUTarget::G71 ||
+                       gpu_target == arm_compute::GPUTarget::G72 ||
+                       gpu_target == arm_compute::GPUTarget::MIDGARD))
+                    {
+                        if(is_large_kernel_sz && is_ifm_ge_16 && is_ifm_gt_ofm)
+                        {
+                            return ConvolutionMethod::DIRECT;
+                        }
+                    }
+                    else
+                    {
+                        if((is_large_kernel_sz && workload_gte_8192 && is_ifm_ge_16) || (is_ofm_lte_8 && is_ifm_ge_16))
+                        {
+                            return ConvolutionMethod::DIRECT;
+                        }
+                    }
                 }
 
                 // Default case

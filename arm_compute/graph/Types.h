@@ -216,6 +216,7 @@ enum class NodeType
     FullyConnectedLayer,
     FusedConvolutionBatchNormalizationLayer,
     FusedConvolutionWithPostOp,
+    FusedConvolutionBatchNormalizationLayerWithPostOpsLayer,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     L2NormalizeLayer,

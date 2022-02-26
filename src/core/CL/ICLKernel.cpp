@@ -116,6 +116,58 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
     ARM_COMPUTE_UNUSED(idx_start);
 }
 
+void ICLKernel::add_3d_tensor_nhw_argument(unsigned int &idx, const ICLTensor *tensor)
+{
+    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+
+    const ITensorInfo *info = tensor->info();
+    ARM_COMPUTE_ERROR_ON(info == nullptr);
+    const Strides &strides = info->strides_in_bytes();
+
+    // Tensor poniter
+    _kernel.setArg(idx++, tensor->cl_buffer());
+
+    // Add stride_y, stride_z
+    _kernel.setArg<cl_uint>(idx++, strides[1]);
+    _kernel.setArg<cl_uint>(idx++, strides[2]);
+
+    // Tensor dimensions
+    _kernel.setArg<cl_uint>(idx++, info->dimension(0));
+    _kernel.setArg<cl_uint>(idx++, info->dimension(1));
+    _kernel.setArg<cl_uint>(idx++, info->dimension(2));
+
+    // Offset of first element
+    unsigned int offset_first_element = info->offset_first_element_in_bytes();
+    _kernel.setArg<cl_uint>(idx++, offset_first_element);
+}
+
+void ICLKernel::add_4d_tensor_nhwc_argument(unsigned int &idx, const ICLTensor *tensor)
+{
+    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+
+    const ITensorInfo *info = tensor->info();
+    ARM_COMPUTE_ERROR_ON(info == nullptr);
+    const Strides &strides = info->strides_in_bytes();
+
+    // Tensor poniter
+    _kernel.setArg(idx++, tensor->cl_buffer());
+
+    // Add stride_y, stride_z and stride_w
+    _kernel.setArg<cl_uint>(idx++, strides[1]);
+    _kernel.setArg<cl_uint>(idx++, strides[2]);
+    _kernel.setArg<cl_uint>(idx++, strides[3]);
+
+    // Tensor dimensions
+    _kernel.setArg<cl_uint>(idx++, info->dimension(0));
+    _kernel.setArg<cl_uint>(idx++, info->dimension(1));
+    _kernel.setArg<cl_uint>(idx++, info->dimension(2));
+    _kernel.setArg<cl_uint>(idx++, info->dimension(3));
+
+    // Offset of first element
+    unsigned int offset_first_element = info->offset_first_element_in_bytes();
+    _kernel.setArg<cl_uint>(idx++, offset_first_element);
+}
+
 #ifndef DOXYGEN_SKIP_THIS
 template void ICLKernel::add_tensor_argument<1>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<2>(unsigned &idx, const ICLTensor *tensor, const Window &window);

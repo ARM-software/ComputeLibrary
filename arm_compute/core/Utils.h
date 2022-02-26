@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -886,6 +886,13 @@ const std::string &string_from_norm_type(NormType type);
  * @return The string describing the pooling type.
  */
 const std::string &string_from_pooling_type(PoolingType type);
+/** Check if the pool region is entirely outside the input tensor
+ *
+ * @param[in] info @ref PoolingLayerInfo to be checked.
+ *
+ * @return True if the pool region is entirely outside the input tensor, False otherwise.
+ */
+bool is_pool_region_entirely_outside_input(const PoolingLayerInfo &info);
 /** Translates a given GEMMLowp output stage to a string.
  *
  * @param[in] output_stage @ref GEMMLowpOutputStageInfo to be translated to string.
@@ -951,6 +958,14 @@ inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
  * @return The lowered string
  */
 std::string lower_string(const std::string &val);
+
+/** Raise a given string to upper case
+ *
+ * @param[in] val Given string to lower.
+ *
+ * @return The upper case string
+ */
+std::string upper_string(const std::string &val);
 
 /** Check if a given data type is of floating point type
  *
@@ -1183,6 +1198,49 @@ inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
     }
 
     return vec_size;
+}
+
+/** Returns the suffix string of CPU kernel implementation names based on the given data type
+ *
+ * @param[in] data_type The data type the CPU kernel implemetation uses
+ *
+ * @return the suffix string of CPU kernel implementations
+ */
+inline std::string cpu_impl_dt(const DataType &data_type)
+{
+    std::string ret = "";
+
+    switch(data_type)
+    {
+        case DataType::F32:
+            ret = "fp32";
+            break;
+        case DataType::F16:
+            ret = "fp16";
+            break;
+        case DataType::U8:
+            ret = "u8";
+            break;
+        case DataType::S16:
+            ret = "s16";
+            break;
+        case DataType::S32:
+            ret = "s32";
+            break;
+        case DataType::QASYMM8:
+            ret = "qu8";
+            break;
+        case DataType::QASYMM8_SIGNED:
+            ret = "qs8";
+            break;
+        case DataType::QSYMM16:
+            ret = "qs16";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported.");
+    }
+
+    return ret;
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

@@ -94,12 +94,12 @@ vars.AddVariables(
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
-    BoolVariable("fat_binary", "Build fat binary version of library. Note works only for armv8.2-a", False),
+    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Note works only for armv8.2-a", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -125,6 +125,7 @@ vars.AddVariables(
     ("specs_file", "Specs file to use (e.g. rdimon.specs)", ""),
     ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
 )
+
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
 build_path = env['build_dir']
@@ -206,8 +207,8 @@ env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
-default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos'] else 'clang++'
-default_c_compiler = 'gcc' if env['os'] not in ['android', 'macos'] else 'clang'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang++'
+default_c_compiler = 'gcc' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
@@ -219,7 +220,7 @@ if 'clang++' in cpp_compiler:
 elif 'armclang' in cpp_compiler:
     pass
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-misleading-indentation'])
 
 if cpp_compiler == 'g++':
     # Don't strip comments that could include markers
@@ -248,42 +249,63 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
     print("ERROR: armv7a architecture has only 32-bit execution state")
     Exit(1)
 
+env.Append(CPPDEFINES = ['ENABLE_NEON', 'ARM_COMPUTE_ENABLE_NEON'])
+
+if 'sve' in env['arch']:
+    env.Append(CPPDEFINES = ['ENABLE_SVE', 'ARM_COMPUTE_ENABLE_SVE'])
+    if 'sve2' in env['arch']:
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
+
 # Add architecture specific flags
 prefix = ""
-if 'v7a' in env['arch']:
-    env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-    if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
-        env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
-    else:
-        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
-elif 'v8' in env['arch']:
-    if 'sve2' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
-    elif 'sve' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
-    elif 'armv8r64' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.4-a'])
-    elif 'v8.' in env['arch']:
-        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-    else:
-        env.Append(CXXFLAGS = ['-march=armv8-a'])
+if env['multi_isa']:
+    # assert arch version is v8
+    if 'v8' not in env['arch']:
+        print("Currently Multi ISA binary is only supported for arm v8 family")
+        Exit(1)
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
         if "disable_mmla_fp" not in env['custom_options']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
-    if 'v8.' in env['arch']:
-        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
 
-elif 'x86' in env['arch']:
-    if env['estate'] == '32':
-        env.Append(CCFLAGS = ['-m32'])
-        env.Append(LINKFLAGS = ['-m32'])
-    else:
-        env.Append(CXXFLAGS = ['-fPIC'])
-        env.Append(CCFLAGS = ['-m64'])
-        env.Append(LINKFLAGS = ['-m64'])
+    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+
+else: # NONE "multi_isa" builds
+
+    if 'v7a' in env['arch']:
+        env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
+        if (env['os'] == 'android' or env['os'] == 'tizen') and not 'hf' in env['arch']:
+            env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
+        else:
+            env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif 'v8' in env['arch']:
+        # Preserve the V8 archs for non-multi-ISA variants
+        if 'sve2' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve2+fp16+dotprod'])
+        elif 'sve' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+        elif 'armv8r64' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.4-a'])
+        elif 'v8.' in env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        else:
+            env.Append(CXXFLAGS = ['-march=armv8-a'])
+
+        if 'v8.6-a' in env['arch']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
+            if "disable_mmla_fp" not in env['custom_options']:
+                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+        if 'v8.' in env['arch']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+
+    elif 'x86' in env['arch']:
+        if env['estate'] == '32':
+            env.Append(CCFLAGS = ['-m32'])
+            env.Append(LINKFLAGS = ['-m32'])
+        else:
+            env.Append(CXXFLAGS = ['-fPIC'])
+            env.Append(CCFLAGS = ['-m64'])
+            env.Append(LINKFLAGS = ['-m64'])
 
 # Define toolchain
 prefix = ""
@@ -306,11 +328,6 @@ if 'x86' not in env['arch']:
             prefix = "aarch64-linux-android-"
         elif env['os'] == 'tizen':
             prefix = "aarch64-tizen-linux-gnu-"
-
-if 'sve' in env['arch']:
-    env.Append(CXXFLAGS = ['-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE'])
-else:
-    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON'])
 
 if env['build'] == 'native':
     prefix = ""
@@ -355,17 +372,8 @@ if not GetOption("help"):
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
 
-if env['fat_binary']:
-    if env['arch'] != 'armv8.2-a':
-        print("Currently fat binary is only supported with armv8.2-a")
-        Exit(1)
-    env.Append(CXXFLAGS = ['-DENABLE_NEON', '-DARM_COMPUTE_ENABLE_NEON',
-                           '-DENABLE_SVE', '-DARM_COMPUTE_ENABLE_SVE',
-                           '-DARM_COMPUTE_ENABLE_FP16', '-DARM_COMPUTE_ENABLE_BF16',
-                           '-DARM_COMPUTE_ENABLE_I8MM', '-DARM_COMPUTE_ENABLE_SVEF32MM'])
-
 if env['high_priority'] and env['build_config']:
-    print("The high priority library cannot be built in conjuction with a user-specified build configuration")
+    print("The high priority library cannot be built in conjunction with a user-specified build configuration")
     Exit(1)
 
 if not env['high_priority'] and not env['build_config']:
@@ -421,6 +429,10 @@ if env['opencl']:
 if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
+if env['os'] == 'openbsd':
+    env.Append(LIBS = ['c'])
+    env.Append(CXXFLAGS = ['-fPIC'])
+
 if env['opencl']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
@@ -474,3 +486,11 @@ if env['exceptions']:
         print("WARNING: Building tests for bare metal and armv7a is not supported")
         Return()
     SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)
+
+# Unknown variables are not allowed
+# Note: we must delay the call of UnknownVariables until after
+# we have applied the Variables object to the construction environment
+unknown = vars.UnknownVariables()
+if unknown:
+    print("Unknown variables: %s" % " ".join(unknown.keys()))
+    Exit(1)

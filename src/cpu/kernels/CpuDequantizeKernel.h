@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 namespace kernels
 {
 /** Interface for the dequantization layer kernel. */
-class CpuDequantizeKernel : public ICpuKernel
+class CpuDequantizeKernel : public ICpuKernel<CpuDequantizeKernel>
 {
 public:
     CpuDequantizeKernel() = default;
