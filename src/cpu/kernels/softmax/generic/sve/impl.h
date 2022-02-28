@@ -24,7 +24,6 @@
 #ifndef SRC_CORE_SVE_KERNELS_SOFTMAX_IMPL_H
 #define SRC_CORE_SVE_KERNELS_SOFTMAX_IMPL_H
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "arm_compute/core/Helpers.h"
 namespace arm_compute
 {
@@ -38,6 +37,5 @@ void sve_softmax_logits_1d_float(const ITensor *in, const ITensor *max, void *co
                                  ITensor *out, const float beta, bool is_log, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
 
 #endif /* SRC_CORE_SVE_KERNELS_SOFTMAX_IMPL_H */

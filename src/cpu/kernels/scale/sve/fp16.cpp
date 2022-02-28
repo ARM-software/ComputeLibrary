@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -172,5 +173,4 @@ void fp16_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, co
 }
 } // namespace cpu
 } // namespace arm_compute
-
-#endif // ARM_COMPUTE_ENABLE_SVE
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

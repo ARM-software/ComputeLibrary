@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
@@ -203,5 +203,3 @@ void qasymm8_signed_sve_scale(const ITensor *src, ITensor *dst, const ITensor *o
 }
 } // namespace cpu
 } // namespace arm_compute
-
-#endif // ARM_COMPUTE_ENABLE_SVE

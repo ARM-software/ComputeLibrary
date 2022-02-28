@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "src/cpu/kernels/add/generic/sve/impl.h"
@@ -36,4 +36,3 @@ void add_fp32_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const 
 }
 }
 } // namespace arm_compute
-#endif //ARM_COMPUTE_ENABLE_SVE

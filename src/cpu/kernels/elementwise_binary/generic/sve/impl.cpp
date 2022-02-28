@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "src/cpu/kernels/elementwise_binary/generic/sve/impl.h"
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
@@ -312,4 +312,3 @@ svint16_t elementwise_div<svint16_t>(svbool_t &pg, const svint16_t &a, const svi
 
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */

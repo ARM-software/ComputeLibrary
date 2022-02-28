@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "src/cpu/kernels/add/generic/sve/impl.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/Traits.h"
@@ -133,4 +133,3 @@ template void add_same_sve<float16_t>(const ITensor *src0, const ITensor *src1, 
 #endif /* (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
 } // namespace cpu
 } // namespace arm_compute
-#endif // ARM_COMPUTE_ENABLE_SVE

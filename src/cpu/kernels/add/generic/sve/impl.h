@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #ifndef SRC_CORE_SVE_KERNELS_ADD_IMPL_H
 #define SRC_CORE_SVE_KERNELS_ADD_IMPL_H
 #include "arm_compute/core/ITensor.h"
@@ -37,4 +37,3 @@ void add_same_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const 
 } // namespace cpu
 } // namespace arm_compute
 #endif // SRC_CORE_SVE_KERNELS_ADD_IMPL_H
-#endif // ARM_COMPUTE_ENABLE_SVE

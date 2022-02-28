@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
 #include "src/cpu/kernels/gemm_matrix_add/generic/neon/impl.h"
 
@@ -35,4 +35,4 @@ void neon_fp16_gemm_matrix_add(const ITensor *src, ITensor *dst, const Window &w
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif //__ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

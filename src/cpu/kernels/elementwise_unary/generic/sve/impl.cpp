@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
@@ -106,4 +106,3 @@ template void elementwise_sve_op<int32_t>(const ITensor *in, ITensor *out, const
 
 } // namespace cpu
 } // namespace arm_compute
-#endif //defined(ARM_COMPUTE_ENABLE_SVE)

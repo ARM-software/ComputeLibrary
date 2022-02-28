@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/SVESymm.h"
 #include <arm_sve.h>
@@ -117,4 +116,3 @@ void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */

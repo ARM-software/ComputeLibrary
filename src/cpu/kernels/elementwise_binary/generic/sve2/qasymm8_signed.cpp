@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
+
 #include "arm_compute/core/Helpers.h"
 #include "src/cpu/kernels/elementwise_binary/generic/sve2/impl.h"
 namespace arm_compute
@@ -58,4 +58,3 @@ template void sve2_qasymm8_signed_comparison_elementwise_binary<ComparisonOperat
 
 } // namespace cpu
 } // namespace arm_compute
-#endif //defined(ARM_COMPUTE_ENABLE_SVE2)

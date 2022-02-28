@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
 #include "src/cpu/kernels/softmax/generic/sve/impl.h"
 namespace arm_compute
@@ -40,4 +40,4 @@ void sve_fp16_logits(const ITensor *in, ITensor *out, const Window &window)
 }
 }
 } // namespace arm_compute
-#endif //ARM_COMPUTE_ENABLE_SVE
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

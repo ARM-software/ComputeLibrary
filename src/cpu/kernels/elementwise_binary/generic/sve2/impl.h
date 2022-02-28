@@ -24,7 +24,6 @@
 #ifndef SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 #define SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/cpu/kernels/elementwise_binary/generic/sve/impl.h"
 namespace arm_compute
 {
@@ -359,5 +358,4 @@ void elementwise_comparison_quantized_op(const ITensor *in1, const ITensor *in2,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_QUANTIZED_LIST_H */
