@@ -40,7 +40,7 @@ public:
      * @param[in] h Height of the 3D shape or object
      * @param[in] d Depth of the 3D shape or object
      */
-    Size3D(size_t w, size_t h, size_t d)
+    Size3D(size_t w, size_t h, size_t d) noexcept
         : width(w), height(h), depth(d)
     {
     }
