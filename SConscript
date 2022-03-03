@@ -172,7 +172,7 @@ def resolve_includes(target, source, env):
             for line in tmp_file:
                 found = pattern.search(line)
                 if found:
-                    include_file = found.group(1)
+                    include_file = found.group(1).split('/')[-1]
                     data = files_dict[include_file].file_contents
                     updated_file.extend(data)
                 else:
@@ -489,6 +489,16 @@ with (open(Dir('#').path + '/filelist.json')) as fp:
 
 # Common backend files
 lib_files = filelist['common']
+
+# Experimental files
+# Dynamic fusion
+if env['experimental_dynamic_fusion']:
+    if env['embed_kernels']:
+        print("Dynamic fusion with embed_kernels=1 not supported. Skipping.")
+    else:
+        lib_files += filelist['experimental']['dynamic_fusion']
+        arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+
 
 # Logging files
 if env["logging"]:

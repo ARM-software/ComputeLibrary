@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,20 @@
 
 #include <string>
 
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+namespace arm_compute
+{
+namespace experimental
+{
+namespace dynamic_fusion
+{
+struct TensorBinding;
+struct ClExecutionDescriptor;
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
 namespace arm_compute
 {
 namespace
@@ -63,7 +77,6 @@ template <typename T>
 class ICLArray;
 class ICLTensor;
 class Window;
-
 /** Common interface for all the OpenCL kernels */
 class ICLKernel : public IKernel
 {
@@ -323,6 +336,14 @@ public:
     {
         ARM_COMPUTE_UNUSED(tensors, window, queue);
     }
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+    /// The execution is carried out through run_op method. But the run_op method needs to be extended to include ClExecutionDescriptor as now LWS GWS tuning will be separated from the IKernel
+    virtual void run_composite_op(experimental::dynamic_fusion::TensorBinding &tensors, const Window &window, cl::CommandQueue &queue, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+    {
+        ARM_COMPUTE_UNUSED(tensors, window, queue, exec_desc);
+    }
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
     /** Add the passed parameters to the object's kernel's arguments starting from the index idx.
      *
      * @param[in,out] idx   Index at which to start adding the arguments. Will be incremented by the number of kernel arguments set.

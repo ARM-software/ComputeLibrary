@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,20 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+namespace arm_compute
+{
+namespace experimental
+{
+namespace dynamic_fusion
+{
+struct TensorBinding;
+struct ClExecutionDescriptor;
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 namespace arm_compute
 {
@@ -86,6 +100,21 @@ public:
      * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
     void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+    /** Schedule the execution of the passed kernel if possible.
+     * Use TensorBinding instead of ITensorPack for working with dynamic fusion
+     * @note Does not support dynamic tuning yet
+     *
+     * @param[in] kernel    Kernel to execute.
+     * @param[in] tensors   Map containing the tensors to operate on.
+     * @param[in] exec_desc Execution descriptor
+     * @param[in] flush     (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
+     */
+    void enqueue_op(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush = true);
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
@@ -173,6 +202,11 @@ public:
 
 private:
     void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush);
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+    void enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 

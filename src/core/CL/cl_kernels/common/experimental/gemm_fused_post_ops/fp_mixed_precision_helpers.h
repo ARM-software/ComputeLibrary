@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "fp_elementwise_op_helpers.h"
+#include "common/experimental/gemm_fused_post_ops/fp_elementwise_op_helpers.h"
 #include "gemm_helpers.h"
 #include "load_store_utility.h"
 

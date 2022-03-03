@@ -114,6 +114,7 @@ vars.AddVariables(
     BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
+    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "src/core/CL/ICLKernel.h"
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 namespace arm_compute
 {
@@ -185,6 +189,35 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
     }
 }
 
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
+                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
+                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
+
+    const bool inject_memory = !tensors._binding.empty();
+
+    // Run kernel
+    inject_memory ? kernel.run_composite_op(tensors, kernel.window(), _queue, exec_desc) : kernel.run(kernel.window(), _queue);
+
+    if(_job_chaining_enabled)
+    {
+        if(++_job_chaining_count >= _job_chaining_size)
+        {
+            _job_chaining_count = 0;
+            _queue.flush();
+        }
+    }
+    else if(flush)
+    {
+        _queue.flush();
+    }
+}
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 {
     ITensorPack pack;
@@ -195,6 +228,15 @@ void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush
 {
     enqueue_common(kernel, tensors, flush);
 }
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::enqueue_op(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+{
+    enqueue_common(kernel, tensors, exec_desc, flush);
+}
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 void CLScheduler::enable_job_chaining(int job_chaining_size)
 {

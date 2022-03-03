@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -406,6 +406,17 @@ public:
     template <typename T, typename DataType>
     void fill_static_values(T &&tensor, const std::vector<DataType> &values) const;
 
+    // Function type to generate a number to fill tensors.
+    template <typename ResultType>
+    using GeneratorFunctionType = std::function<ResultType(void)>;
+    /** Fill a tensor with a value generator function.
+     *
+     * @param[in, out] tensor         To be filled tensor.
+     * @param[in]      generate_value A function that generates values.
+     */
+    template <typename T, typename ResultType>
+    void fill_with_generator(T &&tensor, const GeneratorFunctionType<ResultType> &generate_value) const;
+
 private:
     // Function prototype to convert between image formats.
     using Converter = void (*)(const RawTensor &src, RawTensor &dst);
@@ -413,9 +424,6 @@ private:
     using Extractor = void (*)(const RawTensor &src, RawTensor &dst);
     // Function prototype to load an image file.
     using Loader = RawTensor (*)(const std::string &path);
-    // Function type to generate a number to fill tensors.
-    template <typename ResultType>
-    using GeneratorFunctionType = std::function<ResultType(void)>;
 
     const Converter &get_converter(Format src, Format dst) const;
     const Converter &get_converter(DataType src, Format dst) const;
@@ -459,14 +467,6 @@ private:
      *       is loaded instead.
      */
     const RawTensor &find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const;
-
-    /** Fill a tensor with a value generator function.
-     *
-     * @param[in, out] tensor         To be filled tensor.
-     * @param[in]      generate_value A function that generates values.
-     */
-    template <typename T, typename ResultType>
-    void fill_with_generator(T &&tensor, const GeneratorFunctionType<ResultType> &generate_value) const;
 
     mutable TensorCache             _cache{};
     mutable arm_compute::Mutex      _format_lock{};

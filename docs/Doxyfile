@@ -876,6 +876,7 @@ EXCLUDE                = ./arm_compute/core/NEON/kernels/assembly/ \
                          ./src/core/NEON/kernels/NEL2NormalizeLayerKernel.cpp \
                          ./tests/datasets/ \
                          ./tests/benchmark/fixtures/ \
+                         ./tests/validation/CL/UNIT/dynamic_fusion/ClCompositeKernel.cpp \
                          ./tests/validation/fixtures/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
@@ -2096,7 +2097,8 @@ PREDEFINED             = DOXYGEN_SKIP_THIS \
                          LOCATE_MIN \
                          LOCATE_MAX \
                          HAS_BIAS \
-                         POOL_AVG
+                         POOL_AVG \
+                         ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "fp_mixed_precision_helpers.h"
+#include "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h"
 
 /** (EXPERIMENTAL_POST_OPS) Post Op expansions for the post op sequence:
  * act (optional): POST_OP1_ACTIVATION_OPTIONAL

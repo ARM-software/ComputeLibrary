@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,8 @@ public:
      * @return Build options set
      */
     const StringSet &options() const;
+
+    bool operator==(const CLBuildOptions &other) const;
 
 private:
     StringSet _build_opts; /**< Build options set */

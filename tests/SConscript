@@ -115,6 +115,9 @@ filter_pattern = test_env['test_filter']
 files_validation += Glob('validation/CPP/' + filter_pattern)
 
 if env['opencl']:
+    if env['experimental_dynamic_fusion'] and not env['embed_kernels']:
+        test_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+
     filter_pattern = test_env['test_filter']
 
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
