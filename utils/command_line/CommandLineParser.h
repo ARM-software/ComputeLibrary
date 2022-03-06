@@ -35,6 +35,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cstring>
 
 namespace arm_compute
 {
