@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,6 @@ const GemmImplementation<uint16_t, uint32_t> *gemm_implementation_list<uint16_t,
 
 /* Explicitly instantiate the external functions for these types. */
 template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
-template KernelDescription get_gemm_method<uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
 template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
 
 } // namespace arm_gemm

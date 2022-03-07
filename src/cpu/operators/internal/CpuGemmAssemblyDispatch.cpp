@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -355,19 +355,14 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
     _is_b_constant = b->are_values_constant();
     _is_c_constant = c ? c->are_values_constant() : true;
 
-    arm_gemm::GemmConfig gemm_cfg;
-    _kernel_info = arm_gemm::get_gemm_method<TypeInput, TypeOutput, OutputStage>(args, os);
-    if(_kernel_info.method != arm_gemm::GemmMethod::GEMV_BATCHED)
-    {
-        gemm_cfg.filter = _kernel_info.name;
-        args._cfg       = &gemm_cfg;
-    }
     _gemm_kernel_asm = arm_gemm::gemm<TypeInput, TypeOutput, OutputStage>(args, os);
     if(_gemm_kernel_asm == nullptr)
     {
         //configuration not supported: Leave function unconfigured:
         return;
     }
+
+    arm_gemm::GemmConfig gemm_cfg = _gemm_kernel_asm->get_config();
 
     // arm_compute wrapper for the Gemm object (see above)
     auto acl_gemm_wrapper = std::make_unique<kernel::CpuGemmAssemblyWrapperKernel<TypeInput, TypeOutput>>();

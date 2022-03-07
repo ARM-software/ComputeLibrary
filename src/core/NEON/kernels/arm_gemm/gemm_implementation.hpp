@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -244,18 +244,6 @@ UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage &os) {
     }
 
     return UniqueGemmCommon<Top, Tret>(nullptr);
-}
-
-template<typename Top, typename Tret, class OutputStage>
-KernelDescription get_gemm_method(const GemmArgs &args, const OutputStage &os) {
-    const GemmImplementation<Top, Tret, OutputStage> *impl;
-
-    if (find_implementation<Top, Tret>(args, os, impl)) {
-        return KernelDescription(impl->method, impl->name);
-    }
-
-    /* This shouldn't happen - there should always be at least one valid implementation. */
-    return KernelDescription();
 }
 
 } // namespace arm_gemm
