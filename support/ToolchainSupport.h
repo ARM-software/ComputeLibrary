@@ -310,6 +310,7 @@ inline bool isfinite(bfloat16 value)
     return std::isfinite(float(value));
 }
 
+#if !defined(_WIN64)
 // std::signbit
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
 inline bool signbit(T value)
@@ -326,6 +327,7 @@ inline bool signbit(bfloat16 value)
 {
     return std::signbit(float(value));
 }
+#endif // !defined(_WIN64)
 } // namespace cpp11
 } // namespace support
 } // namespace arm_compute

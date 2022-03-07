@@ -25,7 +25,9 @@
 
 #include "../Framework.h"
 #include "../printers/Printers.h"
+#if !defined(_WIN64)
 #include <unistd.h>
+#endif // !defined(_WIN64)
 
 using namespace arm_compute::utils;
 
@@ -43,7 +45,9 @@ CommonOptions::CommonOptions(CommandLineParser &parser)
       log_file(parser.add_option<SimpleOption<std::string>>("log-file")),
       log_level(),
       throw_errors(parser.add_option<ToggleOption>("throw-errors")),
-      color_output(parser.add_option<ToggleOption>("color-output", isatty(STDOUT_FILENO))), // Only enable colors by default if we're running in a terminal
+#if !defined(_WIN64)
+     color_output(parser.add_option<ToggleOption>("color-output", isatty(STDOUT_FILENO))), // Only enable colors by default if we're running in a terminal
+#endif // !defined(_WIN64)
       pretty_console(parser.add_option<ToggleOption>("pretty-console", false)),
       json_file(parser.add_option<SimpleOption<std::string>>("json-file")),
       pretty_file(parser.add_option<SimpleOption<std::string>>("pretty-file")),

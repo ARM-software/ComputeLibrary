@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 #include "interleave_indirect.hpp"
 #include "bfloat.hpp"
 
-#if !defined(__OpenBSD__)
+#if !defined(_WIN64) && !defined(__OpenBSD__)
 #include <alloca.h>
-#endif /* !defined(__OpenBSD__) */
+#endif /* !defined(_WIN64) && !defined(__OpenBSD__) */
 
 #include <algorithm>
 #include <cstddef>

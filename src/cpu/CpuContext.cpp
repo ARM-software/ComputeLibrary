@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,12 @@
 #include <cstdlib>
 #if !defined(__APPLE__) && !defined(__OpenBSD__)
 #include <malloc.h>
-#endif // !defined(__APPLE__) && !defined(__OpenBSD__)
 
+#if defined(_WIN64)
+#define posix_memalign _aligned_realloc
+#define posix_memalign_free _aligned_free
+#endif // defined(_WIN64)
+#endif // !defined(__APPLE__) && !defined(__OpenBSD__)
 
 namespace arm_compute
 {

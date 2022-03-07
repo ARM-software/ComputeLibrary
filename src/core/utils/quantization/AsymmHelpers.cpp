@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -206,7 +206,9 @@ int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b)
     int64_t a_64(a);
     int64_t b_64(b);
     int64_t ab_64               = a_64 * b_64;
-    bool    is_positive_or_zero = a == 0 || b == 0 || (std::signbit(a) == std::signbit(b));
+    const bool  is_positive_or_zero =
+        a == 0 || b == 0 ||
+        (std::signbit(static_cast<double>(a)) == std::signbit(static_cast<double>(b)));
     int32_t nudge               = is_positive_or_zero ? (1 << 30) : (1 - (1 << 30));
     int32_t ab_x2_high32        = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
     return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Arm Limited.
+# Copyright (c) 2016-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -94,7 +94,7 @@ vars.AddVariables(
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -128,7 +128,9 @@ vars.AddVariables(
 )
 
 
-env = Environment(platform="posix", variables=vars, ENV = os.environ)
+env = Environment(variables=vars, ENV = os.environ)
+
+
 build_path = env['build_dir']
 # If build_dir is a relative path then add a #build/ prefix:
 if not env['build_dir'].startswith('/'):
@@ -201,15 +203,26 @@ if not env['exceptions']:
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
 env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
-         '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
+         '-Wextra','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-         '-std=c++14','-Woverloaded-virtual', '-Wformat-security',
+         '-Woverloaded-virtual', '-Wformat-security',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
+
+if not 'windows' in env['os']:
+    env.Append(CXXFLAGS = ['-std=c++14', '-pedantic' ])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
-default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang++'
-default_c_compiler = 'gcc' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang'
+cpp_tool = {'linux': 'g++', 'android' : 'clang++',
+             'tizen': 'g++', 'macos':'clang++',
+             'bare_metal':'g++', 'openbsd':'g++','windows':'clang-cl'}
+
+c_tool = {'linux':'gcc', 'android': 'clang', 'tizen':'gcc',
+          'macos':'clang','bare_metal':'gcc',
+          'openbsd':'gcc','windows':'clang-cl'}
+
+default_cpp_compiler = cpp_tool[env['os']]
+default_c_compiler = c_tool[env['os']]
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
@@ -220,8 +233,8 @@ if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-vla-extension'])
 elif 'armclang' in cpp_compiler:
     pass
-else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-misleading-indentation'])
+elif not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-misleading-indentation']) 
 
 if cpp_compiler == 'g++':
     # Don't strip comments that could include markers
@@ -344,12 +357,21 @@ env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
 env['CXX'] = env['compiler_cache']+ " " + compiler_prefix + cpp_compiler
 env['LD'] = prefix + "ld"
 env['AS'] = prefix + "as"
-env['AR'] = prefix + "ar"
+
+
+if env['os'] == 'windows':
+    env['AR'] = "LIB"
+else:
+    env['AR'] = prefix + "ar"
+
 env['RANLIB'] = prefix + "ranlib"
 
 if not GetOption("help"):
     try:
-        compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
+        if env['os'] == 'windows':
+            compiler_ver = subprocess.check_output("clang++ -dumpversion").decode().strip()
+        else:
+            compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
@@ -396,7 +418,8 @@ else:
 env = update_data_type_layout_flags(env, data_types, data_layouts)
 
 if env['standalone']:
-    env.Append(CXXFLAGS = ['-fPIC'])
+    if not 'windows' in env['os']: 
+        env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
 
 if env['Werror']:
@@ -414,6 +437,15 @@ elif env['os'] == 'bare_metal':
     env.Append(CPPDEFINES = ['BARE_METAL'])
 if env['os'] == 'linux' and env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = [ '-Wno-psabi' ])
+if env['os'] == 'windows':
+    env.Append(CXXFLAGS = [ '/std:c++14','/EHa'])
+    env.Append(CXXFLAGS = [ '-Wno-c++98-compat', '-Wno-covered-switch-default','-Wno-c++98-compat-pedantic'])
+    env.Append(CXXFLAGS = [ '-Wno-shorten-64-to-32', '-Wno-sign-conversion','-Wno-documentation'])
+    env.Append(CXXFLAGS = [ '-Wno-extra-semi-stmt', '-Wno-float-equal','-Wno-implicit-int-conversion'])
+    env.Append(CXXFLAGS = [ '-Wno-documentation-pedantic', '-Wno-extra-semi','-Wno-shadow-field-in-constructor'])
+    env.Append(CXXFLAGS = [ '-Wno-float-conversion', '-Wno-switch-enum','-Wno-comma'])
+    env.Append(CXXFLAGS = [ '-Wno-implicit-float-conversion', '-Wno-deprecated-declarations','-Wno-old-style-cast'])
+    env.Append(CXXFLAGS = [ '-Wno-zero-as-null-pointer-constant', '-Wno-inconsistent-missing-destructor-override'])
 
 if env['specs_file'] != "":
     env.Append(LINKFLAGS = ['-specs='+env['specs_file']])
@@ -446,8 +478,12 @@ if env['debug']:
     env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
-    env.Append(CXXFLAGS = ['-O3'])
-
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-O3'])
+    else:
+        # on windows we use clang-cl which does not support the option -O3
+        env.Append(CXXFLAGS = ['-O2'])
+ 
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
     env.Append(CXXFLAGS = ['-fstack-protector-strong'])
