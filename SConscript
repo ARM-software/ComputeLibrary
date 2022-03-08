@@ -172,6 +172,8 @@ def resolve_includes(target, source, env):
             for line in tmp_file:
                 found = pattern.search(line)
                 if found:
+                    # Only get the header file name and discard the relative path.
+                    # E.g. "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h" -> "fp_mixed_precision_helpers.h"
                     include_file = found.group(1).split('/')[-1]
                     data = files_dict[include_file].file_contents
                     updated_file.extend(data)
@@ -495,6 +497,7 @@ lib_files = filelist['common']
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     if env['embed_kernels']:
+        # COMPMID-5176
         print("Dynamic fusion with embed_kernels=1 not supported. Skipping.")
     else:
         lib_files += filelist['experimental']['dynamic_fusion']
