@@ -37,13 +37,15 @@ namespace dynamic_fusion
 class ClElementwiseAddKernelComponent : public IClKernelComponent
 {
 public:
-    ClElementwiseAddKernelComponent(const Link &lhs, const Link &rhs, const Link &dst)
-        : _lhs{ lhs }, _rhs{ rhs }, _dst{ dst }
+    ClElementwiseAddKernelComponent(const ClKernelBlueprint *blueprint, const Link &lhs, const Link &rhs, const Link &dst)
+        : IClKernelComponent(blueprint), _lhs{ lhs }, _rhs{ rhs }, _dst{ dst }
     {
     }
+
     ComponentType         get_component_type() const override;
     std::set<std::string> get_headers_list() const override;
     std::string           get_component_code() const override;
+    Window                get_window() const override;
 
     virtual std::vector<Link> get_links() const override
     {

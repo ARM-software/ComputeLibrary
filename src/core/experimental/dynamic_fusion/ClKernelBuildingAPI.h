@@ -100,13 +100,13 @@ struct ClKernelComponentDescriptor
 /** Component: Tensor Argument */
 struct ClTensorDescriptor
 {
-    ClTensorDescriptor(const ITensorInfo *info, unsigned int dim)
+    ClTensorDescriptor(ITensorInfo *info, unsigned int dim)
         : tensor_info(info), slice_dim(dim)
     {
     }
 
-    const ITensorInfo *tensor_info;
-    unsigned int       slice_dim;
+    ITensorInfo *tensor_info;
+    unsigned int slice_dim;
 };
 
 Status add_tensor_argument(ClKernelBlueprint &, const ClTensorDescriptor &, ArgumentID &);
@@ -133,8 +133,8 @@ struct GemmNativeDescriptor
     int32_t           b_offset{};
 };
 
-Status add_kcomp_gemm_native(ClKernelBlueprint &, const ClKernelComponentDescriptor &, const GemmNativeDescriptor &, ArgumentID input_id,
-                             ArgumentID weights_id, ArgumentID bias_id, ArgumentID &dst_id);
+Status add_kcomp_gemm_native(ClKernelBlueprint &, const ClKernelComponentDescriptor &, const GemmNativeDescriptor &,
+                             ArgumentID input_id, ArgumentID weights_id, ArgumentID bias_id, ArgumentID &dst_id);
 
 /** Component: Eltwise Add */
 struct EltwiseAddDescriptor

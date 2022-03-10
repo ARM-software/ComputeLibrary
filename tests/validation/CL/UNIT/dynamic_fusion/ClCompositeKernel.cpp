@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 #include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
@@ -75,85 +74,6 @@ void fill(U &&tensor, int seed)
     // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
     DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
     library->fill_borders_with_garbage(tensor, distribution_inf, seed);
-}
-
-using ElementsProcessed = Steps;
-std::pair<Status, Window> mock_gemm_native_validate_and_configure_window(ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info,
-                                                                         const GEMMRHSMatrixInfo &rhs_info,
-                                                                         const GEMMKernelInfo &gemm_info, ElementsProcessed &num_elements_processed)
-{
-    unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
-    unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
-    bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
-    bool          reinterpret_output_as_3d            = gemm_info.depth_output_gemm3d != 0;
-
-    Window win{};
-    Window win_out{};
-    bool   window_changed = false;
-
-    // In case both input and dst have to be reinterpreted as 3D tensors,
-    // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
-    if(reinterpret_input_as_3d == reinterpret_output_as_3d)
-    {
-        reinterpret_output_as_3d = false;
-    }
-
-    // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
-
-    TensorInfo tmp_info(*dst);
-
-    if(reinterpret_output_as_3d)
-    {
-        // Since the dst tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
-        // the window needs to be constructed on the 2D collapsed version of the tensor
-        TensorShape tmp_shape(dst->tensor_shape());
-        tmp_shape.collapse(2U, 1U);
-        tmp_info.set_tensor_shape(tmp_shape);
-    }
-
-    // Configure kernel window
-    num_elems_processed_per_iteration_x = rhs_info.n0;
-    num_elems_processed_per_iteration_y = lhs_info.m0;
-
-    win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    win_out = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-
-    AccessWindowStatic src0_access(src0, 0, 0,
-                                   src0->dimension(0),
-                                   src0->dimension(1));
-    AccessWindowStatic src1_access(src1, 0, 0,
-                                   ceil_to_multiple(src1->dimension(0), num_elems_processed_per_iteration_x),
-                                   src1->dimension(1));
-    AccessWindowStatic dst_access(dst, 0, 0,
-                                  dst->dimension(0),
-                                  dst->dimension(1));
-
-    if(src2 != nullptr)
-    {
-        const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
-
-        AccessWindowStatic src2_access(src2, 0, 0,
-                                       ceil_to_multiple(src2->dimension(0), bias_processed_per_iteration_x),
-                                       src2->dimension(1));
-
-        window_changed = update_window_and_padding(win, src0_access, src1_access, src2_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, dst_access);                          // window used to update the padding requirements of dst tensor
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win, src0_access, src1_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, dst_access);             // window used to update the padding requirements of dst tensor
-    }
-
-    // Collapse along the Z direction
-    // This collapse needs to be here in order to tune the Z dimension of LWS
-    Window             collapsed             = win;
-    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(dst->num_dimensions()), 2u);
-    collapsed                                = win.collapse(win, dimension_to_collapse);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, collapsed);
 }
 
 void set_build_options(ClKernelCode &cl_code, GemmNativeDescriptor gemm_native_desc,
@@ -241,7 +161,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     const auto t_dst_shape = TensorShape(n, m);
     auto       t_lhs_info  = TensorInfo(t_lhs_shape, 1, data_type);
     auto       t_rhs_info  = TensorInfo(t_rhs_shape, 1, data_type);
-    const auto t_bias_info = TensorInfo(TensorShape(), 1, DataType::F32);
+    auto       t_bias_info = TensorInfo(TensorShape(), 1, DataType::F32);
     auto       t_dst_info  = TensorInfo(t_dst_shape, 1, data_type);
 
     const ClTensorDescriptor t_lhs_desc{ &t_lhs_info, 2 };
@@ -270,7 +190,6 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     ArgumentID tid_acc;
     st = add_tensor_intermed(bp, tid_acc);
     st = add_kcomp_gemm_native(bp, common_kernel_desc, gemm_native_desc, tid_lhs, tid_rhs, tid_l0_bias, tid_acc);
-
     st = add_kcomp_eltwise_add(bp, common_kernel_desc, EltwiseAddDescriptor{}, tid_l1_addend, tid_acc, tid_acc);
     st = add_kcomp_store(bp, common_kernel_desc, tid_acc, tid_dst, StoreType::StoreBlockBoundaryAware);
 
@@ -278,13 +197,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
 
     st = set_tile_info(bp, store_tile_info);
     st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
-
     set_build_options(cl_code, gemm_native_desc, t_lhs_info, t_rhs_info, nullptr, t_dst_info);
-    ElementsProcessed num_elements_processed{};
-    auto              win_config = mock_gemm_native_validate_and_configure_window(&t_lhs_info, &t_rhs_info, nullptr, &t_dst_info, gemm_native_desc.lhs_info, gemm_native_desc.rhs_info, gemm_info,
-                                                                                  num_elements_processed);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    cl_code.window = win_config.second;
 
     ClExecutionDescriptor exec_desc;
     st = tune_static(exec_desc, cl_code);
@@ -432,11 +345,6 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
         st = set_tile_info(bp, store_tile_info);
         st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
         set_build_options(cl_code, gemm_native_desc, t_lhs_info, t_rhs_info, nullptr, t_dst_info);
-        ElementsProcessed num_elements_processed{};
-        auto              win_config = mock_gemm_native_validate_and_configure_window(&t_lhs_info, &t_rhs_info, nullptr, &t_dst_info, gemm_native_desc.lhs_info, gemm_native_desc.rhs_info, gemm_info,
-                                                                                      num_elements_processed);
-        ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-        cl_code.window = win_config.second;
         TOCK(cond0_build_time, measurements)
 
         TICK(cond0_tune_time)

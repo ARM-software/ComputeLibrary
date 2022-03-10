@@ -37,8 +37,8 @@ namespace dynamic_fusion
 class ClStoreBlockBoundaryAwareKernelComponent : public IClKernelComponent
 {
 public:
-    ClStoreBlockBoundaryAwareKernelComponent(const Link &src, const Link &dst)
-        : _src{ src }, _dst{ dst }
+    ClStoreBlockBoundaryAwareKernelComponent(const ClKernelBlueprint *blueprint, const Link &src, const Link &dst)
+        : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
     {
     }
     ComponentType get_component_type() const override;
