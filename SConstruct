@@ -217,14 +217,14 @@ if not env['exceptions']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
-env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
+env.Append(CXXFLAGS = ['-DARCH_ARM',
          '-Wextra','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-Woverloaded-virtual', '-Wformat-security',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 if not 'windows' in env['os']:
-    env.Append(CXXFLAGS = ['-std=c++14', '-pedantic' ])
+    env.Append(CXXFLAGS = ['-Wall','-std=c++14', '-pedantic' ])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
@@ -377,10 +377,13 @@ env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
 env['CXX'] = env['compiler_cache']+ " " + compiler_prefix + cpp_compiler
 env['LD'] = toolchain_prefix + "ld"
 env['AS'] = toolchain_prefix + "as"
+
 if env['os'] == 'windows':
-    env['AR'] = "LIB"
+    env['AR'] = "llvm-lib"
+    env['RANLIB'] = "llvm-ranlib"
 else:
     env['AR'] = toolchain_prefix + "ar"
+
 env['RANLIB'] = toolchain_prefix + "ranlib"
 
 print("Using compilers:")
@@ -446,10 +449,10 @@ else:
 env = update_data_type_layout_flags(env, data_types, data_layouts)
 
 if env['standalone']:
-    if not 'windows' in env['os']: 
+    if not 'windows' in env['os']:
         env.Append(CXXFLAGS = ['-fPIC'])
-    env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
-
+        env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+       
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
 
@@ -487,7 +490,7 @@ if env['opencl']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)
 
-if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
+if env["os"] not in ["windows","android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
 if env['os'] == 'openbsd':
@@ -503,7 +506,12 @@ if env['opencl']:
 
 if env['debug']:
     env['asserts'] = True
-    env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
+    else:
+        env.Append(CXXFLAGS = ['-Z7','-MTd','-fms-compatibility','-fdelayed-template-parsing'])
+        env.Append(LINKFLAGS = ['-DEBUG'])
+ 
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
     if not 'windows' in env['os']:
@@ -511,10 +519,11 @@ else:
     else:
         # on windows we use clang-cl which does not support the option -O3
         env.Append(CXXFLAGS = ['-O2'])
- 
+
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
-    env.Append(CXXFLAGS = ['-fstack-protector-strong'])
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-fstack-protector-strong'])
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])

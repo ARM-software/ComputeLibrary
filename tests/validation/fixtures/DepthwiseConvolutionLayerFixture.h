@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -199,14 +199,14 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint8_t> distribution(0, 15);
+                std::uniform_int_distribution<uint32_t> distribution(0, 15);
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::QASYMM8_SIGNED:
             case DataType::QSYMM8_PER_CHANNEL:
             {
-                std::uniform_int_distribution<int8_t> distribution(-10, 10);
+                std::uniform_int_distribution<int32_t> distribution(-10, 10);
                 library->fill(tensor, distribution, i);
                 break;
             }

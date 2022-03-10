@@ -67,13 +67,13 @@ void fill(U &&tensor, int i)
                     max_bound = bounds.second;
                 }
             }
-            std::uniform_int_distribution<int8_t> distribution(min_bound, max_bound);
+            std::uniform_int_distribution<int32_t> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, i);
             break;
         }
         case DataType::QASYMM8:
         {
-            std::uniform_int_distribution<uint8_t> distribution(1, 254);
+            std::uniform_int_distribution<uint32_t> distribution(1, 254);
             library->fill(tensor, distribution, i);
             break;
         }

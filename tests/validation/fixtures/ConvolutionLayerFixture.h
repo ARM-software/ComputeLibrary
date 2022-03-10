@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,14 +122,14 @@ protected:
             case DataType::QASYMM8:
             {
                 std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+                std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::QASYMM8_SIGNED:
             {
                 std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
+                std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -149,7 +149,7 @@ protected:
                         max_bound = bounds.second;
                     }
                 }
-                std::uniform_int_distribution<int8_t> distribution(min_bound, max_bound);
+                std::uniform_int_distribution<int32_t> distribution(min_bound, max_bound);
                 library->fill(tensor, distribution, i);
                 break;
             }

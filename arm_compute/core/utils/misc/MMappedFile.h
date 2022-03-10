@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_MISC_MMAPPED_FILE_H
 #define ARM_COMPUTE_MISC_MMAPPED_FILE_H
 
-#if !defined(BARE_METAL)
+#if !defined(_WIN64) && !defined(BARE_METAL)
 
 #include <string>
 #include <utility>
@@ -105,6 +105,6 @@ private:
 } // namespace mmap_io
 } // namespace utils
 } // namespace arm_compute
-#endif // !defined(BARE_METAL)
+#endif // !defined(_WIN64) &&!defined(BARE_METAL)
 
 #endif /* ARM_COMPUTE_MISC_MMAPPED_FILE_H */

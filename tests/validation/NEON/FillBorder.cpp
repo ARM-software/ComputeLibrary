@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,10 +60,10 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(
 {
     BorderSize border_size{ static_cast<unsigned int>(size) };
 
-    std::mt19937                           generator(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-    const uint8_t                          border_value = distribution_u8(generator);
-    const uint8_t                          tensor_value = distribution_u8(generator);
+    std::mt19937                            generator(library->seed());
+    std::uniform_int_distribution<uint32_t> distribution_u8(0, 255);
+    const uint8_t                           border_value = distribution_u8(generator);
+    const uint8_t                           tensor_value = distribution_u8(generator);
 
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -77,7 +77,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(
     validate(src.info()->padding(), padding);
 
     // Fill tensor with constant value
-    std::uniform_int_distribution<uint8_t> distribution{ tensor_value, tensor_value };
+    std::uniform_int_distribution<uint32_t> distribution{ tensor_value, tensor_value };
     library->fill(Accessor(src), distribution, 0);
 
     // Create and configure kernel

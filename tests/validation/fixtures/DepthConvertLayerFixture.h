@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ protected:
         if(is_data_type_quantized(tensor.data_type()))
         {
             std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
 
             library->fill(tensor, distribution, i);
         }

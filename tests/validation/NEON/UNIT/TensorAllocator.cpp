@@ -193,7 +193,7 @@ TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
     ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
 }
 
-#if !defined(BARE_METAL)
+#if !defined(_WIN64) && !defined(BARE_METAL)
 TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 {
     const ActivationLayerInfo act_info(ActivationLayerInfo::ActivationFunction::RELU);
@@ -250,7 +250,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
     tensor.allocator()->free();
     ARM_COMPUTE_ASSERT(tensor.info()->is_resizable());
 }
-#endif // !defined(BARE_METAL)
+#endif // !defined(_WIN64) && !defined(BARE_METAL)
 
 TEST_CASE(AlignedAlloc, framework::DatasetMode::ALL)
 {

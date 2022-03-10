@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,8 +59,8 @@ public:
 
         generate_scale(shape);
 
-        std::mt19937                           generator(library->seed());
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
+        std::mt19937                            generator(library->seed());
+        std::uniform_int_distribution<uint32_t> distribution_u8(0, 255);
         _constant_border_value = static_cast<T>(distribution_u8(generator));
 
         _target    = compute_target(shape, data_layout);

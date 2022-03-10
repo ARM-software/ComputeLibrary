@@ -28,23 +28,22 @@
 
 namespace padding
 {
-
 template <typename T>
 void copy_and_pad_tile(
-  const unsigned int tile_rows,
-  const unsigned int tile_cols,
-  const unsigned int n_channels,
-  const T* const inptr,
-  const unsigned int in_row_stride,
-  const unsigned int in_col_stride,
-  T* const outptr,
-  const unsigned int out_row_stride,
-  const unsigned int out_col_stride,
-  const unsigned int pad_top,
-  const unsigned int pad_left,
-  const unsigned int pad_bottom,
-  const unsigned int pad_right,
-  const T pad_value
+  unsigned int tile_rows,
+  unsigned int tile_cols,
+  unsigned int n_channels,
+  const T *inptr,
+  unsigned int in_row_stride,
+  unsigned int in_col_stride,
+  T* outptr,
+  unsigned int out_row_stride,
+  unsigned int out_col_stride,
+  unsigned int pad_top,
+  unsigned int pad_left,
+  unsigned int pad_bottom,
+  unsigned int pad_right,
+  T pad_value
 )
 {
   for (unsigned int out_i = 0; out_i < tile_rows; out_i++)
