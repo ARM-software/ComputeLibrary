@@ -82,6 +82,22 @@ std::string ClElementwiseAddKernelComponent::get_component_code() const
 
 )_";
 }
+
+CLBuildOptions ClElementwiseAddKernelComponent::generate_build_options() const
+{
+    auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    auto tile_info  = _blueprint->impl().get_tile_info();
+
+    CLBuildOptions build_opts{};
+
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(t_dst_info->data_type()));
+    build_opts.add_option("-DM0=" + support::cpp11::to_string(tile_info.tile_dims.y()));
+    build_opts.add_option("-DN0=" + support::cpp11::to_string(tile_info.tile_dims.x()));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(tile_info.boundaries.y() % tile_info.tile_dims.y()));
+
+    return build_opts;
+}
+
 ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::allocate_vars(SharedVarTable &vtable) const
 {
     // Determine which argument is the accumulator

@@ -46,6 +46,7 @@ public:
     std::set<std::string> get_headers_list() const override;
     std::string           get_component_code() const override;
     Window                get_window() const override;
+    CLBuildOptions        generate_build_options() const override;
 
     virtual std::vector<Link> get_links() const override
     {

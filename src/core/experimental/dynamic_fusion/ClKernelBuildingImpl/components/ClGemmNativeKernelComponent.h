@@ -52,6 +52,7 @@ public:
     std::string           get_component_code() const override;
     Window                get_window() const override;
     ClKernelArgList       get_args();
+    CLBuildOptions        generate_build_options() const override;
 
     virtual std::vector<Link> get_links() const override
     {

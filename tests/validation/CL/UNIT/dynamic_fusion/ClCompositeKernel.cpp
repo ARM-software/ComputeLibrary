@@ -75,70 +75,6 @@ void fill(U &&tensor, int seed)
     DistributionType distribution_inf{ T(std::numeric_limits<float>::infinity()), T(std::numeric_limits<float>::infinity()) };
     library->fill_borders_with_garbage(tensor, distribution_inf, seed);
 }
-
-void set_build_options(ClKernelCode &cl_code, GemmNativeDescriptor gemm_native_desc,
-                       const TensorInfo &t_lhs_info,
-                       const TensorInfo &t_rhs_info,
-                       const TensorInfo *t_bias_info,
-                       const TensorInfo &t_dst_info)
-{
-    CLBuildOptions ref_cl_build_options;
-    {
-        // If reinterpret_input_as_3d = reinterpret_output_as_3d = true,
-        // we will dispatch a batched-GEMM to reduce the complexity of the address calculation within the OpenCL kernel.
-        // This means that the actual m used by the kernel is given by dst->dimension(1) and not by gemm_info.m
-        auto reinterpret_input_as_3d  = gemm_native_desc.reinterpret_input_as_3d;
-        auto reinterpret_output_as_3d = gemm_native_desc.depth_output_gemm3d != 0;
-        auto _slide_matrix_b          = (t_rhs_info.num_dimensions() >= t_lhs_info.num_dimensions());
-        auto _use_dummy_work_items    = false;
-        // In case both input and dst have to be reinterpreted as 3D tensors,
-        // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
-        if(reinterpret_input_as_3d == reinterpret_output_as_3d)
-        {
-            reinterpret_input_as_3d  = false;
-            reinterpret_output_as_3d = false;
-        }
-
-        const unsigned int internal_m = reinterpret_output_as_3d ? gemm_native_desc.m : t_dst_info.dimension(1);
-
-        const unsigned int h_gemm_3d = reinterpret_output_as_3d ? t_dst_info.dimension(1) : t_lhs_info.dimension(1);
-        const unsigned int d_gemm_3d = reinterpret_output_as_3d ? t_dst_info.dimension(2) : t_lhs_info.dimension(2);
-
-        // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
-        const unsigned int partial_store_m0 = internal_m % gemm_native_desc.lhs_info.m0;
-        const unsigned int partial_store_n0 = gemm_native_desc.n % gemm_native_desc.rhs_info.n0;
-
-        // Shrink M0 to be always <= M (internal_m) to prevent out-of-bounds reads.
-        const unsigned int internal_m0 = std::min(internal_m, gemm_native_desc.lhs_info.m0);
-
-        ref_cl_build_options.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(t_dst_info.data_type()));
-        ref_cl_build_options.add_option_if(!(helpers::float_ops::is_one(gemm_native_desc.alpha)), "-DALPHA=" + float_to_string_with_full_precision(gemm_native_desc.alpha));
-        ref_cl_build_options.add_option_if(t_bias_info != nullptr, "-DBETA=" + float_to_string_with_full_precision(gemm_native_desc.beta));
-        ref_cl_build_options.add_option_if(helpers::float_ops::is_one(gemm_native_desc.beta), "-DUNIT_BETA");
-        ref_cl_build_options.add_option_if(gemm_native_desc.broadcast_bias, "-DBROADCAST_BIAS");
-        ref_cl_build_options.add_option_if(reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
-        ref_cl_build_options.add_option_if(reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
-        ref_cl_build_options.add_option_if(reinterpret_input_as_3d || reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(h_gemm_3d));
-        ref_cl_build_options.add_option_if(reinterpret_input_as_3d || reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(d_gemm_3d));
-        ref_cl_build_options.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(t_rhs_info.dimension(2)));
-        ref_cl_build_options.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
-        ref_cl_build_options.add_option("-DM=" + support::cpp11::to_string(internal_m));
-        ref_cl_build_options.add_option("-DN=" + support::cpp11::to_string(gemm_native_desc.n));
-        ref_cl_build_options.add_option("-DK=" + support::cpp11::to_string(gemm_native_desc.k));
-        ref_cl_build_options.add_option("-DM0=" + support::cpp11::to_string(internal_m0));
-        ref_cl_build_options.add_option("-DN0=" + support::cpp11::to_string(gemm_native_desc.rhs_info.n0));
-        ref_cl_build_options.add_option("-DK0=" + support::cpp11::to_string(gemm_native_desc.rhs_info.k0));
-        ref_cl_build_options.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
-        ref_cl_build_options.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
-        // Manually add PostOps
-        {
-            ref_cl_build_options.add_option("-DOP=ADD_X_POS_1");
-            ref_cl_build_options.add_option("-DP2_ELTWISE_ARG1_HEIGHT=" + support::cpp11::to_string(t_dst_info.dimension(1)));
-            ref_cl_build_options.add_option("-DP2_ELTWISE_ARG1_WIDTH=" + support::cpp11::to_string(t_dst_info.dimension(0)));
-        }
-    }
-    cl_code.build_options = ref_cl_build_options;
-}
 } // namespace
 
 TEST_SUITE(CL)
@@ -185,7 +121,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     const GemmNativeDescriptor gemm_native_desc{ 1.0, 1.0, m, n, k };
     const GEMMKernelInfo       gemm_info{ m, n, k, 0, false, false, false, false, ActivationLayerInfo{}, 1, 1, gemm_native_desc.lhs_info, gemm_native_desc.rhs_info, 0, 0 };
     const EltwiseAddDescriptor eltwise_add_desc{ ConvertPolicy::WRAP };
-    const TileDescriptor       store_tile_info{};
+    const TileDescriptor       store_tile_info{ Size2D(gemm_info.rhs_info.n0, gemm_info.lhs_info.m0), Size2D(gemm_info.n, gemm_info.m), ClippingStrategy::TOP_LEFT };
 
     ArgumentID tid_acc;
     st = add_tensor_intermed(bp, tid_acc);
@@ -197,7 +133,6 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
 
     st = set_tile_info(bp, store_tile_info);
     st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
-    set_build_options(cl_code, gemm_native_desc, t_lhs_info, t_rhs_info, nullptr, t_dst_info);
 
     ClExecutionDescriptor exec_desc;
     st = tune_static(exec_desc, cl_code);
@@ -288,7 +223,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     const GemmNativeDescriptor gemm_native_desc{ 1.0, 0.0, m, n, k };
     const GEMMKernelInfo       gemm_info{ m, n, k, 0, false, false, false, false, ActivationLayerInfo{}, 1, 1, gemm_native_desc.lhs_info, gemm_native_desc.rhs_info, 0, 0 };
     const EltwiseAddDescriptor eltwise_add_desc{ ConvertPolicy::WRAP };
-    const TileDescriptor       store_tile_info{};
+    const TileDescriptor       store_tile_info{ Size2D(gemm_info.rhs_info.n0, gemm_info.lhs_info.m0), Size2D(gemm_info.n, gemm_info.m), ClippingStrategy::TOP_LEFT };
 
     // Create reference
     SimpleTensor<float> ref_t_lhs{ t_lhs_shape, data_type, 1 };
@@ -344,7 +279,6 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
 
         st = set_tile_info(bp, store_tile_info);
         st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
-        set_build_options(cl_code, gemm_native_desc, t_lhs_info, t_rhs_info, nullptr, t_dst_info);
         TOCK(cond0_build_time, measurements)
 
         TICK(cond0_tune_time)

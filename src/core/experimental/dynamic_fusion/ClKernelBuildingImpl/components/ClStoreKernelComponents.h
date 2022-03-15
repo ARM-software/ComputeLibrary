@@ -41,8 +41,9 @@ public:
         : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
     {
     }
-    ComponentType get_component_type() const override;
-    std::string   get_component_code() const override;
+    ComponentType  get_component_type() const override;
+    std::string    get_component_code() const override;
+    CLBuildOptions generate_build_options() const override;
 
     virtual std::vector<Link> get_links() const override
     {
