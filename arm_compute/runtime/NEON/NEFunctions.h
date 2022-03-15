@@ -80,6 +80,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
+#include "arm_compute/runtime/NEON/functions/NEPooling3dLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQLSTMLayer.h"

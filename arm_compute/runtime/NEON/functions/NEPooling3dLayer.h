@@ -21,37 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLPOOLING3DLAYER_H
-#define ARM_COMPUTE_CLPOOLING3DLAYER_H
-
-#include "arm_compute/runtime/IFunction.h"
+#ifndef ARM_COMPUTE_NEPOOLING3DLAYER_H
+#define ARM_COMPUTE_NEPOOLING3DLAYER_H
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-class CLCompileContext;
-class ICLTensor;
+// Forward declarations
+class ITensor;
 class ITensorInfo;
-
-/** Basic function to run  @ref opencl::ClPool3d */
-class CLPooling3dLayer : public IFunction
+class IMemoryManager;
+/** Basic function to simulate a pooling 3d layer with the specified pooling operation. This function calls the following kernels:
+ *
+ * -# @ref cpu::CpuPool3d
+ */
+class NEPooling3dLayer : public IFunction
 {
 public:
-    /** Default Constructor */
-    CLPooling3dLayer();
-    /** Default Destructor */
-    ~CLPooling3dLayer();
+    /** Constructor */
+    NEPooling3dLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPooling3dLayer(const CLPooling3dLayer &) = delete;
-    /** Default move constructor */
-    CLPooling3dLayer(CLPooling3dLayer &&) = default;
+    NEPooling3dLayer(const NEPooling3dLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPooling3dLayer &operator=(const CLPooling3dLayer &) = delete;
-    /** Default move assignment operator */
-    CLPooling3dLayer &operator=(CLPooling3dLayer &&) = default;
+    NEPooling3dLayer &operator=(const NEPooling3dLayer &) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPooling3dLayer(NEPooling3dLayer &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEPooling3dLayer &operator=(NEPooling3dLayer &&) = delete;
+    /** Default destructor */
+    ~NEPooling3dLayer();
     /** Set the input and output tensors.
      *
      * Valid data layouts:
@@ -64,28 +66,18 @@ public:
      * |F32            |F32            |
      *
      * @note Source tensor is padded with -inf for MAX pooling and 0 otherwise
-     *       Cases where pooling region is completely outside input tensor are not supported
      *
-     * @note Asymmetric padding is not supported when dimension rounding type == CEIL.
-     *
-     * @param[in,out] input     Source tensor. Data types supported: F16/F32.
-     * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
-     * @param[in]     pool_info Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
+     * @param[in]  input     Source tensor. Data types supported: F16/F32.
+     * @param[out] output    Destination tensor.
+     * @param[in]  pool_info Contains pooling operation information described in @ref Pooling3dLayerInfo.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const Pooling3dLayerInfo &pool_info);
-    /** Set the input and output tensors.
+    void configure(const ITensor *input, ITensor *output, const Pooling3dLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEPooling3dLayer
      *
-     * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] input           Source tensor. Data types supported: F16/F32.
-     * @param[out]    output          Destination tensor. Data types supported: Same as @p input.
-     * @param[in]     pool_info       Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
-     */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Pooling3dLayerInfo &pool_info);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLPooling3dLayer
      *
      * @param[in] input     Source tensor info. Data types supported: F16/F32.
-     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
-     * @param[in] pool_info Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
+     * @param[in] output    Destination tensor info.
+     * @param[in] pool_info Contains pooling operation information described in @ref Pooling3dLayerInfo.
      *
      * @return a status
      */
@@ -98,5 +90,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-} // namespace arm_compute
-#endif /* ARM_COMPUTE_CLPOOLING3DLAYER_H */
+}
+#endif /* ARM_COMPUTE_NEPOOLING3DLAYER_H */

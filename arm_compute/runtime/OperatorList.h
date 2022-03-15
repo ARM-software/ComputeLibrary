@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -717,6 +717,16 @@
  * ANEURALNETWORKS_AVERAGE_POOL_2D
  * ANEURALNETWORKS_L2_POOL_2D
  * ANEURALNETWORKS_MAX_POOL_2D
+ *
+ */
+
+/** Pooling3dLayer
+ *
+ * Description:
+ * Function to perform pooling 3D with the specified pooling operation.
+ *
+ * Equivalent Android NNAPI Op:
+ * N/A
  *
  */
 

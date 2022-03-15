@@ -1795,6 +1795,20 @@
           }
         }
       },
+      "Pool3d": {
+        "files": {
+          "common": [
+            "src/cpu/operators/CpuPool3d.cpp",
+            "src/cpu/kernels/CpuPool3dKernel.cpp",
+            "src/runtime/NEON/functions/NEPooling3dLayer.cpp"
+          ],
+          "neon": {
+            "common":[ "src/cpu/kernels/pool3d/neon/impl.cpp" ],
+            "fp16":  [ "src/cpu/kernels/pool3d/neon/fp16.cpp" ],
+            "fp32":  [ "src/cpu/kernels/pool3d/neon/fp32.cpp" ]
+          }
+        }
+      },
       "PRelu": {
         "deps": [ "ElementwiseBinary" ],
         "files": {
