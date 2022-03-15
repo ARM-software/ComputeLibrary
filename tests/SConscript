@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Arm Limited.
+# Copyright (c) 2017-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -129,6 +129,8 @@ if env['opencl']:
 
     files_validation += Glob('validation/CL/*/' + filter_pattern)
     files_validation += Glob('validation/CL/' + filter_pattern)
+    if env['experimental_dynamic_fusion'] and not env['embed_kernels']:
+        files_validation += Glob('validation/CL/UNIT/dynamic_fusion/' + filter_pattern)
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/CL/' + filter_pattern)
     files_validation += Glob('validation/gpu/unit/*.cpp')
