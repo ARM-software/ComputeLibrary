@@ -49,19 +49,22 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_info.stride.x() == 0 || pool_info.stride.y() == 0 || pool_info.stride.z() == 0), "Strides cannot be zero.");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type())) && (!pool_info.exclude_padding
+                                                                                && (pool_info.pool_type == PoolingType::AVG)),
+                                    "Exclude padding is unsupported for non-float types for Avg op");
 
-    const auto   data_layout       = src->data_layout();
-    const int    idx_width         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int    idx_height        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int    idx_depth         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::DEPTH);
-    const bool   is_global_pooling = pool_info.is_global_pooling;
+    const auto         data_layout       = src->data_layout();
+    const int          idx_width         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int          idx_height        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int          idx_depth         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::DEPTH);
+    const bool         is_global_pooling = pool_info.is_global_pooling;
     const unsigned int pool_size_x       = is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
     const unsigned int pool_size_y       = is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
     const unsigned int pool_size_z       = is_global_pooling ? src->dimension(idx_depth) : pool_info.pool_size.depth;
-    int          output_width      = 0;
-    int          output_height     = 0;
-    int          output_depth      = 0;
+    int                output_width      = 0;
+    int                output_height     = 0;
+    int                output_depth      = 0;
 
     bool round_type_ceil_with_asymm_padding = (pool_info.round_type == DimensionRoundingType::CEIL) && (!is_symmetric(pool_info.padding));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(round_type_ceil_with_asymm_padding, "Cannot use dimension round type CEIL when padding is asymmetric.");
@@ -143,10 +146,31 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(idx_height)));
     build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(idx_depth)));
 
+    // If datatype is quantized add relevant parameters
+    if(is_data_type_quantized_asymmetric(data_type) && src->quantization_info() != dst->quantization_info())
+    {
+        const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq_info.offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq_info.scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
+    }
+
     // Set the initial value for the pooling operation accordingly with the data type
     if(pool_type == PoolingType::MAX)
     {
-        build_opts.add_option("-DINITIAL_VALUE=" + float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
+        if(is_data_type_quantized(data_type))
+        {
+            PixelValue type_min{};
+            std::tie(type_min, std::ignore) = get_min_max(data_type);
+            build_opts.add_option("-DINITIAL_VALUE=" + support::cpp11::to_string(type_min.get<int32_t>()));
+        }
+        else
+        {
+            build_opts.add_option("-DINITIAL_VALUE=" + float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
+        }
     }
     else
     {
@@ -164,6 +188,11 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     {
         acc_data_type = DataType::F32;
     }
+    else if(is_data_type_quantized(data_type) && pool_type != PoolingType::MAX) // Use S32 for avg pooling to allow for integer division
+    {
+        acc_data_type = DataType::S32;
+    }
+
     build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(acc_data_type));
     build_opts.add_option_if(use_fp_mixed_precision, "-DFP_MIXED_PRECISION");
     build_opts.add_option_if(exclude_padding, "-DEXCLUDE_PADDING");
@@ -172,8 +201,10 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(idx_channel)));
     build_opts.add_option("-DDST_BATCH_SIZE=" + support::cpp11::to_string(dst->dimension(idx_batch_size)));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % _num_elems_processed_per_iteration));
-    std::string kernel_name = "pooling_3d_layer_MxN_ndhwc";
-    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // if datatype is quantized use quantized kernel function
+    std::string kernel_name = (is_data_type_quantized_asymmetric(data_type) ? "pooling_3d_layer_MxN_ndhwc_quantized" : "pooling_3d_layer_MxN_ndhwc");
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*dst, Steps(_num_elems_processed_per_iteration));

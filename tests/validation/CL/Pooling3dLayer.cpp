@@ -59,10 +59,18 @@ const auto Pooling3dLayerDatasetFPSmall = combine(combine(combine(combine(datase
                                                           framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
                                                   framework::dataset::make("ExcludePadding", { true, false }));
 
+const auto Pooling3DLayerDatasetQuantized = combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                            framework::dataset::make("PoolingSize", { Size3D(2, 3, 2) })),
+                                                                    framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(1, 1, 2), Size3D(2, 2, 1)})),
+                                                            framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
+                                                    framework::dataset::make("ExcludePadding", { true }));
+
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f);       /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
+constexpr AbsoluteTolerance<float>   tolerance_f16(0.1f);         /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1); /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8_SIGNED integer datatype*/
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);        /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
 
 } // namespace
 
@@ -133,8 +141,64 @@ using CLSpecialPooling3dLayerFixture = SpecialPooling3dLayerValidationFixture<CL
 template <typename T>
 using CLPooling3dLayerGlobalFixture = Pooling3dLayerGlobalValidationFixture<CLTensor, CLAccessor, CLPooling3dLayer, T>;
 
+template <typename T>
+using CLPooling3dLayerQuantizedFixture = Pooling3dLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLPooling3dLayer, T>;
+
 // clang-format on
 // *INDENT-ON*
+TEST_SUITE(QUANTIZED)
+
+TEST_SUITE(QASYMM8)
+// Small Dataset Quantized Dataset
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
+                                                                                                                       combine(Pooling3DLayerDatasetQuantized,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) })),
+                                                                                                                       framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, 5), QuantizationInfo(1.f / 127.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+// Large Dataset Quantized Dataset
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large5dShapes(),
+                                                                                                                       combine(Pooling3DLayerDatasetQuantized,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                       framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, 10), QuantizationInfo(1.f / 127.f, 10) })),
+                                                                                                                       framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, 5), QuantizationInfo(1.f / 127.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+// Large Dataset Quantized Dataset Signed
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
+                                                                                                                      combine(Pooling3DLayerDatasetQuantized,
+                                                                                                                              framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                      framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
+                                                                                                                      framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_signed);
+}
+
+// Large Dataset Quantized pooling test
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large5dShapes(),
+                                                                                                                    combine(Pooling3DLayerDatasetQuantized,
+                                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    framework::dataset::make("InputQuantInfo", { QuantizationInfo(1.f / 127.f, -10), QuantizationInfo(1.f / 127.f, -10) })),
+                                                                                                                    framework::dataset::make("OutputQuantInfo", { QuantizationInfo(1.f / 127.f, -5), QuantizationInfo(1.f / 127.f, -10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_signed);
+}
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
@@ -152,8 +216,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<float>, framework::Data
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), combine(Pooling3dLayerDatasetFP,
-                                                                                                            framework::dataset::make("DataType",
-                                                                                                                    DataType::F32))))
+                                                                                                          framework::dataset::make("DataType", DataType::F32))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -219,8 +282,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPooling3dLayerFixture<half>, framework::Datas
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPooling3dLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large5dShapes(), combine(Pooling3dLayerDatasetFP,
-                                                                                                           framework::dataset::make("DataType",
-                                                                                                                   DataType::F16))))
+                                                                                                         framework::dataset::make("DataType", DataType::F16))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

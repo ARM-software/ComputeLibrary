@@ -46,7 +46,7 @@ public:
      * @note Asymmetric padding is not supported when dimension rounding type == CEIL.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             Source tensor info. Data types supported: F16/F32.
+     * @param[in]  src             Source tensor info. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      * @param[in]  pool_info       Contains pooling operation information described in @ref Pooling3dLayerInfo.
      */

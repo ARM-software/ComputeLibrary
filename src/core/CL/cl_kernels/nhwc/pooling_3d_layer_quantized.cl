@@ -24,11 +24,11 @@
 #include "helpers.h"
 #include "tile_helpers.h" // Needed for GET_SPATIAL_IDX()
 
-#if defined(POOL_AVG) || defined(POOL_L2)
+#if defined(POOL_AVG)
 #define POOL_OP(x, y) ((x) + (y))
-#else /* defined(POOL_AVG) || defined(POOL_L2) */
-#define POOL_OP(x, y) (fmax((x), (y)))
-#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+#else /* defined(POOL_AVG)  */
+#define POOL_OP(x, y) (max((x), (y)))
+#endif /* defined(POOL_AVG) */
 
 #define SQRT_OP(x) sqrt((x))
 
@@ -36,12 +36,28 @@
 
 #if defined(POOL_SIZE_X) && defined(POOL_SIZE_Y) && defined(POOL_SIZE_Z)
 
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+#define VEC_FLOAT(VEC_SIZE) VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
+#define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                 \
+    {                                                                                                                                                                 \
+        const VEC_FLOAT(VEC_SIZE) in_f32  = (CONVERT(input, VEC_FLOAT(VEC_SIZE)) - (VEC_FLOAT(VEC_SIZE))((float)in_offset)) * (VEC_FLOAT(VEC_SIZE))((float)in_scale); \
+        const VEC_FLOAT(VEC_SIZE) out_f32 = in_f32 / ((VEC_FLOAT(VEC_SIZE))(float)out_scale) + ((VEC_FLOAT(VEC_SIZE))((float)out_offset));                            \
+        res                               = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT(VEC_SIZE)), VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));                                \
+    }
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+
+#if defined(POOL_L2)
+#error "L2 pooling is not supported"
+#endif /* defined(POOL_L2) */
+
 /** Performs 3d pooling layer of size equal to MxNXD. This OpenCL kernel can perform the following pooling types:
  * -# max, -DPOOL_MAX must be passed at compile time
  * -# average, -DPOOL_AVG must be passed at compile time. If padding has to be excluded, -DEXCLUDE_PADDING should be passed at compile time
- * -# l2 normalisation, -DPOOL_L2 must be passed at compile time
  *
- * @note Datatype must be passed at compile type using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types are F32/F16
+ * @note Datatype must be passed at compile type using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types are QASYMM8_SIGNED, QASYMM8
  * @note Accumulation data type must be passed at compile time using -DACC_DATA_TYPE e.g. -DACC_DATA_TYPE=float
  * @note If -DFP_MIXED_PRECISION is passed at compile time, the kernel will use F32 for the partial result
  * @note Pool size must be passed at compile time using -DPOOL_SIZE_X, -DPOOL_SIZE_Y, and -DPOOL_SIZE_Z. e.g. -DPOOL_SIZE_X=4, -DPOOL_SIZE_Y=4, -DPOOL_SIZE_Z=2
@@ -53,7 +69,7 @@
  * @note Leftover vector size must be passed at compile time using -DVEC_SIZE_LEFTOVER. e.g. -DVEC_SIZE_LEFTOVER=3. It is defined as the remainder between the input's first dimension and VEC_SIZE
  * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: F32/F16
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8_SIGNED, QASYMM8
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -78,12 +94,12 @@
  * @param[in]  output_step_v                        output_stride_v * number of elements along V processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void pooling_3d_layer_MxN_ndhwc(
+__kernel void pooling_3d_layer_MxN_ndhwc_quantized(
     TENSOR5D_DECLARATION(input),
     TENSOR5D_DECLARATION(output))
 {
     // Note: If C is not multiple of VEC_SIZE, we shift back of VEC_SIZE_LEFTOVER elements to compute the leftover elements for get_global_id(0) == 0
-    // Note: If C is less than VEC_SIZE, VEC_SIZE should be SHRINKED to the closest smaller VEC_SIZE. This operation is performed on the host side
+    // Note: If C is less than VEC_SIZE, VEC_SIZE should be shrunk to the closest smaller VEC_SIZE. This operation is performed on the host side
     int idx_out_c = GET_SPATIAL_IDX(0, VEC_SIZE, VEC_SIZE_LEFTOVER);
     int idx_out_w = GET_SPATIAL_IDX(1, 1, 0);
 
@@ -113,31 +129,17 @@ __kernel void pooling_3d_layer_MxN_ndhwc(
     int pool_z_s = max((int)0, -idx_in_d);
     int pool_z_e = min((int)POOL_SIZE_Z, (int)SRC_DEPTH + PAD_Z - idx_in_d);
 
-    // The filter size with all padding in all directions considered.
+#if defined(POOL_AVG) && defined(EXCLUDE_PADDING)
+    int filter_size = 0;
+#elif defined(POOL_AVG) && !defined(EXCLUDE_PADDING) // defined(POOL_AVG) && defined(EXCLUDE_PADDING)
     int filter_size = pool_z_e * pool_y_e * pool_x_e;
+#endif                                               // defined(POOL_AVG) && !defined(EXCLUDE_PADDING)
 
     // The end of width to consider in calculation should exclude PAD_X
     pool_x_e = min(pool_x_e, SRC_WIDTH - idx_in_w);
     pool_y_e = min(pool_y_e, SRC_HEIGHT - idx_in_h);
     pool_z_e = min(pool_z_e, SRC_DEPTH - idx_in_d);
 
-#if defined(EXCLUDE_PADDING)
-    filter_size = (pool_z_e - pool_z_s) * (pool_y_e - pool_y_s) * (pool_x_e - pool_x_s);
-#endif  // defined(EXCLUDE_PADDING)
-
-#if POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && POOL_SIZE_Z == SRC_DEPTH && PAD_X == 0 && PAD_Y == 0 && PAD_Z == 0
-    // Global pooling path
-    for(int z = 0; z < POOL_SIZE_Z; ++z)
-    {
-        int depth_offset_src = (z + idx_in_d) * input_stride_w;
-        for(int y = 0; y < POOL_SIZE_Y; ++y)
-        {
-            int height_offset_src = (y + idx_in_h) * input_stride_z;
-#pragma unroll 8
-            for(int x = 0; x < POOL_SIZE_X; ++x)
-            {
-                int width_offset_src = (x + idx_in_w) * input_stride_y;
-#else // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && POOL_SIZE_Z == SRC_DEPTH && PAD_X == 0 && PAD_Y == 0 && PAD_Z == 0
     for(int z = pool_z_s; z < pool_z_e; ++z)
     {
         int depth_offset_src = (z + idx_in_d) * input_stride_w;
@@ -148,50 +150,36 @@ __kernel void pooling_3d_layer_MxN_ndhwc(
             for(int x = pool_x_s; x < pool_x_e; ++x)
             {
                 int width_offset_src = (x + idx_in_w) * input_stride_y;
-#endif // POOL_SIZE_X == SRC_WIDTH && POOL_SIZE_Y == SRC_HEIGHT && POOL_SIZE_Z == SRC_DEPTH && PAD_X == 0 && PAD_Y == 0 && PAD_Z == 0
+
+                VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+                data;
                 VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE)
                 data0;
-#if defined(FP_MIXED_PRECISION)
-                // In case of FP_MIXED_PRECISION, ACC_DATA_TYPE is != DATA_TYPE
-                data0 = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + width_offset_src + height_offset_src + depth_offset_src)),
-                                VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
-#else  // defined(FP_MIXED_PRECISION)
-                data0 = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + width_offset_src + height_offset_src + depth_offset_src));
-#endif // defined(FP_MIXED_PRECISION)
 
-#if defined(POOL_L2)
-                // Raise to power of 2 for L2 Pooling
-                data0 *= data0;
-#endif // defined(POOL_L2)
+                data  = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(in_base_ptr + width_offset_src + height_offset_src + depth_offset_src));
+                data0 = CONVERT(data, VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE));
+
                 res0 = POOL_OP(res0, data0);
+
+#if defined(POOL_AVG) && defined(EXCLUDE_PADDING)
+                filter_size++;
+#endif // defined(POOL_AVG) && defined(EXCLUDE_PADDING)
             }
         }
     }
 
-#if defined(POOL_AVG) || defined(POOL_L2)
-    res0 /= (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))filter_size;
-#endif // defined(POOL_AVG) || defined(POOL_L2)
-
-#if defined(POOL_L2)
-    // Take square root of the result in L2 pooling
-    res0 = SQRT_OP(res0);
-#endif // defined(POOL_L2)
+#if defined(POOL_AVG)
+    res0 = (res0 + (VEC_DATA_TYPE(ACC_DATA_TYPE, VEC_SIZE))(filter_size >> 1)) / filter_size;
+#endif // defined(POOL_AVG)
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     out_q0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
 
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+    REQUANTIZE(VEC_SIZE, out_q0, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_q0);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
-
-   // Store result
-#if defined(QUANTIZED)
     STORE_VECTOR_SELECT(out_q, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
-#elif defined(FP_MIXED_PRECISION)
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res_converted0 = CONVERT(res0, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));
-    STORE_VECTOR_SELECT(res_converted, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
-#else  // defined(FP_MIXED_PRECISION)
-    STORE_VECTOR_SELECT(res, DATA_TYPE, out_base_ptr, VEC_SIZE, VEC_SIZE_LEFTOVER, (VEC_SIZE_LEFTOVER != 0) && get_global_id(0) == 0);
-#endif // defined(FP_MIXED_PRECISION)
 }
 #endif // defined(POOL_SIZE_X) && defined(POOL_SIZE_Y) && defined(POOL_SIZE_Z)
 #endif // defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(SRC_DEPTH) && defined(DST_CHANNELS) && defined(DST_HEIGHT) && defined(DST_DEPTH) && defined(DST_BATCH_SIZE) && defined(ACC_DATA_TYPE)

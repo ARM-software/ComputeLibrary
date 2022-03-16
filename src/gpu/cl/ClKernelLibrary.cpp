@@ -438,6 +438,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
     { "pooling_3d_layer_MxN_ndhwc", "nhwc/pooling_3d_layer.cl" },
+    { "pooling_3d_layer_MxN_ndhwc_quantized", "nhwc/pooling_3d_layer_quantized.cl" },
     { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
     { "scale_bilinear_nhwc", "nhwc/scale.cl" },
@@ -905,6 +906,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/pooling_3d_layer.cl",
 #include "./cl_kernels/nhwc/pooling_3d_layer.clembed"
+    },
+    {
+        "nhwc/pooling_3d_layer_quantized.cl",
+#include "./cl_kernels/nhwc/pooling_3d_layer_quantized.clembed"
     },
     {
         "nhwc/pooling_layer_quantized.cl",

@@ -62,13 +62,15 @@ public:
      * |:--------------|:--------------|
      * |F16            |F16            |
      * |F32            |F32            |
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
      *
      * @note Source tensor is padded with -inf for MAX pooling and 0 otherwise
      *       Cases where pooling region is completely outside input tensor are not supported
      *
      * @note Asymmetric padding is not supported when dimension rounding type == CEIL.
      *
-     * @param[in,out] input     Source tensor. Data types supported: F16/F32.
+     * @param[in,out] input     Source tensor. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
      */
@@ -76,14 +78,14 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in,out] input           Source tensor. Data types supported: F16/F32.
+     * @param[in,out] input           Source tensor. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[out]    output          Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info       Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Pooling3dLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPooling3dLayer
      *
-     * @param[in] input     Source tensor info. Data types supported: F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
      *

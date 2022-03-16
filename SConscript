@@ -446,6 +446,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_3d_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/pooling_3d_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/scale.cl',

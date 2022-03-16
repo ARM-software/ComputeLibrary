@@ -2330,6 +2330,8 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><th>src<th>dst
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     </table>
 <tr>
   <td rowspan="2">PReluLayer
