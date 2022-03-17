@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QSYMM8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
 
     return Status{};
@@ -123,6 +123,8 @@ void CpuQuantizeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
         { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<int8_t, int8_t> },
         { "op_QASYMM8_SIGNED_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<int8_t> },
 
+        { "op_F32_QSYMM8", &CpuQuantizeKernel::run_quantize_qsymm8<float, int8_t> },
+
         { "op_F32_QASYMM8", &CpuQuantizeKernel::run_quantize_qasymm8<float, uint8_t> },
         { "op_F32_QASYMM8_SIGNED", &CpuQuantizeKernel::run_quantize_qasymm8<float, int8_t> },
         { "op_F32_QASYMM16", &CpuQuantizeKernel::run_quantize_qasymm16<float> },
@@ -155,6 +157,42 @@ Status CpuQuantizeKernel::validate(const ITensorInfo *src, const ITensorInfo *ds
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst));
     return Status{};
+}
+
+template <typename TIn, typename TOut>
+void CpuQuantizeKernel::run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window)
+{
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    const UniformQuantizationInfo uqinfo_in = src->info()->quantization_info().uniform();
+    UniformQuantizationInfo       uqinfo    = dst->info()->quantization_info().uniform();
+    if(is_data_type_quantized_asymmetric(src->info()->data_type()))
+    {
+        uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
+    }
+    // Collapse window and reset first dimension to handle tail calculations manually
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
+    {
+        auto input_ptr  = reinterpret_cast<const TIn *>(input.ptr());
+        auto output_ptr = reinterpret_cast<TOut *>(output.ptr());
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step); x += window_step)
+        {
+            wrapper::vstore(&output_ptr[x], vquantize_qasymm8<TOut>(load_value(&input_ptr[x]), uqinfo));
+        }
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            output_ptr[x] = quantize_qsymm8(input_ptr[x], dst->info()->quantization_info());
+        }
+    },
+    input, output);
 }
 
 template <typename TIn, typename TOut>
