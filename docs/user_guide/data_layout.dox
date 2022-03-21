@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2021 Arm Limited.
+/// Copyright (c) 2021-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -29,14 +29,36 @@ namespace arm_compute
 
 @section data_layout_support_supported_data_layout Supported Data Layouts
 
-Compute Library supports the following data layouts and
-the right-most letter represents the fastest changing dimension:
+With regard to convolution layers, Compute Library supports the following data layouts for input and output tensors:
 
 - NHWC: The native layout of Compute Library that delivers the best performance where channels are in the fastest changing dimension
 - NCHW: Legacy layout where width is in the fastest changing dimension
 - NDHWC: New data layout for supporting 3D operators
 
 , where N = batch, C = channel, H = height, W = width, D = depth.
+
+Note: The right-most letter represents the fastest changing dimension, which is the "lower dimension".
+The corresponding @ref TensorShape for each of the data layout would be initialized as:
+
+- NHWC: TensorShape(C, W, H, N)
+- NCHW: TensorShape(W, H, C, N)
+- NDHWC: TensorShape(C, W, H, D, N)
+
+For 2d Conv, the weight / filter tensors are arranged in 4 dimensions: Height (H), Width (W), Input channel (I), Output channel (O)
+For 3d Conv, the additional Depth dimension means exactly the same as the Depth in the input / output layout.
+
+The layout of weight tensors change with that of the input / output tensors, and the dimensions can be mapped as:
+
+- Weight Height -> Height
+- Weight Width -> Width
+- Weight Input channel -> Channel
+- Weight Output channel -> Batch
+
+Therefore, the corresponding weight layouts for each input / output layout are:
+
+- (input/output tensor) NHWC: (weight tensor) OHWI
+- (input/output tensor) NCHW: (weight tensor) OIHW
+- (input/output tensor) NDHWC: (weight tensor) ODHWI
 
 */
 } // namespace
