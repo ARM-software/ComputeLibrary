@@ -21,7 +21,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import SCons
 import os.path
 
 Import('env')
@@ -174,8 +173,11 @@ if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
 if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos']:
-   test_env['CXXFLAGS'].append('-fopenmp')
-   test_env['LINKFLAGS'].append('-fopenmp')
+    test_env['CXXFLAGS'].append('-fopenmp')
+    test_env['LINKFLAGS'].append('-fopenmp')
+
+    if 'ndk_above_r21' in env:
+        test_env['LINKFLAGS'].append('-static-openmp')
 
 if test_env['validation_tests']:
     arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework, arm_compute_core_a])

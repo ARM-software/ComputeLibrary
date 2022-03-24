@@ -25,8 +25,7 @@
 import SCons
 import json
 import os
-import subprocess
-import sys
+from subprocess import check_output
 
 def version_at_least(version, required):
 
@@ -234,7 +233,7 @@ if 'clang++' in cpp_compiler:
 elif 'armclang' in cpp_compiler:
     pass
 elif not 'windows' in env['os']:
-        env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-misleading-indentation']) 
+        env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-misleading-indentation'])
 
 if cpp_compiler == 'g++':
     # Don't strip comments that could include markers
@@ -369,9 +368,9 @@ env['RANLIB'] = prefix + "ranlib"
 if not GetOption("help"):
     try:
         if env['os'] == 'windows':
-            compiler_ver = subprocess.check_output("clang++ -dumpversion").decode().strip()
+            compiler_ver = check_output("clang++ -dumpversion").decode().strip()
         else:
-            compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
+            compiler_ver = check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
@@ -394,6 +393,13 @@ if not GetOption("help"):
 
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
+
+    # For NDK >= r21, clang 9 or above is used
+    if env['os'] == 'android' and version_at_least(compiler_ver, '9.0.0'):
+        env['ndk_above_r21'] = True
+
+        if env['openmp']:
+            env.Append(LINKFLAGS = ['-static-openmp'])
 
 if env['high_priority'] and env['build_config']:
     print("The high priority library cannot be built in conjunction with a user-specified build configuration")
