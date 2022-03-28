@@ -23,10 +23,12 @@
  */
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
-#ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLSTOREKERNELCOMPONENTS_H
-#define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLSTOREKERNELCOMPONENTS_H
+#ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
+#define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/Common.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -34,65 +36,46 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-class ClStoreBlockBoundaryAwareKernelComponent : public IClKernelComponent
+class ClDirectConvolutionKernelComponent : public IClKernelComponent
 {
 public:
-    ClStoreBlockBoundaryAwareKernelComponent(const ClKernelBlueprint *blueprint, const Link &src, const Link &dst)
-        : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
+    ClDirectConvolutionKernelComponent(const ClKernelBlueprint *blueprint, const DirectConvolutionDescriptor &desc,
+                                       const Link &src, const Link &weight, const Link &dst, const Link &bias = Link{})
+        : IClKernelComponent(blueprint), _desc{ desc }, _src{ src }, _weight{ weight }, _bias{ bias }, _dst{ dst }
     {
     }
-    ComponentType  get_component_type() const override;
-    std::string    get_component_code() const override;
-    CLBuildOptions generate_build_options() const override;
+
+    ComponentType         get_component_type() const override;
+    std::set<std::string> get_headers_list() const override;
+    std::string           get_additional_macros() const override;
+    std::string           get_component_code() const override;
+    Window                get_window() const override;
+    ClKernelArgList       get_args();
+    CLBuildOptions        generate_build_options() const override;
 
     virtual std::vector<Link> get_links() const override
     {
-        return { _src, _dst };
+        return { _src, _weight, _bias, _dst };
     }
 
     virtual TagLUT allocate_vars(SharedVarTable &vtable) const override;
 
     virtual std::string name() const override
     {
-        return "";
+        return "direct_convolution_" + to_string(_blueprint->impl().get_kernel_argument_info(_src.arg_id)->data_layout()) + "_" + std::to_string(id());
     }
 
 private:
-    Link _src{};
-    Link _dst{};
-};
-
-class ClStoreIndirectWidthSelectKernelComponent : public IClKernelComponent
-{
-public:
-    ClStoreIndirectWidthSelectKernelComponent(const ClKernelBlueprint *blueprint, const Link &src, const Link &dst)
-        : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
-    {
-    }
-    ComponentType  get_component_type() const override;
-    std::string    get_component_code() const override;
-    CLBuildOptions generate_build_options() const override;
-
-    virtual std::vector<Link> get_links() const override
-    {
-        return { _src, _dst };
-    }
-
-    virtual TagLUT allocate_vars(SharedVarTable &vtable) const override;
-
-    virtual std::string name() const override
-    {
-        return "";
-    }
-
-private:
-    Link _src{};
-    Link _dst{};
+    DirectConvolutionDescriptor _desc{};
+    Link                        _src{};
+    Link                        _weight{};
+    Link                        _bias{};
+    Link                        _dst{};
 };
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLSTOREKERNELCOMPONENTS_H
+#endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLDIRECTCONVOLUTIONKERNELCOMPONENT_H
 
 #endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)

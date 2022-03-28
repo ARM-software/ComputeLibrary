@@ -32,8 +32,10 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
+#include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/ElementwiseOperations.h"
 #include "tests/validation/reference/GEMM.h"
+#include "tests/validation/reference/Permute.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "src/core/AccessWindowStatic.h"
@@ -83,7 +85,7 @@ TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(ClCompositeKernel)
 TEST_SUITE(Validate)
 
-TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
+TEST_CASE(MoveNet_SubGraph_1_Gemm, framework::DatasetMode::ALL)
 {
     /* Computation:
      * out = add(addend, gemm_native(lhs, rhs, bias)) (non-broadcast)
@@ -100,11 +102,11 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     auto       t_bias_info = TensorInfo(TensorShape(), 1, DataType::F32);
     auto       t_dst_info  = TensorInfo(t_dst_shape, 1, data_type);
 
-    const ClTensorDescriptor t_lhs_desc{ &t_lhs_info, 2 };
-    const ClTensorDescriptor t_rhs_desc{ &t_rhs_info, 2 };
-    const ClTensorDescriptor t_bias_desc{ &t_bias_info, 2 };
-    const ClTensorDescriptor t_addend_desc{ &t_dst_info, 2 };
-    const ClTensorDescriptor t_dst_desc{ &t_dst_info, 2 };
+    const ClTensorDescriptor t_lhs_desc{ &t_lhs_info };
+    const ClTensorDescriptor t_rhs_desc{ &t_rhs_info };
+    const ClTensorDescriptor t_bias_desc{ &t_bias_info };
+    const ClTensorDescriptor t_addend_desc{ &t_dst_info };
+    const ClTensorDescriptor t_dst_desc{ &t_dst_info };
 
     ClKernelBlueprint bp;
     ArgumentID        tid_lhs;
@@ -134,10 +136,10 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     st = set_tile_info(bp, store_tile_info);
     st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
 
-    ClExecutionDescriptor exec_desc;
+    ClExecutionDescriptor exec_desc{};
     st = tune_static(exec_desc, cl_code);
 
-    CLScheduler::get().default_init();
+    CLScheduler::get().default_reinit();
     ClCompositeKernel kernel;
     kernel.configure(CLKernelLibrary::get().get_compile_context(), cl_code);
 
@@ -193,10 +195,149 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     validate(CLAccessor(t_dst), ref_t_dst, tolerance_f32);
 }
 
+TEST_CASE(MoveNet_SubGraph_1_DirectConv2d, framework::DatasetMode::ALL)
+{
+    /* Computation:
+     * out = add(addend, direct_conv2d(lhs, rhs, bias)) (non-broadcast)
+     */
+
+    ClCompositeKernel     kernel{};
+    ClKernelBlueprint     bp{};
+    ClKernelCode          cl_code{};
+    ClExecutionDescriptor exec_desc{};
+    Status                st{};
+
+    const auto data_type = DataType::F32;
+    const auto conv_info = PadStrideInfo(1U, 1U, 1U, 1U);
+
+    const auto width     = 7U;
+    const auto height    = 6U;
+    const auto IFM       = 5U;
+    const auto OFM       = 4U;
+    const auto kernel_sz = 3U;
+
+    const auto src_shape = TensorShape(IFM, width, height);
+    const auto wei_shape = TensorShape(IFM, kernel_sz, kernel_sz, OFM);
+    const auto bia_shape = TensorShape(OFM);
+    const auto dst_shape = TensorShape(OFM, width, height);
+
+    auto src_info = TensorInfo(src_shape, 1, data_type, DataLayout::NHWC);
+    auto wei_info = TensorInfo(wei_shape, 1, data_type, DataLayout::NHWC);
+    auto bia_info = TensorInfo(bia_shape, 1, data_type, DataLayout::NHWC);
+    auto dst_info = TensorInfo(dst_shape, 1, data_type, DataLayout::NHWC);
+
+    const auto src_desc    = ClTensorDescriptor(&src_info);
+    const auto wei_desc    = ClTensorDescriptor(&wei_info);
+    const auto bia_desc    = ClTensorDescriptor(&bia_info);
+    const auto addend_desc = ClTensorDescriptor(&dst_info);
+    const auto dst_desc    = ClTensorDescriptor(&dst_info);
+
+    const auto n0 = std::min(OFM, 4u);
+    const auto m0 = (OFM > 16) ? ((data_type == DataType::F32) ? 2U : 4U) : 1U;
+
+    const ClKernelComponentDescriptor common_kernel_desc{};
+    const DirectConvolutionDescriptor direct_conv2d_desc{ conv_info };
+    const EltwiseAddDescriptor        eltwise_add_desc{ ConvertPolicy::WRAP };
+    const TileDescriptor              store_tile_info{ Size2D(n0, m0), Size2D(width, height), ClippingStrategy::TOP_LEFT };
+
+    ArgumentID src_id{ g_arg_placeholder };
+    ArgumentID wei_id{ g_arg_placeholder };
+    ArgumentID bia_id{ g_arg_placeholder };
+    ArgumentID acc_id{ g_arg_placeholder };
+    ArgumentID addend_id{ g_arg_placeholder };
+    ArgumentID dst_id{ g_arg_placeholder };
+
+    st = add_tensor_argument(bp, src_desc, src_id);
+    st = add_tensor_argument(bp, wei_desc, wei_id);
+    st = add_tensor_argument(bp, bia_desc, bia_id);
+    st = add_tensor_intermed(bp, acc_id);
+    st = add_tensor_argument(bp, addend_desc, addend_id);
+    st = add_tensor_argument(bp, dst_desc, dst_id);
+
+    st = add_kcomp_direct_conv(bp, common_kernel_desc, direct_conv2d_desc, src_id, wei_id, bia_id, acc_id);
+    st = add_kcomp_eltwise_add(bp, common_kernel_desc, eltwise_add_desc, addend_id, acc_id, acc_id);
+    st = add_kcomp_store(bp, common_kernel_desc, acc_id, dst_id, StoreType::TStoreIndirectWidthSelect);
+
+    exec_desc.skip_sliding_window = true;
+
+    st = set_tile_info(bp, store_tile_info);
+    st = build(cl_code, ClCodeBuilderContext{ GpuInfo{ GPUTarget::G71 } }, bp);
+    st = tune_static(exec_desc, cl_code);
+
+    CLScheduler::get().default_reinit();
+    kernel.configure(CLKernelLibrary::get().get_compile_context(), cl_code);
+
+    // Construct tensors
+    CLTensor src{};
+    CLTensor wei{};
+    CLTensor bia{};
+    CLTensor addend{};
+    CLTensor dst{};
+
+    // Init tensors
+    src.allocator()->init(src_info);
+    wei.allocator()->init(wei_info);
+    bia.allocator()->init(bia_info);
+    addend.allocator()->init(dst_info);
+    dst.allocator()->init(dst_info);
+
+    // "Pack" tensors
+    TensorBinding tensors({ { src_id, &src },
+        { wei_id, &wei },
+        { bia_id, &bia },
+        { addend_id, &addend },
+        { dst_id, &dst }
+    });
+
+    // Allocate and fill tensors
+    src.allocator()->allocate();
+    wei.allocator()->allocate();
+    bia.allocator()->allocate();
+    addend.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    fill<float>(CLAccessor(src), 0);
+    fill<float>(CLAccessor(wei), 1);
+    fill<float>(CLAccessor(bia), 2);
+    fill<float>(CLAccessor(addend), 3);
+
+    CLScheduler::get().enqueue_op(kernel, tensors, exec_desc, true);
+
+    // Create reference
+    SimpleTensor<float> ref_src_nhwc{ src_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
+    SimpleTensor<float> ref_wei_nhwc{ wei_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
+    SimpleTensor<float> ref_bia_nhwc{ bia_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
+    SimpleTensor<float> ref_addend_nhwc{ dst_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
+
+    // Fill reference
+    fill<float>(ref_src_nhwc, 0);
+    fill<float>(ref_wei_nhwc, 1);
+    fill<float>(ref_bia_nhwc, 2);
+    fill<float>(ref_addend_nhwc, 3);
+
+    auto ref_src    = reference::permute(ref_src_nhwc, PermutationVector(1U, 2U, 0U));
+    auto ref_wei    = reference::permute(ref_wei_nhwc, PermutationVector(1U, 2U, 0U));
+    auto ref_bia    = reference::permute(ref_bia_nhwc, PermutationVector(1U, 2U, 0U));
+    auto ref_addend = reference::permute(ref_addend_nhwc, PermutationVector(1U, 2U, 0U));
+
+    TensorShape dst_shape_nchw{ dst_shape };
+    permute(dst_shape_nchw, PermutationVector(1U, 2U, 0U));
+
+    const auto ref_dst = reference::arithmetic_operation(
+                             ArithmeticOperation::ADD,
+                             ref_addend,
+                             reference::convolution_layer<float>(ref_src, ref_wei, ref_bia, dst_shape_nchw, conv_info),
+                             data_type,
+                             eltwise_add_desc.convert_policy);
+
+    RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+    validate(CLAccessor(dst), ref_dst, tolerance_f32);
+}
+
 TEST_SUITE_END() // Validate
 
 TEST_SUITE(Benchmark)
-TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
+TEST_CASE(MoveNet_SubGraph_1_Gemm, framework::DatasetMode::ALL)
 {
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
@@ -205,19 +346,19 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
     /* Computation:
      * out = add(addend, gemm_native(lhs, rhs, bias))
      */
-    const auto         data_type     = DataType::F32;
-    const unsigned int m             = 12 * 12;
-    const unsigned int n             = 64;
-    const unsigned int k             = 384;
-    const auto         t_lhs_shape   = TensorShape(k, m);
-    const auto         t_rhs_shape   = TensorShape(n, k);
-    const auto         t_dst_shape   = TensorShape(n, m);
-    auto               t_lhs_info    = TensorInfo(t_lhs_shape, 1, data_type);
-    auto               t_rhs_info    = TensorInfo(t_rhs_shape, 1, data_type);
-    auto               t_bias_info   = TensorInfo(TensorShape(), 1, data_type);
-    auto               t_l0_dst_info = TensorInfo(t_dst_shape, 1, data_type); // Intermediate tensor for cond3
-    auto               t_l1_rhs_info = TensorInfo(t_dst_shape, 1, data_type);
-    auto               t_dst_info    = TensorInfo(t_dst_shape, 1, data_type);
+    const auto data_type     = DataType::F32;
+    const auto m             = 12U * 12U;
+    const auto n             = 64U;
+    const auto k             = 384U;
+    const auto t_lhs_shape   = TensorShape(k, m);
+    const auto t_rhs_shape   = TensorShape(n, k);
+    const auto t_dst_shape   = TensorShape(n, m);
+    auto       t_lhs_info    = TensorInfo(t_lhs_shape, 1, data_type);
+    auto       t_rhs_info    = TensorInfo(t_rhs_shape, 1, data_type);
+    auto       t_bias_info   = TensorInfo(TensorShape(), 1, data_type);
+    auto       t_l0_dst_info = TensorInfo(t_dst_shape, 1, data_type); // Intermediate tensor for cond3
+    auto       t_l1_rhs_info = TensorInfo(t_dst_shape, 1, data_type);
+    auto       t_dst_info    = TensorInfo(t_dst_shape, 1, data_type);
 
     const auto                 common_kernel_desc = ClKernelComponentDescriptor{};
     const GemmNativeDescriptor gemm_native_desc{ 1.0, 0.0, m, n, k };
@@ -242,7 +383,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
                                data_type,
                                eltwise_add_desc.convert_policy);
 
-    CLScheduler::get().default_init();
+    CLScheduler::get().default_reinit();
 
     /* Condition 0: Dynamic Fused Kernel */
     CLTensor cond0_t_dst{};
@@ -256,11 +397,11 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
         ArgumentID        tid_l1_addend;
         ArgumentID        tid_dst;
 
-        const ClTensorDescriptor t_lhs_desc{ &t_lhs_info, 2 };
-        const ClTensorDescriptor t_rhs_desc{ &t_rhs_info, 2 };
-        const ClTensorDescriptor t_bias_desc{ &t_bias_info, 2 };
-        const ClTensorDescriptor t_addend_desc{ &t_dst_info, 2 };
-        const ClTensorDescriptor t_dst_desc{ &t_dst_info, 2 };
+        const ClTensorDescriptor t_lhs_desc{ &t_lhs_info };
+        const ClTensorDescriptor t_rhs_desc{ &t_rhs_info };
+        const ClTensorDescriptor t_bias_desc{ &t_bias_info };
+        const ClTensorDescriptor t_addend_desc{ &t_dst_info };
+        const ClTensorDescriptor t_dst_desc{ &t_dst_info };
 
         ClKernelCode cl_code;
         TICK(cond0_build_time)
@@ -282,7 +423,7 @@ TEST_CASE(MoveNet_SubGraph_1, framework::DatasetMode::ALL)
         TOCK(cond0_build_time, measurements)
 
         TICK(cond0_tune_time)
-        ClExecutionDescriptor exec_desc;
+        ClExecutionDescriptor exec_desc{};
         st = tune_static(exec_desc, cl_code);
         TOCK(cond0_tune_time, measurements)
 

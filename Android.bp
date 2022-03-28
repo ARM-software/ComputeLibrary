@@ -364,6 +364,7 @@ cc_library_static {
         "src/core/Validate.cpp",
         "src/core/Version.cpp",
         "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.cpp",
+        "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.cpp",
         "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.cpp",
         "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClGemmNativeKernelComponent.cpp",
         "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.cpp",

@@ -66,7 +66,6 @@ inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKe
             ARM_COMPUTE_ERROR("Unsupported yet");
             break;
         }
-
         case TensorArgType::Vector:
         {
             add_1D_tensor_argument(idx, tensor, arg_slice);
@@ -93,7 +92,6 @@ inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKe
             _kernel.setArg(idx++, tensor_image2d);
             break;
         }
-
         case TensorArgType::Image_3D:
         {
             add_2D_tensor_argument(idx, tensor, arg_slice);
@@ -109,16 +107,32 @@ inline void ClCompositeKernel::add_tensor_argument(unsigned int &idx, const ClKe
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
             break;
         }
-
         case TensorArgType::Tensor_3D:
         {
             add_3D_tensor_argument(idx, tensor, arg_slice);
             break;
         }
-
         case TensorArgType::Tensor_4D:
         {
             add_4D_tensor_argument(idx, tensor, arg_slice);
+            break;
+        }
+        case TensorArgType::Tensor_4D_t_Buffer:
+        {
+            add_4d_tensor_nhwc_argument(idx, tensor);
+            break;
+        }
+        case TensorArgType::Tensor_4D_t_Image:
+        {
+            const size_t image_w        = tensor->info()->dimension(0) / 4;
+            const size_t image_h        = tensor->info()->tensor_shape().total_size_upper(1);
+            const size_t image_stride_y = tensor->info()->strides_in_bytes()[1];
+
+            cl::Image2D tensor_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(),
+                                                                     TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y);
+
+            _kernel.setArg(idx++, tensor_cl_image);
+            add_4d_tensor_nhwc_argument(idx, tensor);
             break;
         }
         default:
@@ -140,6 +154,7 @@ void ClCompositeKernel::run_composite_op(TensorBinding &tensors, const Window &w
     Window slice_fixed_z = slice;
     slice_fixed_z.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice_fixed_z.set(Window::DimY, Window::Dimension(0, 1, 1));
+
     unsigned int idx = 0;
     do
     {
@@ -162,7 +177,7 @@ void ClCompositeKernel::run_composite_op(TensorBinding &tensors, const Window &w
         bool use_dummy_work_items = false;
         enqueue(queue, *this, slice, lws_hint(), use_dummy_work_items);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(!exec_desc.skip_sliding_window && window.slide_window_slice_3D(slice));
 }
 
 Status bind_arguments(ITensorPack &, const ClKernelCode &, const TensorBinding &)

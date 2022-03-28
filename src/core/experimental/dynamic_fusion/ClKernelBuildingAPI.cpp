@@ -94,6 +94,23 @@ Status add_kcomp_activation(ClKernelBlueprint &, const ClKernelComponentDescript
 {
     return Status{};
 }
+
+Status add_kcomp_direct_conv(ClKernelBlueprint                 &kernel_blueprint, const ClKernelComponentDescriptor &,
+                             const DirectConvolutionDescriptor &direct_conv2d_desc,
+                             ArgumentID src_id, ArgumentID weight_id, ArgumentID bias_id, ArgumentID &dst_id)
+{
+    kernel_blueprint.impl().add_component(
+        std::make_unique<ClDirectConvolutionKernelComponent>(
+            &kernel_blueprint,
+            direct_conv2d_desc,
+            SharedVarLink{ src_id, SharedVarIO::Input, kernel_blueprint.impl().group(src_id) },
+            SharedVarLink{ weight_id, SharedVarIO::Input, kernel_blueprint.impl().group(weight_id) },
+            SharedVarLink{ dst_id, SharedVarIO::Output, kernel_blueprint.impl().group(dst_id) },
+            SharedVarLink{ bias_id, SharedVarIO::Input, kernel_blueprint.impl().group(bias_id) }));
+
+    return Status{};
+}
+
 Status add_kcomp_store(ClKernelBlueprint &kernel_blueprint, const ClKernelComponentDescriptor &, ArgumentID src_tile, ArgumentID dst_tile, const StoreType &store_type)
 {
     switch(store_type)
@@ -101,6 +118,13 @@ Status add_kcomp_store(ClKernelBlueprint &kernel_blueprint, const ClKernelCompon
         case StoreType::StoreBlockBoundaryAware:
             kernel_blueprint.impl().add_component(
                 std::make_unique<ClStoreBlockBoundaryAwareKernelComponent>(
+                    &kernel_blueprint,
+                    SharedVarLink{ src_tile, SharedVarIO::Input, kernel_blueprint.impl().group(src_tile) },
+                    SharedVarLink{ dst_tile, SharedVarIO::Output, kernel_blueprint.impl().group(dst_tile) }));
+            break;
+        case StoreType::TStoreIndirectWidthSelect:
+            kernel_blueprint.impl().add_component(
+                std::make_unique<ClStoreIndirectWidthSelectKernelComponent>(
                     &kernel_blueprint,
                     SharedVarLink{ src_tile, SharedVarIO::Input, kernel_blueprint.impl().group(src_tile) },
                     SharedVarLink{ dst_tile, SharedVarIO::Output, kernel_blueprint.impl().group(dst_tile) }));

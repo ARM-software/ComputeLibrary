@@ -41,7 +41,7 @@ ComponentType ClElementwiseAddKernelComponent::get_component_type() const
 
 std::set<std::string> ClElementwiseAddKernelComponent::get_headers_list() const
 {
-    return std::set<std::string> { "gemm_helpers.h", "repeat.h" };
+    return std::set<std::string> { "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h", "gemm_helpers.h", "repeat.h", "tile_helpers.h" };
 }
 
 Window ClElementwiseAddKernelComponent::get_window() const
@@ -78,6 +78,36 @@ std::string ClElementwiseAddKernelComponent::get_component_code() const
         LOAD_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, addend, addend_addr, 0, {{addend}}_stride_y, g_zero, PARTIAL_LOAD_M0, PARTIAL_LOAD_N0, PARTIAL_COND_Y, PARTIAL_COND_X);                                                                                        \
         MIXED_PRECISION_ELTWISE_OP_BLOCK(ADD_X_POS_0, M0, N0, {{acc}}, addend, DATA_TYPE_ACCUMULATOR, addend_hp);
     }
+
+    // Workaround for the discrepancy between tiles and repeats
+#if defined(IS_TILED)
+    {{acc}}[0].v = {{acc}}0;
+#if M0 >= 2
+    {{acc}}[1].v = {{acc}}1;
+#endif // M0 >= 2
+#if M0 >= 3
+    {{acc}}[2].v = {{acc}}2;
+#endif // M0 >= 3
+#if M0 >= 4
+    {{acc}}[3].v = {{acc}}3;
+#endif // M0 >= 4
+#if M0 >= 8
+    {{acc}}[4].v = {{acc}}4;
+    {{acc}}[5].v = {{acc}}5;
+    {{acc}}[6].v = {{acc}}6;
+    {{acc}}[7].v = {{acc}}7;
+#endif // M0 >= 8
+#if M0 == 16
+    {{acc}}[8].v = {{acc}}8;
+    {{acc}}[9].v = {{acc}}9;
+    {{acc}}[10].v = {{acc}}A;
+    {{acc}}[11].v = {{acc}}B;
+    {{acc}}[12].v = {{acc}}C;
+    {{acc}}[13].v = {{acc}}D;
+    {{acc}}[14].v = {{acc}}E;
+    {{acc}}[15].v = {{acc}}F;
+#endif // M0 == 16
+#endif // defined(IS_TILED)
     //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
 
 )_";

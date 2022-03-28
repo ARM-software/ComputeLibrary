@@ -86,6 +86,60 @@ ClStoreBlockBoundaryAwareKernelComponent::TagLUT ClStoreBlockBoundaryAwareKernel
         { "dst", vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Image_3D), "dst") },
     };
 }
+
+ComponentType ClStoreIndirectWidthSelectKernelComponent::get_component_type() const
+{
+    return ComponentType::Store;
+}
+
+std::string ClStoreIndirectWidthSelectKernelComponent::get_component_code() const
+{
+    return R"_(
+    //------------------ START KERNEL {{meta_kernel_id}} STORE ---------------------
+
+    TILE(uint, M0, 1, dst_indirect_y);
+
+    // Calculate the destination indirect Y
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        dst_indirect_y[i].v = (uint)min(mout + i, (int)({{dst_w}} * {{dst_h}}) - 1);
+        dst_indirect_y[i].v += bout * (int)({{dst_w}} * {{dst_h}});
+    })
+
+    T_STORE_INDIRECT_WIDTH_SELECT({{DST_DATA_TYPE}}, M0, N0, PARTIAL_N0, {{DST_TENSOR_TYPE}}, {{dst}}, cout, {{dst}}_stride_y, PARTIAL_N0 != 0 && g_cond_x, {{src}}, dst_indirect_y);
+
+    //------------------ END KERNEL {{meta_kernel_id}} STORE ---------------------
+
+)_";
+}
+
+CLBuildOptions ClStoreIndirectWidthSelectKernelComponent::generate_build_options() const
+{
+    CLBuildOptions build_opts{};
+
+    return build_opts;
+}
+
+ClStoreIndirectWidthSelectKernelComponent::TagLUT ClStoreIndirectWidthSelectKernelComponent::allocate_vars(SharedVarTable &vtable) const
+{
+    TagLUT lut{};
+
+    lut["meta_kernel_id"] = id();
+    lut["src"]            = vtable.add(_src, ClKernelArgRuntimeDescriptor(_src.arg_id, TensorArgType::Image_3D), "src");
+    lut["dst"]            = vtable.add(_dst, ClKernelArgRuntimeDescriptor(_dst.arg_id, TensorArgType::Tensor_4D_t_Buffer), "dst");
+
+    // Local build options
+    auto dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+
+    lut["dst_w"] = dst_info->dimension(1);
+    lut["dst_h"] = dst_info->dimension(2);
+
+    lut["DST_TENSOR_TYPE"] = "BUFFER";
+    lut["DST_DATA_TYPE"]   = dst_info->data_type();
+
+    return lut;
+}
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

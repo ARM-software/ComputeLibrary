@@ -87,6 +87,15 @@ public:
      */
     void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
 
+    /** Re-initializes the context and command queue used by the scheduler to default values
+     *  and sets a default device and kernel path for the @ref CLKernelLibrary.
+     *
+     * @param[in] cl_tuner        (Optional) Pointer to ICLTuner (default=nullptr)
+     * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
+     */
+    void default_reinit(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr, CLBackendType cl_backend_type = CLBackendType::Native);
+
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.

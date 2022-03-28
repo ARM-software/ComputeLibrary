@@ -141,6 +141,13 @@ void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_
     _cl_tuner = cl_tuner;
 }
 
+void CLScheduler::default_reinit(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
+{
+    _is_initialised = false;
+
+    default_init(cl_tuner, gemm_h, cl_backend_type);
+}
+
 void CLScheduler::set_context(cl::Context context)
 {
     _context = std::move(context);
