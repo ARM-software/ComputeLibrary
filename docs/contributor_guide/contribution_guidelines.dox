@@ -441,7 +441,7 @@ You can add this to your patch with:
 
 You are now ready to submit your patch for review:
 
-	git push acl-gerrit HEAD:refs/for/master
+	git push acl-gerrit HEAD:refs/for/main
 
 @section S5_3_code_review Patch acceptance and code review
 

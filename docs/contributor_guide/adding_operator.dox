@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2018-2021 Arm Limited.
+/// Copyright (c) 2018-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -59,7 +59,7 @@ All the datatype classes or structures are grouped in the core library folder ar
 
 If an operator handles a new datatype, it must be added to the library. While adding a new data type to the library, it's necessary to implement the function to enable printing, the to_string() method and the output stream insertion (<<) operator. Every datatype implements these two functions in utils/TypePrinter.h
 
-A quick example, in <a href="https://github.com/ARM-software/ComputeLibrary/blob/master/arm_compute/core/Types.h">Types.h</a> we add:
+A quick example, in <a href="https://github.com/ARM-software/ComputeLibrary/blob/main/arm_compute/core/Types.h">Types.h</a> we add:
 
 @snippet arm_compute/core/Types.h DataLayout enum definition
 
@@ -97,12 +97,12 @@ We must register the new layer in the respective libraries:
 
 These files contain the list of all kernels available in the corresponding Compute Library's backend, for example CLKernels:
 @code{.cpp}
-... 
+...
 #include "src/core/CL/kernels/CLMinMaxLayerKernel.h"
 #include "src/core/CL/kernels/CLMinMaxLocationKernel.h"
-... 
+...
 #include "src/core/CL/kernels/CLReshapeLayerKernel.h"
-... 
+...
 
 @endcode
 
