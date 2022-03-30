@@ -142,7 +142,7 @@ struct GemmImplementation<Top, Tret, Nothing> {
                        instantiate(instantiate) {   }
 };
 
-/* "Master" function implemented for each valid combination of types.
+/* "Main" function implemented for each valid combination of types.
  * Returns a list of GEMM implementation descriptors for processing by the
  * other functions, ended by an implementation with
  * method==GemmMethod::DEFAULT.  */

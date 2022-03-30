@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,12 +121,12 @@ private:
     SimpleOption<std::string> *detection_scores_opt{ nullptr };
     SimpleOption<std::string> *num_detections_opt{ nullptr };
 
-    ConcatLayer get_node_A_float(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_A_float(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                  unsigned int  conv_filt,
                                  PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
 
         sg << DepthwiseConvolutionLayer(
                3U, 3U,
@@ -157,12 +157,12 @@ private:
         return ConcatLayer(std::move(sg));
     }
 
-    ConcatLayer get_node_B_float(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_B_float(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                  unsigned int  conv_filt,
                                  PadStrideInfo conv_pad_stride_info_1, PadStrideInfo conv_pad_stride_info_2)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
 
         sg << ConvolutionLayer(
                1, 1, conv_filt / 2,
@@ -193,11 +193,11 @@ private:
         return ConcatLayer(std::move(sg));
     }
 
-    ConcatLayer get_node_C_float(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_C_float(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                  unsigned int conv_filt, PadStrideInfo conv_pad_stride_info)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
         sg << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "w.npy"),
@@ -381,13 +381,13 @@ private:
         detection_ouput << OutputLayer(get_detection_output_accessor(common_params, { input_descriptor.shape }));
     }
 
-    ConcatLayer get_node_A_qasymm(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_A_qasymm(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                   unsigned int  conv_filt,
                                   PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info,
                                   std::pair<QuantizationInfo, QuantizationInfo> depth_quant_info, std::pair<QuantizationInfo, QuantizationInfo> point_quant_info)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
 
         sg << DepthwiseConvolutionLayer(
                3U, 3U,
@@ -408,13 +408,13 @@ private:
         return ConcatLayer(std::move(sg));
     }
 
-    ConcatLayer get_node_B_qasymm(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_B_qasymm(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                   unsigned int  conv_filt,
                                   PadStrideInfo conv_pad_stride_info_1x1, PadStrideInfo conv_pad_stride_info_3x3,
                                   const std::pair<QuantizationInfo, QuantizationInfo> quant_info_1x1, const std::pair<QuantizationInfo, QuantizationInfo> quant_info_3x3)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
 
         sg << ConvolutionLayer(
                1, 1, conv_filt / 2,
@@ -435,12 +435,12 @@ private:
         return ConcatLayer(std::move(sg));
     }
 
-    ConcatLayer get_node_C_qasymm(IStream &master_graph, const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_node_C_qasymm(IStream &main_graph, const std::string &data_path, std::string &&param_path,
                                   unsigned int conv_filt, PadStrideInfo               conv_pad_stride_info,
                                   const std::pair<QuantizationInfo, QuantizationInfo> quant_info, TensorShape reshape_shape)
     {
         const std::string total_path = param_path + "_";
-        SubStream         sg(master_graph);
+        SubStream         sg(main_graph);
         sg << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "w.npy"),
