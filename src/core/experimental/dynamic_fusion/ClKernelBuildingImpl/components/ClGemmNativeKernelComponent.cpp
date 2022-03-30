@@ -44,7 +44,7 @@ ComponentType ClGemmNativeKernelComponent::get_component_type() const
 
 std::set<std::string> ClGemmNativeKernelComponent::get_headers_list() const
 {
-    return std::set<std::string> { "./common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h", "gemm_helpers.h", "repeat.h" };
+    return std::set<std::string> { "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h", "gemm_helpers.h", "repeat.h" };
 }
 
 Window ClGemmNativeKernelComponent::get_window() const

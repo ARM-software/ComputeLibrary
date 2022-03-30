@@ -74,7 +74,7 @@ def build_obj_list(arch_info, sources, static=False):
         objs = tmp_env.StaticObject(sources)
     else:
         objs = tmp_env.SharedObject(sources)
-    
+
     tmp_env.Default(objs)
     return objs
 
@@ -96,7 +96,7 @@ def build_lib_objects():
     # Build all the common files for the base architecture
     lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
-    
+
     # Build the SVE specific files
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=False)
@@ -325,7 +325,7 @@ cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 # Generate embed files
 generate_embed = [ version_file ]
 if env['opencl'] and env['embed_kernels']:
-    
+
     # Header files
     cl_helper_files = [ 'src/core/CL/cl_kernels/activation_float_helpers.h',
                         'src/core/CL/cl_kernels/activation_quant_helpers.h',
@@ -496,12 +496,8 @@ lib_files = filelist['common']
 # Experimental files
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
-    if env['embed_kernels']:
-        # COMPMID-5176
-        print("Dynamic fusion with embed_kernels=1 not supported. Skipping.")
-    else:
-        lib_files += filelist['experimental']['dynamic_fusion']
-        arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+    lib_files += filelist['experimental']['dynamic_fusion']
+    arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
 
 
 # Logging files

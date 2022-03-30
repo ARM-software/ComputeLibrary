@@ -114,8 +114,9 @@ filter_pattern = test_env['test_filter']
 files_validation += Glob('validation/CPP/' + filter_pattern)
 
 if env['opencl']:
-    if env['experimental_dynamic_fusion'] and not env['embed_kernels']:
+    if env['experimental_dynamic_fusion']:
         test_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+        files_validation += Glob('validation/CL/UNIT/dynamic_fusion/' + filter_pattern)
 
     filter_pattern = test_env['test_filter']
 
@@ -128,8 +129,7 @@ if env['opencl']:
 
     files_validation += Glob('validation/CL/*/' + filter_pattern)
     files_validation += Glob('validation/CL/' + filter_pattern)
-    if env['experimental_dynamic_fusion'] and not env['embed_kernels']:
-        files_validation += Glob('validation/CL/UNIT/dynamic_fusion/' + filter_pattern)
+
     if env['external_tests_dir']:
         files_validation += Glob(env['external_tests_dir'] + '/tests/validation/CL/' + filter_pattern)
     files_validation += Glob('validation/gpu/unit/*.cpp')

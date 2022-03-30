@@ -27,6 +27,7 @@
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMMON_H
 
 #include "arm_compute/core/CL/CLCompileContext.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "src/core/common/Macros.h"
@@ -494,7 +495,11 @@ public:
 
         for(auto &header : headers_list)
         {
+#if defined(EMBEDDED_KERNELS)
+            code += CLKernelLibrary::get().get_program(header).first;
+#else  // defined(EMBEDDED_KERNELS)
             code += "#include \"" + header + "\"\n";
+#endif // defined(EMBEDDED_KERNELS)
         }
 
         for(auto &macros : additional_macros)
