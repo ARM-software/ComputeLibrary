@@ -232,6 +232,7 @@ const GemmImplementation<float, float> *gemm_implementation_list<float, float>()
 
 /* Explicitly instantiate the external functions for these types. */
 template UniqueGemmCommon<float, float> gemm<float, float, Nothing>(const GemmArgs &args, const Nothing &);
+template bool has_opt_gemm<float, float, Nothing>(const GemmArgs &args, const Nothing &);
 template std::vector<KernelDescription> get_compatible_kernels<float, float, Nothing> (const GemmArgs &args, const Nothing &);
 
 } // namespace arm_gemm

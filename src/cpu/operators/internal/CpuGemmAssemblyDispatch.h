@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,11 +68,11 @@ public:
     class IFallback
     {
     public:
-        virtual void run(ITensorPack &tensors)                         = 0;
-        virtual void prepare(ITensorPack &tensors)                     = 0;
-        virtual experimental::MemoryRequirements workspace() const     = 0;
-        virtual bool                             is_configured() const = 0;
-        virtual ~IFallback()                                           = default;
+        virtual void                             run(ITensorPack &tensors)     = 0;
+        virtual void                             prepare(ITensorPack &tensors) = 0;
+        virtual experimental::MemoryRequirements workspace() const             = 0;
+        virtual bool                             is_configured() const         = 0;
+        virtual ~IFallback()                                                   = default;
     };
 
 public:
@@ -97,6 +97,18 @@ public:
      * @return a status.
      */
     static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info);
+
+    /** Indicates whether or not there is an optimal assembly implementation that can be used to process the given parameters.
+     *
+     * @param[in] a    Input tensor info (Matrix A)
+     * @param[in] b    Input tensor info (Matrix B)
+     * @param[in] c    Input tensor info (Matrix C) used to pass the bias for quantized calculations
+     * @param[in] d    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in] info GEMM meta-data
+     *
+     * @return a status.
+     */
+    static Status has_opt_impl(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info);
     /** Checks if activation is supported by the gemm assembly dispatcher
      *
      * @param[in] activation Activation to check
@@ -111,8 +123,8 @@ public:
     bool is_configured() const;
 
     // Inherited methods overridden:
-    void prepare(ITensorPack &tensors) override;
-    void run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

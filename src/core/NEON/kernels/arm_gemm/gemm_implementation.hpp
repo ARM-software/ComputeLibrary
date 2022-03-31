@@ -236,6 +236,12 @@ std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, cons
 }
 
 template<typename Top, typename Tret, class OutputStage>
+bool has_opt_gemm(const GemmArgs &args, const OutputStage &os) {
+    const GemmImplementation<Top, Tret, OutputStage> *impl;
+    return find_implementation<Top, Tret, OutputStage>(args, os, impl);
+}
+
+template<typename Top, typename Tret, class OutputStage>
 UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage &os) {
     const GemmImplementation<Top, Tret, OutputStage> *impl;
 
