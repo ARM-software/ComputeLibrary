@@ -58,8 +58,9 @@ const auto Pooling3dLayerDatasetFPSmall = combine(combine(combine(combine(datase
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-
+#endif   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } //namespace
 
 TEST_SUITE(NEON)
