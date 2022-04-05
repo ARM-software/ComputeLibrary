@@ -118,7 +118,7 @@ You must use your real name, no pseudonyms or anonymous contributions are accept
 ### Public mailing list
 For technical discussion, the ComputeLibrary project has a public mailing list: acl-dev@lists.linaro.org
 The list is open to anyone inside or outside of Arm to self subscribe.  In order to subscribe, please visit the following website:
-https://lists.linaro.org/mailman/listinfo/acl-dev
+https://lists.linaro.org/mailman3/lists/acl-dev.lists.linaro.org/
 
 <br>
 
