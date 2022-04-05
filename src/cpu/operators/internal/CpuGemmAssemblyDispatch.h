@@ -52,6 +52,7 @@ struct AsmGemmInfo
     int64_t                 padding_left{ 0 };
     float                   padding_value{ 0.f };
     bool                    fast_mode{ false };
+    bool                    fixed_format{ false };
 };
 
 /** Assembly kernel glue */

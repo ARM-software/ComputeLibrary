@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
     asm_info.depth_output_gemm3d     = info.depth_output_gemm3d();
     asm_info.activation_info         = info.activation_info();
     asm_info.fast_mode               = info.fast_math();
+    asm_info.fixed_format            = info.fixed_format();
 
     return asm_info;
 }
@@ -72,8 +73,7 @@ void CpuGemm::configure(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     _run_alpha_scale                  = alpha != 1.f;
     _run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
     _run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
-    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised
-                                                                                                     && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
+    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
     if(run_optimised)
     {

@@ -774,10 +774,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int _pad_left;
-    unsigned int _pad_top;
-    unsigned int _pad_right;
-    unsigned int _pad_bottom;
+    unsigned int                          _pad_left;
+    unsigned int                          _pad_top;
+    unsigned int                          _pad_right;
+    unsigned int                          _pad_bottom;
 
     DimensionRoundingType _round_type;
 };
@@ -919,14 +919,14 @@ public:
     }
 
 private:
-    std::vector<float> _min_sizes;
-    std::vector<float> _variances;
-    float              _offset;
-    bool               _flip;
-    bool               _clip;
-    std::vector<float> _max_sizes;
-    std::vector<float> _aspect_ratios;
-    Coordinates2D      _img_size;
+    std::vector<float>   _min_sizes;
+    std::vector<float>   _variances;
+    float                _offset;
+    bool                 _flip;
+    bool                 _clip;
+    std::vector<float>   _max_sizes;
+    std::vector<float>   _aspect_ratios;
+    Coordinates2D        _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1171,15 @@ public:
     }
 
 private:
-    unsigned int _max_detections;
-    unsigned int _max_classes_per_detection;
-    float        _nms_score_threshold;
-    float        _iou_threshold;
-    unsigned int _num_classes;
+    unsigned int         _max_detections;
+    unsigned int         _max_classes_per_detection;
+    float                _nms_score_threshold;
+    float                _iou_threshold;
+    unsigned int         _num_classes;
     std::array<float, 4> _scales_values;
-    bool         _use_regular_nms;
-    unsigned int _detection_per_class;
-    bool         _dequantize_scores;
+    bool                 _use_regular_nms;
+    unsigned int         _detection_per_class;
+    bool                 _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1612,13 @@ public:
     }
 
 private:
-    float _img_width;
-    float _img_height;
-    float _scale;
-    bool  _apply_scale;
-    bool  _correct_transform_coords;
+    float                _img_width;
+    float                _img_height;
+    float                _scale;
+    bool                 _apply_scale;
+    bool                 _correct_transform_coords;
     std::array<float, 4> _weights;
-    float _bbox_xform_clip;
+    float                _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -2105,7 +2105,8 @@ public:
           _pretranspose_A(false),
           _pretranspose_B(false),
           _activation_info(),
-          _post_ops()
+          _post_ops(),
+          _fixed_format(false)
     {
     }
     /** Constructor
@@ -2124,10 +2125,12 @@ public:
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
+     * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_gemm::WeightFormat.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>()) noexcept
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>(),
+             bool fixed_format = false) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -2141,7 +2144,8 @@ public:
           _pretranspose_A(false),
           _pretranspose_B(false),
           _activation_info(activation_info),
-          _post_ops(post_ops)
+          _post_ops(post_ops),
+          _fixed_format(fixed_format)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2306,6 +2310,14 @@ public:
     {
         _post_ops = post_ops;
     }
+    /** Flag which specifies if the GEMM operation is running fixed-format kernels.
+     *
+     * @return True if the GEMM operation is running fixed-format kernel else false.
+     */
+    bool fixed_format() const
+    {
+        return _fixed_format;
+    }
 
 private:
     bool                                    _is_a_reshaped;
@@ -2322,6 +2334,7 @@ private:
     bool                                    _pretranspose_B;
     ActivationLayerInfo                     _activation_info;
     experimental::PostOpList<ITensorInfo *> _post_ops;
+    bool                                    _fixed_format;
 };
 
 /** Winograd information */

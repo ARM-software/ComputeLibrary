@@ -500,6 +500,10 @@ if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
 
+# Fixed format GEMM kernels.
+if env['experimental_fixed_format_kernels']:
+    arm_compute_env.Append(CPPDEFINES = ['ENABLE_FIXED_FORMAT_KERNELS'])
+
 
 # Logging files
 if env["logging"]:
@@ -575,6 +579,9 @@ if env['neon']:
         attrs = get_attrs_list(env, custom_types, custom_layouts)
     else:
         attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
+
+    if env['experimental_fixed_format_kernels']:
+        attrs.append("experimental_fixed_format_kernels")
 
     # Setup data-type and data-layout files to include
     cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()

@@ -156,8 +156,8 @@ public:
                                                                                             const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     bool                             is_configured() const override;
     experimental::MemoryRequirements workspace() const override;
 
@@ -203,12 +203,12 @@ private:
     /** Indirect buffer */
     std::unique_ptr<const TypeInput *const *, free_delete> _indirect_arg{};
     std::unique_ptr<const TypeInput *, free_delete>        _indirect_buf{};
-    std::vector<TypeInput>           _indirect_pad{};
-    arm_gemm::ConvolutionParameters  _cp{};
-    experimental::MemoryRequirements _aux_mem{ Count };
-    bool                             _B_pretranspose_required{ false };
-    bool                             _is_b_constant{ true };
-    bool                             _is_c_constant{ true };
+    std::vector<TypeInput>                                 _indirect_pad{};
+    arm_gemm::ConvolutionParameters                        _cp{};
+    experimental::MemoryRequirements                       _aux_mem{ Count };
+    bool                                                   _B_pretranspose_required{ false };
+    bool                                                   _is_b_constant{ true };
+    bool                                                   _is_c_constant{ true };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -576,7 +576,7 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     const CPUInfo &ci          = NEScheduler::get().cpu_info();
     unsigned int   num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fixed_format, info.fast_mode);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
@@ -594,7 +594,7 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fixed_format, info.fast_mode);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
@@ -644,7 +644,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
     const CPUInfo       &ci          = NEScheduler::get().cpu_info();
     unsigned int         num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads, info.fast_mode);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads, info.fixed_format, info.fast_mode);
     switch(a->data_type())
     {
         case DataType::F32:
