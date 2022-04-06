@@ -99,6 +99,22 @@ void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // Re-quantize to new output space
                 tmp = svquantize_qsymm16_z(pg, tmp_dep, qi_out.scale);
             }
+            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                // De-quantize
+                auto vin_deq = svdequantize_qsymm16_z(pg, vin, qi_in.scale);
+                // Perform activation
+                const svfloat32x2_t tmp_dep =
+                {
+                    { {
+                            svmin_f32_z(pg,va_f32, svmax_f32_z(pg,vb_f32, svget2_f32(vin_deq, 0))),
+                            svmin_f32_z(pg,va_f32, svmax_f32_z(pg,vb_f32, svget2_f32(vin_deq, 1))),
+                        }
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = svquantize_qsymm16_z(pg, tmp_dep, qi_out.scale);
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");

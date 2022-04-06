@@ -109,11 +109,12 @@ static const std::array<ActivationLayerInfo::ActivationFunction, 7> qasymm8_acti
     ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
 };
 /* Supported activation in the 16-bit integer domain */
-static const std::array<ActivationLayerInfo::ActivationFunction, 3> qsymm16_activations =
+static const std::array<ActivationLayerInfo::ActivationFunction, 4> qsymm16_activations =
 {
     ActivationLayerInfo::ActivationFunction::LOGISTIC,
     ActivationLayerInfo::ActivationFunction::TANH,
-    ActivationLayerInfo::ActivationFunction::HARD_SWISH
+    ActivationLayerInfo::ActivationFunction::HARD_SWISH,
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
 };
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &activation_info)

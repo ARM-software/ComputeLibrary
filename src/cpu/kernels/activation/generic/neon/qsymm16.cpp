@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,6 +101,22 @@ void neon_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // Re-quantize to new output space
                 tmp = vquantize_int16(tmp_dep, qi_out.scale);
             }
+
+            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                // De-quantize
+                const auto vin_deq = vdequantize_int16(vin, qi_in.scale);
+                // Perform activation
+                const float32x4x2_t tmp_dep =
+                {
+                    {
+                        wrapper::vmin(va_f32, wrapper::vmax(vb_f32, vin_deq.val[0])),
+                        wrapper::vmin(va_f32, wrapper::vmax(vb_f32, vin_deq.val[1]))
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = vquantize_int16(tmp_dep, qi_out.scale);
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -123,6 +139,12 @@ void neon_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
             {
                 float tmp_f = dequantize_qsymm16(in, qi_in.scale);
                 tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
+                tmp         = quantize_qsymm16(tmp_f, qi_out);
+            }
+            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                float tmp_f = dequantize_qsymm16(in, qi_in.scale);
+                tmp_f       = std::min<float>(a_f32, std::max<float>(b_f32, tmp_f));
                 tmp         = quantize_qsymm16(tmp_f, qi_out);
             }
             else
