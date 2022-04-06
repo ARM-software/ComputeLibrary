@@ -51,8 +51,10 @@ public:
      * |:--------------|:--------------|
      * |F16            |F16            |
      * |F32            |F32            |
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
      *
-     * @param[in]  src       Source tensor info. Data types supported: F16/F32.
+     * @param[in]  src       Source tensor info. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[out] dst       Destination tensor info. Data types supported: Same as @p src.
      * @param[in]  pool_info Contains pooling operation information described in @ref Pooling3dLayerInfo.
      */

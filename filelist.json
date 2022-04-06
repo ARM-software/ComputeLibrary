@@ -1803,9 +1803,11 @@
             "src/runtime/NEON/functions/NEPooling3dLayer.cpp"
           ],
           "neon": {
-            "common":[ "src/cpu/kernels/pool3d/neon/impl.cpp" ],
-            "fp16":  [ "src/cpu/kernels/pool3d/neon/fp16.cpp" ],
-            "fp32":  [ "src/cpu/kernels/pool3d/neon/fp32.cpp" ]
+            "common":         [ "src/cpu/kernels/pool3d/neon/impl.cpp" ],
+            "fp16":           [ "src/cpu/kernels/pool3d/neon/fp16.cpp" ],
+            "fp32":           [ "src/cpu/kernels/pool3d/neon/fp32.cpp" ],
+            "qasymm8":        [ "src/cpu/kernels/pool3d/neon/qasymm8.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/pool3d/neon/qasymm8_signed.cpp" ]
           }
         }
       },

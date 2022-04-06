@@ -64,10 +64,12 @@ public:
      * |:--------------|:--------------|
      * |F16            |F16            |
      * |F32            |F32            |
+     * |QASYMM8        |QASYMM8        |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |
      *
      * @note Source tensor is padded with -inf for MAX pooling and 0 otherwise
      *
-     * @param[in]  input     Source tensor. Data types supported: F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[out] output    Destination tensor.
      * @param[in]  pool_info Contains pooling operation information described in @ref Pooling3dLayerInfo.
      */
@@ -75,7 +77,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEPooling3dLayer
      *
      *
-     * @param[in] input     Source tensor info. Data types supported: F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[in] output    Destination tensor info.
      * @param[in] pool_info Contains pooling operation information described in @ref Pooling3dLayerInfo.
      *

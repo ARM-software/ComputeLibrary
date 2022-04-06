@@ -512,6 +512,8 @@ cc_library_static {
         "src/cpu/kernels/pool3d/neon/fp16.cpp",
         "src/cpu/kernels/pool3d/neon/fp32.cpp",
         "src/cpu/kernels/pool3d/neon/impl.cpp",
+        "src/cpu/kernels/pool3d/neon/qasymm8.cpp",
+        "src/cpu/kernels/pool3d/neon/qasymm8_signed.cpp",
         "src/cpu/kernels/range/generic/neon/fp16.cpp",
         "src/cpu/kernels/range/generic/neon/fp32.cpp",
         "src/cpu/kernels/range/generic/neon/impl.cpp",

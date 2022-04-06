@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+#include "src/core/helpers/PoolingHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/pool3d/neon/quantized.h"
 
 #include "src/cpu/kernels/pool3d/neon/impl.h"
 
@@ -36,27 +35,6 @@ namespace cpu
 {
 namespace
 {
-inline float calculate_avg_scale(bool exclude_padding, const Coordinates &id, const int pool_size_x, const int pool_size_y, const int pool_size_z, const int upper_bound_w,
-                                 const int upper_bound_h, const int upper_bound_d, const int pad_x, const int pad_y, const int pad_z, const int stride_x, const int stride_y, const int stride_z)
-{
-    // Based on NDHWC
-    int start_x = id[1] * stride_x - pad_x;
-    int start_y = id[2] * stride_y - pad_y;
-    int start_z = id[3] * stride_z - pad_z;
-
-    const int end_x = std::min(start_x + pool_size_x, upper_bound_w);
-    const int end_y = std::min(start_y + pool_size_y, upper_bound_h);
-    const int end_z = std::min(start_z + pool_size_z, upper_bound_d);
-    if(exclude_padding)
-    {
-        start_x = std::max(0, start_x);
-        start_y = std::max(0, start_y);
-        start_z = std::max(0, start_z);
-    }
-    return 1.f / ((end_y - start_y) * (end_x - start_x) * (end_z - start_z));
-}
-
-
 template <typename T>
 void max_poolingMxNxD_fp_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window_out,
                                     const int window_start_x, const int window_end_x, const int window_step_x)
@@ -227,9 +205,9 @@ void avg_poolingMxNxD_fp_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3d
         const uint8_t *in_ptr_n = in_ptr_start + id[4] * n_stride;
 
         // Calculate scale
-        const float scale = calculate_avg_scale(pool_info.exclude_padding, id, pool_size_x, pool_size_y, pool_size_z, upper_bound_w, upper_bound_h, upper_bound_d, pool_pad_left,
-                                                pool_pad_top, pool_pad_front, pool_stride_x,
-                                                pool_stride_y, pool_stride_z);
+        const float scale = calculate_avg_scale_pool3d(pool_info.exclude_padding, id, pool_size_x, pool_size_y, pool_size_z, upper_bound_w, upper_bound_h, upper_bound_d, pool_pad_left,
+                                                       pool_pad_top, pool_pad_front, pool_stride_x,
+                                                       pool_stride_y, pool_stride_z);
         const vector_type scale_v = wrapper::vdup_n(static_cast<T>(scale), tag_type());
 
         int x_off = window_start_x;
@@ -354,9 +332,9 @@ void l2_poolingMxNxD_fp_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dL
         const uint8_t *in_ptr_n = in_ptr_start + id[4] * n_stride;
 
         // Calculate scale
-        const float scale = calculate_avg_scale(pool_info.exclude_padding, id, pool_size_x, pool_size_y, pool_size_z, upper_bound_w, upper_bound_h, upper_bound_d, pool_pad_left,
-                                                pool_pad_top, pool_pad_front, pool_stride_x,
-                                                pool_stride_y, pool_stride_z);
+        const float scale = calculate_avg_scale_pool3d(pool_info.exclude_padding, id, pool_size_x, pool_size_y, pool_size_z, upper_bound_w, upper_bound_h, upper_bound_d, pool_pad_left,
+                                                       pool_pad_top, pool_pad_front, pool_stride_x,
+                                                       pool_stride_y, pool_stride_z);
 
         int x_off = window_start_x;
 
@@ -452,9 +430,33 @@ void poolingMxNxD_fp_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dLaye
     }
 }
 
+template <typename T>
+void poolingMxNxD_q8_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window)
+{
+    constexpr int window_step_x = 16;
+    Window        window_out    = window;
+
+    // Needed to handle loop left-over
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    switch(pool_info.pool_type)
+    {
+        case PoolingType::MAX:
+            max_poolingMxNxD_q8_neon_ndhwc<T>(src, dst0, pool_info, window_out, window_step_x);
+            break;
+        case PoolingType::AVG:
+            avg_poolingMxNxD_q8_neon_ndhwc<T>(src, dst0, pool_info, window_out, window_step_x);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Pool operation not supported");
+    }
+}
+
 template void poolingMxNxD_fp_neon_ndhwc<float>(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 template void poolingMxNxD_fp_neon_ndhwc<float16_t>(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+template void poolingMxNxD_q8_neon_ndhwc<uint8_t>(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
+template void poolingMxNxD_q8_neon_ndhwc<int8_t>(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
 } // namespace cpu
 } // namespace arm_compute

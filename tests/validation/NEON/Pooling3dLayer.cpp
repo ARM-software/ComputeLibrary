@@ -55,12 +55,43 @@ const auto Pooling3dLayerDatasetFPSmall = combine(combine(combine(combine(datase
                                                           framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
                                                   framework::dataset::make("ExcludePadding", { true, false }));
 
+const auto Pooling3dLayerDatasetQASYMM8Small = combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                               framework::dataset::make("PoolingSize", { Size3D(3, 3, 3) })),
+                                                                       framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 1, 1), Size3D(1, 2, 1), Size3D(2, 2, 1) })),
+                                                               framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 1), Padding3D(1, 0, 0) })),
+                                                       framework::dataset::make("ExcludePadding", { true }));
+
+const auto Pooling3dLayerDatasetQASYMM8Large = combine(combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
+                                                                               framework::dataset::make("PoolingSize", { Size3D(3, 3, 3) })),
+                                                                       framework::dataset::make("Stride", { Size3D(1, 1, 1), Size3D(2, 2, 1) })),
+                                                               framework::dataset::make("Padding", { Padding3D(0, 0, 0), Padding3D(1, 1, 0) })),
+                                                       framework::dataset::make("ExcludePadding", { true }));
+
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-#endif   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);     /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+#endif                                                       /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric type */
+
+const auto qasymm8_in_qinfo_dataset  = framework::dataset::make("InputQuantInfo", { QuantizationInfo(.2f, 10) });
+const auto qasymm8_out_qinfo_dataset = framework::dataset::make("OutputQuantInfo",
+{
+    QuantizationInfo(.2f, 10), // Same qinfo
+    QuantizationInfo(.1f, 5),  // Multiplier <= 1
+    QuantizationInfo(2.f, 3)   // Multiplier > 1
+});
+
+const auto qasymm8_signed_in_qinfo_dataset  = framework::dataset::make("InputQuantInfo", { QuantizationInfo(.2f, -10) });
+const auto qasymm8_signed_out_qinfo_dataset = framework::dataset::make("OutputQuantInfo",
+{
+    QuantizationInfo(.2f, -10), // Same qinfo
+    QuantizationInfo(.1f, -5),  // Multiplier <= 1
+    QuantizationInfo(2.f, -3)   // Multiplier > 1
+});
+
 } //namespace
 
 TEST_SUITE(NEON)
@@ -280,8 +311,49 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayer3dFixture<half>, framework::Datas
 TEST_SUITE_END() // GlobalPooling
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
 TEST_SUITE_END() // Float
+TEST_SUITE(Quantized)
+
+template <typename T>
+using NEPooling3dLayerQuantizedFixture = Pooling3dLayerValidationQuantizedFixture<Tensor, Accessor, NEPooling3dLayer, T>;
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
+                                                                                                                       combine(Pooling3dLayerDatasetQASYMM8Small,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                       qasymm8_in_qinfo_dataset),
+                                                                                                                       qasymm8_out_qinfo_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPooling3dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large5dShapes(),
+                                                                                                                       combine(Pooling3dLayerDatasetQASYMM8Large,
+                                                                                                                               framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                       qasymm8_in_qinfo_dataset),
+                                                                                                                       qasymm8_out_qinfo_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPooling3dLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small5dShapes(),
+                                                                                                                      combine(Pooling3dLayerDatasetQASYMM8Small,
+                                                                                                                              framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                      qasymm8_signed_in_qinfo_dataset),
+                                                                                                                      qasymm8_signed_out_qinfo_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_s);
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // Pooling3dLayer
 TEST_SUITE_END() // NEON
 } // namespace validation

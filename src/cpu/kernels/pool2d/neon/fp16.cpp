@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -199,8 +199,8 @@ void poolingMxN_fp16_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
             if(pool_info.pool_type != PoolingType::MAX)
             {
                 // Calculate scale
-                const float scale = calculate_avg_scale(pool_info.exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                        pool_stride_y);
+                const float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                               pool_stride_y);
                 const float16x8_t scale_v = vdupq_n_f16(scale);
 
                 // Perform pooling
@@ -260,8 +260,8 @@ void poolingMxN_fp16_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
             if(pool_info.pool_type != PoolingType::MAX)
             {
                 // Calculate scale
-                const float16_t scale = calculate_avg_scale(pool_info.exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                            pool_stride_y);
+                const float16_t scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                                   pool_stride_y);
 
                 for(int y = pool_start_y; y < pool_end_y; ++y)
                 {

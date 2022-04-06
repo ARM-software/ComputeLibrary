@@ -37,6 +37,8 @@ namespace cpu
 template <typename T>
 void poolingMxNxD_fp_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
 
+template <typename T>
+void poolingMxNxD_q8_neon_ndhwc(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif //define SRC_CORE_POOLING_3D_LAYER_IMPL_H

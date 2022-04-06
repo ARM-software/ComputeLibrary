@@ -21,24 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_POOLING3D_LIST_H
-#define SRC_CORE_NEON_KERNELS_POOLING3D_LIST_H
-
+#include "src/cpu/kernels/pool3d/neon/impl.h"
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_POOLING_KERNEL(func_name) \
-    void func_name(const ITensor *src0, ITensor *dst0, Pooling3dLayerInfo &, const Window &window)
-
-DECLARE_POOLING_KERNEL(neon_q8_pool3d);
-DECLARE_POOLING_KERNEL(neon_q8_signed_pool3d);
-DECLARE_POOLING_KERNEL(neon_fp16_pool3d);
-DECLARE_POOLING_KERNEL(neon_fp32_pool3d);
-
-#undef DECLARE_POOLING_KERNEL
-
+void neon_q8_signed_pool3d(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window)
+{
+    return poolingMxNxD_q8_neon_ndhwc<int8_t>(src, dst0, pool_info, window);
+}
 } // namespace cpu
 } // namespace arm_compute
-
-#endif // SRC_CORE_NEON_KERNELS_POOLING3D_LIST_H
