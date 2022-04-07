@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,47 +29,35 @@
 
 #pragma once
 
-#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
 
 void sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst_impl(unsigned int, const uint8_t *const *, const uint8_t *, const int32_t *, const arm_gemm::Requantize32 &, const int32_t *, const int32_t *, uint8_t *const *);
 
-struct sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst
+class sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<uint8_t, uint8_t, uint8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef uint8_t input_type;
-  typedef uint8_t weight_type;
-  typedef uint8_t return_type;
+  using Parent = DepthwiseDepthfirstStrategy<uint8_t, uint8_t, uint8_t, int32_t>;
 
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::SVE;
-
-  typedef void (*kern_type)(unsigned int, const uint8_t *const *, const uint8_t *, const int32_t *, const arm_gemm::Requantize32 &, const int32_t *, const int32_t *, uint8_t *const *);
-  typedef void (*parameter_packing_fn)(unsigned int, void *, const uint8_t *, size_t, size_t);
-  typedef size_t (*parameter_sizing_fn)(const DepthwiseArgs &);
-
+  public:
   constexpr static unsigned int kernel_rows = 3;
   constexpr static unsigned int kernel_cols = 3;
 
   constexpr static unsigned int stride_rows = 2;
   constexpr static unsigned int stride_cols = 2;
 
-  constexpr static unsigned int output_rows = 2;
-  constexpr static unsigned int output_cols = 2;
+  arm_gemm::VLType get_vl_type(void) const override { return arm_gemm::VLType::SVE; }
+  unsigned int get_accumulator_depth_vl(void) const override { return 2; }
 
-  constexpr static unsigned int input_rows = 5;
-  constexpr static unsigned int input_cols = 5;
+  sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst(const CPUInfo *) : Parent(2, 2, 3, 3, 2, 2) {}
 
-  constexpr static parameter_packing_fn pack_parameters = interleave_sve_u8q_3x3_mla::pack_parameters;
-  constexpr static parameter_sizing_fn get_packed_size = interleave_sve_u8q_3x3_mla::get_packed_size;
+  Parent::KernelType kernel = sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst_impl;
 
-  kern_type kernel = sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst_impl;
-
-  sve_u8q_nhwc_3x3_s2_output2x2_mla_depthfirst(const CPUInfo *) {}
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)

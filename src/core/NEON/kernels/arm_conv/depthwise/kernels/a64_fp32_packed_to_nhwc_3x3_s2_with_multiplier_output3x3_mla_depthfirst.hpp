@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,39 +28,34 @@
 
 #pragma once
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace depthwise {
 
 void a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst_impl(const float *const *const, float *const *const, const void *, const unsigned int, const float, const float);
 
-struct a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst
+struct a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst : DepthfirstMultiplierStrategy<float, float, float, float>
 {
-  typedef float bias_type;
-  typedef float input_type;
-  typedef float weight_type;
-  typedef float return_type;
-
-  typedef void (*kern_type)(const float *const *const, float *const *const, const void *, const unsigned int, const float, const float);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
+  using Parent = DepthfirstMultiplierStrategy<float, float, float, float>;
   constexpr static unsigned int kernel_rows = 3;
   constexpr static unsigned int kernel_cols = 3;
 
   constexpr static unsigned int stride_rows = 2;
   constexpr static unsigned int stride_cols = 2;
 
-  constexpr static unsigned int output_rows = 3;
-  constexpr static unsigned int output_cols = 3;
+  a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst(const CPUInfo *)
+  : Parent(3, 3, kernel_rows, kernel_cols, stride_rows, stride_cols)
+  {
+  }
 
-  constexpr static unsigned int input_rows = 7;
-  constexpr static unsigned int input_cols = 7;
-  constexpr static unsigned int input_col_quads = 2;
+  arm_gemm::VLType get_vl_type() const override { return arm_gemm::VLType::None; }
 
-  kern_type kernel = a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst_impl;
-
-  a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst(const CPUInfo *) {}
+  Parent::KernelType kernel = a64_fp32_packed_to_nhwc_3x3_s2_with_multiplier_output3x3_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
+
+#endif // defined(__aarch64__)

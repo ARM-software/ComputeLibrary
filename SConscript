@@ -555,6 +555,7 @@ if env['neon']:
                                       "src/core/NEON/kernels/convolution/winograd/",
                                       "src/core/NEON/kernels/arm_conv/depthwise/",
                                       "src/core/NEON/kernels/arm_conv/pooling/",
+                                      "src/core/NEON/kernels/arm_conv/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/cpu/kernels/assembly/"])

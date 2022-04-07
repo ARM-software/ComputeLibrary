@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,39 +34,40 @@
 namespace arm_conv {
 namespace depthwise {
 
-void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *, int8_t *const *, const void *, uint64_t, const arm_gemm::Requantize32&);
+void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(unsigned int, const int8_t *const *, const int8_t *, const int32_t *, const arm_gemm::Requantize32&, const int32_t *, const int32_t *, int8_t *const *);
 
-struct a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst
+class a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst : public DepthwiseDepthfirstStrategy<int8_t, int8_t, int8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef int8_t input_type;
-  typedef int8_t weight_type;
-  typedef int8_t return_type;
+  using Parent = DepthwiseDepthfirstStrategy<int8_t, int8_t, int8_t, int32_t>;
 
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  typedef void (*kern_type)(const int8_t *const *, int8_t *const *, const void *, uint64_t, const arm_gemm::Requantize32&);
-  typedef void (*parameter_packing_fn)(unsigned int, void *, const int32_t *, const int8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
-  typedef size_t (*parameter_sizing_fn)(const DepthwiseArgs &);
-
+  public:
   constexpr static unsigned int kernel_rows = 3;
   constexpr static unsigned int kernel_cols = 3;
 
   constexpr static unsigned int stride_rows = 1;
   constexpr static unsigned int stride_cols = 1;
 
-  constexpr static unsigned int output_rows = 2;
-  constexpr static unsigned int output_cols = 2;
+  a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst(const CPUInfo *) : Parent(2, 2, 3, 3, 1, 1) {}
 
-  constexpr static unsigned int input_rows = 4;
-  constexpr static unsigned int input_cols = 4;
+  arm_gemm::VLType get_vl_type(void) const override { return arm_gemm::VLType::None; }
 
-  constexpr static parameter_packing_fn pack_parameters = interleave_a64_s8q_3x3_dot::pack_parameters;
-  constexpr static parameter_sizing_fn get_packed_size = interleave_a64_s8q_3x3_dot::get_packed_size;
+  Parent::KernelType kernel = a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
+  size_t get_storage_size(const DepthwiseArgs &args) const override
+  {
+    return interleave_a64_s8q_3x3_dot::get_packed_size(args);
+  }
 
-  kern_type kernel = a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl;
-
-  a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst(const CPUInfo *) {}
+  void pack_parameters(
+    const DepthwiseArgs &args, void *buffer, const void *biases, const arm_gemm::Requantize32 &qp,
+    const void *weights, size_t ld_weight_col, size_t ld_weight_row
+  ) const override
+  {
+    interleave_a64_s8q_3x3_dot::pack_parameters(
+      args.input_channels, buffer, reinterpret_cast<const int32_t *>(biases),
+      reinterpret_cast<const int8_t *>(weights), qp, ld_weight_col, ld_weight_row
+    );
+  }
 };
 
 }  // namespace depthwise

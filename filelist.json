@@ -665,7 +665,7 @@
     "Reduction": {
       "deps": [ "Reshape" ],
       "files": {
-        "common": [
+        "common": [ 
           "src/core/CL/kernels/CLReductionOperationKernel.cpp",
           "src/runtime/CL/functions/CLReductionOperation.cpp"
         ]
@@ -1154,7 +1154,7 @@
               "src/core/NEON/kernels/convolution/common/qsymm8.cpp",
               "src/core/NEON/kernels/convolution/common/utils.cpp",
               "src/core/NEON/kernels/arm_conv/addressing.cpp",
-              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp16.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_strategies_common.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp",
@@ -1171,6 +1171,7 @@
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp16.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
@@ -1208,13 +1209,18 @@
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_generic_output9_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8qa_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8qa_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8qa_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_s8q_3x3_dot.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic_quantized_dot_product.cpp",
               "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.cpp"
-              ],
+              ], 
               "fp16":["src/cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp"],
-              "fp32":["src/cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp"],
-              "qasymm8":["src/cpu/kernels/depthwiseconv2d/generic/neon/qasymm8.cpp"],
+              "fp32":["src/cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp"], 
+              "qasymm8":["src/cpu/kernels/depthwiseconv2d/generic/neon/qasymm8.cpp"], 
               "qasymm8_signed":["src/cpu/kernels/depthwiseconv2d/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
@@ -1315,7 +1321,7 @@
             "fp32": ["src/cpu/kernels/elementwise_binary/generic/sve/fp32.cpp"],
             "fp16": ["src/cpu/kernels/elementwise_binary/generic/sve/fp16.cpp"]
 
-          },
+          }, 
           "sve2":{
             "qasymm8": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8.cpp"],
             "qasymm8_signed": ["src/cpu/kernels/elementwise_binary/generic/sve2/qasymm8_signed.cpp"]
@@ -1519,7 +1525,7 @@
               "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_6x4/a55.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_6x4/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/a55.cpp",
-              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/a64_smallK_hybrid_u8u32_dot_8x4/generic.cpp", 
               "src/cpu/kernels/gemm_matrix_mul/generic/neon/impl.cpp",
               "src/cpu/kernels/gemm_matrix_add/generic/neon/impl.cpp"
             ],
@@ -1603,7 +1609,7 @@
           "common": [
             "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.cpp",
             "src/runtime/NEON/functions/NEInstanceNormalizationLayer.cpp"
-          ],
+          ], 
           "neon":{
             "common":["src/cpu/kernels/instancenorm/generic/neon/impl.cpp"],
             "fp16":["src/cpu/kernels/instancenorm/generic/neon/fp16.cpp"],
@@ -1663,7 +1669,7 @@
         "files": {
           "common": [
             "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.cpp",
-            "src/runtime/NEON/functions/NEMaxUnpoolingLayer.cpp",
+            "src/runtime/NEON/functions/NEMaxUnpoolingLayer.cpp", 
             "src/cpu/operators/CpuMaxUnpooling.cpp"
           ],
           "neon":{
@@ -1764,12 +1770,12 @@
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8_nhwc_max_generic_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_avg_generic_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_max_generic_depthfirst/generic.cpp"
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/a64_u8q_nhwc_max_generic_depthfirst/generic.cpp"  
             ],
             "nchw": [ "src/cpu/kernels/pool2d/neon/nchw/all.cpp" ],
             "fp16": [ "src/cpu/kernels/pool2d/neon/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/pool2d/neon/fp32.cpp" ],
-            "qasymm8":[ "src/cpu/kernels/pool2d/neon/qasymm8.cpp" ],
+            "fp32": [ "src/cpu/kernels/pool2d/neon/fp32.cpp" ], 
+            "qasymm8":[ "src/cpu/kernels/pool2d/neon/qasymm8.cpp" ], 
             "qasymm8_signed":["src/cpu/kernels/pool2d/neon/qasymm8_signed.cpp"]
           },
           "sve": {
@@ -1969,8 +1975,8 @@
           "neon":{
             "common":["src/cpu/kernels/softmax/generic/neon/impl.cpp"],
             "fp32": ["src/cpu/kernels/softmax/generic/neon/fp32.cpp"],
-            "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"],
-            "qasymm8":[ "src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"],
+            "fp16": ["src/cpu/kernels/softmax/generic/neon/fp16.cpp"], 
+            "qasymm8":[ "src/cpu/kernels/softmax/generic/neon/qasymm8.cpp"], 
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp"]
           },
           "sve": {
@@ -1982,7 +1988,7 @@
           },
           "sve2":{
             "common" :["src/cpu/kernels/softmax/generic/sve2/impl.cpp"],
-            "qasymm8":[ "src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp"],
+            "qasymm8":[ "src/cpu/kernels/softmax/generic/sve2/qasymm8.cpp"], 
             "qasymm8_signed":["src/cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp"]
           }
         }

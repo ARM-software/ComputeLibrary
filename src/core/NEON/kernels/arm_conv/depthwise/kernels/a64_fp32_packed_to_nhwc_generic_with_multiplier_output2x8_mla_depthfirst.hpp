@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,31 +28,25 @@
 
 #pragma once
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace depthwise {
 
 void a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl(const float *const *const, float *const *const, const float *, const float *, const unsigned int, const unsigned int, const float, const float);
 
-struct a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst
+struct a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst : GenericDepthfirstMultiplierKernelStrategy<float, float, float, float>
 {
-  typedef float bias_type;
-  typedef float input_type;
-  typedef float weight_type;
-  typedef float return_type;
-
-  typedef void (*kern_type)(const float *const *const, float *const *const, const float *, const float *, const unsigned int, const unsigned int, const float, const float);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  constexpr static unsigned int output_rows(void) { return 2; };
-  constexpr static unsigned int output_cols(void) { return 8; };
-
-  constexpr static unsigned int output_col_regs(void) { return 2; };
-
-  kern_type kernel = a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
-
-  a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *) {}
+  using Parent = GenericDepthfirstMultiplierKernelStrategy<float, float, float, float>;
+  a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *)
+  : Parent(2, 8, arm_gemm::VLType::None)
+  {
+  }
+  Parent::KernelType kernel = a64_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
+
+#endif  // defined(__aarch64__)

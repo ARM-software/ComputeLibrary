@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,31 +28,25 @@
 
 #pragma once
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace depthwise {
 
 void a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl(const uint8_t *const *const, uint8_t *const *const, const uint8_t *, const int32_t *, const unsigned int, const unsigned int, const int32_t *, const int32_t *, const int32_t *, const arm_gemm::Requantize32&);
 
-struct a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst
+struct a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst : GenericDepthfirstMultiplierKernelStrategy<uint8_t, uint8_t, uint8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef uint8_t input_type;
-  typedef uint8_t weight_type;
-  typedef uint8_t return_type;
-
-  typedef void (*kern_type)(const uint8_t *const *const, uint8_t *const *const, const uint8_t *, const int32_t *, const unsigned int, const unsigned int, const int32_t *, const int32_t *, const int32_t *, const arm_gemm::Requantize32&);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  constexpr static unsigned int output_rows(void) { return 2; };
-  constexpr static unsigned int output_cols(void) { return 8; };
-
-  constexpr static unsigned int output_col_regs(void) { return 2; };
-
-  kern_type kernel = a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
-
-  a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *) {}
+  using Parent = GenericDepthfirstMultiplierKernelStrategy<uint8_t, uint8_t, uint8_t, int32_t>;
+  a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *)
+  : Parent(2, 8, arm_gemm::VLType::None)
+  {
+  }
+  Parent::KernelType kernel = a64_u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
+
+#endif  // defined(__aarch64__)

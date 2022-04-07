@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 
 #pragma once
 
-#if __aarch64__ && defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
@@ -36,19 +36,16 @@ namespace depthwise {
 void sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_indirect_impl(const float *const *const, float *const *const, const void *, unsigned int, const float, const float);
 void sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_direct_impl(const unsigned int, const unsigned int, const float *, int64_t, int64_t, float *, int64_t, int64_t, const void *, unsigned int, const float, const float);
 
-class sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst : public IDepthwiseDepthfirstStrategy
+class sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst : public DepthwiseDepthfirstStrategy<float, float, float, float>
 {
   private:
-  typedef void (*indirect_kern_type)(const float *const *const, float *const *const, const void *, unsigned int, const float, const float);
-  indirect_kern_type m_indirect_kernel = sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_indirect_impl;
-
-  typedef void (*direct_kern_type)(const unsigned int, const unsigned int, const float *, int64_t, int64_t, float *, int64_t, int64_t, const void *, unsigned int, const float, const float);
-  direct_kern_type m_direct_kernel = sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_direct_impl;
+  using Parent = DepthwiseDepthfirstStrategy<float, float, float, float>;
+  Parent::IndirectKernelType m_indirect_kernel = sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_indirect_impl;
+  Parent::DirectKernelType m_direct_kernel = sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst_direct_impl;
 
   public:
-  typedef float return_type;
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::SVE;
+  using return_type = float;
+  constexpr static auto vl_type = arm_gemm::VLType::SVE;
 
   constexpr static unsigned int kernel_rows = 3;
   constexpr static unsigned int kernel_cols = 3;
@@ -59,63 +56,16 @@ class sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst : public IDepthwiseDepthfirs
   constexpr static unsigned int output_rows = 3;
   constexpr static unsigned int output_cols = 3;
 
-  constexpr static unsigned int input_rows = 5;
-  constexpr static unsigned int input_cols = 5;
-
-  sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst(const CPUInfo *) {}
+  sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst(const CPUInfo *)
+  : DepthwiseDepthfirstStrategy<float, float, float, float>(3, 3, 1) {}
 
   arm_gemm::VLType get_vl_type(void) const override { return vl_type; }
 
-  unsigned int get_kernel_rows(void) const override { return kernel_rows; }
-  unsigned int get_kernel_cols(void) const override { return kernel_cols; }
-
-  unsigned int get_stride_rows(void) const override { return stride_rows; }
-  unsigned int get_stride_cols(void) const override { return stride_cols; }
-
-  unsigned int get_output_rows(void) const override { return output_rows; }
-  unsigned int get_output_cols(void) const override { return output_cols; }
-
-  unsigned int get_input_rows(void) const override { return input_rows; }
-  unsigned int get_input_cols(void) const override { return input_cols; }
-
-  void indirect_kernel(
-    const void *const *const input_ptrs,
-    void *const *const outptrs,
-    const void *params,
-    unsigned int n_channels,
-    const void *activation_min,
-    const void *activation_max
-  ) const override
-  {
-    m_indirect_kernel(
-      reinterpret_cast<const float *const *>(input_ptrs),
-      reinterpret_cast<float *const *>(outptrs),
-      params, n_channels,
-      *static_cast<const float *>(activation_min),
-      *static_cast<const float *>(activation_max)
-    );
-  }
-
-  void direct_kernel(
-    const unsigned int n_tile_rows, const unsigned int n_tile_cols,
-    const void *inptr, int64_t ld_input_row, int64_t ld_input_col,
-    void *outptr, int64_t ld_output_row, int64_t ld_output_col,
-    const void *params, unsigned int n_channels,
-    const void *activation_min, const void *activation_max
-  ) const override
-  {
-    m_direct_kernel(
-      n_tile_rows, n_tile_cols,
-      static_cast<const float *>(inptr), ld_input_row, ld_input_col,
-      static_cast<float *>(outptr), ld_output_row, ld_output_col,
-      params, n_channels,
-      *static_cast<const float *>(activation_min),
-      *static_cast<const float *>(activation_max)
-    );
-  }
+  Parent::IndirectKernelType get_indirect_kernel() const override { return m_indirect_kernel; }
+  Parent::DirectKernelType get_direct_kernel() const override { return m_direct_kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // __aarch64__ && defined(ARM_COMPUTE_ENABLE_SVE)
+#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)

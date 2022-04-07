@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,15 @@
 namespace arm_conv {
 namespace depthwise {
 
-void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *const inptrs, int8_t *const *const outptrs, const void *params, const uint64_t n_channels, const arm_gemm::Requantize32& qp)
+void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(
+  const unsigned int n_channels,
+  const int8_t *const *const inptrs,
+  const int8_t *params,
+  const int32_t *,  // Bias, should be wrapped into the parameters
+  const arm_gemm::Requantize32& qp,
+  const int32_t *, const int32_t *,  // Requant parameters, also wrapped
+  int8_t *const *const outptrs
+)
 {
   __asm__ __volatile__(
     "ldp x13, x12, [%x[inptrs], #0x0]\n"
@@ -1307,7 +1315,7 @@ void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *cons
     "34:"  // End
     "add SP, SP, #0x80\n"
     : [params] "+&r" (params)
-    : [inptrs] "r" (inptrs), [n_channels] "r" (n_channels), [offsetof_Requantize32_b_offset] "I" (offsetof(arm_gemm::Requantize32, b_offset)), [offsetof_Requantize32_c_offset] "I" (offsetof(arm_gemm::Requantize32, c_offset)), [offsetof_Requantize32_maxval] "I" (offsetof(arm_gemm::Requantize32, maxval)), [offsetof_Requantize32_minval] "I" (offsetof(arm_gemm::Requantize32, minval)), [outptrs] "r" (outptrs), [qp] "r" (&qp)
+    : [inptrs] "r" (inptrs), [n_channels] "r" ((long unsigned int) n_channels), [offsetof_Requantize32_b_offset] "I" (offsetof(arm_gemm::Requantize32, b_offset)), [offsetof_Requantize32_c_offset] "I" (offsetof(arm_gemm::Requantize32, c_offset)), [offsetof_Requantize32_maxval] "I" (offsetof(arm_gemm::Requantize32, maxval)), [offsetof_Requantize32_minval] "I" (offsetof(arm_gemm::Requantize32, minval)), [outptrs] "r" (outptrs), [qp] "r" (&qp)
     : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x11", "x12", "x13", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
   );
 }

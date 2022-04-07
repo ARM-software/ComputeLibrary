@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,35 +28,25 @@
 
 #pragma once
 
-#if defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(__aarch64__) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
 namespace arm_conv {
 namespace depthwise {
 
 void a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl(const __fp16 *const *const, __fp16 *const *const, const __fp16 *, const __fp16 *, const unsigned int, const unsigned int, const __fp16, const __fp16);
 
-struct a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst
+struct a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst : GenericDepthfirstMultiplierKernelStrategy<__fp16, __fp16, __fp16, __fp16>
 {
-  typedef __fp16 bias_type;
-  typedef __fp16 input_type;
-  typedef __fp16 weight_type;
-  typedef __fp16 return_type;
-
-  typedef void (*kern_type)(const __fp16 *const *const, __fp16 *const *const, const __fp16 *, const __fp16 *, const unsigned int, const unsigned int, const __fp16, const __fp16);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  constexpr static unsigned int output_rows(void) { return 2; };
-  constexpr static unsigned int output_cols(void) { return 8; };
-
-  constexpr static unsigned int output_col_regs(void) { return 1; };
-
-  kern_type kernel = a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
-
-  a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *) {}
+  using Parent = GenericDepthfirstMultiplierKernelStrategy<__fp16, __fp16, __fp16, __fp16>;
+  a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *)
+  : Parent(2, 8, arm_gemm::VLType::None)
+  {
+  }
+  Parent::KernelType kernel = a64_fp16_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#endif  // defined(__aarch64__) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

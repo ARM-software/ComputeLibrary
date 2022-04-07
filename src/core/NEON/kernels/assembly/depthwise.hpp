@@ -59,6 +59,8 @@ struct DepthwiseArgs
 
     const DepthwiseConfig *config;
 
+    bool fast_mode = false;
+
     DepthwiseArgs(
         const CPUInfo *cpu_info,
         unsigned int kernel_rows, unsigned int kernel_cols,
@@ -83,15 +85,18 @@ private:
 
 protected:
     const DepthwiseArgs m_args; // Copy of arguments
+
 public:
     std::string name() const
     {
         return _name;
     }
+
     void set_name(const std::string &n)
     {
         _name = n;
     }
+
     DepthwiseCommon(const DepthwiseArgs &args)
         : m_args(args) {};
     DepthwiseCommon(DepthwiseCommon &) = delete;
@@ -103,7 +108,7 @@ public:
         void *const        output,
         void *const        working_space,
         const unsigned int thread_id,
-        const unsigned int n_threads) const override
+        const unsigned int n_threads) const override final
     {
         const size_t ld_input_col    = m_args.input_channels;
         const size_t ld_input_row    = ld_input_col * m_args.input_cols;
@@ -130,7 +135,7 @@ public:
         size_t             ld_output_batch,
         void *const        working_space,
         const unsigned int thread_id,
-        const unsigned int n_threads) const override
+        const unsigned int n_threads) const override final
     {
         execute(
             m_args.n_batches, m_args.input_rows, m_args.input_cols,
@@ -142,7 +147,36 @@ public:
             working_space, thread_id, n_threads);
     }
 
-    virtual void execute(
+    void execute(
+        unsigned int         batches,
+        unsigned int         input_height,
+        unsigned int         input_width,
+        unsigned int         channels,
+        const PaddingValues &padding,
+        const void          *input,
+        size_t               ld_input_col,
+        size_t               ld_input_row,
+        size_t               ld_input_batch,
+        const void          *parameters,
+        unsigned int         output_height,
+        unsigned int         output_width,
+        void                *output,
+        size_t               ld_output_col,
+        size_t               ld_output_row,
+        size_t               ld_output_batch,
+        void                *working_space,
+        unsigned int         thread_id,
+        unsigned int         n_threads) const override final
+    {
+        this->execute_internal(
+            batches, input_height, input_width, channels, padding, input,
+            ld_input_col, ld_input_row, ld_input_batch, parameters, output_height,
+            output_width, output, ld_output_col, ld_output_row, ld_output_batch,
+            working_space, thread_id, n_threads);
+    }
+
+protected:
+    virtual void execute_internal(
         unsigned int batches,
         unsigned int input_height,
         unsigned int input_width,
@@ -161,7 +195,7 @@ public:
         size_t       ld_output_batch,
         void        *working_space,
         unsigned int thread_id,
-        unsigned int n_threads) const override = 0;
+        unsigned int n_threads) const = 0;
 };
 
 template <typename TInput, typename TWeight = TInput, typename TOutput = TInput>
