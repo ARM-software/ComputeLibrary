@@ -211,6 +211,11 @@ public:
 
 private:
     void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush);
+    /** If job chain is disabled, then flush the command queue according to @p flush. Otherwise @p flush is ignored and the queue is only flushed when job chain count exceeds allocated job chain size
+     *
+     * @param[in] flush Flush the command queue. Ignored when job chain is enabled.
+     */
+    void flush_queue(bool flush);
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
     void enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);

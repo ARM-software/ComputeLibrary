@@ -181,19 +181,12 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
     // Run kernel
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
-
     if(_job_chaining_enabled)
     {
-        if(++_job_chaining_count >= _job_chaining_size)
-        {
-            _job_chaining_count = 0;
-            _queue.flush();
-        }
+        ++_job_chaining_count;
     }
-    else if(flush)
-    {
-        _queue.flush();
-    }
+
+    flush_queue(flush);
 }
 
 #if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
@@ -204,14 +197,31 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion
                              "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
                              or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
 
-    const bool inject_memory = !tensors._binding.empty();
+    // ClCompositeKernel is stateless thus alway requires memory injection
+
+    // Tune the kernel if the CLTuner has been provided
+    if(_cl_tuner != nullptr)
+    {
+        _cl_tuner->tune_kernel_dynamic(kernel, tensors, exec_desc);
+    }
 
     // Run kernel
-    inject_memory ? kernel.run_composite_op(tensors, kernel.window(), _queue, exec_desc) : kernel.run(kernel.window(), _queue);
-
+    kernel.run_composite_op(tensors, kernel.window(), _queue, exec_desc);
     if(_job_chaining_enabled)
     {
-        if(++_job_chaining_count >= _job_chaining_size)
+        ++_job_chaining_count;
+    }
+
+    flush_queue(flush);
+}
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::flush_queue(bool flush)
+{
+    if(_job_chaining_enabled)
+    {
+        if(_job_chaining_count >= _job_chaining_size)
         {
             _job_chaining_count = 0;
             _queue.flush();
@@ -222,8 +232,6 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, experimental::dynamic_fusion
         _queue.flush();
     }
 }
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 {

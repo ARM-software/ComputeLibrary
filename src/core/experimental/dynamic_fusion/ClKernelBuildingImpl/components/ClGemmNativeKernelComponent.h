@@ -53,6 +53,7 @@ public:
     Window                get_window() const override;
     ClKernelArgList       get_args();
     CLBuildOptions        generate_build_options() const override;
+    std::string           generate_config_id() const override;
 
     virtual std::vector<Link> get_links() const override
     {

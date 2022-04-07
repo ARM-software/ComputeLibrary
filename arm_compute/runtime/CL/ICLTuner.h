@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,16 @@ namespace arm_compute
 {
 class ICLKernel;
 
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+namespace experimental
+{
+namespace dynamic_fusion
+{
+struct TensorBinding;
+struct ClExecutionDescriptor;
+} // namespace dynamic_fusion
+} // namespace experimental
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 /** Basic interface for tuning the OpenCL kernels */
 class ICLTuner
 {
@@ -57,6 +67,15 @@ public:
      * @param[in, out] tensors Tensors for the kernel to use
      */
     virtual void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) = 0;
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+    /** Tune OpenCL kernel dynamically for dynamic fusion interface
+     *
+     * @param[in]      kernel    Kernel to tune
+     * @param[in, out] tensors   Tensors for the kernel to use
+     * @param[in]      exec_desc Execution descriptor
+     */
+    virtual void tune_kernel_dynamic(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) = 0;
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLTUNER_H */

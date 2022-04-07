@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,9 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/ICLKernel.h"
 #include "support/StringSupport.h"
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 #include <cerrno>
 #include <fstream>
@@ -39,6 +42,48 @@ CLTuner::CLTuner(bool tune_new_kernels, CLTuningInfo tuning_info)
     : real_clEnqueueNDRangeKernel(nullptr), _tuning_params_table(), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuning_info(tuning_info)
 {
 }
+
+struct CLTuner::IKernelData
+{
+    virtual ~IKernelData() = default;
+    virtual void do_run(ICLKernel &kernel, cl::CommandQueue &queue) = 0;
+};
+struct DefaultKernelData : public CLTuner::IKernelData
+{
+    DefaultKernelData(ITensorPack &tensors)
+        : _tensors{ tensors }
+    {
+    }
+    ~DefaultKernelData() override = default;
+    void do_run(ICLKernel &kernel, cl::CommandQueue &queue) override
+    {
+        const bool inject_memory = !_tensors.empty();
+        inject_memory ? kernel.run_op(_tensors, kernel.window(), queue) : kernel.run(kernel.window(), queue);
+    }
+
+private:
+    ITensorPack &_tensors;
+};
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+struct CompositeKernelData : public CLTuner::IKernelData
+{
+    CompositeKernelData(experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+        : _tensors{ tensors }, _exec_desc{ exec_desc }
+    {
+    }
+    ~CompositeKernelData() override = default;
+    void do_run(ICLKernel &kernel, cl::CommandQueue &queue) override
+    {
+        // ClCompositeKernel is purely stateless, and thus always requires memory injection
+        kernel.run_composite_op(_tensors, kernel.window(), queue, _exec_desc);
+    }
+
+private:
+    experimental::dynamic_fusion::TensorBinding               &_tensors;
+    const experimental::dynamic_fusion::ClExecutionDescriptor &_exec_desc;
+};
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 bool CLTuner::kernel_event_is_set() const
 {
@@ -74,7 +119,7 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
     tune_kernel_dynamic(kernel, pack);
 }
 
-void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
+void CLTuner::do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data)
 {
     // Get the configuration ID from the kernel and append GPU target name and number of available compute units
     const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" + support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
@@ -89,7 +134,7 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
             if(_tune_new_kernels)
             {
                 // Find the optimal LWS for the kernel
-                CLTuningParams opt_tuning_params = find_optimal_tuning_params(kernel, tensors);
+                CLTuningParams opt_tuning_params = find_optimal_tuning_params(kernel, data);
 
                 // Insert the optimal LWS in the table
                 add_tuning_params(config_id, opt_tuning_params);
@@ -113,13 +158,28 @@ void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
         }
     }
 }
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors)
+{
+    DefaultKernelData data{ tensors };
+
+    do_tune_kernel_dynamic(kernel, &data);
+}
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel, experimental::dynamic_fusion::TensorBinding &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc)
+{
+    CompositeKernelData data{ tensors, exec_desc };
+
+    do_tune_kernel_dynamic(kernel, &data);
+}
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 void CLTuner::add_tuning_params(const std::string &kernel_id, CLTuningParams optimal_tuning_params)
 {
     _tuning_params_table.emplace(kernel_id, optimal_tuning_params);
 }
 
-CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, ITensorPack &tensors)
+CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelData *data)
 {
     // Profiling queue
     cl::CommandQueue queue_profiler;
@@ -174,8 +234,7 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, ITensorPac
     cl::NDRange gws = ICLKernel::gws_from_window(kernel.window());
 
     // Run the kernel with default lws to be used as baseline
-    const bool inject_memory = !tensors.empty();
-    inject_memory ? kernel.run_op(tensors, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
+    data->do_run(kernel, queue_profiler);
 
     queue_profiler.finish();
 
@@ -211,7 +270,7 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, ITensorPac
         }
 
         // Run the kernel
-        inject_memory ? kernel.run_op(tensors, kernel.window(), queue_profiler) : kernel.run(kernel.window(), queue_profiler);
+        data->do_run(kernel, queue_profiler);
 
         queue_profiler.finish();
 

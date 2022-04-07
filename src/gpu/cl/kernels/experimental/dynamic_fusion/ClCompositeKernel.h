@@ -43,6 +43,10 @@ struct TensorBinding
         : _binding{ binding }
     {
     }
+    bool empty() const
+    {
+        return _binding.empty();
+    }
     std::map<ArgumentID, ICLTensor *> _binding;
 };
 class ClCompositeKernel : public opencl::IClKernel

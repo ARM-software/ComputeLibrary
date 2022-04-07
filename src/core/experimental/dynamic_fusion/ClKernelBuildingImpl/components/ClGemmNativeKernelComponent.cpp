@@ -470,6 +470,32 @@ CLBuildOptions ClGemmNativeKernelComponent::generate_build_options() const
     return build_opts;
 }
 
+std::string ClGemmNativeKernelComponent::generate_config_id() const
+{
+    auto        t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    std::string config_id{};
+    config_id += (_bias.is_empty() ? "add_bias_" : "");
+    config_id += (_desc.broadcast_bias ? "broadcast_bias_" : "");
+    config_id += (_desc.reinterpret_input_as_3d ? "3di_" : "");
+    config_id += (_desc.depth_output_gemm3d > 0 ? "3do_" : "");
+    config_id += lower_string(string_from_data_type(t_dst_info->data_type()));
+    config_id += "_";
+    config_id += support::cpp11::to_string(t_dst_info->dimension(1));
+    config_id += "_";
+    config_id += support::cpp11::to_string(t_dst_info->dimension(0));
+    config_id += "_";
+    config_id += support::cpp11::to_string(_desc.k);
+    config_id += "_";
+    config_id += support::cpp11::to_string(t_dst_info->dimension(2));
+    config_id += "_";
+    config_id += support::cpp11::to_string(_desc.lhs_info.m0);
+    config_id += "_";
+    config_id += support::cpp11::to_string(_desc.rhs_info.n0);
+    config_id += "_";
+    config_id += support::cpp11::to_string(_desc.rhs_info.k0);
+    return config_id;
+}
+
 ClGemmNativeKernelComponent::TagLUT ClGemmNativeKernelComponent::allocate_vars(SharedVarTable &vtable) const
 {
     TagLUT lut{};

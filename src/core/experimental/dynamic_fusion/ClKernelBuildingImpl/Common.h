@@ -316,6 +316,15 @@ public:
         return "";
     }
 
+    /** Generate config id of the component
+     *
+     * @return std::string
+     */
+    virtual std::string generate_config_id() const
+    {
+        return "";
+    }
+
     virtual CLBuildOptions generate_build_options() const
     {
         return CLBuildOptions{};
@@ -537,9 +546,21 @@ public:
         return code;
     }
 
+    /** Generate config id of the entire kernel
+     *
+     * Format: kernel_name--comp0_config_id--comp1_config_id--...
+     *
+     * @return std::string
+     */
     std::string build_config_id() const
     {
-        return "";
+        std::string config_id = build_kernel_name();
+        traverse([&](std::stack<ComponentID> stack)
+        {
+            config_id += "--" + _components.find(stack.top())->second->generate_config_id() + "--";
+        });
+
+        return config_id;
     }
 
     CLBuildOptions build_options() const

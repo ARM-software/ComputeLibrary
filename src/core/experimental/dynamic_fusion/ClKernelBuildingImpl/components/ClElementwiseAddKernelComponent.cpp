@@ -128,6 +128,20 @@ CLBuildOptions ClElementwiseAddKernelComponent::generate_build_options() const
     return build_opts;
 }
 
+std::string ClElementwiseAddKernelComponent::generate_config_id() const
+{
+    auto        t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    std::string config_id{};
+    config_id += lower_string(string_from_data_type(t_dst_info->data_type()));
+    config_id += "_";
+    config_id += support::cpp11::to_string(t_dst_info->dimension(0));
+    config_id += "_";
+    config_id += support::cpp11::to_string(t_dst_info->dimension(1));
+    config_id += "_";
+    config_id += lower_string(string_from_data_layout(t_dst_info->data_layout()));
+    return config_id;
+}
+
 ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::allocate_vars(SharedVarTable &vtable) const
 {
     // Determine which argument is the accumulator
