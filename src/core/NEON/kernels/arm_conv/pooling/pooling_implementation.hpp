@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ struct PoolingImplementation
   const char * name;
   std::function<bool(const PoolingArgs &, const OutputStage &)> is_supported;
   std::function<uint64_t(const PoolingArgs &, const OutputStage &)> cycle_estimate;
-  std::function<PoolingCommon<TInput, TOutput, OutputStage> *(const PoolingArgs &, const OutputStage &)> initialise;
+  std::function<PoolingCommon<TInput, TOutput> *(const PoolingArgs &, const OutputStage &)> initialise;
 
   bool get_is_supported(const PoolingArgs &args, const OutputStage &os) const
   {
@@ -51,7 +51,7 @@ struct PoolingImplementation
     return (cycle_estimate == nullptr) ? 0 : cycle_estimate(args, os);
   }
 
-  PoolingCommon<TInput, TOutput, OutputStage> *get_instance(const PoolingArgs &args, const OutputStage &os) const
+  PoolingCommon<TInput, TOutput> *get_instance(const PoolingArgs &args, const OutputStage &os) const
   {
     return initialise(args, os);
   }
@@ -92,11 +92,21 @@ bool find_implementation(
 }
 
 template <typename TInput, typename TOutput, class OutputStage>
-UniquePoolingCommon<TInput, TOutput, OutputStage> pooling(const PoolingArgs &args, const OutputStage &os)
+UniquePoolingCommon<TInput, TOutput> pooling(const PoolingArgs &args, const OutputStage &os)
 {
   const PoolingImplementation<TInput, TOutput, OutputStage> *impl = nullptr;
   const bool success = find_implementation<TInput, TOutput, OutputStage>(args, os, impl);
-  return UniquePoolingCommon<TInput, TOutput, OutputStage>(success ? impl->get_instance(args, os) : nullptr);
+  return UniquePoolingCommon<TInput, TOutput>(success ? impl->get_instance(args, os) : nullptr);
+}
+
+template <class Strategy>
+bool is_supported(const PoolingArgs &args, const Nothing &)
+{
+  return ((args.pool_type == Strategy::pooling_type) &&
+          (args.pool_window.rows == Strategy::pool_rows) &&
+          (args.pool_window.cols == Strategy::pool_cols) &&
+          (args.pool_stride.rows == Strategy::stride_rows) &&
+          (args.pool_stride.cols == Strategy::stride_cols));
 }
 
 }  //  namespace pooling

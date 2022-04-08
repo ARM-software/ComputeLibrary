@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,235 +24,263 @@
 
 #pragma once
 
-#include "pool_common.hpp"
+#include "arm_compute/core/Error.h"
+#include "depthfirst_driver.hpp"
 #include "utils.hpp"
+#include <alloca.h>
 
 namespace arm_conv {
 namespace pooling {
 
-template <class strategy>
-class PoolingDepthfirstGeneric : public PoolingCommon<typename strategy::operand_type, typename strategy::return_type>
+template <typename TInput, typename TOutput, typename OutputStage = Nothing>
+class IGenericDepthfirstStrategy;
+
+template <typename TInput, typename TOutput>
+class IGenericDepthfirstStrategy<TInput, TOutput, Nothing>
 {
-  using TInput = typename strategy::operand_type;
-  using TOutput = typename strategy::return_type;
+  public:
+  virtual ~IGenericDepthfirstStrategy() = default;
 
-  const PoolingArgs m_args;  // Copy of arguments
+  typedef void (*KernelType)(
+    uint64_t window_cells,
+    uint64_t n_valid_cells,
+    uint64_t n_channels,
+    const TInput *const *,
+    TOutput *
+  );
 
-  unsigned int input_rows(void) const
+  virtual KernelType get_kernel(void) const = 0;
+};
+
+template <typename TInput, typename TOutput>
+class IGenericDepthfirstStrategy<TInput, TOutput, Requantize32>
+{
+  public:
+  virtual ~IGenericDepthfirstStrategy() = default;
+
+  typedef void (*KernelType)(
+    uint64_t window_cells,
+    uint64_t n_valid_cells,
+    uint64_t n_channels,
+    const TInput *const *,
+    TOutput *,
+    const Requantize32 &
+  );
+
+  virtual KernelType get_kernel(void) const = 0;
+};
+
+template <typename TInput, typename TOutput, typename OutputStage>
+struct Invoker;
+
+template <typename TInput, typename TOutput>
+struct Invoker<TInput, TOutput, Nothing>
+{
+  static inline void invoke(
+    const typename IGenericDepthfirstStrategy<TInput, TOutput, Nothing>::KernelType kern,
+    uint64_t window_cells,
+    uint64_t n_valid_cells,
+    uint64_t n_channels,
+    const TInput *const *inptrs,
+    TOutput *outptr,
+    const Nothing &
+  )
   {
-    return m_args.pool_window.rows;
+    kern(window_cells, n_valid_cells, n_channels, inptrs, outptr);
+  }
+};
+
+template <typename TInput, typename TOutput>
+struct Invoker<TInput, TOutput, Requantize32>
+{
+  static inline void invoke(
+    const typename IGenericDepthfirstStrategy<TInput, TOutput, Requantize32>::KernelType kern,
+    uint64_t window_cells,
+    uint64_t n_valid_cells,
+    uint64_t n_channels,
+    const TInput *const *inptrs,
+    TOutput *outptr,
+    const Requantize32 &qp
+  )
+  {
+    kern(window_cells, n_valid_cells, n_channels, inptrs, outptr, qp);
+  }
+};
+
+template <typename TInput, typename TOutput, typename OutputStage>
+class GenericDepthfirstWrapper : public IDepthfirstStrategy
+{
+  using StratType = IGenericDepthfirstStrategy<TInput, TOutput, OutputStage>;
+
+  std::unique_ptr<const StratType> m_strat;
+  const unsigned int window_rows, window_cols;
+
+  public:
+  GenericDepthfirstWrapper(const StratType *strat, const PoolingArgs &args)
+  : m_strat(strat), window_rows(args.pool_window.rows), window_cols(args.pool_window.cols)
+  {
   }
 
-  unsigned int input_cols(void) const
+  unsigned int get_input_rows(void) const override { return window_rows; }
+  unsigned int get_input_cols(void) const override { return window_cols; }
+  unsigned int get_output_rows(void) const override { return 1; }
+  unsigned int get_output_cols(void) const override { return 1; }
+
+  typename StratType::KernelType get_kernel(void) const { return m_strat->get_kernel(); }
+};
+
+template <typename TInput, typename TOutput=TInput, typename OutputStage=Nothing>
+class PoolingDepthfirstGeneric : public DepthfirstDriver<TInput, TOutput>
+{
+  const OutputStage m_os;
+
+  protected:
+  size_t get_working_size_per_thread(unsigned int) const override { return 0; }
+  void initialise_working_space(void *, unsigned int) const override { /* Nothing */ }
+
+  /* Compute a portion of the output tensor with padding. */
+  void compute_tile_padded(
+    unsigned int output_i, unsigned int output_j,
+    unsigned int channel_start, unsigned int channel_end,
+    const TensorSpec<const TInput *> &input,
+    const TensorSpec<TOutput *> &output,
+    void *
+  ) const override
   {
-    return m_args.pool_window.cols;
+    // Determine start position and padding
+    const int start_i = static_cast<int>(output_i * this->m_args.pool_stride.rows) - this->m_args.padding.top;
+    const auto input_i = static_cast<unsigned int>(start_i < 0 ? 0 : start_i);
+    const auto pad_top = static_cast<unsigned int>(start_i < 0 ? -start_i : 0);
+    const int end_i = start_i + this->m_args.pool_window.rows;
+    const auto pad_bottom = static_cast<unsigned int>((unsigned int) end_i < this->m_args.input_rows ? 0 : end_i - this->m_args.input_rows);
+    const auto valid_rows = this->m_args.pool_window.rows - (pad_top + pad_bottom);
+
+    const int start_j = static_cast<int>(output_j * this->m_args.pool_stride.cols) - this->m_args.padding.left;
+    const auto input_j = static_cast<unsigned int>(start_j < 0 ? 0 : start_j);
+    const auto pad_left = static_cast<unsigned int>(start_j < 0 ? -start_j : 0);
+    const int end_j = start_j + this->m_args.pool_window.cols;
+    const auto pad_right = static_cast<unsigned int>((unsigned int) end_j < this->m_args.input_cols ? 0 : end_j - this->m_args.input_cols);
+    const auto valid_cols = this->m_args.pool_window.cols - (pad_left + pad_right);
+
+    // Determine the number of valid cells and prepare the pointers
+    const auto n_valid_cells = valid_rows * valid_cols;
+    auto inptrs = reinterpret_cast<const TInput **>(alloca(n_valid_cells * sizeof(TInput *)));
+    {
+      auto my_ptr = inptrs;
+      auto row_ptr = input.base + input_i*input.ld_row + input_j*input.ld_col + channel_start;
+      for (auto i = valid_rows; i; i--)
+      {
+        auto ptr = row_ptr;
+        row_ptr += input.ld_row;
+
+        for (auto j = valid_cols; j; j--)
+        {
+          *(my_ptr++) = ptr;
+          ptr += input.ld_col;
+        }
+      }
+    }
+
+    auto outptr = output.base + output_i*output.ld_row + output_j*output.ld_col + channel_start;
+
+    // Some padding variants include (or exclude) the padding values; we handle
+    // this by computing the extent of the padded input tensor and hence
+    // computing the total number of cells captured in the pooling window.
+    const auto bottom_padded_height = this->m_args.input_rows + this->m_args.padding.bottom;
+    const auto captured_rows = std::min<int>(end_i, bottom_padded_height) - start_i;
+    const auto right_padded_width = this->m_args.input_cols + this->m_args.padding.right;
+    const auto captured_cols = std::min<int>(end_j, right_padded_width) - start_j;
+    const auto captured_cells = captured_rows * captured_cols;
+    const auto window_cells = this->m_args.exclude_padding ? n_valid_cells : captured_cells;
+
+    // Execute the kernel
+    Invoker<TInput, TOutput, OutputStage>::invoke(
+      reinterpret_cast<const GenericDepthfirstWrapper<TInput, TOutput, OutputStage> *>(this->m_strat.get())->get_kernel(),
+      window_cells, n_valid_cells, channel_end - channel_start, inptrs, outptr, m_os
+    );
+  }
+
+  // Compute a portion of the work with only top/bottom padding.
+  void compute_row_padded_tile_row(
+    const unsigned int output_i, unsigned int output_j, unsigned int n_tile_cols,
+    const unsigned int channel_start, const unsigned int channel_end,
+    const TensorSpec<const TInput *> &input,
+    const TensorSpec<TOutput *> &output,
+    void *working_space
+  ) const override
+  {
+    ARM_COMPUTE_UNUSED(working_space);
+    // Determine start position and padding
+    const int start_i = static_cast<int>(output_i * this->m_args.pool_stride.rows) - this->m_args.padding.top;
+    const auto input_i = static_cast<unsigned int>(start_i < 0 ? 0 : start_i);
+    const auto pad_top = static_cast<unsigned int>(start_i < 0 ? -start_i : 0);
+    const int end_i = start_i + this->m_args.pool_window.rows;
+    const auto pad_bottom = static_cast<unsigned int>((unsigned int) end_i < this->m_args.input_rows ? 0 : end_i - this->m_args.input_rows);
+    const auto valid_rows = this->m_args.pool_window.rows - (pad_top + pad_bottom);
+
+    const int start_j = static_cast<int>(output_j * this->m_args.pool_stride.cols) - this->m_args.padding.left;
+    const auto input_j = static_cast<unsigned int>(start_j < 0 ? 0 : start_j);
+    const auto valid_cols = this->m_args.pool_window.cols;
+
+    // Determine the number of valid cells and prepare the pointers
+    const auto n_valid_cells = valid_rows * valid_cols;
+    auto inptrs = reinterpret_cast<const TInput **>(alloca(n_valid_cells * sizeof(TInput *)));
+    {
+      auto my_ptr = inptrs;
+      auto row_ptr = input.base + input_i*input.ld_row + input_j*input.ld_col + channel_start;
+      for (auto i = valid_rows; i; i--)
+      {
+        auto ptr = row_ptr;
+        row_ptr += input.ld_row;
+
+        for (auto j = valid_cols; j; j--)
+        {
+          *(my_ptr++) = ptr;
+          ptr += input.ld_col;
+        }
+      }
+    }
+
+    auto outptr = output.base + output_i*output.ld_row + output_j*output.ld_col + channel_start;
+
+    // Some padding variants include (or exclude) the padding values; we handle
+    // this by computing the extent of the padded input tensor and hence
+    // computing the total number of cells captured in the pooling window.
+    const auto bottom_padded_height = this->m_args.input_rows + this->m_args.padding.bottom;
+    const auto captured_rows = std::min<int>(end_i, bottom_padded_height) - start_i;
+    const auto captured_cells = captured_rows * valid_cols;
+    const auto window_cells = this->m_args.exclude_padding ? n_valid_cells : captured_cells;
+
+    for (; n_tile_cols; n_tile_cols--)
+    {
+      // Execute the kernel
+      Invoker<TInput, TOutput, OutputStage>::invoke(
+        reinterpret_cast<const GenericDepthfirstWrapper<TInput, TOutput, OutputStage> *>(this->m_strat.get())->get_kernel(),
+        window_cells, n_valid_cells, channel_end - channel_start, inptrs, outptr, m_os
+      );
+
+      // Update the pointers; the output strides by a column and the inputs
+      // stride by a number of columns.
+      outptr += output.ld_col;
+      for (auto n = 0u; n < n_valid_cells; n++)
+      {
+        inptrs[n] += this->m_args.pool_stride.cols * input.ld_col;
+      }
+    }
   }
 
   public:
-  PoolingDepthfirstGeneric(const PoolingArgs &args) : m_args(args)
+  PoolingDepthfirstGeneric(
+    const IGenericDepthfirstStrategy<TInput, TOutput, OutputStage> *strat,
+    const PoolingArgs &args,
+    const OutputStage &os = {}
+  )
+  : DepthfirstDriver<TInput, TOutput>(
+      new GenericDepthfirstWrapper<TInput, TOutput, OutputStage>(strat, args),
+      args
+    ),
+    m_os(os)
   {
-  }
-
-  PoolingDepthfirstGeneric(PoolingDepthfirstGeneric &) = delete;
-  PoolingDepthfirstGeneric &operator=(PoolingDepthfirstGeneric &) = delete;
-
-  size_t sizeof_input_pointer_array(void) const
-  {
-    return sizeof(TInput *) * input_rows() * input_cols();
-  }
-
-  size_t get_working_size(unsigned int num_threads) const override
-  {
-    return num_threads * sizeof_input_pointer_array();
-  }
-
-  void execute(
-    const void *const input,
-    void *const output,
-    void *const working_space,
-    unsigned int thread_id,
-    unsigned int num_threads
-  ) const override
-  {
-    const size_t ld_input_col = m_args.n_channels;
-    const size_t ld_input_row = ld_input_col * m_args.input_cols;
-    const size_t ld_input_batch = ld_input_row * m_args.input_rows;
-    const size_t ld_output_col = ld_input_col;
-    const size_t ld_output_row = ld_output_col * m_args.output_cols;
-    const size_t ld_output_batch = ld_output_row * m_args.output_rows;
-
-    execute(
-      input, ld_input_col, ld_input_row, ld_input_batch,
-      output, ld_output_col, ld_output_row, ld_output_batch,
-      working_space,
-      thread_id, num_threads
-    );
-  }
-
-  void execute(
-    const void *const input,
-    size_t ld_input_col,
-    size_t ld_input_row,
-    size_t ld_input_batch,
-    void *const output,
-    size_t ld_output_col,
-    size_t ld_output_row,
-    size_t ld_output_batch,
-    void *const working_space,
-    unsigned int thread_id,
-    unsigned int num_threads
-  ) const override
-  {
-    execute(
-      m_args.n_batches, m_args.input_rows, m_args.input_cols,
-      m_args.n_channels,
-      input, ld_input_col, ld_input_row, ld_input_batch,
-      m_args.padding,
-      m_args.output_rows, m_args.output_cols,
-      output, ld_output_col, ld_output_row, ld_output_batch,
-      working_space,
-      thread_id, num_threads
-    );
-  }
-
-  void execute(
-    unsigned int batches,
-    unsigned int height,
-    unsigned int width,
-    unsigned int channels,
-    const void *const _input,
-    size_t ld_input_col,
-    size_t ld_input_row,
-    size_t ld_input_batch,
-    const PaddingValues &padding,
-    unsigned int output_height,
-    unsigned int output_width,
-    void *const _output,
-    size_t ld_output_col,
-    size_t ld_output_row,
-    size_t ld_output_batch,
-    void *const _working_space,
-    unsigned int thread_id,
-    unsigned int num_threads
-  ) const override
-  {
-    strategy strat(m_args.cpu_info);
-#ifdef CYCLE_PROFILING
-    arm_gemm::profiler prof;
-#endif // CYCLE_PROFILING
-
-    const unsigned int roundup_output_rows = roundup(output_height, num_threads);
-    const unsigned int rows_per_thread = roundup_output_rows / num_threads;
-    int start_out_height = static_cast<int>(thread_id * rows_per_thread);
-    int end_out_height = std::min<int>(output_height, static_cast<int>((thread_id + 1) * rows_per_thread));
-
-    unsigned int start_channel = 0;
-    unsigned int end_channel = channels;
-    if(output_height == 1)
-    {
-      const unsigned int channels_per_thread = roundup(channels, num_threads) / num_threads;
-      start_channel = thread_id * channels_per_thread;
-      end_channel = std::min(start_channel + channels_per_thread, channels);
-
-      // Reset start and end rows
-      start_out_height = 0;
-      end_out_height = output_height;
-    }
-
-    if(start_channel >= end_channel)
-    {
-        // Early exit in case of multiple threads parallelising on channels
-        return;
-    }
-
-    // Cast input and output pointers into the right types
-    const TInput *const inptr = static_cast<const TInput *>(_input) + start_channel;
-    TOutput *const outptr = static_cast<TOutput *>(_output) + start_channel;
-
-    // Grab the input pointer array
-    uint8_t *const working_space = static_cast<uint8_t *>(_working_space);
-    const TInput **const inptr_array = reinterpret_cast<const TInput **>(working_space + thread_id * sizeof_input_pointer_array());
-
-    // For each output tile, construct the requisite set of pointers and call
-    // into the kernel.
-    for (unsigned int batch = 0; batch < batches; batch++)
-    {
-      // Get batch pointers
-      const auto inptr_batch = inptr + batch * ld_input_batch;
-      auto outptr_row = outptr + batch * ld_output_batch + start_out_height * ld_output_row;
-
-      for (int out_i = start_out_height; out_i < end_out_height; out_i++)
-      {
-        const int start_in_i = out_i * m_args.pool_stride.rows - padding.top;
-        const int end_in_i = start_in_i + m_args.pool_window.rows;
-
-        // Compute top/bottom padding
-        const auto pad_top = static_cast<unsigned int>(std::max(0 - start_in_i, 0));
-        const auto pad_bottom = static_cast<unsigned int>(std::max<int>(end_in_i - height, 0));
-        const auto valid_rows = input_rows() - pad_top - pad_bottom;
-
-        // Compute the number of pooling window rows which are contained in
-        // either the valid region of the input tensor, or the padding.
-        const auto padded_bottom = std::min<unsigned int>(
-          start_in_i + m_args.pool_window.rows, height + padding.bottom
-        );
-        const auto n_total_rows = padded_bottom - start_in_i;
-
-        auto outptr_col = outptr_row;
-        auto inptr_row = inptr_batch + (start_in_i + pad_top) * ld_input_row;
-
-        for (int out_j = 0, start_in_j = -padding.left;
-             out_j < static_cast<int>(output_width);
-             out_j++, start_in_j += m_args.pool_stride.cols)
-        {
-          const int end_in_j = start_in_j + m_args.pool_window.cols;
-
-          // Compute left/right padding
-          const auto pad_left = static_cast<unsigned int>(std::max(0 - start_in_j, 0));
-          const auto pad_right = static_cast<unsigned int>(std::max<int>(0, end_in_j - width));
-          const auto valid_cols = input_cols() - pad_left - pad_right;
-
-          // Compute the number of pooling window columns which are contained
-          // in either the valid region of the input tensor, or the padding.
-          const auto padded_right = std::min<unsigned int>(
-            start_in_j + m_args.pool_window.cols, width + padding.right
-          );
-          const auto n_total_cols = padded_right - start_in_j;
-
-          // Construct the input pointer array - fill in all valid points
-          // contiguously.
-          const TInput **ptrs = inptr_array;
-          const TInput *rowptr = inptr_row + (start_in_j + pad_left) * ld_input_col;
-          for (auto i = 0u; i < valid_rows; i++)
-          {
-            const TInput *colptr = rowptr;
-            for (auto j = 0u; j < valid_cols; j++)
-            {
-              *(ptrs++) = colptr;
-              colptr += ld_input_col;
-            }
-            rowptr += ld_input_row;
-          }
-
-          // Compute the number of valid cells
-          const auto valid_cells = valid_rows * valid_cols;
-          const auto cells_in_range = n_total_rows * n_total_cols;
-          const auto window_cells = m_args.exclude_padding ? valid_cells : cells_in_range;
-
-          // Get the output pointer for this call
-          TOutput *outptr = outptr_col;
-          outptr_col += ld_output_col;
-
-#ifdef CYCLE_PROFILING
-          // TODO Work number
-          auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(strategy::out_rows() * strategy::out_cols() * strategy::pool_rows() * strategy::pool_cols()));
-#endif // CYCLE_PROFILING
-          strat.kernel(window_cells, valid_cells, end_channel - start_channel, inptr_array, outptr);
-        }
-
-        outptr_row += ld_output_row;
-      }
-    }
   }
 };
 

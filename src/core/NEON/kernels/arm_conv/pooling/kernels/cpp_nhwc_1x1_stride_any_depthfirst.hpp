@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,18 +33,11 @@ template <typename T>
 void cpp_nhwc_1x1_stride_any_depthfirst_impl(const uint64_t, const uint64_t, uint64_t n_channels, const T *const *const inptrs, T *outptr);
 
 template <typename T>
-struct cpp_nhwc_1x1_stride_any_depthfirst
+struct cpp_nhwc_1x1_stride_any_depthfirst : IGenericDepthfirstStrategy<T, T, Nothing>
 {
-  typedef T operand_type;
-  typedef T return_type;
-
-  typedef void (*kern_type)(const uint64_t, const uint64_t, uint64_t n_channels, const operand_type *const *const inptrs, return_type *outptr);
-
-  constexpr static PoolingType pooling_type(void) { return PoolingType::MAX; }
-
-  kern_type kernel = cpp_nhwc_1x1_stride_any_depthfirst_impl;
-
+  using Parent = IGenericDepthfirstStrategy<T, T, Nothing>;
   cpp_nhwc_1x1_stride_any_depthfirst(const CPUInfo *) {}
+  typename Parent::KernelType get_kernel(void) const override { return cpp_nhwc_1x1_stride_any_depthfirst_impl<T>; }
 };
 
 }  // namespace pooling

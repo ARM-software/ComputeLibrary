@@ -553,7 +553,8 @@ if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
-                                      "src/core/NEON/kernels/convolution/depthwise/",
+                                      "src/core/NEON/kernels/arm_conv/depthwise/",
+                                      "src/core/NEON/kernels/arm_conv/pooling/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/cpu/kernels/assembly/"])

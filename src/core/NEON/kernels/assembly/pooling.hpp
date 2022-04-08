@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 
 #include "arm_gemm_local.hpp"
 #include "pool_common.hpp"
-
-#include <memory>
 
 namespace arm_conv
 {
@@ -89,6 +87,10 @@ struct PoolingArgs
     }
 };
 
+struct Nothing
+{
+};
+
 struct Requantize32
 {
     int32_t input_offset  = 0;
@@ -106,12 +108,124 @@ struct Requantize32
     }
 };
 
-template <typename TInput, typename TOutput, class OutputStage = Nothing>
-using UniquePoolingCommon = std::unique_ptr<PoolingCommon<TInput, TOutput, OutputStage>>;
+template <typename TInput, typename TOutput>
+class PoolingCommon : public IPoolingCommon
+{
+protected:
+    const PoolingArgs m_args;
+
+public:
+    PoolingCommon(const PoolingArgs &args)
+        : m_args(args)
+    {
+    }
+    PoolingCommon(PoolingCommon &) = delete;
+    PoolingCommon &operator=(PoolingCommon &) = delete;
+
+    size_t get_working_size(unsigned int, unsigned int) const override = 0;
+    size_t get_working_size(unsigned int n_threads) const override
+    {
+        return this->get_working_size(n_threads, m_args.n_channels);
+    }
+
+    // Execute pooling over the specified area of memory.
+    void execute(
+        const void *const input,
+        void *const       output,
+        void             *working_space,
+        unsigned int      thread_id,
+        unsigned int      num_threads) const override
+    {
+        this->execute(
+            input,
+            m_args.n_channels,
+            m_args.n_channels * m_args.input_cols,
+            m_args.n_channels * m_args.input_cols * m_args.input_rows,
+            output,
+            m_args.n_channels,
+            m_args.n_channels * m_args.output_cols,
+            m_args.n_channels * m_args.output_cols * m_args.output_rows,
+            working_space,
+            thread_id, num_threads);
+    }
+
+    void execute(
+        const void *const input,
+        size_t            ld_input_col,
+        size_t            ld_input_row,
+        size_t            ld_input_batch,
+        void *const       output,
+        size_t            ld_output_col,
+        size_t            ld_output_row,
+        size_t            ld_output_batch,
+        void             *working_space,
+        unsigned int      thread_id,
+        unsigned int      num_threads) const override
+    {
+        this->execute(
+            m_args.n_batches, m_args.input_rows, m_args.input_cols, m_args.n_channels,
+            input, ld_input_col, ld_input_row, ld_input_batch,
+            m_args.padding, m_args.output_rows, m_args.output_cols,
+            output, ld_output_col, ld_output_row, ld_output_batch,
+            working_space, thread_id, num_threads);
+    }
+
+    void execute(
+        unsigned int         batches,
+        unsigned int         height,
+        unsigned int         width,
+        unsigned int         channels,
+        const void *const    input,
+        size_t               ld_input_col,
+        size_t               ld_input_row,
+        size_t               ld_input_batch,
+        const PaddingValues &padding,
+        unsigned int         output_height,
+        unsigned int         output_width,
+        void *const          output,
+        size_t               ld_output_col,
+        size_t               ld_output_row,
+        size_t               ld_output_batch,
+        void                *working_space,
+        unsigned int         thread_id,
+        unsigned int         num_threads) const override
+    {
+        this->execute_internal(
+            batches, height, width, channels, padding,
+            input, ld_input_col, ld_input_row, ld_input_batch,
+            output_height, output_width,
+            output, ld_output_col, ld_output_row, ld_output_batch,
+            working_space, thread_id, num_threads);
+    }
+
+protected:
+    virtual void execute_internal(
+        unsigned int batches,
+        unsigned int height,
+        unsigned int width,
+        unsigned int channels,
+        const PaddingValues &,
+        const void *const input,
+        size_t            ld_input_col,
+        size_t            ld_input_row,
+        size_t            ld_input_batch,
+        unsigned int      output_height,
+        unsigned int      output_width,
+        void *const       output,
+        size_t            ld_output_col,
+        size_t            ld_output_row,
+        size_t            ld_output_batch,
+        void             *working_space,
+        unsigned int      thread_id,
+        unsigned int      num_threads) const = 0;
+};
+
+template <typename TInput, typename TOutput>
+using UniquePoolingCommon = std::unique_ptr<PoolingCommon<TInput, TOutput>>;
 
 // Get a pooling engine
 template <typename TInput, typename TOutput = TInput, class OutputStage = Nothing>
-UniquePoolingCommon<TInput, TOutput, OutputStage> pooling(const PoolingArgs &, const OutputStage & = {});
+UniquePoolingCommon<TInput, TOutput> pooling(const PoolingArgs &, const OutputStage & = {});
 
 } // namespace pooling
 } // namespace arm_conv
