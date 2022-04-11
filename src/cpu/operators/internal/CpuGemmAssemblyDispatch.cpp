@@ -656,7 +656,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
         case DataType::QASYMM8:
             if(d->data_type() == DataType::S32)
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::gemm<uint8_t, uint32_t, arm_gemm::Nothing>(args, {})),
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(args, {})),
                                                 "We could not find an optimized kernel for U8/QASYMM8 input and S32 output");
             }
             else
