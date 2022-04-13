@@ -591,6 +591,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.hembed"
     },
     {
+        "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h",
+#include "./cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.hembed"
+    },
+    {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
 #include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.clembed"
     },
@@ -633,6 +637,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "repeat.h",
 #include "./cl_kernels/repeat.hembed"
+    },
+    {
+        "tile_helpers.h",
+#include "./cl_kernels/tile_helpers.hembed"
     },
     {
         "common/instance_normalization.cl",

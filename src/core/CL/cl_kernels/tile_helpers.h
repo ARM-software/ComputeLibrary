@@ -24,6 +24,8 @@
 
 // *INDENT-OFF*
 // clang-format off
+#ifndef ARM_COMPUTE_TILE_HELPERS_H
+#define ARM_COMPUTE_TILE_HELPERS_H
 
 #define TILE_VECTOR_SIZE1 1
 #define TILE_VECTOR_SIZE2 2
@@ -1076,3 +1078,5 @@
             })                                                                                             \
         })                                                                                             \
     })
+
+#endif // ARM_COMPUTE_TILE_HELPERS_H
