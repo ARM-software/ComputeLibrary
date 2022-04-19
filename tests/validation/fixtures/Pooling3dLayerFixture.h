@@ -163,19 +163,6 @@ public:
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class Pooling3dLayerValidationQuantizedFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, Size3D pool_size, Size3D stride, Padding3D padding, bool exclude_padding, DataType data_type,
-               QuantizationInfo input_qinfo, QuantizationInfo output_qinfo)
-    {
-        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding),
-                                                                                                 data_type, input_qinfo, output_qinfo);
-    }
-};
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
