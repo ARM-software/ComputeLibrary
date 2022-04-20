@@ -252,8 +252,6 @@ void NEQLSTMLayer::configure(const ITensor *input,
 
         _dequantize_input_to_forget_weights.configure(input_to_forget_weights, &_input_to_forget_weights_f32);
         _quantize_input_to_forget_weights.configure(&_input_to_forget_weights_f32, &_input_to_forget_weights_symm8);
-        _input_to_forget_weights_f32.allocator()->allocate();
-        _input_to_forget_weights_symm8.allocator()->allocate();
 
         ARM_COMPUTE_ERROR_THROW_ON(NEQLSTMLayer::validate(input->info(), _input_to_forget_weights_symm8.info(), input_to_cell_weights->info(), input_to_output_weights->info(),
                                                           recurrent_to_forget_weights->info(), recurrent_to_cell_weights->info(), recurrent_to_output_weights->info(),
@@ -1055,12 +1053,6 @@ void NEQLSTMLayer::run()
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(_convert_input_to_forget_weights_to_qsymm8)
-    {
-        _dequantize_input_to_forget_weights.run();
-        _quantize_input_to_forget_weights.run();
-    }
-
     // Forget gate.
     _mm_input_to_forget.run();
     _input_to_forget_outstage.run();
@@ -1200,6 +1192,14 @@ void NEQLSTMLayer::prepare()
 {
     if(!_is_prepared)
     {
+        if(_convert_input_to_forget_weights_to_qsymm8)
+        {
+            _input_to_forget_weights_f32.allocator()->allocate();
+            _input_to_forget_weights_symm8.allocator()->allocate();
+            _dequantize_input_to_forget_weights.run();
+            _quantize_input_to_forget_weights.run();
+        }
+
         // Pre-transpose weights to be used in GEMM.
         _input_to_forget_weights_transposed.allocator()->allocate();
         _input_to_cell_weights_transposed.allocator()->allocate();
