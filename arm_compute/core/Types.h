@@ -1268,7 +1268,7 @@ struct PoolingLayerInfo
 struct Pooling3dLayerInfo
 {
     /** Default Constructor */
-    Pooling3dLayerInfo()
+    Pooling3dLayerInfo() noexcept
         : pool_type(PoolingType::MAX),
           pool_size(Size3D()),
           stride(Size3D()),
