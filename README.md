@@ -66,6 +66,8 @@ All the binaries can be downloaded from [here](https://github.com/ARM-software/C
 
 <br>
 
+Pre-build binaries are generated with the following security / good coding practices related flags:
+> -Wall, -Wextra, -Wformat=2, -Winit-self, -Wstrict-overflow=2, -Wswitch-default, -Woverloaded-virtual, -Wformat-security, -Wctor-dtor-privacy, -Wsign-promo, -Weffc++, -pedantic, -fstack-protector-strong
 
 ## Supported Architectures/Technologies
 
