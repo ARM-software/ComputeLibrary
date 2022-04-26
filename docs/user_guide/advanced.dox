@@ -124,5 +124,16 @@ ptrace_scope in /proc/sys/kernel/yama.
 
 Please refer to: https://www.kernel.org/doc/html/v4.15/admin-guide/LSM/Yama.html for more information on this regard.
 
+@subsection Malicious users could alter Compute Library related files
+
+Extra care must be taken in order to reduce the posibility of a user altering sensitive files. CLTuner files
+should be protected by arbitrary writes since this can lead Compute Library to crash or waste all system's resources.
+
+@subsection Various concerns
+
+Sensitive applications that use Compute Library should consider posible attack vectors such as shared library hooking,
+information leakage from the underlying OpenCL driver or previous excecution and running arbitrary networks that consume
+all the available resources on the system, leading to denial of service.
+
 */
 } // namespace
