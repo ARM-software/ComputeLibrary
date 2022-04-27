@@ -100,12 +100,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 template <typename T>
 using NEGatherFixture = GatherFixture<Tensor, Accessor, NEGather, T>;
 
+const auto gather_small_shapes = arm_compute::test::framework::dataset::concat(datasets::SmallGatherDataset(),datasets::SmallGatherMultiDimIndicesDataset());
+
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEGatherFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine( gather_small_shapes, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -125,7 +127,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEGatherFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(gather_small_shapes, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -146,7 +148,7 @@ TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEGatherFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::U8)))
+                       combine(gather_small_shapes, framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -166,7 +168,7 @@ TEST_SUITE(U16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEGatherFixture<uint16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::U16)))
+                       combine(gather_small_shapes, framework::dataset::make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

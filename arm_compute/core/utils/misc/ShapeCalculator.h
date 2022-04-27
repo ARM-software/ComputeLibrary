@@ -1496,13 +1496,24 @@ inline TensorShape compute_pool3d_shape(const TensorShape &src, Pooling3dLayerIn
 
 inline TensorShape compute_gather_shape(const TensorShape &input_shape, const TensorShape &indices_shape, uint32_t actual_axis)
 {
-    ARM_COMPUTE_ERROR_ON(indices_shape.num_dimensions() > 1);
     ARM_COMPUTE_ERROR_ON(input_shape.num_dimensions() > 4);
     ARM_COMPUTE_ERROR_ON(actual_axis >= input_shape.num_dimensions());
 
-    TensorShape output_shape  = input_shape;
-    output_shape[actual_axis] = indices_shape[0];
-
+    TensorShape output_shape = input_shape;
+    if(indices_shape.num_dimensions() == 1u)
+    {
+        output_shape[actual_axis] = indices_shape[0];
+    }
+    else
+    {
+        const auto inddims{ indices_shape.num_dimensions() };
+        output_shape.shift_right(indices_shape.num_dimensions() - 1);
+        output_shape[0] = input_shape[0];
+        for(size_t idx(1); (idx - 1) < inddims; ++idx)
+        {
+            output_shape.set(actual_axis + idx, indices_shape[idx - 1], false);
+        }
+    }
     return output_shape;
 }
 } // namespace shape_calculator

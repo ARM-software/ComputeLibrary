@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,16 +47,21 @@ namespace
 template <typename U>
 void validate_indices(const ITensor *indices)
 {
-    for(size_t i = 0; i < indices->info()->tensor_shape()[0]; ++i)
+    auto *indices_ptr = (reinterpret_cast<const U *>(  indices->buffer() + indices->info()->offset_first_element_in_bytes() ));
+    for(size_t i = 0; i < indices->info()->total_size(); ++i)
     {
-        ARM_COMPUTE_ERROR_ON(*(reinterpret_cast<U *>(indices->ptr_to_element(Coordinates(i)))) < 0);
+        const U index_value = indices_ptr[i];
+        ARM_COMPUTE_UNUSED(index_value);
+        if(index_value < 0)
+        {
+            ARM_COMPUTE_ERROR_ON(index_value < 0);
+        }
     }
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(indices->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
 
     if(axis < 0)
@@ -65,6 +70,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, 
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(0 > axis || axis >= static_cast<int32_t>(input->num_dimensions()));
+    ARM_COMPUTE_RETURN_ERROR_ON(axis != 0 && indices->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(output->total_size() != 0)
@@ -84,6 +90,40 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, 
 NEGatherKernel::NEGatherKernel()
     : _input{}, _indices{}, _axis{}, _output{}, _func{}
 {
+}
+
+template <typename U>
+inline void NEGatherKernel::gather_dims_0_axis(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON(_indices->info()->num_dimensions() < 2);
+    validate_indices<U>(_indices);
+
+    Window output_window{ window };
+    output_window.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator output_it(_output, output_window);
+
+    const uint8_t *const in_ptr_start    = _input->buffer() + _input->info()->offset_first_element_in_bytes();
+    const uint32_t       input_stride_y  = _input->info()->strides_in_bytes()[1];
+    const uint32_t       output_stride_y = _output->info()->strides_in_bytes()[1];
+
+    const U *const dex_ptr_start = reinterpret_cast<const U *const>(_indices->buffer() + _indices->info()->offset_first_element_in_bytes());
+    execute_window_loop(output_window, [&](const Coordinates & id)
+    {
+        const auto        new_index = *(dex_ptr_start + id.y() + id.z() * _output->info()->tensor_shape()[1] + id[3] * _indices->info()->tensor_shape()[1] * _indices->info()->tensor_shape()[0]);
+        U                *out_ptr   = reinterpret_cast<U *>(output_it.ptr());
+        const char *const in_ptr    = reinterpret_cast<const char *const>(in_ptr_start + new_index * input_stride_y);
+        memcpy(out_ptr, in_ptr, output_stride_y);
+    },
+    output_it);
+}
+
+template <typename U>
+inline void NEGatherKernel::gather_dims_n_axis(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
 }
 
 template <typename U>
@@ -147,38 +187,75 @@ void NEGatherKernel::configure(const ITensor *input, const ITensor *indices, ITe
     }
     ARM_COMPUTE_ERROR_ON(0 > _axis || _axis >= static_cast<int32_t>(input->info()->num_dimensions()));
 
-    if(0 == _axis)
+    if(indices->info()->num_dimensions() == 1u)
     {
-        switch(_indices->info()->data_type())
+        if(0 == _axis)
         {
-            case DataType::U32:
-                _func = &NEGatherKernel::gather_0_axis<uint32_t>;
-                break;
-            case DataType::S32:
-                _func = &NEGatherKernel::gather_0_axis<int32_t>;
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Not supported");
-                break;
+            switch(_indices->info()->data_type())
+            {
+                case DataType::U32:
+                    _func = &NEGatherKernel::gather_0_axis<uint32_t>;
+                    break;
+                case DataType::S32:
+                    _func = &NEGatherKernel::gather_0_axis<int32_t>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+                    break;
+            }
+        }
+        else
+        {
+            switch(_indices->info()->data_type())
+            {
+                case DataType::U32:
+                    _func = &NEGatherKernel::gather_n_axis<uint32_t>;
+                    break;
+                case DataType::S32:
+                    _func = &NEGatherKernel::gather_n_axis<int32_t>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+                    break;
+            }
         }
     }
     else
     {
-        switch(_indices->info()->data_type())
+        if(0 == _axis)
         {
-            case DataType::U32:
-                _func = &NEGatherKernel::gather_n_axis<uint32_t>;
-                break;
-            case DataType::S32:
-                _func = &NEGatherKernel::gather_n_axis<int32_t>;
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Not supported");
-                break;
+            switch(_indices->info()->data_type())
+            {
+                case DataType::U32:
+                    _func = &NEGatherKernel::gather_dims_0_axis<uint32_t>;
+                    break;
+                case DataType::S32:
+                    _func = &NEGatherKernel::gather_dims_0_axis<int32_t>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+                    break;
+            }
+        }
+        else
+        {
+            switch(_indices->info()->data_type())
+            {
+                case DataType::U32:
+                    _func = &NEGatherKernel::gather_dims_n_axis<uint32_t>;
+                    break;
+                case DataType::S32:
+                    _func = &NEGatherKernel::gather_dims_n_axis<int32_t>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+                    break;
+            }
         }
     }
+
     // Output auto initialization if not yet initialized
-    TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(input->info()->tensor_shape(), indices->info()->tensor_shape(), _axis);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(input->info()->tensor_shape(), indices->info()->tensor_shape(), _axis);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Create window
