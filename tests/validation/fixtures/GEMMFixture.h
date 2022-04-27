@@ -48,7 +48,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool pretranspose_a = false, bool pretranspose_b = false>
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
@@ -170,9 +170,30 @@ protected:
             }
         }
 
+        // Define transposed shapes
+        TensorShape a_transposed_shape(a.shape().y(), a.shape().x());
+        TensorShape b_transposed_shape(b.shape().y(), b.shape().x());
+
+        // Define transposed tensors
+        SimpleTensor<T> a_transposed{ a_transposed_shape, data_type };
+        SimpleTensor<T> b_transposed{ b_transposed_shape, data_type };
+
+        // pretranspose a if necessary
+        if(pretranspose_a)
+        {
+            transpose_matrix<T>(a, a_transposed);
+        }
+
+        // pretranspose b if necessary
+        if(pretranspose_b)
+        {
+            transpose_matrix<T>(b, b_transposed);
+        }
+
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
-        return reference::gemm<T>(a, b, c, alpha, disable_c ? 0.f : beta);
+        // Use transposed tensors if boolean enabled else use original tensors
+        return reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
     }
 
     TensorType      _target{};
