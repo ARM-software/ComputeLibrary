@@ -244,7 +244,7 @@ template void elementwise_arithmetic_op<ArithmeticOperation::SQUARED_DIFF, int32
 template void elementwise_arithmetic_op<ArithmeticOperation::POWER, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void elementwise_arithmetic_op<ArithmeticOperation::PRELU, int32_t>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 
-template <ComparisonOperation op, typename InputScalarType, typename OutputScalarType = uint8_t>
+template <ComparisonOperation op, typename InputScalarType, typename OutputScalarType>
 void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     static_assert(sizeof(InputScalarType) >= sizeof(OutputScalarType), "input data type's width should be equal to or greater than output data type's width");

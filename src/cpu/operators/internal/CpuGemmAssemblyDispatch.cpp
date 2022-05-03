@@ -156,8 +156,8 @@ public:
                                                                                             const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &tensors) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
     bool                             is_configured() const override;
     experimental::MemoryRequirements workspace() const override;
 
@@ -203,12 +203,12 @@ private:
     /** Indirect buffer */
     std::unique_ptr<const TypeInput *const *, free_delete> _indirect_arg{};
     std::unique_ptr<const TypeInput *, free_delete>        _indirect_buf{};
-    std::vector<TypeInput>                                 _indirect_pad{};
-    arm_gemm::ConvolutionParameters                        _cp{};
-    experimental::MemoryRequirements                       _aux_mem{ Count };
-    bool                                                   _B_pretranspose_required{ false };
-    bool                                                   _is_b_constant{ true };
-    bool                                                   _is_c_constant{ true };
+    std::vector<TypeInput>           _indirect_pad{};
+    arm_gemm::ConvolutionParameters  _cp{};
+    experimental::MemoryRequirements _aux_mem{ Count };
+    bool                             _B_pretranspose_required{ false };
+    bool                             _is_b_constant{ true };
+    bool                             _is_c_constant{ true };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -682,7 +682,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
 #if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
         case DataType::BFLOAT16:
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<bfloat, float, arm_gemm::Nothing>(args, {})),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(args, {})),
                                             "We could not find an optimized kernel for BFLOAT16 input and F32 output");
             break;
         }
