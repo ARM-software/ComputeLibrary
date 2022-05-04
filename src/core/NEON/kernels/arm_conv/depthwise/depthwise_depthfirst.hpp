@@ -437,7 +437,9 @@ class DepthwiseDepthfirst
     const auto input_i = static_cast<unsigned int>(ii < 0 ? 0 : ii);
     const auto input_j = output_j * this->m_args.stride_cols - this->m_args.padding.left;
 
-    const auto valid_input_rows = std::min(strat->get_input_rows(), this->m_args.input_rows - input_i);
+    // Valid input rows is the smallest of the input rows that aren't padding for this tile, and the number of rows
+    // available.
+    const auto valid_input_rows = std::min(strat->get_input_rows() - input_pad_top, this->m_args.input_rows - input_i);
     const auto valid_output_rows = std::min(strat->get_output_rows(), this->m_args.output_rows - output_i);
 
     const auto input_point_stride = input.ld_col * this->m_strat->get_output_cols() * this->m_args.stride_cols;
@@ -471,7 +473,7 @@ class DepthwiseDepthfirst
       // Update all unpadded pointers
       {
         auto ptr = ws->inptr_array + strat->get_input_cols() * input_pad_top;
-        for (auto n = input_pad_top; n < valid_input_rows; n++)
+        for (auto n = input_pad_top; n < (valid_input_rows + input_pad_top); n++)
         {
           for (auto m = 0u; m < strat->get_input_cols(); m++)
           {
