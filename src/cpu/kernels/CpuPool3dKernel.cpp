@@ -97,6 +97,8 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     int output_height = 0;
     int output_depth  = 0;
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_3d_region_entirely_outside_input(pool_info), "Pooling region that is entirely outside input tensor is unsupported");
+
     std::tie(output_width, output_height, output_depth) = scaled_3d_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height], src->tensor_shape()[idx_depth],
                                                                                       pool_size_x, pool_size_y, pool_size_z, pool_info);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1), "Calculated output dimension size is invalid");
