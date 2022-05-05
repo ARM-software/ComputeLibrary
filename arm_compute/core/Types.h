@@ -2089,7 +2089,8 @@ public:
           _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranspose_B(true),
+          _pretranspose_A(false),
+          _pretranspose_B(false),
           _activation_info(),
           _post_ops()
     {
@@ -2124,7 +2125,8 @@ public:
           _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranspose_B(reshape_b_only_on_first_run),
+          _pretranspose_A(false),
+          _pretranspose_B(false),
           _activation_info(activation_info),
           _post_ops(post_ops)
     {
@@ -2227,6 +2229,22 @@ public:
     {
         return _broadcast_bias;
     };
+    /** Flag which specifies whether A should be pre-transposed if supported.
+     *
+     * @return True if A should be pre-transposed else false.
+     */
+    bool pretranspose_A() const
+    {
+        return _pretranspose_A;
+    };
+    /** Set pre-transpose A flag
+     *
+     * @param[in] flag Flag to set
+     */
+    void set_pretranspose_A(bool flag)
+    {
+        _pretranspose_A = flag;
+    }
     /** Flag which specifies whether b should be pre-transposed if supported.
      *
      * @return True if b should be pre-transposed else false.
@@ -2287,6 +2305,7 @@ private:
     bool                                    _fast_math;
     bool                                    _fp_mixed_precision;
     bool                                    _broadcast_bias;
+    bool                                    _pretranspose_A;
     bool                                    _pretranspose_B;
     ActivationLayerInfo                     _activation_info;
     experimental::PostOpList<ITensorInfo *> _post_ops;
