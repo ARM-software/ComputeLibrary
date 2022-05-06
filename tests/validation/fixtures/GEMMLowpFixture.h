@@ -191,6 +191,10 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
     fill(b, 1);
 
     // Transpose reference if required
+    /* Note: Assuming the usual batch matmul dimensions A = (B x M x K), B = (B x K x N), if pretranspose_A is set to true, then A is assumed to be (B x K x M),
+       therefore, A must be pre-transposed before passing it to the fixture. And, we transpose A again in the fixture to make it (B x M x K)
+       in order to be able to call reference implementation that works with (B x M x K) input.
+       Similarly, if pretranspose_B is set to true, then B is assumed to be (B x N x K), B must be pre-transposed before passing it to the fixture. */
     if(pretranspose_A)
     {
         transpose_matrix<TI>(a, a_transposed);
