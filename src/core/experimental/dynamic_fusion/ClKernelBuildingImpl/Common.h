@@ -857,15 +857,13 @@ private:
     {
         auto       dst_info   = get_kernel_argument_info(_dst_id);
         auto       dst_w      = dst_info->dimension(0);
-        auto       dst_h      = dst_info->dimension(1);
         const auto tile_w     = std::max(1, get_execution_window().x().step());
         const auto tile_h     = std::max(1, get_execution_window().y().step());
         auto       leftover_w = dst_w % tile_w;
-        auto       leftover_h = dst_h % tile_h;
 
         std::string code = "";
         code += std::string("    int cout = GET_SPATIAL_IDX(0, ") + std::to_string(tile_w) + ", " + std::to_string(leftover_w) + ");\n";
-        code += std::string("    int mout = GET_SPATIAL_IDX(1, ") + std::to_string(tile_h) + ", " + std::to_string(leftover_h) + ");\n";
+        code += std::string("    int mout = GET_SPATIAL_IDX(1, ") + std::to_string(tile_h) + ", " + "0);\n";
         code += std::string("    int bout = GET_SPATIAL_IDX(2, 1, 0);\n\n");
 
         switch(_tile_info.clipping)

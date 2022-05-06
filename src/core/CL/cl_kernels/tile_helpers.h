@@ -1030,6 +1030,26 @@
         })                                                  \
     })
 
+/** Element-wise addition between two tiles (LHS and RHS)
+ *
+ * @note Performs: LHS + RHS = DST
+ * @note Both tiles must have same data type
+ *
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of LHS rows
+ * @param[in]  N0            Number of LHS columns
+ * @param[in]  lhs           LHS tile
+ * @param[in]  rhs           RHS tile
+ * @param[out] dst           DST tile
+ */
+#define T_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
+            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
+        })                                                  \
+    })
+
 /** Matrix multiplication
  *
  * @note Performs: LHS X RHS + DST = DST
