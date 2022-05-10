@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "src/core/CL/CLValidate.h"
@@ -217,3 +215,4 @@ std::vector<ClKernel *> traverse(ClKernelGraph &graph)
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

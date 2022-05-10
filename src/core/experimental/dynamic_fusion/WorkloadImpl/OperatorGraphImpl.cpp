@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -385,3 +383,4 @@ Status translate(ClKernelGraph &kernel_graph, const OperatorGraph::Implementatio
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

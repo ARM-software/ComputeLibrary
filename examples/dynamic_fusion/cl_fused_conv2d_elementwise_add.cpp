@@ -28,9 +28,7 @@
 /// @page example_dynamic_fusion_cl_conv2d_elementwise_add Dynamic Fusion Example: Conv2d + Elementwise Addition (OpenCL target)
 /// This example demonstrates how to fuse a Conv2d with an Addition using the new OperatorGraph API, and to run it with the Async Composite Operator
 
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif                 /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #ifndef ARM_COMPUTE_CL /* Needed by Utils.cpp to handle OpenCL exceptions properly */
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
@@ -384,3 +382,4 @@ int main(int argc, char **argv)
 #undef TICK
 #undef TOCK
 #undef TOCK_AVG
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

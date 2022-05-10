@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "arm_compute/core/experimental/ClWorkload.h"
 #include "src/core/experimental/dynamic_fusion/WorkloadImpl/ClFusedKernelGraph.h"
 #include "src/core/experimental/dynamic_fusion/WorkloadImpl/ClKernelGraph.h"
@@ -71,3 +69,4 @@ Status build(ClWorkload &workload, const OperatorGraph &op_graph, const ClWorklo
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

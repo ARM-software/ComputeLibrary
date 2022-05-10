@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "arm_compute/core/TensorInfo.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -401,3 +399,4 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

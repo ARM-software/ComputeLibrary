@@ -22,9 +22,7 @@
  * SOFTWARE.
  */
 
-#ifndef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
-#error "This experimental feature must be enabled with -DENABLE_EXPERIMENTAL_DYNAMIC_FUSION"
-#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "src/core/experimental/dynamic_fusion/WorkloadImpl/ClFusedKernelGraph.h"
 
 namespace arm_compute
@@ -231,3 +229,4 @@ Status generate(ClWorkload &workload, const ClWorkloadContext &ctx, const ClFuse
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+#endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */
