@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Arm Limited.
+# Copyright (c) 2016-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -32,7 +32,7 @@ import json
 import codecs
 
 VERSION = "v0.0-unreleased"
-LIBRARY_VERSION_MAJOR = 26
+LIBRARY_VERSION_MAJOR = 27
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
