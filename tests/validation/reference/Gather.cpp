@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, 2022 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,39 +45,22 @@ SimpleTensor<T> gather(const SimpleTensor<T> &src, const SimpleTensor<uint32_t> 
 
     Window win;
     win.use_tensor_dimensions(dst_shape);
-    if(indices.shape().num_dimensions() == 1u)
+    execute_window_loop(win, [&](const Coordinates & id)
     {
-        execute_window_loop(win, [&](const Coordinates & id)
+        Coordinates offset;
+        for(unsigned int dim = 0; dim < id.num_dimensions(); ++dim)
         {
-            Coordinates offset;
-            for(unsigned int dim = 0; dim < id.num_dimensions(); ++dim)
+            if(dim == actual_axis)
             {
-                if(dim == actual_axis)
-                {
-                    offset.set(dim, indices_ptr[id[dim]]);
-                }
-                else
-                {
-                    offset.set(dim, id[dim]);
-                }
+                offset.set(dim, indices_ptr[id[dim]]);
             }
-            *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
-        });
-    }
-    else
-    {
-        if(actual_axis == 0)
-        {
-            win.set(Window::DimX, Window::Dimension(0, 1, 1));
-            uint32_t index = 0;
-            execute_window_loop(win, [&](const Coordinates & id)
+            else
             {
-                auto     *dst_ptr     = reinterpret_cast<T *>(dst(id));
-                const int row_to_copy = indices[index++];
-                std::copy_n(src.data() + row_to_copy * src.shape()[0], src.shape()[0], dst_ptr);
-            });
+                offset.set(dim, id[dim]);
+            }
         }
-    }
+        *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
+    });
 
     return dst;
 }

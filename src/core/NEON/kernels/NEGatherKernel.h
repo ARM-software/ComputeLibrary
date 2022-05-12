@@ -85,23 +85,18 @@ private:
      *
      * For gather on the 0 axis an element by element copy is performed.
      *
-     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about running thread and CPU.
+     * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about executing thread and CPU.
      */
     template <typename U>
     void gather_0_axis(const Window &window, const ThreadInfo &info);
 
-    template <typename U>
-    void gather_dims_0_axis(const Window &window, const ThreadInfo &info);
-
-    template <typename U>
-    void gather_dims_n_axis(const Window &window, const ThreadInfo &info);
     /** Implementation of the gather operation.
      *
      * For 1<=axis a row-wise copy is taking place.
      *
-     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about running thread and CPU.
+     * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about executing thread and CPU.
      */
     template <typename U>
     void gather_n_axis(const Window &window, const ThreadInfo &info);
