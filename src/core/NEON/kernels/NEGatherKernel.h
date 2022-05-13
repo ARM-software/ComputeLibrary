@@ -61,17 +61,17 @@ public:
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: All
-     * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
+     * @param[in]  indices Indices tensor. Supported tensor rank: up to 3. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
+     *                     @note 2D or 3D indices are only supported for the axis 1.
      * @param[out] output  Destination tensor. Data type supported: Same as @p input
-     * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
+     * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0.
+     *
      */
     void configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis = 0);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEGatherKernel
+
+    /** Static function to check if given info will lead to a valid configuration
      *
-     * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: All
-     * @param[in] indices Indices tensor info. Supported tensor rank: up to 1. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
-     * @param[in] output  Destination tensor info. Data type supported: Same as @p input
-     * @param[in] axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
+     * Similar to @ref NEGatherKernel::configure()
      *
      * @return a status
      */
@@ -85,18 +85,20 @@ private:
      *
      * For gather on the 0 axis an element by element copy is performed.
      *
-     * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about executing thread and CPU.
+     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about running thread and CPU.
      */
     template <typename U>
     void gather_0_axis(const Window &window, const ThreadInfo &info);
 
+    template <typename U>
+    void gather_multiindices_1_axis(const Window &window, const ThreadInfo &info);
     /** Implementation of the gather operation.
      *
      * For 1<=axis a row-wise copy is taking place.
      *
-     * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about executing thread and CPU.
+     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about running thread and CPU.
      */
     template <typename U>
     void gather_n_axis(const Window &window, const ThreadInfo &info);

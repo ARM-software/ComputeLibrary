@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2019, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,19 @@ private:
     std::vector<TensorShape> _input_shapes{};
     std::vector<TensorShape> _indices_shapes{};
     std::vector<int>         _axis{};
+};
+
+class SmallGatherMultiDimIndicesDataset final : public GatherDataset
+{
+public:
+    SmallGatherMultiDimIndicesDataset()
+    {
+        add_config(TensorShape(2U, 6U), TensorShape(4U, 9U), 1);
+        add_config(TensorShape(15U, 15U), TensorShape(3U, 2U, 2U), 1);
+        add_config(TensorShape(15U, 15U), TensorShape(2U, 11U), 1);
+        add_config(TensorShape(5U, 3U, 4U), TensorShape(2U, 7U), 1);
+        add_config(TensorShape(1U, 5U, 3U), TensorShape(1U, 7U, 3U), 1);
+    }
 };
 
 class SmallGatherDataset final : public GatherDataset
