@@ -30,6 +30,15 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-5324) Issue identified with direct and depthwise convolutions for certain Arm® Mali™ DDK versions.
+    - Versions Affected: All.
+    - Conditions:
+        - Arm® Mali™ DDK Versions : >= r23p0 && <= r38p0
+        - Mali™ GPUs: Bifrost GPU family with the exception of G71
+        - Backend: OpenCL
+        - Build options Include : "cl-fast-relaxed-math"
+    - Result: Reduced accuracy issue, while using direct and depthwise convolutions fused with LU_BOUNDED_RELU activation.
+
 - (COMPMID-5134) An issue has been identified when running the graph_deepspeech_v0_4_1 graph example.
     - Versions Affected: >= v21.08
     - Conditions:
