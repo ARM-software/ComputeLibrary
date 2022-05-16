@@ -42,7 +42,7 @@ As part of the initiative to use inclusive language, there are certain phrases a
 Please also follow this guideline when committing changes to Compute Library.
 It is worth mentioning that the term "master" is still used in some comments but only in reference to external code links that Arm has no governance on.
 
-Futhermore, starting from next release (22.05), 'master' branch will no longer be used, it will be replaced by 'main'. Please update your clone jobs accordingly.
+Futhermore, starting from this release (22.05), 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 @section S5_1_coding_standards Coding standards and guidelines
 
 Best practices (as suggested by clang-tidy):

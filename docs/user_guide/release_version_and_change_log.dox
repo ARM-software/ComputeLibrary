@@ -37,9 +37,31 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
-@note Starting from next release (22.05), 'master' branch will no longer be used, it will be replaced by 'main'. Please update your clone jobs accordingly.
+@note Starting from this release (22.05), 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+
+v22.05 Public major release
+ - Various bug fixes.
+ - Various optimizations.
+ - Add support for NDK r23b.
+ - Inclusive language adjustment. Please refer to @ref S5_0_inc_lang for details.
+ - New Arm® Neon™ kernels / functions :
+   - \link opencl::kernels::ClPool3dKernel ClPool3dKernel \endlink
+ - New OpenCL kernels / functions :
+   - \link cpu::kernels::CpuPool3dKernel CpuPool3dKernel \endlink
+ - Improve the start-up times for the following OpenCL kernels:
+   - \link opencl::kernels::ClWinogradInputTransformKernel ClWinogradInputTransformKernel \endlink
+   - \link opencl::kernels::ClWinogradOutputTransformKernel ClWinogradOutputTransformKernel \endlink
+   - \link opencl::kernels::ClWinogradFilterTransformKernel ClWinogradFilterTransformKernel \endlink
+   - \link opencl::kernels::ClHeightConcatenateKernel ClHeightConcatenateKernel \endlink
+ - Decouple the implementation of the following Cpu kernels into various data types (fp32, fp16, int):
+   - \link cpu::kernels::CpuDirectConv2dKernel CpuDirectConv2dKernel \endlink
+   - \link cpu::kernels::CpuDepthwiseConv2dNativeKernel CpuDepthwiseConv2dNativeKernel \endlink
+   - \link cpu::kernels::CpuGemmMatrixAdditionKernel CpuGemmMatrixAdditionKernel \endlink
+   - \link cpu::kernels::CpuGemmMatrixMultiplyKernel CpuGemmMatrixMultiplyKernel \endlink
+   - @ref NEFuseBatchNormalizationKernel
+   - @ref NEL2NormalizeLayerKernel
 
 v22.02 Public major release
  - Various bug fixes.
