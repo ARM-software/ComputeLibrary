@@ -52,7 +52,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src,
                                                          1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
+                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst,

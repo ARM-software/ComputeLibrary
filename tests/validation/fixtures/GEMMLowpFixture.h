@@ -24,19 +24,10 @@
 #ifndef ARM_COMPUTE_TEST_GEMMLOWP_FIXTURE
 #define ARM_COMPUTE_TEST_GEMMLOWP_FIXTURE
 
-#include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
-#include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/GEMMLowp.h"
-
-#include <random>
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -1358,6 +1349,370 @@ protected:
         }
     }
 
+    TensorType            _target{};
+    SimpleTensor<int32_t> _reference{};
+};
+
+template <typename T, typename TensorType, typename AccessorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType, typename ReduceOperation, typename CastOperation>
+class GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
+               unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, bool broadcast_bias, DataType data_type)
+    {
+        GEMMLowpOutputStageInfo output_stage;
+        output_stage.type                    = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        output_stage.output_data_type        = data_type;
+        output_stage.gemmlowp_multipliers    = std::vector<int32_t> { 1 };
+        output_stage.gemmlowp_shifts         = std::vector<int32_t> { 1 };
+        output_stage.gemmlowp_multipliers[0] = 1;
+        output_stage.gemmlowp_shifts[0]      = 1;
+        output_stage.gemmlowp_offset         = 0;
+        constexpr float scale                = 0.001f;
+        quantization::calculate_quantized_multiplier(scale, &output_stage.gemmlowp_multipliers[0], &output_stage.gemmlowp_shifts[0]);
+        output_stage.gemmlowp_min_bound = -100;
+        output_stage.gemmlowp_max_bound = 100;
+
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0         = n0;
+        rhs_info.k0         = k0;
+        rhs_info.h0         = h0;
+        rhs_info.interleave = interleave_rhs;
+        rhs_info.transpose  = transpose_rhs;
+
+        int a_offset = 1;
+        int b_offset = 1;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, output_stage, a_offset, b_offset);
+        if(gemm_validated == true)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, output_stage, a_offset, b_offset);
+        }
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::QASYMM8:
+            {
+                // Between 1 and 254 in order to avoid having -128 and 128 for the DOT product path
+                std::uniform_int_distribution<> distribution(1, 254);
+                library->fill(tensor, distribution, i);
+            }
+            break;
+            case DataType::QASYMM8_SIGNED:
+            {
+                std::uniform_int_distribution<> distribution(-127, 126);
+                library->fill(tensor, distribution, i);
+            }
+            break;
+            case DataType::S32:
+            {
+                std::uniform_int_distribution<> distribution(-10000, 10000);
+                library->fill(tensor, distribution, i);
+            }
+            break;
+            default:
+                ARM_COMPUTE_ERROR("Unsupported data type");
+        }
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info,
+                              const GEMMRHSMatrixInfo &rhs_info, DataType data_type, GEMMLowpOutputStageInfo output_stage, const int a_offset, const int b_offset)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1, QuantizationInfo(1.0f / 255, a_offset));
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1, QuantizationInfo(1.0f / 255, b_offset));
+        TensorType bias = create_tensor<TensorType>(bias_shape, DataType::S32, 1);
+        TensorType dst;
+        TensorType rhs_reshaped;
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+
+        // Tensors for precomputing sum of lhs rows / rhs columns
+        TensorType vec_sum_rows = create_tensor<TensorType>(TensorShape(M, 1, lhs_shape[2]), DataType::S32, 1);
+        TensorType vec_sum_cols = create_tensor<TensorType>(TensorShape(N, 1, rhs_shape[2]), DataType::S32, 1);
+
+        GEMMKernelInfo gemm_info;
+        gemm_info.m            = M;
+        gemm_info.n            = N;
+        gemm_info.k            = K;
+        gemm_info.lhs_info     = lhs_info;
+        gemm_info.rhs_info     = rhs_info;
+        gemm_info.output_stage = output_stage;
+        gemm_info.a_offset     = a_offset;
+        gemm_info.b_offset     = b_offset;
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeRHSOperatorType reshape_rhs;
+        GEMMFunctionType       gemm;
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+
+        // If GEMM is not validated, do not try to run. The validation will check
+        // if the technology supports this extension. If not, the test will be skipped.
+        // If it supports, the test will fail anyway because target and reference
+        // will not match.
+        gemm_validated = bool(gemm.validate(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info, vec_sum_cols.info(), vec_sum_rows.info(), bias.info()));
+        if(gemm_validated == true)
+        {
+            gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info, vec_sum_cols.info(), vec_sum_rows.info(), bias.info());
+
+            ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
+
+            // Allocate tensors
+            lhs.allocator()->allocate();
+            rhs.allocator()->allocate();
+            rhs_reshaped.allocator()->allocate();
+            bias.allocator()->allocate();
+            vec_sum_cols.allocator()->allocate();
+            vec_sum_rows.allocator()->allocate();
+            dst.allocator()->allocate();
+
+            ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!vec_sum_cols.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!vec_sum_rows.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+
+            // Fill tensors
+            fill(AccessorType(lhs), 0);
+            fill(AccessorType(rhs), 1);
+            fill(AccessorType(bias), 2);
+
+            TensorType    lhs_32 = create_tensor<TensorType>(lhs_shape, DataType::S32, 1);
+            TensorType    rhs_32 = create_tensor<TensorType>(rhs_shape, DataType::S32, 1);
+            CastOperation cast_lhs;
+            CastOperation cast_rhs;
+            cast_lhs.configure(&lhs, &lhs_32, ConvertPolicy::SATURATE);
+            cast_rhs.configure(&rhs, &rhs_32, ConvertPolicy::SATURATE);
+            lhs_32.allocator()->allocate();
+            rhs_32.allocator()->allocate();
+            cast_lhs.run();
+            cast_rhs.run();
+
+            ReduceOperation lhs_sum_rows;
+            ReduceOperation rhs_sum_cols;
+
+            lhs_sum_rows.configure(&lhs_32, &vec_sum_rows, 0, ReductionOperation::SUM, false);
+            rhs_sum_cols.configure(&rhs_32, &vec_sum_cols, 1, ReductionOperation::SUM);
+
+            lhs_sum_rows.run();
+            rhs_sum_cols.run();
+
+            // Compute GEMM
+            ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+            reshape_rhs.run(reshape_rhs_pack);
+            ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_SRC_2, &bias }, { ACL_DST, &dst }, { ACL_VEC_COL_SUM, &vec_sum_cols }, { ACL_VEC_ROW_SUM, &vec_sum_rows } });
+            gemm.run(gemm_pack);
+        }
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, GEMMLowpOutputStageInfo output_stage,
+                                      const int a_offset, const int b_offset)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T>       lhs{ lhs_shape, data_type, 1, QuantizationInfo(1.0f / 255, a_offset) };
+        SimpleTensor<T>       rhs{ rhs_shape, data_type, 1, QuantizationInfo(1.0f / 255, b_offset) };
+        SimpleTensor<int32_t> bias{ bias_shape, DataType::S32, 1 };
+        SimpleTensor<int32_t> dst{ dst_shape, DataType::S32, 1 };
+        SimpleTensor<T>       dst_final{ dst_shape, data_type, 1 };
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        dst       = reference::gemmlowp_matrix_multiply_core<int32_t, T>(lhs, rhs, dst_shape, a_offset, b_offset);
+        dst_final = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, T>(dst, bias,
+                                                                                      output_stage.gemmlowp_multipliers, output_stage.gemmlowp_shifts, output_stage.gemmlowp_offset, output_stage.gemmlowp_min_bound, output_stage.gemmlowp_max_bound);
+        return dst_final;
+    }
+
+    bool            gemm_validated = true;
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename ReshapeRHSOperatorType, typename GEMMFunctionType>
+class GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
+               unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, DataType data_type)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0         = n0;
+        rhs_info.k0         = k0;
+        rhs_info.h0         = h0;
+        rhs_info.interleave = interleave_rhs;
+        rhs_info.transpose  = transpose_rhs;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info, data_type);
+        if(gemm_validated == true)
+        {
+            _reference = compute_reference(lhs_shape, rhs_shape, data_type);
+        }
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::QASYMM8:
+            {
+                // Between 1 and 254 in order to avoid having -128 and 128 for the DOT product path
+                std::uniform_int_distribution<> distribution(1, 254);
+                library->fill(tensor, distribution, i);
+            }
+            break;
+            case DataType::QASYMM8_SIGNED:
+            {
+                std::uniform_int_distribution<> distribution(-127, 126);
+                library->fill(tensor, distribution, i);
+            }
+            break;
+            default:
+                ARM_COMPUTE_ERROR("Unsupported data type");
+        }
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info,
+                              const GEMMRHSMatrixInfo &rhs_info, DataType data_type)
+    {
+        // Create tensors
+        TensorType lhs = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType rhs_reshaped;
+        TensorType dst;
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+
+        GEMMKernelInfo gemm_info;
+        gemm_info.m        = M;
+        gemm_info.n        = N;
+        gemm_info.k        = K;
+        gemm_info.lhs_info = lhs_info;
+        gemm_info.rhs_info = rhs_info;
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeRHSOperatorType reshape_rhs;
+        GEMMFunctionType       gemm;
+        reshape_rhs.configure(rhs.info(), rhs_reshaped.info(), rhs_info);
+
+        // If GEMM is not validated, do not try to run. The validation will check
+        // if the technology supports this extension. If not, the test will be skipped.
+        // If it supports, the test will fail anyway because target and reference
+        // will not match.
+        gemm_validated = bool(gemm.validate(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info, nullptr, nullptr, nullptr));
+        if(gemm_validated == true)
+        {
+            gemm.configure(lhs.info(), rhs_reshaped.info(), dst.info(), gemm_info, nullptr, nullptr, nullptr);
+
+            ARM_COMPUTE_ASSERT(lhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(rhs.info()->is_resizable());
+
+            // Allocate tensors
+            lhs.allocator()->allocate();
+            rhs.allocator()->allocate();
+            rhs_reshaped.allocator()->allocate();
+            dst.allocator()->allocate();
+
+            ARM_COMPUTE_ASSERT(!lhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!rhs.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!rhs_reshaped.info()->is_resizable());
+            ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
+
+            // Fill tensors
+            fill(AccessorType(lhs), 0);
+            fill(AccessorType(rhs), 1);
+
+            // Compute GEMM
+            ITensorPack reshape_rhs_pack = { { ACL_SRC, &rhs }, { ACL_DST, &rhs_reshaped } };
+            reshape_rhs.run(reshape_rhs_pack);
+            ITensorPack gemm_pack({ { ACL_SRC_0, &lhs }, { ACL_SRC_1, &rhs_reshaped }, { ACL_DST, &dst } });
+            gemm.run(gemm_pack);
+        }
+
+        return dst;
+    }
+
+    SimpleTensor<int32_t> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        if(data_type == DataType::QASYMM8)
+        {
+            // Create reference
+            SimpleTensor<uint8_t> lhs{ lhs_shape, data_type, 1 };
+            SimpleTensor<uint8_t> rhs{ rhs_shape, data_type, 1 };
+            SimpleTensor<int32_t> dst{ dst_shape, DataType::S32, 1 };
+
+            // Fill reference
+            fill(lhs, 0);
+            fill(rhs, 1);
+
+            return reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(lhs, rhs, dst_shape, 0, 0);
+        }
+        else
+        {
+            // Create reference
+            SimpleTensor<int8_t>  lhs{ lhs_shape, data_type, 1 };
+            SimpleTensor<int8_t>  rhs{ rhs_shape, data_type, 1 };
+            SimpleTensor<int32_t> dst{ dst_shape, DataType::S32, 1 };
+
+            // Fill reference
+            fill(lhs, 0);
+            fill(rhs, 1);
+
+            return reference::gemmlowp_matrix_multiply_core<int32_t, int8_t>(lhs, rhs, dst_shape, 0, 0);
+        }
+    }
+
+    bool                  gemm_validated = true;
     TensorType            _target{};
     SimpleTensor<int32_t> _reference{};
 };

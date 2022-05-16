@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ namespace kernels
 class ClCastKernel;
 class ClGemmLowpMatrixMultiplyNativeKernel;
 class ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel;
+class ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel;
 class ClGemmReshapeRhsMatrixKernel;
 class ClGemmLowpMatrixAReductionKernel;
 class ClGemmLowpMatrixBReductionKernel;
@@ -120,14 +121,15 @@ private:
 
 private:
     // Kernels used
-    std::unique_ptr<kernels::ClCastKernel>                                  _weights_to_qasymm8;
-    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyNativeKernel>          _mm_native_kernel;
-    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel> _mm_reshaped_only_rhs_kernel;
-    std::unique_ptr<kernels::ClGemmReshapeRhsMatrixKernel>                  _mtx_b_reshape_kernel;
-    std::unique_ptr<kernels::ClGemmLowpMatrixAReductionKernel>              _mtx_a_reduction_kernel;
-    std::unique_ptr<kernels::ClGemmLowpMatrixBReductionKernel>              _mtx_b_reduction_kernel;
-    std::unique_ptr<kernels::ClGemmLowpOffsetContributionKernel>            _offset_contribution_kernel;
-    std::unique_ptr<kernels::ClGemmLowpOffsetContributionOutputStageKernel> _offset_contribution_output_stage_kernel;
+    std::unique_ptr<kernels::ClCastKernel>                                      _weights_to_qasymm8;
+    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyNativeKernel>              _mm_native_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>     _mm_reshaped_only_rhs_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel> _mm_reshaped_only_rhs_mmul_kernel;
+    std::unique_ptr<kernels::ClGemmReshapeRhsMatrixKernel>                      _mtx_b_reshape_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixAReductionKernel>                  _mtx_a_reduction_kernel;
+    std::unique_ptr<kernels::ClGemmLowpMatrixBReductionKernel>                  _mtx_b_reduction_kernel;
+    std::unique_ptr<kernels::ClGemmLowpOffsetContributionKernel>                _offset_contribution_kernel;
+    std::unique_ptr<kernels::ClGemmLowpOffsetContributionOutputStageKernel>     _offset_contribution_output_stage_kernel;
 
     // Temporary tensors
     TensorInfo _qasymm8_weights{};
@@ -138,15 +140,15 @@ private:
     TensorInfo _gemm_output_stage_multipliers{};
     TensorInfo _gemm_output_stage_shifts{};
 
-    int32_t  _a_offset{ 0 };
-    int32_t  _b_offset{ 0 };
-    bool     _is_gemm_reshaped{ true };
-    bool     _reshape_b_only_on_first_run{ false };
-    bool     _run_output_stage{ false };
-    bool     _convert_to_qasymm8{ false };
-    bool     _run_offset_contribution{ false };
-    bool     _is_prepared{ false };
-    GEMMInfo _gemm_info{};
+    int32_t          _a_offset{ 0 };
+    int32_t          _b_offset{ 0 };
+    bool             _reshape_b_only_on_first_run{ false };
+    bool             _run_output_stage{ false };
+    bool             _convert_to_qasymm8{ false };
+    bool             _run_offset_contribution{ false };
+    bool             _is_prepared{ false };
+    GEMMInfo         _gemm_info{};
+    CLGEMMKernelType _gemm_kernel_type{};
 
     experimental::MemoryRequirements _aux_mem{};
 };

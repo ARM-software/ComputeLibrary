@@ -473,6 +473,7 @@
           "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.cpp",
           "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.cpp",
           "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.cpp",
+          "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel.cpp",
           "src/gpu/cl/kernels/ClGemmLowpOffsetContributionKernel.cpp",
           "src/gpu/cl/kernels/ClGemmLowpOffsetContributionOutputStageKernel.cpp",
           "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel.cpp",

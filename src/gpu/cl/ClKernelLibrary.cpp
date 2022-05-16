@@ -303,6 +303,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "common/gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t", "common/gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_mmul", "common/gemmlowp_reshaped_only_rhs_mmul.cl" },
     { "gemmlowp_offset_contribution", "common/gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "common/gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "common/gemmlowp.cl" },
@@ -616,6 +617,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemmlowp.cl",
 #include "./cl_kernels/common/gemmlowp.clembed"
+    },
+    {
+        "common/gemmlowp_reshaped_only_rhs_mmul.cl",
+#include "./cl_kernels/common/gemmlowp_reshaped_only_rhs_mmul.clembed"
     },
     {
         "common/gemv.cl",

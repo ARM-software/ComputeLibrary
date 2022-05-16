@@ -376,6 +376,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
                        'src/core/CL/cl_kernels/common/gemv.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
+                       'src/core/CL/cl_kernels/common/gemmlowp_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',
                        'src/core/CL/cl_kernels/common/instance_normalization.cl',
