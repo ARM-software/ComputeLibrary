@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "src/core/CL/ICLKernel.h"
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+#include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 namespace arm_compute
 {
@@ -137,6 +141,13 @@ void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_
     _cl_tuner = cl_tuner;
 }
 
+void CLScheduler::default_reinit(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)
+{
+    _is_initialised = false;
+
+    default_init(cl_tuner, gemm_h, cl_backend_type);
+}
+
 void CLScheduler::set_context(cl::Context context)
 {
     _context = std::move(context);
@@ -170,10 +181,47 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
 
     // Run kernel
     inject_memory ? kernel.run_op(tensors, kernel.window(), _queue) : kernel.run(kernel.window(), _queue);
-
     if(_job_chaining_enabled)
     {
-        if(++_job_chaining_count >= _job_chaining_size)
+        ++_job_chaining_count;
+    }
+
+    flush_queue(flush);
+}
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
+                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
+                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
+
+    // ClCompositeKernel is stateless thus alway requires memory injection
+
+    // Tune the kernel if the CLTuner has been provided
+    if(_cl_tuner != nullptr)
+    {
+        _cl_tuner->tune_kernel_dynamic(kernel, tensors, exec_desc);
+    }
+
+    // Run kernel
+    kernel.run_composite_op(tensors, kernel.window(), _queue, exec_desc);
+    if(_job_chaining_enabled)
+    {
+        ++_job_chaining_count;
+    }
+
+    flush_queue(flush);
+}
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::flush_queue(bool flush)
+{
+    if(_job_chaining_enabled)
+    {
+        if(_job_chaining_count >= _job_chaining_size)
         {
             _job_chaining_count = 0;
             _queue.flush();
@@ -195,6 +243,15 @@ void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush
 {
     enqueue_common(kernel, tensors, flush);
 }
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
+{
+    enqueue_common(kernel, tensors, exec_desc, flush);
+}
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 void CLScheduler::enable_job_chaining(int job_chaining_size)
 {

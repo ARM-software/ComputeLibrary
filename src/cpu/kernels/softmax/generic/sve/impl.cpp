@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "src/cpu/kernels/softmax/generic/sve/impl.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 
@@ -176,4 +176,3 @@ template void sve_softmax_logits_1d_float<float16_t>(const ITensor *in, const IT
                                                      ITensor *out, const float beta, bool is_log, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */

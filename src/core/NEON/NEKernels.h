@@ -45,7 +45,6 @@
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"
-#include "src/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 #include "src/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"

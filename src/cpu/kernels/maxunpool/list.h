@@ -28,7 +28,7 @@ namespace arm_compute
 namespace cpu
 {
 #define DECLARE_MAXUNPOOL_KERNEL(func_name) \
-    void func_name(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window)
+    void func_name(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)
 DECLARE_MAXUNPOOL_KERNEL(neon_fp32_maxunpooling);
 DECLARE_MAXUNPOOL_KERNEL(neon_fp16_maxunpooling);
 DECLARE_MAXUNPOOL_KERNEL(neon_qs8_maxunpooling);

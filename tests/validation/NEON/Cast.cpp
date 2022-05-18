@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
+#include "src/cpu/kernels/CpuCastKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
@@ -34,7 +36,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/CastFixture.h"
-
 namespace arm_compute
 {
 namespace test
@@ -186,6 +187,73 @@ CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, NECastToF16Fixture<float>, 
 #endif //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 CAST_SUITE(F32_to_S32, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
 CAST_SUITE(F32_to_U8, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
+
+DATA_TEST_CASE(KernelSelectionDstFP16, framework::DatasetMode::ALL,
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                       framework::dataset::make("DataType",
+{
+    DataType::F16,
+    DataType::U8,
+    DataType::S32,
+    DataType::QASYMM8,
+    DataType::QASYMM8_SIGNED,
+    DataType::BFLOAT16,
+})),
+cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+    const CpuCastKernel::CastKernel *selected_impl;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+
+    cpu_isa.bf16 = (data_type == DataType::BFLOAT16);
+
+    /* bf16 cast is different from all the others being converted to fp32 and not to fp16 */
+    if(cpu_isa.bf16)
+    {
+        cpu_isa.fp16  = false;
+        selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ data_type, DataType::F32, cpu_isa }, cpu::KernelSelectionType::Preferred);
+    }
+    else
+    {
+        cpu_isa.fp16  = true;
+        selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ data_type, DataType::F16, cpu_isa }, cpu::KernelSelectionType::Preferred);
+    }
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_cast";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(KernelSelectionSrcFP32, framework::DatasetMode::ALL,
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                       framework::dataset::make("DataType",
+{
+    DataType::F16,
+    DataType::BFLOAT16,
+})),
+cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+    cpu_isa.bf16 = (data_type == DataType::BFLOAT16);
+
+    const auto *selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ DataType::F32, data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_fp32_to_" + cpu_impl_dt(data_type) + "_cast";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
 
 TEST_SUITE_END() // Cast
 TEST_SUITE_END() // Neon

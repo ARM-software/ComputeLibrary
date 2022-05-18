@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,11 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
+#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
+#include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
@@ -255,6 +257,9 @@ private:
     };
 
     // Functions used
+
+    NEDequantizationLayer                                            _dequantize_input_to_forget_weights;
+    NEQuantizationLayer                                              _quantize_input_to_forget_weights;
     NETranspose                                                      _transpose_input_to_forget_weights;
     NETranspose                                                      _transpose_input_to_cell_weights;
     NETranspose                                                      _transpose_input_to_output_weights;
@@ -381,6 +386,9 @@ private:
     static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias);
 
     // Temporary tensors
+    Tensor _input_to_forget_weights_f32{ nullptr };
+    Tensor _input_to_forget_weights_symm8{ nullptr };
+
     Tensor _input_to_forget_weights_transposed{ nullptr };
     Tensor _input_to_cell_weights_transposed{ nullptr };
     Tensor _input_to_output_weights_transposed{ nullptr };
@@ -449,6 +457,7 @@ private:
     bool _has_peephole{ false };
     bool _has_layer_norm{ false };
     bool _projection_tensor_copy_required{ false };
+    bool _convert_input_to_forget_weights_to_qsymm8{ false };
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEQLSTMLAYER_H */

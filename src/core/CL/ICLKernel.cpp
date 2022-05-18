@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,6 +173,7 @@ template void ICLKernel::add_tensor_argument<1>(unsigned &idx, const ICLTensor *
 template void ICLKernel::add_tensor_argument<2>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<3>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<4>(unsigned &idx, const ICLTensor *tensor, const Window &window);
+template void ICLKernel::add_tensor_argument<5>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 #endif /* DOXYGEN_SKIP_THIS */
 
 void ICLKernel::set_target(cl::Device &device)

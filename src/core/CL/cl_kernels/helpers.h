@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -829,6 +829,20 @@
     uint        name##_step_z,   \
     uint        name##_stride_w, \
     uint        name##_step_w,   \
+    uint        name##_offset_first_element_in_bytes
+
+#define TENSOR5D_DECLARATION(name)   \
+    __global uchar *name##_ptr,      \
+    uint        name##_stride_x, \
+    uint        name##_step_x,   \
+    uint        name##_stride_y, \
+    uint        name##_step_y,   \
+    uint        name##_stride_z, \
+    uint        name##_step_z,   \
+    uint        name##_stride_w, \
+    uint        name##_step_w,   \
+    uint        name##_stride_v, \
+    uint        name##_step_v,   \
     uint        name##_offset_first_element_in_bytes
 
 #define CONVERT_TO_VECTOR_STRUCT(name) \

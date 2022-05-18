@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,7 +87,6 @@ void ClWidthConcatenateKernel::configure(const CLCompileContext &compile_context
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(width_offset));
-    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(src->dimension(2)));
 
     if(is_data_type_quantized_asymmetric(src->data_type()) && src->quantization_info() != dst->quantization_info())
     {
@@ -99,9 +98,15 @@ void ClWidthConcatenateKernel::configure(const CLCompileContext &compile_context
         build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iqinfo.scale));
         build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
+    _depth                  = src->dimension(2);
+    std::string kernel_name = "concatenate_width";
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
 
     // Create kernel
-    _kernel = create_kernel(compile_context, "concatenate_width", build_opts.options());
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win.collapse(win, Window::DimZ));
@@ -120,6 +125,7 @@ void ClWidthConcatenateKernel::run_op(ITensorPack &tensors, const Window &window
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, src, window);
     add_4D_tensor_argument(idx, dst, window);
+    _kernel.setArg<cl_uint>(idx++, _depth);
     enqueue(queue, *this, window, lws_hint());
 }
 } // namespace kernels

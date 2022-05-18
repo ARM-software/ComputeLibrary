@@ -29,7 +29,7 @@ class Window;
 namespace cpu
 {
 template <typename T>
-void max_unpooling(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window)
+void max_unpooling(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)
 {
     Iterator  input_itr(input, window);
     Iterator  indices_itr(indices, window);
@@ -43,12 +43,12 @@ void max_unpooling(const ITensor *input, ITensor *output, const ITensor *indices
     },
     input_itr, indices_itr);
 }
-template void max_unpooling<float>(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window);
-template void max_unpooling<int8_t>(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window);
-template void max_unpooling<uint8_t>(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window);
+template void max_unpooling<float>(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window);
+template void max_unpooling<int8_t>(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window);
+template void max_unpooling<uint8_t>(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window);
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-template void max_unpooling<float16_t>(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window);
+template void max_unpooling<float16_t>(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window);
 #endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 } // namespace cpu
 } // namespace arm_compute

@@ -40,214 +40,255 @@ namespace kernels
 {
 namespace
 {
-struct ElementwiseSelectorData
+template <ArithmeticOperation                                                   op>
+const std::vector<CpuElementwiseKernel<CpuArithmeticKernel>::ElementwiseKernel> available_kernels_arithmetic =
 {
-    DataType       dt;
-    const CPUInfo &ci;
+    {
+        "sve2_qu8_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8 && data.isa.sve2 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SVE2(sve2_qasymm8_elementwise_binary<op>)
+    },
+    {
+        "sve2_qs8_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SIGNED_SVE2(sve2_qasymm8_signed_elementwise_binary<op>)
+    },
+    {
+        "sve_fp32_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && data.isa.sve && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_FP32_SVE(sve_fp32_elementwise_binary<op>)
+    },
+    {
+        "sve_s32_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S32 && data.isa.sve && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_SVE(sve_s32_elementwise_binary<op>)
+    },
+    {
+        "sve_s16_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S16 && data.isa.sve && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_SVE(sve_s16_elementwise_binary<op>)
+    },
+    {
+        "sve_fp16_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_FP16_SVE(sve_fp16_elementwise_binary<op>)
+    },
+    {
+        "neon_fp32_arithmetic",
+
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_FP32_NEON(neon_fp32_elementwise_binary<op>)
+    },
+    {
+        "neon_s32_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S32 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_NEON(neon_s32_elementwise_binary<op>)
+    },
+    {
+        "neon_fp16_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.fp16 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_FP16_NEON(neon_fp16_elementwise_binary<op>)
+    },
+    {
+        "neon_s16_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S16 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_NEON(neon_s16_elementwise_binary<op>)
+    },
+    {
+        "neon_qu8_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8 && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_NEON(neon_qasymm8_elementwise_binary<op>)
+    },
+    {
+        "neon_qs8_arithmetic",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED && static_cast<ArithmeticOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SIGNED_NEON(neon_qasymm8_signed_elementwise_binary<op>)
+    },
 };
-
-using ElementwiseSelector = std::add_pointer<bool(const ElementwiseSelectorData &)>::type;
-using UKernelType         = CpuElementwiseKernel::ElementwiseFunction;
-struct ElementwiseKernel
+template <ComparisonOperation                                                   op>
+const std::vector<CpuElementwiseKernel<CpuComparisonKernel>::ElementwiseKernel> available_kernels_comperison =
 {
-    const char               *name;
-    const ElementwiseSelector is_selected;
-    UKernelType              *ukernel;
+    {
+        "sve2_qu8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8 && data.isa.sve2 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SVE2(sve2_qasymm8_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve2_qs8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SIGNED_SVE2(sve2_qasymm8_signed_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve_u8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::U8 && data.isa.sve && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_SVE(sve_u8_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve_fp32_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && data.isa.sve && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_FP32_SVE(sve_fp32_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve_s16_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S16 && data.isa.sve && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_SVE(sve_s16_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve_s32_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S32 && data.isa.sve && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_SVE(sve_s32_comparison_elementwise_binary<op>)
+    },
+    {
+        "sve_fp16_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_FP16_SVE(sve_fp16_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_u8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::U8 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_NEON(neon_u8_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_fp32_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_FP32_NEON(neon_fp32_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_s16_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S16 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_NEON(neon_s16_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_s32_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S32 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_INTEGER_NEON(neon_s32_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_qu8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_NEON(neon_qasymm8_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_qs8_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_QASYMM8_SIGNED_NEON(neon_qasymm8_signed_comparison_elementwise_binary<op>)
+    },
+    {
+        "neon_fp16_comparison",
+        [](const ElementwiseDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.fp16 && static_cast<ComparisonOperation>(data.op) == op;
+        },
+        REGISTER_FP16_NEON(neon_fp16_comparison_elementwise_binary<op>)
+    },
 };
-
-template <ArithmeticOperation     op>
-CpuElementwiseKernel::UKernelInfo configure_arithm_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    ARM_COMPUTE_UNUSED(src1, dst);
-    static ElementwiseKernel kernels[] =
-    {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-        {
-            "sve_fp32_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
-            REGISTER_FP32_SVE((arm_compute::cpu::sve_fp32_elementwise_binary<op>))
-        },
-        {
-            "sve_s32_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
-            REGISTER_INTEGER_SVE((arm_compute::cpu::sve_s32_elementwise_binary<op>))
-        },
-        {
-            "sve_s16_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
-            REGISTER_INTEGER_SVE((arm_compute::cpu::sve_s16_elementwise_binary<op>))
-        },
-        {
-            "sve_fp16_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
-            REGISTER_FP16_SVE((arm_compute::cpu::sve_fp16_elementwise_binary<op>))
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-#if defined(ARM_COMPUTE_ENABLE_NEON)
-        {
-            "neon_fp32_elementwise",
-
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
-            REGISTER_FP32_NEON((arm_compute::cpu::neon_fp32_elementwise_binary<op>))
-        },
-        {
-            "neon_s32_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
-            REGISTER_INTEGER_NEON((arm_compute::cpu::neon_s32_elementwise_binary<op>))
-        },
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-        {
-            "neon_fp16_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
-            REGISTER_FP16_NEON((arm_compute::cpu::neon_fp16_elementwise_binary<op>))
-        },
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
-        {
-            "neon_s16_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
-            REGISTER_INTEGER_NEON((arm_compute::cpu::neon_s16_elementwise_binary<op>))
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-        {
-            "sve2_qu8_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
-            REGISTER_QASYMM8_SVE2((arm_compute::cpu::sve2_qasymm8_elementwise_binary<op>))
-        },
-        {
-            "sve2_qs8_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
-            REGISTER_QASYMM8_SIGNED_SVE2((arm_compute::cpu::sve2_qasymm8_signed_elementwise_binary<op>))
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
-#if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
-        {
-            "neon_qu8_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
-            REGISTER_QASYMM8_NEON((arm_compute::cpu::neon_qasymm8_elementwise_binary<op>))
-        },
-        {
-            "neon_qs8_elementwise",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
-            REGISTER_QASYMM8_SIGNED_NEON((arm_compute::cpu::neon_qasymm8_signed_elementwise_binary<op>))
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)  */
-    };
-
-    for(const auto &uk : kernels)
-    {
-        if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
-        {
-            return { uk.name, uk.ukernel };
-        }
-    }
-
-    return { "", nullptr };
-}
-
-template <ComparisonOperation     op>
-CpuElementwiseKernel::UKernelInfo configure_comp_func(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    ARM_COMPUTE_UNUSED(src1, dst);
-    static ElementwiseKernel kernels[] =
-    {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-        {
-            "sve_u8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8 && data.ci.has_sve(); },
-            REGISTER_INTEGER_SVE(arm_compute::cpu::sve_u8_comparison_elementwise_binary<op>)
-        },
-        {
-            "sve_fp32_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32 && data.ci.has_sve(); },
-            REGISTER_FP32_SVE(arm_compute::cpu::sve_fp32_comparison_elementwise_binary<op>)
-        },
-        {
-            "sve_s16_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16 && data.ci.has_sve(); },
-            REGISTER_INTEGER_SVE(arm_compute::cpu::sve_s16_comparison_elementwise_binary<op>)
-        },
-        {
-            "sve_s32_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32 && data.ci.has_sve(); },
-            REGISTER_INTEGER_SVE(arm_compute::cpu::sve_s32_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-#if defined(ARM_COMPUTE_ENABLE_NEON)
-        {
-            "neon_u8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::U8; },
-            REGISTER_INTEGER_NEON(arm_compute::cpu::neon_u8_comparison_elementwise_binary<op>)
-        },
-        {
-            "neon_fp32_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F32; },
-            REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_comparison_elementwise_binary<op>)
-        },
-        {
-            "neon_s16_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S16; },
-            REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s16_comparison_elementwise_binary<op>)
-        },
-        {
-            "neon_s32_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::S32; },
-            REGISTER_INTEGER_NEON(arm_compute::cpu::neon_s32_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-        {
-            "sve2_qu8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8 && data.ci.has_sve2(); },
-            REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_comparison_elementwise_binary<op>)
-        },
-        {
-            "sve2_qs8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.ci.has_sve2(); },
-            REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
-#if defined(ARM_COMPUTE_ENABLE_NEON) || defined(ARM_COMPUTE_ENABLE_SVE)
-        {
-            "neon_qu8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8; },
-            REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_comparison_elementwise_binary<op>)
-        },
-        {
-            "neon_qs8_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
-            REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON ||ARM_COMPUTE_ENABLE_SVE) */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
-        {
-            "sve_fp16_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_sve(); },
-            REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE)  */
-#if defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-        {
-            "neon_fp16_comparison",
-            [](const ElementwiseSelectorData & data) { return data.dt == DataType::F16 && data.ci.has_fp16(); },
-            REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_comparison_elementwise_binary<op>)
-        },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
-    };
-
-    for(const auto &uk : kernels)
-    {
-        if(uk.is_selected({ src0->data_type(), CPUInfo::get() }))
-        {
-            return { uk.name, uk.ukernel };
-        }
-    }
-
-    return { "", nullptr };
-}
 } // namespace
 
-Status CpuElementwiseKernel::validate_arguments_common(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
+const std::vector<CpuElementwiseKernel<CpuArithmeticKernel>::ElementwiseKernel> &CpuArithmeticKernel::get_available_kernels()
+{
+    static std::vector<CpuElementwiseKernel<CpuArithmeticKernel>::ElementwiseKernel> available_kernels;
+    std::move(available_kernels_arithmetic<ArithmeticOperation::ADD>.begin(), available_kernels_arithmetic<ArithmeticOperation::ADD>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::SUB>.begin(), available_kernels_arithmetic<ArithmeticOperation::SUB>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::DIV>.begin(), available_kernels_arithmetic<ArithmeticOperation::DIV>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::MIN>.begin(), available_kernels_arithmetic<ArithmeticOperation::MIN>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::MAX>.begin(), available_kernels_arithmetic<ArithmeticOperation::MAX>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::SQUARED_DIFF>.begin(), available_kernels_arithmetic<ArithmeticOperation::SQUARED_DIFF>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::POWER>.begin(), available_kernels_arithmetic<ArithmeticOperation::POWER>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_arithmetic<ArithmeticOperation::PRELU>.begin(), available_kernels_arithmetic<ArithmeticOperation::PRELU>.end(), std::back_inserter(available_kernels));
+
+    return available_kernels;
+}
+
+const std::vector<CpuElementwiseKernel<CpuComparisonKernel>::ElementwiseKernel> &CpuComparisonKernel::get_available_kernels()
+{
+    static std::vector<CpuElementwiseKernel<CpuComparisonKernel>::ElementwiseKernel> available_kernels;
+    std::move(available_kernels_comperison<ComparisonOperation::Equal>.begin(), available_kernels_comperison<ComparisonOperation::Equal>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_comperison<ComparisonOperation::NotEqual>.begin(), available_kernels_comperison<ComparisonOperation::NotEqual>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_comperison<ComparisonOperation::Greater>.begin(), available_kernels_comperison<ComparisonOperation::Greater>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_comperison<ComparisonOperation::GreaterEqual>.begin(), available_kernels_comperison<ComparisonOperation::GreaterEqual>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_comperison<ComparisonOperation::Less>.begin(), available_kernels_comperison<ComparisonOperation::Less>.end(), std::back_inserter(available_kernels));
+    std::move(available_kernels_comperison<ComparisonOperation::LessEqual>.begin(), available_kernels_comperison<ComparisonOperation::LessEqual>.end(), std::back_inserter(available_kernels));
+
+    return available_kernels;
+}
+
+template <class Derived>
+Status CpuElementwiseKernel<Derived>::validate_arguments_common(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src0);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &src1);
@@ -266,14 +307,16 @@ Status CpuElementwiseKernel::validate_arguments_common(const ITensorInfo &src0, 
     return Status{};
 }
 
-void CpuElementwiseKernel::configure_common(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+void CpuArithmeticKernel::configure_common(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
-    const auto uk = get_implementation(src0, src1, dst);
+    const auto *uk = CpuArithmeticKernel::get_implementation(ElementwiseDataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa(), static_cast<int>(_op) });
 
-    _run_method = uk.ukernel;
-    _name       = std::string("CpuElementwiseKernel").append("/").append(uk.name);
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuArithmeticKernel").append("/").append(uk->name);
 
     // If any of shapes is dynamic, expect a configured window and dst at run-time.
     if(src0->is_dynamic() || src1->is_dynamic())
@@ -286,7 +329,30 @@ void CpuElementwiseKernel::configure_common(const ITensorInfo *src0, const ITens
     ICpuKernel::configure(shape_and_window.second);
 }
 
-void CpuElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuComparisonKernel::configure_common(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
+
+    const auto *uk = CpuComparisonKernel::get_implementation(ElementwiseDataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa(), static_cast<int>(_op) });
+
+    ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
+
+    _run_method = uk->ukernel;
+    _name       = std::string("CpuComparisonKernel").append("/").append(uk->name);
+
+    // If any of shapes is dynamic, expect a configured window and dst at run-time.
+    if(src0->is_dynamic() || src1->is_dynamic())
+    {
+        return;
+    }
+
+    auto shape_and_window = compute_output_shape_and_window(src0->tensor_shape(), src1->tensor_shape());
+    auto_init_if_empty(*dst, shape_and_window.first, 1, src0->data_type());
+    ICpuKernel::configure(shape_and_window.second);
+}
+
+template <class Derived>
+void CpuElementwiseKernel<Derived>::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr);
@@ -297,18 +363,23 @@ void CpuElementwiseKernel::run_op(ITensorPack &tensors, const Window &window, co
 
     _run_method(src0, src1, dst, window);
 }
+template void CpuElementwiseKernel<CpuArithmeticKernel>::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info);
+template void CpuElementwiseKernel<CpuComparisonKernel>::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info);
 
-const char *CpuElementwiseKernel::name() const
+template <class Derived>
+const char *CpuElementwiseKernel<Derived>::name() const
 {
     return _name.c_str();
 }
+template const char *CpuElementwiseKernel<CpuArithmeticKernel>::name() const;
+template const char *CpuElementwiseKernel<CpuComparisonKernel>::name() const;
 
 /** Arithmetic operators (min, max, squared_diff) */
 void CpuArithmeticKernel::configure(ArithmeticOperation op, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = op;
-    configure_common(src0, src1, dst);
+    CpuArithmeticKernel::configure_common(src0, src1, dst);
 }
 
 Status CpuArithmeticKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -330,35 +401,13 @@ Status CpuArithmeticKernel::validate(ArithmeticOperation op, const ITensorInfo *
     return Status{};
 }
 
-CpuElementwiseKernel::UKernelInfo CpuArithmeticKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    switch(_op)
-    {
-        case ArithmeticOperation::MAX:
-            return configure_arithm_func<ArithmeticOperation::MAX>(src0, src1, dst);
-        case ArithmeticOperation::MIN:
-            return configure_arithm_func<ArithmeticOperation::MIN>(src0, src1, dst);
-        case ArithmeticOperation::SQUARED_DIFF:
-            return configure_arithm_func<ArithmeticOperation::SQUARED_DIFF>(src0, src1, dst);
-        case ArithmeticOperation::PRELU:
-            return configure_arithm_func<ArithmeticOperation::PRELU>(src0, src1, dst);
-        case ArithmeticOperation::DIV:
-            return configure_arithm_func<ArithmeticOperation::DIV>(src0, src1, dst);
-        case ArithmeticOperation::POWER:
-            return configure_arithm_func<ArithmeticOperation::POWER>(src0, src1, dst);
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-    return { "", nullptr };
-}
-
 /** The division operator */
 
 void CpuDivisionKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = ArithmeticOperation::DIV;
-    configure_common(src0, src1, dst);
+    CpuArithmeticKernel::configure_common(src0, src1, dst);
 }
 
 Status CpuDivisionKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -379,7 +428,7 @@ void CpuPowerKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1,
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = ArithmeticOperation::POWER;
-    configure_common(src0, src1, dst);
+    CpuArithmeticKernel::configure_common(src0, src1, dst);
 }
 
 Status CpuPowerKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -400,7 +449,7 @@ void CpuComparisonKernel::configure(ComparisonOperation op, const ITensorInfo *s
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst));
     _op = op;
-    configure_common(src0, src1, dst);
+    CpuComparisonKernel::configure_common(src0, src1, dst);
 }
 
 Status CpuComparisonKernel::validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst)
@@ -420,28 +469,6 @@ Status CpuComparisonKernel::validate(ComparisonOperation op, const ITensorInfo *
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst));
     return Status{};
-}
-
-CpuElementwiseKernel::UKernelInfo CpuComparisonKernel::get_implementation(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst)
-{
-    switch(_op)
-    {
-        case ComparisonOperation::Equal:
-            return configure_comp_func<ComparisonOperation::Equal>(src0, src1, dst);
-        case ComparisonOperation::NotEqual:
-            return configure_comp_func<ComparisonOperation::NotEqual>(src0, src1, dst);
-        case ComparisonOperation::Greater:
-            return configure_comp_func<ComparisonOperation::Greater>(src0, src1, dst);
-        case ComparisonOperation::GreaterEqual:
-            return configure_comp_func<ComparisonOperation::GreaterEqual>(src0, src1, dst);
-        case ComparisonOperation::Less:
-            return configure_comp_func<ComparisonOperation::Less>(src0, src1, dst);
-        case ComparisonOperation::LessEqual:
-            return configure_comp_func<ComparisonOperation::LessEqual>(src0, src1, dst);
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-    return { "", nullptr };
 }
 } // namespace kernels
 } // namespace cpu

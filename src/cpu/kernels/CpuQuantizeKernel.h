@@ -81,6 +81,9 @@ private:
     template <typename T>
     void run_quantize_qasymm16(const ITensor *src, ITensor *dst, const Window &window);
 
+    template <typename TIn, typename TOut>
+    void run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window);
+
     QuantizeFunctionExecutorPtr _func{ nullptr };
 };
 } // namespace kernels

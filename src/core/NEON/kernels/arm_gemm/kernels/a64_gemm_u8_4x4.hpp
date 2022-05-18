@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,9 +71,11 @@ public:
     static PerformanceParameters get_performance_parameters(const CPUInfo *ci) {
         if (std::is_same<T, uint32_t>::value) {
             switch (ci->get_cpu_model()) {
+                case CPUModel::A55r0:
+                case CPUModel::A55r1:
+                    return { 2.25, 2.92, 1.84 };
                 case CPUModel::A510:
                     return { 2.64, 2.72, 2.64 };
-
                 default:
                     return { 7.95, 3.76, 7.27 };
             }
@@ -81,6 +83,9 @@ public:
 
         if (std::is_same<T, uint8_t>::value) {
             switch(ci->get_cpu_model()) {
+                case CPUModel::A55r0:
+                case CPUModel::A55r1:
+                    return { 2.25, 2.18, 0.09 };
                 case CPUModel::A510:
                     return { 2.64, 1.79, 0.10 };
                 default:

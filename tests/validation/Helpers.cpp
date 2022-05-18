@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -385,6 +385,8 @@ template void transpose_matrix(const SimpleTensor<half> &in, SimpleTensor<half> 
 template void transpose_matrix(const SimpleTensor<int> &in, SimpleTensor<int> &out);
 template void transpose_matrix(const SimpleTensor<short> &in, SimpleTensor<short> &out);
 template void transpose_matrix(const SimpleTensor<char> &in, SimpleTensor<char> &out);
+template void transpose_matrix(const SimpleTensor<int8_t> &in, SimpleTensor<int8_t> &out);
+template void transpose_matrix(const SimpleTensor<uint8_t> &in, SimpleTensor<uint8_t> &out);
 template void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
 template void matrix_multiply(const SimpleTensor<half> &a, const SimpleTensor<half> &b, SimpleTensor<half> &out);
 

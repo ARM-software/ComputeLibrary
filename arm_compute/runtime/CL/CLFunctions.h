@@ -84,6 +84,7 @@
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
+#include "arm_compute/runtime/CL/functions/CLPooling3dLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPriorBoxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLQLSTMLayer.h"

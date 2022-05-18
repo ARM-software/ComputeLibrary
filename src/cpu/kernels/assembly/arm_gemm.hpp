@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -186,5 +186,8 @@ UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage & = {})
 
 template <typename Top, typename Tret, class OutputStage = Nothing>
 std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, const OutputStage & = {});
+
+template <typename Top, typename Tret, class OutputStage = Nothing>
+bool has_opt_gemm(const GemmArgs &args, const OutputStage & = {});
 
 } // namespace arm_gemm

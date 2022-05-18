@@ -398,9 +398,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, fram
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 /** Input data sets. */
-const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                                                                                                       ActivationLayerInfo::ActivationFunction::TANH
-                                                                                                     });
+const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction",
+{
+    ActivationLayerInfo::ActivationFunction::LOGISTIC,
+    ActivationLayerInfo::ActivationFunction::TANH,
+    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+});
 const auto Int16QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), Int16QuantizedActivationFunctionsDataset),
                                                      framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 

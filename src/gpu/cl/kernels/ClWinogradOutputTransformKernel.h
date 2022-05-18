@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,7 +77,11 @@ public:
 private:
     using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    bool _is_nhwc{ false };
+    bool    _is_nhwc{ false };
+    int32_t _src_height{ 0 };
+    int32_t _dst_width{ 0 };
+    int32_t _dst_height{ 0 };
+    int32_t _num_tiles_x{ 0 };
 };
 } // namespace kernels
 } // namespace opencl

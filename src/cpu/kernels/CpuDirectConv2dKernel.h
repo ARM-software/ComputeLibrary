@@ -36,6 +36,9 @@ namespace kernels
 /** Interface for the kernel to perform Direct Convolution Layer. */
 class CpuDirectConv2dKernel : public ICpuKernel<CpuDirectConv2dKernel>
 {
+private:
+    using DirectConv2dKernel_Ptr = std::add_pointer<void(const Window &, const ITensor *, const ITensor *, ITensor *, const PadStrideInfo &)>::type;
+
 public:
     CpuDirectConv2dKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuDirectConv2dKernel);
@@ -67,19 +70,16 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
+    struct DirectConv2dKernel
+    {
+        const char                         *name;
+        const DataTypeDataLayoutSelectorPtr is_selected;
+        DirectConv2dKernel_Ptr              ukernel;
+    };
+
+    static const std::vector<DirectConv2dKernel> &get_available_kernels();
+
 private:
-    /* Template function for optimized convolution NHWC */
-    template <typename T>
-    void convolve_nhwc_optimized(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst);
-
-    /* Template function for convolution NHWC */
-    template <typename T>
-    void convolve_nhwc(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst);
-
-    /* Template function for convolution NCHW */
-    template <typename T>
-    void convolve_nchw(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst);
-
     PadStrideInfo _conv_info{};
     unsigned int  _kernel_size{ 0 };
     DataLayout    _data_layout{ DataLayout::UNKNOWN };

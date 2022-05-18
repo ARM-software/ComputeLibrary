@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -147,10 +147,8 @@ void ClWinogradInputTransformKernel::configure(const ClCompileContext &compile_c
     if(_data_layout == DataLayout::NHWC)
     {
         build_opts.add_option("-DNHWC");
-        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(idx_w)));
-        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(idx_h)));
-        build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
-        build_opts.add_option("-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
+        _src_width  = src->dimension(idx_w);
+        _src_height = src->dimension(idx_h);
         build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
         build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
@@ -189,6 +187,8 @@ void ClWinogradInputTransformKernel::configure(const ClCompileContext &compile_c
     kernel_name += support::cpp11::to_string(_step_z);
     kernel_name += "_" + lower_string(string_from_data_layout(_data_layout));
 
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Create window and update padding
@@ -247,6 +247,10 @@ void ClWinogradInputTransformKernel::run_op(ITensorPack &tensors, const Window &
         unsigned int idx = 0;
         add_4D_tensor_argument(idx, src, slice);
         add_4D_tensor_argument(idx, dst, slice);
+        _kernel.setArg<cl_uint>(idx++, _src_width);
+        _kernel.setArg<cl_uint>(idx++, _src_height);
+        _kernel.setArg<cl_uint>(idx++, _num_tiles_x);
+        _kernel.setArg<cl_uint>(idx++, _num_tiles_y);
         enqueue(queue, *this, slice, lws_hint());
     }
     else

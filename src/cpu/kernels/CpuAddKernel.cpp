@@ -79,7 +79,7 @@ static const std::vector<CpuAddKernel::AddKernel> available_kernels =
         "sve_fp16_add",
         [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::F16) && data.isa.sve;
+            return (data.dt == DataType::F16) && data.isa.sve && data.isa.fp16;
         },
         REGISTER_FP16_SVE(arm_compute::cpu::add_fp16_sve)
     },

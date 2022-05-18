@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,33 +35,24 @@ namespace depthwise {
 
 void sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst_impl(const float *const *const, float *const *const, const void *, const unsigned int, const float, const float);
 
-struct sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst
+struct sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst : DepthfirstMultiplierStrategy<float, float, float, float>
 {
-  typedef float bias_type;
-  typedef float input_type;
-  typedef float weight_type;
-  typedef float return_type;
-
-  typedef void (*kern_type)(const float *const *const, float *const *const, const void *, const unsigned int, const float, const float);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::SVE;
-
+  using Parent = DepthfirstMultiplierStrategy<float, float, float, float>;
   constexpr static unsigned int kernel_rows = 5;
   constexpr static unsigned int kernel_cols = 5;
 
   constexpr static unsigned int stride_rows = 1;
   constexpr static unsigned int stride_cols = 1;
 
-  constexpr static unsigned int output_rows = 2;
-  constexpr static unsigned int output_cols = 4;
+  sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst(const CPUInfo *)
+  : Parent(2, 4, kernel_rows, kernel_cols, stride_rows, stride_cols)
+  {
+  }
 
-  constexpr static unsigned int input_rows = 6;
-  constexpr static unsigned int input_cols = 8;
-  constexpr static unsigned int input_col_quads = 2;
+  arm_gemm::VLType get_vl_type() const override { return arm_gemm::VLType::SVE; }
 
-  kern_type kernel = sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst_impl;
-
-  sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst(const CPUInfo *) {}
+  Parent::KernelType kernel = sve_fp32_packed_to_nhwc_5x5_s1_with_multiplier_output2x4_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise

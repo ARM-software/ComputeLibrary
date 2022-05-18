@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEAsymm.h"
 #include "src/core/NEON/SVEMath.h"
 #include <arm_sve.h>
@@ -126,16 +125,11 @@ void sve2_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 // De-quantize
                 const auto vin_deq = svdequantize_z(pg, vin, qi_in);
                 // Perform activation
-                const svfloat32x4_t tmp_dep =
-                {
-                    { {
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 0))))),
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 1))))),
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 2))))),
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 3))))),
-                        }
-                    }
-                };
+                const svfloat32x4_t tmp_dep = svcreate4_f32(
+                                                  svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 0))))),
+                                                  svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 1))))),
+                                                  svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 2))))),
+                                                  svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget4_f32(vin_deq, 3))))));
                 // Re-quantize to new output space
                 tmp = svquantize_signed_z(pg, tmp_dep, qi_out);
             }
@@ -144,16 +138,11 @@ void sve2_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 // De-quantize
                 const auto vin_deq = svdequantize_z(pg, vin, qi_in);
                 // Perform activation
-                const svfloat32x4_t tmp_dep =
-                {
-                    { {
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 0), vb_f32))),
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 1), vb_f32))),
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 2), vb_f32))),
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 3), vb_f32))),
-                        }
-                    }
-                };
+                const svfloat32x4_t tmp_dep = svcreate4_f32(
+                                                  svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 0), vb_f32))),
+                                                  svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 1), vb_f32))),
+                                                  svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 2), vb_f32))),
+                                                  svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 3), vb_f32))));
                 // Re-quantize to new output space
                 tmp = svquantize_signed_z(pg, tmp_dep, qi_out);
             }
@@ -162,16 +151,11 @@ void sve2_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 // De-quantize
                 const auto vin_deq = svdequantize_z(pg, vin, qi_in);
                 // Perform activation
-                const svfloat32x4_t tmp_dep =
-                {
-                    { {
-                            svmul_f32_z(pg, svget4_f32(vin_deq, 0), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 0), const_3_f32))))),
-                            svmul_f32_z(pg, svget4_f32(vin_deq, 1), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 1), const_3_f32))))),
-                            svmul_f32_z(pg, svget4_f32(vin_deq, 2), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 2), const_3_f32))))),
-                            svmul_f32_z(pg, svget4_f32(vin_deq, 3), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 3), const_3_f32))))),
-                        }
-                    }
-                };
+                const svfloat32x4_t tmp_dep = svcreate4_f32(
+                                                  svmul_f32_z(pg, svget4_f32(vin_deq, 0), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 0), const_3_f32))))),
+                                                  svmul_f32_z(pg, svget4_f32(vin_deq, 1), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 1), const_3_f32))))),
+                                                  svmul_f32_z(pg, svget4_f32(vin_deq, 2), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 2), const_3_f32))))),
+                                                  svmul_f32_z(pg, svget4_f32(vin_deq, 3), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 3), const_3_f32))))));
                 // Re-quantize to new output space
                 tmp = svquantize_signed_z(pg, tmp_dep, qi_out);
             }
@@ -181,16 +165,11 @@ void sve2_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 svint32x4_t tmp_dep;
 
                 // Expand to int32
-                const svint32x4_t vin_s32 =
-                {
-                    { {
-                            svmovlb_s32(svmovlb_s16(vin)),
-                            svmovlt_s32(svmovlb_s16(vin)),
-                            svmovlb_s32(svmovlt_s16(vin)),
-                            svmovlt_s32(svmovlt_s16(vin)),
-                        }
-                    }
-                };
+                const svint32x4_t vin_s32 = svcreate4_s32(
+                                                svmovlb_s32(svmovlb_s16(vin)),
+                                                svmovlt_s32(svmovlb_s16(vin)),
+                                                svmovlb_s32(svmovlt_s16(vin)),
+                                                svmovlt_s32(svmovlt_s16(vin)));
 
                 // Compare elements to input offset
                 if(qi_in.scale >= 0)
@@ -250,4 +229,3 @@ void sve2_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */

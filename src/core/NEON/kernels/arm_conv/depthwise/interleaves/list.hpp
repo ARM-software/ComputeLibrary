@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,90 +29,30 @@ namespace depthwise {
 
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 
-class interleave_sve_u8q_3x3_dot
+struct interleave_sve_u8q_3x3_dot
 {
-  public:
-    static void pack_parameters(unsigned int, void *, const int32_t *, const uint8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
+  static void pack_parameters(unsigned int, void *, const int32_t *, const uint8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
+  static size_t get_packed_size(const DepthwiseArgs &);
 };
 
-class interleave_sve_s8q_3x3_dot
+struct interleave_sve_s8q_3x3_dot
 {
-  public:
-    static void pack_parameters(unsigned int, void *, const int32_t *, const int8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_sve_u8q_3x3_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const uint8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_sve_s8q_3x3_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const int8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_sve_u8q_5x5_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const uint8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_sve_s8q_5x5_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const int8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
+  static void pack_parameters(unsigned int, void *, const int32_t *, const int8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
+  static size_t get_packed_size(const DepthwiseArgs &);
 };
 
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 
-class interleave_a64_u8q_3x3_dot
+struct interleave_a64_u8q_3x3_dot
 {
-  public:
-    static void pack_parameters(unsigned int, void *, const int32_t *, const uint8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
+  static void pack_parameters(unsigned int, void *, const int32_t *, const uint8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
+  static size_t get_packed_size(const DepthwiseArgs &);
 };
 
-class interleave_a64_s8q_3x3_dot
+struct interleave_a64_s8q_3x3_dot
 {
-  public:
-    static void pack_parameters(unsigned int, void *, const int32_t *, const int8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_a64_u8q_3x3_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const uint8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_a64_s8q_3x3_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const int8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_a64_u8q_5x5_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const uint8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
-};
-
-class interleave_a64_s8q_5x5_mla
-{
-  public:
-    static void pack_parameters(unsigned int, void *, const int8_t *, size_t, size_t);
-    static size_t get_packed_size(const DepthwiseArgs &);
+  static void pack_parameters(unsigned int, void *, const int32_t *, const int8_t *, const arm_gemm::Requantize32 &, size_t, size_t);
+  static size_t get_packed_size(const DepthwiseArgs &);
 };
 
 }  // namespace depthwise

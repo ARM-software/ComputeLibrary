@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,37 +36,24 @@ namespace depthwise {
 
 void a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst_impl(unsigned int, const uint8_t *const *, const int8_t *, const int32_t *, const arm_gemm::Requantize32 &, const int32_t *, const int32_t *, uint8_t *const *);
 
-struct a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst
+class a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<uint8_t, int8_t, uint8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef uint8_t input_type;
-  typedef int8_t weight_type;
-  typedef uint8_t return_type;
+  using Parent = DepthwiseDepthfirstStrategy<uint8_t, int8_t, uint8_t, int32_t>;
 
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  typedef void (*kern_type)(unsigned int, const uint8_t *const *, const int8_t *, const int32_t *, const arm_gemm::Requantize32 &, const int32_t *, const int32_t *, uint8_t *const *);
-  typedef void (*parameter_packing_fn)(unsigned int, void *, const int8_t *, size_t, size_t);
-  typedef size_t (*parameter_sizing_fn)(const DepthwiseArgs &);
-
+  public:
   constexpr static unsigned int kernel_rows = 3;
   constexpr static unsigned int kernel_cols = 3;
 
   constexpr static unsigned int stride_rows = 1;
   constexpr static unsigned int stride_cols = 1;
 
-  constexpr static unsigned int output_rows = 2;
-  constexpr static unsigned int output_cols = 2;
+  a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst(const CPUInfo *) : Parent(2, 2, 3, 3, 1, 1) {}
 
-  constexpr static unsigned int input_rows = 4;
-  constexpr static unsigned int input_cols = 4;
+  arm_gemm::VLType get_vl_type(void) const override { return arm_gemm::VLType::None; }
 
-  constexpr static parameter_packing_fn pack_parameters = interleave_a64_s8q_3x3_mla::pack_parameters;
-  constexpr static parameter_sizing_fn get_packed_size = interleave_a64_s8q_3x3_mla::get_packed_size;
-
-  kern_type kernel = a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst_impl;
-
-  a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst(const CPUInfo *) {}
+  Parent::KernelType kernel = a64_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
+  unsigned int get_accumulator_depth_vl(void) const override { return 2; }
 };
 
 }  // namespace depthwise

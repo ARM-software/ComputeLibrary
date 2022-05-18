@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -160,7 +160,7 @@ TensorType compute_gemmlowp_target(const TensorShape &shape_a, const TensorShape
     return output;
 }
 
-template <bool        reinterpret_input_as_3d, typename TI = uint8_t, typename TW = uint8_t>
+template <bool reinterpret_input_as_3d, typename TI = uint8_t, typename TW = uint8_t, bool pretranspose_A = false, bool pretranspose_B = false>
 SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_output, int32_t a_offset, int32_t b_offset,
                                                  DataType data_type_a = DataType::QASYMM8, DataType data_type_b = DataType::QASYMM8, QuantizationInfo b_qinfo = QuantizationInfo())
 {
@@ -175,10 +175,37 @@ SimpleTensor<int32_t> compute_gemmlowp_reference(const TensorShape &shape_a, con
     SimpleTensor<TI> a{ shape_a_to_use, data_type_a, 1 };
     SimpleTensor<TW> b{ shape_b, data_type_b, 1, data_type_b == DataType::QSYMM8_PER_CHANNEL ? b_qinfo : QuantizationInfo(1.0f / 255, b_offset) };
 
+    TensorShape shape_a_to_use_transposed{ shape_a_to_use };
+    TensorShape shape_b_transposed{ shape_b };
+
+    shape_a_to_use_transposed.set(0, shape_a_to_use[1]);
+    shape_a_to_use_transposed.set(1, shape_a_to_use[0]);
+    shape_b_transposed.set(0, shape_b[1]);
+    shape_b_transposed.set(1, shape_b[0]);
+
+    SimpleTensor<TI> a_transposed{ shape_a_to_use_transposed, data_type_a, 1 };
+    SimpleTensor<TW> b_transposed{ shape_b_transposed, data_type_b, 1, data_type_b == DataType::QSYMM8_PER_CHANNEL ? b_qinfo : QuantizationInfo(1.0f / 255, b_offset) };
+
     // Fill reference
     fill(a, 0);
     fill(b, 1);
-    return reference::gemmlowp_matrix_multiply_core<int32_t, TI, TW>(a, b, shape_output, a_offset, b_offset);
+
+    // Transpose reference if required
+    /* Note: Assuming the usual batch matmul dimensions A = (B x M x K), B = (B x K x N), if pretranspose_A is set to true, then A is assumed to be (B x K x M),
+       therefore, A must be pre-transposed before passing it to the fixture. And, we transpose A again in the fixture to make it (B x M x K)
+       in order to be able to call reference implementation that works with (B x M x K) input.
+       Similarly, if pretranspose_B is set to true, then B is assumed to be (B x N x K), B must be pre-transposed before passing it to the fixture. */
+    if(pretranspose_A)
+    {
+        transpose_matrix<TI>(a, a_transposed);
+    }
+
+    if(pretranspose_B)
+    {
+        transpose_matrix<TW>(b, b_transposed);
+    }
+
+    return reference::gemmlowp_matrix_multiply_core<int32_t, TI, TW>((pretranspose_A ? a_transposed : a), (pretranspose_B ? b_transposed : b), shape_output, a_offset, b_offset);
 }
 }
 

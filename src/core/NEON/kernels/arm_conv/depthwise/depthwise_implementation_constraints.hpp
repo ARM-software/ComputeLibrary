@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,6 +109,12 @@ bool has_no_channel_multiplier(const DepthwiseArgs &args, const void *)
   return args.channel_multiplier == 1;
 }
 
+bool has_channel_multiplier(const DepthwiseArgs &args, const void *) __attribute__ ((unused));
+bool has_channel_multiplier(const DepthwiseArgs &args, const void *)
+{
+  return args.channel_multiplier > 1;
+}
+
 bool qp_has_no_left_shift(const DepthwiseArgs &args, const void *_qp) __attribute__ ((unused));
 bool qp_has_no_left_shift(const DepthwiseArgs &, const void *_qp)
 {
@@ -116,6 +122,21 @@ bool qp_has_no_left_shift(const DepthwiseArgs &, const void *_qp)
   return qp->per_channel_requant ?
     (qp->per_channel_left_shifts == nullptr) :
     (qp->per_layer_left_shift == 0);
+}
+
+bool qp_zero_a_offset(const DepthwiseArgs &args, const void *_qp) __attribute__ ((unused));
+bool qp_zero_a_offset(const DepthwiseArgs &, const void *_qp)
+{
+  const auto qp = static_cast<const arm_gemm::Requantize32 *>(_qp);
+  return qp->a_offset == 0;
+}
+
+template <typename T> bool qp_skip_clamp(const DepthwiseArgs &args, const void *_qp) __attribute__ ((unused));
+template <typename T> bool qp_skip_clamp(const DepthwiseArgs &, const void *_qp)
+{
+  const auto qp = static_cast<const arm_gemm::Requantize32 *>(_qp);
+  return (qp->minval == std::numeric_limits<T>::min() &&
+          qp->maxval == std::numeric_limits<T>::max());
 }
 
 }  // namespace

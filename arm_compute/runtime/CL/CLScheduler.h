@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,19 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+namespace arm_compute
+{
+namespace experimental
+{
+namespace dynamic_fusion
+{
+struct ClExecutionDescriptor;
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 namespace arm_compute
 {
@@ -73,6 +86,15 @@ public:
      */
     void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr);
 
+    /** Re-initializes the context and command queue used by the scheduler to default values
+     *  and sets a default device and kernel path for the @ref CLKernelLibrary.
+     *
+     * @param[in] cl_tuner        (Optional) Pointer to ICLTuner (default=nullptr)
+     * @param[in] gemm_h          (Optional) Pointer to CLGEMMHeuristicsHandle (default = nullptr)
+     * @param[in] cl_backend_type (Optional) Type of backend to use (default = CLBackendType::Native)
+     */
+    void default_reinit(ICLTuner *cl_tuner = nullptr, CLGEMMHeuristicsHandle *gemm_h = nullptr, CLBackendType cl_backend_type = CLBackendType::Native);
+
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.
@@ -86,6 +108,19 @@ public:
      * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
     void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
+    /** Schedule the execution of the passed kernel if possible.
+     *
+     * @param[in] kernel    Kernel to execute.
+     * @param[in] tensors   Map containing the tensors to operate on.
+     * @param[in] exec_desc Execution descriptor
+     * @param[in] flush     (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
+     */
+    void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush = true);
+
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
@@ -173,6 +208,16 @@ public:
 
 private:
     void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool flush);
+    /** If job chain is disabled, then flush the command queue according to @p flush. Otherwise @p flush is ignored and the queue is only flushed when job chain count exceeds allocated job chain size
+     *
+     * @param[in] flush Flush the command queue. Ignored when job chain is enabled.
+     */
+    void flush_queue(bool flush);
+
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+    void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 

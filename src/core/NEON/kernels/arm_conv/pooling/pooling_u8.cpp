@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,9 +31,7 @@
 #include "kernels/cpp_nhwc_1x1_stride_any_depthfirst.hpp"
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "kernels/sve_u8_nhwc_avg_generic_depthfirst.hpp"
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "kernels/sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst.hpp"
 #include "kernels/sve_u8_nhwc_max_generic_depthfirst.hpp"
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
@@ -47,19 +45,6 @@
 namespace arm_conv {
 namespace pooling {
 
-namespace
-{
-  template <class Strategy>
-  bool is_supported(const PoolingArgs &args, const Nothing &)
-  {
-    return ((args.pool_type == Strategy::pooling_type()) &&
-            (args.pool_window.rows == Strategy::pool_rows()) &&
-            (args.pool_window.cols == Strategy::pool_cols()) &&
-            (args.pool_stride.rows == Strategy::stride_rows()) &&
-            (args.pool_stride.cols == Strategy::stride_cols()));
-  }
-}
-
 static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
@@ -69,12 +54,25 @@ static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirstGeneric<cpp_nhwc_1x1_stride_any_depthfirst<uint8_t>>(args);
+      auto strat = new cpp_nhwc_1x1_stride_any_depthfirst<uint8_t>(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t>(strat, args);
     },
   },
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst",
+    [] (const PoolingArgs &args, const Nothing &os) -> bool {
+      return args.cpu_info->has_sve() &&
+             is_supported<sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst>(args, os);
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
+      auto strat = new sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<uint8_t>(strat, args);
+    },
+  },
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8_nhwc_avg_generic_depthfirst",
@@ -82,35 +80,28 @@ static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
       // This kernel can only be used when there is either no padding, or we don't care
       // about the value of the padding. Otherwise, we would need to pass in the zero-point
       // for the quantization regime.
-      return args.cpu_info->has_sve2() && (args.exclude_padding ||
+      return (args.exclude_padding ||
               (args.padding.top == 0 && args.padding.bottom == 0 &&
                args.padding.left == 0 && args.padding.right == 0)
-              ) && args.pool_type == PoolingType::AVERAGE;
+              ) && args.pool_type == PoolingType::AVERAGE &&
+             args.cpu_info->has_sve2();
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirstGeneric<sve_u8_nhwc_avg_generic_depthfirst>(args);
-    },
-  },
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE2)
-  {
-    PoolingMethod::DEPTHFIRST,
-    "sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
-      return args.cpu_info->has_sve() && is_supported<sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst>(args, unused);
-    },
-    nullptr,
-    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirst<sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
+      auto strat = new sve_u8_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t>(strat, args);
     },
   },
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8_nhwc_max_generic_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &) -> bool { return args.cpu_info->has_sve() && args.pool_type == PoolingType::MAX; },
+    [] (const PoolingArgs &args, const Nothing &) -> bool {
+      return args.cpu_info->has_sve() && args.pool_type == PoolingType::MAX;
+    },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirstGeneric<sve_u8_nhwc_max_generic_depthfirst>(args);
+      auto strat = new sve_u8_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t>(strat, args);
     },
   },
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
@@ -120,7 +111,8 @@ static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
     is_supported<a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst>,
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirst<a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
+      auto strat = new a64_u8_nhwc_max_2x2_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<uint8_t>(strat, args);
     },
   },
   {
@@ -137,7 +129,8 @@ static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirstGeneric<a64_u8_nhwc_avg_generic_depthfirst>(args);
+      auto strat = new a64_u8_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t>(strat, args);
     },
   },
   {
@@ -146,7 +139,8 @@ static const PoolingImplementation<uint8_t, uint8_t> pooling_u8_methods[] = {
     [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::MAX; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<uint8_t, uint8_t> * {
-      return new PoolingDepthfirstGeneric<a64_u8_nhwc_max_generic_depthfirst>(args);
+      auto strat = new a64_u8_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t>(strat, args);
     },
   },
 #endif  // defined(__aarch64__)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -253,9 +253,22 @@ struct ValidRegion
         return *this;
     }
 
+    /** Check whether two valid regions are equal.
+     *
+     * @param[in] lhs LHS valid region
+     * @param[in] rhs RHS valid region
+     *
+     * @return True if the valid regions are the same.
+     */
+    inline friend bool operator==(const ValidRegion &lhs, const ValidRegion &rhs);
+
     Coordinates anchor; /**< Anchor for the start of the valid region. */
     TensorShape shape;  /**< Shape of the valid region. */
 };
+inline bool operator==(const ValidRegion &lhs, const ValidRegion &rhs)
+{
+    return (lhs.anchor == rhs.anchor) && (lhs.shape == rhs.shape);
+}
 
 /** Methods available to handle borders */
 enum class BorderMode
@@ -346,7 +359,7 @@ struct BorderSize
      *
      * @return true if they are equal
      */
-    bool operator==(const BorderSize &rhs)
+    bool operator==(const BorderSize &rhs) const
     {
         return (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom) && (left == rhs.left);
     }
@@ -357,7 +370,7 @@ struct BorderSize
      *
      * @return true if they are different
      */
-    bool operator!=(const BorderSize &rhs)
+    bool operator!=(const BorderSize &rhs) const
     {
         return !(*this == rhs);
     }
@@ -1264,6 +1277,109 @@ struct PoolingLayerInfo
     bool          fp_mixed_precision;
 };
 
+/** Pooling Layer Information struct*/
+struct Pooling3dLayerInfo
+{
+    /** Default Constructor */
+    Pooling3dLayerInfo() noexcept
+        : pool_type(PoolingType::MAX),
+          pool_size(Size3D()),
+          stride(Size3D()),
+          padding(Padding3D()),
+          exclude_padding(false),
+          is_global_pooling(false),
+          fp_mixed_precision(false),
+          round_type(DimensionRoundingType::FLOOR)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across x, y and z.
+     * @param[in] stride             (Optional) stride information @ref Size3D
+     * @param[in] padding            (Optional) padding information @ref Padding3D
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     */
+    explicit Pooling3dLayerInfo(PoolingType           pool_type,
+                                unsigned int          pool_size,
+                                Size3D                stride             = Size3D(1U, 1U, 1U),
+                                Padding3D             padding            = Padding3D(),
+                                bool                  exclude_padding    = false,
+                                bool                  fp_mixed_precision = false,
+                                DimensionRoundingType round_type         = DimensionRoundingType::FLOOR)
+        : pool_type(pool_type),
+          pool_size(Size3D(pool_size, pool_size, pool_size)),
+          stride(stride),
+          padding(padding),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision),
+          round_type(round_type)
+    {
+    }
+
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x, y and z.
+     * @param[in] stride             (Optional) stride information @ref Size3D
+     * @param[in] padding            (Optional) padding information @ref Padding3D
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     */
+    explicit Pooling3dLayerInfo(PoolingType           pool_type,
+                                Size3D                pool_size,
+                                Size3D                stride             = Size3D(1U, 1U, 1U),
+                                Padding3D             padding            = Padding3D(),
+                                bool                  exclude_padding    = false,
+                                bool                  fp_mixed_precision = false,
+                                DimensionRoundingType round_type         = DimensionRoundingType::FLOOR)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          stride(stride),
+          padding(padding),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision),
+          round_type(round_type)
+    {
+    }
+
+    /** Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    explicit Pooling3dLayerInfo(PoolingType pool_type)
+        : pool_type(pool_type),
+          pool_size(Size3D()),
+          stride(Size3D(1U, 1U, 1U)),
+          padding(Padding3D(0, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false),
+          round_type(DimensionRoundingType::FLOOR)
+    {
+    }
+
+    PoolingType           pool_type;
+    Size3D                pool_size;
+    Size3D                stride;
+    Padding3D             padding;
+    bool                  exclude_padding;
+    bool                  is_global_pooling;
+    bool                  fp_mixed_precision;
+    DimensionRoundingType round_type;
+};
+
 /** ROI Pooling Layer Information class */
 class ROIPoolingLayerInfo final
 {
@@ -1986,7 +2102,8 @@ public:
           _fast_math(false),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranspose_B(true),
+          _pretranspose_A(false),
+          _pretranspose_B(false),
           _activation_info(),
           _post_ops()
     {
@@ -2021,7 +2138,8 @@ public:
           _fast_math(fast_math),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranspose_B(reshape_b_only_on_first_run),
+          _pretranspose_A(false),
+          _pretranspose_B(false),
           _activation_info(activation_info),
           _post_ops(post_ops)
     {
@@ -2124,6 +2242,22 @@ public:
     {
         return _broadcast_bias;
     };
+    /** Flag which specifies whether A should be pre-transposed if supported.
+     *
+     * @return True if A should be pre-transposed else false.
+     */
+    bool pretranspose_A() const
+    {
+        return _pretranspose_A;
+    };
+    /** Set pre-transpose A flag
+     *
+     * @param[in] flag Flag to set
+     */
+    void set_pretranspose_A(bool flag)
+    {
+        _pretranspose_A = flag;
+    }
     /** Flag which specifies whether b should be pre-transposed if supported.
      *
      * @return True if b should be pre-transposed else false.
@@ -2184,6 +2318,7 @@ private:
     bool                                    _fast_math;
     bool                                    _fp_mixed_precision;
     bool                                    _broadcast_bias;
+    bool                                    _pretranspose_A;
     bool                                    _pretranspose_B;
     ActivationLayerInfo                     _activation_info;
     experimental::PostOpList<ITensorInfo *> _post_ops;

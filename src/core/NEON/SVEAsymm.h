@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,18 +67,13 @@ svint8_t svmla_qasymm8_signed_z(svbool_t pg, svint8_t vd, svfloat32_t vs, svfloa
  */
 inline svfloat32x4_t svdequantize_z(svbool_t pg, const svuint8_t &qv, float scale, int32_t offset)
 {
-    const auto          voffset = svdup_n_s32(offset);
-    const auto          vscale  = svdup_n_f32(scale);
-    const svfloat32x4_t vdequantized_input =
-    {
-        { {
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(qv))), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(qv))), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(qv))), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(qv))), voffset)), vscale),
-            }
-        }
-    };
+    const auto          voffset            = svdup_n_s32(offset);
+    const auto          vscale             = svdup_n_f32(scale);
+    const svfloat32x4_t vdequantized_input = svcreate4_f32(
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlb_u16(qv))), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlb_u16(qv))), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlb_u32(svmovlt_u16(qv))), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svreinterpret_s32_u32(svmovlt_u32(svmovlt_u16(qv))), voffset)), vscale));
     return vdequantized_input;
 }
 
@@ -106,18 +101,14 @@ inline svfloat32x4_t svdequantize_z(svbool_t pg, const svuint8_t &qv, const Unif
  */
 inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint8_t &qv, float scale, int32_t offset)
 {
-    const auto          voffset = svdup_n_s32(offset);
-    const auto          vscale  = svdup_n_f32(scale);
-    const svfloat32x4_t vdequantized_input =
-    {
-        { {
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlb_s32(svmovlb_s16(qv)), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlt_s32(svmovlb_s16(qv)), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlb_s32(svmovlt_s16(qv)), voffset)), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlt_s32(svmovlt_s16(qv)), voffset)), vscale),
-            }
-        }
-    };
+    const auto          voffset            = svdup_n_s32(offset);
+    const auto          vscale             = svdup_n_f32(scale);
+    const svfloat32x4_t vdequantized_input = svcreate4_f32(
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlb_s32(svmovlb_s16(qv)), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlt_s32(svmovlb_s16(qv)), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlb_s32(svmovlt_s16(qv)), voffset)), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svsub_s32_z(pg, svmovlt_s32(svmovlt_s16(qv)), voffset)), vscale));
+
     return vdequantized_input;
 }
 
@@ -144,16 +135,12 @@ inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint8_t &qv, const Unifo
  */
 inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint8_t &qv, const svfloat32x4_t vscale)
 {
-    const svfloat32x4_t vdequantized_input =
-    {
-        { {
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlb_s16(qv))), svget4_f32(vscale, 0)),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlb_s16(qv))), svget4_f32(vscale, 1)),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlt_s16(qv))), svget4_f32(vscale, 2)),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlt_s16(qv))), svget4_f32(vscale, 3)),
-            }
-        }
-    };
+    const svfloat32x4_t vdequantized_input = svcreate4_f32(
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlb_s16(qv))), svget4_f32(vscale, 0)),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlb_s16(qv))), svget4_f32(vscale, 1)),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlt_s16(qv))), svget4_f32(vscale, 2)),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlt_s16(qv))), svget4_f32(vscale, 3)));
+
     return vdequantized_input;
 }
 
@@ -166,17 +153,12 @@ inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint8_t &qv, const svflo
  */
 inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint8_t &qv, float scale)
 {
-    const auto          vscale = svdup_n_f32(scale);
-    const svfloat32x4_t vdequantized_input =
-    {
-        { {
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlb_s16(qv))), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlb_s16(qv))), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlt_s16(qv))), vscale),
-                svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlt_s16(qv))), vscale),
-            }
-        }
-    };
+    const auto          vscale             = svdup_n_f32(scale);
+    const svfloat32x4_t vdequantized_input = svcreate4_f32(
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlb_s16(qv))), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlb_s16(qv))), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svmovlt_s16(qv))), vscale),
+                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svmovlt_s16(qv))), vscale));
     return vdequantized_input;
 }
 

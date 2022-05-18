@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,7 @@ public:
 
 private:
     unsigned int _height_offset;
+    int32_t      _depth{ 0 };
 };
 } // namespace kernels
 } // namespace opencl

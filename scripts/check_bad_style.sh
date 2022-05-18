@@ -29,7 +29,7 @@ then
     exit -1
 fi
 
-grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=arm_conv "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude-dir=dynamic_fusion --exclude-dir=arm_conv "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

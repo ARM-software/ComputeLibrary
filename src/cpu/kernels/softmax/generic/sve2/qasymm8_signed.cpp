@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
+
 #include "arm_compute/core/Helpers.h"
 #include "src/cpu/kernels/softmax/generic/sve2/impl.h"
 
@@ -36,4 +36,3 @@ void sve2_qasymm8_signed_softmax(const ITensor *in, const ITensor *max, void *co
 }
 }
 } // namespace arm_compute
-#endif //defined(ARM_COMPUTE_ENABLE_SVE2)

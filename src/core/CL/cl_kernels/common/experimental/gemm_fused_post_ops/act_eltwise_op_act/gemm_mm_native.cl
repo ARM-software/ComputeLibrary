@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,10 @@
  * SOFTWARE.
  */
 
-#include "fp_post_ops_act_eltwise_op_act.h"
+#include "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h"
+#include "common/experimental/gemm_fused_post_ops/fp_elementwise_op_helpers.h"
+#include "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h"
+
 #include "gemm_helpers.h"
 #include "repeat.h"
 

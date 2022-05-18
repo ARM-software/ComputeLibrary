@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include <cstdint>
 
+#if defined(__aarch64__)
+
 #pragma once
 
 namespace arm_conv {
@@ -33,34 +35,26 @@ namespace depthwise {
 
 void a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst_impl(const int8_t *const *const, int8_t *const *const, const void *, unsigned int, const arm_gemm::Requantize32&);
 
-struct a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst
+struct a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst : DepthfirstMultiplierStrategy<int8_t, int8_t, int8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef int8_t input_type;
-  typedef int8_t weight_type;
-  typedef int8_t return_type;
-
-  typedef void (*kern_type)(const int8_t *const *const, int8_t *const *const, const void *, unsigned int, const arm_gemm::Requantize32&);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
+  using Parent = DepthfirstMultiplierStrategy<int8_t, int8_t, int8_t, int32_t>;
   constexpr static unsigned int kernel_rows = 5;
   constexpr static unsigned int kernel_cols = 5;
 
   constexpr static unsigned int stride_rows = 1;
   constexpr static unsigned int stride_cols = 1;
 
-  constexpr static unsigned int output_rows = 4;
-  constexpr static unsigned int output_cols = 2;
+  a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst(const CPUInfo *)
+  : Parent(4, 2, kernel_rows, kernel_cols, stride_rows, stride_cols)
+  {
+  }
 
-  constexpr static unsigned int input_rows = 8;
-  constexpr static unsigned int input_cols = 6;
-  constexpr static unsigned int input_col_quads = 1;
+  arm_gemm::VLType get_vl_type() const override { return arm_gemm::VLType::None; }
 
-  kern_type kernel = a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst_impl;
-
-  a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst(const CPUInfo *) {}
+  Parent::KernelType kernel = a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

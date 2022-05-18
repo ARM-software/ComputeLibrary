@@ -15,6 +15,7 @@ def get_list_flags( filename, arch):
     flags = ["-std=c++14"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
+    flags.append("-DENABLE_EXPERIMENTAL_DYNAMIC_FUSION")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
     return flags

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,7 +142,7 @@ struct GemmImplementation<Top, Tret, Nothing> {
                        instantiate(instantiate) {   }
 };
 
-/* "Master" function implemented for each valid combination of types.
+/* "Main" function implemented for each valid combination of types.
  * Returns a list of GEMM implementation descriptors for processing by the
  * other functions, ended by an implementation with
  * method==GemmMethod::DEFAULT.  */
@@ -236,6 +236,12 @@ std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, cons
 }
 
 template<typename Top, typename Tret, class OutputStage>
+bool has_opt_gemm(const GemmArgs &args, const OutputStage &os) {
+    const GemmImplementation<Top, Tret, OutputStage> *impl;
+    return find_implementation<Top, Tret, OutputStage>(args, os, impl);
+}
+
+template<typename Top, typename Tret, class OutputStage>
 UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage &os) {
     const GemmImplementation<Top, Tret, OutputStage> *impl;
 
@@ -244,18 +250,6 @@ UniqueGemmCommon<Top, Tret> gemm(const GemmArgs &args, const OutputStage &os) {
     }
 
     return UniqueGemmCommon<Top, Tret>(nullptr);
-}
-
-template<typename Top, typename Tret, class OutputStage>
-KernelDescription get_gemm_method(const GemmArgs &args, const OutputStage &os) {
-    const GemmImplementation<Top, Tret, OutputStage> *impl;
-
-    if (find_implementation<Top, Tret>(args, os, impl)) {
-        return KernelDescription(impl->method, impl->name);
-    }
-
-    /* This shouldn't happen - there should always be at least one valid implementation. */
-    return KernelDescription();
 }
 
 } // namespace arm_gemm

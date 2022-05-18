@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,7 +104,7 @@ void set_thread_affinity(int core_id)
         return;
     }
 
-#if !defined(__APPLE__) && !defined(__OpenBSD__)
+#if !defined(_WIN64) && !defined(__APPLE__) && !defined(__OpenBSD__)
     cpu_set_t set;
     CPU_ZERO(&set);
     CPU_SET(core_id, &set);

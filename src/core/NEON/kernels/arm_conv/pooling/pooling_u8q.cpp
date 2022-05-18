@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,13 @@
 #include "arm_gemm_local.hpp"
 
 #include "pooling_implementation.hpp"
-#include "pooling_depthfirst_generic_quantized.hpp"
+#include "pooling_depthfirst_generic.hpp"
 
 #if defined(__aarch64__)
-#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_u8q_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/sve_u8q_nhwc_max_generic_depthfirst.hpp"
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/a64_u8q_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/a64_u8q_nhwc_max_generic_depthfirst.hpp"
 #endif  // defined(__aarch64__)
@@ -41,9 +41,9 @@
 namespace arm_conv {
 namespace pooling {
 
-static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_methods[] = {
+static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8q_methods[] = {
 #if defined(__aarch64__)
-#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8q_nhwc_avg_generic_depthfirst",
@@ -51,20 +51,24 @@ static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_me
       return args.cpu_info->has_sve2() && args.pool_type == PoolingType::AVERAGE;
     },
     nullptr,
-    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
-      return new PoolingDepthfirstGenericQuantized<sve_u8q_nhwc_avg_generic_depthfirst>(args, rq);
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t> * {
+      auto strat = new sve_u8q_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t, uint8_t, Requantize32>(strat, args, rq);
     },
   },
   {
     PoolingMethod::DEPTHFIRST,
     "sve_u8q_nhwc_max_generic_depthfirst",
-    [] (const PoolingArgs &args, const Requantize32 &) -> bool { return args.cpu_info->has_sve2() && args.pool_type == PoolingType::MAX; },
+    [] (const PoolingArgs &args, const Requantize32 &) -> bool {
+      return args.cpu_info->has_sve2() && args.pool_type == PoolingType::MAX;
+    },
     nullptr,
-    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
-      return new PoolingDepthfirstGenericQuantized<sve_u8q_nhwc_max_generic_depthfirst>(args, rq);
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t> * {
+      auto strat = new sve_u8q_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t, uint8_t, Requantize32>(strat, args, rq);
     },
   },
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SVE2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
   {
     PoolingMethod::DEPTHFIRST,
     "a64_u8q_nhwc_avg_generic_depthfirst",
@@ -72,8 +76,9 @@ static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_me
       return args.pool_type == PoolingType::AVERAGE;
     },
     nullptr,
-    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
-      return new PoolingDepthfirstGenericQuantized<a64_u8q_nhwc_avg_generic_depthfirst>(args, rq);
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t> * {
+      auto strat = new a64_u8q_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t, uint8_t, Requantize32>(strat, args, rq);
     },
   },
   {
@@ -81,8 +86,9 @@ static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_me
     "a64_u8q_nhwc_max_generic_depthfirst",
     [] (const PoolingArgs &args, const Requantize32 &) -> bool { return args.pool_type == PoolingType::MAX; },
     nullptr,
-    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t, Requantize32> * {
-      return new PoolingDepthfirstGenericQuantized<a64_u8q_nhwc_max_generic_depthfirst>(args, rq);
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<uint8_t, uint8_t> * {
+      auto strat = new a64_u8q_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<uint8_t, uint8_t, Requantize32>(strat, args, rq);
     },
   },
 #endif  // defined(__aarch64__)
@@ -92,10 +98,10 @@ static const PoolingImplementation<uint8_t, uint8_t, Requantize32> pooling_u8_me
 template <>
 const PoolingImplementation<uint8_t, uint8_t, Requantize32> *pooling_implementation_list()
 {
-  return pooling_u8_methods;
+  return pooling_u8q_methods;
 }
 
-template UniquePoolingCommon<uint8_t, uint8_t, Requantize32> pooling(const PoolingArgs &, const Requantize32 &);
+template UniquePoolingCommon<uint8_t, uint8_t> pooling(const PoolingArgs &, const Requantize32 &);
 
 }  //  namespace pooling
 }  //  namespace arm_conv

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,8 +91,13 @@ void ClBatchConcatenateKernel::configure(const CLCompileContext &compile_context
         build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
     }
 
+    std::string kernel_name = "concatenate";
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     // Create kernel
-    _kernel = create_kernel(compile_context, "concatenate", build_opts.options());
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration));

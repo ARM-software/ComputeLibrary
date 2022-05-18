@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Arm Limited.
+# Copyright (c) 2016-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -31,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v22.02"
-LIBRARY_VERSION_MAJOR = 26
+VERSION = "v22.05"
+LIBRARY_VERSION_MAJOR = 27
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -74,7 +74,7 @@ def build_obj_list(arch_info, sources, static=False):
         objs = tmp_env.StaticObject(sources)
     else:
         objs = tmp_env.SharedObject(sources)
-    
+
     tmp_env.Default(objs)
     return objs
 
@@ -96,7 +96,7 @@ def build_lib_objects():
     # Build all the common files for the base architecture
     lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
-    
+
     # Build the SVE specific files
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=False)
@@ -172,7 +172,9 @@ def resolve_includes(target, source, env):
             for line in tmp_file:
                 found = pattern.search(line)
                 if found:
-                    include_file = found.group(1)
+                    # Only get the header file name and discard the relative path.
+                    # E.g. "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h" -> "fp_mixed_precision_helpers.h"
+                    include_file = found.group(1).split('/')[-1]
                     data = files_dict[include_file].file_contents
                     updated_file.extend(data)
                 else:
@@ -323,7 +325,7 @@ cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 # Generate embed files
 generate_embed = [ version_file ]
 if env['opencl'] and env['embed_kernels']:
-    
+
     # Header files
     cl_helper_files = [ 'src/core/CL/cl_kernels/activation_float_helpers.h',
                         'src/core/CL/cl_kernels/activation_quant_helpers.h',
@@ -443,6 +445,8 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/pooling_3d_layer.cl',
+                    'src/core/CL/cl_kernels/nhwc/pooling_3d_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/pooling_layer_quantized.cl',
                     'src/core/CL/cl_kernels/nhwc/reorg_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
@@ -489,6 +493,13 @@ with (open(Dir('#').path + '/filelist.json')) as fp:
 
 # Common backend files
 lib_files = filelist['common']
+
+# Experimental files
+# Dynamic fusion
+if env['experimental_dynamic_fusion']:
+    lib_files += filelist['experimental']['dynamic_fusion']
+    arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+
 
 # Logging files
 if env["logging"]:
@@ -542,7 +553,9 @@ if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
-                                      "src/core/NEON/kernels/convolution/depthwise/",
+                                      "src/core/NEON/kernels/arm_conv/depthwise/",
+                                      "src/core/NEON/kernels/arm_conv/pooling/",
+                                      "src/core/NEON/kernels/arm_conv/",
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/cpu/kernels/assembly/"])

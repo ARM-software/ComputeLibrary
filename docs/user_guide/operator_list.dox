@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2021 Arm Limited.
+/// Copyright (c) 2021-2022 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -2298,6 +2298,40 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
+    </table>
+<tr>
+  <td rowspan="2">Pooling3dLayer
+  <td rowspan="2" style="width:200px;"> Function to perform pooling 3D with the specified pooling operation.
+  <td rowspan="2">
+      <ul>
+       <li>N/A
+      </ul>
+  <td>NEPooling3dLayer
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
+    </table>
+<tr>
+  <td>CLPooling3dLayer
+  <td>
+      <ul>
+       <li>NDHWC
+      </ul>
+  <td>
+    <table>
+    <tr><th>src<th>dst
+    <tr><td>F16<td>F16
+    <tr><td>F32<td>F32
+    <tr><td>QASYMM8<td>QASYMM8
+    <tr><td>QASYMM8_SIGNED<td>QASYMM8_SIGNED
     </table>
 <tr>
   <td rowspan="2">PReluLayer

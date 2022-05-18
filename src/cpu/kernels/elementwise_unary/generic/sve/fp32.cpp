@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+
 #include "arm_compute/core/Helpers.h"
 #include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
@@ -35,4 +35,3 @@ void sve_fp32_elementwise_unary(const ITensor *in, ITensor *out, const Window &w
 }
 }
 } // namespace arm_compute
-#endif //ARM_COMPUTE_ENABLE_SVE

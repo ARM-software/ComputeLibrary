@@ -156,7 +156,7 @@ void CpuPool2dAssemblyWrapperKernel::run_op(ITensorPack &tensors, const Window &
 
     const auto in_ptr        = src->buffer() + src->info()->offset_first_element_in_bytes();
     auto       out_ptr       = dst->buffer() + dst->info()->offset_first_element_in_bytes();
-    auto       working_space = workspace->buffer() + workspace->info()->offset_first_element_in_bytes();
+    auto       working_space = (workspace == nullptr) ? nullptr : workspace->buffer() + workspace->info()->offset_first_element_in_bytes();
 
     const auto src_shape   = src->info()->tensor_shape();
     const auto dst_shape   = dst->info()->tensor_shape();
@@ -197,7 +197,7 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling(const ITensorInfo *src, 
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;
@@ -236,7 +236,7 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     arm_conv::pooling::PoolingStride stride{};
     std::tie(stride.cols, stride.rows) = info.pad_stride_info.stride();
 
-    const arm_conv::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
+    const arm_conv::pooling::PaddingValues padding{ info.pad_stride_info.pad_left(), info.pad_stride_info.pad_top(), info.pad_stride_info.pad_right(), info.pad_stride_info.pad_bottom() };
 
     constexpr unsigned int idx_width    = 1;
     constexpr unsigned int idx_height   = 2;
@@ -280,19 +280,9 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
 size_t CpuPool2dAssemblyWrapperKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
-    // Tuning results that gave optimized results in performance investigation
-    if(platform.get_cpu_model() == CPUModel::A73)
-    {
-        return 10240;
-    }
-    else if(platform.get_cpu_model() == CPUModel::A53 || platform.get_cpu_model() == CPUModel::A55r0 || platform.get_cpu_model() == CPUModel::A55r1)
-    {
-        return 1;
-    }
-    else
-    {
-        return 9216;
-    }
+    ARM_COMPUTE_UNUSED(platform);
+
+    return ICPPKernel::default_mws;
 }
 } // namespace kernels
 } // namespace cpu

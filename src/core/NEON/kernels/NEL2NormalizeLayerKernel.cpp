@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,13 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/core/NEON/NEMath.h"
+#include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/l2normlayer/list.h"
 
-#include "src/core/NEON/wrapper/wrapper.h"
 #include <arm_neon.h>
 #include <cmath>
 
@@ -44,90 +46,64 @@ namespace
 {
 constexpr int max_input_tensor_dim = 3;
 
-template <typename T, int S>
-void l2_normalize_X(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window)
+struct L2NormalizeLayerSelectorData
 {
-    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
+    DataType            dt;
+    unsigned int        actual_axis;
+    cpuinfo::CpuIsaInfo isa;
+};
 
-    const int  window_step_x  = 16 / data_size_from_type(in->info()->data_type());
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
+using L2NormalizeLayerKernelSelctorPtr = std::add_pointer<bool(const L2NormalizeLayerSelectorData &data)>::type;
 
-    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
-    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+using L2NormalizeLayerPtr = std::add_pointer<void(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)>::type;
 
-    Iterator input_it(in, win_collapsed);
-    Iterator sum_it(sum, win_collapsed);
-    Iterator output_it(out, win_collapsed);
-
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto in_ptr  = reinterpret_cast<const T *>(input_it.ptr());
-        const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
-
-        const T    sum_value      = *reinterpret_cast<const T *>(sum_it.ptr());
-        const T    norm_value     = static_cast<T>(1.f) / std::sqrt(std::max(sum_value, static_cast<T>(epsilon)));
-        const auto vec_norm_value = wrapper::vdup_n(norm_value, ExactTagType{});
-
-        // Compute elements over vector steps
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            wrapper::vstore(out_ptr + x, wrapper::vmul(wrapper::vloadq(in_ptr + x), vec_norm_value));
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            out_ptr[x] = in_ptr[x] * norm_value;
-        }
-    },
-    input_it, sum_it, output_it);
-}
-
-template <typename T, int S>
-void l2_normalize_YZ(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)
+struct L2NormalizeLayerKernel
 {
-    using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
+    const char                            *name;
+    const L2NormalizeLayerKernelSelctorPtr is_selected;
+    L2NormalizeLayerPtr                    ukernel;
+};
 
-    const int  window_step_x  = 16 / data_size_from_type(in->info()->data_type());
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-
-    Window win = window;
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Window window_sum(win);
-    window_sum.set(axis, Window::Dimension(0, 0, 0));
-
-    Iterator input_it(in, win);
-    Iterator sum_it(sum, window_sum);
-    Iterator output_it(out, win);
-
-    const auto vec_eps = wrapper::vdup_n(static_cast<T>(epsilon), ExactTagType{});
-
-    execute_window_loop(win, [&](const Coordinates &)
+static const L2NormalizeLayerKernel available_kernels[] =
+{
     {
-        const auto in_ptr  = reinterpret_cast<const T *>(input_it.ptr());
-        const auto sum_ptr = reinterpret_cast<const T *>(sum_it.ptr());
-        const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
-
-        // Compute elements over vector steps
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto vec_norm_value = wrapper::vinvsqrt(wrapper::vmax(wrapper::vloadq(sum_ptr + x), vec_eps));
-            wrapper::vstore(out_ptr + x, wrapper::vmul(wrapper::vloadq(in_ptr + x), vec_norm_value));
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const T norm_value = static_cast<T>(1.f) / std::sqrt(std::max(sum_ptr[x], static_cast<T>(epsilon)));
-            out_ptr[x]         = in_ptr[x] * norm_value;
-        }
+        "fp32_neon_l2normalize_x",
+        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F32 && data.actual_axis == Window::DimX; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_x)
     },
-    input_it, sum_it, output_it);
+    {
+        "fp32_neon_l2normalize_yz",
+        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F32 && data.actual_axis != Window::DimX; },
+        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_l2_normalize_yz)
+    },
+    {
+        "fp16_neon_l2normalize_x",
+        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis == Window::DimX; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_l2_normalize_x),
+    },
+    {
+        "fp16_neon_l2normalize_yz",
+        [](const L2NormalizeLayerSelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16 && data.actual_axis != Window::DimX; },
+        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_l2_normalize_yz),
+    },
+};
+
+/** Micro-kernel selector
+ *
+ * @param[in] data Selection data passed to help pick the appropriate micro-kernel
+ *
+ * @return A matching micro-kernel else nullptr
+ */
+const L2NormalizeLayerKernel *get_implementation(const L2NormalizeLayerSelectorData &data)
+{
+    for(const auto &uk : available_kernels)
+    {
+        if(uk.is_selected(data))
+        {
+            return &uk;
+        }
+    }
+    return nullptr;
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
@@ -212,18 +188,10 @@ void NEL2NormalizeLayerKernel::run(const Window &window, const ThreadInfo &info)
         ARM_COMPUTE_ERROR("Unsupported normalization axis");
     }
 
-    switch(_input->info()->data_type())
-    {
-        case DataType::F32:
-            (_actual_axis == Window::DimX) ? l2_normalize_X<float, 4>(_input, _sum, _output, _epsilon, window) : l2_normalize_YZ<float, 4>(_input, _sum, _output, _epsilon, window, _actual_axis);
-            break;
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            (_actual_axis == Window::DimX) ? l2_normalize_X<float16_t, 8>(_input, _sum, _output, _epsilon, window) : l2_normalize_YZ<float16_t, 8>(_input, _sum, _output, _epsilon, window, _actual_axis);
-            break;
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        default:
-            ARM_COMPUTE_ERROR("Not implemented");
-    }
+    const auto *uk = get_implementation(L2NormalizeLayerSelectorData{ _output->info()->data_type(), _actual_axis, CPUInfo::get().get_isa() });
+    ARM_COMPUTE_ERROR_ON(uk == nullptr);
+    ARM_COMPUTE_ERROR_ON(uk->ukernel == nullptr);
+
+    uk->ukernel(_input, _sum, _output, _epsilon, window, _actual_axis);
 }
 } // namespace arm_compute

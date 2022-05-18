@@ -437,6 +437,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_2x2_nhwc", "nhwc/pooling_layer.cl" },
     { "pooling_layer_MxN_quantized_nhwc", "nhwc/pooling_layer_quantized.cl" },
+    { "pooling_3d_layer_MxN_ndhwc", "nhwc/pooling_3d_layer.cl" },
+    { "pooling_3d_layer_MxN_ndhwc_quantized", "nhwc/pooling_3d_layer_quantized.cl" },
     { "reorg_layer_nhwc", "nhwc/reorg_layer.cl" },
     { "scale_nearest_neighbour_nhwc", "nhwc/scale.cl" },
     { "scale_bilinear_nhwc", "nhwc/scale.cl" },
@@ -586,6 +588,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/gemm_utils.clembed"
     },
     {
+        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h",
+#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.hembed"
+    },
+    {
+        "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h",
+#include "./cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.hembed"
+    },
+    {
         "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
 #include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.clembed"
     },
@@ -614,12 +624,24 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/generate_proposals_quantized.clembed"
     },
     {
+        "gemm_helpers.h",
+#include "./cl_kernels/gemm_helpers.hembed"
+    },
+    {
         "helpers.h",
 #include "./cl_kernels/helpers.hembed"
     },
     {
         "helpers_asymm.h",
 #include "./cl_kernels/helpers_asymm.hembed"
+    },
+    {
+        "repeat.h",
+#include "./cl_kernels/repeat.hembed"
+    },
+    {
+        "tile_helpers.h",
+#include "./cl_kernels/tile_helpers.hembed"
     },
     {
         "common/instance_normalization.cl",
@@ -880,6 +902,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/pooling_layer.cl",
 #include "./cl_kernels/nhwc/pooling_layer.clembed"
+    },
+    {
+        "nhwc/pooling_3d_layer.cl",
+#include "./cl_kernels/nhwc/pooling_3d_layer.clembed"
+    },
+    {
+        "nhwc/pooling_3d_layer_quantized.cl",
+#include "./cl_kernels/nhwc/pooling_3d_layer_quantized.clembed"
     },
     {
         "nhwc/pooling_layer_quantized.cl",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,45 @@ namespace arm_compute
 {
 namespace cpu
 {
+CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info,
+                                                        const Size2D &dilation, const ActivationLayerInfo &act_info)
+{
+    const DataLayout   data_layout   = src->data_layout();
+    const int          idx_width     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int          idx_height    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int kernel_width  = weights->dimension(idx_width);
+    const unsigned int kernel_height = weights->dimension(idx_height);
+    unsigned int       conv_w        = 0;
+    unsigned int       conv_h        = 0;
+    std::tie(conv_w, conv_h)         = scaled_dimensions(src->dimension(idx_width),
+                                                         src->dimension(idx_height),
+                                                         kernel_width,
+                                                         kernel_height,
+                                                         conv_info,
+                                                         dilation);
+    const bool skip_im2col           = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+
+    if(skip_im2col)
+    {
+        const bool skip_col2im = (data_layout == DataLayout::NHWC && (bool(CpuGemmConv2d::validate_gemm3d(src, weights, act_info, conv_h, /*skip_im2col*/ true))));
+        if(skip_col2im)
+        {
+            return { true, true };
+        }
+    }
+    else
+    {
+        const bool skip_col2im = (data_layout == DataLayout::NHWC && (bool(CpuGemmConv2d::validate_gemm3d(src, weights, act_info, conv_h, /*skip_im2col*/ false))));
+        if(skip_col2im)
+        {
+            return { false, true };
+        }
+    }
+
+    // Default case when we cannot reinterpret the input and output as 3D.
+    return { false, false };
+}
+
 CpuGemmConv2d::CpuGemmConv2d()
     : _weights_reshape_kernel(nullptr), _im2col_kernel(), _mm_gemm(), _mm_gemmlowp(), _col2im_kernel(), _reshape_kernel(), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(),
       _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false), _aux_mem(AuxTensorIdx::Count)
@@ -100,8 +139,8 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
         PixelValue type_min{};
         PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int32_t min_activation = type_min.get<int32_t>();
-        int32_t max_activation = type_max.get<int32_t>();
+        int32_t min_activation       = type_min.get<int32_t>();
+        int32_t max_activation       = type_max.get<int32_t>();
 
         if(supported_acts.count(act_info.activation()) != 0)
         {
@@ -163,8 +202,8 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
         PixelValue type_min{};
         PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int32_t min_activation = type_min.get<int32_t>();
-        int32_t max_activation = type_max.get<int32_t>();
+        int32_t min_activation       = type_min.get<int32_t>();
+        int32_t max_activation       = type_max.get<int32_t>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -188,8 +227,8 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
         std::unique_ptr<ITensorInfo> weights_qa = weights->clone();
         input_qa->set_quantization_info(QuantizationInfo(iqinfo.uniform().scale, -iqinfo.uniform().offset));
         weights_qa->set_quantization_info(QuantizationInfo(wqinfo.uniform().scale, -wqinfo.uniform().offset));
-        return CpuGemmLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info,
-                                                                                                               false, enable_fast_math, false, act_info));
+        return CpuGemmLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info, false, enable_fast_math,
+                                                                                                               false, act_info));
     }
     else
     {
@@ -247,8 +286,8 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     ITensorInfo       *gemm_output_to_use = dst;
 
     // Get convolved dimensions
-    unsigned int conv_w = 0;
-    unsigned int conv_h = 0;
+    unsigned int conv_w      = 0;
+    unsigned int conv_h      = 0;
     std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width),
                                                  src->dimension(idx_height),
                                                  kernel_width,
@@ -259,23 +298,13 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
                              "Output shape does not match the expected one");
 
     // Check if GEMM3D is supported
-    if(data_layout == DataLayout::NHWC)
-    {
-        _skip_col2im = bool(validate_gemm3d(src, weights, act_info, conv_h, true));
-        // If not supported, we need to perform im2col and col2im (or reshape layer)
-        if(!_skip_col2im)
-        {
-            _skip_im2col = false;
-        }
-    }
-    else
-    {
-        _skip_col2im = false;
-    }
+    const CpuGemmConv2d::SkipInfo skip_info = CpuGemmConv2d::skip_im_col_info(src, weights, conv_info, dilation, act_info);
+    _skip_im2col                            = skip_info.skip_im2col;
+    _skip_col2im                            = skip_info.skip_col2im;
 
     // Get parameters from conv_info
-    unsigned int stride_x = 0;
-    unsigned int stride_y = 0;
+    unsigned int stride_x        = 0;
+    unsigned int stride_y        = 0;
     std::tie(stride_x, stride_y) = conv_info.stride();
 
     unsigned int mat_weights_cols = weights->dimension(idx_kernels);
@@ -386,7 +415,6 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
     const bool append_bias  = false;
     const bool is_quantized = is_data_type_quantized_asymmetric(data_type);
     const bool is_bf16      = data_type == DataType::BFLOAT16;
-    bool       skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
 
     // Get convolved dimensions
     unsigned int conv_w = 0;
@@ -400,26 +428,9 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
                                                  dilation);
 
     // Check if GEMM3D is supported
-    bool skip_col2im = false;
-    if(data_layout == DataLayout::NHWC)
-    {
-        skip_col2im = bool(validate_gemm3d(src, weights, act_info, conv_h, true));
-        // If not supported, we need to perform im2col and col2im (or reshape layer)
-        if(!skip_col2im)
-        {
-            skip_im2col = false;
-        }
-    }
-
-    if(skip_col2im)
-    {
-        // If not supported, we need to perform im2col and col2im (or reshape layer)
-        if(!bool(validate_gemm3d(src, weights, act_info, conv_h, skip_im2col)))
-        {
-            skip_im2col = false;
-            skip_col2im = false;
-        }
-    }
+    const CpuGemmConv2d::SkipInfo skip_info   = CpuGemmConv2d::skip_im_col_info(src, weights, conv_info,
+                                                                                dilation, act_info);
+    const bool                    skip_im2col = skip_info.skip_im2col, skip_col2im = skip_info.skip_col2im;
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_channel) != src->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -508,7 +519,7 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-        ITensorPack  pack =
+        ITensorPack  pack  =
         {
             { TensorType::ACL_SRC, src },
             { TensorType::ACL_DST, im2col_output.get() }
@@ -590,7 +601,7 @@ void CpuGemmConv2d::prepare(ITensorPack &tensors)
         // Run weights reshaping and mark original weights tensor as unused
         CpuAuxTensorHandler weights_reshaped(offset_int_vec(WeightsReshaped), _weights_reshaped, tensors);
         auto                weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
-        ITensorPack         pack =
+        ITensorPack         pack    =
         {
             { TensorType::ACL_SRC, weights },
             { TensorType::ACL_DST, weights_reshaped.get() }

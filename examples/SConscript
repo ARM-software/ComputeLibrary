@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Arm Limited.
+# Copyright (c) 2017-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -95,6 +95,15 @@ if env['opencl']:
         prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
+    if env['experimental_dynamic_fusion']:
+        examples_env.Append(CPPDEFINES = ['ARM_COMPUTE_CL', 'ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
+        for file in Glob("./dynamic_fusion/*.cpp"):
+            example = os.path.basename(os.path.splitext(str(file))[0])
+            prog = examples_env.Program(example, ["./dynamic_fusion/{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+            Depends(prog, arm_compute_dependency)
+            prog = install_bin(prog)
+            alias = examples_env.Alias(example, prog)
+            Default(alias)
 
 if env['gemm_tuner'] and env['opencl']:
     gemm_tuner_common_options = examples_env.Object("./gemm_tuner/CommonGemmExampleOptions.cpp")

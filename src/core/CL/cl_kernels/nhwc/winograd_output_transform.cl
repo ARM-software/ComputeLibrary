@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,16 +25,14 @@
 #include "helpers.h"
 #include "tile_helpers.h"
 
-#if defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#if defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 #if defined(VEC_SIZE) && VEC_SIZE == 2
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_2X2_7X7_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_2X1_7X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X2_1X7_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 2x2/2x1 or 1x2, the filter size 7x7/7x1 or 1x7 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
+ * @note  must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
- * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT: e.g. -DSRC_HEIGHT=32
- * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
- * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 7x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x7, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -60,6 +58,10 @@
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  _ISRC_HEIGHT                      The source tensor's height
+ * @param[in]  _IDST_WIDTH                       The destination tensor's width
+ * @param[in]  _IDST_HEIGHT                      The destination tensor's height
+ * @param[in]  _INUM_TILES_X                     The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TENSOR4D(src, BUFFER),
@@ -67,13 +69,12 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int _ISRC_HEIGHT,
+    const int _IDST_WIDTH,
+    const int _IDST_HEIGHT,
+    const int _INUM_TILES_X)
 {
-#define _ISRC_HEIGHT SRC_HEIGHT
-#define _IDST_WIDTH DST_WIDTH
-#define _IDST_HEIGHT DST_HEIGHT
-#define _INUM_TILES_X NUM_TILES_X
-
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
     const int bout = GET_SPATIAL_IDX(2, 1, 0);  // BATCH SIZE IDX
@@ -201,17 +202,15 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 4, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_2X2_7X7_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_2X1_7X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X2_1X7_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 2
 
 #if defined(VEC_SIZE) && VEC_SIZE == 4
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_4X4_3X3_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_3X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X3_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 4x4, 4x1 or 1x4, the filter size 3x3, 3x1 or 1x3 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
- * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT: e.g. -DSRC_HEIGHT=32
- * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
- * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 3x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x3, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -238,6 +237,10 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  dst_size                          Size of the destination tensor, minus the last padding
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TENSOR4D(src, BUFFER),
@@ -245,7 +248,11 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
@@ -397,15 +404,13 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 16, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X4_3X3_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_3X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X3_NHWC)
 
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_4X4_5X5_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_5X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X5_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 4x4/4x1 or 1x4, the filter size 5x5/5x1 or 1x5 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
- * @note The height of the input tensor must be passed at compile time using -DSRC_HEIGHT: e.g. -DSRC_HEIGHT=32
- * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
- * @note The height of the output tensor must be passed at compile time using -DDST_HEIGHT: e.g. -DDST_HEIGHT=32
  * @note If this kernel is used to perform Winograd output transform 5x1, -DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd output transform 1x5, -DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -431,6 +436,10 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x4_5x5_nhwc(
     TENSOR4D(src, BUFFER),
@@ -438,7 +447,11 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
@@ -605,13 +618,14 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, 16, N0, 0, BUFFER, dst, cout, dst_stride_y, false, out, dst_indirect_y);
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X4_5X5_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_5X1_NHWC) || defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X5_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
 #if defined(VEC_SIZE) && VEC_SIZE == 2
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_2X1_7X1_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 2x1, the filter size 7x1 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -639,6 +653,10 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_2x1_7x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -646,7 +664,11 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -674,15 +696,19 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_2X1_7X1_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 2
 
 #if defined(VEC_SIZE) && VEC_SIZE == 4
-
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_3X1_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 4x1, the filter size 3x1 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -710,6 +736,10 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x1_3x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -717,7 +747,11 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -745,12 +779,17 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_3X1_NHWC)
 
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_5X1_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 4x1, the filter size 5x1 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -778,6 +817,10 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x1_5x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -785,7 +828,11 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -813,16 +860,21 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_5X1_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 #if defined(VEC_SIZE) && VEC_SIZE == 2
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_1X2_1X7_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 1x2, the filter size 1x7 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -850,6 +902,10 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x2_1x7_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -857,7 +913,11 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -885,14 +945,19 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X2_1X7_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 2
 
 #if defined(VEC_SIZE) && VEC_SIZE == 4
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X3_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 1x4, the filter size 1x3 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -920,6 +985,10 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x4_1x3_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -927,7 +996,11 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -955,12 +1028,17 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X3_NHWC)
 
+#if defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X5_NHWC)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 1x4, the filter size 1x5 and the data layout is NHWC
  *
- * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
  * @note The width of the output tensor must be passed at compile time using -DDST_WIDTH: e.g. -DDST_WIDTH=24
@@ -988,6 +1066,10 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
  * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
  * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_HEIGHT                        The source tensor's height
+ * @param[in]  DST_WIDTH                         The destination tensor's width
+ * @param[in]  DST_HEIGHT                        The destination tensor's height
+ * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x4_1x5_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -995,7 +1077,11 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-    int dst_size)
+    int       dst_size,
+    const int SRC_HEIGHT,
+    const int DST_WIDTH,
+    const int DST_HEIGHT,
+    const int NUM_TILES_X)
 {
     winograd_output_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -1023,8 +1109,13 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            bias_step_x,
                                            bias_offset_first_element_in_bytes,
 #endif // defined(HAS_BIAS)
-                                           dst_size);
+                                           dst_size,
+                                           SRC_HEIGHT,
+                                           DST_WIDTH,
+                                           DST_HEIGHT,
+                                           NUM_TILES_X);
 }
+#endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X5_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 #endif // defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)

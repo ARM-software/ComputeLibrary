@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,19 +33,11 @@ namespace pooling {
 
 void a64_fp16_nhwc_max_generic_depthfirst_impl(const uint64_t, const uint64_t n_valid_cells, uint64_t n_channels, const __fp16 *const *const inptrs, __fp16 *outptr);
 
-struct a64_fp16_nhwc_max_generic_depthfirst
+struct a64_fp16_nhwc_max_generic_depthfirst : IGenericDepthfirstStrategy<__fp16, __fp16>
 {
-  typedef __fp16 operand_type;
-  typedef __fp16 return_type;
-
-  typedef void (*kern_type)(const uint64_t, const uint64_t n_valid_cells, uint64_t n_channels, const __fp16 *const *const inptrs, __fp16 *outptr);
-
-  constexpr static PoolingType pooling_type(void) { return PoolingType::MAX; }
-
-
-  kern_type kernel = a64_fp16_nhwc_max_generic_depthfirst_impl;
-
+  using Parent = IGenericDepthfirstStrategy<__fp16, __fp16>;
   a64_fp16_nhwc_max_generic_depthfirst(const CPUInfo *) {}
+  typename Parent::KernelType get_kernel(void) const override { return a64_fp16_nhwc_max_generic_depthfirst_impl; }
 };
 
 }  // namespace pooling

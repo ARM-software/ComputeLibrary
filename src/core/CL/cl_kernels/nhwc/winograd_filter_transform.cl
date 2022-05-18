@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(SRC_DIM_Z)
-
 #define OUTPUT_ROW_2x2_7x7(out, tmp)                                                                                               \
     ({                                                                                                                             \
         out.s0 = -tmp.s0 / 36.f;                                                                                                   \
@@ -37,9 +35,9 @@
         out.s7 = tmp.s6;                                                                                                           \
     })
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_4X4_3X3_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_4X1_3X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X3_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 3x3/3x1/1x3 when the data layout is NHWC and the output tile is 4x4/4x1/1x4
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note If this kernel is used to perform Winograd filter transform 3x1, -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd filter transform 1x3, -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -62,10 +60,12 @@
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_4x4_3x3_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DIM_Z);
 
@@ -194,10 +194,11 @@ __kernel void winograd_filter_transform_4x4_3x3_nhwc(
     *(__global DATA_TYPE *)(dst_addr + 35 * dst_stride_z) = out55;
 #endif // !defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_FILTER_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_4X4_3X3_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_4X1_3X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X3_NHWC)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_4X4_5X5_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_4X1_5X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X5_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 5x5/5x1 or 1x5 when the data layout is NHWC and the output tile is 4x4/4x1 or 1x4
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note If this kernel is used to perform Winograd filter transform 5x1, -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd filter transform 1x5, -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -220,10 +221,12 @@ __kernel void winograd_filter_transform_4x4_3x3_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_4x4_5x5_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DIM_Z);
 
@@ -473,9 +476,12 @@ __kernel void winograd_filter_transform_4x4_5x5_nhwc(
     *(__global DATA_TYPE *)(dst_addr + 63 * dst_stride_z) = out7.s7;
 #endif // !defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_FILTER_TRANSFORM_VERTICAL)
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_4X4_5X5_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_4X1_5X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X5_NHWC)
+
+#if defined(WINOGRAD_FILTER_TRANSFORM_2X2_7X7_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_2X1_7X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X2_1X7_NHWC)
+
 /** This OpenCL kernel performs Winograd filter transform 7x7/7x1 or 1x7 when the data layout is NHWC and the output tile is 2x2/2x1 or 1x2
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note If this kernel is used to perform Winograd filter transform 7x1, -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time
  * @note If this kernel is used to perform Winograd filter transform 1x7, -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
@@ -498,10 +504,12 @@ __kernel void winograd_filter_transform_4x4_5x5_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_2x2_7x7_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DIM_Z);
 
@@ -773,13 +781,13 @@ __kernel void winograd_filter_transform_2x2_7x7_nhwc(
     *(__global DATA_TYPE *)(dst_addr + 63 * dst_stride_z) = out7.s7;
 #endif // !defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_FILTER_TRANSFORM_VERTICAL)
 }
-#endif // defined(SRC_DIM_Z)
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_2X2_7X7_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_2X1_7X1_NHWC) || defined(WINOGRAD_FILTER_TRANSFORM_1X2_1X7_NHWC)
 
 #if defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_4X1_3X1_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 3x1 when the data layout is NHWC and the output tile is 4x1
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -801,10 +809,12 @@ __kernel void winograd_filter_transform_2x2_7x7_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_4x1_3x1_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -823,12 +833,14 @@ __kernel void winograd_filter_transform_4x1_3x1_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_4X1_3X1_NHWC)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_4X1_5X1_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 5x1 when the data layout is NHWC and the output tile is 4x1
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -850,10 +862,12 @@ __kernel void winograd_filter_transform_4x1_3x1_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_4x1_5x1_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -872,12 +886,14 @@ __kernel void winograd_filter_transform_4x1_5x1_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_4X1_5X1_NHWC)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_2X1_7X1_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 7x1 when the data layout is NHWC and the output tile is 2x1
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
  *
@@ -899,10 +915,12 @@ __kernel void winograd_filter_transform_4x1_5x1_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_2x1_7x1_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -921,14 +939,16 @@ __kernel void winograd_filter_transform_2x1_7x1_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_2X1_7X1_NHWC)
 #endif // defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL)
 
 #if defined(WINOGRAD_FILTER_TRANSFORM_VERTICAL)
+#if defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X3_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 1x3 when the data layout is NHWC and the output tile is 1x4
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -950,10 +970,12 @@ __kernel void winograd_filter_transform_2x1_7x1_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_1x4_1x3_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -972,12 +994,14 @@ __kernel void winograd_filter_transform_1x4_1x3_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X3_NHWC)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X5_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 1x5 when the data layout is NHWC and the output tile is 1x4
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float/half.
  *
@@ -999,10 +1023,12 @@ __kernel void winograd_filter_transform_1x4_1x3_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_1x4_1x5_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -1021,12 +1047,14 @@ __kernel void winograd_filter_transform_1x4_1x5_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_1X4_1X5_NHWC)
 
+#if defined(WINOGRAD_FILTER_TRANSFORM_1X2_1X7_NHWC)
 /** This OpenCL kernel performs Winograd filter transform 1x7 when the data layout is NHWC and the output tile is 1x2
  *
- * @note In order to correctly split the input tensor in batches, its dimension across the Z axis (channels for NCHW, height for NHWC) must be passed at compile time using -DSRC_DIM_Z: e.g. -DSRC_DIM_Z=64
  * @note -DWINOGRAD_FILTER_TRANSFORM_VERTICAL has to be passed at compile time to perform Winograd Filter Transform
  * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
  *
@@ -1048,10 +1076,12 @@ __kernel void winograd_filter_transform_1x4_1x5_nhwc(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  SRC_DIM_Z                         The third (Z) dimension of the src tensor
  */
 __kernel void winograd_filter_transform_1x2_1x7_nhwc(
     TENSOR4D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR3D_DECLARATION(dst),
+    const int SRC_DIM_Z)
 {
     winograd_filter_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -1070,6 +1100,8 @@ __kernel void winograd_filter_transform_1x2_1x7_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
-                                           dst_offset_first_element_in_bytes);
+                                           dst_offset_first_element_in_bytes,
+                                           SRC_DIM_Z);
 }
+#endif // defined(WINOGRAD_FILTER_TRANSFORM_1X2_1X7_NHWC)
 #endif // defined(WINOGRAD_FILTER_TRANSFORM_VERTICAL)

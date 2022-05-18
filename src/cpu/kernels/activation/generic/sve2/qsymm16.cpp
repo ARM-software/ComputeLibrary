@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,6 @@
 #include <cmath>
 #include <cstddef>
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEMath.h"
 #include "src/core/NEON/SVESymm.h"
 #include <arm_sve.h>
@@ -73,14 +72,8 @@ void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // De-quantize
                 auto vin_deq = svdequantize_qsymm16_z(pg, vin, qi_in.scale);
                 // Perform activation
-                const svfloat32x2_t tmp_dep =
-                {
-                    { {
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget2_f32(vin_deq, 0))))),
-                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget2_f32(vin_deq, 1))))),
-                        }
-                    }
-                };
+                const svfloat32x2_t tmp_dep = svcreate2_f32(svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget2_f32(vin_deq, 0))))),
+                                                            svdiv_f32_z(pg, vconst_1, svadd_f32_z(pg, vconst_1, svexp_f32_z(pg, svneg_f32_z(pg, svget2_f32(vin_deq, 1))))));
                 // Re-quantize to new output space
                 tmp = svquantize_qsymm16_z(pg, tmp_dep, qi_out.scale);
             }
@@ -89,14 +82,18 @@ void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // De-quantize
                 auto vin_deq = svdequantize_qsymm16_z(pg, vin, qi_in.scale);
                 // Perform activation
-                const svfloat32x2_t tmp_dep =
-                {
-                    { {
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget2_f32(vin_deq, 0), vb_f32))),
-                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget2_f32(vin_deq, 1), vb_f32))),
-                        }
-                    }
-                };
+                const svfloat32x2_t tmp_dep = svcreate2_f32(svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget2_f32(vin_deq, 0), vb_f32))),
+                                                            svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget2_f32(vin_deq, 1), vb_f32))));
+                // Re-quantize to new output space
+                tmp = svquantize_qsymm16_z(pg, tmp_dep, qi_out.scale);
+            }
+            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                // De-quantize
+                auto vin_deq = svdequantize_qsymm16_z(pg, vin, qi_in.scale);
+                // Perform activation
+                const svfloat32x2_t tmp_dep = svcreate2_f32(svmin_f32_z(pg, va_f32, svmax_f32_z(pg, vb_f32, svget2_f32(vin_deq, 0))),
+                                                            svmin_f32_z(pg, va_f32, svmax_f32_z(pg, vb_f32, svget2_f32(vin_deq, 1))));
                 // Re-quantize to new output space
                 tmp = svquantize_qsymm16_z(pg, tmp_dep, qi_out.scale);
             }
@@ -117,4 +114,3 @@ void sve2_qsymm16_activation(const ITensor *src, ITensor *dst, const ActivationL
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */

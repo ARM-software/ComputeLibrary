@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,22 +35,14 @@ namespace depthwise {
 
 void sve_fp32_nhwc_generic_output9_mla_depthfirst_impl(const float *const *const, float *const *const, const void *, const void *, const unsigned int, const unsigned int, const float, const float);
 
-struct sve_fp32_nhwc_generic_output9_mla_depthfirst
+class sve_fp32_nhwc_generic_output9_mla_depthfirst : public GenericDepthfirstKernelStrategy<float, float, float, float>
 {
-  typedef float bias_type;
-  typedef float input_type;
-  typedef float weight_type;
-  typedef float return_type;
+  KernelType kernel = sve_fp32_nhwc_generic_output9_mla_depthfirst_impl;
 
-  typedef void (*kern_type)(const float *const *const, float *const *const, const void *, const void *, const unsigned int, const unsigned int, const float, const float);
+  public:
+  sve_fp32_nhwc_generic_output9_mla_depthfirst(const CPUInfo *) : GenericDepthfirstKernelStrategy<float, float, float, float>(9, arm_gemm::VLType::SVE) {}
 
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::SVE;
-
-  constexpr static unsigned int n_output_points = 9;
-
-  kern_type kernel = sve_fp32_nhwc_generic_output9_mla_depthfirst_impl;
-
-  sve_fp32_nhwc_generic_output9_mla_depthfirst(const CPUInfo *) {}
+  KernelType get_kernel() const override { return kernel; }
 };
 
 }  // namespace depthwise

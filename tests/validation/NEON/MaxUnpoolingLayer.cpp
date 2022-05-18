@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -33,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/MaxUnpoolingLayerFixture.h"
-
 namespace arm_compute
 {
 namespace test
@@ -74,7 +74,37 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework
 }
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
 TEST_SUITE_END() // Float
+
+TEST_SUITE(KernelSelection)
+
+DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
+               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+                       framework::dataset::make("DataType", { DataType::F32,
+                                                              DataType::F16,
+                                                              DataType::QASYMM8,
+                                                              DataType::QASYMM8_SIGNED
+                                                            })),
+               cpu_ext, data_type)
+{
+    using namespace cpu::kernels;
+
+    cpuinfo::CpuIsaInfo cpu_isa{};
+    cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.sve  = (cpu_ext == "SVE");
+    cpu_isa.fp16 = (data_type == DataType::F16);
+
+    const auto *selected_impl = CpuMaxUnpoolingLayerKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
+
+    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_maxunpooling";
+    std::string actual   = selected_impl->name;
+
+    ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END() // KernelSelection
 TEST_SUITE_END() // PoolingLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

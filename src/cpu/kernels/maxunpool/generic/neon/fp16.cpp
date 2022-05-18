@@ -27,9 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp16_maxunpooling(const ITensor *input, ITensor *output, const ITensor *indices, const Window &window)
+void neon_fp16_maxunpooling(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)
 {
-    return max_unpooling<float16_t>(input, output, indices, window);
+    return max_unpooling<float16_t>(input, indices, output, window);
 }
 } // namespace cpu
 } // namespace arm_compute

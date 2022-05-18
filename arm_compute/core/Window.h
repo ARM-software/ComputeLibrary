@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited.
+ * Copyright (c) 2016-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,8 @@ public:
     static constexpr size_t DimZ = 2;
     /** Alias for dimension 3 also known as W dimension */
     static constexpr size_t DimW = 3;
+    /** Alias for dimension 4 also known as V dimension */
+    static constexpr size_t DimV = 4;
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()
@@ -120,6 +122,17 @@ public:
         void set_end(int end)
         {
             _end = end;
+        }
+        /** Check whether two Dimensions are equal.
+         *
+         * @param[in] lhs LHS Dimensions
+         * @param[in] rhs RHS Dimensions
+         *
+         * @return True if the Dimensions are the same.
+         */
+        friend bool operator==(const Dimension &lhs, const Dimension &rhs)
+        {
+            return (lhs._start == rhs._start) && (lhs._end == rhs._end) && (lhs._step == rhs._step);
         }
 
     private:
@@ -348,7 +361,6 @@ public:
     {
         return slide_window_slice<4>(slice);
     }
-
     /** Collapse the dimensions between @p first and @p last if possible.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
@@ -413,6 +425,14 @@ public:
      * @param[in] rhs Second window to swap.
      */
     friend void swap(Window &lhs, Window &rhs);
+    /** Check whether two Windows are equal.
+     *
+     * @param[in] lhs LHS window
+     * @param[in] rhs RHS window
+     *
+     * @return True if the given windows are the same.
+     */
+    friend bool operator==(const Window &lhs, const Window &rhs);
 
 private:
     /** First slice of the window

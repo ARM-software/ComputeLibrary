@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,11 @@ void CLBuildOptions::add_options_if(bool cond, const StringSet &options)
 const CLBuildOptions::StringSet &CLBuildOptions::options() const
 {
     return _build_opts;
+}
+
+bool CLBuildOptions::operator==(const CLBuildOptions &other) const
+{
+    return _build_opts == other._build_opts;
 }
 
 Program::Program()

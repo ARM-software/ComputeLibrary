@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
+#include "depthwise.hpp"
 
 #include <cstddef>
 #include <functional>
@@ -136,14 +136,7 @@ UniqueDepthwiseCommon<TInput, TWeight, TOutput> depthwise(const DepthwiseArgs &a
 {
   const DepthwiseImplementation<TInput, TWeight, TOutput, OutputStage> *impl = nullptr;
   const bool success = find_implementation<TInput, TWeight, TOutput, OutputStage>(args, os, impl);
-
-  if(success)
-  {
-        auto i =  impl->get_instance(args, os);
-        i->set_name(impl->name);
-        return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(i);
-  }
-  return nullptr;
+  return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(success ? impl->get_instance(args, os) : nullptr);
 }
 
 }  // namespace depthwise

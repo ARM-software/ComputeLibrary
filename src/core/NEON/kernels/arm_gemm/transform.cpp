@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 
 #include "bfloat.hpp"
 
-#if !defined(__OpenBSD__)
+#if !defined(_WIN64) && !defined(__OpenBSD__)
 #include <alloca.h>
-#endif /* !defined(__OpenBSD__) */
+#endif /* !defined(_WIN64) && !defined(__OpenBSD__) */
 
 namespace arm_gemm {
 

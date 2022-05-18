@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,28 +28,23 @@
 
 #pragma once
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace depthwise {
 
 void a64_s8q_nhwc_generic_output9_mla_depthfirst_impl(const int8_t *const *const, int8_t *const *const, const void *, const arm_gemm::Requantize32&, const unsigned int, const unsigned int);
 
-struct a64_s8q_nhwc_generic_output9_mla_depthfirst
+class a64_s8q_nhwc_generic_output9_mla_depthfirst : public GenericDepthfirstKernelStrategy<int8_t, int8_t, int8_t, int32_t>
 {
-  typedef int32_t bias_type;
-  typedef int8_t input_type;
-  typedef int8_t weight_type;
-  typedef int8_t return_type;
+  KernelType kernel = a64_s8q_nhwc_generic_output9_mla_depthfirst_impl;
 
-  typedef void (*kern_type)(const int8_t *const *const, int8_t *const *const, const void *, const arm_gemm::Requantize32&, const unsigned int, const unsigned int);
+  public:
+  a64_s8q_nhwc_generic_output9_mla_depthfirst(const CPUInfo *) : GenericDepthfirstKernelStrategy<int8_t, int8_t, int8_t, int32_t>(9, arm_gemm::VLType::None) {}
 
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::None;
-
-  constexpr static unsigned int n_output_points = 9;
-
-  kern_type kernel = a64_s8q_nhwc_generic_output9_mla_depthfirst_impl;
-
-  a64_s8q_nhwc_generic_output9_mla_depthfirst(const CPUInfo *) {}
+  KernelType get_kernel() const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
+#endif // defined(__aarch64__)

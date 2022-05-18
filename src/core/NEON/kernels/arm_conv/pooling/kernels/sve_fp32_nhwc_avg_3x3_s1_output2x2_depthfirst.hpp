@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,27 +31,18 @@ namespace pooling {
 
 void sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(unsigned int, const float *const *const, float *const *const, bool, unsigned int, unsigned int, unsigned int, unsigned int);
 
-struct sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst
+struct sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst : public DepthfirstStrategy<float, float>
 {
-  typedef float operand_type;
-  typedef float return_type;
+  using Parent = DepthfirstStrategy<float, float>;
 
-  typedef void (*kern_type)(unsigned int, const float *const *const, float *const *const, bool, unsigned int, unsigned int, unsigned int, unsigned int);
+  const static auto pooling_type = PoolingType::AVERAGE;
+  const static auto pool_rows = 3u, pool_cols = 3u;
+  const static auto stride_rows = 1u, stride_cols = 1u;
 
-  constexpr static PoolingType pooling_type(void) { return PoolingType::AVERAGE; }
+  sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst(const CPUInfo *)
+  : Parent(pool_rows, pool_cols, stride_rows, stride_cols, 2, 2) {}
 
-  constexpr static unsigned int pool_rows(void) { return 3; }
-  constexpr static unsigned int pool_cols(void) { return 3; }
-
-  constexpr static unsigned int stride_rows(void) { return 1; }
-  constexpr static unsigned int stride_cols(void) { return 1; }
-
-  constexpr static unsigned int out_rows(void) { return 2; }
-  constexpr static unsigned int out_cols(void) { return 2; }
-
-  kern_type kernel = sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl;
-
-  sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst(const CPUInfo *) {}
+  Parent::KernelType get_kernel(void) const { return sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl; }
 };
 
 }  // namespace pooling

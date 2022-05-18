@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
 #include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
@@ -35,4 +35,4 @@ void sve_fp16_elementwise_unary(const ITensor *in, ITensor *out, const Window &w
 }
 }
 } // namespace arm_compute
-#endif //defined(ARM_COMPUTE_ENABLE_SVE)
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

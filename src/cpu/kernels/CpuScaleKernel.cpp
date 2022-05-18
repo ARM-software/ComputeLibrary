@@ -50,10 +50,9 @@ namespace
 {
 static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels =
 {
-#if defined(ARM_COMPUTE_ENABLE_SVE)
     {
         "sve_fp16_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve; },
+        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16; },
         REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_scale)
     },
     {
@@ -81,15 +80,11 @@ static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels =
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::S16 && data.isa.sve; },
         REGISTER_INTEGER_SVE(arm_compute::cpu::s16_sve_scale)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-#if defined(ARM_COMPUTE_ENABLE_NEON)
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
     {
         "neon_fp16_scale",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::common_neon_scale<float16_t>)
     },
-#endif /* !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
     {
         "neon_fp32_scale",
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
@@ -115,7 +110,6 @@ static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels =
         [](const DataTypeISASelectorData & data) { return data.dt == DataType::S16; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_scale)
     },
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 };
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy,

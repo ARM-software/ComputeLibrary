@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,35 +28,25 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
 
 void sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl(const float *const *const, float *const *const, const float *, const float *, const unsigned int, const unsigned int, const float, const float);
 
-struct sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst
+struct sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst : GenericDepthfirstMultiplierKernelStrategy<float, float, float, float>
 {
-  typedef float bias_type;
-  typedef float input_type;
-  typedef float weight_type;
-  typedef float return_type;
-
-  typedef void (*kern_type)(const float *const *const, float *const *const, const float *, const float *, const unsigned int, const unsigned int, const float, const float);
-
-  constexpr static arm_gemm::VLType vl_type = arm_gemm::VLType::SVE;
-
-  constexpr static unsigned int output_rows(void) { return 2; };
-  constexpr static unsigned int output_cols(void) { return 8; };
-
-  constexpr static unsigned int output_col_regs(void) { return 2; };
-
-  kern_type kernel = sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
-
-  sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *) {}
+  using Parent = GenericDepthfirstMultiplierKernelStrategy<float, float, float, float>;
+  sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(const CPUInfo *)
+  : Parent(2, 8, arm_gemm::VLType::SVE)
+  {
+  }
+  Parent::KernelType kernel = sve_fp32_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst_impl;
+  Parent::KernelType get_kernel(void) const override { return kernel; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)
+#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)

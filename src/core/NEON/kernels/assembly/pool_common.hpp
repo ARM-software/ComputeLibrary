@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,9 @@
  */
 
 #pragma once
-
-#include "common.hpp"
+#ifdef CYCLE_PROFILING
+#include "profiler.hpp"
+#endif
 
 namespace arm_conv
 {
@@ -53,6 +54,11 @@ struct PoolingStride
     unsigned int rows, cols;
 };
 
+struct PaddingValues
+{
+    unsigned int left, top, right, bottom;
+};
+
 class IPoolingCommon
 {
 public:
@@ -60,6 +66,7 @@ public:
 
     // Determine the amount of working space required.
     virtual size_t get_working_size(unsigned int num_threads) const = 0;
+    virtual size_t get_working_size(unsigned int num_threads, unsigned int n_channels) const = 0;
 
     // Execute pooling over the specified area of memory.
     virtual void execute(
@@ -101,15 +108,6 @@ public:
         void        *working_space,
         unsigned int thread_id,
         unsigned int num_threads) const = 0;
-};
-
-struct Nothing
-{
-};
-
-template <typename TInput, typename TOutput, class OutputStage = Nothing>
-class PoolingCommon : public IPoolingCommon
-{
 };
 
 } // namespace pooling

@@ -1,7 +1,11 @@
 //
-// Copyright © 2020 Arm Ltd. All rights reserved.
+// Copyright © 2020,2022 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
+
+// The following files are omitted due to technical limitations:
+// Directories : data, include, python
+// Files : LICENSE, README.md, SConscript, SConstruct, Security.md, filelist.json, filedefs.json
 
 /** @file Android.bp
  *  @brief Generation script for building AndroidNN driver.

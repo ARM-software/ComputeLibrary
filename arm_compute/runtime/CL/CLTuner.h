@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,6 +124,9 @@ public:
     void tune_kernel_static(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel) override;
     void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors) override;
+#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
+    void tune_kernel_dynamic(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc) override;
+#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Is the kernel_event set ?
      *
@@ -131,15 +134,26 @@ public:
      */
     bool kernel_event_is_set() const;
 
+    /** A wrapper wrapping tensors and other objects needed for running the kernel
+     */
+    struct IKernelData;
+
 private:
+    /** Perform tune_kernel_dynamic
+     *
+     * @param[in]     kernel OpenCL kernel to be tuned with tuning parameters
+     * @param[in,out] data   IKernelData object wrapping tensors and other objects needed for running the kernel
+     *
+     */
+    void do_tune_kernel_dynamic(ICLKernel &kernel, IKernelData *data);
     /** Find optimal tuning parameters using brute-force approach
      *
-     * @param[in]     kernel  OpenCL kernel to be tuned with tuning parameters
-     * @param[in,out] tensors Tensors for the kernel to operate on
+     * @param[in]     kernel OpenCL kernel to be tuned with tuning parameters
+     * @param[in,out] data   IKernelData object wrapping tensors and other objects needed for running the kernel
      *
      * @return The optimal tuning parameters to use
      */
-    CLTuningParams find_optimal_tuning_params(ICLKernel &kernel, ITensorPack &tensors);
+    CLTuningParams find_optimal_tuning_params(ICLKernel &kernel, IKernelData *data);
 
     std::unordered_map<std::string, CLTuningParams> _tuning_params_table;
     std::unordered_map<std::string, cl::NDRange>    _lws_table;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1457,6 +1457,40 @@ inline TensorShape compute_conv3d_shape(const TensorShape &src, const TensorShap
     output_shape.set(height_dim, output_height_size);
     output_shape.set(depth_dim, output_depth_size);
     output_shape.set(channel_dim, weights[weights_CHout_dim]);
+    return output_shape;
+}
+
+/** Calculate the output pool3d shape of a tensor
+ *
+ * @param[in] src         Input tensor info
+ * @param[in] pool3d_info Pooling layer info
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_pool3d_shape(const TensorShape &src, Pooling3dLayerInfo pool3d_info)
+{
+    TensorShape output_shape{ src };
+
+    const auto data_layout      = DataLayout::NDHWC;
+    const int  idx_width        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int  idx_depth        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::DEPTH);
+    const int  pool_size_width  = pool3d_info.is_global_pooling ? src[idx_width] : pool3d_info.pool_size.width;
+    const int  pool_size_height = pool3d_info.is_global_pooling ? src[idx_height] : pool3d_info.pool_size.height;
+    const int  pool_size_depth  = pool3d_info.is_global_pooling ? src[idx_depth] : pool3d_info.pool_size.depth;
+    int        output_width     = 0;
+    int        output_height    = 0;
+    int        output_depth     = 0;
+
+    std::tie(output_width, output_height, output_depth) = scaled_3d_dimensions_signed(src[idx_width], src[idx_height], src[idx_depth], pool_size_width, pool_size_height,
+                                                                                      pool_size_depth, pool3d_info);
+
+    ARM_COMPUTE_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1), "Calculated output dimension size is invalid");
+
+    output_shape.set(idx_width, static_cast<size_t>(output_width));
+    output_shape.set(idx_height, static_cast<size_t>(output_height));
+    output_shape.set(idx_depth, static_cast<size_t>(output_depth));
+
     return output_shape;
 }
 

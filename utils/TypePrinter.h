@@ -2083,6 +2083,122 @@ inline std::string to_string(const PoolingLayerInfo &info)
     return str.str();
 }
 
+/** Formatted output of the Size3D type.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  size Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Size3D &size)
+{
+    os << size.width << "x" << size.height << "x" << size.depth;
+
+    return os;
+}
+
+/** Formatted output of the Size3D type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Size3D &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+/** Formatted output of the Padding3D type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  padding3d Padding info for 3D spatial dimension shape.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Padding3D &padding3d)
+{
+    os << padding3d.left << "," << padding3d.right << ","
+       << padding3d.top << "," << padding3d.bottom << ","
+       << padding3d.front << "," << padding3d.back;
+    return os;
+}
+
+/** Converts a @ref Padding3D to string
+ *
+ * @param[in] padding3d Padding3D value to be converted
+ *
+ * @return String representing the corresponding Padding3D
+ */
+inline std::string to_string(const Padding3D &padding3d)
+{
+    std::stringstream str;
+    str << padding3d;
+    return str.str();
+}
+
+/** Formatted output of the DimensionRoundingType type.
+ *
+ * @param[out] os            Output stream.
+ * @param[in]  rounding_type DimensionRoundingType Dimension rounding type when down-scaling, or compute output shape of pooling(2D or 3D).
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DimensionRoundingType &rounding_type)
+{
+    switch(rounding_type)
+    {
+        case DimensionRoundingType::CEIL:
+            os << "CEIL";
+            break;
+        case DimensionRoundingType::FLOOR:
+            os << "FLOOR";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
+/** Formatted output of the Pooling 3d Layer Info.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Pooling 3D layer info to print to output stream.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Pooling3dLayerInfo &info)
+{
+    os << "{Type=" << info.pool_type << ","
+       << "IsGlobalPooling=" << info.is_global_pooling;
+    if(!info.is_global_pooling)
+    {
+        os << ","
+           << "PoolSize=" << info.pool_size << ", "
+           << "Stride=" << info.stride << ", "
+           << "Padding=" << info.padding << ", "
+           << "Exclude Padding=" << info.exclude_padding << ", "
+           << "fp_mixed_precision=" << info.fp_mixed_precision << ", "
+           << "DimensionRoundingType=" << info.round_type;
+    }
+    os << "}";
+    return os;
+}
+
+/** Formatted output of the Pooling 3d Layer Info.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Pooling3dLayerInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
 /** Formatted output of the PriorBoxLayerInfo.
  *
  * @param[in] info Type to output.
@@ -2128,33 +2244,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
  * @return Formatted string.
  */
 inline std::string to_string(const Size2D &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
-/** Formatted output of the Size3D type.
- *
- * @param[out] os   Output stream
- * @param[in]  size Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const Size3D &size)
-{
-    os << size.width << "x" << size.height << "x" << size.depth;
-
-    return os;
-}
-
-/** Formatted output of the Size2D type.
- *
- * @param[in] type Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const Size3D &type)
 {
     std::stringstream str;
     str << type;
@@ -3097,29 +3186,6 @@ inline std::string to_string(const BoxNMSLimitInfo &info)
     return str.str();
 }
 
-/** Formatted output of the DimensionRoundingType type.
- *
- * @param[out] os            Output stream.
- * @param[in]  rounding_type DimensionRoundingType to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const DimensionRoundingType &rounding_type)
-{
-    switch(rounding_type)
-    {
-        case DimensionRoundingType::CEIL:
-            os << "CEIL";
-            break;
-        case DimensionRoundingType::FLOOR:
-            os << "FLOOR";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-    return os;
-}
-
 /** Converts a @ref DimensionRoundingType to string
  *
  * @param[in] rounding_type DimensionRoundingType value to be converted
@@ -3130,34 +3196,6 @@ inline std::string to_string(const DimensionRoundingType &rounding_type)
 {
     std::stringstream str;
     str << rounding_type;
-    return str.str();
-}
-
-/** Formatted output of the Padding3D type.
- *
- * @param[out] os        Output stream.
- * @param[in]  padding3d Padding3D to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const Padding3D &padding3d)
-{
-    os << padding3d.left << "," << padding3d.right << ","
-       << padding3d.top << "," << padding3d.bottom << ","
-       << padding3d.front << "," << padding3d.back;
-    return os;
-}
-
-/** Converts a @ref Padding3D to string
- *
- * @param[in] padding3d Padding3D value to be converted
- *
- * @return String representing the corresponding Padding3D
- */
-inline std::string to_string(const Padding3D &padding3d)
-{
-    std::stringstream str;
-    str << padding3d;
     return str.str();
 }
 

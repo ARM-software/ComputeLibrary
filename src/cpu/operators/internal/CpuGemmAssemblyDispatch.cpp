@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -355,19 +355,14 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensorInfo *
     _is_b_constant = b->are_values_constant();
     _is_c_constant = c ? c->are_values_constant() : true;
 
-    arm_gemm::GemmConfig gemm_cfg;
-    _kernel_info = arm_gemm::get_gemm_method<TypeInput, TypeOutput, OutputStage>(args, os);
-    if(_kernel_info.method != arm_gemm::GemmMethod::GEMV_BATCHED)
-    {
-        gemm_cfg.filter = _kernel_info.name;
-        args._cfg       = &gemm_cfg;
-    }
     _gemm_kernel_asm = arm_gemm::gemm<TypeInput, TypeOutput, OutputStage>(args, os);
     if(_gemm_kernel_asm == nullptr)
     {
         //configuration not supported: Leave function unconfigured:
         return;
     }
+
+    arm_gemm::GemmConfig gemm_cfg = _gemm_kernel_asm->get_config();
 
     // arm_compute wrapper for the Gemm object (see above)
     auto acl_gemm_wrapper = std::make_unique<kernel::CpuGemmAssemblyWrapperKernel<TypeInput, TypeOutput>>();
@@ -640,6 +635,72 @@ CpuGemmAssemblyDispatch::CpuGemmAssemblyDispatch()
 {
 }
 
+Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
+    ARM_COMPUTE_UNUSED(c);
+    arm_gemm::Activation act         = assembly_utils::map_to_arm_gemm_activation(info.activation_info);
+    Params               p           = extract_parameters(a, b, d, info);
+    const CPUInfo       &ci          = NEScheduler::get().cpu_info();
+    unsigned int         num_threads = NEScheduler::get().num_threads();
+
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads, info.fast_mode);
+    switch(a->data_type())
+    {
+        case DataType::F32:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float, float, arm_gemm::Nothing>(args, {})),
+                                            "We could not find an optimized kernel for F32 input");
+            break;
+#ifdef __aarch64__
+        case DataType::U8:
+        case DataType::QASYMM8:
+            if(d->data_type() == DataType::S32)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(args, {})),
+                                                "We could not find an optimized kernel for U8/QASYMM8 input and S32 output");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint8_t, arm_gemm::Requantize32>(args, {})),
+                                                "We could not find an optimized kernel for U8 input and U8 output");
+            }
+            break;
+        case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
+            if(d->data_type() == DataType::S32)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int32_t, arm_gemm::Nothing>(args, {})),
+                                                "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and S32 output");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int8_t, arm_gemm::Requantize32>(args, {})),
+                                                "We could not find an optimized kernel for S8 input and S32 output");
+            }
+            break;
+#endif /* __aarch64__ */
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+        case DataType::BFLOAT16:
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(args, {})),
+                                            "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+            break;
+        }
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(args, {})),
+                                            "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+            break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        default:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Usupported type. Could not find a kernel");
+            break;
+    }
+
+    return Status{};
+}
+
 Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
 {
     ARM_COMPUTE_UNUSED(c, info);
@@ -668,7 +729,7 @@ Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::U8 && d->data_type() != DataType::U32, "Only U32 output supported for U8 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::S8 && d->data_type() != DataType::S32, "Only S32 output supported for S8 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::QASYMM8 && d->data_type() != DataType::QASYMM8, "Only QASYMM8 output supported for QASYMM8 input");
-    return Status{};
+    return CpuGemmAssemblyDispatch::has_opt_impl(a, b, c, d, info);
 }
 
 bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,15 @@
 namespace arm_conv {
 namespace depthwise {
 
-void sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *const inptrs, int8_t *const *const outptrs, const void *params, const uint64_t n_channels, const arm_gemm::Requantize32& qp)
+void sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(
+  const unsigned int n_channels,
+  const int8_t *const *const inptrs,
+  const int8_t *params,
+  const int32_t *,  // Bias, should be wrapped into the parameters
+  const arm_gemm::Requantize32& qp,
+  const int32_t *, const int32_t *,  // Requant parameters, also wrapped
+  int8_t *const *const outptrs
+)
 {
   __asm__ __volatile__(
     "ldp x11, x10, [%x[inptrs], #0x0]\n"
@@ -446,7 +454,7 @@ void sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(const int8_t *const *cons
     "b.any 1b\n"
     "addvl SP, SP, #8\n"
     : [params] "+&r" (params)
-    : [inptrs] "r" (inptrs), [n_channels] "r" (n_channels), [offsetof_Requantize32_b_offset] "I" (offsetof(arm_gemm::Requantize32, b_offset)), [offsetof_Requantize32_c_offset] "I" (offsetof(arm_gemm::Requantize32, c_offset)), [offsetof_Requantize32_maxval] "I" (offsetof(arm_gemm::Requantize32, maxval)), [offsetof_Requantize32_minval] "I" (offsetof(arm_gemm::Requantize32, minval)), [outptrs] "r" (outptrs), [qp] "r" (&qp)
+    : [inptrs] "r" (inptrs), [n_channels] "r" ((long unsigned int) n_channels), [offsetof_Requantize32_b_offset] "I" (offsetof(arm_gemm::Requantize32, b_offset)), [offsetof_Requantize32_c_offset] "I" (offsetof(arm_gemm::Requantize32, c_offset)), [offsetof_Requantize32_maxval] "I" (offsetof(arm_gemm::Requantize32, maxval)), [offsetof_Requantize32_minval] "I" (offsetof(arm_gemm::Requantize32, minval)), [outptrs] "r" (outptrs), [qp] "r" (&qp)
     : "cc", "memory", "p0", "p1", "p2", "x9", "x10", "x11", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
   );
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,19 +45,6 @@
 namespace arm_conv {
 namespace pooling {
 
-namespace
-{
-  template <class Strategy>
-  bool is_supported(const PoolingArgs &args, const Nothing &)
-  {
-    return ((args.pool_type == Strategy::pooling_type()) &&
-            (args.pool_window.rows == Strategy::pool_rows()) &&
-            (args.pool_window.cols == Strategy::pool_cols()) &&
-            (args.pool_stride.rows == Strategy::stride_rows()) &&
-            (args.pool_stride.cols == Strategy::stride_cols()));
-  }
-}
-
 static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
@@ -67,7 +54,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirstGeneric<cpp_nhwc_1x1_stride_any_depthfirst<float>>(args);
+      auto strat = new cpp_nhwc_1x1_stride_any_depthfirst<float>(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float, float, Nothing>(strat, args);
     },
   },
 #if defined(__aarch64__)
@@ -75,23 +63,27 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
-      return args.cpu_info->has_sve() && is_supported<sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>(args, unused);
+    [] (const PoolingArgs &args, const Nothing &os) -> bool {
+      return args.cpu_info->has_sve() &&
+             is_supported<sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>(args, os);
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirst<sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
+      auto strat = new sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
     },
   },
   {
     PoolingMethod::DEPTHFIRST,
     "sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst",
-    [] (const PoolingArgs &args, const Nothing &unused) -> bool {
-      return args.cpu_info->has_sve() && is_supported<sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>(args, unused);
+    [] (const PoolingArgs &args, const Nothing &os) -> bool {
+      return args.cpu_info->has_sve() &&
+             is_supported<sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>(args, os);
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirst<sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>(args);
+      auto strat = new sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
     },
   },
   {
@@ -102,7 +94,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirstGeneric<sve_fp32_nhwc_avg_generic_depthfirst>(args);
+      auto strat = new sve_fp32_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
     },
   },
   {
@@ -113,7 +106,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirstGeneric<sve_fp32_nhwc_max_generic_depthfirst>(args);
+      auto strat = new sve_fp32_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
     },
   },
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
@@ -123,7 +117,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     is_supported<a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>,
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirst<a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>(args);
+      auto strat = new a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
     },
   },
   {
@@ -132,7 +127,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     is_supported<a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>,
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirst<a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>(args);
+      auto strat = new a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
     },
   },
   {
@@ -141,7 +137,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::AVERAGE; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirstGeneric<a64_fp32_nhwc_avg_generic_depthfirst>(args);
+      auto strat = new a64_fp32_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
     },
   },
   {
@@ -150,7 +147,8 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     [] (const PoolingArgs &args, const Nothing &) -> bool { return args.pool_type == PoolingType::MAX; },
     nullptr,
     [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
-      return new PoolingDepthfirstGeneric<a64_fp32_nhwc_max_generic_depthfirst>(args);
+      auto strat = new a64_fp32_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
     },
   },
 #endif  // defined(__aarch64__)

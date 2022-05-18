@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <map>
 
 namespace arm_compute

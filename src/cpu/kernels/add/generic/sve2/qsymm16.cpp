@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
@@ -153,4 +153,3 @@ void add_qsymm16_sve2(const ITensor *src0, const ITensor *src1, ITensor *dst, co
 }
 } // namespace cpu
 } // namespace arm_compute
-#endif //ARM_COMPUTE_ENABLE_SVE2

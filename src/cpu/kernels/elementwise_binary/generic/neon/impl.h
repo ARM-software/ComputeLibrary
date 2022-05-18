@@ -69,6 +69,7 @@ typename VectorType::type elementwise_arithm_op(const typename VectorType::type 
 
     return res;
 }
+
 template <ArithmeticOperation op, typename ScalarType, typename VectorType>
 typename VectorType::type elementwise_arithm_op_broadcast(const typename VectorType::type &a, const ScalarType &broadcast_value, const bool reorder)
 {

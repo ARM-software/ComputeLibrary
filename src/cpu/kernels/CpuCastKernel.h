@@ -39,6 +39,9 @@ namespace kernels
  */
 class CpuCastKernel : public ICpuKernel<CpuCastKernel>
 {
+private:
+    using CastKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ThreadInfo &, ConvertPolicy, const Window &)>::type;
+
 public:
     CpuCastKernel() = default;
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(CpuCastKernel);
@@ -72,6 +75,15 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+
+    struct CastKernel
+    {
+        const char                          *name;
+        const CastDataTypeISASelectorDataPtr is_selected;
+        CastKernelPtr                        ukernel;
+    };
+
+    static const std::vector<CastKernel> &get_available_kernels();
 
 private:
     ConvertPolicy _policy{ ConvertPolicy::SATURATE };

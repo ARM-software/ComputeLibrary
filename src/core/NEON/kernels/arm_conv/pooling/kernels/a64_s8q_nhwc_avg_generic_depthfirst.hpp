@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,19 +33,11 @@ namespace pooling {
 
 void a64_s8q_nhwc_avg_generic_depthfirst_impl(const uint64_t window_cells, const uint64_t n_valid_cells, uint64_t n_channels, const int8_t *const *const inptrs, int8_t *outptr, const Requantize32 &qp);
 
-struct a64_s8q_nhwc_avg_generic_depthfirst
+struct a64_s8q_nhwc_avg_generic_depthfirst : IGenericDepthfirstStrategy<int8_t, int8_t, Requantize32>
 {
-  typedef int8_t operand_type;
-  typedef int8_t return_type;
-
-  typedef void (*kern_type)(const uint64_t window_cells, const uint64_t n_valid_cells, uint64_t n_channels, const int8_t *const *const inptrs, int8_t *outptr, const Requantize32 &qp);
-
-  constexpr static PoolingType pooling_type(void) { return PoolingType::AVERAGE; }
-
-
-  kern_type kernel = a64_s8q_nhwc_avg_generic_depthfirst_impl;
-
+  using Parent = IGenericDepthfirstStrategy<int8_t, int8_t, Requantize32>;
   a64_s8q_nhwc_avg_generic_depthfirst(const CPUInfo *) {}
+  typename Parent::KernelType get_kernel(void) const override { return a64_s8q_nhwc_avg_generic_depthfirst_impl; }
 };
 
 }  // namespace pooling
