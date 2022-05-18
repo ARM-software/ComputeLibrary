@@ -11,6 +11,9 @@
         <tab type="user" url="@ref operators_list" title="Operator List"/>
         <tab type="user" url="@ref tests" title="Validation and benchmarks"/>
         <tab type="user" url="@ref advanced" title="Advanced"/>
+        <tab type="usergroup" title="Examples">
+            <tab type="user" url="@ref example_dynamic_fusion_cl_conv2d_elementwise_add" title="(Experimental) Fuse conv2d with elementwise addition"/>
+        </tab>
         <tab type="user" url="@ref versions_changelogs" title="Release Versions and Changelog"/>
         <tab type="user" url="@ref errata" title="Errata"/>
     </tab>
@@ -19,7 +22,7 @@
         <tab type="user" url="@ref adding_operator" title="How to Add a New Operator"/>
         <tab type="user" url="@ref implementation_topic" title="Implementation Topics"/>
     </tab>
-    <tab type="pages" visible="yes" title="Pages" intro=""/>
+    <tab type="pages" visible="no" title="Pages" intro=""/>
     <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
@@ -27,7 +30,7 @@
     </tab>
     <tab type="classes" visible="yes" title="">
       <tab type="classlist" visible="yes" title="" intro=""/>
-      <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/> 
+      <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
       <tab type="hierarchy" visible="yes" title="" intro=""/>
       <tab type="classmembers" visible="yes" title="" intro=""/>
     </tab>
@@ -35,7 +38,7 @@
       <tab type="filelist" visible="yes" title="" intro="Below is a list of files with brief descriptions. Please note that the descriptions of some miscellaneous files and directories (e.g. data/ and include/) are omitted because of Doxygen limitations."/>
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
-    <tab type="examples" visible="yes" title="" intro=""/>  
+    <tab type="examples" visible="yes" title="" intro=""/>
   </navindex>
 
   <!-- Layout definition for a class page -->
