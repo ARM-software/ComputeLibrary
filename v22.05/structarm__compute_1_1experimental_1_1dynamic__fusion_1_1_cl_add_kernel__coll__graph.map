@@ -1,0 +1,5 @@
+<map id="ClAddKernel" name="ClAddKernel">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_kernel.xhtml" title="ClKernel" alt="" coords="5,95,81,121"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_eltwise_add_kernel_descriptor.xhtml" title="ClEltwiseAddKernelDescriptor" alt="" coords="105,95,320,121"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_add_descriptor.xhtml" title="Descriptor for Addition operation. " alt="" coords="155,5,270,32"/>
+</map>

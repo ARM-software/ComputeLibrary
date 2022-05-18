@@ -1,0 +1,7 @@
+var classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4 =
+[
+    [ "KernelType", "classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a29a6b8d1f3e444959bda508926fb438e", null ],
+    [ "get_kernel", "classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a447ae6f1d2a595027d0ebcb8e94a3ba8", null ],
+    [ "get_storage_size", "classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a1acb91503a7760505b240fc04bbab5ad", null ],
+    [ "pack_parameters", "classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a612ce03e0496be0258f6f0fedb6c15dc", null ]
+];

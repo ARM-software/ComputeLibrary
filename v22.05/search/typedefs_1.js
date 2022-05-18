@@ -1,0 +1,11 @@
+var searchData=
+[
+  ['bbox',['BBox',['../namespacearm__compute.xhtml#aa2b075b5da72ec6bb14f90c202443eb0',1,'arm_compute']]],
+  ['bfloat16',['bfloat16',['../namespacearm__gemm.xhtml#ac882ca3f500a8e83c76a8acc59831255',1,'arm_gemm']]],
+  ['bindfunc',['BindFunc',['../classarm__compute_1_1_i_scheduler.xhtml#a47266bbd911ce9049fc1194e9fac9051',1,'arm_compute::IScheduler']]],
+  ['bistrides',['BiStrides',['../namespacearm__compute.xhtml#a11916d4148a39a67794050373f54825a',1,'arm_compute']]],
+  ['blobmemorymanagementservice',['BlobMemoryManagementService',['../namespacearm__compute_1_1test_1_1validation.xhtml#a965151ed88fb7dac5a5efa2048820353',1,'arm_compute::test::validation']]],
+  ['broadcastloopfunctype',['BroadcastLoopFuncType',['../namespacearm__compute_1_1cpu.xhtml#a594793ba5a56a978b6a003bbb935aaa4',1,'arm_compute::cpu']]],
+  ['broadcastquantizedloopfunctype',['BroadcastQuantizedLoopFuncType',['../namespacearm__compute_1_1cpu.xhtml#ab37daa8b0d55203741eb7ddeeb510fc1',1,'arm_compute::cpu']]],
+  ['buffer',['Buffer',['../classarm__compute_1_1test_1_1_simple_tensor.xhtml#acf18a24d1f21176e811e88cee2a70f1f',1,'arm_compute::test::SimpleTensor']]]
+];

@@ -1,0 +1,5 @@
+<map id="QuantizedLoopArguments&lt; InputScalarType, OutputScalarType, OperatorType &gt;" name="QuantizedLoopArguments&lt; InputScalarType, OutputScalarType, OperatorType &gt;">
+<area shape="rect" id="node2" href="$classarm__compute_1_1opencl_1_1_cl_gemm.xhtml" title="Basic function to execute GEMM on OpenCL. " alt="" coords="82,157,161,184"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1_i_c_l_operator.xhtml" title="Basic interface for functions which have a single async CL kernel. " alt="" coords="73,81,169,108"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1experimental_1_1_i_operator.xhtml" title="Base class for all async functions. " alt="" coords="80,5,163,32"/>
+</map>

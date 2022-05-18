@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_kernel.xhtml" title="ClKernel" alt="" coords="5,31,81,57"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_add_kernel.xhtml" title="ClAddKernel" alt="" coords="161,5,262,32"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_direct_conv2d_kernel.xhtml" title="ClDirectConv2dKernel" alt="" coords="129,56,293,83"/>
+</map>

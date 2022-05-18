@@ -1,0 +1,11 @@
+<map id="ClAuxTensorData::DataView" name="ClAuxTensorData::DataView">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. " alt="" coords="91,247,181,273"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. " alt="" coords="81,171,175,197"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="ICloneable\&lt; ITensorInfo \&gt;" alt="" coords="5,95,197,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface. " alt="" coords="37,5,166,32"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_c_l_tensor.xhtml" title="Basic implementation of the OpenCL tensor interface. " alt="" coords="211,247,290,273"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor. " alt="" coords="209,171,292,197"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for CPU tensor. " alt="" coords="222,95,290,121"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_i_memory_manageable.xhtml" title="Interface of an object than can be memory managed. " alt="" coords="317,171,475,197"/>
+<area shape="rect" id="node10" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_aux_memory_info.xhtml" title="Memory Info for a WorkloadTensor of Auxiliary memory type. " alt="" coords="315,247,440,273"/>
+</map>

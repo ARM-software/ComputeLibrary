@@ -1,0 +1,16 @@
+<map id="src/cpu/kernels/fuse_batch_normalization" name="src/cpu/kernels/fuse_batch_normalization">
+<area shape="rect" id="node2" href="dir_a1c5d8e5f910cc021621e5f63768cddc.xhtml" title="generic" alt="" coords="37,159,109,207"/>
+<area shape="rect" id="node5" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="85,351,197,399"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000340_000000.xhtml" title="1" alt="" coords="113,323,122,338"/>
+<area shape="rect" id="node6" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="105,255,177,303"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000340_000020.xhtml" title="1" alt="" coords="116,227,125,242"/>
+<area shape="rect" id="node3" href="dir_b88a95520b4724aa38fb98bd2c9d4779.xhtml" title="nchw" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000383_000340.xhtml" title="1" alt="" coords="77,133,86,147"/>
+<area shape="rect" id="node4" href="dir_8214c66eb519552933c96f6da57248c9.xhtml" title="nhwc" alt="" coords="133,63,205,111"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000341_000340.xhtml" title="1" alt="" coords="112,144,121,159"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000341_000000.xhtml" title="1" alt="" coords="176,334,185,348"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000341_000020.xhtml" title="1" alt="" coords="151,230,160,245"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000020_000000.xhtml" title="631" alt="" coords="137,325,162,339"/>
+<area shape="rect" id="clust2" href="dir_bb11e055db43bd302d9253e2592a4191.xhtml" alt="" coords="27,52,432,217"/>
+<area shape="rect" id="clust1" href="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml" title="kernels" alt="" coords="16,16,443,228"/>
+</map>

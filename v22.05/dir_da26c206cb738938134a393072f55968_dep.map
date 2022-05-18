@@ -1,0 +1,15 @@
+<map id="src/cpu/kernels/directconv2d" name="src/cpu/kernels/directconv2d">
+<area shape="rect" id="node5" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="113,255,185,303"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000293_000020.xhtml" title="8" alt="" coords="147,228,156,242"/>
+<area shape="rect" id="node2" href="dir_a36841fb7ad02ee975d4c167586b8a07.xhtml" title="nchw" alt="" coords="168,63,240,111"/>
+<area shape="rect" id="node3" href="dir_f0f309bec51ee57c068b104738fc6fbb.xhtml" title="nhwc" alt="" coords="40,159,112,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000382_000367.xhtml" title="1" alt="" coords="123,147,133,162"/>
+<area shape="rect" id="node4" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="93,351,205,399"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000382_000000.xhtml" title="6" alt="" coords="183,333,193,348"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000382_000020.xhtml" title="3" alt="" coords="168,233,178,248"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000367_000000.xhtml" title="6" alt="" coords="121,323,131,338"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000367_000020.xhtml" title="4" alt="" coords="122,227,131,242"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000020_000000.xhtml" title="631" alt="" coords="145,325,170,339"/>
+<area shape="rect" id="clust2" href="dir_da26c206cb738938134a393072f55968.xhtml" alt="" coords="27,52,251,217"/>
+<area shape="rect" id="clust1" href="dir_1de7bcbbdec2bf3559cb3c688662d4f5.xhtml" title="kernels" alt="" coords="16,16,261,228"/>
+</map>

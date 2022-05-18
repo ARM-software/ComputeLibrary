@@ -1,0 +1,9 @@
+<map id="DepthfirstMultiplierStrategy&lt; TInput, TWeight, TOutput, int32_t &gt;" name="DepthfirstMultiplierStrategy&lt; TInput, TWeight, TOutput, int32_t &gt;">
+<area shape="rect" id="node2" href="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml" title="DepthwiseDepthfirstStrategy\lCommon\&lt; TInput, TWeight,\l TOutput, int32_t, arm_gemm\l::Requantize32 \&gt;" alt="" coords="1332,73,1547,144"/>
+<area shape="rect" id="node3" href="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; TInput, TWeight, TOutput,\l int32_t, arm_gemm::Requantize32 \&gt;" alt="" coords="857,40,1123,96"/>
+<area shape="rect" id="node4" href="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy_untyped.xhtml" title="DepthfirstStrategyUntyped" alt="" coords="200,55,396,82"/>
+<area shape="rect" id="node6" href="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; TInput, TWeight, TOutput,\l TAccum, OutputStage \&gt;" alt="" coords="445,40,648,96"/>
+<area shape="rect" id="node8" href="$classarm__conv_1_1depthwise_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; TInput, TWeight, TOutput,\l TAccum, OutputStage \&gt;" alt="" coords="445,120,648,176"/>
+<area shape="rect" id="node5" href="$classarm__conv_1_1depthwise_1_1_i_depthfirst_strategy.xhtml" title="IDepthfirstStrategy" alt="" coords="5,55,151,82"/>
+<area shape="rect" id="node7" href="$classarm__conv_1_1depthwise_1_1_depthwise_depthfirst_strategy_common.xhtml" title="DepthwiseDepthfirstStrategy\lCommon\&lt; TInput, TWeight,\l TOutput, TAccum, OutputStage \&gt;" alt="" coords="869,120,1111,176"/>
+</map>
