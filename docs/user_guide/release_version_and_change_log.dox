@@ -41,6 +41,13 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v22.08 Public major release
+ - Build flag change: toolchain_prefix, compiler_prefix:
+   - Use empty string "" to suppress any prefixes
+   - Use "auto" to use default (auto) prefixes chosen by the build script. This is the default behavior when unspecified
+   - Any other string will be used as custom prefixes to the compiler and the rest of toolchain tools
+   - The default behaviour when prefix is unspecified does not change, but its signifier has been changed from empty string "" to "auto"
+
 v22.05 Public major release
  - Various bug fixes.
  - Various optimizations.

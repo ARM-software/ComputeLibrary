@@ -118,8 +118,8 @@ vars.AddVariables(
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
-    ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc.", ""),
-    ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; if left empty, SCons only uses toolchain_prefix; this is for when the compiler prefixes are different from that of the linkers, archivers etc.", ""),
+    ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc. If unspecified, use default(auto) prefixes; if passed an empty string '' prefixes would be disabled", "auto"),
+    ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; this is for when the compiler prefixes are different from that of the linkers, archivers etc. If unspecified, this is the same as toolchain_prefix; if passed an empty string '' prefixes would be disabled", "auto"),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
@@ -323,35 +323,42 @@ else: # NONE "multi_isa" builds
 # Define toolchain
 # The reason why we distinguish toolchain_prefix from compiler_prefix is for cases where the linkers/archivers use a
 # different prefix than the compilers. An example is the NDK r20 toolchain
-toolchain_prefix = ""
+auto_toolchain_prefix = ""
 if 'x86' not in env['arch']:
     if env['estate'] == '32':
         if env['os'] == 'linux':
-            toolchain_prefix = "arm-linux-gnueabihf-" if 'v7' in env['arch'] else "armv8l-linux-gnueabihf-"
+            auto_toolchain_prefix = "arm-linux-gnueabihf-" if 'v7' in env['arch'] else "armv8l-linux-gnueabihf-"
         elif env['os'] == 'bare_metal':
-            toolchain_prefix = "arm-eabi-"
+            auto_toolchain_prefix = "arm-eabi-"
         elif env['os'] == 'android':
-            toolchain_prefix = "arm-linux-androideabi-"
+            auto_toolchain_prefix = "arm-linux-androideabi-"
         elif env['os'] == 'tizen':
-            toolchain_prefix = "armv7l-tizen-linux-gnueabi-"
+            auto_toolchain_prefix = "armv7l-tizen-linux-gnueabi-"
     elif env['estate'] == '64' and 'v8' in env['arch']:
         if env['os'] == 'linux':
-            toolchain_prefix = "aarch64-linux-gnu-"
+            auto_toolchain_prefix = "aarch64-linux-gnu-"
         elif env['os'] == 'bare_metal':
-            toolchain_prefix = "aarch64-elf-"
+            auto_toolchain_prefix = "aarch64-elf-"
         elif env['os'] == 'android':
-            toolchain_prefix = "aarch64-linux-android-"
+            auto_toolchain_prefix = "aarch64-linux-android-"
         elif env['os'] == 'tizen':
-            toolchain_prefix = "aarch64-tizen-linux-gnu-"
+            auto_toolchain_prefix = "aarch64-tizen-linux-gnu-"
 
 if env['build'] == 'native':
     toolchain_prefix = ""
 
-if env["toolchain_prefix"] != "":
+if env["toolchain_prefix"] == "":
+    toolchain_prefix = ""
+elif env["toolchain_prefix"] == "auto":
+    toolchain_prefix = auto_toolchain_prefix
+else:
     toolchain_prefix = env["toolchain_prefix"]
 
-compiler_prefix = toolchain_prefix
-if env["compiler_prefix"] != "":
+if env["compiler_prefix"] == "":
+    compiler_prefix = ""
+elif env["compiler_prefix"] == "auto":
+    compiler_prefix = toolchain_prefix
+else:
     compiler_prefix = env["compiler_prefix"]
 
 env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
@@ -364,6 +371,9 @@ else:
     env['AR'] = toolchain_prefix + "ar"
 env['RANLIB'] = toolchain_prefix + "ranlib"
 
+print("Using compilers:")
+print("CC", env['CC'])
+print("CXX", env['CXX'])
 
 if not GetOption("help"):
     try:

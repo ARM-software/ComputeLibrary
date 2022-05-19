@@ -391,9 +391,21 @@ For NDK r18 or older, here is a guide to <a href="https://developer.android.com/
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
 
 For NDK r19 or newer, you can directly <a href="https://developer.android.com/ndk/downloads">Download</a> the NDK package for your development platform, without the need to launch the make_standalone_toolchain.py script. You can find all the prebuilt binaries inside $NDK/toolchains/llvm/prebuilt/$OS_ARCH/bin/.
-@attention the building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You should copy/rename the binary removing this suffix, or - alternatively - create an alias for it.
+@parblock
+@attention The building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You can instruct scons to use the correct version by using a combination of the toolchain_prefix and the "CC" "CXX" environment variables.
+@attention For this particular example, you can specify:
 
+	CC=clang CXX=clang++ scons toolchain_prefix=aarch64-linux-android21-
+
+@attention or:
+
+	CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++ scons toolchain_prefix=""
+
+@endparblock
+
+@parblock
 @attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
+@endparblock
 
 @note Make sure to add the toolchains to your PATH:
 
