@@ -387,6 +387,7 @@ For NDK r18 or older, here is a guide to <a href="https://developer.android.com/
 - Generate the 32 and/or 64 toolchains by running the following commands to your toolchain directory $MY_TOOLCHAINS:
 
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b --stl libc++ --api 21
+
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
 
 For NDK r19 or newer, you can directly <a href="https://developer.android.com/ndk/downloads">Download</a> the NDK package for your development platform, without the need to launch the make_standalone_toolchain.py script. You can find all the prebuilt binaries inside $NDK/toolchains/llvm/prebuilt/$OS_ARCH/bin/.
