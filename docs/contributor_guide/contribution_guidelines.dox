@@ -272,7 +272,7 @@ auto d = vdup_n_u8(0); // NO: It's not obvious what type this function returns.
 
         - No '*' in front of argument names
         - [in], [out] or [in,out] *in front* of arguments
-        - Skip a line between the description and params and between params and @return (If there is a return)
+        - Skip a line between the description and params and between params and \@return (If there is a return)
         - Align params names and params descriptions (Using spaces), and with a single space between the widest column and the next one.
         - Use an upper case at the beginning of the description
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,7 @@ public:
      * @param[in] platform     The CPU platform used to create the context.
      * @param[in] thread_count Number of threads in the execution.
      *
-     * @return[out] mws         Minimum workload size for requsted configuration.
+     * @return Minimum workload size for requested configuration.
      */
     virtual size_t get_mws(const CPUInfo &platform, size_t thread_count) const
     {
