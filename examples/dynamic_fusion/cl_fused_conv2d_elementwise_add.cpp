@@ -138,6 +138,7 @@ public:
         CLScheduler::get().default_init(tuner_to_use);
 
         TICK(startup_time);
+        TICK(configure);
         /* Computation:
          * out = add_desc(addend, conv2d1x1(direct_conv)(input, weights, bias))
          */
@@ -251,7 +252,9 @@ public:
         const auto success = ClCompositeOperator::validate(workload); // Optional
         op.configure(CLKernelLibrary::get().get_compile_context(), workload);
         // [Validate and configure ClCompositeOperator]
+        TOCK(configure, measurements);
 
+        TICK(tensor_allocation);
         /// @page example_dynamic_fusion_cl_conv2d_elementwise_add
         /// @subsection run_clcompositeoperator Run ClCompositeOperator
         /// Construct the runtime CLTensor s with backing memory
@@ -312,7 +315,9 @@ public:
             tensor_data.tensor->allocator()->allocate();
         }
         // [Initialize and Allocate Auxiliary CLTensor objects]
+        TOCK(tensor_allocation, measurements);
 
+        TICK(dummy_run);
         /// @page example_dynamic_fusion_cl_conv2d_elementwise_add
         /// Run the ClCompositeOperator prepare job. This performs any jobs that are required for the first run, like
         /// reshaping tensors for a more performant format.
@@ -327,6 +332,8 @@ public:
         // [Run ClCompositeOperator]
         op.run(run_pack_map);
         // [Run ClCompositeOperator]
+        CLScheduler::get().sync();
+        TOCK(dummy_run, measurements);
         TOCK(startup_time, measurements);
         return true;
     }
