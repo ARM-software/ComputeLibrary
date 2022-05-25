@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,8 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
 {
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(src0, src1, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
+
+    // When fusing activation, same workaround introduced for COMPMID-5324 may be necessary
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv3d_info.act_info.enabled(), "Fused activation not supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src0);

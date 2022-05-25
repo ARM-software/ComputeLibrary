@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -253,11 +253,27 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
             build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(biases->data_type())));
         }
 
-        build_options.add_option("-cl-fast-relaxed-math");
+        // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324
+        const auto act_function  = act_info.activation();
+        const auto dst_data_type = dst->data_type();
+
+        if((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
+           && (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU || act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+           && (dst_data_type == DataType::F32 || dst_data_type == DataType::F16))
+        {
+            // -cl-fast-relaxed-math also sets -cl-finite-math-only and -cl-unsafe-math-optimizations
+            // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
+            build_options.add_option("-cl-unsafe-math-optimizations");
+        }
+        else
+        {
+            build_options.add_option("-cl-fast-relaxed-math");
+        }
+
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
+        build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
         build_options.add_option_if_else(export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
         build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
@@ -271,7 +287,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
         build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
         build_options.add_option_if((src->dimension(channel_idx) % k0) != 0, "-DLEFTOVER_LOOP");
-        build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+        build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_function)));
 
         if(is_data_type_quantized(data_type))
         {
