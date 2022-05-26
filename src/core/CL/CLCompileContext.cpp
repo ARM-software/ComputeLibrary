@@ -247,7 +247,7 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
 
-    if(_device.supported("cl_arm_integer_dot_product_int8"))
+    if(_device.supported("cl_arm_integer_dot_product_int8") || _device.supported("cl_khr_integer_dot_product"))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
     }
