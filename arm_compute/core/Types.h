@@ -774,10 +774,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int                          _pad_left;
-    unsigned int                          _pad_top;
-    unsigned int                          _pad_right;
-    unsigned int                          _pad_bottom;
+    unsigned int _pad_left;
+    unsigned int _pad_top;
+    unsigned int _pad_right;
+    unsigned int _pad_bottom;
 
     DimensionRoundingType _round_type;
 };
@@ -919,14 +919,14 @@ public:
     }
 
 private:
-    std::vector<float>   _min_sizes;
-    std::vector<float>   _variances;
-    float                _offset;
-    bool                 _flip;
-    bool                 _clip;
-    std::vector<float>   _max_sizes;
-    std::vector<float>   _aspect_ratios;
-    Coordinates2D        _img_size;
+    std::vector<float> _min_sizes;
+    std::vector<float> _variances;
+    float              _offset;
+    bool               _flip;
+    bool               _clip;
+    std::vector<float> _max_sizes;
+    std::vector<float> _aspect_ratios;
+    Coordinates2D      _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1171,15 @@ public:
     }
 
 private:
-    unsigned int         _max_detections;
-    unsigned int         _max_classes_per_detection;
-    float                _nms_score_threshold;
-    float                _iou_threshold;
-    unsigned int         _num_classes;
+    unsigned int _max_detections;
+    unsigned int _max_classes_per_detection;
+    float        _nms_score_threshold;
+    float        _iou_threshold;
+    unsigned int _num_classes;
     std::array<float, 4> _scales_values;
-    bool                 _use_regular_nms;
-    unsigned int         _detection_per_class;
-    bool                 _dequantize_scores;
+    bool         _use_regular_nms;
+    unsigned int _detection_per_class;
+    bool         _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1612,13 @@ public:
     }
 
 private:
-    float                _img_width;
-    float                _img_height;
-    float                _scale;
-    bool                 _apply_scale;
-    bool                 _correct_transform_coords;
+    float _img_width;
+    float _img_height;
+    float _scale;
+    bool  _apply_scale;
+    bool  _correct_transform_coords;
     std::array<float, 4> _weights;
-    float                _bbox_xform_clip;
+    float _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -1643,6 +1643,9 @@ public:
         IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
         HARD_SWISH       /**< Hard-swish ( \f$ f(x) = (x * relu6(x+3))/6 \f$ ) */
     };
+
+    /** Lookup table  */
+    using LookupTable256 = std::array<qasymm8_t, 256>;
 
     ActivationLayerInfo() = default;
     /** Default Constructor
@@ -1677,11 +1680,30 @@ public:
         return _enabled;
     }
 
+    const LookupTable256 &lut() const
+    {
+        return _lut;
+    }
+
+    void init_lut(const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+    }
+
 private:
     ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::IDENTITY };
     float              _a       = {};
     float              _b       = {};
     bool               _enabled = { false };
+    LookupTable256     _lut     = {};
+
+    inline void qasymm8_hard_swish_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_hard_swish(i, qi_in, qi_out);
+        }
+    }
 };
 
 /** Fully connected layer info */
