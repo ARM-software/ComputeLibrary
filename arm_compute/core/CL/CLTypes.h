@@ -41,7 +41,8 @@ enum class CLVersion
     CL10,   /* the OpenCL 1.0 */
     CL11,   /* the OpenCL 1.1 */
     CL12,   /* the OpenCL 1.2 */
-    CL20,   /* the OpenCL 2.0 and above */
+    CL20,   /* the OpenCL 2.x */
+    CL30,   /* the OpenCL 3.x */
     UNKNOWN /* unkown version */
 };
 

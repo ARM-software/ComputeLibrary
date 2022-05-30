@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -256,7 +256,11 @@ bool dot8_acc_supported(const cl::Device &device)
 CLVersion get_cl_version(const cl::Device &device)
 {
     std::string version_str = device.getInfo<CL_DEVICE_VERSION>();
-    if(version_str.find("OpenCL 2") != std::string::npos)
+    if(version_str.find("OpenCL 3") != std::string::npos)
+    {
+        return CLVersion::CL30;
+    }
+    else if(version_str.find("OpenCL 2") != std::string::npos)
     {
         return CLVersion::CL20;
     }
@@ -386,6 +390,15 @@ size_t get_cl_image_pitch_alignment(const cl::Device &device)
     {
         return 0;
     }
+}
+
+bool get_cl_non_uniform_work_group_supported(const cl::Device &device)
+{
+    cl_bool supported = CL_FALSE;
+
+    cl_int err = clGetDeviceInfo(device(), CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT, sizeof(cl_bool), &supported, nullptr);
+
+    return (err == CL_SUCCESS && supported == CL_TRUE);
 }
 
 cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
