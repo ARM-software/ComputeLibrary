@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,9 @@
 
 namespace arm_compute
 {
+// Forward declaration
+struct DirectConvComputeKernelInfo;
+
 namespace opencl
 {
 namespace kernels
@@ -62,9 +65,10 @@ public:
      *                             The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p src.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  act_info        Contains activaton information described in @ref ActivationLayerInfo.
+     * @param[in]  desc            Direct convolution descriptor used to build the NHWC direct convolution kernel. For NCHW, this parameter is ignored.
      */
     void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info);
+                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClDirectConv2dKernel::configure()
@@ -72,7 +76,7 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info);
+                           const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
@@ -80,6 +84,7 @@ public:
 public:
     DataLayout    _data_layout{};
     PadStrideInfo _conv_info{};
+    bool          _export_to_cl_image{ false };
 };
 } // namespace kernels
 } // namespace opencl

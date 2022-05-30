@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,21 @@
  */
 #include "src/gpu/cl/operators/ClDirectConv2d.h"
 
+#include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "src/gpu/cl/kernels/ClActivationKernel.h"
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
+#include "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigBifrost.h"
+#include "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigValhall.h"
+#include "src/gpu/cl/kernels/direct_conv/ClDirectConvKernelConfig.h"
+#include "src/gpu/cl/kernels/direct_conv/IClDirectConvKernelConfig.h"
 
 #include "src/common/utils/Log.h"
+
+using namespace arm_compute::cl_direct_conv;
 
 namespace arm_compute
 {
@@ -43,6 +52,17 @@ ITensorPack select_activation_src_dst(ITensorPack &tensors)
     pack.add_tensor(TensorType::ACL_DST, tensors.get_tensor(TensorType::ACL_DST));
     return pack;
 }
+
+DirectConvComputeKernelInfo config_direct_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
+{
+    // Get GPU target
+    GPUTarget gpu_target = CLScheduler::get().target();
+
+    std::unique_ptr<IClDirectConvKernelConfig> t = ClDirectConvKernelConfigurationFactory::create(gpu_target);
+
+    return t->configure(src, weights, conv_info);
+}
+
 } // namespace
 
 void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
@@ -51,11 +71,14 @@ void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorI
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info);
 
+    // Initialize the direct convolution descriptor
+    const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, weights, conv_info);
+
     // Configure direct convolution kernel
     const ActivationLayerInfo conv2d_act_info = (src->data_layout() == DataLayout::NHWC && is_data_type_float(src->data_type())) ? act_info : ActivationLayerInfo();
     auto                      k               = std::make_unique<kernels::ClDirectConv2dKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(compile_context, src, weights, biases, dst, conv_info, conv2d_act_info);
+    k->configure(compile_context, src, weights, biases, dst, conv_info, conv2d_act_info, desc);
     _direct_conv_kernel = std::move(k);
 
     // Configure border handler
@@ -83,7 +106,10 @@ void ClDirectConv2d::configure(const CLCompileContext &compile_context, ITensorI
 Status ClDirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
                                 const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv2dKernel::validate(src, weights, biases, dst, conv_info, ActivationLayerInfo()));
+    // Initialize the direct convolution descriptor
+    const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, weights, conv_info);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClDirectConv2dKernel::validate(src, weights, biases, dst, conv_info, ActivationLayerInfo(), desc));
     if(act_info.enabled())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClActivationKernel::validate(dst, dst, act_info));
