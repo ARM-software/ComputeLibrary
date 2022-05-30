@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -188,7 +188,7 @@ std::size_t IScheduler::adjust_num_of_windows(const Window &window, std::size_t 
                 recommended_split_dim = dims;
             }
         }
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("%lu dimension is not a suitable dimension to split the workload. Recommended: %lu recommended_split_dim", split_dimension,
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("%zu dimension is not a suitable dimension to split the workload. Recommended: %zu recommended_split_dim", split_dimension,
                                                   recommended_split_dim);
     }
 
