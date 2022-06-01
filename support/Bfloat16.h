@@ -90,7 +90,7 @@ public:
      *
      * @param[in] v Floating-point value
      */
-    explicit bfloat16(float v)
+    bfloat16(float v)
         : value(float_to_bf16(v))
     {
     }

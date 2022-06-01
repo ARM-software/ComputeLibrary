@@ -28,11 +28,18 @@
 #include "depthwise_depthfirst.hpp"
 #include "depthwise_depthfirst_generic.hpp"
 #include "depthwise_depthfirst_multiplier.hpp"
+#include "depthwise_planar.hpp"
 
 #include "depthwise_implementation_constraints.hpp"
 
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#include "kernels/sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za.hpp"
+#include "kernels/sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za.hpp"
+#include "kernels/sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za.hpp"
+#include "kernels/sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za.hpp"
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
 #include "kernels/sve_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
 #include "kernels/sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst.hpp"
 #include "kernels/sve_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst.hpp"
@@ -54,6 +61,60 @@ namespace depthwise {
 static const DepthwiseImplementation<uint8_t, int8_t, uint8_t, Requantize32> depthwise_u8q_methods[] = {
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za",
+    constraint<Requantize32>(cpu_has_sme, cpu_has_sme2,
+                             is_supported<sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za>,
+                             has_no_channel_multiplier,
+                             qp_has_no_left_shift),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<uint8_t, int8_t, uint8_t> * {
+      auto strat = new sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<uint8_t, int8_t>(strat, args, qp);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za",
+    constraint<Requantize32>(cpu_has_sme, cpu_has_sme2,
+                             is_supported<sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za>,
+                             has_no_channel_multiplier,
+                             qp_has_no_left_shift),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<uint8_t, int8_t, uint8_t> * {
+      auto strat = new sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<uint8_t, int8_t>(strat, args, qp);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za",
+    constraint<Requantize32>(cpu_has_sme, cpu_has_sme2,
+                             is_supported<sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za>,
+                             has_no_channel_multiplier,
+                             qp_has_no_left_shift),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<uint8_t, int8_t, uint8_t> * {
+      auto strat = new sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<uint8_t, int8_t>(strat, args, qp);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za",
+    constraint<Requantize32>(cpu_has_sme, cpu_has_sme2,
+                             is_supported<sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za>,
+                             has_no_channel_multiplier,
+                             qp_has_no_left_shift),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<uint8_t, int8_t, uint8_t> * {
+      auto strat = new sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<uint8_t, int8_t>(strat, args, qp);
+    },
+  },
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst",

@@ -168,6 +168,16 @@ An example build command with SVE is:
 
         scons arch=armv8.2-a-sve os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
 
+@subsection S1_2_4_sme Build for SME2
+
+In order to build for SME2 you need to use a compiler that supports SVE2 and enable SVE2 in the build as well.
+
+@note You the need to indicate the toolchains using the scons "toolchain_prefix" parameter.
+
+An example build command with SME2 is:
+
+        scons arch=armv8.6-a-sve2-sme2 os=linux build_dir=arm64 -j55 standalone=0 opencl=0 openmp=0 validation_tests=1 neon=1 cppthreads=1 toolchain_prefix=aarch64-none-linux-gnu-
+
 @section S1_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:

@@ -256,6 +256,9 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
   {
   }
 
+  DepthwisePlanar(DepthwisePlanar &) = delete;
+  DepthwisePlanar &operator=(DepthwisePlanar &) = delete;
+
   size_t get_storage_size(void) const override
   {
     return m_strat->get_storage_size(this->m_args);

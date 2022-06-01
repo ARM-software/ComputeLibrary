@@ -30,6 +30,7 @@
 #include "bfloat.hpp"
 #include "convolver.hpp"
 #include "kernel_weight_format.hpp"
+#include "kernel_traits.hpp"
 #include "mergeresults.hpp"
 #include "performance_parameters.hpp"
 #include "quantized.hpp"
@@ -574,6 +575,26 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
         // K blocking not supported if we are requantizing.
         if (std::is_same<OutputStage, Requantize32>::value) {
             return get_ktotal(args);
+        }
+
+        // Special blocking for SME
+        if (is_sme<strategy>::value) {
+            // Don't bother to block below this size threshold, experimentally determined to be 320 for FP32
+            unsigned int scaling_threshold = 1280 / sizeof(Toi);
+
+            if (get_ktotal(args) <= scaling_threshold) {
+                return get_ktotal(args);
+            }
+
+            // Once we are blocking, this (lower) threshold determines when we should use more blocks
+            // NOTE: Could be that some factor-based solution would work better here.
+            unsigned int max_block_size = 1024 / sizeof(Toi);
+
+            unsigned int num_k_blocks = iceildiv(get_ktotal(args), max_block_size);
+
+            unsigned int k_block = roundup(iceildiv(get_ktotal(args), num_k_blocks), strategy::k_unroll());
+
+            return k_block;
         }
 
         const unsigned int L1_size = args._ci->get_L1_cache_size();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,10 +41,10 @@ namespace {
 template<typename OutputStage>
 class run_gemv_kernel {
 public:
-    template<typename strategy, typename To, typename Tr>
+    template<typename strategy, typename Tlo, typename Tro, typename Tr>
     static void run (
         const strategy &strat,
-        const To *A_ptr, const To *B_ptr, Tr *c_ptr,
+        const Tlo *A_ptr, const Tro *B_ptr, Tr *c_ptr,
         size_t N, size_t K,
         const Tr *bias, const Activation &act, bool Accumulate,
         const OutputStage &os, const int32_t *col_bias, unsigned int col_base
@@ -52,10 +52,10 @@ public:
 };
 
 template<>
-template<typename strategy, typename To, typename Tr>
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
 void run_gemv_kernel<Nothing>::run(
         const strategy &strat,
-        const To *A_ptr, const To *B_ptr, Tr *C_ptr,
+        const Tlo *A_ptr, const Tro *B_ptr, Tr *C_ptr,
         size_t N, size_t K,
         const Tr *bias, const Activation &act, bool Accumulate,
         const Nothing &, const int32_t *, unsigned int
@@ -65,10 +65,10 @@ void run_gemv_kernel<Nothing>::run(
 }
 
 template<>
-template<typename strategy, typename To, typename Tr>
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
 void run_gemv_kernel<Requantize32>::run(
         const strategy &strat,
-        const To *A_ptr, const To *B_ptr, Tr *C_ptr,
+        const Tlo *A_ptr, const Tro *B_ptr, Tr *C_ptr,
         size_t N, size_t K,
         const Tr *, const Activation &, bool,
         const Requantize32 &qp, const int32_t *col_bias, unsigned int col_base

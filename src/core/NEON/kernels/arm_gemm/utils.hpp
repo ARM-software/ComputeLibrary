@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,7 @@ inline T roundup(const T a, const T b) {
 enum class VLType {
     None,
     SVE,
+    SME
 };
 
 template<typename T>
@@ -191,6 +192,20 @@ inline unsigned long get_vector_length() {
 #endif // defined(__aarch64__)
 }
 
+#ifdef ARM_COMPUTE_ENABLE_SME
+namespace sme {
+
+// function from misc-sve.cpp
+extern unsigned int raw_vector_length();
+
+template <typename T>
+inline unsigned long get_vector_length() {
+    return raw_vector_length() / sizeof(T);
+}
+
+} // namespace sme
+#endif // ARM_COMPUTE_ENABLE_SME
+
 // get_vector_length(VLType): Returns vector length for type "T".
 //
 // This has the same requirements and constraints as the SVE-only form above, so we call into that code for SVE.
@@ -198,6 +213,10 @@ inline unsigned long get_vector_length() {
 template <typename T>
 inline unsigned long get_vector_length(VLType vl_type) {
   switch (vl_type) {
+#ifdef ARM_COMPUTE_ENABLE_SME
+    case VLType::SME:
+      return sme::get_vector_length<T>();
+#endif // ARM_COMPUTE_ENABLE_SME
     case VLType::SVE:
       return get_vector_length<T>();
     default:

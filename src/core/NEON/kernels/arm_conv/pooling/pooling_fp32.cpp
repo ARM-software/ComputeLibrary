@@ -30,6 +30,12 @@
 
 #include "kernels/cpp_nhwc_1x1_stride_any_depthfirst.hpp"
 #if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+#include "kernels/sme_fp32_nhwc_max_2x2_s1_output2x2_depthfirst.hpp"
+#include "kernels/sme_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst.hpp"
+#include "kernels/sme_fp32_nhwc_avg_generic_depthfirst.hpp"
+#include "kernels/sme_fp32_nhwc_max_generic_depthfirst.hpp"
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_fp32_nhwc_max_2x2_s1_output2x2_depthfirst.hpp"
 #include "kernels/sve_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst.hpp"
@@ -59,6 +65,58 @@ static const PoolingImplementation<float, float> pooling_fp32_methods[] = {
     },
   },
 #if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_fp32_nhwc_max_2x2_s1_output2x2_depthfirst",
+    [] (const PoolingArgs &args, const Nothing &os) -> bool {
+      return args.cpu_info->has_sme() &&
+             is_supported<sme_fp32_nhwc_max_2x2_s1_output2x2_depthfirst>(args, os);
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
+      auto strat = new sme_fp32_nhwc_max_2x2_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
+    },
+  },
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst",
+    [] (const PoolingArgs &args, const Nothing &os) -> bool {
+      return args.cpu_info->has_sme() &&
+             is_supported<sme_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst>(args, os);
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
+      auto strat = new sme_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst(args.cpu_info);
+      return new PoolingDepthfirst<float>(strat, args);
+    },
+  },
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_fp32_nhwc_avg_generic_depthfirst",
+    [] (const PoolingArgs &args, const Nothing &) -> bool {
+      return args.cpu_info->has_sme() && args.pool_type == PoolingType::AVERAGE;
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
+      auto strat = new sme_fp32_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
+    },
+  },
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_fp32_nhwc_max_generic_depthfirst",
+    [] (const PoolingArgs &args, const Nothing &) -> bool {
+      return args.cpu_info->has_sme() && args.pool_type == PoolingType::MAX;
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Nothing &) -> PoolingCommon<float, float> * {
+      auto strat = new sme_fp32_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<float>(strat, args);
+    },
+  },
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
   {
     PoolingMethod::DEPTHFIRST,

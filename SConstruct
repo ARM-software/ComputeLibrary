@@ -91,7 +91,7 @@ vars.AddVariables(
     BoolVariable("logging", "Enable Logging", False),
     EnumVariable("arch", "Target Architecture. The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.", "armv7a",
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
-                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8.6-a-sve2-sme2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
     EnumVariable("build", "Either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
@@ -286,6 +286,11 @@ if 'sve' in env['arch']:
     if 'sve2' in env['arch']:
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
 
+if 'sme' in env['arch']:
+    env.Append(CPPDEFINES = ['ENABLE_SME', 'ARM_COMPUTE_ENABLE_SME'])
+    if 'sme2' in env['arch']:
+       env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SME2'])
+
 # Add architecture specific flags
 if env['multi_isa']:
     # assert arch version is v8
@@ -308,7 +313,7 @@ else: # NONE "multi_isa" builds
         else:
             env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
     elif 'v8.6-a' in env['arch']:
-        if 'armv8.6-a-sve2' == env['arch']:
+        if 'armv8.6-a-sve2' in env['arch']:
             env.Append(CXXFLAGS = ['-march=armv8.6-a+sve2'])
         elif 'armv8.6-a-sve' == env['arch']:
             env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])

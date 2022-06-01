@@ -237,6 +237,8 @@ int main(int argc, char **argv)
                 const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
                 const unsigned int          num_cpus = cpu_info.get_cpu_num();
                 p->print_entry("cpu_has_sve", support::cpp11::to_string(cpu_info.has_sve()));
+                p->print_entry("cpu_has_sme", support::cpp11::to_string(cpu_info.has_sme()));
+                p->print_entry("cpu_has_sme2", support::cpp11::to_string(cpu_info.has_sme2()));
                 p->print_entry("cpu_has_fp16", support::cpp11::to_string(cpu_info.has_fp16()));
                 p->print_entry("cpu_has_bf16", support::cpp11::to_string(cpu_info.has_bf16()));
                 p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));

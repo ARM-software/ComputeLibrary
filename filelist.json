@@ -1108,7 +1108,11 @@
             ]
           },
           "sve": {
-            "common": ["src/core/NEON/kernels/convolution/winograd/input_transforms/sve_fp32_6x6.cpp"]
+            "common": [
+              "src/core/NEON/kernels/convolution/winograd/input_transforms/sve_fp32_6x6.cpp",
+              "src/core/NEON/kernels/convolution/winograd/input_transforms/sme_fp32_mla_6x6.cpp",
+              "src/core/NEON/kernels/convolution/winograd/output_transforms/sme_fp32_mopa_4x4_3x3.cpp"
+            ]
           }
         }
       },
@@ -1292,7 +1296,38 @@
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp"
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sve_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_direct.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_planar_3x3_s1_4rows_mla_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_planar_3x3_s2_4rows_mla_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_planar_5x5_s1_4rows_mla_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32_planar_5x5_s2_4rows_mla_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_3x3_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_3x3_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s2_2rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_5x5_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_5x5_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s2_2rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_5x5_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_5x5_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s2_2rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za/generic.cpp"
             ]
           }
         }
@@ -1577,6 +1612,27 @@
           },
           "sve": {
             "common": [
+              "src/core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_gemv_bf16fp32_dot_16VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp32_mla_16VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp32bf16fp32_dot_16VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_gemv_s8qa_dot_16VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_gemv_u8qa_dot_16VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_bf16fp32_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_bf16fp32_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_fp32_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_fp32_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_fp32_mopa_4VLx1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8q_mopa_4VLx1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_s8s32_mopa_4VLx1VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_u8q_mopa_1VLx4VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_u8q_mopa_2VLx2VL/generic.cpp",
+              "src/core/NEON/kernels/arm_gemm/kernels/sme2_interleaved_nomerge_u8q_mopa_4VLx1VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_bf16fp32_dot_6x4VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_bf16fp32_mmla_6x4VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_hybrid_fp16_mla_6x4VL/a64fx.cpp",
@@ -1616,7 +1672,8 @@
               "src/core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_s8s32_dot_8x1VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_u8u32_dot_8x1VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/mergeresults-sve.cpp",
-              "src/core/NEON/kernels/arm_gemm/transform-sve.cpp"
+              "src/core/NEON/kernels/arm_gemm/transform-sve.cpp",
+              "src/core/NEON/kernels/arm_gemm/misc-sve.cpp"
             ],
             "experimental_fixed_format_kernels": [
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_bf16fp32_mmla_6x4VL/generic.cpp",
@@ -1844,7 +1901,25 @@
               "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_max_generic_depthfirst/generic.cpp",
               "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_avg_generic_depthfirst/generic.cpp",
-              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_max_generic_depthfirst/generic.cpp"
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp16_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp16_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp32_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp32_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_fp32_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_s8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_s8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_s8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_s8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_s8q_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_u8_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_u8_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_u8_nhwc_max_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_u8q_nhwc_avg_generic_depthfirst/generic.cpp",
+              "src/core/NEON/kernels/arm_conv/pooling/kernels/sme_u8q_nhwc_max_generic_depthfirst/generic.cpp"
             ]
           }
         }

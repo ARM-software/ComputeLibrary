@@ -32,8 +32,27 @@
 
 #include "depthwise_implementation_constraints.hpp"
 
+#include "interleaves/list.hpp"
+
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#include "kernels/sme2_fp32bf16fp32_planar_3x3_s1_4rows_dot_za.hpp"
+#include "kernels/sme2_fp32bf16fp32_planar_3x3_s2_4rows_dot_za.hpp"
+#include "kernels/sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za.hpp"
+#include "kernels/sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za.hpp"
+
+#include "kernels/sme2_fp32_planar_3x3_s1_4rows_mla_za.hpp"
+#include "kernels/sme2_fp32_planar_3x3_s2_4rows_mla_za.hpp"
+#include "kernels/sme2_fp32_planar_5x5_s1_4rows_mla_za.hpp"
+#include "kernels/sme2_fp32_planar_5x5_s2_4rows_mla_za.hpp"
+
+#include "kernels/sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
+#include "kernels/sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
+#include "kernels/sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
+#include "kernels/sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst.hpp"
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
+
 #include "kernels/sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
@@ -72,6 +91,18 @@ namespace
           );
   }
 
+  template <class Strategy>
+  unsigned int planar_cycle_estimate(const DepthwiseArgs &args, const Nothing &)
+  {
+    // First-pass: compute the number of output pixels which will be computed.
+    return arm_gemm::roundup(args.output_rows, Strategy::output_rows) *
+           args.output_cols *
+           arm_gemm::iceildiv(
+            (long unsigned) args.input_channels * args.channel_multiplier,
+            arm_gemm::utils::get_vector_length<typename Strategy::return_type>(Strategy::vl_type)
+          );
+  }
+
 #if defined(__aarch64__)
   unsigned int not_preferred(const DepthwiseArgs &, const Nothing &)
   {
@@ -89,6 +120,165 @@ namespace
 static const DepthwiseImplementation<float, float> depthwise_fp32_methods[] = {
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32bf16fp32_planar_3x3_s1_4rows_dot_za",
+    constraint(fast_mode_enabled,
+               cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32bf16fp32_planar_3x3_s1_4rows_dot_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32bf16fp32_planar_3x3_s1_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32bf16fp32_planar_3x3_s2_4rows_dot_za",
+    constraint(fast_mode_enabled,
+               cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32bf16fp32_planar_3x3_s2_4rows_dot_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32bf16fp32_planar_3x3_s2_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za",
+    constraint(fast_mode_enabled,
+               cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za",
+    constraint(fast_mode_enabled,
+               cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32_planar_3x3_s1_4rows_mla_za",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_planar_3x3_s1_4rows_mla_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    [] (const DepthwiseArgs &args, const Nothing &os) -> unsigned int {
+      // Heuristic, don't prefer this kernel unless the input plane is greater
+      // than the number of channels.
+      if (args.input_rows * args.input_cols < args.input_channels)
+        return UINT32_MAX;
+
+      return planar_cycle_estimate<sme2_fp32_planar_3x3_s1_4rows_mla_za>(args, os);
+    },
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_planar_3x3_s1_4rows_mla_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32_planar_3x3_s2_4rows_mla_za",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_planar_3x3_s2_4rows_mla_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    planar_cycle_estimate<sme2_fp32_planar_3x3_s2_4rows_mla_za>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_planar_3x3_s2_4rows_mla_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32_planar_5x5_s1_4rows_mla_za",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_planar_5x5_s1_4rows_mla_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_planar_5x5_s1_4rows_mla_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::PLANAR,
+    "sme2_fp32_planar_5x5_s2_4rows_mla_za",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_planar_5x5_s2_4rows_mla_za>,
+               has_no_channel_multiplier, no_prime_right_pad),
+    nullptr,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_planar_5x5_s2_4rows_mla_za(args.cpu_info);
+      return new DepthwisePlanar<float>(strat, args);
+    },
+  },
+
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst",
+    constraint(cpu_has_sme,  cpu_has_sme2,
+               is_supported<sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst>,
+               has_no_channel_multiplier),
+    cycle_estimate<sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<float, float, float, float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst>,
+               has_no_channel_multiplier),
+    cycle_estimate<sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<float, float, float, float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst>,
+               has_no_channel_multiplier),
+    cycle_estimate<sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<float, float, float, float>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst",
+    constraint(cpu_has_sme, cpu_has_sme2,
+               is_supported<sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst>,
+               has_no_channel_multiplier),
+    cycle_estimate<sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<float, float, float> * {
+      auto strat = new sme2_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<float, float, float, float>(strat, args);
+    },
+  },
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst",
