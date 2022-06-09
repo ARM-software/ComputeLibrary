@@ -190,7 +190,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 
     if(activation_info.activation() == ActivationLayerInfo::ActivationFunction::HARD_SWISH && src->data_type() == DataType::QASYMM8)
     {
-        activation_info.init_lut(src->quantization_info().uniform(), dst->quantization_info().uniform());
+        activation_info.init_lut(src->quantization_info().uniform(),(dst)?dst->quantization_info().uniform():src->quantization_info().uniform());
     }
     _act_info = activation_info;
 
