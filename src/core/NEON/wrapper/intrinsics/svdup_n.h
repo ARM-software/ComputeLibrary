@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,9 @@ SVDUP_N_IMPL(uint64_t, svuint64_t, u64)
 SVDUP_N_IMPL(float16_t, svfloat16_t, f16)
 SVDUP_N_IMPL(float, svfloat32_t, f32)
 SVDUP_N_IMPL(float64_t, svfloat64_t, f64)
+#if __ARM_FEATURE_SVE_BF16
 SVDUP_N_IMPL(bfloat16_t, svbfloat16_t, bf16)
+#endif // #if __ARM_FEATURE_SVE_BF16
 
 #undef SVDUP_N_IMPL
 
