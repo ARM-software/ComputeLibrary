@@ -867,7 +867,8 @@
           },
           "sve": {
             "fp16": [ "src/cpu/kernels/activation/generic/sve/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ]
+            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ],
+            "qasymm8": ["src/cpu/kernels/activation/generic/sve/lut.cpp"]
           },
           "sve2":{
             "qasymm8": [ "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp" ],
