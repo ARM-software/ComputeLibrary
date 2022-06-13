@@ -168,6 +168,10 @@ Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
 
+if 'armv7a' in env['arch'] and env['os'] == 'android':
+    print("armv7a is not supported on Android")
+    Exit(1)
+
 if env['linker_script'] and env['os'] != 'bare_metal':
     print("Linker script is only supported for bare_metal builds")
     Exit(1)

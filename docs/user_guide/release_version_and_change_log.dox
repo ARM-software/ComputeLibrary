@@ -47,6 +47,7 @@ v22.08 Public major release
    - Use "auto" to use default (auto) prefixes chosen by the build script. This is the default behavior when unspecified
    - Any other string will be used as custom prefixes to the compiler and the rest of toolchain tools
    - The default behaviour when prefix is unspecified does not change, but its signifier has been changed from empty string "" to "auto"
+   - armv7a will no longer be supported on Android
 
 v22.05 Public major release
  - Various bug fixes.

@@ -377,7 +377,6 @@ An example build command with SVE is:
 @section S1_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - clang++ from NDK r18b for armv7a
  - clang++ from NDK r20b for armv8a
  - clang++ from NDK r20b for armv8.2-a with FP16 support
 
