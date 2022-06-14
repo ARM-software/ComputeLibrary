@@ -187,6 +187,7 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
         build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
         build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
         build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
+        build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
     }
     else
     {
@@ -279,7 +280,6 @@ void ClWinogradOutputTransformKernel::run_op(ITensorPack &tensors, const Window 
         _kernel.setArg<cl_int>(idx2++, _src_height);
         _kernel.setArg<cl_int>(idx2++, _dst_width);
         _kernel.setArg<cl_int>(idx2++, _dst_height);
-        _kernel.setArg<cl_int>(idx2++, _num_tiles_x);
     }
 
     do
