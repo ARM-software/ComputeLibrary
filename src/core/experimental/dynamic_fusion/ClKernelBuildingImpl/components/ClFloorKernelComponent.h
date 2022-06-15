@@ -23,8 +23,8 @@
  */
 #ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 
-#ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
-#define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
+#ifndef ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLFLOORKERNELCOMPONENT_H
+#define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLFLOORKERNELCOMPONENT_H
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/Common.h"
 
@@ -34,11 +34,11 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-class ClElementwiseAddKernelComponent : public IClKernelComponent
+class ClFloorKernelComponent : public IClKernelComponent
 {
 public:
-    ClElementwiseAddKernelComponent(ClKernelBlueprint *blueprint, const Link &lhs, const Link &rhs, const Link &dst)
-        : IClKernelComponent(blueprint), _lhs{ lhs }, _rhs{ rhs }, _dst{ dst }
+    ClFloorKernelComponent(ClKernelBlueprint *blueprint, const Link &src, const Link &dst)
+        : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
     {
     }
 
@@ -51,7 +51,7 @@ public:
 
     virtual std::vector<Link> get_links() const override
     {
-        return { _lhs, _rhs, _dst };
+        return { _src, _dst };
     }
 
     virtual TagLUT get_tag_lut(const SharedVarTable &vtable) const override;
@@ -59,17 +59,16 @@ public:
 
     virtual std::string name() const override
     {
-        return "eltwise_add_" + std::to_string(id());
+        return "floor_" + std::to_string(id());
     }
 
 private:
-    Link _lhs{};
-    Link _rhs{};
+    Link _src{};
     Link _dst{};
 };
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLELEMENTWISEADDKERNELCOMPONENT_H
+#endif // ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_COMPONENTS_CLFLOORKERNELCOMPONENT_H
 #endif /* ENABLE_EXPERIMENTAL_DYNAMIC_FUSION */

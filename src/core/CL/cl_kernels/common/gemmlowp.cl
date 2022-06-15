@@ -703,7 +703,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 
     a_offset_s32[0].v *= A_OFFSET;
 
-    T_ADD_BROADCAST_X(int, M0, N0, offset_s32, a_offset_s32, offset_s32);
+    T_ELTWISE_BROADCAST_ADD_X(int, M0, N0, offset_s32, a_offset_s32, offset_s32);
 #endif // defined(A_OFFSET)
 
 #if defined(B_OFFSET)
@@ -728,7 +728,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 
     T_LOAD(int, 1, N0, BUFFER, biases, xo, 0, 1, 0, bias);
 
-    T_ADD_BROADCAST_X(int, M0, N0, offset_s32, bias, offset_s32);
+    T_ELTWISE_BROADCAST_ADD_X(int, M0, N0, offset_s32, bias, offset_s32);
 #endif // defined(ADD_BIAS)
 
     LOOP_UNROLLING(int, i, 0, 1, M0,

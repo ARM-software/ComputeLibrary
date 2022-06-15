@@ -970,6 +970,9 @@
 #define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 #define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 
+#define T_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
+#define T_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
+
 /** Element-wise activation for quantized types
  *
  * @note Performs: activation(LHS) = DST
@@ -1014,11 +1017,15 @@
         })                                                        \
     })
 
-/** Element-wise addition with RHS broadcasted (RHS has the X dimension only)
+#define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(T_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(T_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+/** Element-wise operation with RHS broadcasted (RHS has the X dimension only)
  *
- * @note Performs: LHS + RHS[broadcasted] = DST
+ * @note Performs: LHS OP RHS[broadcasted] = DST
  * @note Both tiles must have same data type
  *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
  * @param[in]  DST_DATA_TYPE DST data type
  * @param[in]  M0            Number of LHS rows
  * @param[in]  N0            Number of LHS columns
@@ -1026,19 +1033,23 @@
  * @param[in]  rhs           RHS tile
  * @param[out] dst           DST tile
  */
-#define T_ADD_BROADCAST_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+#define T_ELTWISE_BROADCAST_X(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
     ({                                                      \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
-            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
         })                                                  \
     })
 
-/** Element-wise addition between two tiles (LHS and RHS)
+#define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(T_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(T_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+/** Element-wise operation between two tiles (LHS and RHS)
  *
- * @note Performs: LHS + RHS = DST
+ * @note Performs: LHS OP RHS = DST
  * @note Both tiles must have same data type
  *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
  * @param[in]  DST_DATA_TYPE DST data type
  * @param[in]  M0            Number of LHS rows
  * @param[in]  N0            Number of LHS columns
@@ -1046,11 +1057,30 @@
  * @param[in]  rhs           RHS tile
  * @param[out] dst           DST tile
  */
-#define T_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+#define T_ELTWISE(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
     ({                                                      \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
-            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
+        })                                                  \
+    })
+
+/** Floor operation on a tile
+ *
+ * @note Performs: floor(SRC) = DST
+ * @note Both tiles must have same data type
+ *
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of SRC rows
+ * @param[in]  N0            Number of SRC columns
+ * @param[in]  src           LHS tile
+ * @param[out] dst           DST tile
+ */
+#define T_FLOOR(DST_DATA_TYPE, M0, N0, src, dst) \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
+            dst[_m0].v = floor(CONVERT(src[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
         })                                                  \
     })
 

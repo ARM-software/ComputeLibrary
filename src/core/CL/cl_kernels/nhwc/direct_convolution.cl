@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -233,7 +233,7 @@ __kernel void direct_convolution_nhwc(
     T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 1, 0, bias0);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
+    T_ELTWISE_BROADCAST_ADD_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
 
 #endif // HAS_BIAS
 

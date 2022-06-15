@@ -237,7 +237,7 @@ std::string ClDirectConvolutionKernelComponent::get_component_code() const
             T_LOAD({{BIA_DATA_TYPE}}, 1, N0, BUFFER, {{bias}}, cout, 0, 1, 0, bias0);
 
             // c = c + bias[broadcasted]
-            T_ADD_BROADCAST_X({{ACC_DATA_TYPE}}, M0, N0, {{dst}}, bias0, {{dst}});
+            T_ELTWISE_BROADCAST_ADD_X({{ACC_DATA_TYPE}}, M0, N0, {{dst}}, bias0, {{dst}});
         )_";
     }
 

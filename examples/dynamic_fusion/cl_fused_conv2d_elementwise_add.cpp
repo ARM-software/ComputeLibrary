@@ -218,12 +218,12 @@ public:
 
         /// @snippet dynamic_fusion/cl_fused_conv2d_elementwise_add.cpp  Add Elementwise Add Operator
         // [Add Elementwise Add Operator]
-        auto          t_l1_addend_info = TensorInfo(t_l1_addend_shape, 1, data_type, data_layout);
-        auto          t_dst_info       = TensorInfo();
-        const auto    op_t_l1_addend   = add_tensor(op_graph, t_l1_addend_info);
-        const auto    op_t_dst         = add_tensor(op_graph, t_dst_info);
-        AddDescriptor add_desc{};
-        add_op_elementwise_add(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
+        auto                  t_l1_addend_info = TensorInfo(t_l1_addend_shape, 1, data_type, data_layout);
+        auto                  t_dst_info       = TensorInfo();
+        const auto            op_t_l1_addend   = add_tensor(op_graph, t_l1_addend_info);
+        const auto            op_t_dst         = add_tensor(op_graph, t_dst_info);
+        ElementwiseDescriptor add_desc{ ArithmeticOperation::ADD };
+        add_op_elementwise_op(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
         // [Add Elementwise Add Operator]
 
         /// @page example_dynamic_fusion_cl_conv2d_elementwise_add

@@ -111,7 +111,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
-    T_ADD_BROADCAST_X(DATA_TYPE, 2, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 2, N0, out, b, out);
 #endif // defined(HAS_BIAS)
 
     T_ACTIVATION(DATA_TYPE, 2, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
@@ -177,7 +177,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // defined(HAS_BIAS)
 
     T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
@@ -287,7 +287,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -374,7 +374,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 16, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -488,7 +488,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -586,7 +586,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 16, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;

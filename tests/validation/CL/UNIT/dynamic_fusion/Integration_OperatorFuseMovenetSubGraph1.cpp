@@ -77,8 +77,8 @@ TEST_CASE(Operator_Fuse_Movenet_SubGraph_1_F32, framework::DatasetMode::ALL)
     auto       t_acc_info       = TensorInfo(); // Intermediate tensor for cond3
     auto       t_dst_info       = TensorInfo();
 
-    Conv2dDescriptor conv2d_desc{};
-    AddDescriptor    add_desc{};
+    Conv2dDescriptor      conv2d_desc{};
+    ElementwiseDescriptor add_desc{ ArithmeticOperation::ADD };
 
     // Create reference
     SimpleTensor<float> ref_t_input{ t_input_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
@@ -119,7 +119,7 @@ TEST_CASE(Operator_Fuse_Movenet_SubGraph_1_F32, framework::DatasetMode::ALL)
 
     auto conv2d = add_op_conv2d(op_graph, conv2d_desc, op_t_input, op_t_weight, op_t_acc);
     force_conv2d_method(op_graph, conv2d, ConvolutionMethod::DIRECT);
-    add_op_elementwise_add(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
 
     const ClWorkloadContext workload_ctx{ GpuInfo{ CLScheduler::get().target() } };
     ClWorkload              workload;
@@ -180,8 +180,8 @@ TEST_CASE(DataType_QASYMM8, framework::DatasetMode::ALL)
     auto       t_acc_info       = TensorInfo(t_dst_shape, 1, data_type, data_layout);
     auto       t_dst_info       = TensorInfo(t_dst_shape, 1, data_type, data_layout);
 
-    Conv2dDescriptor conv2d_desc{};
-    AddDescriptor    add_desc{};
+    Conv2dDescriptor      conv2d_desc{};
+    ElementwiseDescriptor add_desc{};
 
     OperatorGraph op_graph;
 
@@ -192,7 +192,7 @@ TEST_CASE(DataType_QASYMM8, framework::DatasetMode::ALL)
     const auto op_t_dst       = add_tensor(op_graph, t_dst_info);
 
     auto conv2d = add_op_conv2d(op_graph, conv2d_desc, op_t_input, op_t_weight, op_t_acc);
-    add_op_elementwise_add(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_acc, op_t_l1_addend, op_t_dst);
     force_conv2d_method(op_graph, conv2d, ConvolutionMethod::DIRECT);
 
     const ClWorkloadContext workload_ctx{ GpuInfo{ CLScheduler::get().target() } };
@@ -290,7 +290,7 @@ TEST_CASE(Enlarging_Execution_Space, framework::DatasetMode::ALL)
     auto t_dst_info    = TensorInfo();
 
     OperatorGraph op_graph;
-    const auto    add_desc = AddDescriptor{};
+    const auto    add_desc = ElementwiseDescriptor{};
 
     const auto op_t_l0_lhs = add_tensor(op_graph, t_l0_lhs_info);
     const auto op_t_l0_rhs = add_tensor(op_graph, t_l0_rhs_info);
@@ -300,9 +300,9 @@ TEST_CASE(Enlarging_Execution_Space, framework::DatasetMode::ALL)
     const auto op_t_l1_dst = add_tensor(op_graph, t_l1_dst_info); // temp accumulator; TensorInfo to be inferred
     const auto op_t_dst    = add_tensor(op_graph, t_dst_info);
 
-    add_op_elementwise_add(op_graph, add_desc, op_t_l0_lhs, op_t_l0_rhs, op_t_l0_dst);
-    add_op_elementwise_add(op_graph, add_desc, op_t_l0_dst, op_t_l1_rhs, op_t_l1_dst);
-    add_op_elementwise_add(op_graph, add_desc, op_t_l1_dst, op_t_l2_lhs, op_t_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l0_lhs, op_t_l0_rhs, op_t_l0_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l0_dst, op_t_l1_rhs, op_t_l1_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l1_dst, op_t_l2_lhs, op_t_dst);
 
     const ClWorkloadContext workload_ctx{ GpuInfo{ CLScheduler::get().target() } };
     ClWorkload              workload;
@@ -334,7 +334,7 @@ TEST_CASE(Root_Simple_And_Complex, framework::DatasetMode::ALL)
 
     OperatorGraph op_graph;
     const auto    conv2d_desc = Conv2dDescriptor{};
-    const auto    add_desc    = AddDescriptor{};
+    const auto    add_desc    = ElementwiseDescriptor{};
 
     const auto op_t_l0_0_input  = add_tensor(op_graph, t_l0_0_input_info);
     const auto op_t_l0_0_weight = add_tensor(op_graph, t_l0_0_weight_info);
@@ -345,8 +345,8 @@ TEST_CASE(Root_Simple_And_Complex, framework::DatasetMode::ALL)
     const auto op_t_dst         = add_tensor(op_graph, t_dst_info);
 
     add_op_conv2d(op_graph, conv2d_desc, op_t_l0_0_input, op_t_l0_0_weight, op_t_l0_0_dst);
-    add_op_elementwise_add(op_graph, add_desc, op_t_l0_1_lhs, op_t_l0_1_rhs, op_t_l0_1_dst);
-    add_op_elementwise_add(op_graph, add_desc, op_t_l0_0_dst, op_t_l0_1_dst, op_t_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l0_1_lhs, op_t_l0_1_rhs, op_t_l0_1_dst);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l0_0_dst, op_t_l0_1_dst, op_t_dst);
 
     const ClWorkloadContext workload_ctx{ GpuInfo{ CLScheduler::get().target() } };
     ClWorkload              workload;
@@ -374,7 +374,7 @@ TEST_CASE(Loop, framework::DatasetMode::ALL)
 
     OperatorGraph op_graph;
     const auto    conv2d_desc = Conv2dDescriptor{};
-    const auto    add_desc    = AddDescriptor{};
+    const auto    add_desc    = ElementwiseDescriptor{};
 
     const auto op_t_l0_lhs = add_tensor(op_graph, t_l0_lhs_info);
     const auto op_t_l1_lhs = add_tensor(op_graph, t_l1_lhs_info);
@@ -382,7 +382,7 @@ TEST_CASE(Loop, framework::DatasetMode::ALL)
     const auto op_t_state1 = add_tensor(op_graph, state1_info);
 
     add_op_conv2d(op_graph, conv2d_desc, op_t_l0_lhs, op_t_state0, op_t_state1);
-    add_op_elementwise_add(op_graph, add_desc, op_t_l1_lhs, op_t_state1, op_t_state0);
+    add_op_elementwise_op(op_graph, add_desc, op_t_l1_lhs, op_t_state1, op_t_state0);
 
     const ClWorkloadContext workload_ctx{ GpuInfo{ CLScheduler::get().target() } };
     ClWorkload              workload;

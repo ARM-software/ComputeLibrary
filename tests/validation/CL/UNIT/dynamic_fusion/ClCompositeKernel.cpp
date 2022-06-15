@@ -74,8 +74,9 @@ TEST_CASE(MoveNet_SubGraph_1_DirectConv2d, framework::DatasetMode::ALL)
     ClExecutionDescriptor exec_desc{};
     Status                st{};
 
-    const auto data_type = DataType::F32;
-    const auto conv_info = Conv2dDescriptor{ Padding2D{ 1U, 1U, 1U, 1U }, { 1U, 1U } /* stride */ };
+    const auto data_type    = DataType::F32;
+    const auto conv_info    = Conv2dDescriptor{ Padding2D{ 1U, 1U, 1U, 1U }, { 1U, 1U } /* stride */ };
+    const auto eltwise_info = ElementwiseDescriptor{ ArithmeticOperation::ADD };
 
     const auto width     = 7U;
     const auto height    = 6U;
@@ -99,7 +100,7 @@ TEST_CASE(MoveNet_SubGraph_1_DirectConv2d, framework::DatasetMode::ALL)
     const auto m0 = (OFM > 16) ? ((data_type == DataType::F32) ? 2U : 4U) : 1U;
 
     const ClDirectConv2dKernelDescriptor direct_conv2d_desc{ conv_info };
-    const ClEltwiseAddKernelDescriptor   eltwise_add_desc{};
+    const ClElementwiseKernelDescriptor  eltwise_add_desc{ eltwise_info };
     const TileDescriptor                 store_tile_info{ Size2D(n0, m0), Size2D(width, height), ClippingStrategy::TOP_LEFT };
 
     ArgumentID src_id{ g_arg_placeholder };
@@ -119,7 +120,7 @@ TEST_CASE(MoveNet_SubGraph_1_DirectConv2d, framework::DatasetMode::ALL)
     st = add_tensor(bp, &dst_info, dst_id);
 
     st = add_kcomp_direct_conv2d(bp, direct_conv2d_desc, src_id, wei_id, bia_id, acc_id);
-    st = add_kcomp_eltwise_add(bp, eltwise_add_desc, addend_id, acc_id, acc_1_id);
+    st = add_kcomp_eltwise_op(bp, eltwise_add_desc, addend_id, acc_id, acc_1_id);
     st = add_kcomp_store(bp, StoreType::TStoreIndirectWidthSelect, acc_1_id, dst_id);
 
     exec_desc.skip_sliding_window = true;

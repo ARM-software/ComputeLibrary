@@ -23,7 +23,7 @@
  */
 #ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 
-#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.h"
+#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseKernelComponent.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -34,17 +34,17 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-ComponentType ClElementwiseAddKernelComponent::get_component_type() const
+ComponentType ClElementwiseKernelComponent::get_component_type() const
 {
     return ComponentType::Simple;
 }
 
-std::set<std::string> ClElementwiseAddKernelComponent::get_headers_list() const
+std::set<std::string> ClElementwiseKernelComponent::get_headers_list() const
 {
     return std::set<std::string> { "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h", "tile_helpers.h" };
 }
 
-Window ClElementwiseAddKernelComponent::get_window() const
+Window ClElementwiseKernelComponent::get_window() const
 {
     const ITensorInfo *lhs_info = _blueprint->impl().get_kernel_argument_info(_lhs.arg_id);
     const ITensorInfo *rhs_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
@@ -64,7 +64,7 @@ Window ClElementwiseAddKernelComponent::get_window() const
     return win;
 }
 
-std::string ClElementwiseAddKernelComponent::get_component_code() const
+std::string ClElementwiseKernelComponent::get_component_code() const
 {
     std::string code;
     const bool  is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
@@ -72,7 +72,7 @@ std::string ClElementwiseAddKernelComponent::get_component_code() const
     if(is_root)
     {
         return R"_(
-    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
     // IN_0(LHS)            {{lhs}}
     // IN_1(RHS)            {{rhs}}
     // OUT(dst, accum)      {{dst}}
@@ -87,19 +87,19 @@ std::string ClElementwiseAddKernelComponent::get_component_code() const
         T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{rhs}}, cout, mout, 1, {{rhs}}_stride_y, rhs_tile);
 
 #if defined(IS_BROADCAST)
-        T_ADD_BROADCAST_X({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
+        T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
 #else // !defined(IS_BROADCAST)
-        T_ADD({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
+        T_ELTWISE_{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
 #endif // defined(IS_BROADCAST)
 
     }
-    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
 )_";
     }
     else
     {
         return R"_(
-    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
     // IN_0/Out(Accumulator)   {{acc}}
     // IN_1(Addend)        {{addend}}
 
@@ -110,17 +110,17 @@ std::string ClElementwiseAddKernelComponent::get_component_code() const
         T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{addend}}, cout, mout, 1, {{addend}}_stride_y, addend_tile);
 
 #if defined(IS_BROADCAST)
-        T_ADD_BROADCAST_X({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
+        T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
 #else // !defined(IS_BROADCAST)
-        T_ADD({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
+        T_ELTWISE_{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
 #endif // defined(IS_BROADCAST)
     }
-    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_ADD ---------------------
+    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
 )_";
     }
 }
 
-CLBuildOptions ClElementwiseAddKernelComponent::generate_build_options() const
+CLBuildOptions ClElementwiseKernelComponent::generate_build_options() const
 {
     const auto t_src_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
     const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
@@ -137,7 +137,7 @@ CLBuildOptions ClElementwiseAddKernelComponent::generate_build_options() const
     return build_opts;
 }
 
-std::string ClElementwiseAddKernelComponent::generate_config_id() const
+std::string ClElementwiseKernelComponent::generate_config_id() const
 {
     auto        t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
     std::string config_id{};
@@ -151,7 +151,7 @@ std::string ClElementwiseAddKernelComponent::generate_config_id() const
     return config_id;
 }
 
-void ClElementwiseAddKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
+void ClElementwiseKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
 {
     const bool is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
     vtable.add(_lhs, _blueprint->impl().group(_lhs.arg_id), ClKernelArgDescriptor(_lhs.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "lhs");
@@ -162,7 +162,7 @@ void ClElementwiseAddKernelComponent::allocate_shared_vars(SharedVarTable &vtabl
     }
 }
 
-ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
+ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
     TagLUT     lut{};
     const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
@@ -199,6 +199,18 @@ ClElementwiseAddKernelComponent::TagLUT ClElementwiseAddKernelComponent::get_tag
     // Local build options
     lut["meta_kernel_id"] = id();
     lut["DATA_TYPE"]      = get_cl_type_from_data_type(t_dst_info->data_type());
+
+    switch(_desc.eltwise.op)
+    {
+        case ArithmeticOperation::DIV:
+            lut["ELTWISE_OP"] = "DIV";
+            break;
+        case ArithmeticOperation::ADD:
+            lut["ELTWISE_OP"] = "ADD";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Arithmetic Operation not supported");
+    }
     return lut;
 }
 } // namespace dynamic_fusion
