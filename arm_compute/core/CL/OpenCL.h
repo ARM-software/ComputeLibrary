@@ -75,11 +75,12 @@ public:
     static CLSymbols &get();
     /** Load symbols from the given OpenCL library path.
      *
-     * @param[in] library Path to the OpenCL library.
+     * @param[in] library    Path to the OpenCL library.
+     * @param[in] use_loader Use symbol loader function loadOpenCLPointer.
      *
      * @return True if loading the library is successful.
      */
-    bool load(const std::string &library);
+    bool load(const std::string &library, bool use_loader = false);
     /** Load symbols from any of the default OpenCL library names.
      *
      * @return True if loading any library is successful.

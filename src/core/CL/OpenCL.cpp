@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,18 +62,32 @@ bool CLSymbols::load_default()
 
     for(const auto &lib : libraries)
     {
-        if(load(lib))
+        if(load(lib, /* use_loader */false))
         {
             ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from shared library");
             return true;
         }
     }
 
+#ifdef __ANDROID__
+    // When running in NDK environment, the above libraries are not accessible.
+    static const std::vector<std::string> android_libraries{ "libOpenCL-pixel.so", "libOpenCL-car.so" };
+
+    for(const auto &lib : android_libraries)
+    {
+        if(load(lib, /* use_loader */true))
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from android shared library");
+            return true;
+        }
+    }
+#endif /* __ANDROID__ */
+
     std::cerr << "Couldn't find any OpenCL library.\n";
     return false;
 }
 
-bool CLSymbols::load(const std::string &library)
+bool CLSymbols::load(const std::string &library, bool use_loader)
 {
     void *handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
 
@@ -85,8 +99,28 @@ bool CLSymbols::load(const std::string &library)
         return false;
     }
 
+#ifdef __ANDROID__
+    typedef void* (*loadOpenCLPointer_t)(const char* name);
+    loadOpenCLPointer_t loadOpenCLPointer;
+    if (use_loader) {
+        typedef void (*enableOpenCL_t)();
+        enableOpenCL_t enableOpenCL =
+            reinterpret_cast<enableOpenCL_t>(dlsym(handle, "enableOpenCL"));
+        enableOpenCL();
+
+        loadOpenCLPointer = reinterpret_cast<loadOpenCLPointer_t>(
+            dlsym(handle, "loadOpenCLPointer"));
+    } else {
+        loadOpenCLPointer = nullptr;
+    }
+#define LOAD_FUNCTION_PTR(func_name, _handle) \
+    func_name##_ptr = reinterpret_cast<decltype(func_name) *>( use_loader ? \
+        loadOpenCLPointer(#func_name) : dlsym(handle, #func_name));
+#else /* __ANDROID__ */
+    (void)use_loader; // Avoid unused warning
 #define LOAD_FUNCTION_PTR(func_name, handle) \
     func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
+#endif /* __ANDROID__ */
 
     LOAD_FUNCTION_PTR(clCreateContext, handle);
     LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
