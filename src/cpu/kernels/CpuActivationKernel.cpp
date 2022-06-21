@@ -45,11 +45,13 @@ namespace
 {
 static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
-    { // neon LUT implementantion of HARD_SWISH takes precedence
-        "neon_qu8_activation_hardswish_lut",
-        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.f == ActivationLayerInfo::ActivationFunction::HARD_SWISH; },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_hardswish_lut)
+#ifdef __aarch64__
+    { // Neon LUT implementantion takes precedence
+        "neon_qu8_activation_lut",
+        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt); },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation_lut)
     },
+#endif // __aarch64__
     {
         "sve2_qu8_activation",
         [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
@@ -87,7 +89,7 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
     },
     {
         "neon_qu8_activation",
-        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.f != ActivationLayerInfo::ActivationFunction::HARD_SWISH; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)
     },
     {
@@ -188,10 +190,12 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     _run_method = uk->ukernel;
     _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
 
-    if(activation_info.activation() == ActivationLayerInfo::ActivationFunction::HARD_SWISH && src->data_type() == DataType::QASYMM8)
+#ifdef __aarch64__
+    if(ActivationLayerInfo::is_lut_supported(activation_info.activation(), src->data_type()))
     {
         activation_info.init_lut(src->quantization_info().uniform(),(dst)?dst->quantization_info().uniform():src->quantization_info().uniform());
     }
+#endif // __aarch64__
     _act_info = activation_info;
 
     // Configure kernel window

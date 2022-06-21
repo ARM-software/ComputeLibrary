@@ -417,9 +417,9 @@ void substitute_bytes_neon(
 #endif // __aarch64__
 } // namespace
 
-void neon_qasymm8_hardswish_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+void neon_qasymm8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON(act_info.activation() != ActivationLayerInfo::ActivationFunction::HARD_SWISH);
+    ARM_COMPUTE_ERROR_ON(!ActivationLayerInfo::is_lut_supported(act_info.activation(), src->info()->data_type()));
 #ifdef __aarch64__
     const int window_step_x  = src->info()->tensor_shape().x();
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
@@ -471,6 +471,13 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
     const float32x4_t vb_f32 = vdupq_n_f32(act_info.b());
     const float       a_f32  = act_info.a();
     const float       b_f32  = act_info.b();
+
+#ifndef __aarch64__
+    const auto const_6_f32     = vdupq_n_f32(6.f);
+    const auto const_0_f32     = vdupq_n_f32(0.f);
+    const auto const_3_f32     = vdupq_n_f32(3.f);
+    const auto const_inv_6_f32 = vdupq_n_f32(0.166666667f);
+#endif // __aarch64__
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -545,21 +552,28 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // Re-quantize to new output space
                 tmp = vquantize(tmp_dep, qi_out);
             }
+#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
+            else if(act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
+            {
+                // De-quantize
+                const auto vin_deq = vdequantize(vin, qi_in);
+                // Perform activation
+                const float32x4x4_t tmp_dep =
+                {
+                    {
+                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = vquantize(tmp_dep, qi_out);
+            }
             else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
             {
                 const auto vin_deq = vdequantize(vin, qi_in);
 
-#ifdef __aarch64__
-                const uint32x4x4_t pos_mask =
-                {
-                    {
-                        wrapper::vcgtz(vin_deq.val[0]),
-                        wrapper::vcgtz(vin_deq.val[1]),
-                        wrapper::vcgtz(vin_deq.val[2]),
-                        wrapper::vcgtz(vin_deq.val[3]),
-                    }
-                };
-#else  // __aarch64__
                 const uint32x4x4_t pos_mask =
                 {
                     {
@@ -569,7 +583,6 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
                         wrapper::vcgt(vin_deq.val[3], vconst_0_f32),
                     }
                 };
-#endif // __aarch64__
 
                 const float32x4x4_t tmp_dep =
                 {
@@ -583,6 +596,7 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
 
                 tmp = vquantize(tmp_dep, qi_out);
             }
+#endif // __aarch64__
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -622,12 +636,20 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
                 tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
                 tmp         = quantize_qasymm8(tmp_f, qi_out);
             }
+#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
+            else if(act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
+            {
+                float tmp_f = dequantize_qasymm8(in, qi_in);
+                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
+                tmp         = quantize_qasymm8(tmp_f, qi_out);
+            }
             else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
             {
                 float tmp_f = dequantize_qasymm8(in, qi_in);
                 tmp_f       = tmp_f > 0 ? tmp_f : tmp_f * a_f32;
                 tmp         = quantize_qasymm8(tmp_f, qi_out);
             }
+#endif // __aarch64__
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");

@@ -1680,6 +1680,7 @@ public:
         return _enabled;
     }
 
+#ifdef __aarch64__
     const LookupTable256 &lut() const
     {
         return _lut;
@@ -1687,7 +1688,27 @@ public:
 
     void init_lut(const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
     {
-        qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+        if(_act == ActivationFunction::HARD_SWISH)
+        {
+            qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+        }
+        else if(_act == ActivationFunction::LEAKY_RELU)
+        {
+            qasymm8_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
+        }
+    }
+#endif // __aarch64__
+
+    static inline bool is_lut_supported(ActivationFunction act_func, DataType data_type)
+    {
+#ifdef __aarch64__
+        auto supported = (data_type == DataType::QASYMM8 && (act_func == ActivationFunction::HARD_SWISH || act_func == ActivationFunction::LEAKY_RELU));
+        return supported;
+#else  // __aarch64__
+        ARM_COMPUTE_UNUSED(act_func);
+        ARM_COMPUTE_UNUSED(data_type);
+        return false;
+#endif // __aarch64__
     }
 
 private:
@@ -1695,15 +1716,26 @@ private:
     float              _a       = {};
     float              _b       = {};
     bool               _enabled = { false };
-    LookupTable256     _lut     = {};
 
-    inline void qasymm8_hard_swish_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+#ifdef __aarch64__
+    LookupTable256 _lut = {};
+
+    static inline void qasymm8_hard_swish_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
     {
         for(size_t i = 0; i < lut.size(); ++i)
         {
             lut[i] = qasymm8_hard_swish(i, qi_in, qi_out);
         }
     }
+
+    static inline void qasymm8_leaky_relu_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out, float alpha)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_leaky_relu(i, qi_in, qi_out, alpha);
+        }
+    }
+#endif // __aarch64__
 };
 
 /** Fully connected layer info */

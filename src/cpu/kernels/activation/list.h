@@ -32,7 +32,7 @@ namespace cpu
     void func_name(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation);
-DECLARE_ACTIVATION_KERNEL(neon_qasymm8_hardswish_lut);
+DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation_lut);
 DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_activation);
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_signed_activation);
 DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_signed_activation);
