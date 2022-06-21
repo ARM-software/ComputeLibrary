@@ -1,6 +1,9 @@
 
 > **⚠ Important**
-> From this release (22.05): 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+> From release 22.05: 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+
+> **⚠ Important**
+> From release 22.08: armv7a with Android build will no longer be tested or maintained.
 
 <br>
 <div align="center">
@@ -57,7 +60,6 @@ All the binaries can be downloaded from [here](https://github.com/ARM-software/C
 
 | Architecture    | Operating System | Release archive (Download) |
 | ----------- | ----------- | ----------- |
-| armv7 | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-neon-cl.tar.gz) |
 | armv7 | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-neon-cl.tar.gz) |
 | arm64-v8a | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-neon-cl.tar.gz) |
 | arm64-v8a | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon-cl.tar.gz) |

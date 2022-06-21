@@ -39,6 +39,8 @@ Several builds of the library are available using various configurations:
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
 
+@warning From 22.08 release, armv7a with Android build will no longer be tested or maintained.
+
 @b Minimum toolchains requirements are shown below:
 
 <table>
@@ -69,8 +71,6 @@ Several builds of the library are available using various configurations:
   <td>armv8.2-a
   <td>Monterey (OS version): clang 13 (native)
 </table>
-
-@warning From 22.08 release, armv7a will no longer be supported on Android.
 
 @section S0_1_contact Contact / Support
 

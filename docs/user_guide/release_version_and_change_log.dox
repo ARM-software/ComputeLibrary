@@ -37,7 +37,7 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
-@note Starting from this release (22.05), 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
+@note Starting from release 22.05, 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
 
@@ -47,7 +47,7 @@ v22.08 Public major release
    - Use "auto" to use default (auto) prefixes chosen by the build script. This is the default behavior when unspecified
    - Any other string will be used as custom prefixes to the compiler and the rest of toolchain tools
    - The default behaviour when prefix is unspecified does not change, but its signifier has been changed from empty string "" to "auto"
-   - armv7a will no longer be supported on Android
+ - armv7a with Android build will no longer be tested or maintained
 
 v22.05 Public major release
  - Various bug fixes.
