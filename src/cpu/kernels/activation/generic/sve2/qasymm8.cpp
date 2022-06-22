@@ -57,10 +57,7 @@ void sve2_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
     const auto                    vconst_1        = svdup_n_f32(1.f);
     const auto                    va_f32          = svdup_n_f32(act_info.a());
     const auto                    vb_f32          = svdup_n_f32(act_info.b());
-    const auto                    const_6_f32     = svdup_n_f32(6.f);
-    const auto                    const_0_f32     = svdup_n_f32(0.f);
-    const auto                    const_3_f32     = svdup_n_f32(3.f);
-    const auto                    const_inv_6_f32 = svdup_n_f32(0.166666667f);
+
 
     // Initialise scale/offset for re-quantization
     bool requant = true;
@@ -143,19 +140,6 @@ void sve2_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
                                                             svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 2), vb_f32))),
                                                             svmul_f32_z(pg, va_f32, svtanh_f32_z(pg, svmul_f32_z(pg, svget4_f32(vin_deq, 3), vb_f32))));
 
-                // Re-quantize to new output space
-                tmp = svquantize_z(pg, tmp_dep, qi_out);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-            {
-                // De-quantize
-                const auto vin_deq = svdequantize_z(pg, vin, qi_in);
-                // Perform activation
-                const svfloat32x4_t tmp_dep = svcreate4_f32(svmul_f32_z(pg, svget4_f32(vin_deq, 0), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg,
-                                                                                                                svget4_f32(vin_deq, 0), const_3_f32))))),
-                                                            svmul_f32_z(pg, svget4_f32(vin_deq, 1), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 1), const_3_f32))))),
-                                                            svmul_f32_z(pg, svget4_f32(vin_deq, 2), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 2), const_3_f32))))),
-                                                            svmul_f32_z(pg, svget4_f32(vin_deq, 3), svmul_f32_z(pg, const_inv_6_f32, svmin_f32_z(pg, const_6_f32, svmax_f32_z(pg, const_0_f32, svadd_f32_z(pg, svget4_f32(vin_deq, 3), const_3_f32))))));
                 // Re-quantize to new output space
                 tmp = svquantize_z(pg, tmp_dep, qi_out);
             }

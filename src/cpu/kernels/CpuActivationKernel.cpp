@@ -45,6 +45,11 @@ namespace
 {
 static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
+    { // neon LUT implementantion of HARD_SWISH takes precedence
+        "neon_qu8_activation_hardswish_lut",
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.f == ActivationLayerInfo::ActivationFunction::HARD_SWISH; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_hardswish_lut)
+    },
     {
         "sve2_qu8_activation",
         [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
@@ -84,11 +89,6 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
         "neon_qu8_activation",
         [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.f != ActivationLayerInfo::ActivationFunction::HARD_SWISH; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)
-    },
-    {
-        "neon_qu8_activation_hardswish",
-        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.f == ActivationLayerInfo::ActivationFunction::HARD_SWISH; },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_hardswish_lut)
     },
     {
         "neon_qs8_activation",
