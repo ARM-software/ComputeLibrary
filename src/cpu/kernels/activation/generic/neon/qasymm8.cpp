@@ -421,33 +421,16 @@ void neon_qasymm8_hardswish_lut(const ITensor *src, ITensor *dst, const Activati
 {
     ARM_COMPUTE_ERROR_ON(act_info.activation() != ActivationLayerInfo::ActivationFunction::HARD_SWISH);
 #ifdef __aarch64__
-    constexpr int window_step_x  = 16;
-    const auto    window_start_x = static_cast<int>(window.x().start());
-    const auto    window_end_x   = static_cast<int>(window.x().end());
-
+    const int window_step_x  = src->info()->tensor_shape().x();
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
-
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
-
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr() + x);
-            auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr() + x);
-            substitute_bytes_neon(act_info.lut().data(), 1u, window_step_x, &input_ptr, &output_ptr);
-        }
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr() + x);
-            auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr() + x);
-            substitute_bytes_neon(act_info.lut().data(), 1u, 1u, &input_ptr, &output_ptr);
-        }
+        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+        auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+        substitute_bytes_neon(act_info.lut().data(), 1u, window_step_x, &input_ptr, &output_ptr);
     },
     input, output);
 #else  // #ifdef __aarch64__
