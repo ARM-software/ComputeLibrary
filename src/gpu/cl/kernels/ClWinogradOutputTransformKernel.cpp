@@ -176,6 +176,8 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
         build_opts.add_option("-DVEC_SIZE=4");
     }
 
+    _num_tiles_x = num_tiles.width;
+
     if(_is_nhwc)
     {
         build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
@@ -210,7 +212,6 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
     _src_height  = src->dimension(1);
     _dst_width   = dst->dimension(idx_width);
     _dst_height  = dst->dimension(idx_height);
-    _num_tiles_x = num_tiles.width;
 
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
