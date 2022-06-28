@@ -153,11 +153,11 @@ OutputVectorType elementwise_comparison_op(svbool_t &pg, const InputVectorType &
     return ret;
 }
 
-template <ArithmeticOperation op, typename ScalarType>
-void elementwise_arithmetic_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template <typename ScalarType>
+void elementwise_arithmetic_op(const ITensor *in1, const ITensor *in2, ITensor *out, ArithmeticOperation op, const Window &window);
 
-template <ComparisonOperation op, typename ScalarType, typename OutputScalarType = uint8_t>
-void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
+template <typename ScalarType, typename OutputScalarType = uint8_t>
+void elementwise_comparison_op(const ITensor *in1, const ITensor *in2, ITensor *out, ComparisonOperation op, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif /* SRC_CORE_SVE_KERNELS_ELEMENTWISE_LIST_H */
