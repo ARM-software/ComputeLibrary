@@ -347,17 +347,14 @@ if 'x86' not in env['arch']:
         elif env['os'] == 'tizen':
             auto_toolchain_prefix = "aarch64-tizen-linux-gnu-"
 
-if env['build'] == 'native':
-    toolchain_prefix = ""
-
-if env["toolchain_prefix"] == "":
+if env['build'] == 'native' or env["toolchain_prefix"] == "":
     toolchain_prefix = ""
 elif env["toolchain_prefix"] == "auto":
     toolchain_prefix = auto_toolchain_prefix
 else:
     toolchain_prefix = env["toolchain_prefix"]
 
-if env["compiler_prefix"] == "":
+if env['build'] == 'native' or env["compiler_prefix"] == "":
     compiler_prefix = ""
 elif env["compiler_prefix"] == "auto":
     compiler_prefix = toolchain_prefix
