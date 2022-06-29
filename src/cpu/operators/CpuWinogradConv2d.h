@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
+#include "src/cpu/kernels/assembly/gemm_common.hpp"
 #include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "src/cpu/operators/CpuPermute.h"
@@ -59,13 +60,13 @@ public:
      * |F16            |F16            |F16    |F16            |
      * |F32            |F32            |F32    |F32            |
      *
-     * @param[in]  src              Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
+     * @param[in]  src              Source tensor Info. 3 lower dimensions represent a single input [width, height, IFM],
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: F16/F32.
-     * @param[in]  weights          Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
+     * @param[in]  weights          Weights tensor Info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      *                              Currently only 3x3 and 5x5 kernels are supported.
-     * @param[in]  biases           Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[out] dst              Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     * @param[in]  biases           Biases tensor Info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[out] dst              Destination tensor Info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p input.
      * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
@@ -107,28 +108,27 @@ private:
         PermutedOutput     = TransformedInput,
         Count              = 10
     };
-
-    std::unique_ptr<CpuGemm>       _gemm_function;
-    std::unique_ptr<CpuActivation> _activation_func;
-    std::unique_ptr<CpuPermute>    _permute_input;
-    std::unique_ptr<CpuPermute>    _permute_output;
-    std::unique_ptr<CpuPermute>    _permute_weights;
-    std::unique_ptr<ICPPKernel>    _transform_input_kernel;
-    std::unique_ptr<ICPPKernel>    _transform_weights_kernel;
-    std::unique_ptr<ICPPKernel>    _transform_output_kernel;
-
-    DataLayout                       _data_layout;
-    experimental::MemoryRequirements _aux_mem{ Count };
-    TensorInfo                       _input_nhwc;
-    TensorInfo                       _output_nhwc;
-    TensorInfo                       _input_workspace;
-    TensorInfo                       _kernel_storage;
-    TensorInfo                       _output_workspace;
-    TensorInfo                       _input_transformed;
-    TensorInfo                       _output_transformed;
-    TensorInfo                       _weights_hwio;
-    bool                             _run_activation;
-    bool                             _is_prepared;
+    std::unique_ptr<CpuGemm>                   _gemm_function;
+    std::unique_ptr<CpuActivation>             _activation_func;
+    std::unique_ptr<ICPPKernel>                _transform_input_kernel;
+    std::unique_ptr<ICPPKernel>                _transform_output_kernel;
+    std::unique_ptr<CpuPermute>                _permute_input;
+    std::unique_ptr<CpuPermute>                _permute_output;
+    std::unique_ptr<CpuPermute>                _permute_weights;
+    experimental::MemoryRequirements           _aux_mem{ Count };
+    std::unique_ptr<arm_conv::ConvolutionArgs> _conv_args; // Make it unique ptr because this type does not have a default constructor
+    arm_conv::winograd::WinogradImpl           _winograd_impl;
+    DataLayout                                 _data_layout;
+    TensorInfo                                 _winograd_transformed_input;
+    TensorInfo                                 _winograd_transformed_output;
+    TensorInfo                                 _winograd_transformed_weights;
+    TensorInfo                                 _input_workspace;
+    TensorInfo                                 _output_workspace;
+    TensorInfo                                 _weights_hwio;
+    TensorInfo                                 _input_nhwc;
+    TensorInfo                                 _output_nhwc;
+    bool                                       _is_prepared;
+    bool                                       _run_activation;
 };
 } // namespace cpu
 } // namespace arm_compute

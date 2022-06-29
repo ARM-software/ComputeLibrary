@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,25 +22,29 @@
  * SOFTWARE.
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#include "arm.hpp"
-#include "output.hpp"
 
-namespace winograd
-{
+#include <algorithm>
+#include <arm_neon.h>
+#include <cstddef>
 
-template <>
-void winograd::OutputTransform<3, 3, 6, 6, __fp16, __fp16, winograd::WinogradRoots::Integers>::transform_tile(
-    const int n_channels,
+namespace arm_conv {
+namespace winograd {
+namespace output_transform {
+
+void a64_fp16_4x4_3x3(
+    unsigned int n_channels,
     const __fp16* inptr,
-    const int matrix_stride,
+    const size_t matrix_stride,
     const __fp16* bptr,
     __fp16* const output,
-    const int output_row_stride,
-    const int output_col_stride,
+    const size_t output_row_stride,
+    const size_t output_col_stride,
     const __fp16 output_min,
     const __fp16 output_max
 )
 {
+    constexpr int output_tile_rows = 4, output_tile_cols = 4;
+
     // Construct a map to the output cells
     __fp16 *outptrs[output_tile_rows][output_tile_cols];
     for (int i = 0; i < output_tile_rows; i++)
@@ -249,7 +253,8 @@ void winograd::OutputTransform<3, 3, 6, 6, __fp16, __fp16, winograd::WinogradRoo
     }
 }
 
-template class OutputTransform<3, 3, 6, 6, __fp16, __fp16, winograd::WinogradRoots::Integers>;
+} // namespace output_transform
+} // namespace winograd
+} // namespace arm_conv
 
-}  // namespace winograd
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

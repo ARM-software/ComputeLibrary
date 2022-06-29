@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#include "arm.hpp"
-#include "input.hpp"
+#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
-namespace winograd
-{
-template <>
-void InputTransform<6, 6, __fp16, __fp16, WinogradRoots::Integers>::transform_tile(
-    const int n_channels,
+#include <arm_neon.h>
+#include <cstddef>
+
+namespace arm_conv {
+namespace winograd {
+namespace input_transform {
+
+void a64_fp16_6x6(
+    const unsigned int n_channels,
     const __fp16* const input_base,
-    const int input_row_stride,
-    const int input_col_stride,
+    const size_t input_row_stride,
+    const size_t input_col_stride,
     __fp16* outptr,
-    const int matrix_stride
+    const size_t matrix_stride
 )
 {
     constexpr int inner_tile_rows = 6;
@@ -271,7 +273,8 @@ void InputTransform<6, 6, __fp16, __fp16, WinogradRoots::Integers>::transform_ti
     }
 }
 
-template class InputTransform<6, 6, __fp16, __fp16, WinogradRoots::Integers>;
-
+}  // namespace input_transform
 }  // namespace winograd
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+}  // namespace arm_conv
+
+#endif // defined(__aarch64__) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

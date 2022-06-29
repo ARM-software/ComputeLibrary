@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2022 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,47 +22,38 @@
  * SOFTWARE.
  */
 
-#include "output.hpp"
-#include "arm.hpp"
+#include <algorithm>
+#include <cstddef>
+#include <arm_neon.h>
 
-namespace winograd
-{
+namespace arm_conv {
+namespace winograd {
+namespace output_transform {
 
-template <>
-void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transform_tile(
-  const int n_channels,
+void arm_fp32_2x2_5x5(
+  unsigned int n_channels,
   const float* inptr,
-  const int matrix_stride,
+  const size_t matrix_stride,
   const float* bptr,
-  float* const output,
-  const int output_row_stride,
-  const int output_col_stride,
+  float *outptr,
+  const size_t output_row_stride,
+  const size_t output_col_stride,
   const float output_min,
   const float output_max
 )
 {
-  // Construct a map to the output cells
-  float *outptrs[output_tile_rows][output_tile_cols];
-  for (int i = 0; i < output_tile_rows; i++)
-  {
-    for (int j = 0; j < output_tile_cols; j++)
-    {
-      outptrs[i][j] = output + i*output_row_stride + j*output_col_stride;
-    }
-  }
+  constexpr auto output_tile_rows = 2u, output_tile_cols = 2u;
 
   // For each channel of the output
-  int channels_remaining = n_channels;
-#ifdef __aarch64__
-  for (; channels_remaining >= 4; channels_remaining -= 4)
+  for (; n_channels >= 4; n_channels -= 4)
   {
     // Matrices used and computed during this transform
     float32x4_t F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    for (auto i = 0u, m = 0u; i < 6; i++)
     {
-      for (int j = 0; j < 6; j++, m++)
+      for (auto j = 0u; j < 6; j++, m++)
       {
         F[i][j] = vld1q_f32(inptr + m*matrix_stride);
       }
@@ -70,7 +61,7 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     inptr += 4;
 
     // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
+    for (auto i = 0u; i < 6; i++)
     {
       // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
       FZ[i][0] = vaddq_f32(vaddq_f32(vaddq_f32(F[i][0], F[i][1]), vaddq_f32(F[i][2], F[i][3])), F[i][4]);
@@ -80,7 +71,7 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 2; j++)
+    for (auto j = 0u; j < 2; j++)
     {
       // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
       f[0][j] = vaddq_f32(vaddq_f32(vaddq_f32(FZ[0][j], FZ[1][j]), vaddq_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
@@ -99,29 +90,27 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       b = vdupq_n_f32(0.0f);
     }
-    for (int i = 0; i < output_tile_rows; i++)
+    for (auto i = 0u; i < output_tile_rows; i++)
     {
-      for (int j = 0; j < output_tile_cols; j++)
+      for (auto j = 0u; j < output_tile_cols; j++)
       {
         const auto y =
             vmaxq_f32(vminq_f32(vaddq_f32(f[i][j], b), vdupq_n_f32(output_max)),
                       vdupq_n_f32(output_min));
-        vst1q_f32(outptrs[i][j], y);
-        outptrs[i][j] += 4;
+        vst1q_f32(outptr + i*output_row_stride + j*output_col_stride, y);
       }
     }
+    outptr += 4;
   }
-#endif  // __aarch64__
-#ifdef __arm_any__
-  for (; channels_remaining >= 2; channels_remaining -= 2)
+  for (; n_channels >= 2; n_channels -= 2)
   {
     // Matrices used and computed during this transform
     float32x2_t F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    for (auto i = 0u, m = 0u; i < 6; i++)
     {
-      for (int j = 0; j < 6; j++, m++)
+      for (auto j = 0u; j < 6; j++, m++)
       {
         F[i][j] = vld1_f32(inptr + m*matrix_stride);
       }
@@ -129,7 +118,7 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     inptr += 2;
 
     // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
+    for (auto i = 0u; i < 6; i++)
     {
       // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
       FZ[i][0] = vadd_f32(vadd_f32(vadd_f32(F[i][0], F[i][1]), vadd_f32(F[i][2], F[i][3])), F[i][4]);
@@ -139,7 +128,7 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 2; j++)
+    for (auto j = 0u; j < 2; j++)
     {
       // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
       f[0][j] = vadd_f32(vadd_f32(vadd_f32(FZ[0][j], FZ[1][j]), vadd_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
@@ -158,43 +147,41 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       b = vdup_n_f32(0.0f);
     }
-    for (int i = 0; i < output_tile_rows; i++)
+    for (auto i = 0u; i < output_tile_rows; i++)
     {
-      for (int j = 0; j < output_tile_cols; j++)
+      for (auto j = 0u; j < output_tile_cols; j++)
       {
         const auto y =
             vmax_f32(vmin_f32(vadd_f32(f[i][j], b), vdup_n_f32(output_max)),
                      vdup_n_f32(output_min));
-        vst1_f32(outptrs[i][j], y);
-        outptrs[i][j] += 2;
+        vst1_f32(outptr + i*output_row_stride + j*output_col_stride, y);
       }
     }
+    outptr += 2;
   }
-#endif  // __arm_any__
-  for (; channels_remaining; channels_remaining--)
+  if (n_channels)
   {
     // Matrices used and computed during this transform
     float F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    for (auto i = 0u, m = 0u; i < 6; i++)
     {
-      for (int j = 0; j < 6; j++, m++)
+      for (auto j = 0u; j < 6; j++, m++)
       {
         F[i][j] = *(inptr + m*matrix_stride);
       }
     }
-    inptr++;
 
     // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
+    for (auto i = 0u; i < 6; i++)
     {
       FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
       FZ[i][1] =               1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4] +  1*F[i][5];
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 2; j++)
+    for (auto j = 0u; j < 2; j++)
     {
       f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
       f[1][j] =                1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j] +  1*FZ[5][j];
@@ -209,17 +196,17 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       b = 0.0f;
     }
-    for (int i = 0; i < output_tile_rows; i++)
+    for (auto i = 0u; i < output_tile_rows; i++)
     {
-      for (int j = 0; j < output_tile_cols; j++)
+      for (auto j = 0u; j < output_tile_cols; j++)
       {
         const auto y = std::max(std::min(f[i][j] + b, output_max), output_min);
-        *(outptrs[i][j]++) = y;
+        *(outptr + i*output_row_stride + j*output_col_stride) = y;
       }
     }
   }
 }
 
-template class OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>;
-
-}  // namespace
+}  // namespace output_transform
+}  // namespace winograd
+}  // namespace arm_conv

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2022 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,42 +22,36 @@
  * SOFTWARE.
  */
 
-#include "output.hpp"
-#include "arm.hpp"
+#include <algorithm>
+#include <cstddef>
+#include <arm_neon.h>
 
-namespace winograd
-{
+namespace arm_conv {
+namespace winograd {
+namespace output_transform {
 
-template <>
-void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transform_tile(
-  const int n_channels,
+void arm_fp32_1x4_1x5(
+  unsigned int n_channels,
   const float* inptr,
-  const int matrix_stride,
+  const size_t matrix_stride,
   const float* bptr,
-  float* const output,
-  const int,  // No need to stride across rows
-  const int output_col_stride,
+  float *outptr,
+  size_t,  // No need to stride across rows
+  const size_t output_col_stride,
   const float output_min,
   const float output_max
 )
 {
-  // Construct a map to the output cells
-  float *outptrs[output_tile_cols];
-  for (int j = 0; j < output_tile_cols; j++)
-  {
-    outptrs[j] = output + j*output_col_stride;
-  }
+  constexpr auto inner_tile_cols = 8u, output_tile_cols = 4u;
 
   // For each channel of the output
-  int channels_remaining = n_channels;
-#ifdef __arm_any__
-  for (; channels_remaining >= 4; channels_remaining -= 4)
+  for (; n_channels >= 4; n_channels -= 4)
   {
     // Matrices used and computed during this transform
     float32x4_t F[inner_tile_cols], f[output_tile_cols], b = vdupq_n_f32(0.0f);
 
     // Read a 1x8 tile in the Winograd domain
-    for (int j = 0; j < inner_tile_cols; j++)
+    for (auto j = 0u; j < inner_tile_cols; j++)
     {
       F[j] = vld1q_f32(inptr + j*matrix_stride);
     }
@@ -66,9 +60,7 @@ void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transfo
     f[0] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[6], 1), F[5], 1), F[4], 1), F[3], 1), F[2], 1), F[1], 1), F[0], 1);
     f[1] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
     f[2] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[1], 1), F[6], 9), F[5], 9), F[4], 4), F[3], 4);
-    f[3] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
-    f[4] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[1], 1), F[6], 81), F[5], 81), F[4], 16), F[3], 16);
-    f[5] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[7], 1), F[2], 1), F[6], 243), F[4], 32), F[3], -32), F[5], -243), F[1], -1);
+    f[3] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[7], 1), F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
 
     // Write out the output tile
     if (bptr != 0)
@@ -76,21 +68,22 @@ void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transfo
       b = vld1q_f32(bptr);
       bptr += 4;
     }
-    for (int j = 0; j < output_tile_cols; j++)
+    for (auto j = 0u; j < output_tile_cols; j++)
     {
-      const auto y = vminq_f32(vmaxq_f32(f[j] + b, vdupq_n_f32(output_min)),
-                               vdupq_n_f32(output_max));
-      vst1q_f32(outptrs[j], y);
-      outptrs[j] += 4;
+      const auto y =
+          vmaxq_f32(vminq_f32(vaddq_f32(f[j], b), vdupq_n_f32(output_max)),
+                    vdupq_n_f32(output_min));
+      vst1q_f32(outptr + j*output_col_stride, y);
     }
+    outptr += 4;
   }
-  for (; channels_remaining >= 2; channels_remaining -= 2)
+  for (; n_channels >= 2; n_channels -= 2)
   {
     // Matrices used and computed during this transform
     float32x2_t F[inner_tile_cols], f[output_tile_cols], b = vdup_n_f32(0.0f);
 
     // Read a 1x8 tile in the Winograd domain
-    for (int j = 0; j < inner_tile_cols; j++)
+    for (auto j = 0u; j < inner_tile_cols; j++)
     {
       F[j] = vld1_f32(inptr + j*matrix_stride);
     }
@@ -99,9 +92,7 @@ void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transfo
     f[0] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[6], 1), F[5], 1), F[4], 1), F[3], 1), F[2], 1), F[1], 1), F[0], 1);
     f[1] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
     f[2] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[1], 1), F[6], 9), F[5], 9), F[4], 4), F[3], 4);
-    f[3] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
-    f[4] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[1], 1), F[6], 81), F[5], 81), F[4], 16), F[3], 16);
-    f[5] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[7], 1), F[2], 1), F[6], 243), F[4], 32), F[3], -32), F[5], -243), F[1], -1);
+    f[3] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[7], 1), F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
 
     // Write out the output tile
     if (bptr != 0)
@@ -109,22 +100,22 @@ void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transfo
       b = vld1_f32(bptr);
       bptr += 2;
     }
-    for (int j = 0; j < output_tile_cols; j++)
+    for (auto j = 0u; j < output_tile_cols; j++)
     {
-      const auto y = vmin_f32(vmax_f32(f[j] + b, vdup_n_f32(output_min)),
-                              vdup_n_f32(output_max));
-      vst1_f32(outptrs[j], y);
-      outptrs[j] += 2;
+      const auto y =
+          vmax_f32(vmin_f32(vadd_f32(f[j], b), vdup_n_f32(output_max)),
+                   vdup_n_f32(output_min));
+      vst1_f32(outptr + j*output_col_stride, y);
     }
+    outptr += 2;
   }
-#endif  // __arm_any__
-  for (; channels_remaining; channels_remaining--)
+  for (; n_channels; n_channels--)
   {
     // Matrices used and computed during this transform
     float F[inner_tile_cols], f[output_tile_cols], b = 0.0f;
 
     // Read a 1x8 tile in the Winograd domain
-    for (int j = 0; j < inner_tile_cols; j++)
+    for (auto j = 0u; j < inner_tile_cols; j++)
     {
       F[j] = *(inptr + j*matrix_stride);
     }
@@ -133,23 +124,22 @@ void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transfo
     f[0] = F[0]*1 + F[1]*1 + F[2]*1 + F[3]*1 + F[4]*1 + F[5]*1 + F[6]*1;
     f[1] = F[1]*-1 + F[5]*-3 + F[3]*-2 + F[4]*2 + F[6]*3 + F[2]*1;
     f[2] = F[3]*4 + F[4]*4 + F[5]*9 + F[6]*9 + F[1]*1 + F[2]*1;
-    f[3] = F[1]*-1 + F[5]*-27 + F[3]*-8 + F[4]*8 + F[6]*27 + F[2]*1;
-    f[4] = F[3]*16 + F[4]*16 + F[5]*81 + F[6]*81 + F[1]*1 + F[2]*1;
-    f[5] = F[1]*-1 + F[5]*-243 + F[3]*-32 + F[4]*32 + F[6]*243 + F[2]*1 + F[7]*1;
+    f[3] = F[1]*-1 + F[5]*-27 + F[3]*-8 + F[4]*8 + F[6]*27 + F[2]*1 + F[7]*1;
 
     // Write out the output tile
     if (bptr != 0)
     {
       b = *(bptr++);
     }
-    for (int j = 0; j < output_tile_cols; j++)
+    for (auto j = 0u; j < output_tile_cols; j++)
     {
-      *(outptrs[j]++) = std::max(std::min(f[j] + b, output_max), output_min);
+      const auto y = std::max(std::min(f[j] + b, output_max), output_min);
+      *(outptr + j*output_col_stride) = y;
     }
+    outptr++;
   }
 }
 
-template class OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>;
-template class OutputTransform<3, 1, 8, 1, float, float, WinogradRoots::Integers>;
-
-}  // namespace
+}  // namespace output_transform
+}  // namespace winograd
+}  // namespace arm_conv

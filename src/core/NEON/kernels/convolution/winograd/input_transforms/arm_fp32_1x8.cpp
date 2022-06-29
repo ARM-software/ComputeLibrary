@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2022 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,20 +22,20 @@
  * SOFTWARE.
  */
 
-#include "arm.hpp"
-#include "input.hpp"
+#include <cstddef>
+#include <arm_neon.h>
 
-namespace winograd
-{
+namespace arm_conv {
+namespace winograd {
+namespace input_transform {
 
-template <>
-void InputTransform<1, 8, float, float, WinogradRoots::Integers>::transform_tile(
-  const int n_channels,
-  const float* const input_base,
-  const int,  // We don't need to stride over rows
-  const int input_col_stride,
-  float* outptr,
-  const int matrix_stride
+void arm_fp32_1x8(
+  const unsigned int n_channels,
+  const float *const input_base,
+  size_t,  // We don't need to stride over rows
+  const size_t input_col_stride,
+  float *outptr,
+  const size_t matrix_stride
 )
 {
   constexpr int inner_tile_cols = 8;
@@ -59,7 +59,6 @@ void InputTransform<1, 8, float, float, WinogradRoots::Integers>::transform_tile
   // Perform the Winograd input transformation for each channel in the input
   // tensor.
   int channels_remaining = n_channels;
-#ifdef _arm_any_
   for (; channels_remaining >= 4; channels_remaining -= 4)
   {
     float32x4_t x[inner_tile_cols], U[inner_tile_cols];
@@ -124,7 +123,6 @@ void InputTransform<1, 8, float, float, WinogradRoots::Integers>::transform_tile
     }
     outptr += 2;
   }
-#endif  // _arm_any_
   for (; channels_remaining; channels_remaining--)
   {
     // Load x
@@ -152,7 +150,6 @@ void InputTransform<1, 8, float, float, WinogradRoots::Integers>::transform_tile
   }
 }
 
-template class InputTransform<1, 8, float, float, WinogradRoots::Integers>;
-template class InputTransform<8, 1, float, float, WinogradRoots::Integers>;
-
+}  // namespace input_transform
 }  // namespace winograd
+}  // namespace arm_conv

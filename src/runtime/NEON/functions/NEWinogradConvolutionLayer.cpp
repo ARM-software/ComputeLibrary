@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "src/cpu/operators/CpuWinogradConv2d.h"
 
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
-#include "src/core/NEON/kernels/convolution/winograd/winograd.hpp"
 
 namespace arm_compute
 {

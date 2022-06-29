@@ -143,12 +143,12 @@ struct GemmArgs
 {
 public:
     const CPUInfo    *_ci;
-    unsigned int      _Msize;
-    unsigned int      _Nsize;
-    unsigned int      _Ksize;
+    unsigned int      _Msize; // num of tiles
+    unsigned int      _Nsize; // output channels
+    unsigned int      _Ksize; // input channels
     unsigned int      _Ksections;
     unsigned int      _nbatches;
-    unsigned int      _nmulti;
+    unsigned int      _nmulti; // n_gemms to be performed
     bool              _indirect_input;
     Activation        _act;
     int               _maxthreads;

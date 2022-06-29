@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,23 +22,26 @@
  * SOFTWARE.
  */
 
-#include "input.hpp"
-#include "arm.hpp"
+#ifndef __aarch64__
 
-namespace winograd
-{
+#include <arm_neon.h>
+#include <cstddef>
 
-template <>
-void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile(
-  const int n_channels,
+namespace arm_conv {
+namespace winograd {
+namespace input_transform {
+
+void arm_fp32_6x6(
+  unsigned int n_channels,
   const float* const input_base,
-  const int input_row_stride,
-  const int input_col_stride,
+  const size_t input_row_stride,
+  const size_t input_col_stride,
   float* outptr,
-  const int matrix_stride
+  const size_t matrix_stride
 )
 {
-  constexpr int inner_tile_rows = 4, inner_tile_cols = 4;
+  constexpr int inner_tile_rows = 6;
+  constexpr int inner_tile_cols = 6;
 
   // Get pointers into the input tile
   const float *x_ptrs[inner_tile_rows][inner_tile_cols];
@@ -57,7 +60,6 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
   float x[inner_tile_rows][inner_tile_cols];
   float XTx[inner_tile_rows][inner_tile_cols];
   float U[inner_tile_rows][inner_tile_cols];
-
   for (int i = 0; i < inner_tile_rows; i++)
   {
     for (int j = 0; j < inner_tile_cols; j++)
@@ -69,84 +71,12 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
   // Perform the Winograd input transformation for each channel in the input
   // tensor.
   int channels_remaining = n_channels;
-#ifdef __aarch64__
-  for (; channels_remaining >= 4; channels_remaining -= 4)
-  {
-    // Matrices used/computed in this kernel.
-    float32x4_t x[inner_tile_rows][inner_tile_cols];
-    float32x4_t XTx[inner_tile_rows][inner_tile_cols];
-    float32x4_t U[inner_tile_rows][inner_tile_cols];
-
-    for (int i = 0; i < inner_tile_rows; i++)
-    {
-      for (int j = 0; j < inner_tile_cols; j++)
-      {
-        x[i][j] = vdupq_n_f32(0.0f);
-        XTx[i][j] = vdupq_n_f32(0.0f);
-      }
-    }
-
-    // Load x
-    for (int i = 0; i < inner_tile_rows; i++)
-    {
-      for (int j = 0; j < inner_tile_cols; j++)
-      {
-        x[i][j] = vld1q_f32(x_ptrs[i][j]);
-        x_ptrs[i][j] += 4;
-      }
-    }
-
-    // Compute XT . x
-    for (int j = 0; j < inner_tile_cols; j++)
-    {
-      // XTx[0][j] = x[0][j] - x[2][j];
-      XTx[0][j] = vsubq_f32(x[0][j], x[2][j]);
-
-      // XTx[1][j] = x[1][j] + x[2][j];
-      XTx[1][j] = vaddq_f32(x[1][j], x[2][j]);
-
-      // XTx[2][j] = x[2][j] - x[1][j];
-      XTx[2][j] = vsubq_f32(x[2][j], x[1][j]);
-
-      // XTx[3][j] = x[1][j] - x[3][j];
-      XTx[3][j] = vsubq_f32(x[1][j], x[3][j]);
-    }
-
-    // Compute U = XT . x . X
-    for (int i = 0; i < inner_tile_rows; i++)
-    {
-      // U[i][0] = XTx[i][0] - XTx[i][2];
-      U[i][0] = vsubq_f32(XTx[i][0], XTx[i][2]);
-
-      // U[i][1] = XTx[i][1] + XTx[i][2];
-      U[i][1] = vaddq_f32(XTx[i][1], XTx[i][2]);
-
-      // U[i][2] = XTx[i][2] - XTx[i][1];
-      U[i][2] = vsubq_f32(XTx[i][2], XTx[i][1]);
-
-      // U[i][3] = XTx[i][1] - XTx[i][3];
-      U[i][3] = vsubq_f32(XTx[i][1], XTx[i][3]);
-    }
-
-    // Store the transformed matrix
-    for (int i = 0, m = 0; i < inner_tile_rows; i++)
-    {
-      for (int j = 0; j < inner_tile_cols; j++, m++)
-      {
-        vst1q_f32(outptr + m*matrix_stride, U[i][j]);
-      }
-    }
-    outptr += 4;
-  }
-#endif  // __aarch64__
-#ifdef __arm_any__
   for (; channels_remaining >= 2; channels_remaining -= 2)
   {
-    // Matrices used/computed in this kernel.
+    // Matrices used/computed in this kernel
     float32x2_t x[inner_tile_rows][inner_tile_cols];
     float32x2_t XTx[inner_tile_rows][inner_tile_cols];
     float32x2_t U[inner_tile_rows][inner_tile_cols];
-
     for (int i = 0; i < inner_tile_rows; i++)
     {
       for (int j = 0; j < inner_tile_cols; j++)
@@ -156,7 +86,7 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
       }
     }
 
-    // Load x
+    // Read a 6x6 tile in the Winograd domain
     for (int i = 0; i < inner_tile_rows; i++)
     {
       for (int j = 0; j < inner_tile_cols; j++)
@@ -169,33 +99,45 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
     // Compute XT . x
     for (int j = 0; j < inner_tile_cols; j++)
     {
-      // XTx[0][j] = x[0][j] - x[2][j];
-      XTx[0][j] = vsub_f32(x[0][j], x[2][j]);
+      // XTx[0][j] =  4*x[0][j] + -5*x[2][j] +  1*x[4][j];
+      XTx[0][j] = vmls_n_f32(vmla_n_f32(x[4][j], x[0][j], 4.0f), x[2][j], 5.0f);
 
-      // XTx[1][j] = x[1][j] + x[2][j];
-      XTx[1][j] = vadd_f32(x[1][j], x[2][j]);
+      // XTx[1][j] = -4*x[1][j] + -4*x[2][j] +  1*x[3][j] +  1*x[4][j];
+      XTx[1][j] = vmls_n_f32(vadd_f32(x[3][j], x[4][j]), vadd_f32(x[1][j], x[2][j]), 4.0f);
 
-      // XTx[2][j] = x[2][j] - x[1][j];
-      XTx[2][j] = vsub_f32(x[2][j], x[1][j]);
+      // XTx[2][j] =  4*x[1][j] + -4*x[2][j] + -1*x[3][j] +  1*x[4][j];
+      XTx[2][j] = vmla_n_f32(vsub_f32(x[4][j], x[3][j]), vsub_f32(x[1][j], x[2][j]), 4.0f);
 
-      // XTx[3][j] = x[1][j] - x[3][j];
-      XTx[3][j] = vsub_f32(x[1][j], x[3][j]);
+      // XTx[3][j] = -2*x[1][j] + -1*x[2][j] +  2*x[3][j] +  1*x[4][j];
+      XTx[3][j] = vmla_n_f32(vsub_f32(x[4][j], x[2][j]), vsub_f32(x[3][j], x[1][j]), 2.0f);
+
+      // XTx[4][j] =  2*x[1][j] + -1*x[2][j] + -2*x[3][j] +  1*x[4][j];
+      XTx[4][j] = vmla_n_f32(vsub_f32(x[4][j], x[2][j]), vsub_f32(x[1][j], x[3][j]), 2.0f);
+
+      // XTx[5][j] =  4*x[1][j] + -5*x[3][j] +  1*x[5][j];
+      XTx[5][j] = vmls_n_f32(vmla_n_f32(x[5][j], x[1][j], 4.0f), x[3][j], 5.0f);
     }
 
     // Compute U = XT . x . X
     for (int i = 0; i < inner_tile_rows; i++)
     {
-      // U[i][0] = XTx[i][0] - XTx[i][2];
-      U[i][0] = vsub_f32(XTx[i][0], XTx[i][2]);
+      // U[i][0] =  4*XTx[i][0] + -5*XTx[i][2] +  1*XTx[i][4];
+      U[i][0] = vmls_n_f32(vmla_n_f32(XTx[i][4], XTx[i][0], 4.0f), XTx[i][2], 5.0f);
 
-      // U[i][1] = XTx[i][1] + XTx[i][2];
-      U[i][1] = vadd_f32(XTx[i][1], XTx[i][2]);
+      // U[i][1] = -4*XTx[i][1] + -4*XTx[i][2] +  1*XTx[i][3] +  1*XTx[i][4];
+      U[i][1] = vmls_n_f32(vadd_f32(XTx[i][3], XTx[i][4]), vadd_f32(XTx[i][1], XTx[i][2]), 4.0f);
 
-      // U[i][2] = XTx[i][2] - XTx[i][1];
-      U[i][2] = vsub_f32(XTx[i][2], XTx[i][1]);
+      // U[i][2] =  4*XTx[i][1] + -4*XTx[i][2] + -1*XTx[i][3] +  1*XTx[i][4];
+      U[i][2] = vmla_n_f32(vsub_f32(XTx[i][4], XTx[i][3]), vsub_f32(XTx[i][1], XTx[i][2]), 4.0f);
 
-      // U[i][3] = XTx[i][1] - XTx[i][3];
-      U[i][3] = vsub_f32(XTx[i][1], XTx[i][3]);
+      // U[i][3] = -2*XTx[i][1] + -1*XTx[i][2] +  2*XTx[i][3] +  1*XTx[i][4];
+      U[i][3] = vmla_n_f32(vsub_f32(XTx[i][4], XTx[i][2]), vsub_f32(XTx[i][3], XTx[i][1]), 2.0f);
+
+      // U[i][4] =  2*XTx[i][1] + -1*XTx[i][2] + -2*XTx[i][3] +  1*XTx[i][4];
+      U[i][4] = vmla_n_f32(vsub_f32(XTx[i][4], XTx[i][2]), vsub_f32(XTx[i][1], XTx[i][3]), 2.0f);
+
+      // U[i][5] =  4*XTx[i][1] + -5*XTx[i][3] +  1*XTx[i][5];
+      U[i][5] = vmls_n_f32(vmla_n_f32(XTx[i][5], XTx[i][1], 4.0f), XTx[i][3], 5.0f);
     }
 
     // Store the transformed matrix
@@ -208,7 +150,6 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
     }
     outptr += 2;
   }
-#endif  // __arm_any__
   for (; channels_remaining; channels_remaining--)
   {
     // Load x
@@ -223,19 +164,23 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
     // Compute XT . x
     for (int j = 0; j < inner_tile_cols; j++)
     {
-      XTx[0][j] = x[0][j] - x[2][j];
-      XTx[1][j] = x[1][j] + x[2][j];
-      XTx[2][j] = x[2][j] - x[1][j];
-      XTx[3][j] = x[1][j] - x[3][j];
+      XTx[0][j] =  4*x[0][j] + -5*x[2][j] +  1*x[4][j];
+      XTx[1][j] = -4*x[1][j] + -4*x[2][j] +  1*x[3][j] +  1*x[4][j];
+      XTx[2][j] =  4*x[1][j] + -4*x[2][j] + -1*x[3][j] +  1*x[4][j];
+      XTx[3][j] = -2*x[1][j] + -1*x[2][j] +  2*x[3][j] +  1*x[4][j];
+      XTx[4][j] =  2*x[1][j] + -1*x[2][j] + -2*x[3][j] +  1*x[4][j];
+      XTx[5][j] =  4*x[1][j] + -5*x[3][j] +  1*x[5][j];
     }
 
     // Compute U = XT . x . X
     for (int i = 0; i < inner_tile_rows; i++)
     {
-      U[i][0] = XTx[i][0] - XTx[i][2];
-      U[i][1] = XTx[i][1] + XTx[i][2];
-      U[i][2] = XTx[i][2] - XTx[i][1];
-      U[i][3] = XTx[i][1] - XTx[i][3];
+      U[i][0] =  4*XTx[i][0] + -5*XTx[i][2] +  1*XTx[i][4];
+      U[i][1] = -4*XTx[i][1] + -4*XTx[i][2] +  1*XTx[i][3] +  1*XTx[i][4];
+      U[i][2] =  4*XTx[i][1] + -4*XTx[i][2] + -1*XTx[i][3] +  1*XTx[i][4];
+      U[i][3] = -2*XTx[i][1] + -1*XTx[i][2] +  2*XTx[i][3] +  1*XTx[i][4];
+      U[i][4] =  2*XTx[i][1] + -1*XTx[i][2] + -2*XTx[i][3] +  1*XTx[i][4];
+      U[i][5] =  4*XTx[i][1] + -5*XTx[i][3] +  1*XTx[i][5];
     }
 
     // Store the transformed matrix
@@ -250,6 +195,8 @@ void InputTransform<4, 4, float, float, WinogradRoots::Integers>::transform_tile
   }
 }
 
-template class InputTransform<4, 4, float, float, WinogradRoots::Integers>;
+}  // namespace input_transform
+}  // namespace winograd
+}  // namespace arm_conv
 
-}  // namespace
+#endif // ! __aarch64__
