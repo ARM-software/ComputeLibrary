@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -193,7 +193,9 @@ void CpuGemmDirectConv2d::run(ITensorPack &tensors)
     _gemm_asm_func->run(tensors);
     if(_run_activation)
     {
-        _activation_func->run(tensors);
+        ITensor    *io = tensors.get_tensor(ACL_DST);
+        ITensorPack pack{ { ACL_SRC, io }, { ACL_DST, io } };
+        _activation_func->run(pack);
     }
 }
 
