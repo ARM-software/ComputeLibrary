@@ -129,6 +129,17 @@ https://lists.linaro.org/mailman3/lists/acl-dev.lists.linaro.org/
 
 The software is provided under MIT license. Contributions to this project are accepted under the same license.
 
+### Other Projects
+This project contains code from other projects as listed below. The original license text is included in those source files.
+
+* The OpenCL header library is licensed under Apache License, Version 2.0, which is a permissive license compatible with MIT license.
+
+* The half library is licensed under MIT license.
+
+* The libnpy library is licensed under MIT license.
+
+* The stb image library is either licensed under MIT license or is in Public Domain. It is used by this project under the terms of MIT license.
+
 <br>
 
 ## Trademarks and Copyrights
