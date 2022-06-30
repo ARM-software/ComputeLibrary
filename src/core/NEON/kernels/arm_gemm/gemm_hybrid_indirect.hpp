@@ -450,7 +450,7 @@ public:
         }
 
         /* Make sure we've been set up correctly. */
-        assert(_B_transposed);
+        assert(FixedFormat || _B_transposed);
         static_assert(std::is_same<To, Tloi>::value, "gemm_native: Operand types must be the same.");
 //        static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 

@@ -33,21 +33,21 @@
 
 #include "kernels/a32_sgemm_8x6.hpp"
 
-#ifdef ENABLE_FIXED_FORMAT_KERNELS
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_ffhybrid_bf16fp32_mmla_6x16.hpp"
 #include "kernels/a64_ffinterleaved_bf16fp32_dot_8x12.hpp"
 #include "kernels/a64_ffinterleaved_bf16fp32_mmla_8x12.hpp"
-#endif // ENABLE_FIXED_FORMAT_KERNELS
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_hybrid_bf16fp32_dot_6x16.hpp"
 #include "kernels/a64_hybrid_bf16fp32_mmla_6x16.hpp"
 #include "kernels/a64_interleaved_bf16fp32_dot_8x12.hpp"
 #include "kernels/a64_interleaved_bf16fp32_mmla_8x12.hpp"
 #include "kernels/a64_sgemm_8x12.hpp"
 
-#ifdef ENABLE_FIXED_FORMAT_KERNELS
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/sve_ffhybrid_bf16fp32_mmla_6x4VL.hpp"
 #include "kernels/sve_ffinterleaved_bf16fp32_mmla_8x3VL.hpp"
-#endif // ENABLE_FIXED_FORMAT_KERNELS
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/sve_hybrid_bf16fp32_dot_6x4VL.hpp"
 #include "kernels/sve_hybrid_bf16fp32_mmla_6x4VL.hpp"
 #include "kernels/sve_interleaved_bf16fp32_dot_8x3VL.hpp"
@@ -89,7 +89,7 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleaved<cls_sve_interleaved_bf16fp32_dot_8x3VL, bfloat16, float>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_bf16fp32_dot_8x3VL, bfloat16, float>(args); }
 ),
-#ifdef ENABLE_FIXED_FORMAT_KERNELS
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 GemmImplementation<bfloat16, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "sve_ffinterleaved_bf16fp32_mmla_8x3VL",
@@ -106,7 +106,7 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return GemmHybridIndirectFixedFormat<cls_sve_ffhybrid_bf16fp32_mmla_6x4VL, bfloat16, float>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmHybridIndirectFixedFormat<cls_sve_ffhybrid_bf16fp32_mmla_6x4VL, bfloat16, float>(args); }
 ),
-#endif // ENABLE_FIXED_FORMAT_KERNELS
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #endif // ARM_COMPUTE_ENABLE_SVE
 GemmImplementation<bfloat16, float>::with_estimate(
     GemmMethod::GEMM_HYBRID,
@@ -136,7 +136,7 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleaved<cls_a64_interleaved_bf16fp32_dot_8x12, bfloat16, float>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_interleaved_bf16fp32_dot_8x12, bfloat16, float>(args); }
 ),
-#ifdef ENABLE_FIXED_FORMAT_KERNELS
+#ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 GemmImplementation<bfloat16, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_ffinterleaved_bf16fp32_mmla_8x12",
@@ -161,7 +161,7 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>::estimate_cycles<bfloat16>(args); },
     [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_dot_8x12, bfloat16, float>(args); }
 ),
-#endif // ENABLE_FIXED_FORMAT_KERNELS
+#endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 GemmImplementation<bfloat16, float>::with_estimate(
     GemmMethod::GEMM_INTERLEAVED,
     "a64_sgemm_8x12",
@@ -197,7 +197,7 @@ const GemmImplementation<bfloat16, float> *gemm_implementation_list<bfloat16, fl
 
 /* Explicitly instantiate the external functions for these types. */
 template UniqueGemmCommon<bfloat16, float> gemm<bfloat16, float, Nothing>(const GemmArgs &args, const Nothing &);
-template bool has_opt_gemm<bfloat16, float, Nothing>(const GemmArgs &args, const Nothing &);
+template bool has_opt_gemm<bfloat16, float, Nothing>(WeightFormat &weight_format, const GemmArgs &args, const Nothing &);
 template KernelDescription get_gemm_method<bfloat16, float, Nothing>(const GemmArgs &args, const Nothing &);
 template std::vector<KernelDescription> get_compatible_kernels<bfloat16, float, Nothing>(const GemmArgs &args, const Nothing &);
 

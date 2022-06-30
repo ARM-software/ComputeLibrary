@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/utils/misc/Macros.h"
+#include "src/cpu/kernels/assembly/arm_gemm.hpp"
 #include "support/Bfloat16.h"
 #include "support/Half.h"
 
@@ -774,10 +775,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int _pad_left;
-    unsigned int _pad_top;
-    unsigned int _pad_right;
-    unsigned int _pad_bottom;
+    unsigned int                          _pad_left;
+    unsigned int                          _pad_top;
+    unsigned int                          _pad_right;
+    unsigned int                          _pad_bottom;
 
     DimensionRoundingType _round_type;
 };
@@ -919,14 +920,14 @@ public:
     }
 
 private:
-    std::vector<float> _min_sizes;
-    std::vector<float> _variances;
-    float              _offset;
-    bool               _flip;
-    bool               _clip;
-    std::vector<float> _max_sizes;
-    std::vector<float> _aspect_ratios;
-    Coordinates2D      _img_size;
+    std::vector<float>   _min_sizes;
+    std::vector<float>   _variances;
+    float                _offset;
+    bool                 _flip;
+    bool                 _clip;
+    std::vector<float>   _max_sizes;
+    std::vector<float>   _aspect_ratios;
+    Coordinates2D        _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1172,15 @@ public:
     }
 
 private:
-    unsigned int _max_detections;
-    unsigned int _max_classes_per_detection;
-    float        _nms_score_threshold;
-    float        _iou_threshold;
-    unsigned int _num_classes;
+    unsigned int         _max_detections;
+    unsigned int         _max_classes_per_detection;
+    float                _nms_score_threshold;
+    float                _iou_threshold;
+    unsigned int         _num_classes;
     std::array<float, 4> _scales_values;
-    bool         _use_regular_nms;
-    unsigned int _detection_per_class;
-    bool         _dequantize_scores;
+    bool                 _use_regular_nms;
+    unsigned int         _detection_per_class;
+    bool                 _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1613,13 @@ public:
     }
 
 private:
-    float _img_width;
-    float _img_height;
-    float _scale;
-    bool  _apply_scale;
-    bool  _correct_transform_coords;
+    float                _img_width;
+    float                _img_height;
+    float                _scale;
+    bool                 _apply_scale;
+    bool                 _correct_transform_coords;
     std::array<float, 4> _weights;
-    float _bbox_xform_clip;
+    float                _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -1900,7 +1901,7 @@ class WeightsInfo
 public:
     /** Default constructor */
     WeightsInfo()
-        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(false)
+        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(false), _weight_format(arm_gemm::WeightFormat::UNSPECIFIED)
     {
     }
     /** Constructor
@@ -1910,9 +1911,11 @@ public:
      * @param[in] kernel_height           Kernel height.
      * @param[in] num_kernels             Number of convolution kernels.
      * @param[in] retain_internal_weights (Optional) True if internal reshaped weights must be retained. Used for reconfiguration purposes. Default is false.
+     * @param[in] weight_format           (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_gemm::WeightFormat::UNSPECIFIED.
      */
-    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels, bool retain_internal_weights = false)
-        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels), _retain_internal_weights(retain_internal_weights)
+    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels, bool retain_internal_weights = false,
+                arm_gemm::WeightFormat weight_format = arm_gemm::WeightFormat::UNSPECIFIED)
+        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels), _retain_internal_weights(retain_internal_weights), _weight_format(weight_format)
     {
     }
     /** Flag which specifies if the weights tensor has been reshaped.
@@ -1943,13 +1946,26 @@ public:
     {
         return _retain_internal_weights;
     }
+    arm_gemm::WeightFormat weight_format() const
+    {
+        return _weight_format;
+    }
+    unsigned int kernel_width() const
+    {
+        return _kernel_width;
+    }
+    unsigned int kernel_height() const
+    {
+        return _kernel_height;
+    }
 
 private:
-    bool         _are_reshaped;
-    unsigned int _kernel_width;
-    unsigned int _kernel_height;
-    unsigned int _num_kernels;
-    bool         _retain_internal_weights;
+    bool                   _are_reshaped;
+    unsigned int           _kernel_width;
+    unsigned int           _kernel_height;
+    unsigned int           _num_kernels;
+    bool                   _retain_internal_weights;
+    arm_gemm::WeightFormat _weight_format;
 };
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
@@ -2160,7 +2176,8 @@ public:
           _pretranspose_B(false),
           _activation_info(),
           _post_ops(),
-          _fixed_format(false)
+          _fixed_format(false),
+          _weight_format(arm_gemm::WeightFormat::UNSPECIFIED)
     {
     }
     /** Constructor
@@ -2180,11 +2197,12 @@ public:
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
      * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_gemm::WeightFormat.
+     * @param[in] weight_format               (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_gemm::WeightFormat::UNSPECIFIED.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
              const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>(),
-             bool fixed_format = false) noexcept
+             bool fixed_format = false, arm_gemm::WeightFormat weight_format = arm_gemm::WeightFormat::UNSPECIFIED) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -2199,7 +2217,8 @@ public:
           _pretranspose_B(false),
           _activation_info(activation_info),
           _post_ops(post_ops),
-          _fixed_format(fixed_format)
+          _fixed_format(fixed_format),
+          _weight_format(weight_format)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -2373,6 +2392,11 @@ public:
         return _fixed_format;
     }
 
+    arm_gemm::WeightFormat weight_format() const
+    {
+        return _weight_format;
+    }
+
 private:
     bool                                    _is_a_reshaped;
     bool                                    _is_b_reshaped;
@@ -2389,6 +2413,7 @@ private:
     ActivationLayerInfo                     _activation_info;
     experimental::PostOpList<ITensorInfo *> _post_ops;
     bool                                    _fixed_format;
+    arm_gemm::WeightFormat                  _weight_format;
 };
 
 /** Winograd information */

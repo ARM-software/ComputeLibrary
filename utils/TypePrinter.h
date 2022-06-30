@@ -3242,6 +3242,30 @@ inline std::string to_string(const Conv3dInfo &conv3d_info)
     return str.str();
 }
 
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_gemm::WeightFormat &wf)
+{
+    os << arm_gemm::to_string(wf);
+    return os;
+}
+inline std::string to_string(const arm_gemm::WeightFormat wf)
+{
+    std::stringstream str;
+    str << wf;
+    return str.str();
+}
+
+inline std::string to_string(const std::tuple<TensorShape, TensorShape, arm_gemm::WeightFormat> values)
+{
+    std::stringstream str;
+    str << "[Input shape = " << std::get<0>(values);
+    str << ", ";
+    str << "Expected output shape = " << std::get<1>(values);
+
+    str << ", ";
+    str << "WeightFormat = " << std::get<2>(values) << "]";
+    return str.str();
+}
+
 } // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */

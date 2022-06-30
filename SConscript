@@ -503,7 +503,7 @@ if env['experimental_dynamic_fusion']:
 
 # Fixed format GEMM kernels.
 if env['experimental_fixed_format_kernels']:
-    arm_compute_env.Append(CPPDEFINES = ['ENABLE_FIXED_FORMAT_KERNELS'])
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
 
 
 # Logging files

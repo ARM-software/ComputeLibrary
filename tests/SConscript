@@ -184,6 +184,10 @@ if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos','win
     if 'ndk_above_r21' in env:
         test_env['LINKFLAGS'].append('-static-openmp')
 
+# Testing for fixed format GEMM kernels.
+if env['experimental_fixed_format_kernels'] and test_env['validation_tests']:
+    test_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
+
 if test_env['validation_tests']:
     arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework, arm_compute_core_a])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
