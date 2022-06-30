@@ -27,8 +27,9 @@
 #include "depthfirst_driver.hpp"
 #include "src/core/NEON/kernels/arm_conv/addressing.hpp"
 #include "utils.hpp"
-
+#if !defined(_WIN64) && !defined(__OpenBSD__)
 #include <alloca.h>
+#endif /* !defined(_WIN64) && !defined(__OpenBSD__) */
 #include <limits>
 
 namespace arm_conv {
