@@ -53,6 +53,7 @@ enum class GPUTarget
     G77           = 0x310,
     G78           = 0x320,
     G710          = 0x330,
+    G57           = 0x340,
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */

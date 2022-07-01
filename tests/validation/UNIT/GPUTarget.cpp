@@ -53,6 +53,7 @@ TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78") == GPUTarget::G78, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78AE") == GPUTarget::G78, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G710") == GPUTarget::G710, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G57") == GPUTarget::G57, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T000") == GPUTarget::MIDGARD, framework::LogLevel::ERRORS);
 }
 
