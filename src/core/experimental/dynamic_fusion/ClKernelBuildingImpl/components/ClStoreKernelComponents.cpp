@@ -108,6 +108,10 @@ std::string ClStoreIndirectWidthSelectKernelComponent::get_component_code() cons
     return R"_(
     //------------------ START KERNEL {{meta_kernel_id}} STORE ---------------------
     {
+    // This also follows NHWC layout
+    // cout maps to global_id(0) maps to Channel
+    // mout maps to global_id(1) maps to Height and Weight (Collapsed Window)
+    // bout maps to global_id(3) maps to N / Batch
     #define _IDST_WIDTH {{dst}}_w
     #define _IDST_HEIGHT {{dst}}_h
         TILE(uint, M0, 1, dst_indirect_y);

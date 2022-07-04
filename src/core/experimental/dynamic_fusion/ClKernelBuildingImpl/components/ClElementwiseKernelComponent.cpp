@@ -24,6 +24,7 @@
 #ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseKernelComponent.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -57,9 +58,13 @@ Window ClElementwiseKernelComponent::get_window() const
 
     auto_init_if_empty(*dst_info, out_shape, 1, lhs_info->data_type());
 
+    TensorShape output_shape = dst_info->tensor_shape();
+    // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) and upper dimensions unchanged
+    // This is in line with the collapsing convention used by Conv2d
+    output_shape.collapse(2U, 1U);
     const unsigned int vector_size_byte_opencl           = 16;
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / dst_info->element_size(), dst_info->dimension(0));
-    Window             win                               = calculate_max_window(*dst_info, Steps(num_elems_processed_per_iteration));
+    Window             win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 
     return win;
 }
@@ -83,8 +88,12 @@ std::string ClElementwiseKernelComponent::get_component_code() const
         TILE({{DATA_TYPE}}, M0, N0, lhs_tile);
         TILE({{DATA_TYPE}}, M0, N0, rhs_tile);
 
+        // Since mout maps to dimensions 1 (y) and dimension 2 (z) of the input tensor because of the collapsed window, bout maps to dimension 3 (w)
+        {{lhs}}_offset_first_element_in_bytes += bout * {{lhs}}_stride_w;
+        {{rhs}}_offset_first_element_in_bytes += bout * {{rhs}}_stride_w;
+
         T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{lhs}}, cout, mout, 1, {{lhs}}_stride_y, lhs_tile);
-        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{rhs}}, cout, mout, 1, {{rhs}}_stride_y, rhs_tile);
+        T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{rhs}}, {{rhs_start_x}}, {{rhs_start_y}}, 1, {{rhs}}_stride_y, rhs_tile);
 
 #if defined(IS_BROADCAST)
         T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
@@ -107,7 +116,7 @@ std::string ClElementwiseKernelComponent::get_component_code() const
     {
         TILE({{DATA_TYPE}}, M0, N0, addend_tile);
 
-        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{addend}}, cout, mout, 1, {{addend}}_stride_y, addend_tile);
+        T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{addend}}, {{rhs_start_x}}, {{rhs_start_y}}, 1, {{addend}}_stride_y, addend_tile);
 
 #if defined(IS_BROADCAST)
         T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, {{acc}}, addend_tile, {{acc}});
@@ -122,16 +131,18 @@ std::string ClElementwiseKernelComponent::get_component_code() const
 
 CLBuildOptions ClElementwiseKernelComponent::generate_build_options() const
 {
-    const auto t_src_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
+    const auto t_rhs_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
     const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
 
-    CLBuildOptions build_opts{};
-    const auto     n0           = _blueprint->impl().get_execution_window().x().step();
-    const auto     m0           = _blueprint->impl().get_execution_window().y().step();
-    const bool     is_broadcast = t_src_info->tensor_shape() != t_dst_info->tensor_shape();
+    CLBuildOptions     build_opts{};
+    const auto         n0               = _blueprint->impl().get_execution_window().x().step();
+    const auto         m0               = _blueprint->impl().get_execution_window().y().step();
+    const unsigned int partial_store_n0 = t_dst_info->dimension(0) % n0;
+    const bool         is_broadcast     = t_rhs_info->tensor_shape() != t_dst_info->tensor_shape();
 
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
+    build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
     build_opts.add_option_if(is_broadcast, "-DIS_BROADCAST");
 
     return build_opts;
@@ -166,6 +177,7 @@ ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(c
 {
     TagLUT     lut{};
     const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    const auto t_rhs_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
     // Arguments and global shared variables
     const bool is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
     if(is_root)
@@ -210,6 +222,39 @@ ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(c
             break;
         default:
             ARM_COMPUTE_ERROR("Arithmetic Operation not supported");
+    }
+
+    // Set broadcast parameters
+    // PRE: All tensors are broadcast-compatible
+    const bool is_broadcast = t_rhs_info->tensor_shape() != t_dst_info->tensor_shape();
+    if(is_broadcast)
+    {
+        // Note that n0 maps to input tensor dimension 0, m0 maps to input dimensions 1 and 2 because of our collapse strategy
+        if(t_rhs_info->dimension(0) == 1U && t_rhs_info->dimension(1) == 1U && t_rhs_info->dimension(2) == 1U) // Broadcast in X, Y, Z: collapsed rhs win [M0xN0] = [1x1]
+        {
+            lut["rhs_m0"]      = "1";
+            lut["rhs_n0"]      = "1";
+            lut["rhs_start_y"] = "0";
+            lut["rhs_start_x"] = "0";
+        }
+        else if(t_rhs_info->dimension(1) == 1U && t_rhs_info->dimension(2) == 1U) // Broadcast in Y and Z: collapsed rhs win [M0xN0] = [1xN]
+        {
+            lut["rhs_m0"]      = "1";
+            lut["rhs_n0"]      = "N0";
+            lut["rhs_start_y"] = "0";
+            lut["rhs_start_x"] = "cout";
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Only support rhs broadcasting in all X, Y, Z dimensions, or just in Y and Z dimensions");
+        }
+    }
+    else
+    {
+        lut["rhs_m0"]      = "M0";
+        lut["rhs_n0"]      = "N0";
+        lut["rhs_start_y"] = "mout";
+        lut["rhs_start_x"] = "cout";
     }
     return lut;
 }

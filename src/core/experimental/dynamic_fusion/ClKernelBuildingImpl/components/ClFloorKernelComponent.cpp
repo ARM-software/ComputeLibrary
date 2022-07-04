@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 
+#ifdef ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClFloorKernelComponent.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -38,12 +39,10 @@ ComponentType ClFloorKernelComponent::get_component_type() const
 {
     return ComponentType::Simple;
 }
-
 std::set<std::string> ClFloorKernelComponent::get_headers_list() const
 {
     return std::set<std::string> { "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h", "tile_helpers.h" };
 }
-
 Window ClFloorKernelComponent::get_window() const
 {
     const ITensorInfo *src_info = _blueprint->impl().get_kernel_argument_info(_src.arg_id);
@@ -52,16 +51,22 @@ Window ClFloorKernelComponent::get_window() const
     ARM_COMPUTE_ERROR_ON_NULLPTR(src_info, dst_info);
     auto_init_if_empty(*dst_info, src_info->tensor_shape(), 1, src_info->data_type());
 
+    TensorShape output_shape = dst_info->tensor_shape();
+    // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) and upper dimensions unchanged
+    // This is in line with the collapsing convention used by Conv2d
+    output_shape.collapse(2U, 1U);
     const unsigned int vector_size_byte_opencl           = 16;
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / dst_info->element_size(), dst_info->dimension(0));
-    Window             win                               = calculate_max_window(*dst_info, Steps(num_elems_processed_per_iteration));
+    Window             win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 
     return win;
 }
-
 std::string ClFloorKernelComponent::get_component_code() const
 {
-    return R"_(
+    bool is_root = _blueprint->impl().group(_src.arg_id) == SharedVarGroup::Argument;
+    if(is_root)
+    {
+        return R"_(
     //------------------ START KERNEL {{meta_kernel_id}} FLOOR ---------------------
     // IN_0(src)            {{src}}
     // OUT(dst, accum)      {{dst}}
@@ -69,30 +74,40 @@ std::string ClFloorKernelComponent::get_component_code() const
     {
         TILE({{DATA_TYPE}}, M0, N0, src_tile);
 
+        // Since mout maps to dimensions 1 (y) and dimension 2 (z) of the input tensor because of the collapsed window, bout maps to dimension 3 (w)
+        {{src}}_offset_first_element_in_bytes += bout * {{src}}_stride_w;
         T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{src}}, cout, mout, 1, {{src}}_stride_y, src_tile);
+
         T_FLOOR({{DATA_TYPE}}, M0, N0, src_tile, {{dst}});
     }
-
     //------------------ END KERNEL {{meta_kernel_id}} FLOOR ---------------------
 )_";
+    }
+    else
+    {
+        return R"_(
+    //------------------ START KERNEL {{meta_kernel_id}} FLOOR ---------------------
+    // IN_0/Out(Accumulator)        {{acc}}
+    // output = floor(input)
+    {
+        T_FLOOR({{DATA_TYPE}}, M0, N0, {{acc}}, {{acc}});
+    }
+    //------------------ END KERNEL {{meta_kernel_id}} FLOOR ---------------------
+)_";
+    }
 }
-
 CLBuildOptions ClFloorKernelComponent::generate_build_options() const
 {
-    CLBuildOptions build_opts{};
-
-    const auto n0 = _blueprint->impl().get_execution_window().x().step();
-    const auto m0 = _blueprint->impl().get_execution_window().y().step();
-
+    CLBuildOptions     build_opts{};
+    const auto         n0               = _blueprint->impl().get_execution_window().x().step();
+    const auto         m0               = _blueprint->impl().get_execution_window().y().step();
     const auto         dst_info         = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
     const unsigned int partial_store_n0 = dst_info->dimension(0) % n0;
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
-
     return build_opts;
 }
-
 std::string ClFloorKernelComponent::generate_config_id() const
 {
     auto        t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
@@ -106,20 +121,28 @@ std::string ClFloorKernelComponent::generate_config_id() const
     config_id += lower_string(string_from_data_layout(t_dst_info->data_layout()));
     return config_id;
 }
-
 void ClFloorKernelComponent::allocate_shared_vars(SharedVarTable &vtable) const
 {
     vtable.add(_src, _blueprint->impl().group(_src.arg_id), ClKernelArgDescriptor(_src.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "src");
     vtable.add(_dst, _blueprint->impl().group(_dst.arg_id), ClKernelArgDescriptor(_dst.arg_id, ClKernelTensorArgType::Tensor_4D_t_Buffer), "dst");
 }
-
 ClFloorKernelComponent::TagLUT ClFloorKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
     TagLUT     lut{};
     const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
     // Arguments and global shared variables
-    lut["src"]            = vtable.get(_src);
-    lut["dst"]            = vtable.get(_dst);
+    const bool is_root = _blueprint->impl().group(_src.arg_id) == SharedVarGroup::Argument;
+
+    if(is_root)
+    {
+        lut["src"] = vtable.get(_src);
+        lut["dst"] = vtable.get(_dst);
+    }
+    else
+    {
+        lut["acc"] = vtable.get(_src);
+    }
+
     lut["meta_kernel_id"] = id();
     lut["DATA_TYPE"]      = get_cl_type_from_data_type(t_dst_info->data_type());
     return lut;

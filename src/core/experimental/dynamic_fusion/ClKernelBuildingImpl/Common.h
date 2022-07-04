@@ -371,6 +371,7 @@ public:
     {
         return Window{};
     }
+
     /** Get the tag look-up table used to instantiate the component code.
      *
      * @param vtable
@@ -557,7 +558,7 @@ public:
 
     std::string build_code()
     {
-        ARM_COMPUTE_ERROR_ON_MSG(_graph_root < 0, "No root found in the component graph");
+        ARM_COMPUTE_ERROR_ON_MSG(_graph_root == -1, "No root found in the component graph");
 
         // These data structures will hold the data from all the components in the blueprint
         std::set<std::string>    headers_list{};
@@ -666,9 +667,10 @@ public:
         return _tile_info;
     }
 
+    // Get the global execution window, i.e. that of the root component
     Window get_execution_window() const
     {
-        ARM_COMPUTE_ERROR_ON_MSG(_graph_root < 0, "No root found in the component graph");
+        ARM_COMPUTE_ERROR_ON_MSG(_graph_root == -1, "No root found in the component graph");
         ARM_COMPUTE_ERROR_ON_MSG(_dst_id == -1, "Destination Tensor Id should be ready before calling get_execution_window()");
 
         return _components.find(_graph_root)->second->get_window();

@@ -37,6 +37,17 @@ namespace dynamic_fusion
 class ClFloorKernelComponent : public IClKernelComponent
 {
 public:
+    /** Construct a new Cl Floor Kernel Component object
+     *
+     * @param blueprint  Blueprint to which this component is added
+     * @param src        Link to SRC tensor
+     * @param dst        Link to DST tensor
+     *
+     * Support Level
+     * Data Type:       F16, F32
+     * Tensor Shape:    Any shape of arbitrary dimension >= 1 and <= 4
+     * Value Range:     All
+     */
     ClFloorKernelComponent(ClKernelBlueprint *blueprint, const Link &src, const Link &dst)
         : IClKernelComponent(blueprint), _src{ src }, _dst{ dst }
     {

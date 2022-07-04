@@ -37,6 +37,20 @@ namespace dynamic_fusion
 class ClElementwiseKernelComponent : public IClKernelComponent
 {
 public:
+    /** Construct a new Cl Elementwise Kernel Component object
+     *
+     * @param[in]  blueprint Blueprint to which this component is added
+     * @param[in]  desc      Component descriptor
+     * @param[in]  lhs       Link to LHS tensor
+     * @param[in]  rhs       Link to RHS tensor
+     * @param[out] dst       Link to DST tensor
+     *
+     * Support Level
+     * Data Type:       F16, F32
+     * Tensor Shape:    Any shape of arbitrary dimension >= 1 and <= 4
+     * Value Range:     All
+     * Broadcasting:    Only RHS tensor can be broadcasted into LHS. Only support broadcasting in dimension 1 and dimension 2 or all dimension 0, 1 and 2
+     */
     ClElementwiseKernelComponent(ClKernelBlueprint *blueprint, const ClElementwiseKernelDescriptor &desc, const Link &lhs, const Link &rhs, const Link &dst)
         : IClKernelComponent(blueprint), _desc{ desc }, _lhs{ lhs }, _rhs{ rhs }, _dst{ dst }
     {
