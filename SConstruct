@@ -89,12 +89,12 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Enable Logging", False),
-    EnumVariable("arch", "Target Architecture", "armv7a",
+    EnumVariable("arch", "Target Architecture. The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.", "armv7a",
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
-    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
+    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
+    EnumVariable("build", "Either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
@@ -102,17 +102,29 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
-    BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
-    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
-    BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
-    BoolVariable("openmp", "Enable OpenMP backend", False),
+    BoolVariable("embed_kernels", "Enable if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate '.cl' / '.cs' files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to './cl_kernels'.", True),
+    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary using zlib. Useful for reducing the binary size. embed_kernels should be enabled", False),
+    BoolVariable("set_soname", "If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects. (requires SCons 2.4 or above)", False),
+    BoolVariable("openmp", "Enable OpenMP backend. Only works when building with g++ and not clang++", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
-    PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
+    PathVariable("external_tests_dir", """Add examples, benchmarks and tests to the tests suite from an external path. In order to use this option, the external tests directory must have the following structure: 
+    EXTERNAL_TESTS_DIR:
+    └── tests
+        ├── benchmark
+        │   ├── CL
+        │   ├── datasets
+        │   ├── fixtures
+        │   └── Neon
+        └── validation
+            ├── CL
+            ├── datasets
+            ├── fixtures
+            └── Neon\n""", "", PathVariable.PathAccept),
     BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
     BoolVariable("experimental_fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
