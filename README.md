@@ -91,6 +91,7 @@ Pre-build binaries are generated with the following security / good coding pract
 - Android™
 - Bare Metal
 - Linux®
+- OpenBSD®
 - macOS®
 - Tizen™
 
