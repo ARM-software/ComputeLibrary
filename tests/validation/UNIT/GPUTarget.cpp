@@ -37,6 +37,7 @@ TEST_SUITE(GPUTarget)
 
 TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
 {
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T000") == GPUTarget::MIDGARD, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T600") == GPUTarget::T600, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T700") == GPUTarget::T700, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T800") == GPUTarget::T800, framework::LogLevel::ERRORS);
@@ -45,16 +46,22 @@ TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51") == GPUTarget::G51, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51BIG") == GPUTarget::G51BIG, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51LIT") == GPUTarget::G51LIT, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52") == GPUTarget::G52, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52LIT") == GPUTarget::G52LIT, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G31") == GPUTarget::G31, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G76") == GPUTarget::G76, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G76 r0p0") == GPUTarget::G76, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52") == GPUTarget::G52, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52LIT") == GPUTarget::G52LIT, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G77") == GPUTarget::G77, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78") == GPUTarget::G78, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78AE") == GPUTarget::G78, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G710") == GPUTarget::G710, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G57") == GPUTarget::G57, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T000") == GPUTarget::MIDGARD, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78") == GPUTarget::G78, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G68") == GPUTarget::G68, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G78AE") == GPUTarget::G78AE, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G710") == GPUTarget::G710, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G610") == GPUTarget::G610, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G510") == GPUTarget::G510, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G310") == GPUTarget::G310, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G715") == GPUTarget::G715, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G615") == GPUTarget::G615, framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(GPUTargetIsIn, framework::DatasetMode::ALL)

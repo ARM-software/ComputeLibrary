@@ -35,6 +35,18 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G77;
     }
+    else if(version.find("G57") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G57;
+    }
+    if(version.find("G68") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G68;
+    }
+    if(version.find("G78AE") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G78AE;
+    }
     if(version.find("G78") != std::string::npos)
     {
         return arm_compute::GPUTarget::G78;
@@ -43,9 +55,17 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G710;
     }
-    else if(version.find("G57") != std::string::npos)
+    else if(version.find("G610") != std::string::npos)
     {
-        return arm_compute::GPUTarget::G57;
+        return arm_compute::GPUTarget::G610;
+    }
+    else if(version.find("G510") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G510;
+    }
+    else if(version.find("G310") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G310;
     }
     else if(version.find("G715") != std::string::npos)
     {
@@ -143,15 +163,21 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G51, "g51" },
         { GPUTarget::G51BIG, "g51big" },
         { GPUTarget::G51LIT, "g51lit" },
+        { GPUTarget::G31, "g31" },
+        { GPUTarget::G76, "g76" },
         { GPUTarget::G52, "g52" },
         { GPUTarget::G52LIT, "g52lit" },
-        { GPUTarget::G76, "g76" },
         { GPUTarget::G77, "g77" },
-        { GPUTarget::G78, "g78" },
-        { GPUTarget::G710, "g710" },
         { GPUTarget::G57, "g57" },
+        { GPUTarget::G78, "g78" },
+        { GPUTarget::G68, "g68" },
+        { GPUTarget::G78AE, "g78ae" },
+        { GPUTarget::G710, "g710" },
+        { GPUTarget::G610, "g610" },
+        { GPUTarget::G510, "g510" },
+        { GPUTarget::G310, "g310" },
         { GPUTarget::G715, "g715" },
-        { GPUTarget::G615, "g615" }
+        { GPUTarget::G615, "g615" },
     };
 
     return gpu_target_map[target];

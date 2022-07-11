@@ -2320,6 +2320,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::GPU_ARCH_MASK:
             os << "GPU_ARCH_MASK";
             break;
+        case GPUTarget::GPU_GENERATION_MASK:
+            os << "GPU_GENERATION_MASK";
+            break;
         case GPUTarget::MIDGARD:
             os << "MIDGARD";
             break;
@@ -2353,20 +2356,44 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G51LIT:
             os << "G51LIT";
             break;
+        case GPUTarget::G31:
+            os << "G31";
+            break;
         case GPUTarget::G76:
             os << "G76";
+            break;
+        case GPUTarget::G52:
+            os << "G52";
+            break;
+        case GPUTarget::G52LIT:
+            os << "G52LIT";
             break;
         case GPUTarget::G77:
             os << "G77";
             break;
+        case GPUTarget::G57:
+            os << "G57";
+            break;
         case GPUTarget::G78:
             os << "G78";
             break;
-        case GPUTarget::G31:
-            os << "G31";
+        case GPUTarget::G68:
+            os << "G68";
+            break;
+        case GPUTarget::G78AE:
+            os << "G78AE";
             break;
         case GPUTarget::G710:
             os << "G710";
+            break;
+        case GPUTarget::G610:
+            os << "G610";
+            break;
+        case GPUTarget::G510:
+            os << "G510";
+            break;
+        case GPUTarget::G310:
+            os << "G310";
             break;
         case GPUTarget::G715:
             os << "G715";
