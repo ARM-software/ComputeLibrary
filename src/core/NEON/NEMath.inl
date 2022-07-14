@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,6 +165,43 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 
     return poly;
 }
+
+#ifdef __aarch64__
+inline float32x4_t verfq_f32(float32x4_t x)
+{
+    static const float       erffdata[4] = { 0.278393f, 0.230389f, 0.000972f, 0.078108f };
+    static const float32x4_t coeffdata   = vld1q_f32(erffdata);
+    static const float32x4_t onev{ vdupq_n_f32(1.0f) };
+
+    uint32x4_t selector = vcltzq_f32(x);
+
+    float32x4_t absx  = vabsq_f32(x);
+    float32x4_t absx2 = vmulq_f32(x, x);
+    float32x4_t absx3 = vmulq_f32(absx2, absx);
+    float32x4_t absx4 = vmulq_f32(absx2, absx2);
+
+    float32x4_t denom = onev;
+    denom             = vfmaq_laneq_f32(denom, absx, coeffdata, 0);
+    denom             = vfmaq_laneq_f32(denom, absx2, coeffdata, 1);
+    denom             = vfmaq_laneq_f32(denom, absx3, coeffdata, 2);
+    denom             = vfmaq_laneq_f32(denom, absx4, coeffdata, 3);
+
+    denom = vmulq_f32(denom, denom);
+    denom = vmulq_f32(denom, denom);
+
+    float32x4_t fract = onev;
+    fract             = vdivq_f32(fract, denom);
+
+    float32x4_t result = onev;
+    result             = vsubq_f32(result, fract);
+
+    float32x4_t inverse = vnegq_f32(result);
+
+    result = vbslq_f32(selector, inverse, result);
+
+    return result;
+}
+#endif // #ifdef __aarch64__
 
 inline float32x4_t vlogq_f32(float32x4_t x)
 {
@@ -516,6 +553,17 @@ inline float16x8_t vexpq_f16(float16x8_t x)
     const float16x8_t res = vcombine_f16(vcvt_f16_f32(vexpq_f32(x_low)), vcvt_f16_f32(vexpq_f32(x_high)));
     return res;
 }
+
+#ifdef __aarch64__
+inline float16x8_t verfq_f16(float16x8_t x)
+{
+    const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
+    const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
+
+    const float16x8_t res = vcombine_f16(vcvt_f16_f32(verfq_f32(x_low)), vcvt_f16_f32(verfq_f32(x_high)));
+    return res;
+}
+#endif // #ifdef __aarch64__
 
 inline float16x8_t vlogq_f16(float16x8_t x)
 {

@@ -58,9 +58,13 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
     const qasymm8_t               b        = quantize_qasymm8(act_info.b(), qi_in);
     const qasymm8_t               const_0  = quantize_qasymm8(0.f, qi_in);
     const qasymm8x16_t            vconst_0 = vdupq_n_u8(const_0);
+    const auto                    vconst_1 = vdupq_n_f32(1.f);
+
 #ifndef __aarch64__
-    const auto vconst_1     = vdupq_n_f32(1.f);
     const auto vconst_0_f32 = vdupq_n_f32(0);
+#else  // #ifndef __aarch64__
+    const auto const_inv_2      = vdupq_n_f32(0.5f);
+    const auto const_inv_sqrt_2 = vdupq_n_f32(0.70710678118f);
 #endif // __aarch64__
     const float32x4_t va_f32 = vdupq_n_f32(act_info.a());
     const float32x4_t vb_f32 = vdupq_n_f32(act_info.b());
@@ -193,6 +197,23 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
 
                 tmp = vquantize(tmp_dep, qi_out);
             }
+#else  // #ifndef __aarch64__
+            else if (act == ActivationLayerInfo::ActivationFunction::GELU)
+            {
+                const auto vin_deq = vdequantize(vin, qi_in);
+                // Perform activation
+                const float32x4x4_t tmp_dep =
+                {
+                    {
+                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[0], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[1], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[2], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[3], const_inv_sqrt_2))))),
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = vquantize(tmp_dep, qi_out);
+            }
 #endif // __aarch64__
             else
             {
@@ -246,6 +267,12 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
             {
                 float tmp_f = dequantize_qasymm8(in, qi_in);
                 tmp_f       = tmp_f > 0 ? tmp_f : tmp_f * a_f32;
+                tmp         = quantize_qasymm8(tmp_f, qi_out);
+            }
+            else if(act == ActivationLayerInfo::ActivationFunction::GELU)
+            {
+                float tmp_f = dequantize_qasymm8(in, qi_in);
+                tmp         = tmp_f * 0.5f * (1.0f + std::erff(in / 1.41421356237f));
                 tmp         = quantize_qasymm8(tmp_f, qi_out);
             }
 #endif // __aarch64__

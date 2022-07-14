@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,7 @@ AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activ
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
+        case ActivationLayerInfo::ActivationFunction::GELU:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
         case ActivationLayerInfo::ActivationFunction::TANH:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : 0.00001f);

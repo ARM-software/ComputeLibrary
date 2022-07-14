@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,9 @@
 
 // Linear Activation
 #define linear_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (MLA((DATA_TYPE)B_VAL, (DATA_TYPE)A_VAL, x))
+
+// GELU Activation
+#define gelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (x * (DATA_TYPE)0.5 * ((DATA_TYPE)1.0 + erf(x / (DATA_TYPE)1.41421356237)))
 
 // Identity Activation
 #define identity_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (x)
