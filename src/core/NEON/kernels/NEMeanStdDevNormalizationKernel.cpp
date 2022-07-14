@@ -55,7 +55,7 @@ struct MeanStdDevNormKernel
     MeanStdDevNormUKernelPtr       ukernel;
 };
 
-static const MeanStdDevNormKernel available_kernels[] =
+static const std::vector<MeanStdDevNormKernel> available_kernels =
 {
     {
         "fp32_neon_meanstddevnorm",
@@ -69,6 +69,11 @@ static const MeanStdDevNormKernel available_kernels[] =
         REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_meanstddevnorm)
     },
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    {
+        "qasymm8_neon_meanstddevnorm",
+        [](const MeanStdDevNormSelectorData & data) { return data.dt == DataType::QASYMM8; },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_meanstddevnorm)
+    },
 };
 
 /** Micro-kernel selector
@@ -95,7 +100,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 2, "Input tensor cannot have more than 2 dimensions");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8);
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))

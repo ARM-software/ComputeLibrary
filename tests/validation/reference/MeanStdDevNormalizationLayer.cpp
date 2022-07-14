@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,15 @@ SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T> &src, float e
             dst[j + i * cols] = (src[j + i * cols] - mean) * stddev_inv;
         }
     }
+    return dst;
+}
+
+template <>
+SimpleTensor<uint8_t> mean_std_normalization_layer(const SimpleTensor<uint8_t> &src, float epsilon)
+{
+    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float>   dst_tmp = mean_std_normalization_layer<float>(src_tmp, epsilon);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     return dst;
 }
 

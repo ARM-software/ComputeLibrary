@@ -1,5 +1,12 @@
 #include <arm_neon.h>
 
+#if __arm__
+inline uint32x4_t vpaddq_u32(uint32x4_t, uint32x4_t)
+{
+    return vdupq_n_u32(0);
+}
+#endif
+
 inline float16x4_t vrsqrts_f16 (float16x4_t, float16x4_t)
 {
   return vdup_n_f16(0);

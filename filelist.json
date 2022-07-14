@@ -1738,7 +1738,8 @@
         "neon":{
           "common":["src/cpu/kernels/meanstddevnorm/generic/neon/impl.cpp"],
           "fp32":["src/cpu/kernels/meanstddevnorm/generic/neon/fp32.cpp"],
-          "fp16":["src/cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp"]
+          "fp16":["src/cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp"],
+          "qasymm8":["src/cpu/kernels/meanstddevnorm/generic/neon/qasymm8.cpp"]
         }
         }
       },
