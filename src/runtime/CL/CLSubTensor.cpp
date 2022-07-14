@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,11 +81,15 @@ void CLSubTensor::unmap()
 uint8_t *CLSubTensor::do_map(cl::CommandQueue &q, bool blocking)
 {
     ARM_COMPUTE_ERROR_ON(cl_buffer().get() == nullptr);
-    return static_cast<uint8_t *>(q.enqueueMapBuffer(cl_buffer(), blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, info()->total_size()));
+    if(_parent->buffer() == nullptr)
+    {
+        _parent->map(q, blocking);
+    }
+    return _parent->buffer();
 }
 
 void CLSubTensor::do_unmap(cl::CommandQueue &q)
 {
     ARM_COMPUTE_ERROR_ON(cl_buffer().get() == nullptr);
-    q.enqueueUnmapMemObject(cl_buffer(), buffer());
+    _parent->unmap(q);
 }
