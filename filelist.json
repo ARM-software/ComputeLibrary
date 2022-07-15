@@ -1075,7 +1075,6 @@
               "src/core/NEON/kernels/convolution/winograd/input_transforms/arm_fp32_1x8.cpp",
               "src/core/NEON/kernels/convolution/winograd/input_transforms/arm_fp32_4x4.cpp",
               "src/core/NEON/kernels/convolution/winograd/input_transforms/arm_fp32_6x6.cpp",
-              "src/core/NEON/kernels/convolution/winograd/input_transforms/sve_fp32_6x6.cpp",
               "src/core/NEON/kernels/convolution/winograd/output_transforms/a64_fp16_4x4_3x3.cpp",
               "src/core/NEON/kernels/convolution/winograd/output_transforms/arm_fp32_1x2_1x7.cpp",
               "src/core/NEON/kernels/convolution/winograd/output_transforms/arm_fp32_1x4_1x5.cpp",
@@ -1096,6 +1095,9 @@
             "fp32": [
               "src/cpu/kernels/directconv2d/nhwc/neon/fp32.cpp"
             ]
+          },
+          "sve": {
+            "common": ["src/core/NEON/kernels/convolution/winograd/input_transforms/sve_fp32_6x6.cpp"]
           }
         }
       },
