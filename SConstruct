@@ -306,6 +306,17 @@ else: # NONE "multi_isa" builds
             env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
         else:
             env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif 'v8.6-a' in env['arch']:
+        if 'armv8.6-a-sve2' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve2'])
+        elif 'armv8.6-a-sve' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])
+        elif 'armv8.6-a' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a'])
+
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
+        if "disable_mmla_fp" not in env['custom_options']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
     elif 'v8' in env['arch']:
         # Preserve the V8 archs for non-multi-ISA variants
         if 'sve2' in env['arch']:
@@ -319,10 +330,6 @@ else: # NONE "multi_isa" builds
         else:
             env.Append(CXXFLAGS = ['-march=armv8-a'])
 
-        if 'v8.6-a' in env['arch']:
-            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
-            if "disable_mmla_fp" not in env['custom_options']:
-                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
         if 'v8.' in env['arch']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
 

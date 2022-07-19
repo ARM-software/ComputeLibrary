@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,7 @@ vcvt(const float32x4_t &a)
     return vcvtq_s32_f32(a);
 }
 
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
 /** Convert 2x128-bit floating point vectors into 1x128-bit bfloat16 vector
  *
  * @param[in]     inptr  Pointer to the input memory to load values from
@@ -89,7 +89,7 @@ inline void vcvt_bf16_f32(const float *inptr, uint16_t *outptr)
         : [outptr] "r"(outptr)
         : "v0", "v1", "memory");
 }
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
 } // namespace wrapper
 } // namespace arm_compute

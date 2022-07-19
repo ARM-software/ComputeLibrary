@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
 
 #include "arm_compute/core/TensorInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -142,4 +142,4 @@ void neon_bfloat16_to_fp32_cast(const ITensor *_src, ITensor *_dst, const Thread
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */

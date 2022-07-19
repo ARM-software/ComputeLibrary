@@ -472,6 +472,16 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransform
     return os;
 }
 
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+inline ::std::ostream &operator<<(::std::ostream &os, const bfloat16& v)
+{
+    std::stringstream str;
+    str << v;
+    os << str.str();
+    return os;
+}
+#endif           /* defined(ARM_COMPUTE_ENABLE_BF16) */
+
 /** Formatted output of the BoundingBoxTransformInfo type.
  *
  * @param[in] bbox_info Type to output.

@@ -359,11 +359,11 @@ void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
             case DataType::F32:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float, false, true> : &CpuIm2ColKernel::run_im2col<float, true, true>;
                 break;
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
             case DataType::BFLOAT16:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<bfloat16, false, true> : &CpuIm2ColKernel::run_im2col<bfloat16, true, true>;
                 break;
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float16_t, false, true> : &CpuIm2ColKernel::run_im2col<float16_t, true, true>;
@@ -385,11 +385,11 @@ void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
             case DataType::F32:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float, false, false> : &CpuIm2ColKernel::run_im2col<float, true, false>;
                 break;
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
             case DataType::BFLOAT16:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<bfloat16, false, false> : &CpuIm2ColKernel::run_im2col<bfloat16, true, false>;
                 break;
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = (!conv_info.has_padding()) ? &CpuIm2ColKernel::run_im2col<float16_t, false, false> : &CpuIm2ColKernel::run_im2col<float16_t, true, false>;
