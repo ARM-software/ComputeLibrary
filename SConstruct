@@ -426,12 +426,21 @@ if not GetOption("help"):
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
 
-    # For NDK >= r21, clang 9 or above is used
-    if env['os'] == 'android' and version_at_least(compiler_ver, '9.0.0'):
-        env['ndk_above_r21'] = True
+    # Add Android NDK toolchain specific flags
+    if 'clang++' in cpp_compiler and env['os'] == 'android':
+        # For NDK >= r21, clang 9 or above is used
+        if version_at_least(compiler_ver, '9.0.0'):
+            env['ndk_above_r21'] = True
 
-        if env['openmp']:
-            env.Append(LINKFLAGS = ['-static-openmp'])
+            if env['openmp']:
+                env.Append(LINKFLAGS = ['-static-openmp'])
+
+        # For NDK >= r23, clang 12 or above is used. This condition detects NDK < r23
+        if not version_at_least(compiler_ver, '12.0.0'):
+            # System assembler is deprecated and integrated assembler is preferred since r23.
+            # However integrated assembler has always been suppressed for NDK < r23.
+            # Thus for backward compatibility, we include this flag only for NDK < r23
+            env.Append(CXXFLAGS = ['-no-integrated-as'])
 
 if env['high_priority'] and env['build_config']:
     print("The high priority library cannot be built in conjunction with a user-specified build configuration")
