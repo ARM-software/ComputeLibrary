@@ -368,7 +368,7 @@ experimental::MemoryRequirements CpuGemm::workspace() const
     return _aux_mem;
 }
 
-Status CpuGemm::has_opt_impl(arm_gemm::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
+Status CpuGemm::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
                              const GEMMInfo &gemm_info)
 {
     const cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);

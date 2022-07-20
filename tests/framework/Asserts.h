@@ -30,6 +30,8 @@
 #include <sstream>
 #include <type_traits>
 
+#include "utils/TypePrinter.h"
+
 namespace arm_compute
 {
 namespace test
@@ -42,9 +44,9 @@ inline int make_printable(int8_t value)
     return value;
 }
 
-inline std::string make_printable(arm_gemm::WeightFormat wf)
+inline std::string make_printable(const arm_compute::WeightFormat wf)
 {
-    return arm_gemm::to_string(wf);
+    return arm_compute::to_string(wf);
 }
 
 inline unsigned int make_printable(uint8_t value)

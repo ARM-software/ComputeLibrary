@@ -122,14 +122,14 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::pair<int, int>                     bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::QASYMM8_SIGNED:
             {
-                std::pair<int, int>                    bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
@@ -400,7 +400,7 @@ public:
 };
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
-inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_gemm::WeightFormat weight_format)
+inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_compute::WeightFormat weight_format)
 {
     const DataLayout data_layout = tensor_info.data_layout();
     ARM_COMPUTE_EXPECT(data_layout == DataLayout::NHWC, framework::LogLevel::ERRORS);
@@ -411,8 +411,8 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_gemm::
     const int         W            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
     const int         C            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)]; // C=I
 
-    const int interleave_by = arm_gemm::interleave_by(weight_format);
-    const int block_by      = arm_gemm::block_by(weight_format);
+    const int interleave_by = arm_compute::interleave_by(weight_format);
+    const int block_by      = arm_compute::block_by(weight_format);
     const int Ip            = arm_gemm::roundup<unsigned int>(C, block_by);      // C'=I'
     const int Op            = arm_gemm::roundup<unsigned int>(N, interleave_by); // O'=N'
 
@@ -421,12 +421,12 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_gemm::
 }
 
 template <typename ScalarType, typename AccessorType>
-inline void rearrange_data(const AccessorType src, AccessorType dst, const arm_gemm::WeightFormat weight_format)
+inline void rearrange_data(const AccessorType src, AccessorType dst, const arm_compute::WeightFormat weight_format)
 {
-    ARM_COMPUTE_EXPECT(arm_gemm::is_fixed_format(weight_format), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format(weight_format), framework::LogLevel::ERRORS);
     // Data Layout: OHWIo<interleave_by>i<block_by>
-    const int         interleave_by    = arm_gemm::interleave_by(weight_format);
-    const int         block_by         = arm_gemm::block_by(weight_format);
+    const int         interleave_by    = arm_compute::interleave_by(weight_format);
+    const int         block_by         = arm_compute::block_by(weight_format);
     const TensorShape src_tensor_shape = src.shape();
     const DataLayout  data_layout      = src.data_layout();
     ARM_COMPUTE_EXPECT(data_layout == DataLayout::NHWC, framework::LogLevel::ERRORS);
@@ -545,12 +545,12 @@ private:
         const int kernel_width  = weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH)];
         const int num_kernels   = weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES)];
 
-        const WeightsInfo query_weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false, arm_gemm::WeightFormat::ANY);
+        const WeightsInfo query_weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false, arm_compute::WeightFormat::ANY);
         const bool        kernel_found = bool(ConvolutionFunction::has_opt_impl(_computed_weight_format, &src_tensor_info, &weight_tensor_info,
                                                                                 &bias_tensor_info, &dst_tensor_info, conv_info, query_weights_info));
         // Make surethat the setup founds a fixed-format kernel as requested by the test case.
         ARM_COMPUTE_EXPECT(kernel_found, framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(arm_gemm::is_fixed_format(_computed_weight_format), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format(_computed_weight_format), framework::LogLevel::ERRORS);
 
         const WeightsInfo weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false, _computed_weight_format);
         configure_and_execute_kernel(src_tensor_info, weight_tensor_info, bias_tensor_info, dst_tensor_info, weights_info, conv_info,
@@ -576,7 +576,7 @@ private:
 
 protected:
     std::unique_ptr<ConvolutionFunction> conv{};
-    arm_gemm::WeightFormat               _computed_weight_format{ arm_gemm::WeightFormat::UNSPECIFIED };
+    arm_compute::WeightFormat            _computed_weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
     TensorClass                          _target{};
     SimpleTensor<ScalarType>             _reference{};
 };
@@ -669,7 +669,7 @@ class HasOptImplFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(DataType data_type, arm_gemm::WeightFormat query_weight_format)
+    void setup(DataType data_type, arm_compute::WeightFormat query_weight_format)
     {
         auto              conv        = std::make_unique<ConvolutionClass>();
         const auto        src_info    = TensorInfo(TensorShape(1U, 5U, 2U), 1, data_type, DataLayout::NHWC);
@@ -683,8 +683,8 @@ public:
     }
 
 protected:
-    bool                   _kernel_found{ false };
-    arm_gemm::WeightFormat _computed_weight_format{ arm_gemm::WeightFormat::UNSPECIFIED };
+    bool                      _kernel_found{ false };
+    arm_compute::WeightFormat _computed_weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
 };
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 

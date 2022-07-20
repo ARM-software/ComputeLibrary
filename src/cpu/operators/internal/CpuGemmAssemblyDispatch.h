@@ -41,19 +41,19 @@ enum class AsmConvMethod
 
 struct AsmGemmInfo
 {
-    AsmConvMethod           method{ AsmConvMethod::Im2Col };
-    PadStrideInfo           ps_info{};
-    ActivationLayerInfo     activation_info{};
-    GEMMLowpOutputStageInfo output_stage{};
-    bool                    negated_offsets{ true };
-    bool                    reinterpret_input_as_3d{ false };
-    bool                    depth_output_gemm3d{ false };
-    int64_t                 padding_top{ 0 };
-    int64_t                 padding_left{ 0 };
-    float                   padding_value{ 0.f };
-    bool                    fast_mode{ false };
-    bool                    fixed_format{ false };
-    arm_gemm::WeightFormat  weight_format{ arm_gemm::WeightFormat::UNSPECIFIED };
+    AsmConvMethod             method{ AsmConvMethod::Im2Col };
+    PadStrideInfo             ps_info{};
+    ActivationLayerInfo       activation_info{};
+    GEMMLowpOutputStageInfo   output_stage{};
+    bool                      negated_offsets{ true };
+    bool                      reinterpret_input_as_3d{ false };
+    bool                      depth_output_gemm3d{ false };
+    int64_t                   padding_top{ 0 };
+    int64_t                   padding_left{ 0 };
+    float                     padding_value{ 0.f };
+    bool                      fast_mode{ false };
+    bool                      fixed_format{ false };
+    arm_compute::WeightFormat weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
 };
 
 /** Assembly kernel glue */
@@ -70,12 +70,12 @@ public:
     class IFallback
     {
     public:
-        virtual void                             run(ITensorPack &tensors)     = 0;
-        virtual void                             prepare(ITensorPack &tensors) = 0;
-        virtual experimental::MemoryRequirements workspace() const             = 0;
-        virtual bool                             is_configured() const         = 0;
-        virtual bool                             isVarWeightsKernel() const    = 0;
-        virtual ~IFallback()                                                   = default;
+        virtual void run(ITensorPack &tensors)                              = 0;
+        virtual void prepare(ITensorPack &tensors)                          = 0;
+        virtual experimental::MemoryRequirements workspace() const          = 0;
+        virtual bool                             is_configured() const      = 0;
+        virtual bool                             isVarWeightsKernel() const = 0;
+        virtual ~IFallback()                                                = default;
     };
 
 public:
@@ -105,12 +105,12 @@ public:
      *
      * This method has the same use of @ref
      * NEGEMMConvolutionLayer::has_opt_impl, with the only caveat that
-     * the value of arm_gemm::WeightFormat need to be passed via the
+     * the value of arm_compute::WeightFormat need to be passed via the
      * parameter info.
      *
      * @return a status.
      */
-    static Status has_opt_impl(arm_gemm::WeightFormat &weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info);
+    static Status has_opt_impl(arm_compute::WeightFormat &weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info);
     /** Checks if activation is supported by the gemm assembly dispatcher
      *
      * @param[in] activation Activation to check
@@ -133,8 +133,8 @@ public:
     }
 
     // Inherited methods overridden:
-    void                             prepare(ITensorPack &tensors) override;
-    void                             run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
+    void run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

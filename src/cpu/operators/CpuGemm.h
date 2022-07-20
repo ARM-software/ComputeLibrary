@@ -105,15 +105,15 @@ public:
      *
      * This method has the same use of @ref
      * NEGEMMConvolutionLayer::has_opt_impl, with the only caveat that
-     * the value of arm_gemm::WeightFormat need to be passed via the
+     * the value of arm_compute::WeightFormat need to be passed via the
      * parameter gemm_info.
      */
-    static Status has_opt_impl(arm_gemm::WeightFormat &weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
+    static Status has_opt_impl(arm_compute::WeightFormat &weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
                                const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &constants) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
     /** Indicates if the convolution executes in variable weights mode.
