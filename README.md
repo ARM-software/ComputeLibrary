@@ -13,7 +13,7 @@
 # Compute Library ![](https://img.shields.io/badge/latest_release-22.05-green)
 
 
-The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A and Arm® Mali™ GPUs architectures.<br>
+The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A, Arm® Neoverse® and Arm® Mali™ GPUs architectures.<br>
 
 The library provides superior performance to other open source alternatives and immediate support for new Arm® technologies e.g. SVE2.
 
@@ -75,6 +75,7 @@ Pre-build binaries are generated with the following security / good coding pract
 
 - Arm® CPUs:
     - Arm® Cortex®-A processor family using Arm® Neon™ technology
+    - Arm® Neoverse® processor family
     - Arm® Cortex®-R processor family with Armv8-R AArch64 architecture using Arm® Neon™ technology
     - Arm® Cortex®-X1 processor using Arm® Neon™ technology
 
