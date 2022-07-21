@@ -509,23 +509,45 @@ TEST_SUITE(VariableWeightUtils)
 
 // UC2_1_* tests: the user requests a specific fixed format, but there is no kernel that supports it.
 
-FIXTURE_DATA_TEST_CASE(UC2_1_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+template <typename ConvolutionClass>
+using HasOptImplFixtureNoFastMath = HasOptImplFixture<ConvolutionClass, /*enable_fast_math*/ false>;
+
+template <typename ConvolutionClass>
+using HasOptImplFixtureFastMath = HasOptImplFixture<ConvolutionClass, /*enable_fast_math*/ true>;
+
+// UC2_1
+
+FIXTURE_DATA_TEST_CASE(UC2_1_CpuGemmConv2d, HasOptImplFixtureNoFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo2 })))
 {
     ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
 }
-FIXTURE_DATA_TEST_CASE(UC2_1_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC2_1_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo2 })))
 {
     ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
 }
 
-// UC2_1_* tests: the user requests a specific fixed format, and a
+FIXTURE_DATA_TEST_CASE(UC2_1_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo2 })))
+{
+    ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC2_1_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo2 })))
+{
+    ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+}
+
+// UC2_2_* tests: the user requests a specific fixed format, and a
 // kernel that support that fixed format is found.
 
-FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d, HasOptImplFixtureNoFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo4 })))
 {
@@ -533,12 +555,28 @@ FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d
     ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo4, framework::LogLevel::ERRORS);
 }
 
-FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo4 })))
 {
     ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo4, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo8i4_bf16 })))
+{
+    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(_computed_weight_format, arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo8i4_bf16 })))
+{
+    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
 }
 
 // UC3_1_* tests: the user queries for ANY fixed format, but there is
@@ -546,14 +584,28 @@ FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMCon
 // example, there is no fixed format kernel for the datatype of the
 // problem).
 
-FIXTURE_DATA_TEST_CASE(UC3_1_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC3_1_CpuGemmConv2d, HasOptImplFixtureNoFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::S32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
     ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
 }
 
-FIXTURE_DATA_TEST_CASE(UC3_1_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC3_1_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::S32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
+{
+    ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC3_1_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::S32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
+{
+    ARM_COMPUTE_EXPECT(!_kernel_found, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC3_1_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::S32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
@@ -570,7 +622,7 @@ FIXTURE_DATA_TEST_CASE(UC3_1_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMCon
 // format like OHWIo4 for FP32 data returned for 128-bit NEON hardware
 // is replaced by OHWIo8 when running on 256-bit SVE.
 
-FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d, HasOptImplFixtureNoFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
@@ -579,12 +631,32 @@ FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d, HasOptImplFixture<cpu::CpuGemmConv2d
     ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
 }
 
-FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer, HasOptImplFixture<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
 {
     ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
+{
+    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
+}
+
+FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureFastMath<NEGEMMConvolutionLayer>, framework::DatasetMode::ALL,
+                       combine(framework::dataset::make("DataType", { DataType::F32 }),
+                               framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
+{
+    ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::ANY, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
 }
 
 namespace
@@ -669,7 +741,7 @@ TEST_SUITE_END() // VariableWeightUtils
 TEST_SUITE(ExperimentalCpuAPIVariableWeightWithFixtures)
 
 template <typename ScalarType>
-using VarWidth = VariableWeightsFixture<cpu::CpuGemmConv2d, Tensor, Accessor, ScalarType>;
+using VarWidth = VariableWeightsFixture<cpu::CpuGemmConv2d, Tensor, Accessor, ScalarType, /*enable_fast_math*/ false>;
 
 FIXTURE_DATA_TEST_CASE(RunSmallFloat, VarWidth<float>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
@@ -689,12 +761,26 @@ FIXTURE_DATA_TEST_CASE(RunSmallHalf, VarWidth<half>, framework::DatasetMode::ALL
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
 }
 
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+template <typename ScalarType>
+using VarWidthFastMath = VariableWeightsFixture<cpu::CpuGemmConv2d, Tensor, Accessor, ScalarType, /*enable_fast_math*/ true>;
+
+FIXTURE_DATA_TEST_CASE(RunSmallFloatFastMath, VarWidthFastMath<float>, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                               framework::dataset::make("ACL Scalar type", { DataType::F32 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+#endif // ARM_COMPUTE_ENABLE_BF16
+
 TEST_SUITE_END() // ExperimentalCpuAPIVariableWeightWithFixtures
 
 TEST_SUITE(ExperimentalNEAPIVariableWeightWithFixtures)
 
 template <typename ScalarType>
-using NEGEMMVarWidth = VariableWeightsFixtureNEInterface<NEGEMMConvolutionLayer, Tensor, Accessor, ScalarType>;
+using NEGEMMVarWidth = VariableWeightsFixtureNEInterface<NEGEMMConvolutionLayer, Tensor, Accessor, ScalarType, /*enable_fast_math*/ false>;
 
 FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallFloat, NEGEMMVarWidth<float>, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallConvolutionLayerDataset(),
@@ -713,6 +799,20 @@ FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallHalf, NEGEMMVarWidth<half>, framework::Data
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
 }
+
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+template <typename ScalarType>
+using NEGEMMVarWidthFastMath = VariableWeightsFixtureNEInterface<NEGEMMConvolutionLayer, Tensor, Accessor, ScalarType, /*enable_fast_math*/ true>;
+
+FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallFloatFastMath, NEGEMMVarWidthFastMath<float>, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                               framework::dataset::make("ACL Scalar type", { DataType::F32 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+#endif // ARM_COMPUTE_ENABLE_BF16
 
 TEST_SUITE_END() // ExperimentalNEAPIVariableWeightWithFixtures
 
@@ -823,9 +923,7 @@ TEST_SUITE(Float)
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 TEST_SUITE(BFLOAT16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                    framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::BFLOAT16)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::BFLOAT16)), framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                                                                                             ActivationFunctionsDataset))
 {
     // Validate output
@@ -837,10 +935,7 @@ TEST_SUITE_END() // BFLOAT16
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                   framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                           ActivationFunctionsDataset))
+                                                                                                                   framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NCHW })), ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
@@ -850,9 +945,7 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                    framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                             ActivationFunctionsDataset))
 {
     // Validate output
@@ -894,11 +987,8 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                       QuantizedActivationFunctionsDataset))
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })), QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -924,11 +1014,8 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })),
-                                                                                                                      QuantizedActivationFunctionsDataset))
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })), QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -1082,10 +1169,7 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectGEMMConv2dLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                     framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                     framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                                                             ActivationFunctionsDataset))
+                                                                                                                     framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NHWC })), ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
@@ -1109,11 +1193,8 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectGEMMConv2dLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                        QuantizedActivationFunctionsDataset))
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })), QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -1122,11 +1203,8 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectGEMMConv2dLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })),
-                                                                                                                       QuantizedActivationFunctionsDataset))
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })), QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

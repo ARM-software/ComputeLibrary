@@ -695,7 +695,7 @@ public:
 #endif
 
         /* Make sure we've been set up correctly. */
-        assert(_B_transposed);
+        assert(FixedFormat || _B_transposed);
         assert(_working_space);
         int8_t *working_space_bytes = reinterpret_cast<int8_t *>(_working_space);
 

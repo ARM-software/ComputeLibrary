@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -240,6 +240,7 @@ int main(int argc, char **argv)
                 p->print_entry("cpu_has_fp16", support::cpp11::to_string(cpu_info.has_fp16()));
                 p->print_entry("cpu_has_bf16", support::cpp11::to_string(cpu_info.has_bf16()));
                 p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));
+                p->print_entry("cpu_has_svebf16", support::cpp11::to_string(cpu_info.has_svebf16()));
 
                 for(unsigned int j = 0; j < num_cpus; ++j)
                 {

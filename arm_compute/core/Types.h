@@ -1987,15 +1987,19 @@ enum class WeightFormat
 // OHWIo<interleave_by>i<block_by>
 inline int interleave_by(const WeightFormat wf)
 {
-    return ((int)wf >> 8) & 0xFFF;
+    return (static_cast<int>(wf) >> 8) & 0xFFF;
 }
 inline int block_by(const WeightFormat wf)
 {
-    return ((int)wf >> 20) & 0xF;
+    return (static_cast<int>(wf) >> 20) & 0xF;
 }
-inline bool is_fixed_format(const WeightFormat wf)
+inline bool is_fixed_format(const WeightFormat &wf)
 {
     return wf != WeightFormat::UNSPECIFIED && wf != WeightFormat::ANY;
+}
+inline bool is_fixed_format_fast_math(const WeightFormat &wf)
+{
+    return (static_cast<int>(wf) >> 4) & 0x1;
 }
 
 /** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */

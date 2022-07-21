@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/AssemblyUtils.h"
 #include "src/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
@@ -507,14 +508,20 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
             const TensorShape tensor_shape    = tensor_info->tensor_shape();
             const int         tensor_height   = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
             const int         tensor_width    = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
-            const int         tensor_channels = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)];
+            int               tensor_channels = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)];
             const int         interleave_by   = arm_compute::interleave_by(wf);
+            const int         blocked_by      = arm_compute::block_by(wf);
             // We need to find a new stride that is distance from the data for one
             // set of output channels to the next
             if(ldb == tensor_channels && multi_stride_b == tensor_channels * tensor_width)
             {
                 // In this case dimensions that are packed are height, width and channel
                 // so we need to stride it by interleave_by
+                if(tensor_channels % blocked_by != 0)
+                {
+                    // We need to pad
+                    tensor_channels = arm_gemm::iceildiv(tensor_channels, blocked_by) * blocked_by;
+                }
                 ldb = interleave_by * tensor_height * tensor_width * tensor_channels;
             }
             else if(multi_stride_b == 0 || (ldb == tensor_width && multi_stride_b == tensor_height * tensor_width))
