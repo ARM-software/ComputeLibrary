@@ -184,6 +184,7 @@ For NDK r18 or older, here is a guide to <a href="https://developer.android.com/
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
 
 For NDK r19 or newer, you can directly <a href="https://developer.android.com/ndk/downloads">Download</a> the NDK package for your development platform, without the need to launch the make_standalone_toolchain.py script. You can find all the prebuilt binaries inside $NDK/toolchains/llvm/prebuilt/$OS_ARCH/bin/.
+
 @parblock
 @attention The building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You can instruct scons to use the correct version by using a combination of the toolchain_prefix and the "CC" "CXX" environment variables.
 @attention For this particular example, you can specify:
@@ -309,14 +310,14 @@ To cross-compile the library with Arm® Neon™ support for baremetal armv8a:
 
 Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
 
-@section S1_6_windows_host Building on a Windows host system
+@section S1_6_windows_host Building on a Windows host system (cross-compile)
 
 Using `scons` directly from the Windows command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
 it gets confused about Windows style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows
+@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows (cross-compile)
 
 The best and easiest option is to use
 <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>.
@@ -324,7 +325,7 @@ This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
 Ubuntu on Windows* shell and following the general guidelines given above.
 
-@subsection S1_6_2_cygwin Cygwin
+@subsection S1_6_2_cygwin Cygwin (cross-compile)
 
 If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
 can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
@@ -336,6 +337,38 @@ that can be used from the Cygwin terminal. When building for Android the
 compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
+
+@subsection S1_6_3_WoA Windows on ARM (native build)
+
+    Native builds on Windows are experimental and some features from the library interacting with the OS are missing.
+
+It's possible to build Compute Library natively on a windows system running on ARM.
+
+Windows on ARM(WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
+
+Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows.
+
+Native arm64 toolchain installation for WoA:
+- LLVM+Clang-12 which can be downloaded from: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/LLVM-12.0.0-woa64.exe
+- Arm64 VC Runtime which can be downloaded from  https://aka.ms/vs/17/release/vc_redist.arm64.exe
+
+- While full VS22 cannot be installed on WoA, we can install some components
+    -# Desktop development with C++ and all Arm64 components for Visual Studio, refer to:  https://developer.arm.com/documentation/102528/0100/Install-Visual-Studio
+    -# VS22 build tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+
+There are some additional tools we need to install to build Compute Library:
+
+- git https://git-scm.com/download/win
+- python 3 https://www.python.org/downloads/windows/
+- scons can be installed with pip install scons
+
+In order to use clang to build windows binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
+
+    cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsx86_arm64.bat"
+
+To build Compute Library type:
+
+     scons opencl=0 neon=1 os=windows examples=0 validation_tests=1 benchmark_examples=0 build=native arch=armv8a Werror=0 exceptions=1 standalone=1
 
 @section S1_7_cl_requirements OpenCL DDK Requirements
 
