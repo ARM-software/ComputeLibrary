@@ -169,9 +169,15 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, K0, a);
             TILE(WEI_DATA_TYPE, N0, K0, b);
 
+            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
+            })
+
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
@@ -199,9 +205,15 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, 1, a);
             TILE(WEI_DATA_TYPE, N0, 1, b);
 
+            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
+            })
+
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
