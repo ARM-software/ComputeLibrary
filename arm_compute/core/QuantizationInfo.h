@@ -409,6 +409,16 @@ inline qasymm8_t qasymm8_hard_swish(qasymm8_t                      in,
     return tmp;
 }
 
+inline qasymm8_signed_t qasymm8_signed_hard_swish(qasymm8_signed_t               in,
+                                                  const UniformQuantizationInfo &qi_in,
+                                                  const UniformQuantizationInfo &qi_out)
+{
+    float tmp_f         = dequantize_qasymm8_signed(in, qi_in);
+    tmp_f               = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
+    const qasymm8_t tmp = quantize_qasymm8_signed(tmp_f, qi_out);
+    return tmp;
+}
+
 inline qasymm8_t qasymm8_leaky_relu(qasymm8_t                      in,
                                     const UniformQuantizationInfo &qi_in,
                                     const UniformQuantizationInfo &qi_out,

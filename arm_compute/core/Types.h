@@ -774,10 +774,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int                          _pad_left;
-    unsigned int                          _pad_top;
-    unsigned int                          _pad_right;
-    unsigned int                          _pad_bottom;
+    unsigned int _pad_left;
+    unsigned int _pad_top;
+    unsigned int _pad_right;
+    unsigned int _pad_bottom;
 
     DimensionRoundingType _round_type;
 };
@@ -919,14 +919,14 @@ public:
     }
 
 private:
-    std::vector<float>   _min_sizes;
-    std::vector<float>   _variances;
-    float                _offset;
-    bool                 _flip;
-    bool                 _clip;
-    std::vector<float>   _max_sizes;
-    std::vector<float>   _aspect_ratios;
-    Coordinates2D        _img_size;
+    std::vector<float> _min_sizes;
+    std::vector<float> _variances;
+    float              _offset;
+    bool               _flip;
+    bool               _clip;
+    std::vector<float> _max_sizes;
+    std::vector<float> _aspect_ratios;
+    Coordinates2D      _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1171,15 @@ public:
     }
 
 private:
-    unsigned int         _max_detections;
-    unsigned int         _max_classes_per_detection;
-    float                _nms_score_threshold;
-    float                _iou_threshold;
-    unsigned int         _num_classes;
+    unsigned int _max_detections;
+    unsigned int _max_classes_per_detection;
+    float        _nms_score_threshold;
+    float        _iou_threshold;
+    unsigned int _num_classes;
     std::array<float, 4> _scales_values;
-    bool                 _use_regular_nms;
-    unsigned int         _detection_per_class;
-    bool                 _dequantize_scores;
+    bool         _use_regular_nms;
+    unsigned int _detection_per_class;
+    bool         _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1612,13 @@ public:
     }
 
 private:
-    float                _img_width;
-    float                _img_height;
-    float                _scale;
-    bool                 _apply_scale;
-    bool                 _correct_transform_coords;
+    float _img_width;
+    float _img_height;
+    float _scale;
+    bool  _apply_scale;
+    bool  _correct_transform_coords;
     std::array<float, 4> _weights;
-    float                _bbox_xform_clip;
+    float _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -1690,7 +1690,14 @@ public:
     {
         if(_act == ActivationFunction::HARD_SWISH)
         {
-            qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+            if(data_type == DataType::QASYMM8)
+            {
+                qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+            }
+            else
+            {
+                qasymm8_signed_hard_swish_populate_table(_lut, qi_in, qi_out);
+            }
         }
         else if(_act == ActivationFunction::LEAKY_RELU)
         {
@@ -1716,12 +1723,11 @@ public:
         switch(act_func)
         {
             case ActivationFunction::HARD_SWISH:
+                return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
             case ActivationFunction::LEAKY_RELU:
                 return data_type == DataType::QASYMM8;
-
             case ActivationFunction::LOGISTIC:
-                return (data_type == DataType::QASYMM8) || (data_type == DataType::QASYMM8_SIGNED);
-
+                return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
             default:
                 return false;
         }
@@ -1746,6 +1752,14 @@ private:
         for(size_t i = 0; i < lut.size(); ++i)
         {
             lut[i] = qasymm8_hard_swish(i, qi_in, qi_out);
+        }
+    }
+
+    static inline void qasymm8_signed_hard_swish_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_signed_hard_swish(i, qi_in, qi_out);
         }
     }
 
