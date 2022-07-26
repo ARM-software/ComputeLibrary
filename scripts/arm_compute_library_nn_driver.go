@@ -11,7 +11,7 @@ import (
     "strings"
 )
 
-func isVersionAtLeast(version_name string, target_version int) []bool {
+func isVersionAtLeast(version_name string, target_version int) bool {
     name_map := map[string]int {
     "L": 5, "5": 5,
     "M": 6, "6": 6,
@@ -23,10 +23,11 @@ func isVersionAtLeast(version_name string, target_version int) []bool {
     "S": 12, "12": 12,
     "T": 13, "13": 13,
     }
-    if ! name_map[version_name] {
+    if _, ok := name_map[version_name]; ok {
+        return name_map[version_name] >= target_version
+    } else {
         return false
     }
-    return name_map[version_name] >= target_version
 }
 
 func globalFlags(ctx android.BaseContext) []string {
