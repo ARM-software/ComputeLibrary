@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,20 +89,21 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Win
 #ifndef DOXYGEN_SKIP_THIS
 void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> &workloads)
 {
-    const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
-    if(num_threads < 1)
+    const unsigned int amount_of_work = static_cast<unsigned int>(workloads.size());
+    if(amount_of_work < 1 || _num_threads == 1)
     {
         return;
     }
 
     ThreadInfo info;
     info.cpu_info    = &cpu_info();
-    info.num_threads = num_threads;
-    #pragma omp parallel firstprivate(info) num_threads(num_threads)
+    info.num_threads = _num_threads;
+    #pragma omp parallel for firstprivate(info) num_threads(_num_threads) default(shared) proc_bind(close) schedule(static, 1)
+    for(unsigned int wid = 0; wid < amount_of_work; ++wid)
     {
         const int tid  = omp_get_thread_num();
         info.thread_id = tid;
-        workloads[tid](info);
+        workloads[wid](info);
     }
 }
 #endif /* DOXYGEN_SKIP_THIS */
