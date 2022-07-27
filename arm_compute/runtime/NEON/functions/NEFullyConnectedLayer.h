@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,20 +112,21 @@ public:
      * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
-     * @param[in]  input   Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  weights Weights tensor. The weights must be 2 dimensional.
-     *                     If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
-     *                     If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
-     *                     Data type supported: Same as @p input.
-     * @param[in]  biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
-     * @param[out] output  Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
-     *                     - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
-     *                     - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
-     *                     Data type supported: Same as @p input.
-     * @param[in]  fc_info (Optional) Fully connected layer additional info
+     * @param[in]  input        Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  weights      Weights tensor. The weights must be 2 dimensional.
+     *                          If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
+     *                          If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
+     *                          Data type supported: Same as @p input.
+     * @param[in]  biases       Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
+     * @param[out] output       Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
+     *                          - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
+     *                          - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
+     *                          Data type supported: Same as @p input.
+     * @param[in]  fc_info      (Optional) Fully connected layer additional info
+     * @param[in]  weights_info (Optional) Stores neccessary compute information when weights are already reshaped
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
-                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
+                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEFullyConnectedLayer
      *
      * Similar to @ref NEFullyConnectedLayer
@@ -134,6 +135,21 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
                            FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
+
+    /** Static function that queries whether fixed-format kernel exists for a given problem description
+     *
+     * @param[out] expected_weight_format Format in which weights should be for found fixed format kernel
+     * @param[in]  input                  Source tensor
+     * @param[in]  weights                Weights tensor.
+     * @param[in]  biases                 Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
+     * @param[in]  output                 Destination tensor
+     * @param[in]  fc_info                Fully connected layer additional info
+     * @param[in]  weights_info           Describes weights shape
+     *
+     * @return a status
+     */
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *input, const ITensorInfo *weights,
+                               const ITensorInfo *biases, const ITensorInfo *output, const FullyConnectedLayerInfo &fc_info, const WeightsInfo &weights_info);
 
     //Inherited methods override
     void run() override;

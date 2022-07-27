@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,20 +72,21 @@ public:
      * |QASYMM8        |QASYMM8            |S32    |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      *
-     * @param[in]  src     Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  weights Weights tensor info. The weights must be 2 dimensional.
-     *                     If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
-     *                     If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
-     *                     Data type supported: Same as @p src.
-     * @param[in]  biases  Bias tensor info. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
-     * @param[out] dst     Destination tensor info. Its shape should be equal to the output of a matrix multiplication between:
-     *                     - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
-     *                     - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
-     *                     Data type supported: Same as @p src.
-     * @param[in]  fc_info (Optional) Fully connected layer additional info
+     * @param[in]  src          Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  weights      Weights tensor info. The weights must be 2 dimensional.
+     *                          If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
+     *                          If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
+     *                          Data type supported: Same as @p src.
+     * @param[in]  biases       Bias tensor info. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
+     * @param[out] dst          Destination tensor info. Its shape should be equal to the output of a matrix multiplication between:
+     *                          - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
+     *                          - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
+     *                          Data type supported: Same as @p src.
+     * @param[in]  fc_info      (Optional) Fully connected layer additional info
+     * @param[in]  weights_info (Optional) Stores neccessary compute information when weights are already reshaped
      */
     void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst,
-                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
+                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CpuFullyConnected
      *
      * Similar to @ref CpuFullyConnected
@@ -95,9 +96,19 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
                            FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
+    /** Static function that queries whether there exists fixed-format kernel and if it exists it will return in the first argument in what format
+     * weights are expected to be reshaped as defined by WeightFormat class. Apart from the first argument the rest of the arguments are the same
+     * as in @ref CpuFullyConnectedLayer::validate() except that all arguments are required.
+     *
+     * @return a status
+     */
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
+                               const ITensorInfo *biases, const ITensorInfo *dst,
+                               FullyConnectedLayerInfo fc_info, WeightsInfo weights_info);
+
     //Inherited methods override
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -136,12 +147,14 @@ private:
 
     experimental::MemoryRequirements _aux_mem;
 
-    bool _needs_weights_conversion;
-    bool _needs_weights_reshape;
-    bool _is_fc_after_conv;
-    bool _is_quantized_asymmetric;
-    bool _is_prepared;
-    bool _enable_fast_math;
+    bool                      _needs_weights_conversion;
+    bool                      _needs_weights_reshape;
+    bool                      _is_fc_after_conv;
+    bool                      _is_quantized_asymmetric;
+    bool                      _is_prepared;
+    bool                      _enable_fast_math;
+    bool                      _fixed_format;
+    arm_compute::WeightFormat _weight_format;
 };
 } // namespace cpu
 } // namespace arm_compute

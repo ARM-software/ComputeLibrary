@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,8 +62,9 @@ struct Conv2dInfo
                const ActivationLayerInfo                     &act_info,
                bool                                           enable_fast_math,
                unsigned int                                   num_groups,
-               const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *> {})
-        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), post_ops(post_ops)
+               const experimental::PostOpList<ITensorInfo *> &post_ops     = experimental::PostOpList<ITensorInfo *> {},
+               const WeightsInfo                             &weights_info = WeightsInfo())
+        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), post_ops(post_ops), weights_info(weights_info)
     {
     }
 
@@ -73,6 +74,7 @@ struct Conv2dInfo
     bool                                    enable_fast_math{ false };
     unsigned int                            num_groups{ 1 };
     experimental::PostOpList<ITensorInfo *> post_ops{};
+    WeightsInfo                             weights_info{};
 };
 
 /** Descriptor used by the 3d Convolution function */

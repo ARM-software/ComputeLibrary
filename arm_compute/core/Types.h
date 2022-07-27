@@ -774,10 +774,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int _pad_left;
-    unsigned int _pad_top;
-    unsigned int _pad_right;
-    unsigned int _pad_bottom;
+    unsigned int                          _pad_left;
+    unsigned int                          _pad_top;
+    unsigned int                          _pad_right;
+    unsigned int                          _pad_bottom;
 
     DimensionRoundingType _round_type;
 };
@@ -919,14 +919,14 @@ public:
     }
 
 private:
-    std::vector<float> _min_sizes;
-    std::vector<float> _variances;
-    float              _offset;
-    bool               _flip;
-    bool               _clip;
-    std::vector<float> _max_sizes;
-    std::vector<float> _aspect_ratios;
-    Coordinates2D      _img_size;
+    std::vector<float>   _min_sizes;
+    std::vector<float>   _variances;
+    float                _offset;
+    bool                 _flip;
+    bool                 _clip;
+    std::vector<float>   _max_sizes;
+    std::vector<float>   _aspect_ratios;
+    Coordinates2D        _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1171,15 @@ public:
     }
 
 private:
-    unsigned int _max_detections;
-    unsigned int _max_classes_per_detection;
-    float        _nms_score_threshold;
-    float        _iou_threshold;
-    unsigned int _num_classes;
+    unsigned int         _max_detections;
+    unsigned int         _max_classes_per_detection;
+    float                _nms_score_threshold;
+    float                _iou_threshold;
+    unsigned int         _num_classes;
     std::array<float, 4> _scales_values;
-    bool         _use_regular_nms;
-    unsigned int _detection_per_class;
-    bool         _dequantize_scores;
+    bool                 _use_regular_nms;
+    unsigned int         _detection_per_class;
+    bool                 _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1612,13 @@ public:
     }
 
 private:
-    float _img_width;
-    float _img_height;
-    float _scale;
-    bool  _apply_scale;
-    bool  _correct_transform_coords;
+    float                _img_width;
+    float                _img_height;
+    float                _scale;
+    bool                 _apply_scale;
+    bool                 _correct_transform_coords;
     std::array<float, 4> _weights;
-    float _bbox_xform_clip;
+    float                _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -2053,6 +2053,11 @@ public:
     {
         return _weight_format;
     }
+    void set_weight_format(arm_compute::WeightFormat weight_format)
+    {
+        _weight_format = weight_format;
+    }
+
     unsigned int kernel_width() const
     {
         return _kernel_width;
@@ -2495,9 +2500,27 @@ public:
         return _fixed_format;
     }
 
+    /** Set fixed-format flag
+     *
+     * @param[in] fixed_format sets whether or not to use fixed-format kernels
+     */
+    void set_fixed_format(bool fixed_format)
+    {
+        _fixed_format = fixed_format;
+    }
+
     arm_compute::WeightFormat weight_format() const
     {
         return _weight_format;
+    }
+
+    /** Set weight format to be used
+     *
+     * @param[in] weight_format arm_compute::WeightFormat enumeration
+     */
+    void set_weight_format(arm_compute::WeightFormat weight_format)
+    {
+        _weight_format = weight_format;
     }
 
 private:

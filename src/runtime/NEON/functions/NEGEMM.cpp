@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,13 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     return cpu::CpuGemm::validate(a, b, c, output, alpha, beta, gemm_info);
+}
+
+Status NEGEMM::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output,
+                            float alpha, float beta, const GEMMInfo &gemm_info)
+{
+    ARM_COMPUTE_UNUSED(alpha, beta);
+    return cpu::CpuGemm::has_opt_impl(expected_weight_format, a, b, c, output, gemm_info);
 }
 
 void NEGEMM::run()
