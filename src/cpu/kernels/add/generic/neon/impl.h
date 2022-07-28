@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,9 @@ namespace cpu
 {
 template <typename ScalarType>
 void add_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
+
+template <typename ScalarType>
+void add_same_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif // SRC_CORE_NEON_KERNELS_ADD_IMPL_H

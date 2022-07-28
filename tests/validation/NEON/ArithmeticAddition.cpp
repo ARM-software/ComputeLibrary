@@ -89,7 +89,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 
 DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
+               combine(combine(framework::dataset::make("CpuExt", std::string("NEON")),
                        framework::dataset::make("DataType", { DataType::F32,
                                                               DataType::F16,
                                                               DataType::U8,
@@ -99,19 +99,22 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
                                                               DataType::QASYMM8_SIGNED,
                                                               DataType::QSYMM16
                                                             })),
-                combine(framework::dataset::make("CpuExt", std::string("SVE")),
+                        framework::dataset::make("CanInterpretAs1D", {true, false})),
+                combine(combine(framework::dataset::make("CpuExt", std::string("SVE")),
                         framework::dataset::make("DataType", { DataType::F32,
                                                                DataType::F16,
                                                                DataType::U8,
                                                                DataType::S16,
                                                                DataType::S32
-                                                             }))),
-                combine(framework::dataset::make("CpuExt", std::string("SVE2")),
+                                                             })),
+                        framework::dataset::make("CanInterpretAs1D", {true, false}))),
+                combine(combine(framework::dataset::make("CpuExt", std::string("SVE2")),
                         framework::dataset::make("DataType", { DataType::QASYMM8,
                                                                DataType::QASYMM8_SIGNED,
                                                                DataType::QSYMM16
-                                                             }))),
-               cpu_ext, data_type)
+                                                             })),
+                        framework::dataset::make("CanInterpretAs1D", {false}))),
+               cpu_ext, data_type, can_interpret_inputs_as_1d_array)
 {
     using namespace cpu::kernels;
 
@@ -121,11 +124,23 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
     cpu_isa.sve2 = (cpu_ext == "SVE2");
     cpu_isa.fp16 = (data_type == DataType::F16);
 
-    const auto *selected_impl = CpuAddKernel::get_implementation(DataTypeISASelectorData{data_type, cpu_isa}, cpu::KernelSelectionType::Preferred);
+    const auto *selected_impl = CpuAddKernel::get_implementation(CpuAddKernelDataTypeISASelectorData{data_type, cpu_isa, can_interpret_inputs_as_1d_array}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
 
-    std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_add";
+    bool float_or_integer = (data_type == DataType::F32 || data_type == DataType::F16 || data_type == DataType::U8 ||
+                             data_type == DataType::S16 || data_type == DataType::S32);
+
+    std::string expected;
+    if(can_interpret_inputs_as_1d_array && float_or_integer)
+    {
+        expected = "neon_" + cpu_impl_dt(data_type) + "_add_as_1d_array";
+    }
+    else
+    {
+        expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_add";
+    }
+
     std::string actual   = selected_impl->name;
 
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);

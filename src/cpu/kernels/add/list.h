@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,10 +38,15 @@ DECLARE_ADD_KERNEL(add_qasymm8_neon);
 DECLARE_ADD_KERNEL(add_qasymm8_signed_neon);
 DECLARE_ADD_KERNEL(add_qsymm16_neon);
 DECLARE_ADD_KERNEL(add_fp32_neon);
+DECLARE_ADD_KERNEL(add_fp32_neon_as_1d_array);
 DECLARE_ADD_KERNEL(add_fp16_neon);
+DECLARE_ADD_KERNEL(add_fp16_neon_as_1d_array);
 DECLARE_ADD_KERNEL(add_u8_neon);
+DECLARE_ADD_KERNEL(add_u8_neon_as_1d_array);
 DECLARE_ADD_KERNEL(add_s16_neon);
+DECLARE_ADD_KERNEL(add_s16_neon_as_1d_array);
 DECLARE_ADD_KERNEL(add_s32_neon);
+DECLARE_ADD_KERNEL(add_s32_neon_as_1d_array);
 DECLARE_ADD_KERNEL(add_fp32_sve);
 DECLARE_ADD_KERNEL(add_fp16_sve);
 DECLARE_ADD_KERNEL(add_u8_sve);

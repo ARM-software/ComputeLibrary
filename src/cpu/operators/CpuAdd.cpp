@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 
 #include "src/common/utils/Log.h"
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -44,6 +46,18 @@ Status CpuAdd::validate(const ITensorInfo *src0, const ITensorInfo *src1, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuAddKernel::validate(src0, src1, dst, policy);
+}
+
+void CpuAdd::run(ITensorPack &tensors)
+{
+    if(static_cast<kernels::CpuAddKernel *>(_kernel.get())->get_can_interpret_inputs_as_1d_array())
+    {
+        NEScheduler::get().schedule_op(_kernel.get(), Window::DimX, _kernel->window(), tensors);
+    }
+    else
+    {
+        ICpuOperator::run(tensors);
+    }
 }
 } // namespace cpu
 } // namespace arm_compute
