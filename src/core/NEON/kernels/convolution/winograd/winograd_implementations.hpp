@@ -38,6 +38,7 @@ enum class MethodConstraints
   RequiresSVE2 = 0x2,
   RequiresSME  = 0x4,
   RequiresSME2 = 0x8,
+  LargerShape  = 0x10, // Input tensor shape is larger than the output transform tile shape.
 };
 
 constexpr inline bool operator!(const MethodConstraints &c)
@@ -63,6 +64,14 @@ inline bool constraints_met(const MethodConstraints &c, const CPUInfo *ci, const
     (!(c & MethodConstraints::RequiresSME) || (ci->has_sme())) &&
     (!(c & MethodConstraints::RequiresSME2) || (ci->has_sme2()))
     // Add further constraints here
+  );
+}
+
+inline bool output_transform_constraints_met(const output_transform::ITransform *transform, const MethodConstraints &c, const CPUInfo *ci, const ConvolutionArgs &conv_args, const WinogradConfig *cfg)
+{
+  return (
+    constraints_met(c, ci, conv_args, cfg) &&
+    (!(c & MethodConstraints::LargerShape) || (conv_args.input_shape.rows > transform->get_output_rows() && conv_args.input_shape.cols > transform->get_output_cols()))
   );
 }
 
@@ -209,7 +218,7 @@ inline std::vector<const output_transform::ITransform *> get_output_transforms(
        impl->transform.get() != nullptr; impl++)
   {
     if(
-      constraints_met(impl->constraints, ci, conv_args,  cfg) &&
+      output_transform_constraints_met(impl->transform.get(), impl->constraints, ci, conv_args,  cfg) &&
       impl->transform->get_kernel_rows() == conv_args.kernel_shape.rows &&
       impl->transform->get_kernel_cols() == conv_args.kernel_shape.cols &&
       (cfg->output_rows == 0 || cfg->output_rows == impl->transform->get_output_rows()) &&

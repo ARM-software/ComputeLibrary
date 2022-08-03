@@ -45,7 +45,7 @@ void arm_fp32_1x2_1x7(unsigned int, const float *, size_t, const float *, float 
 static const TransformImplementation<float> transforms_fp32[] = {
 #if defined(__aarch64__)
 #endif  // defined(__aarch64__)
-  { IMPL(4, 4, 3, 3, arm_fp32_4x4_3x3, Unpadded) },
+  { IMPL(4, 4, 3, 3, arm_fp32_4x4_3x3, Unpadded), MethodConstraints::LargerShape },
   { IMPL(2, 2, 3, 3, arm_fp32_2x2_3x3, Unpadded) },
   { IMPL(2, 2, 5, 5, arm_fp32_2x2_5x5, Unpadded) },
   { IMPL(1, 6, 1, 3, arm_fp32_1x6_1x3, Unpadded) },

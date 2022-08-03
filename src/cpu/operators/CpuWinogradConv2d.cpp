@@ -252,8 +252,14 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
             _permute_output->configure(&_output_nhwc, dst, PermutationVector(1U, 2U, 0U));
         }
 
+        // Configure input transform kernel
+        _transform_input_kernel = std::make_unique<CpuWinogradConv2dTransformInputKernel>(_winograd_impl, *_conv_args, nthreads);
+
         // Configure GEMM function
         _gemm_function->configure(&_winograd_transformed_input, &_winograd_transformed_weights, nullptr, &_winograd_transformed_output, 1.0f, 0.f);
+
+        // Configure output transform kernel
+        _transform_output_kernel = std::make_unique<CpuWinogradConv2dTransformOutputKernel>(_winograd_impl, *_conv_args, nthreads);
 
         //Configure Activation Layer
         _run_activation = act_info.enabled() && !fuse_function_supported(act_info);
@@ -331,8 +337,6 @@ void CpuWinogradConv2d::run(ITensorPack &tensors)
     CpuAuxTensorHandler output_nhwc(offset_int_vec(PermutedOutput), _output_nhwc, tensors, true);
 
     ITensorPack transform_input_pack{ { ACL_SRC, is_nchw ? input_nhwc.get() : src }, { ACL_DST, winograd_input_transformed.get() }, { ACL_INT, input_workspace.get() } };
-    _transform_input_kernel = std::make_unique<CpuWinogradConv2dTransformInputKernel>(_winograd_impl, *_conv_args, nthreads);
-
     NEScheduler::get().schedule_op(_transform_input_kernel.get(), Window::DimX, win, transform_input_pack);
 
     CpuAuxTensorHandler winograd_weights_transformed(offset_int_vec(TransformedWeights), _winograd_transformed_weights, tensors, true);
@@ -346,7 +350,6 @@ void CpuWinogradConv2d::run(ITensorPack &tensors)
     _gemm_function->run(gemm_pack);
 
     // Output transform
-    _transform_output_kernel = std::make_unique<CpuWinogradConv2dTransformOutputKernel>(_winograd_impl, *_conv_args, nthreads);
     ITensorPack transform_output_pack{ { ACL_SRC_0, winograd_output_transformed.get() }, { ACL_DST, is_nchw ? output_nhwc.get() : output }, { ACL_SRC_1, biases }, { ACL_INT, output_workspace.get() } };
     NEScheduler::get().schedule_op(_transform_output_kernel.get(), Window::DimX, win, transform_output_pack);
     if(is_nchw)
