@@ -31,7 +31,7 @@ namespace arm_compute
 @section S7_1_errata Errata
 
 - (COMPMID-5324) Issue identified with direct and depthwise convolutions for certain Arm® Mali™ DDK versions.
-    - Versions Affected: All.
+    - Versions Affected: < v22.08
     - Conditions:
         - Arm® Mali™ DDK Versions : >= r23p0 && <= r38p0
         - Mali™ GPUs: Bifrost GPU family with the exception of G71
