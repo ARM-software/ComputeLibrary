@@ -1686,7 +1686,7 @@ public:
         return _lut;
     }
 
-    void init_lut(const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    void init_lut(DataType data_type, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
     {
         if(_act == ActivationFunction::HARD_SWISH)
         {
@@ -1696,14 +1696,35 @@ public:
         {
             qasymm8_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
         }
+        else if(_act == ActivationFunction::LOGISTIC)
+        {
+            if(data_type == DataType::QASYMM8)
+            {
+                qasymm8_logistic_populate_table(_lut, qi_in, qi_out);
+            }
+            else
+            {
+                qasymm8_signed_logistic_populate_table(_lut, qi_in, qi_out);
+            }
+        }
     }
 #endif // __aarch64__
 
     static inline bool is_lut_supported(ActivationFunction act_func, DataType data_type)
     {
 #ifdef __aarch64__
-        auto supported = (data_type == DataType::QASYMM8 && (act_func == ActivationFunction::HARD_SWISH || act_func == ActivationFunction::LEAKY_RELU));
-        return supported;
+        switch(act_func)
+        {
+            case ActivationFunction::HARD_SWISH:
+            case ActivationFunction::LEAKY_RELU:
+                return data_type == DataType::QASYMM8;
+
+            case ActivationFunction::LOGISTIC:
+                return (data_type == DataType::QASYMM8) || (data_type == DataType::QASYMM8_SIGNED);
+
+            default:
+                return false;
+        }
 #else  // __aarch64__
         ARM_COMPUTE_UNUSED(act_func);
         ARM_COMPUTE_UNUSED(data_type);
@@ -1733,6 +1754,22 @@ private:
         for(size_t i = 0; i < lut.size(); ++i)
         {
             lut[i] = qasymm8_leaky_relu(i, qi_in, qi_out, alpha);
+        }
+    }
+
+    static inline void qasymm8_logistic_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_logistic(i, qi_in, qi_out);
+        }
+    }
+
+    static inline void qasymm8_signed_logistic_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_signed_logistic(static_cast<int8_t>(i), qi_in, qi_out);
         }
     }
 #endif // __aarch64__

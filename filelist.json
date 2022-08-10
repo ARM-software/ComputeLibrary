@@ -855,8 +855,14 @@
           "neon": {
             "fp16": [ "src/cpu/kernels/activation/generic/neon/fp16.cpp" ],
             "fp32": [ "src/cpu/kernels/activation/generic/neon/fp32.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/activation/generic/neon/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp" ],
+            "qasymm8": [
+              "src/cpu/kernels/activation/generic/neon/qasymm8.cpp",
+              "src/cpu/kernels/activation/generic/neon/lut.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp",
+              "src/cpu/kernels/activation/generic/neon/lut.cpp"
+            ],
             "qsymm16": [ "src/cpu/kernels/activation/generic/neon/qsymm16.cpp" ]
           },
           "sve": {

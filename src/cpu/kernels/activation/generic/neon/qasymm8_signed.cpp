@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,9 +56,9 @@ void neon_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
     const qasymm8_signed_t        b        = quantize_qasymm8_signed(act_info.b(), qi_in);
     const qasymm8_signed_t        const_0  = quantize_qasymm8_signed(0.f, qi_in);
     const qasymm8x16_signed_t     vconst_0 = vdupq_n_s8(const_0);
-    const auto                    vconst_1 = vdupq_n_f32(1.f);
 #ifndef __aarch64__
-    const auto vconst_0_f32 = vdupq_n_f32(1.f);
+    const auto vconst_1     = vdupq_n_f32(1.f);
+    const auto vconst_0_f32 = vdupq_n_f32(0.f);
 #endif // __aarch64__
     const float32x4_t va_f32          = vdupq_n_f32(act_info.a());
     const float32x4_t vb_f32          = vdupq_n_f32(act_info.b());
@@ -108,6 +108,7 @@ void neon_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 // Re-quantize to new output space
                 tmp = vmlaq_qasymm8_signed(tmp, vs, vo);
             }
+#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
             else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
             {
                 // De-quantize
@@ -125,6 +126,7 @@ void neon_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 // Re-quantize to new output space
                 tmp = vquantize_signed(tmp_dep, qi_out);
             }
+#endif // __aarch64__
             else if(act == ActivationLayerInfo::ActivationFunction::TANH)
             {
                 // De-quantize
@@ -224,12 +226,14 @@ void neon_qasymm8_signed_activation(const ITensor *src, ITensor *dst, const Acti
                 tmp = std::min(a, std::max(b, in));
                 tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
+#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
             else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
             {
                 float tmp_f = dequantize_qasymm8_signed(in, qi_in);
                 tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
                 tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
             }
+#endif // __aarch64__
             else if(act == ActivationLayerInfo::ActivationFunction::TANH)
             {
                 float tmp_f = dequantize_qasymm8_signed(in, qi_in);

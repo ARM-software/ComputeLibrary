@@ -141,6 +141,12 @@
 #define REGISTER_QSYMM16_SVE2(func_name) nullptr
 #endif /* defined(ENABLE_QSYMM16_KERNELS) */
 
+#if defined(ENABLE_QASYMM8_KERNELS) || defined(ENABLE_QASYMM8_SIGNED_KERNELS)
+#define REGISTER_Q8_NEON(func_name) &(func_name)
+#else /* !defined(ENABLE_QASYMM8_KERNELS) && !defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
+#define REGISTER_Q8_NEON(func_name) nullptr
+#endif /* defined(ENABLE_QASYMM8_KERNELS) || defined(ENABLE_QASYMM8_SIGNED_KERNELS) */
+
 #if defined(ENABLE_INTEGER_KERNELS)
 
 #if defined(ARM_COMPUTE_ENABLE_SVE)

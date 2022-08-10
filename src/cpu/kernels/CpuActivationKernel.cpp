@@ -47,9 +47,9 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
 {
 #ifdef __aarch64__
     { // Neon LUT implementantion takes precedence
-        "neon_qu8_activation_lut",
+        "neon_q8_activation_lut",
         [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation_lut)
+        REGISTER_Q8_NEON(arm_compute::cpu::neon_q8_activation_lut)
     },
 #endif // __aarch64__
     {
@@ -193,7 +193,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 #ifdef __aarch64__
     if(ActivationLayerInfo::is_lut_supported(activation_info.activation(), src->data_type()))
     {
-        activation_info.init_lut(src->quantization_info().uniform(),(dst)?dst->quantization_info().uniform():src->quantization_info().uniform());
+        activation_info.init_lut(src->data_type(), src->quantization_info().uniform(), (dst)?dst->quantization_info().uniform():src->quantization_info().uniform());
     }
 #endif // __aarch64__
     _act_info = activation_info;
