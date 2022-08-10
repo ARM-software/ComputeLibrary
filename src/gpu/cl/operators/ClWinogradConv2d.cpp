@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -214,6 +214,7 @@ void ClWinogradConv2d::configure(const ClCompileContext &compile_context, ITenso
                                                                                                                   (src->data_type() == DataType::F16)));
 
     // Configure output transform
+    _output_transform->set_target(CLScheduler::get().target());
     _output_transform->configure(compile_context, &_batched_mm_output, biases, dst, winograd_info, act_info);
 
     _aux_mem                             = _batched_mm.workspace();

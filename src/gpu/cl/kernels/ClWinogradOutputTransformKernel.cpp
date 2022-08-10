@@ -178,14 +178,31 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
 
     _num_tiles_x = num_tiles.width;
 
+    // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324
+    const GPUTarget gpu_target    = get_target();
+    const auto      act_function  = act_info.activation();
+    const auto      src_data_type = src->data_type();
+
+    if((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
+       && (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU || act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+       && (src_data_type == DataType::F32 || src_data_type == DataType::F16))
+    {
+        // -cl-fast-relaxed-math also sets -cl-finite-math-only and -cl-unsafe-math-optimizations
+        // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
+        build_opts.add_option("-cl-unsafe-math-optimizations");
+    }
+    else
+    {
+        build_opts.add_option("-cl-fast-relaxed-math");
+    }
+
     if(_is_nhwc)
     {
         build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
-        build_opts.add_option("-cl-fast-relaxed-math");
         build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
         build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src_data_type));
         build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
         build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
         build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
@@ -194,12 +211,11 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
     else
     {
         build_opts.add_option_if(bias != nullptr, std::string("-DHAS_BIAS"));
-        build_opts.add_option("-cl-fast-relaxed-math");
         build_opts.add_option("-DN0=" + support::cpp11::to_string(win_config.second.x().step()));
         build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
         build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
-        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src_data_type));
         build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(1)));
         build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(idx_width)));
         build_opts.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(idx_height)));
@@ -209,9 +225,9 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
     }
 
     // Storing tensor dimensions to be sent later as kernel arguments
-    _src_height  = src->dimension(1);
-    _dst_width   = dst->dimension(idx_width);
-    _dst_height  = dst->dimension(idx_height);
+    _src_height = src->dimension(1);
+    _dst_width  = dst->dimension(idx_width);
+    _dst_height = dst->dimension(idx_height);
 
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
@@ -223,7 +239,7 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
     _config_id += "_";
-    _config_id += lower_string(string_from_data_type(src->data_type()));
+    _config_id += lower_string(string_from_data_type(src_data_type));
     _config_id += "_";
     _config_id += support::cpp11::to_string(src->dimension(0));
     _config_id += "_";
