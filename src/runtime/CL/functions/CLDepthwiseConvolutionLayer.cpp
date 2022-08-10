@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -227,6 +227,7 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
 
     const ConvolutionInfo conv_kernel_info{ conv_info, depth_multiplier, act_info, dilation };
 
+    _dwc_native_kernel->set_target(gpu_target);
     _dwc_native_kernel->configure(compile_context, input_to_use, weights_to_use, biases, output_to_use,
                                   dwc_native_compute_info, conv_kernel_info, output_multipliers_to_use, output_shifts_to_use);
 
