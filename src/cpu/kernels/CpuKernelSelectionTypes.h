@@ -90,6 +90,13 @@ struct CpuAddKernelDataTypeISASelectorData
     bool                can_interpret_inputs_as_1d_array;
 };
 
+struct ScaleKernelDataTypeISASelectorData
+{
+    DataType            dt;
+    cpuinfo::CpuIsaInfo isa;
+    InterpolationPolicy interpolation_policy;
+};
+
 // Selector pointer types
 using DataTypeISASelectorPtr                      = std::add_pointer<bool(const DataTypeISASelectorData &data)>::type;
 using DataTypeDataLayoutSelectorPtr               = std::add_pointer<bool(const DataTypeDataLayoutISASelectorData &data)>::type;
@@ -99,6 +106,7 @@ using DepthwiseConv2dNativeDataTypeISASelectorPtr = std::add_pointer<bool(const 
 using CastDataTypeISASelectorDataPtr              = std::add_pointer<bool(const CastDataTypeISASelectorData &data)>::type;
 using ActivationDataTypeISASelectorDataPtr        = std::add_pointer<bool(const ActivationDataTypeISASelectorData &data)>::type;
 using CpuAddKernelDataTypeISASelectorDataPtr      = std::add_pointer<bool(const CpuAddKernelDataTypeISASelectorData &data)>::type;
+using ScaleKernelDataTypeISASelectorDataPtr       = std::add_pointer<bool(const ScaleKernelDataTypeISASelectorData &data)>::type;
 
 } // namespace kernels
 } // namespace cpu

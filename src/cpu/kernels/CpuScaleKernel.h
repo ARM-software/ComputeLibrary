@@ -75,9 +75,9 @@ public:
 
     struct ScaleKernel
     {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        ScaleKernelPtr               ukernel;
+        const char                                 *name;
+        const ScaleKernelDataTypeISASelectorDataPtr is_selected;
+        ScaleKernelPtr                              ukernel;
     };
 
     static const std::vector<ScaleKernel> &get_available_kernels();
