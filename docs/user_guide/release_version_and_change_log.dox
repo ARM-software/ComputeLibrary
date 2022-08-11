@@ -62,6 +62,7 @@ v22.08 Public major release
  - Add fixed-format BF16, FP16 and FP32 Neon™ GEMM kernels to support variable weights.
  - Add new winograd convolution kernels implementation and update the ACL \link arm_compute::cpu::CpuWinogradConv2d CpuWinogradConv2d\endlink operator.
  - Add experimental support for native builds for Windows on Arm®.
+ - Build flag interpretation change: arch=armv8.6-a now translates to -march=armv8.6-a CXX flag instead of march=armv8.2-a + explicit selection of feature extensions.
  - Build flag change: toolchain_prefix, compiler_prefix:
    - Use empty string "" to suppress any prefixes.
    - Use "auto" to use default (auto) prefixes chosen by the build script. This is the default behavior when unspecified.
