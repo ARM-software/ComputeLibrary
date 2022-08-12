@@ -37,7 +37,7 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
-@note Starting from release 22.05, 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
+@note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
 
