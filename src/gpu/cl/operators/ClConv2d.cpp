@@ -273,6 +273,11 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                         {
                             return ConvolutionMethod::WINOGRAD;
                         }
+
+                        if(weights->dimension(idx_w) > 3 && weights->dimension(idx_h) > 3)
+                        {
+                            return ConvolutionMethod::WINOGRAD;
+                        }
                     }
                     else
                     {
@@ -301,7 +306,11 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                     {
                         if( ((is_large_kernel_sz || is_m_one) && workload_gte_8192) || is_ofm_lte_8 )
                         {
-                            return ConvolutionMethod::DIRECT;
+                            // Do not use direct convolution when the kernel is large and the stride is unit
+                            if(!(is_large_kernel_sz && conv_info.stride().first == 1 && conv_info.stride().second == 1))
+                            {
+                                return ConvolutionMethod::DIRECT;
+                            }
                         }
                     }
                 }
