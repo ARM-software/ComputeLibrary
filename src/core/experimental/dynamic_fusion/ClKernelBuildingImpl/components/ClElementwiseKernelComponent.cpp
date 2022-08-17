@@ -175,16 +175,17 @@ void ClElementwiseKernelComponent::allocate_shared_vars(SharedVarTable &vtable) 
 
 ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(const SharedVarTable &vtable) const
 {
-    TagLUT     lut{};
-    const auto t_dst_info = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
-    const auto t_rhs_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
+    TagLUT       lut{};
+    const auto   t_dst_info    = _blueprint->impl().get_kernel_argument_info(_blueprint->impl().get_dst_id());
+    ITensorInfo *t_addend_info = nullptr;
     // Arguments and global shared variables
     const bool is_root = _blueprint->impl().group(_lhs.arg_id) == SharedVarGroup::Argument && _blueprint->impl().group(_rhs.arg_id) == SharedVarGroup::Argument;
     if(is_root)
     {
-        lut["lhs"] = vtable.get(_lhs);
-        lut["rhs"] = vtable.get(_rhs);
-        lut["dst"] = vtable.get(_dst);
+        lut["lhs"]    = vtable.get(_lhs);
+        lut["rhs"]    = vtable.get(_rhs);
+        lut["dst"]    = vtable.get(_dst);
+        t_addend_info = _blueprint->impl().get_kernel_argument_info(_rhs.arg_id);
     }
     else
     {
@@ -207,6 +208,7 @@ ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(c
         }
         lut["acc"]    = vtable.get(accumulator);
         lut["addend"] = vtable.get(addend);
+        t_addend_info = _blueprint->impl().get_kernel_argument_info(addend.arg_id);
     }
     // Local build options
     lut["meta_kernel_id"] = id();
@@ -226,18 +228,18 @@ ClElementwiseKernelComponent::TagLUT ClElementwiseKernelComponent::get_tag_lut(c
 
     // Set broadcast parameters
     // PRE: All tensors are broadcast-compatible
-    const bool is_broadcast = t_rhs_info->tensor_shape() != t_dst_info->tensor_shape();
+    const bool is_broadcast = t_addend_info->tensor_shape() != t_dst_info->tensor_shape();
     if(is_broadcast)
     {
         // Note that n0 maps to input tensor dimension 0, m0 maps to input dimensions 1 and 2 because of our collapse strategy
-        if(t_rhs_info->dimension(0) == 1U && t_rhs_info->dimension(1) == 1U && t_rhs_info->dimension(2) == 1U) // Broadcast in X, Y, Z: collapsed rhs win [M0xN0] = [1x1]
+        if(t_addend_info->dimension(0) == 1U && t_addend_info->dimension(1) == 1U && t_addend_info->dimension(2) == 1U) // Broadcast in X, Y, Z: collapsed rhs win [M0xN0] = [1x1]
         {
             lut["rhs_m0"]      = "1";
             lut["rhs_n0"]      = "1";
             lut["rhs_start_y"] = "0";
             lut["rhs_start_x"] = "0";
         }
-        else if(t_rhs_info->dimension(1) == 1U && t_rhs_info->dimension(2) == 1U) // Broadcast in Y and Z: collapsed rhs win [M0xN0] = [1xN]
+        else if(t_addend_info->dimension(1) == 1U && t_addend_info->dimension(2) == 1U) // Broadcast in Y and Z: collapsed rhs win [M0xN0] = [1xN]
         {
             lut["rhs_m0"]      = "1";
             lut["rhs_n0"]      = "N0";
