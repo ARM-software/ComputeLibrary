@@ -1,0 +1,7 @@
+<map id="ClWorkload" name="ClWorkload">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_i_workload.xhtml" title="Run&#45;time&#45;agnostic, platform&#45;specific graph that describes everything required to run a workload It ca..." alt="" coords="33,95,120,121"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_dependency_graph.xhtml" title="The dependency graph of a workload, where the nodes are of 2 types: Tensor or Operator Represented as..." alt="" coords="5,5,148,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_status.xhtml" title="Status class. " alt="" coords="144,95,207,121"/>
+<area shape="rect" id="node5" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_workload_context.xhtml" title="Context (device capabilities, platform details) associated with a ClWorkload. " alt="" coords="231,95,378,121"/>
+<area shape="rect" id="node6" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_gpu_info.xhtml" title="GPU information for ClWorkloadContext. " alt="" coords="268,5,341,32"/>
+</map>

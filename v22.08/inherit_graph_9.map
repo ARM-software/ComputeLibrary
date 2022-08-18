@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$struct_acl_tensor__.xhtml" title="AclTensor_" alt="" coords="5,31,96,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_v2.xhtml" title="Base class specifying the tensor interface. " alt="" coords="144,31,229,57"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cpu_1_1_cpu_tensor.xhtml" title="CPU tensor implementation class. " alt="" coords="277,5,367,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1gpu_1_1opencl_1_1_cl_tensor.xhtml" title="OpenCL tensor implementation class. " alt="" coords="283,56,361,83"/>
+</map>

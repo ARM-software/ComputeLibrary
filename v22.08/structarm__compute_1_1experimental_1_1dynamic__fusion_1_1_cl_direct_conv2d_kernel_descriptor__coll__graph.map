@@ -1,0 +1,5 @@
+<map id="ClDirectConv2dKernelDescriptor" name="ClDirectConv2dKernelDescriptor">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_conv2d_descriptor.xhtml" title="Descriptor for Conv2dDescriptor operation. " alt="" coords="51,109,190,136"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_padding2_d.xhtml" title="Padding information for 2D operations like Conv2dDescriptor. " alt="" coords="25,5,115,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle. " alt="" coords="139,5,206,32"/>
+</map>

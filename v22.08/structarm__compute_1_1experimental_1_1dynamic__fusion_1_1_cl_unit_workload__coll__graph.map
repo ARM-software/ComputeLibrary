@@ -1,0 +1,7 @@
+<map id="ClUnitWorkload" name="ClUnitWorkload">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_unit_workload.xhtml" title="The basic atomic unit in an IWorkload. " alt="" coords="35,95,146,121"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_unit_workload_stage.xhtml" title="Describes when a Unit Workload is run. " alt="" coords="5,5,152,32"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_kernel_code.xhtml" title="Contains kernel code to be compiled and run in a ClUnitWorkload. " alt="" coords="183,95,292,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_build_options.xhtml" title="Build options. " alt="" coords="177,5,298,32"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_window.xhtml" title="Describe a multidimensional execution window. " alt="" coords="323,5,397,32"/>
+</map>

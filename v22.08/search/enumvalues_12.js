@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['t600',['T600',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a6855a4342969d2b58c96d95385d6e673',1,'arm_compute']]],
+  ['t700',['T700',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a664a94fa85b127eabc7bed25091843fd',1,'arm_compute']]],
+  ['t800',['T800',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3aae926a8537ded0221329aa9a89b84048',1,'arm_compute']]],
+  ['tanh',['TANH',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa143c8c6f51b9bb893ce71e38702e3cc1',1,'arm_compute::ActivationLayerInfo']]],
+  ['temporary',['Temporary',['../namespacearm__compute_1_1experimental.xhtml#a90cbc7f3fa8bbc097dfd0429b31efb83a10d85d7664a911bcaec89732098c269a',1,'arm_compute::experimental']]],
+  ['tensor',['Tensor',['../namespacearm__compute_1_1detail.xhtml#a2c0ee4eb5bed32d6fb8358d113995aa4af20fc369b14cb5d40e695dab98bcb742',1,'arm_compute::detail']]],
+  ['tensor_5f3d',['Tensor_3D',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a6072e09c65444602fbe6cc6027d369c7a30bd3b885ab6a7786a0117197346c49c',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['tensor_5f4d',['Tensor_4D',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a6072e09c65444602fbe6cc6027d369c7a73d5ced9c9cf7e7cdffe9016d463c2b4',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['tensor_5f4d_5ft_5fbuffer',['Tensor_4D_t_Buffer',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a6072e09c65444602fbe6cc6027d369c7aa735f986cc40b7d5c4fd2d5a7ba883fd',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['tensor_5f4d_5ft_5fimage',['Tensor_4D_t_Image',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a6072e09c65444602fbe6cc6027d369c7a89e1a66e65ce2fc93995b94f32d9d928',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['tensorpack',['TensorPack',['../namespacearm__compute_1_1detail.xhtml#a2c0ee4eb5bed32d6fb8358d113995aa4acdbd44e2664d66a4b5e62af62e8f52ad',1,'arm_compute::detail']]],
+  ['tests',['TESTS',['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9ac769ef7bddc01ed21a9f7c5fecbe2430',1,'arm_compute::test::framework']]],
+  ['text',['Text',['../namespacearm__compute_1_1mlgo_1_1parser.xhtml#aa520fbf142ba1e7e659590c07da31921a9dffbf69ffba8bc38bc4e01abf4b1675',1,'arm_compute::mlgo::parser']]],
+  ['tf_5fcenter',['TF_CENTER',['../namespacearm__compute.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ae65a115db9b4bcc4ae0aa0b989089d16',1,'arm_compute']]],
+  ['time_5fms',['TIME_MS',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100a8ed2f2476469f812d63a2f4e83166c61',1,'arm_compute::test::framework']]],
+  ['time_5fs',['TIME_S',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100a55d658bdb6741297d391d36632cb51b1',1,'arm_compute::test::framework']]],
+  ['time_5fus',['TIME_US',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100ab843f590d06438293e06980b4f94bf39',1,'arm_compute::test::framework']]],
+  ['to_5fnearest_5feven',['TO_NEAREST_EVEN',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150',1,'arm_compute']]],
+  ['to_5fnearest_5fup',['TO_NEAREST_UP',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea8c0084566b290fa9e5e429f4ae241f95',1,'arm_compute']]],
+  ['to_5fzero',['TO_ZERO',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06',1,'arm_compute::TO_ZERO()'],['../namespacearm__compute_1_1utils_1_1rounding.xhtml#a5959c934b204c7bcb6766cfaea8ae101a5631ad8e27788edfca7e13535d862c06',1,'arm_compute::utils::rounding::TO_ZERO()']]],
+  ['top_5fleft',['TOP_LEFT',['../namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7ba747385047b85ae751f83adb36435a3c1',1,'arm_compute::TOP_LEFT()'],['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#afe5ece05d566f71af093d15bd4531459a747385047b85ae751f83adb36435a3c1',1,'arm_compute::experimental::dynamic_fusion::TOP_LEFT()']]],
+  ['top_5fright',['TOP_RIGHT',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#afe5ece05d566f71af093d15bd4531459a901d87dedda8db733f5e6d34c4eb5fe0',1,'arm_compute::experimental::dynamic_fusion']]],
+  ['tstoreindirectwidthselect',['TStoreIndirectWidthSelect',['../namespacearm__compute_1_1experimental_1_1dynamic__fusion.xhtml#a204edbd0a54dd4c773a4f5a0e14f450ca230c8bbd95d90b28049617d5e793bb5f',1,'arm_compute::experimental::dynamic_fusion']]]
+];

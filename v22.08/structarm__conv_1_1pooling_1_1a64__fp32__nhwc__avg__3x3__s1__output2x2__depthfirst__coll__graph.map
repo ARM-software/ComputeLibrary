@@ -1,0 +1,5 @@
+<map id="a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst" name="a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst">
+<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; float, float \&gt;" alt="" coords="28,185,169,227"/>
+<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_i_depthfirst_strategy.xhtml" title="IDepthfirstStrategy" alt="" coords="21,5,166,32"/>
+<area shape="rect" id="node4" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; TInput, TOutput \&gt;" alt="" coords="115,81,269,123"/>
+</map>

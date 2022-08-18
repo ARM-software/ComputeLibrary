@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_i_workload.xhtml" title="Run&#45;time&#45;agnostic, platform&#45;specific graph that describes everything required to run a workload It ca..." alt="" coords="5,5,92,32"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_workload.xhtml" title="Workload for Cl backend. " alt="" coords="140,5,236,32"/>
+</map>

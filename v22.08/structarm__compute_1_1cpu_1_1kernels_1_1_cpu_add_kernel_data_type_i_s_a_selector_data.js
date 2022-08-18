@@ -1,0 +1,6 @@
+var structarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel_data_type_i_s_a_selector_data =
+[
+    [ "can_interpret_inputs_as_1d_array", "structarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel_data_type_i_s_a_selector_data.xhtml#a02ce82621cd3b76f0c2b63c8181a66d4", null ],
+    [ "dt", "structarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel_data_type_i_s_a_selector_data.xhtml#aa36901a4911e511f25f42e191df3526d", null ],
+    [ "isa", "structarm__compute_1_1cpu_1_1kernels_1_1_cpu_add_kernel_data_type_i_s_a_selector_data.xhtml#a1659171e98a705cddffe279eda7c17b8", null ]
+];

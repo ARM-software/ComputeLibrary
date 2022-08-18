@@ -1,0 +1,7 @@
+var classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4 =
+[
+    [ "KernelType", "classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#adde274d1c3c0eb97189328ab739a2dd0", null ],
+    [ "get_kernel", "classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a213a049a509b6b12d98016281ece3452", null ],
+    [ "get_storage_size", "classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a1acb91503a7760505b240fc04bbab5ad", null ],
+    [ "pack_parameters", "classarm__conv_1_1depthwise_1_1_depthfirst_multiplier_strategy_3_01_t_input_00_01_t_weight_00_01_t_output_00_01int32__t_01_4.xhtml#a409288287d6409326f4dcf71d19ea12f", null ]
+];

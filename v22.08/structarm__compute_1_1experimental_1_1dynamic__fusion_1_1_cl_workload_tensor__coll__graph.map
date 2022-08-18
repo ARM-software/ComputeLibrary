@@ -1,0 +1,8 @@
+<map id="ClWorkloadTensor" name="ClWorkloadTensor">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_workload_tensor.xhtml" title="A descriptor for IWorkload Tensors. " alt="" coords="67,260,192,287"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_aux_memory_info.xhtml" title="Memory Info for a WorkloadTensor of Auxiliary memory type. " alt="" coords="5,171,131,197"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. " alt="" coords="155,171,248,197"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="ICloneable\&lt; ITensorInfo \&gt;" alt="" coords="105,95,297,121"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface. " alt="" coords="137,5,266,32"/>
+<area shape="rect" id="node7" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_kernel_arg_descriptor.xhtml" title="Describes all the info required to add a kernel argument at run time. " alt="" coords="216,260,381,287"/>
+</map>

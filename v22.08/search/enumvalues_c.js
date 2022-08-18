@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['native',['Native',['../namespacearm__compute.xhtml#a94eb95e47316e7dc5af7615592d26bdda925641e0b76c28cc940e8f3ca178d826',1,'arm_compute::Native()'],['../namespacearm__compute.xhtml#a6f7d2fe6b41e36d408375ad6bf9a612aaf78504d96ba7177dc0c6784905ac8743',1,'arm_compute::NATIVE()']]],
+  ['ncdhw',['NCDHW',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a884e0167ebf9bbe6cfd6ca5ab97ab015',1,'arm_compute']]],
+  ['nchw',['NCHW',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f',1,'arm_compute']]],
+  ['ndhwc',['NDHWC',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a4dd0194b114cbf51da5b3a72569863ef',1,'arm_compute']]],
+  ['nearest_5fneighbor',['NEAREST_NEIGHBOR',['../namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a7f5ccbc3d30c2cd3fd04d567946cbde2',1,'arm_compute']]],
+  ['neg',['NEG',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da5dd68b1a7db42a1cce4dce09dbaa179e',1,'arm_compute']]],
+  ['neon',['NEON',['../namespacearm__compute.xhtml#ad258d4c51629346fceac4679b3209ad9acaf162e9233294cadf62d2a71a14ca09',1,'arm_compute::NEON()'],['../namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35dacaf162e9233294cadf62d2a71a14ca09',1,'arm_compute::graph::NEON()']]],
+  ['nhwc',['NHWC',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0ad066db54b89b0912e7e7c6da51e2da51',1,'arm_compute']]],
+  ['nightly',['NIGHTLY',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfad791cd54143e331164a2b216451a5dd3',1,'arm_compute::test::framework']]],
+  ['non_5ffixed',['NON_FIXED',['../namespacearm__gemm.xhtml#a19076cd620581b8e671ad674359c1b76aa2730bd24646daa3279918eeff467d8c',1,'arm_gemm']]],
+  ['none',['None',['../structarm__gemm_1_1_activation.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a6adf97f83acf6453d4a6a4b1070f3754',1,'arm_gemm::Activation::None()'],['../namespacearm__compute.xhtml#a5558e2cc22f7f4771653d992c8ad8864ab50339a10e1de285ac99d4c3990b8693',1,'arm_compute::NONE()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9ab50339a10e1de285ac99d4c3990b8693',1,'arm_compute::test::framework::NONE()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100ab50339a10e1de285ac99d4c3990b8693',1,'arm_compute::test::framework::NONE()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ab50339a10e1de285ac99d4c3990b8693',1,'arm_compute::test::framework::NONE()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#a043aa97de3c71ad015852f46ec4cc6adab50339a10e1de285ac99d4c3990b8693',1,'arm_compute::test::framework::NONE()'],['../namespacearm__gemm.xhtml#a764ff3bbe137fc7792aee26f022aa29da6adf97f83acf6453d4a6a4b1070f3754',1,'arm_gemm::None()']]],
+  ['nopadding',['NoPadding',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0a23bb2bd76e5604aace0bdaa7b279a8fd',1,'arm_compute::IOFormatInfo']]],
+  ['normal',['Normal',['../namespaceacl.xhtml#a63674c70cc3037c6ac5a8b4ec8424278a960b44c579bc2f6818d2daaf9e4c16f0',1,'acl::Normal()'],['../namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5ca1e23852820b9154316c7c06e2b7ba051',1,'arm_compute::NORMAL()']]],
+  ['normalizationlayer',['NormalizationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a227ecc6e858c8d1f61664f1967173bea',1,'arm_compute::graph']]],
+  ['normalizeplanaryuvlayer',['NormalizePlanarYUVLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a7844e69eea1226939211d12a975aa512',1,'arm_compute::graph']]],
+  ['not',['NOT',['../namespacearm__compute.xhtml#a1f8212fef242f87e34893c8db13fc16ea10df3d67626099df882920ba6552f16d',1,'arm_compute::NOT()'],['../namespacearm__compute.xhtml#a8cb8460f7fedf906ecab5621af891707aa74c05d080620f087c4e523977230666',1,'arm_compute::Not()']]],
+  ['not_5frun',['NOT_RUN',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bad3cbb6cb9043ad908cdd5414236e6603',1,'arm_compute::test::framework::TestResult']]],
+  ['notequal',['NotEqual',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca19bb0af2c3c530538cb41aff7f235b96',1,'arm_compute']]],
+  ['num',['Num',['../namespacearm__compute_1_1mlgo_1_1parser.xhtml#a1e92ccbb4f87d26f5da6bc220138a80cab3e3076d9b3c53bede50d468b647b109',1,'arm_compute::mlgo::parser']]],
+  ['nv12',['NV12',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a202f5d8c2c70d31048154d8b8b28e755',1,'arm_compute']]],
+  ['nv21',['NV21',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a8e9f6aa1af7e0abbc7e64521e6ffe1b4',1,'arm_compute']]]
+];
