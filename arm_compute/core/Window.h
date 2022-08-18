@@ -90,6 +90,7 @@ public:
             : _start(start), _end(end), _step(step)
         {
         }
+        Dimension(const Dimension &d) = default;
         /** Default assignment operator to allow dimensions to be copied */
         Dimension &operator=(const Dimension &d) = default;
         /** Return the start of the dimension */

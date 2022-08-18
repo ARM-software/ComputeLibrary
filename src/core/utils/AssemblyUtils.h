@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,22 @@ arm_gemm::Activation map_to_arm_gemm_activation(const ActivationLayerInfo &act);
  * @return Assembly padding values.
  */
 arm_conv::PaddingValues map_to_arm_conv_padding(const PadStrideInfo &pad_stride_info);
+
+/** Performs a mapping from Compute Library WeightFormat to the assembly WeightFormat enum
+ *
+ * @param[in] weight_format Compute Library WeightFormat enum value
+ *
+ * @return Assembly WeightFormat
+ */
+arm_gemm::WeightFormat map_to_arm_gemm_weight_format(const arm_compute::WeightFormat &weight_format);
+
+/** Performs a mapping from Assembly WeightFormat to the Compute Library WeightFormat enum
+ *
+ * @param[in] weight_format Assembly WeightFormat enum value
+ *
+ * @return Compute Library WeightFormat
+ */
+arm_compute::WeightFormat map_to_arm_compute_weight_format(const arm_gemm::WeightFormat &weight_format);
 } // namespace assembly
 } // namespace arm_compute
 #endif /* UTILS_CORE_ASSEMBLY_UTILS_H */

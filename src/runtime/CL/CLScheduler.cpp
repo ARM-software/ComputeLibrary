@@ -137,8 +137,9 @@ void CLScheduler::default_init(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_
         init(ctx, queue, dev, cl_tuner, gemm_h);
     }
 
-    // Set CL tuner
-    _cl_tuner = cl_tuner;
+    // Set CL tuner and GEMM heuristics
+    _cl_tuner        = cl_tuner;
+    _gemm_heuristics = gemm_h;
 }
 
 void CLScheduler::default_reinit(ICLTuner *cl_tuner, CLGEMMHeuristicsHandle *gemm_h, CLBackendType cl_backend_type)

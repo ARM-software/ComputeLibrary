@@ -333,7 +333,11 @@
     ({                                                \
         c += (C_DATA_TYPE)(a) * (C_DATA_TYPE)(b);     \
     })
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_khr_integer_dot_product)
+#define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += dot((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0)), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0)));
+#define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += dot((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0));
+#define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c += dot((a), (b));
+#elif defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8) //  defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_khr_integer_dot_product)
 #define DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((A_DATA_TYPE##4)((a).s01, (A_DATA_TYPE##2)(0)), (B_DATA_TYPE##4)(((b).s01), (B_DATA_TYPE##2)(0)), (c));
 #define DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((A_DATA_TYPE##4)((a).s012, (A_DATA_TYPE)0), (B_DATA_TYPE##4)(((b).s012), (B_DATA_TYPE)0), (c));
 #define DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) c = arm_dot_acc((a), (b), (c));
@@ -966,6 +970,9 @@
 #define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 #define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 
+#define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
+#define V_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
+
 /** Element-wise activation for quantized types
  *
  * @note Performs: activation(LHS) = DST
@@ -988,6 +995,25 @@
         })                                                                                          \
     })
 
+/** Element-wise addition between two tiles
+ *
+ * @note Performs: LHS + RHS = DST
+ *
+ * @param[in]  DATA_TYPE LHS/RHS/DST data type
+ * @param[in]  M0        Number of LHS rows
+ * @param[in]  N0        Number of LHS columns
+ * @param[in]  lhs       LHS tile
+ * @param[in]  rhs       Constant RHS tile
+ * @param[out] dst       DST tile
+ */
+#define T_ADD(DATA_TYPE, M0, N0, lhs, rhs, dst) \
+    ({                                                            \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
+        {                                                         \
+            dst[_m0].v = lhs[_m0].v + rhs[_m0].v; \
+        })                                                        \
+    })
+
 /** Element-wise addition with a constant value
  *
  * @note Performs: LHS + constant = DST
@@ -1003,18 +1029,38 @@
     ({                                                            \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
         {                                                         \
-            LOOP_UNROLLING(int, _n0, 0, 1, N0,                    \
-            {                                                     \
-                dst[_m0].s[_n0] = lhs[_m0].s[_n0] + rhs_constant; \
-            })                                                    \
+            dst[_m0].v = lhs[_m0].v + (DATA_TYPE)rhs_constant;               \
         })                                                        \
     })
 
-/** Element-wise addition with RHS broadcasted (RHS has the X dimension only)
+#define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+/** Element-wise scale with a constant value
  *
- * @note Performs: LHS + RHS[broadcasted] = DST
+ * @note Performs: LHS * constant = DST
+ *
+ * @param[in]  DATA_TYPE    LHS/RHS/DST data type
+ * @param[in]  M0           Number of LHS rows
+ * @param[in]  N0           Number of LHS columns
+ * @param[in]  lhs          LHS tile
+ * @param[in]  rhs_constant Constant value
+ * @param[out] dst          DST tile
+ */
+#define T_SCALE_CONSTANT(DATA_TYPE, M0, N0, lhs, rhs_constant, dst) \
+    ({                                                            \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                        \
+        {                                                         \
+            dst[_m0].v = lhs[_m0].v * (DATA_TYPE)rhs_constant; \
+        })                                                        \
+    })
+
+/** Element-wise operation with RHS broadcasted (RHS has the X dimension only)
+ *
+ * @note Performs: LHS OP RHS[broadcasted] = DST
  * @note Both tiles must have same data type
  *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
  * @param[in]  DST_DATA_TYPE DST data type
  * @param[in]  M0            Number of LHS rows
  * @param[in]  N0            Number of LHS columns
@@ -1022,19 +1068,23 @@
  * @param[in]  rhs           RHS tile
  * @param[out] dst           DST tile
  */
-#define T_ADD_BROADCAST_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+#define T_ELTWISE_BROADCAST_X(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
     ({                                                      \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
-            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
         })                                                  \
     })
 
-/** Element-wise addition between two tiles (LHS and RHS)
+#define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+/** Element-wise operation between two tiles (LHS and RHS)
  *
- * @note Performs: LHS + RHS = DST
+ * @note Performs: LHS OP RHS = DST
  * @note Both tiles must have same data type
  *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
  * @param[in]  DST_DATA_TYPE DST data type
  * @param[in]  M0            Number of LHS rows
  * @param[in]  N0            Number of LHS columns
@@ -1042,11 +1092,30 @@
  * @param[in]  rhs           RHS tile
  * @param[out] dst           DST tile
  */
-#define T_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+#define T_ELTWISE(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
     ({                                                      \
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
-            dst[_m0].v = CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)) + CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0));             \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
+        })                                                  \
+    })
+
+/** Floor operation on a tile
+ *
+ * @note Performs: floor(SRC) = DST
+ * @note Both tiles must have same data type
+ *
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of SRC rows
+ * @param[in]  N0            Number of SRC columns
+ * @param[in]  src           LHS tile
+ * @param[out] dst           DST tile
+ */
+#define T_FLOOR(DST_DATA_TYPE, M0, N0, src, dst) \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
+            dst[_m0].v = floor(CONVERT(src[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
         })                                                  \
     })
 

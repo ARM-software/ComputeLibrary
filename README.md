@@ -1,16 +1,19 @@
 
 > **⚠ Important**
-> From this release (22.05): 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+> From release 22.05: 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+
+> **⚠ Important**
+> From release 22.08: armv7a with Android build will no longer be tested or maintained.
 
 <br>
 <div align="center">
  <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"/><br><br>
 </div>
 
-# Compute Library ![](https://img.shields.io/badge/latest_release-22.05-green)
+# Compute Library ![](https://img.shields.io/badge/latest_release-22.08-green)
 
 
-The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A and Arm® Mali™ GPUs architectures.<br>
+The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A, Arm® Neoverse® and Arm® Mali™ GPUs architectures.<br>
 
 The library provides superior performance to other open source alternatives and immediate support for new Arm® technologies e.g. SVE2.
 
@@ -35,7 +38,7 @@ Key Features:
 <br>
 
 ## Documentation
-[![Documentation](https://img.shields.io/badge/documentation-22.05-green)](https://arm-software.github.io/ComputeLibrary/latest)
+[![Documentation](https://img.shields.io/badge/documentation-22.08-green)](https://arm-software.github.io/ComputeLibrary/latest)
 
 > Note: The documentation includes the reference API, changelogs, build guide, contribution guide, errata, etc.
 
@@ -48,23 +51,23 @@ All the binaries can be downloaded from [here](https://github.com/ARM-software/C
 
 | Platform    | Operating System | Release archive (Download) |
 | ----------- | ----------- | ----------- |
-| Raspberry Pi 4 | Linux 32bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-neon.tar.gz) |
-| Raspberry Pi 4 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon.tar.gz) |
-| Odroid N2 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon-cl.tar.gz) |
-| HiKey960 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon-cl.tar.gz) |
+| Raspberry Pi 4 | Linux 32bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-armv7a-neon.tar.gz) |
+| Raspberry Pi 4 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon.tar.gz) |
+| Odroid N2 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon-cl.tar.gz) |
+| HiKey960 | Linux 64bit | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon-cl.tar.gz) |
 
 <br>
 
 | Architecture    | Operating System | Release archive (Download) |
 | ----------- | ----------- | ----------- |
-| armv7 | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-armv7a-neon-cl.tar.gz) |
-| armv7 | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-armv7a-neon-cl.tar.gz) |
-| arm64-v8a | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8a-neon-cl.tar.gz) |
-| arm64-v8a | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8a-neon-cl.tar.gz) |
-| arm64-v8.2-a | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8.2-a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8.2-a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-android-arm64-v8.2-a-neon-cl.tar.gz) |
-| arm64-v8.2-a | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8.2-a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8.2-a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.05/arm_compute-v22.05-bin-linux-arm64-v8.2-a-neon-cl.tar.gz) |
+| armv7 | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-armv7a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-armv7a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-armv7a-neon-cl.tar.gz) |
+| arm64-v8a | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8a-neon-cl.tar.gz) |
+| arm64-v8a | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8a-neon-cl.tar.gz) |
+| arm64-v8.2-a | Android | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8.2-a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8.2-a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-android-arm64-v8.2-a-neon-cl.tar.gz) |
+| arm64-v8.2-a | Linux | [![](https://img.shields.io/badge/build-neon-orange)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8.2-a-neon.tar.gz) [![](https://img.shields.io/badge/build-opencl-blue)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8.2-a-cl.tar.gz) [![](https://img.shields.io/badge/build-neon+cl-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/download/v22.08/arm_compute-v22.08-bin-linux-arm64-v8.2-a-neon-cl.tar.gz) |
 
 <br>
+Please refer to the following link for more pre-built binaries: [![](https://img.shields.io/badge/v22.08-bins-yellowgreen)](https://github.com/ARM-software/ComputeLibrary/releases/tag/v22.08)
 
 Pre-build binaries are generated with the following security / good coding practices related flags:
 > -Wall, -Wextra, -Wformat=2, -Winit-self, -Wstrict-overflow=2, -Wswitch-default, -Woverloaded-virtual, -Wformat-security, -Wctor-dtor-privacy, -Wsign-promo, -Weffc++, -pedantic, -fstack-protector-strong
@@ -73,6 +76,7 @@ Pre-build binaries are generated with the following security / good coding pract
 
 - Arm® CPUs:
     - Arm® Cortex®-A processor family using Arm® Neon™ technology
+    - Arm® Neoverse® processor family
     - Arm® Cortex®-R processor family with Armv8-R AArch64 architecture using Arm® Neon™ technology
     - Arm® Cortex®-X1 processor using Arm® Neon™ technology
 
@@ -89,6 +93,7 @@ Pre-build binaries are generated with the following security / good coding pract
 - Android™
 - Bare Metal
 - Linux®
+- OpenBSD®
 - macOS®
 - Tizen™
 
@@ -125,6 +130,17 @@ https://lists.linaro.org/mailman3/lists/acl-dev.lists.linaro.org/
 ## License and Contributions
 
 The software is provided under MIT license. Contributions to this project are accepted under the same license.
+
+### Other Projects
+This project contains code from other projects as listed below. The original license text is included in those source files.
+
+* The OpenCL header library is licensed under Apache License, Version 2.0, which is a permissive license compatible with MIT license.
+
+* The half library is licensed under MIT license.
+
+* The libnpy library is licensed under MIT license.
+
+* The stb image library is either licensed under MIT license or is in Public Domain. It is used by this project under the terms of MIT license.
 
 <br>
 

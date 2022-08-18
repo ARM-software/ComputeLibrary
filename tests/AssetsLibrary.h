@@ -725,7 +725,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::U8:
         case DataType::QASYMM8:
         {
-            std::uniform_int_distribution<uint8_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(), std::numeric_limits<uint8_t>::max());
+            std::uniform_int_distribution<unsigned int> distribution_u8(std::numeric_limits<uint8_t>::lowest(), std::numeric_limits<uint8_t>::max());
             fill(tensor, distribution_u8, seed_offset);
             break;
         }
@@ -734,7 +734,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QASYMM8_SIGNED:
         {
-            std::uniform_int_distribution<int8_t> distribution_s8(std::numeric_limits<int8_t>::lowest(), std::numeric_limits<int8_t>::max());
+            std::uniform_int_distribution<int> distribution_s8(std::numeric_limits<int8_t>::lowest(), std::numeric_limits<int8_t>::max());
             fill(tensor, distribution_s8, seed_offset);
             break;
         }
@@ -826,20 +826,20 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
         case DataType::U8:
         case DataType::QASYMM8:
         {
-            const auto                         converted_pairs = detail::convert_range_pair<uint8_t>(excluded_range_pairs);
-            RangedUniformDistribution<uint8_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(),
-                                                               std::numeric_limits<uint8_t>::max(),
-                                                               converted_pairs);
+            const auto                          converted_pairs = detail::convert_range_pair<uint32_t>(excluded_range_pairs);
+            RangedUniformDistribution<uint32_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(),
+                                                                std::numeric_limits<uint8_t>::max(),
+                                                                converted_pairs);
             fill(tensor, distribution_u8, seed_offset);
             break;
         }
         case DataType::S8:
         case DataType::QSYMM8:
         {
-            const auto                        converted_pairs = detail::convert_range_pair<int8_t>(excluded_range_pairs);
-            RangedUniformDistribution<int8_t> distribution_s8(std::numeric_limits<int8_t>::lowest(),
-                                                              std::numeric_limits<int8_t>::max(),
-                                                              converted_pairs);
+            const auto                         converted_pairs = detail::convert_range_pair<int32_t>(excluded_range_pairs);
+            RangedUniformDistribution<int32_t> distribution_s8(std::numeric_limits<int8_t>::lowest(),
+                                                               std::numeric_limits<int8_t>::max(),
+                                                               converted_pairs);
             fill(tensor, distribution_s8, seed_offset);
             break;
         }
@@ -918,7 +918,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::QASYMM8:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<uint8_t, D>::value));
-            std::uniform_int_distribution<uint8_t> distribution_u8(low, high);
+            std::uniform_int_distribution<uint32_t> distribution_u8(low, high);
             fill(tensor, distribution_u8, seed_offset);
             break;
         }
@@ -927,7 +927,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         case DataType::QASYMM8_SIGNED:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int8_t, D>::value));
-            std::uniform_int_distribution<int8_t> distribution_s8(low, high);
+            std::uniform_int_distribution<int32_t> distribution_s8(low, high);
             fill(tensor, distribution_s8, seed_offset);
             break;
         }

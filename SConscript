@@ -31,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v22.05"
-LIBRARY_VERSION_MAJOR = 27
+VERSION = "v22.08"
+LIBRARY_VERSION_MAJOR = 28
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -369,12 +369,14 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/floor.cl',
                        'src/core/CL/cl_kernels/common/gather.cl',
                        'src/core/CL/cl_kernels/common/gemm.cl',
+                       'src/core/CL/cl_kernels/common/gemm_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/gemm_utils.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
                        'src/core/CL/cl_kernels/common/gemv.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
+                       'src/core/CL/cl_kernels/common/gemmlowp_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',
                        'src/core/CL/cl_kernels/common/instance_normalization.cl',
@@ -500,6 +502,10 @@ if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
     arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
 
+# Fixed format GEMM kernels.
+if env['experimental_fixed_format_kernels']:
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
+
 
 # Logging files
 if env["logging"]:
@@ -575,6 +581,9 @@ if env['neon']:
         attrs = get_attrs_list(env, custom_types, custom_layouts)
     else:
         attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
+
+    if env['experimental_fixed_format_kernels']:
+        attrs.append("experimental_fixed_format_kernels")
 
     # Setup data-type and data-layout files to include
     cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()

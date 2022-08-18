@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,6 +123,14 @@ CLVersion get_cl_version(const cl::Device &device);
  * @return the cl_image pitch alignment in pixels. If an error occurs, the function will return 0
  */
 size_t get_cl_image_pitch_alignment(const cl::Device &device);
+
+/** Helper function to check whether non-uniform work group is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the feature is supported
+ */
+bool get_cl_non_uniform_work_group_supported(const cl::Device &device);
 
 /** Helper function to check whether a given extension is supported
  *
@@ -252,5 +260,12 @@ bool export_weights_to_cl_image(const ITensorInfo *tensor);
  */
 void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values);
 
+/** Helper function to check whether the cl_arm_matrix_multiply extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool arm_matrix_multiply_supported(const cl::Device &device);
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

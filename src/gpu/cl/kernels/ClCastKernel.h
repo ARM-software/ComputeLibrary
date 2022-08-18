@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,7 @@ public:
      *
      *   - QSYMM8_PER_CHANNEL -> QASYMM8 (ATTENTION: it is the user's responsibility to keep track of the quantization info in the TensorInfo meta-data)
      *   - U8  -> S8, U16, S16, U32, S32, F16, F32
+     *   - S8  -> U8, U16, S16, U32, S32, F16, F32
      *   - U16 -> U8, S8, S16, U32, S32, F16, F32
      *   - S16 -> U8, S8, U16, U32, S32, F16, F32
      *   - U32 -> U8, S8, U16, S16, S32, F16, F32

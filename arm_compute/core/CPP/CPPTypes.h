@@ -127,6 +127,16 @@ public:
      * @return true of the cpu supports sve2, false otherwise
      */
     bool has_sve2() const;
+    /** Checks if the cpu model supports sme.
+     *
+     * @return true of the cpu supports sme, false otherwise
+     */
+    bool has_sme() const;
+    /** Checks if the cpu model supports sme2.
+     *
+     * @return true of the cpu supports sme2, false otherwise
+     */
+    bool has_sme2() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,

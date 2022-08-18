@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -703,7 +703,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 
     a_offset_s32[0].v *= A_OFFSET;
 
-    T_ADD_BROADCAST_X(int, M0, N0, offset_s32, a_offset_s32, offset_s32);
+    T_ELTWISE_BROADCAST_ADD_X(int, M0, N0, offset_s32, a_offset_s32, offset_s32);
 #endif // defined(A_OFFSET)
 
 #if defined(B_OFFSET)
@@ -728,7 +728,7 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 
     T_LOAD(int, 1, N0, BUFFER, biases, xo, 0, 1, 0, bias);
 
-    T_ADD_BROADCAST_X(int, M0, N0, offset_s32, bias, offset_s32);
+    T_ELTWISE_BROADCAST_ADD_X(int, M0, N0, offset_s32, bias, offset_s32);
 #endif // defined(ADD_BIAS)
 
     LOOP_UNROLLING(int, i, 0, 1, M0,
@@ -1096,17 +1096,17 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
         VEC_DATA_TYPE(DATA_TYPE, 16)
         a0 = vload16(0, matrix_a + i);
 
-        sum_row += arm_dot(a0.s0123, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.s4567, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.s89AB, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.sCDEF, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s0123, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s4567, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s89AB, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.sCDEF, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
 
         a0 = vload16(1, matrix_a + i);
 
-        sum_row += arm_dot(a0.s0123, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.s4567, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.s89AB, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
-        sum_row += arm_dot(a0.sCDEF, (VEC_DATA_TYPE(DATA_TYPE, 4))(1));
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s0123, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s4567, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.s89AB, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
+        DOT_PRODUCT4_INTEGER8(DATA_TYPE, DATA_TYPE, DATA_TYPE, a0.sCDEF, (VEC_DATA_TYPE(DATA_TYPE, 4))(1), sum_row);
     }
 
     // This for loop performs the leftover accumulations

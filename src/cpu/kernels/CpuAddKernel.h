@@ -42,9 +42,9 @@ private:
 public:
     struct AddKernel
     {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        AddKernelPtr                 ukernel;
+        const char                                  *name;
+        const CpuAddKernelDataTypeISASelectorDataPtr is_selected;
+        AddKernelPtr                                 ukernel;
     };
 
     CpuAddKernel() = default;
@@ -91,10 +91,16 @@ public:
 
     static const std::vector<AddKernel> &get_available_kernels();
 
+    bool get_can_interpret_inputs_as_1d_array()
+    {
+        return _can_interpret_inputs_as_1d_array;
+    }
+
 private:
     ConvertPolicy _policy{};
     AddKernelPtr  _run_method{ nullptr };
     std::string   _name{};
+    bool          _can_interpret_inputs_as_1d_array{ false };
 };
 } // namespace kernels
 } // namespace cpu

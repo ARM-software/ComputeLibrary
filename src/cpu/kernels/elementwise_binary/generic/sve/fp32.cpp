@@ -31,7 +31,7 @@ namespace cpu
 template <ArithmeticOperation op>
 void sve_fp32_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithmetic_op<op, float32_t>(in1, in2, out, window);
+    return elementwise_arithmetic_op<float32_t>(in1, in2, out, op, window);
 }
 
 template void sve_fp32_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -46,7 +46,7 @@ template void sve_fp32_elementwise_binary<ArithmeticOperation::PRELU>(const ITen
 template <ComparisonOperation op>
 void sve_fp32_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comparison_op<op, float>(in1, in2, out, window);
+    return elementwise_comparison_op<float>(in1, in2, out, op, window);
 }
 template void sve_fp32_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_fp32_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);

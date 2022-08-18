@@ -89,12 +89,12 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Enable Logging", False),
-    EnumVariable("arch", "Target Architecture", "armv7a",
+    EnumVariable("arch", "Target Architecture. The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.", "armv7a",
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
-    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
+    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows")),
+    EnumVariable("build", "Either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
@@ -102,23 +102,36 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
-    BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", True),
-    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled", False),
-    BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
-    BoolVariable("openmp", "Enable OpenMP backend", False),
+    BoolVariable("embed_kernels", "Enable if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate '.cl' / '.cs' files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to './cl_kernels'.", True),
+    BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary using zlib. Useful for reducing the binary size. embed_kernels should be enabled", False),
+    BoolVariable("set_soname", "If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects. (requires SCons 2.4 or above)", False),
+    BoolVariable("openmp", "Enable OpenMP backend. Only works when building with g++ and not clang++", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     BoolVariable("high_priority", "Generate a library containing only the high priority operators", False),
     PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
-    PathVariable("external_tests_dir", "Add examples, benchmarks and tests to the tests suite", "", PathVariable.PathAccept),
+    PathVariable("external_tests_dir", """Add examples, benchmarks and tests to the tests suite from an external path. In order to use this option, the external tests directory must have the following structure: 
+    EXTERNAL_TESTS_DIR:
+    └── tests
+        ├── benchmark
+        │   ├── CL
+        │   ├── datasets
+        │   ├── fixtures
+        │   └── Neon
+        └── validation
+            ├── CL
+            ├── datasets
+            ├── fixtures
+            └── Neon\n""", "", PathVariable.PathAccept),
     BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
+    BoolVariable("experimental_fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
-    ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc.", ""),
-    ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; if left empty, SCons only uses toolchain_prefix; this is for when the compiler prefixes are different from that of the linkers, archivers etc.", ""),
+    ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc. If unspecified, use default(auto) prefixes; if passed an empty string '' prefixes would be disabled", "auto"),
+    ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; this is for when the compiler prefixes are different from that of the linkers, archivers etc. If unspecified, this is the same as toolchain_prefix; if passed an empty string '' prefixes would be disabled", "auto"),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
@@ -167,6 +180,9 @@ Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
 
+if 'armv7a' in env['arch'] and env['os'] == 'android':
+    print("WARNING: armv7a on Android is no longer maintained")
+
 if env['linker_script'] and env['os'] != 'bare_metal':
     print("Linker script is only supported for bare_metal builds")
     Exit(1)
@@ -201,14 +217,14 @@ if not env['exceptions']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
-env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
+env.Append(CXXFLAGS = ['-DARCH_ARM',
          '-Wextra','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-Woverloaded-virtual', '-Wformat-security',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 if not 'windows' in env['os']:
-    env.Append(CXXFLAGS = ['-std=c++14', '-pedantic' ])
+    env.Append(CXXFLAGS = ['-Wall','-std=c++14', '-pedantic' ])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
@@ -290,6 +306,17 @@ else: # NONE "multi_isa" builds
             env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
         else:
             env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif 'v8.6-a' in env['arch']:
+        if 'armv8.6-a-sve2' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve2'])
+        elif 'armv8.6-a-sve' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])
+        elif 'armv8.6-a' == env['arch']:
+            env.Append(CXXFLAGS = ['-march=armv8.6-a'])
+
+        env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
+        if "disable_mmla_fp" not in env['custom_options']:
+            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
     elif 'v8' in env['arch']:
         # Preserve the V8 archs for non-multi-ISA variants
         if 'sve2' in env['arch']:
@@ -303,10 +330,6 @@ else: # NONE "multi_isa" builds
         else:
             env.Append(CXXFLAGS = ['-march=armv8-a'])
 
-        if 'v8.6-a' in env['arch']:
-            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16'])
-            if "disable_mmla_fp" not in env['custom_options']:
-                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
         if 'v8.' in env['arch']:
             env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
 
@@ -322,47 +345,57 @@ else: # NONE "multi_isa" builds
 # Define toolchain
 # The reason why we distinguish toolchain_prefix from compiler_prefix is for cases where the linkers/archivers use a
 # different prefix than the compilers. An example is the NDK r20 toolchain
-toolchain_prefix = ""
+auto_toolchain_prefix = ""
 if 'x86' not in env['arch']:
     if env['estate'] == '32':
         if env['os'] == 'linux':
-            toolchain_prefix = "arm-linux-gnueabihf-" if 'v7' in env['arch'] else "armv8l-linux-gnueabihf-"
+            auto_toolchain_prefix = "arm-linux-gnueabihf-" if 'v7' in env['arch'] else "armv8l-linux-gnueabihf-"
         elif env['os'] == 'bare_metal':
-            toolchain_prefix = "arm-eabi-"
+            auto_toolchain_prefix = "arm-eabi-"
         elif env['os'] == 'android':
-            toolchain_prefix = "arm-linux-androideabi-"
+            auto_toolchain_prefix = "arm-linux-androideabi-"
         elif env['os'] == 'tizen':
-            toolchain_prefix = "armv7l-tizen-linux-gnueabi-"
+            auto_toolchain_prefix = "armv7l-tizen-linux-gnueabi-"
     elif env['estate'] == '64' and 'v8' in env['arch']:
         if env['os'] == 'linux':
-            toolchain_prefix = "aarch64-linux-gnu-"
+            auto_toolchain_prefix = "aarch64-linux-gnu-"
         elif env['os'] == 'bare_metal':
-            toolchain_prefix = "aarch64-elf-"
+            auto_toolchain_prefix = "aarch64-elf-"
         elif env['os'] == 'android':
-            toolchain_prefix = "aarch64-linux-android-"
+            auto_toolchain_prefix = "aarch64-linux-android-"
         elif env['os'] == 'tizen':
-            toolchain_prefix = "aarch64-tizen-linux-gnu-"
+            auto_toolchain_prefix = "aarch64-tizen-linux-gnu-"
 
-if env['build'] == 'native':
+if env['build'] == 'native' or env["toolchain_prefix"] == "":
     toolchain_prefix = ""
-
-if env["toolchain_prefix"] != "":
+elif env["toolchain_prefix"] == "auto":
+    toolchain_prefix = auto_toolchain_prefix
+else:
     toolchain_prefix = env["toolchain_prefix"]
 
-compiler_prefix = toolchain_prefix
-if env["compiler_prefix"] != "":
+if env['build'] == 'native' or env["compiler_prefix"] == "":
+    compiler_prefix = ""
+elif env["compiler_prefix"] == "auto":
+    compiler_prefix = toolchain_prefix
+else:
     compiler_prefix = env["compiler_prefix"]
 
 env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
 env['CXX'] = env['compiler_cache']+ " " + compiler_prefix + cpp_compiler
 env['LD'] = toolchain_prefix + "ld"
 env['AS'] = toolchain_prefix + "as"
+
 if env['os'] == 'windows':
-    env['AR'] = "LIB"
+    env['AR'] = "llvm-lib"
+    env['RANLIB'] = "llvm-ranlib"
 else:
     env['AR'] = toolchain_prefix + "ar"
+
 env['RANLIB'] = toolchain_prefix + "ranlib"
 
+print("Using compilers:")
+print("CC", env['CC'])
+print("CXX", env['CXX'])
 
 if not GetOption("help"):
     try:
@@ -393,12 +426,21 @@ if not GetOption("help"):
         if not version_at_least(compiler_ver, '7.0.0') and env['os'] == 'bare_metal':
             env.Append(LINKFLAGS = ['-fstack-protector-strong'])
 
-    # For NDK >= r21, clang 9 or above is used
-    if env['os'] == 'android' and version_at_least(compiler_ver, '9.0.0'):
-        env['ndk_above_r21'] = True
+    # Add Android NDK toolchain specific flags
+    if 'clang++' in cpp_compiler and env['os'] == 'android':
+        # For NDK >= r21, clang 9 or above is used
+        if version_at_least(compiler_ver, '9.0.0'):
+            env['ndk_above_r21'] = True
 
-        if env['openmp']:
-            env.Append(LINKFLAGS = ['-static-openmp'])
+            if env['openmp']:
+                env.Append(LINKFLAGS = ['-static-openmp'])
+
+        # For NDK >= r23, clang 12 or above is used. This condition detects NDK < r23
+        if not version_at_least(compiler_ver, '12.0.0'):
+            # System assembler is deprecated and integrated assembler is preferred since r23.
+            # However integrated assembler has always been suppressed for NDK < r23.
+            # Thus for backward compatibility, we include this flag only for NDK < r23
+            env.Append(CXXFLAGS = ['-no-integrated-as'])
 
 if env['high_priority'] and env['build_config']:
     print("The high priority library cannot be built in conjunction with a user-specified build configuration")
@@ -423,10 +465,10 @@ else:
 env = update_data_type_layout_flags(env, data_types, data_layouts)
 
 if env['standalone']:
-    if not 'windows' in env['os']: 
+    if not 'windows' in env['os']:
         env.Append(CXXFLAGS = ['-fPIC'])
-    env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
-
+        env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+       
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
 
@@ -464,7 +506,7 @@ if env['opencl']:
         print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)
 
-if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
+if env["os"] not in ["windows","android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
 if env['os'] == 'openbsd':
@@ -480,7 +522,12 @@ if env['opencl']:
 
 if env['debug']:
     env['asserts'] = True
-    env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
+    else:
+        env.Append(CXXFLAGS = ['-Z7','-MTd','-fms-compatibility','-fdelayed-template-parsing'])
+        env.Append(LINKFLAGS = ['-DEBUG'])
+ 
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
     if not 'windows' in env['os']:
@@ -488,10 +535,11 @@ else:
     else:
         # on windows we use clang-cl which does not support the option -O3
         env.Append(CXXFLAGS = ['-O2'])
- 
+
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
-    env.Append(CXXFLAGS = ['-fstack-protector-strong'])
+    if not 'windows' in env['os']:
+        env.Append(CXXFLAGS = ['-fstack-protector-strong'])
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])

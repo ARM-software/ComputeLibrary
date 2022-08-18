@@ -39,6 +39,8 @@ Several builds of the library are available using various configurations:
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
 
+@warning From 22.08 release, armv7a with Android build will no longer be tested or maintained.
+
 @b Minimum toolchains requirements are shown below:
 
 <table>
@@ -59,11 +61,9 @@ Several builds of the library are available using various configurations:
   <td>armv8.2-a-sve
   <td>gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
 <tr>
-  <td rowspan="3">Android
-  <td>armv7a
-  <td rowspan="3">NDK r18b
-  <tr>
+  <td rowspan="2">Android
   <td>armv8a
+  <td rowspan="2">NDK r18b
   <tr>
   <td>armv8.2-a
 <tr>
@@ -78,8 +78,8 @@ Please create an issue on <a href="https://github.com/ARM-software/ComputeLibrar
 
 In order to facilitate the work of the support team please provide the build information of the library you are using. To get the version of the library you are using simply run:
 
-    $ strings android-armv7a-cl-asserts/libarm_compute.so | grep arm_compute_version
-    arm_compute_version=v16.12 Build options: {'embed_kernels': '1', 'opencl': '1', 'arch': 'armv7a', 'neon': '0', 'asserts': '1', 'debug': '0', 'os': 'android', 'Werror': '1'} Git hash=f51a545d4ea12a9059fe4e598a092f1fd06dc858
+    $ strings android-armv8a-cl-asserts/libarm_compute.so | grep arm_compute_version
+    arm_compute_version=v16.12 Build options: {'embed_kernels': '1', 'opencl': '1', 'arch': 'armv8a', 'neon': '0', 'asserts': '1', 'debug': '0', 'os': 'android', 'Werror': '1'} Git hash=f51a545d4ea12a9059fe4e598a092f1fd06dc858
 
 @section S0_2_prebuilt_binaries Pre-built binaries
 
@@ -91,7 +91,6 @@ These binaries have been built using the following toolchains:
             - Linux armv8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
             - Linux armv8.2-a (multi-ISA binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
             - Linux armv8.2-a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
-            - Android armv7a: clang++ / libc++ NDK r20b
             - Android armv8a: clang++ / libc++ NDK r20b
             - Android armv8.2-a: clang++ / libc++ NDK r20b
 

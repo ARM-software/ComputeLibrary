@@ -55,18 +55,32 @@ Status add_tensor(ClKernelBlueprint &kernel_blueprint, ITensorInfo *tensor_info,
     return Status{};
 }
 
-Status add_kcomp_eltwise_add(ClKernelBlueprint &kernel_blueprint, const ClEltwiseAddKernelDescriptor &,
-                             ArgumentID src0_id, ArgumentID src1_id, ArgumentID &dst_id)
+Status add_kcomp_eltwise_op(ClKernelBlueprint &kernel_blueprint, const ClElementwiseKernelDescriptor &desc,
+                            ArgumentID src0_id, ArgumentID src1_id, ArgumentID &dst_id)
 {
     kernel_blueprint.impl().add_component(
-        std::make_unique<ClElementwiseAddKernelComponent>(
+        std::make_unique<ClElementwiseKernelComponent>(
             &kernel_blueprint,
+            desc,
             SharedVarLink{ src0_id, SharedVarIO::Input },
             SharedVarLink{ src1_id, SharedVarIO::Input },
             SharedVarLink{ dst_id, SharedVarIO::Output }));
 
     return Status{};
 }
+
+Status add_kcomp_floor(ClKernelBlueprint &kernel_blueprint, const ClFloorKernelDescriptor &,
+                       ArgumentID src_id, ArgumentID &dst_id)
+{
+    kernel_blueprint.impl().add_component(
+        std::make_unique<ClFloorKernelComponent>(
+            &kernel_blueprint,
+            SharedVarLink{ src_id, SharedVarIO::Input },
+            SharedVarLink{ dst_id, SharedVarIO::Output }));
+
+    return Status{};
+}
+
 Status add_kcomp_activation(ClKernelBlueprint &, const ClActivationKernelDescriptor &, ArgumentID, ArgumentID &)
 {
     return Status{};

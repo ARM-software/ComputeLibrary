@@ -176,17 +176,18 @@ Operator add_op_conv2d(OperatorGraph &graph, const Conv2dDescriptor &desc, OpTen
  */
 void force_conv2d_method(OperatorGraph &graph, Operator conv2d, ConvolutionMethod method);
 
-/** Descriptor for Addition operation
+/** Descriptor for Elementwise binary operation
  *
  */
-struct AddDescriptor
+struct ElementwiseDescriptor
 {
     /* TOSA compliant attribute parameters start */
     /* TOSA compliant attribute parameters end */
     /* Non-TOSA compliant attribute parameters start */
+    ArithmeticOperation op;
     /* Non-TOSA compliant attribute parameters end */
 };
-/** Add op Add to @p graph, and optionally describes fusion through passing of intermediate @ref OpTensor s
+/** Add op Elementwise to @p graph, and optionally describes fusion through passing of intermediate @ref OpTensor s
  *
  * @param[in,out] graph OperatorGraph where the operator is added to
  * @param[in]     desc  Operator descriptor
@@ -196,12 +197,34 @@ struct AddDescriptor
  *
  * @return Operator
  */
-Operator add_op_elementwise_add(OperatorGraph &graph, const AddDescriptor &desc, OpTensor lhs, OpTensor rhs, OpTensor dst);
+Operator add_op_elementwise_op(OperatorGraph &graph, const ElementwiseDescriptor &desc, OpTensor lhs, OpTensor rhs, OpTensor dst);
+
+/** Descriptor for Floor operation
+ *
+ */
+struct FloorDescriptor
+{
+    /* TOSA compliant attribute parameters start */
+    /* TOSA compliant attribute parameters end */
+    /* Non-TOSA compliant attribute parameters start */
+    /* Non-TOSA compliant attribute parameters end */
+};
+/** Add op Floor to @p graph, and optionally describes fusion through passing of intermediate @ref OpTensor s
+ *
+ * @param[in,out] graph OperatorGraph where the operator is added to
+ * @param[in]     desc  Operator descriptor
+ * @param[in]     src   Source OpTensor
+ * @param[in]     dst   Destination OpTensor
+ *
+ * @return Operator
+ */
+Operator add_op_floor(OperatorGraph &graph, const FloorDescriptor &desc, OpTensor src, OpTensor dst);
 
 bool operator==(const OpTensor &t0, const OpTensor &t1);
 bool operator==(const Padding2D &pad0, const Padding2D &pad1);
 bool operator==(const Conv2dDescriptor &conv2d0, const Conv2dDescriptor &conv2d1);
-bool operator==(const AddDescriptor &, const AddDescriptor &);
+bool operator==(const ElementwiseDescriptor &, const ElementwiseDescriptor &);
+bool operator==(const FloorDescriptor &, const FloorDescriptor &);
 
 } // namespace dynamic_fusion
 } // namespace experimental

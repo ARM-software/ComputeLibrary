@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -342,7 +342,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToS32Fixture<int16_t>, frame
 }
 TEST_SUITE_END() // S16_to_S32
 
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
 TEST_SUITE(BFLOAT16_to_F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<bfloat16>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerBF16toF32Dataset),
                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
@@ -362,7 +362,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToBF16Fixture<float>, framew
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // F32_to_BFLOAT16
-#endif           /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif           /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16_to_QASYMM8)

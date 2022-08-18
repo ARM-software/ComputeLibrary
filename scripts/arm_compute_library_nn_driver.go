@@ -11,6 +11,25 @@ import (
     "strings"
 )
 
+func isVersionAtLeast(version_name string, target_version int) bool {
+    name_map := map[string]int {
+    "L": 5, "5": 5,
+    "M": 6, "6": 6,
+    "N": 7, "7": 7,
+    "O": 8, "8": 8,
+    "P": 9, "9": 9,
+    "Q": 10, "10": 10,
+    "R": 11, "11": 11,
+    "S": 12, "12": 12,
+    "T": 13, "13": 13,
+    }
+    if _, ok := name_map[version_name]; ok {
+        return name_map[version_name] >= target_version
+    } else {
+        return false
+    }
+}
+
 func globalFlags(ctx android.BaseContext) []string {
     var cppflags []string
 
@@ -28,6 +47,12 @@ func globalFlags(ctx android.BaseContext) []string {
           cppflags = append(cppflags, "-DARM_COMPUTE_ENABLE_FP16")
         }
       }
+    }
+
+    // Since Android T, the underlying NDK stops supporting system assembler like GAS, in favor of integrated assembler
+    // However for Android < Android T we still want to suppress integrated assembler for backward compatibility
+    if ! isVersionAtLeast(ctx.AConfig().PlatformVersionName(), 13) {
+        cppflags = append(cppflags, "-no-integrated-as")
     }
 
     data_types := strings.Split(ctx.AConfig().GetenvWithDefault("COMPUTE_LIB_DATA_TYPE", "ALL"), ",")

@@ -44,6 +44,7 @@
 
 #define GPU_ARCH_MIDGARD 0x100
 #define GPU_ARCH_BIFROST 0x200
+#define GPU_ARCH_VALHALL 0x300
 
 /** Concatenate two inputs.
  *

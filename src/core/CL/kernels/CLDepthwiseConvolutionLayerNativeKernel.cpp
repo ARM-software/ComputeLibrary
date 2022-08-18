@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -211,8 +211,25 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
         arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(weights->info());
     }
 
-    build_opts.add_option("-cl-fast-relaxed-math");
-    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(conv_info.act_info.activation())));
+    // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324  
+    const GPUTarget gpu_target    = get_target();
+    const auto      act_function  = conv_info.act_info.activation();
+    const auto      dst_data_type = _output->info()->data_type();
+
+    if((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
+       && (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU || act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+       && (dst_data_type == DataType::F32 || dst_data_type == DataType::F16))
+    {
+        // -cl-fast-relaxed-math also sets -cl-finite-math-only and -cl-unsafe-math-optimizations
+        // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
+        build_opts.add_option("-cl-unsafe-math-optimizations");
+    }
+    else
+    {
+        build_opts.add_option("-cl-fast-relaxed-math");
+    }
+
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_function)));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(conv_info.depth_multiplier));
     build_opts.add_option("-DSRC_TENSOR_TYPE=BUFFER");
     // Note: SRC_DATA_TYPE must have the same data type of WEI_DATA_TYPE. In quantized, we could
@@ -220,7 +237,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     // only works when both have same data type, we have to change the offset to take into account this aspect
     build_opts.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     build_opts.add_option("-DDST_TENSOR_TYPE=BUFFER");
-    build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(_output->info()->data_type()));
+    build_opts.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
     build_opts.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
     build_opts.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(_weights->info()->dimension(1)));
     build_opts.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(_weights->info()->dimension(2)));

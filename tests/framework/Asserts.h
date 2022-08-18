@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,8 @@
 #include <sstream>
 #include <type_traits>
 
+#include "utils/TypePrinter.h"
+
 namespace arm_compute
 {
 namespace test
@@ -40,6 +42,11 @@ namespace framework
 inline int make_printable(int8_t value)
 {
     return value;
+}
+
+inline std::string make_printable(const arm_compute::WeightFormat wf)
+{
+    return arm_compute::to_string(wf);
 }
 
 inline unsigned int make_printable(uint8_t value)

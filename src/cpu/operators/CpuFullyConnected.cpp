@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ std::pair<PixelValue, PixelValue> get_quantized_asymmetric_output_min_max(const 
 {
     PixelValue type_min{};
     PixelValue type_max{};
-    std::tie(type_min, type_max) = get_min_max(data_type);
+    std::tie(type_min, type_max)         = get_min_max(data_type);
     const UniformQuantizationInfo q_unif = q_info.uniform();
 
     if(act_info.enabled())
@@ -162,8 +162,9 @@ CpuFullyConnected::CpuFullyConnected()
       _is_fc_after_conv(false),
       _is_quantized_asymmetric(false),
       _is_prepared(false),
-      _enable_fast_math(false)
-
+      _enable_fast_math(false),
+      _fixed_format(false),
+      _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
 {
 }
 
@@ -199,6 +200,8 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
         GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
         gemm_info.set_activation_info(act);
         gemm_info.set_fast_math(_enable_fast_math);
+        gemm_info.set_fixed_format(_fixed_format);
+        gemm_info.set_weight_format(_weight_format);
         _mm_gemm = std::make_unique<CpuGemm>();
         _mm_gemm->configure(src, weights, biases, dst, 1.f, 1.0f, gemm_info);
     }
@@ -229,7 +232,7 @@ void CpuFullyConnected::configure_fc_fc(const ITensorInfo *src, const ITensorInf
 }
 
 void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst,
-                                  FullyConnectedLayerInfo fc_info)
+                                  FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
@@ -248,6 +251,8 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     _is_prepared              = false;
     _trans_weights_idx        = AuxTensorIdx::Count;
     _enable_fast_math         = fc_info.enable_fast_math;
+    _fixed_format             = weights_info.weight_format() != WeightFormat::UNSPECIFIED;
+    _weight_format            = weights_info.weight_format();
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -261,9 +266,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
     if(is_batched_fc_layer)
     {
-        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3,
-                                                                                  src->tensor_shape().cend(),
-                                                                                  dst->tensor_shape().cbegin() + 1));
+        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(), dst->tensor_shape().cbegin() + 1));
     }
     else
     {
@@ -323,12 +326,10 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     {
         // Release permuted weights at the end of prepare as they are further transposed by the assembly dispatch
         // Do not release them if biases are dynamic and data type is quantized, since the weights tensor will be used for biases offset calculation
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric
-                                                                                     && biases && !(biases->are_values_constant())) ?
-                                                 MemoryLifetime::Persistent :
-                                                 MemoryLifetime::Prepare,
+        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric && biases
+                                                                                     && !(biases->are_values_constant())) ? MemoryLifetime::Persistent : MemoryLifetime::Prepare,
                                                  _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights] = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
+        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
     }
     else
     {
@@ -336,6 +337,18 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
         _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Persistent, _converted_weights.total_size());
     }
     _aux_mem[FlattenedSrc] = MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
+}
+
+Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
+                                       const ITensorInfo *biases, const ITensorInfo *dst, FullyConnectedLayerInfo fc_info, WeightsInfo weights_info)
+{
+    GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+    gemm_info.set_activation_info(fc_info.activation_info);
+    gemm_info.set_fast_math(fc_info.enable_fast_math);
+    gemm_info.set_fixed_format(weights_info.weight_format() != WeightFormat::UNSPECIFIED);
+    gemm_info.set_weight_format(weights_info.weight_format());
+
+    return CpuGemm::has_opt_impl(expected_weight_format, src, weights, biases, dst, gemm_info);
 }
 
 Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
@@ -384,9 +397,7 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
 
     if(is_batched_fc_layer)
     {
-        is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3,
-                                                                                 src->tensor_shape().cend(),
-                                                                                 dst->tensor_shape().cbegin() + 1));
+        is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(), dst->tensor_shape().cbegin() + 1));
     }
     else
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,11 @@
  */
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -40,6 +40,7 @@
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -49,7 +50,7 @@ namespace kernels
 namespace
 {
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                          const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+                          const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -80,6 +81,21 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5,
                                             "Kernel sizes other than 1x1, 3x3 or 5x5 are not supported with float data types");
+        }
+    }
+
+    if(data_layout == DataLayout::NHWC)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
+                                        "N0 can only be: 1, 2, 3, 4, 8, and 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
+                                        "K0 can only be: 1, 2, 3, 4, 8, and 16");
+        if(desc.export_weights_to_cl_image)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
+                                            "K0 can only be: 4, 8, and 16");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_weights_to_cl_image(weights),
+                                            "Export to CLImage is not supported for this weight configuration");
         }
     }
 
@@ -121,50 +137,6 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
     }
     return Status{};
 }
-
-bool export_to_cl_image_support(ITensorInfo *tensor, GPUTarget gpu_target, DataLayout data_layout)
-{
-    if(tensor->tensor_shape()[0] % 4 || (data_layout != DataLayout::NHWC))
-    {
-        return false;
-    }
-
-    // If not floating point
-    if(!is_data_type_float(tensor->data_type()))
-    {
-        return false;
-    }
-
-    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-    {
-        return false;
-    }
-
-    // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
-    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
-    {
-        return false;
-    }
-
-    // Check cl image pitch alignment
-    if(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
-    {
-        return false;
-    }
-
-    const size_t image_w     = tensor->tensor_shape()[0] / 4;
-    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
-    const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
-    const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
-
-    if(image_w > max_image_w || image_h > max_image_h)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 } // namespace
 
 ClDirectConv2dKernel::ClDirectConv2dKernel()
@@ -173,12 +145,12 @@ ClDirectConv2dKernel::ClDirectConv2dKernel()
 }
 
 void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
-                                     const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+                                     const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
     // Perform validation
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, dst, conv_info, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, dst, conv_info, act_info, desc));
 
     const int conv_stride_x = std::get<0>(conv_info.stride());
     const int conv_stride_y = std::get<1>(conv_info.stride());
@@ -208,15 +180,12 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     Window win;
     if(_data_layout == DataLayout::NHWC)
     {
-        const unsigned int vec_size = std::min(static_cast<unsigned int>(dst->tensor_shape()[0]), 4u);
-        unsigned int       num_rows = 1U;
-        if(dst->tensor_shape()[0] > 16)
-        {
-            num_rows = src->data_type() == DataType::F32 ? 2U : 4U;
-        }
+        output_shape.collapse(2U, 1U);
+        const unsigned int n0 = adjust_vec_size(desc.n0, output_shape[0]);
+        const unsigned int m0 = adjust_vec_size(desc.m0, output_shape[1]);
 
         // Create window and update padding
-        win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
+        win = calculate_max_window(output_shape, Steps(n0, m0));
     }
     else if(_data_layout == DataLayout::NCHW)
     {
@@ -233,16 +202,17 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     {
         kernel_name << "direct_convolution_nhwc";
 
-        const unsigned int n0                 = win.x().step();
-        const unsigned int m0                 = win.y().step();
-        const unsigned int k0                 = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, src->dimension(channel_idx));
-        const unsigned int partial_store_n0   = dst->dimension(channel_idx) % n0;
-        const unsigned int pad_left           = conv_info.pad_left();
-        const unsigned int pad_top            = conv_info.pad_top();
-        const bool         export_to_cl_image = export_to_cl_image_support(weights, gpu_target, _data_layout);
+        const unsigned int n0               = win.x().step();
+        const unsigned int m0               = win.y().step();
+        const unsigned int k0               = adjust_vec_size(desc.k0, src->dimension(channel_idx));
+        const unsigned int partial_store_n0 = dst->dimension(channel_idx) % n0;
+        const unsigned int pad_left         = conv_info.pad_left();
+        const unsigned int pad_top          = conv_info.pad_top();
+
+        _export_to_cl_image = desc.export_weights_to_cl_image;
 
         // Update the padding for the weights tensor if we can export to cl_image
-        if(export_to_cl_image)
+        if(_export_to_cl_image)
         {
             gemm::update_padding_for_cl_image(weights);
         }
@@ -253,12 +223,28 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
             build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(biases->data_type())));
         }
 
-        build_options.add_option("-cl-fast-relaxed-math");
+        // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324
+        const auto act_function  = act_info.activation();
+        const auto dst_data_type = dst->data_type();
+
+        if((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
+           && (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU || act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+           && (dst_data_type == DataType::F32 || dst_data_type == DataType::F16))
+        {
+            // -cl-fast-relaxed-math also sets -cl-finite-math-only and -cl-unsafe-math-optimizations
+            // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
+            build_options.add_option("-cl-unsafe-math-optimizations");
+        }
+        else
+        {
+            build_options.add_option("-cl-fast-relaxed-math");
+        }
+
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
-        build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
-        build_options.add_option_if_else(export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
+        build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
+        build_options.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
         build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
         build_options.add_option("-DWEI_DATA_TYPE=" + get_cl_type_from_data_type(weights->data_type()));
@@ -271,7 +257,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
         build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
         build_options.add_option_if((src->dimension(channel_idx) % k0) != 0, "-DLEFTOVER_LOOP");
-        build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+        build_options.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_function)));
 
         if(is_data_type_quantized(data_type))
         {
@@ -309,6 +295,8 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     }
     else
     {
+        _export_to_cl_image = false;
+
         kernel_name << "direct_convolution_nchw";
         build_options.add_option_if(biases != nullptr, std::string("-DHAS_BIAS"));
         build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(width_idx)));
@@ -377,9 +365,9 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 }
 
 Status ClDirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                      const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+                                      const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info, act_info, desc));
     return Status{};
 }
 
@@ -400,13 +388,7 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
     {
         cl::Image2D weights_cl_image;
 
-        const size_t dim_y_collapsed    = ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2), slice.y().step());
-        const bool   export_to_cl_image = export_to_cl_image_support(weights->info(), get_target(), _data_layout);
-
-        slice.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, slice.y().step()));
-        slice.set(Window::DimZ, Window::Dimension(0, dst->info()->dimension(3), 1));
-
-        if(export_to_cl_image)
+        if(_export_to_cl_image)
         {
             const size_t      image_w = weights->info()->dimension(0) / 4;
             const size_t      image_h = weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
@@ -420,7 +402,7 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
         unsigned int idx = 0;
         add_4d_tensor_nhwc_argument(idx, src);
         add_4d_tensor_nhwc_argument(idx, dst);
-        if(export_to_cl_image)
+        if(_export_to_cl_image)
         {
             _kernel.setArg(idx++, weights_cl_image);
         }

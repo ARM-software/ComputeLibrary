@@ -37,9 +37,38 @@ If there is more than one release in a month then an extra sequential number is 
 	v17.04 (First release of April 2017)
 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
-@note Starting from this release (22.05), 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
+@note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+
+v22.08 Public major release
+ - Various bug fixes.
+ - Disable unsafe FP optimizations causing accuracy issues in:
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv2dKernel \endlink
+   - \link opencl::kernels::ClDirectConv2dKernel ClDirectConv3dKernel \endlink
+   - @ref CLDepthwiseConvolutionLayerNativeKernel
+ - Add Dynamic Fusion of Elementwise Operators: Div, Floor, Add.
+ - Optimize the gemm_reshaped_rhs_nly_nt OpenCL kernel using the arm_matrix_multiply extension available for Arm® Mali™-G715 and Arm® Mali™-G615.
+ - Add support for the arm_matrix_multiply extension in the gemmlowp_mm_reshaped_only_rhs_t OpenCL kernel.
+ - Expand GPUTarget list with missing Mali™ GPUs product names: G57, G68, G78AE, G610, G510, G310.
+ - Extend the direct convolution 2d interface to configure the block size.
+ - Update ClConv2D heuristic to use direct convolution.
+ - Use official Khronos® OpenCL extensions:
+   - Add cl_khr_integer_dot_product extension support.
+   - Add support of OpenCL 3.0 non-uniform workgroup.
+ - Cpu performance optimizations:
+   - Add LUT-based implementation of Hard Swish and Leaky ReLU activation function for aarch64 build.
+   - Optimize Add layer by considering the input tensors as 1D array.
+ - Add fixed-format BF16, FP16 and FP32 Neon™ GEMM kernels to support variable weights.
+ - Add new winograd convolution kernels implementation and update the ACL \link arm_compute::cpu::CpuWinogradConv2d CpuWinogradConv2d\endlink operator.
+ - Add experimental support for native builds for Windows on Arm®.
+ - Build flag interpretation change: arch=armv8.6-a now translates to -march=armv8.6-a CXX flag instead of march=armv8.2-a + explicit selection of feature extensions.
+ - Build flag change: toolchain_prefix, compiler_prefix:
+   - Use empty string "" to suppress any prefixes.
+   - Use "auto" to use default (auto) prefixes chosen by the build script. This is the default behavior when unspecified.
+   - Any other string will be used as custom prefixes to the compiler and the rest of toolchain tools.
+   - The default behaviour when prefix is unspecified does not change, but its signifier has been changed from empty string "" to "auto".
+ - armv7a with Android build will no longer be tested or maintained.
 
 v22.05 Public major release
  - Various bug fixes.
@@ -267,7 +296,7 @@ v21.05 Public major release
    - CLThreshold
    - CLWarpAffine
    - CLWarpPerspective
- 
+
 v21.02 Public major release
  - Various bug fixes.
  - Various optimisations.

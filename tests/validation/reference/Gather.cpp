@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,22 +45,55 @@ SimpleTensor<T> gather(const SimpleTensor<T> &src, const SimpleTensor<uint32_t> 
 
     Window win;
     win.use_tensor_dimensions(dst_shape);
-    execute_window_loop(win, [&](const Coordinates & id)
+    if(indices.shape().num_dimensions() == 1u)
     {
-        Coordinates offset;
-        for(unsigned int dim = 0; dim < id.num_dimensions(); ++dim)
+        execute_window_loop(win, [&](const Coordinates & id)
         {
-            if(dim == actual_axis)
+            Coordinates offset;
+            for(unsigned int dim = 0; dim < id.num_dimensions(); ++dim)
             {
-                offset.set(dim, indices_ptr[id[dim]]);
+                if(dim == actual_axis)
+                {
+                    offset.set(dim, indices_ptr[id[dim]]);
+                }
+                else
+                {
+                    offset.set(dim, id[dim]);
+                }
             }
-            else
+            *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
+        });
+    }
+    else
+    {
+        if(actual_axis == 1)
+        {
+            win.set(Window::DimX, Window::Dimension(0, 1, 1));
+            execute_window_loop(win, [&](const Coordinates & id)
             {
-                offset.set(dim, id[dim]);
-            }
+                auto       *dst_ptr = dst(id);
+                Coordinates index_offset;
+                for(uint32_t k = 0; k < indices.shape().num_dimensions(); ++k)
+                {
+                    index_offset.set(k, id[k + 1]);
+                }
+                const uint32_t row = *reinterpret_cast<const uint32_t *>(indices(index_offset));
+                Coordinates    src_offset;
+                src_offset.set(0, 0);
+                src_offset.set(1, row);
+                for(uint32_t j = 2; j < src.shape().num_dimensions(); ++j)
+                {
+                    src_offset.set(j, id[1 + indices.shape().num_dimensions() + (j - 2)]);
+                }
+                const auto in_ptr_row = src(src_offset);
+                memcpy(dst_ptr, in_ptr_row, src.shape()[0] * src.element_size());
+            });
         }
-        *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
-    });
+        else
+        {
+            ARM_COMPUTE_ERROR("Not implemented.");
+        }
+    }
 
     return dst;
 }

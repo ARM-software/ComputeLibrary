@@ -59,9 +59,13 @@ public:
 };
 
 ///// Kernel Components /////
-/** Component: Eltwise Add */
-Status add_kcomp_eltwise_add(ClKernelBlueprint &, const ClEltwiseAddKernelDescriptor &, ArgumentID src0_id,
-                             ArgumentID src1_id, ArgumentID &dst_id);
+/** Component: Eltwise Operator */
+Status add_kcomp_eltwise_op(ClKernelBlueprint &, const ClElementwiseKernelDescriptor &, ArgumentID src0_id,
+                            ArgumentID src1_id, ArgumentID &dst_id);
+
+/** Component: Floor */
+Status add_kcomp_floor(ClKernelBlueprint &, const ClFloorKernelDescriptor &, ArgumentID src_id,
+                       ArgumentID &dst_id);
 
 /** Component: Activation */
 Status add_kcomp_activation(ClKernelBlueprint &, const ClActivationKernelDescriptor &, ArgumentID src_id, ArgumentID &dst_id);

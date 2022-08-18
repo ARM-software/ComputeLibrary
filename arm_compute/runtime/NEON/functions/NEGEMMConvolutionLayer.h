@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,65 @@ public:
                            const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
                            bool enable_fast_math = false, unsigned int num_groups = 1);
 
+    /** Static function to check if there is an optimized version of
+     * GEMM available for the input parameters.
+     *
+     * The method is intended to be used to find out the optimal
+     * memory layout to be used for the weights tensor when running
+     * variable weights execution.
+     *
+     * The user can query the database of optimised kernels in
+     * arm_gemm by specifying one of the enumerations of
+     * arm_compute::WeightFormat in the weight_format field of the input
+     * parameter weights_info. In case of success, the method
+     * writes the expected format in the output parameter
+     * expected_weight_format. The expected_weight_format can than be
+     * used in the configure method of the class for retrieving the
+     * best optimal kernel.
+     *
+     * Use case one - query for a specific format:
+     *
+     *     WeightInfo weights_info(..., arm_compute::WeightFormat::OHWIo4, ...); // Set the value of the input query.
+     *     if (NEGEMMConvolutionlayer::has_opt_impl(WeightFormat(), ...., weights_info, ...))
+     *     {
+     *       auto conv = std::unique_ptr<NEGEMMConvolutionlayer>();
+     *       conv->configure(..., weights_info, ...);  // uses the same WeightFormat the user wanted originally, OHWYo4.
+     *       conv->run(...);
+     *     }
+     *
+     * Use case two - query for any format that would be optimal for the GEMM to execute:
+     *
+     *     WeightInfo weights_info(..., arm_compute::WeightFormat::ANY, ...); // Set the value of the input query.
+     *     arm_compute::WeightFormat expected_wf;
+     *     if (NEGEMMConvolutionlayer::has_opt_impl(expected_wf, ...., weights_info, ...))
+     *     {
+     *       auto conv = std::unique_ptr<NEGEMMConvolutionlayer>();
+     *       // ... code to convert the layout of the weights tensor to the layout returned by has_opt_impl
+     *       WeightInfo new_weights_info(..., expected_wf, ...); // Set the value of the WeightFormat returned by has_opt_impl.
+     *       conv->configure(..., new_weights_info, ...);
+     *       conv->run(...);
+     *     }
+     *
+     * Notice that a GEMM configured with a WeightFormat other than
+     * UNSPECIFIED will run GEMM with variable weights mode.
+     *
+     * @param[out] expected_weight_format The arm_compute::WeightFormat expected by the kernel.
+     * @param[in]  src                    Source tensor info.
+     * @param[in]  weights                Weights tensor info.
+     * @param[in]  biases                 Biases tensor info. Shared biases supported.
+     * @param[in]  dst                    Destination tensor info.
+     * @param[in]  conv_info              Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  weights_info           (optional) Specifies additional configuration parameters for the weights of the GEMM computation.
+     * @param[in]  dilation               (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info               (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported. And no activation (i.e. Linear) which is the default value.
+     * @param[in]  enable_fast_math       (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *
+     * @return a Status
+     */
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                               const PadStrideInfo &conv_info,
+                               const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
+                               bool enable_fast_math = false);
     // Inherited methods overridden:
     void run() override;
     void prepare() override;

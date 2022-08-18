@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -169,9 +169,15 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, K0, a);
             TILE(WEI_DATA_TYPE, N0, K0, b);
 
+            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
+            })
+
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
@@ -199,9 +205,15 @@ __kernel void direct_convolution_nhwc(
             TILE(SRC_DATA_TYPE, M0, 1, a);
             TILE(WEI_DATA_TYPE, N0, 1, b);
 
+            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = ZERO_VALUE;
+            })
+
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
             })
 
             // Load tile from the src tensor
@@ -233,7 +245,7 @@ __kernel void direct_convolution_nhwc(
     T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 1, 0, bias0);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
+    T_ELTWISE_BROADCAST_ADD_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
 
 #endif // HAS_BIAS
 

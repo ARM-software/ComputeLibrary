@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,8 @@ enum class CLVersion
     CL10,   /* the OpenCL 1.0 */
     CL11,   /* the OpenCL 1.1 */
     CL12,   /* the OpenCL 1.2 */
-    CL20,   /* the OpenCL 2.0 and above */
+    CL20,   /* the OpenCL 2.x */
+    CL30,   /* the OpenCL 3.x */
     UNKNOWN /* unkown version */
 };
 
@@ -81,7 +82,7 @@ enum CLKernelType
     UNKNOWN,     /**< Unknown CL kernel type */
     DEPTHWISE,   /**< Depthwise CL kernel type */
     DIRECT,      /**< Direct Convolution CL kernel type */
-    ELEMENTWISE, /**< Elementeise CL kernel type */
+    ELEMENTWISE, /**< Elementwise CL kernel type */
     GEMM,        /**< GEMM CL kernel type */
     POOL,        /**< Pool CL kernel type */
     WINOGRAD     /**< Winograd CL kernel type */

@@ -23,7 +23,8 @@
             },
             "armv8.6-a": {
                 "cxxflags": ["-march=armv8.6-a+fp16"],
-                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16"]
+                "cppdefines": ["ARM_COMPUTE_ENABLE_FP16", "ARM_COMPUTE_ENABLE_BF16",
+                               "ARM_COMPUTE_ENABLE_I8MM"]
             },
             "armv8.6-a-sve": {
                 "cxxflags": ["-march=armv8.6-a+sve+fp16+dotprod"],

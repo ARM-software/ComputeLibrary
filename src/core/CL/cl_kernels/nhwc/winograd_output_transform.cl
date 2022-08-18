@@ -61,7 +61,6 @@
  * @param[in]  _ISRC_HEIGHT                      The source tensor's height
  * @param[in]  _IDST_WIDTH                       The destination tensor's width
  * @param[in]  _IDST_HEIGHT                      The destination tensor's height
- * @param[in]  _INUM_TILES_X                     The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_2x2_7x7_nhwc(
     TENSOR4D(src, BUFFER),
@@ -72,15 +71,14 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
     int       dst_size,
     const int _ISRC_HEIGHT,
     const int _IDST_WIDTH,
-    const int _IDST_HEIGHT,
-    const int _INUM_TILES_X)
+    const int _IDST_HEIGHT)
 {
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
     const int bout = GET_SPATIAL_IDX(2, 1, 0);  // BATCH SIZE IDX
 
-    int x_out = (mout % _INUM_TILES_X) * OUTPUT_TILE_W;
-    int y_out = (mout / _INUM_TILES_X) * OUTPUT_TILE_H;
+    int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
+    int y_out = (mout / NUM_TILES_X) * OUTPUT_TILE_H;
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     TILE(DATA_TYPE, 8, N0, in);
@@ -113,7 +111,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
-    T_ADD_BROADCAST_X(DATA_TYPE, 2, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 2, N0, out, b, out);
 #endif // defined(HAS_BIAS)
 
     T_ACTIVATION(DATA_TYPE, 2, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
@@ -179,7 +177,7 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
 
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // defined(HAS_BIAS)
 
     T_ACTIVATION(DATA_TYPE, 4, N0, ACTIVATION_TYPE, A_VAL, B_VAL, out, out);
@@ -240,7 +238,6 @@ __kernel void winograd_output_transform_2x2_7x7_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TENSOR4D(src, BUFFER),
@@ -251,8 +248,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
@@ -291,7 +287,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -378,7 +374,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 16, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -439,7 +435,6 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x4_5x5_nhwc(
     TENSOR4D(src, BUFFER),
@@ -450,8 +445,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     const int cout = GET_SPATIAL_IDX(0, N0, 0); // OFM
     const int mout = GET_SPATIAL_IDX(1, 1, 0);  // WINOGRAD OUTPUT TILES
@@ -494,7 +488,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 4, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 4, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -592,7 +586,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     T_LOAD(DATA_TYPE, 1, N0, BUFFER, bias, cout, 0, 1, 0, b);
 
     // c = c + bias[broadcasted]
-    T_ADD_BROADCAST_X(DATA_TYPE, 16, N0, out, b, out);
+    T_ELTWISE_BROADCAST_ADD_X(DATA_TYPE, 16, N0, out, b, out);
 #endif // HAS_BIAS
 
     int x_out = (mout % NUM_TILES_X) * OUTPUT_TILE_W;
@@ -656,7 +650,6 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_2x1_7x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -667,8 +660,7 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -699,8 +691,7 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_2X1_7X1_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 2
@@ -739,7 +730,6 @@ __kernel void winograd_output_transform_2x1_7x1_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x1_3x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -750,8 +740,7 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -782,8 +771,7 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_3X1_NHWC)
 
@@ -820,7 +808,6 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_4x1_5x1_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -831,8 +818,7 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -863,8 +849,7 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_4X1_5X1_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4
@@ -905,7 +890,6 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x2_1x7_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -916,8 +900,7 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_2x2_7x7_nhwc(src_ptr,
                                            src_stride_x,
@@ -948,8 +931,7 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X2_1X7_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 2
@@ -988,7 +970,6 @@ __kernel void winograd_output_transform_1x2_1x7_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x4_1x3_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -999,8 +980,7 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_4x4_3x3_nhwc(src_ptr,
                                            src_stride_x,
@@ -1031,8 +1011,7 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X3_NHWC)
 
@@ -1069,7 +1048,6 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
  * @param[in]  SRC_HEIGHT                        The source tensor's height
  * @param[in]  DST_WIDTH                         The destination tensor's width
  * @param[in]  DST_HEIGHT                        The destination tensor's height
- * @param[in]  NUM_TILES_X                       The number of tiles along the X direction
  */
 __kernel void winograd_output_transform_1x4_1x5_nhwc(
     TENSOR4D_DECLARATION(src),
@@ -1080,8 +1058,7 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
     int       dst_size,
     const int SRC_HEIGHT,
     const int DST_WIDTH,
-    const int DST_HEIGHT,
-    const int NUM_TILES_X)
+    const int DST_HEIGHT)
 {
     winograd_output_transform_4x4_5x5_nhwc(src_ptr,
                                            src_stride_x,
@@ -1112,8 +1089,7 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            dst_size,
                                            SRC_HEIGHT,
                                            DST_WIDTH,
-                                           DST_HEIGHT,
-                                           NUM_TILES_X);
+                                           DST_HEIGHT);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_1X4_1X5_NHWC)
 #endif // defined(VEC_SIZE) && VEC_SIZE == 4

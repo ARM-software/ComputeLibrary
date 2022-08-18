@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,19 +32,19 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
-#include "src/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
-#include "src/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
-#include "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "src/core/CL/kernels/CLIm2ColKernel.h"
-#include "src/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "src/gpu/cl/kernels/ClCastKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyNativeKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpOffsetContributionKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpOffsetContributionOutputStageKernel.h"
+#include "src/gpu/cl/kernels/ClGemmLowpReductionKernel.h"
+#include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
+#include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsKernel.h"
+#include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
+#include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
+#include "src/gpu/cl/kernels/ClIm2ColKernel.h"
+#include "src/gpu/cl/kernels/ClWeightsReshapeKernel.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
@@ -204,7 +204,11 @@ public:
             mm_gemmlowp.configure(&src0, &src1, nullptr, &tmp_dst);
 
             // Configure GEMMlowp output stage
-            mm_gemmlowp_output_stage.configure(&tmp_dst, add_bias ? &biases : nullptr, &dst, dst_multiplier, dst_shift, offset_dst);
+            GEMMLowpOutputStageInfo gemm_info{};
+            gemm_info.gemmlowp_multiplier = dst_multiplier;
+            gemm_info.gemmlowp_shift      = dst_shift;
+            gemm_info.gemmlowp_offset     = offset_dst;
+            mm_gemmlowp_output_stage.configure(&tmp_dst, add_bias ? &biases : nullptr, &dst, gemm_info);
             tmp_dst.allocator()->allocate();
             biases.allocator()->allocate();
             fill(CLAccessor(biases), 3);
@@ -392,9 +396,9 @@ private:
     CLTensor src0{}, src1{}, src2{}, dst{};
     CLTensor tmp_dst{}, biases{};
 
-    CLGEMM                                              mm_gemm{};
-    CLGEMMLowpMatrixMultiplyCore                        mm_gemmlowp{};
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint mm_gemmlowp_output_stage{};
+    CLGEMM                       mm_gemm{};
+    CLGEMMLowpMatrixMultiplyCore mm_gemmlowp{};
+    CLGEMMLowpOutputStage        mm_gemmlowp_output_stage{};
 
     size_t   M{ 7 }, N{ 3 }, K{ 5 }, B{ 1 };
     DataType data_type{ DataType::F32 };

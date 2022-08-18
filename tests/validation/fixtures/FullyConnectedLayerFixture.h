@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,12 +92,12 @@ protected:
     {
         if(_data_type == DataType::QASYMM8)
         {
-            std::uniform_int_distribution<uint8_t> distribution(0, 30);
+            std::uniform_int_distribution<uint32_t> distribution(0, 30);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::QASYMM8_SIGNED)
         {
-            std::uniform_int_distribution<int8_t> distribution(-15, 15);
+            std::uniform_int_distribution<int32_t> distribution(-15, 15);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::S32)
@@ -291,7 +291,7 @@ private:
         }
         else if(_data_type == DataType::QASYMM8)
         {
-            std::uniform_int_distribution<uint8_t> distribution(0, 30);
+            std::uniform_int_distribution<uint32_t> distribution(0, 30);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::S32)
@@ -336,7 +336,7 @@ private:
         }
         else if(_data_type == DataType::QASYMM8)
         {
-            constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+            constexpr AbsoluteTolerance<uint32_t> tolerance_qasymm8(1);
             validate(AccessorType(target), ref, tolerance_qasymm8);
         }
         else

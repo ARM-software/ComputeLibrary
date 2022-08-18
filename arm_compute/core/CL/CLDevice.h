@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -141,6 +141,32 @@ public:
     bool supported(const std::string &extension) const override
     {
         return _options.extensions.count(extension) != 0;
+    }
+
+    /** Returns whether non-uniform workgroup is supported and the build options.
+     *
+     * If the feature is supported, the appropriate build options will be
+     * appended to the specified string.
+     *
+     * @return A tuple (supported, build_options) indicating whether the feature
+     *         is supported and the corresponding build options to enable it.
+     */
+    std::tuple<bool, std::string> is_non_uniform_workgroup_supported() const
+    {
+        if(version() == CLVersion::CL30 && get_cl_non_uniform_work_group_supported(_device))
+        {
+            return {true, " -cl-std=CL3.0 "};
+        }
+        else if(version() == CLVersion::CL20)
+        {
+            return {true, " -cl-std=CL2.0 "};
+        }
+        else if(supported("cl_arm_non_uniform_work_group_size"))
+        {
+            return {true, " -cl-arm-non-uniform-work-group-size "};
+        }
+
+        return {false, ""};
     }
 
 private:

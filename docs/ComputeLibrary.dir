@@ -198,14 +198,6 @@
  *  @brief Utility scripts.
  */
 
-/** @file scripts/caffe_data_extractor.py
- *  @brief Basic script to export weights from Caffe to npy files.
- */
-
-/** @file scripts/tensorflow_data_extractor.py
- *  @brief Basic script to export weights from TensorFlow to npy files.
- */
-
 /** @dir src
  *  @brief Source code implementing all the arm_compute headers.
  */

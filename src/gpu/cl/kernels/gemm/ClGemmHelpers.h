@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,21 @@ void update_padding_for_cl_image(ITensorInfo *tensor);
  * @return Status reporting if we can use the image2d OpenCL object on the RHS reshaped matrix
  */
 Status validate_image2d_support_on_rhs(const ITensorInfo &tensor_reshaped_info, const GEMMRHSMatrixInfo &rhs_info);
+
+/** Determine if the MMUL kernels should be preferred
+ *
+ * @param[in]      m         Number of rows of the LHS matrix
+ * @param[in]      n         Number of columns of the RHS matrix
+ * @param[in]      k         Number of columns of the LHS matrix, rows of the RHS matrix
+ * @param[in]      b         Batch size
+ * @param[in]      data_type Data type FP32/FP16
+ * @param[in, out] best_m0   Suggested M0 (number of rows of the output block) for the kernel
+ * @param[in, out] best_n0   Suggested N0 (number of columns of the output block) for the kernel
+ *
+ * @return true if MMUL kernel is preferred over kernels w/o MMUL, false otherwise
+ */
+bool is_mmul_kernel_preferred(const unsigned int m, const unsigned int n, const unsigned int k, const unsigned int b,
+                              const DataType data_type, unsigned int &best_m0, unsigned int &best_n0);
 } // namespace gemm
 } // namespace kernels
 } // namespace opencl

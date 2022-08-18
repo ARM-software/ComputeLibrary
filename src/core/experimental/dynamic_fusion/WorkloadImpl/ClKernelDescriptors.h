@@ -42,14 +42,24 @@ struct ClDirectConv2dKernelDescriptor
     Conv2dDescriptor conv2d{};
 };
 
-struct ClEltwiseAddKernelDescriptor
+struct ClElementwiseKernelDescriptor
 {
-    friend bool operator==(const ClEltwiseAddKernelDescriptor &desc0, const ClEltwiseAddKernelDescriptor &desc1)
+    friend bool operator==(const ClElementwiseKernelDescriptor &desc0, const ClElementwiseKernelDescriptor &desc1)
     {
-        return desc0.add == desc1.add;
+        return desc0.eltwise == desc1.eltwise;
     }
-    AddDescriptor add{};
+    ElementwiseDescriptor eltwise{};
 };
+
+struct ClFloorKernelDescriptor
+{
+    friend bool operator==(const ClFloorKernelDescriptor &desc0, const ClFloorKernelDescriptor &desc1)
+    {
+        return desc0.floor == desc1.floor;
+    }
+    FloorDescriptor floor{};
+};
+
 struct ClActivationKernelDescriptor
 {
     friend bool operator==(const ClActivationKernelDescriptor &, const ClActivationKernelDescriptor &)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 #ifndef ARM_COMPUTE_NO_EXCEPTIONS
 #define CL_HPP_ENABLE_EXCEPTIONS
 #endif // ARM_COMPUTE_NO_EXCEPTIONS
-#define CL_TARGET_OPENCL_VERSION 200
+#define CL_TARGET_OPENCL_VERSION 300
 #define CL_HPP_TARGET_OPENCL_VERSION 110
 #define CL_HPP_MINIMUM_OPENCL_VERSION 110
 #pragma GCC diagnostic push
@@ -75,11 +75,12 @@ public:
     static CLSymbols &get();
     /** Load symbols from the given OpenCL library path.
      *
-     * @param[in] library Path to the OpenCL library.
+     * @param[in] library    Path to the OpenCL library.
+     * @param[in] use_loader Use symbol loader function loadOpenCLPointer.
      *
      * @return True if loading the library is successful.
      */
-    bool load(const std::string &library);
+    bool load(const std::string &library, bool use_loader = false);
     /** Load symbols from any of the default OpenCL library names.
      *
      * @return True if loading any library is successful.

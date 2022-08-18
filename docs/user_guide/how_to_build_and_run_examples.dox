@@ -30,213 +30,7 @@ namespace arm_compute
 @section S1_1_build_options Build options
 
 scons 2.3 or above is required to build the library.
-To see the build options available simply run ```scons -h```:
-
-        debug: Debug (yes|no)
-            default: False
-
-        asserts: Enable asserts (this flag is forced to 1 for debug=1) (yes|no)
-            default: False
-
-        logging: Logging (this flag is forced to 1 for debug=1) (yes|no)
-            default: False
-
-        arch: Target Architecture (armv7a|x86_32|x86_64|armv8a|armv8.2-a|armv8.2-a-sve|armv8.2-a-sve2|armv8.6-a|armv8.6-a-sve|armv8.6-a-sve2|armv8r64|x86)
-            default: armv7a
-
-        estate: Execution State (auto|32|64)
-            default: auto
-
-        os: Target OS (linux|android|macos|tizen|bare_metal)
-            default: linux
-
-        build: Build type (native|cross_compile|embed_only)
-            default: cross_compile
-
-        examples: Build example programs (yes|no)
-            default: True
-
-        gemm_tuner: Build gemm_tuner programs (yes|no)
-            default: True
-
-        Werror: Enable/disable the -Werror compilation flag (yes|no)
-            default: True
-
-        standalone: Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute (yes|no)
-            default: False
-
-        opencl: Enable OpenCL support (yes|no)
-            default: True
-
-        neon: Enable Arm® Neon™ support (yes|no)
-            default: False
-
-        embed_kernels: Embed OpenCL kernels in library binary (yes|no)
-            default: True
-
-        compress_kernels: Compress embedded OpenCL kernels in library binary. Note embed_kernels should be enabled as well (yes|no)
-            default: False
-
-        set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
-            default: False
-
-        openmp: Enable OpenMP backend (yes|no)
-            default: False
-
-        cppthreads: Enable C++11 threads backend (yes|no)
-            default: True
-
-        build_dir: Specify sub-folder for the build ( /path/to/build_dir )
-            default: .
-
-        install_dir: Specify sub-folder for the install ( /path/to/install_dir )
-            default:
-
-        exceptions: Enable/disable C++ exception support (yes|no)
-            default: True
-
-        linker_script: Use an external linker script ( /path/to/linker_script )
-            default:
-
-        custom_options: Custom options that can be used to turn on/off features
-            (all|none|comma-separated list of names)
-            allowed names: disable_mmla_fp
-            default: none
-
-        data_type_support: Enable a list of data types to support
-            (all|none|comma-separated list of names)
-            allowed names: qasymm8 qasymm8_signed qsymm16 fp16 fp32
-            default: all
-
-        toolchain_prefix: Override the toolchain prefix
-            default:
-
-        compiler_prefix: Override the compiler prefix
-            default:
-
-        extra_cxx_flags: Extra CXX flags to be appended to the build command
-            default:
-
-        extra_link_flags: Extra LD flags to be appended to the build command
-            default:
-
-        compiler_cache: Command to prefix to the C and C++ compiler (e.g ccache)
-            default:
-
-        specs_file: Specs file to use
-            default: rdimon.specs
-
-        benchmark_examples: Build benchmark examples programs (yes|no)
-            default: False
-
-        validate_examples: Build validate examples programs (yes|no)
-            default: False
-
-        reference_openmp: Build reference validation with openmp (yes|no)
-            default: True
-
-        validation_tests: Build validation test programs (yes|no)
-            default: False
-
-        benchmark_tests: Build benchmark test programs (yes|no)
-            default: False
-
-        test_filter: Pattern to specify the tests' filenames to be compiled
-            default: *.cpp
-
-        pmu: Enable PMU counters (yes|no)
-            default: False
-
-        mali: Enable Arm® Mali™ hardware counters (yes|no)
-            default: False
-
-        external_tests_dir: Add examples, benchmarks and tests to the tests suite from an external path ( /path/to/external_tests_dir )
-            default:
-
-        high_priority: Generate a library using only the high priority operators
-            default: False
-
-        data_layout_support: Enable a list of data layout to support
-            default: False
-
-@b debug / @b asserts:
- - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
- - With debug=0 and asserts=1: Optimisations are enabled and symbols are removed, however all the asserts are still present (This is about 20% slower than the release build)
- - With debug=0 and asserts=0: All optimisations are enable and no validation is performed, if the application misuses the library it is likely to result in a crash. (Only use this mode once you are sure your application is working as expected).
-
-@b arch: The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.
-
-@b os: Choose the operating system you are targeting: Linux, Android or bare metal.
-@note bare metal can only be used for Arm® Neon™ (not OpenCL), only static libraries get built and Neon™'s multi-threading support is disabled.
-
-@b build: you can either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.
-
-@note If you want to natively compile for 32bit on a 64bit Arm device running a 64bit OS then you will have to use cross-compile too.
-
-There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels. This might be useful if using a different build system to compile the library.
-
-In addition the option 'compress_kernels' will compress the embedded OpenCL kernel files using zlib and inject them in the library. This is useful for reducing the binary size. Note, this option is only available for Android when 'embed_kernels' is enabled.
-
-@b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue on Github).
-
-@b opencl / @b neon: Choose which SIMD technology you want to target. (Neon™ for Arm® Cortex®-A CPUs or OpenCL for Arm® Mali™ GPUs)
-
-@b embed_kernels: For OpenCL only: set embed_kernels=1 if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to "./cl_kernels".
-
-@b set_soname: Do you want to build the versioned version of the library ?
-
-If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects.
-Example:
-  libarm_compute_core.so -> libarm_compute_core.so.1.0.0
-  libarm_compute_core.so.1 -> libarm_compute_core.so.1.0.0
-  libarm_compute_core.so.1.0.0
-
-@note This options is disabled by default as it requires SCons version 2.4 or above.
-
-@b extra_cxx_flags: Custom CXX flags which will be appended to the end of the build command.
-
-@b build_dir: Build the library in a subfolder of the "build" folder. (Allows to build several configurations in parallel).
-
-@b examples: Build or not the examples
-
-@b validation_tests: Enable the build of the validation suite.
-
-@b benchmark_tests: Enable the build of the benchmark tests
-
-@b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)
-
-@b mali: Enable the collection of Arm® Mali™ hardware counters to measure execution time in benchmark tests. (Your device needs to have a Arm® Mali™ driver that supports it)
-
-@b openmp: Build in the OpenMP scheduler for Neon™.
-
-@note Only works when building with g++ not clang++
-
-@b cppthreads: Build in the C++11 scheduler for Neon™.
-
-@sa Scheduler::set
-
-@b external_tests_dir: Add examples, benchmarks and tests to the tests suite from an external path ( /path/to/external_tests_dir )
-
-In order to use this option, the external tests directory must have the following structure:
-
-    EXTERNAL_TESTS_DIR:
-    └── tests
-        ├── benchmark
-        │   ├── CL
-        │   ├── datasets
-        │   ├── fixtures
-        │   └── Neon
-        └── validation
-            ├── CL
-            ├── datasets
-            ├── fixtures
-            └── Neon
-
-Then, build the library with `external_tests_dir=<PATH_TO_EXTERNAL_TESTS_DIR>`.
-
-@b high_priority: Generate a library using only the high priority operators
-
-@b data_layout_support: Enable a list of data layout to support
+To see the build options available simply run ```scons -h```
 
 @section S1_2_linux Building for Linux
 
@@ -377,7 +171,6 @@ An example build command with SVE is:
 @section S1_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - clang++ from NDK r18b for armv7a
  - clang++ from NDK r20b for armv8a
  - clang++ from NDK r20b for armv8.2-a with FP16 support
 
@@ -387,12 +180,26 @@ For NDK r18 or older, here is a guide to <a href="https://developer.android.com/
 - Generate the 32 and/or 64 toolchains by running the following commands to your toolchain directory $MY_TOOLCHAINS:
 
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b --stl libc++ --api 21
+
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
 
 For NDK r19 or newer, you can directly <a href="https://developer.android.com/ndk/downloads">Download</a> the NDK package for your development platform, without the need to launch the make_standalone_toolchain.py script. You can find all the prebuilt binaries inside $NDK/toolchains/llvm/prebuilt/$OS_ARCH/bin/.
-@attention the building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You should copy/rename the binary removing this suffix, or - alternatively - create an alias for it.
 
+@parblock
+@attention The building script will look for a binary named "aarch64-linux-android-clang++", while the prebuilt binaries will have their API version as a suffix to their filename (e.g. "aarch64-linux-android21-clang++"). You can instruct scons to use the correct version by using a combination of the toolchain_prefix and the "CC" "CXX" environment variables.
+@attention For this particular example, you can specify:
+
+	CC=clang CXX=clang++ scons toolchain_prefix=aarch64-linux-android21-
+
+@attention or:
+
+	CC=aarch64-linux-android21-clang CXX=aarch64-linux-android21-clang++ scons toolchain_prefix=""
+
+@endparblock
+
+@parblock
 @attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
+@endparblock
 
 @note Make sure to add the toolchains to your PATH:
 
@@ -503,14 +310,14 @@ To cross-compile the library with Arm® Neon™ support for baremetal armv8a:
 
 Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
 
-@section S1_6_windows_host Building on a Windows host system
+@section S1_6_windows_host Building on a Windows host system (cross-compile)
 
 Using `scons` directly from the Windows command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
 it gets confused about Windows style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows
+@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows (cross-compile)
 
 The best and easiest option is to use
 <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>.
@@ -518,7 +325,7 @@ This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
 Ubuntu on Windows* shell and following the general guidelines given above.
 
-@subsection S1_6_2_cygwin Cygwin
+@subsection S1_6_2_cygwin Cygwin (cross-compile)
 
 If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
 can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
@@ -530,6 +337,38 @@ that can be used from the Cygwin terminal. When building for Android the
 compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
+
+@subsection S1_6_3_WoA Windows on ARM (native build)
+
+    Native builds on Windows are experimental and some features from the library interacting with the OS are missing.
+
+It's possible to build Compute Library natively on a windows system running on ARM.
+
+Windows on ARM(WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
+
+Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows.
+
+Native arm64 toolchain installation for WoA:
+- LLVM+Clang-12 which can be downloaded from: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/LLVM-12.0.0-woa64.exe
+- Arm64 VC Runtime which can be downloaded from  https://aka.ms/vs/17/release/vc_redist.arm64.exe
+
+- While full VS22 cannot be installed on WoA, we can install some components
+    -# Desktop development with C++ and all Arm64 components for Visual Studio, refer to:  https://developer.arm.com/documentation/102528/0100/Install-Visual-Studio
+    -# VS22 build tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+
+There are some additional tools we need to install to build Compute Library:
+
+- git https://git-scm.com/download/win
+- python 3 https://www.python.org/downloads/windows/
+- scons can be installed with pip install scons
+
+In order to use clang to build windows binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
+
+    cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsx86_arm64.bat"
+
+To build Compute Library type:
+
+     scons opencl=0 neon=1 os=windows examples=0 validation_tests=1 benchmark_examples=0 build=native arch=armv8a Werror=0 exceptions=1 standalone=1
 
 @section S1_7_cl_requirements OpenCL DDK Requirements
 

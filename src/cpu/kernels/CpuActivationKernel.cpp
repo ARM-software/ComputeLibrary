@@ -45,54 +45,61 @@ namespace
 {
 static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
+#ifdef __aarch64__
+    { // Neon LUT implementantion takes precedence
+        "neon_qu8_activation_lut",
+        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt); },
+        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation_lut)
+    },
+#endif // __aarch64__
     {
         "sve2_qu8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve2; },
         REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_qasymm8_activation)
     },
     {
         "sve2_qs8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve2; },
         REGISTER_QASYMM8_SIGNED_SVE2(arm_compute::cpu::sve2_qasymm8_signed_activation)
     },
     {
         "sve2_qs16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16 && data.isa.sve2; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16 && data.isa.sve2; },
         REGISTER_QSYMM16_SVE2(arm_compute::cpu::sve2_qsymm16_activation)
     },
     {
         "sve_fp16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16; },
         REGISTER_FP16_SVE(arm_compute::cpu::sve_fp16_activation)
     },
     {
         "sve_fp32_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32 && data.isa.sve; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::F32 && data.isa.sve; },
         REGISTER_FP32_SVE(arm_compute::cpu::sve_fp32_activation)
     },
     {
         "neon_fp16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_activation)
     },
     {
         "neon_fp32_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_activation)
     },
     {
         "neon_qu8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_qasymm8_activation)
     },
     {
         "neon_qs8_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_qasymm8_signed_activation)
     },
     {
         "neon_qs16_activation",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16; },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QSYMM16; },
         REGISTER_QSYMM16_NEON(arm_compute::cpu::neon_qsymm16_activation)
     },
 };
@@ -122,7 +129,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = CpuActivationKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), activation_info.activation() });
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -176,13 +183,20 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
 
-    const auto uk = CpuActivationKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), activation_info.activation() });
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
-    _act_info   = activation_info;
     _run_method = uk->ukernel;
     _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
+
+#ifdef __aarch64__
+    if(ActivationLayerInfo::is_lut_supported(activation_info.activation(), src->data_type()))
+    {
+        activation_info.init_lut(src->quantization_info().uniform(),(dst)?dst->quantization_info().uniform():src->quantization_info().uniform());
+    }
+#endif // __aarch64__
+    _act_info = activation_info;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(src, dst);

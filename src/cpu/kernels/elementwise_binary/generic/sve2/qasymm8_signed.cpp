@@ -31,7 +31,7 @@ namespace cpu
 template <ArithmeticOperation op>
 void sve2_qasymm8_signed_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithmetic_quantized_op<op, int8_t>(in1, in2, out, window);
+    return elementwise_arithmetic_quantized_op<int8_t>(in1, in2, out, op, window);
 }
 
 template void sve2_qasymm8_signed_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -46,7 +46,7 @@ template void sve2_qasymm8_signed_elementwise_binary<ArithmeticOperation::PRELU>
 template <ComparisonOperation op>
 void sve2_qasymm8_signed_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comparison_quantized_op<op, int8_t>(in1, in2, out, window);
+    return elementwise_comparison_quantized_op<int8_t>(in1, in2, out, op, window);
 }
 
 template void sve2_qasymm8_signed_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);

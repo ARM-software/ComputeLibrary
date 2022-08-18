@@ -1,6 +1,7 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Arm Limited.
+# Copyright (c) 2017-2022 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -29,8 +30,8 @@ Import('vars')
 
 # vars is imported from arm_compute:
 variables = [
-    BoolVariable("pmu", "Enable PMU counters", False),
-    BoolVariable("mali", "Enable Arm® Mali™ hardware counters", False),
+    BoolVariable("pmu", "Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)", False),
+    BoolVariable("mali", "Enable the collection of Arm® Mali™ hardware counters to measure execution time in benchmark tests. (Your device needs to have a Arm® Mali™ driver that supports it)", False),
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)

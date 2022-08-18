@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ public:
                 default:
                     return { 31.54, 4.30, 7.33 };
                 case CPUModel::V1:
-                    return { 41.44, 5.01, 5.64 };
+                    return { 59.94, 5.08, 9.83 };
                 case CPUModel::A510:
                     return { 7.82, 4.05, 3.07 };
             }
@@ -91,7 +91,7 @@ public:
                 default:
                     return { 31.15, 2.51, 5.25 };
                 case CPUModel::V1:
-                    return { 59.44, 3.18, 7.26 };
+                    return { 41.44, 5.01, 5.64 };
                 case CPUModel::A510:
                     return { 7.83, 2.53, 2.71 };
             }

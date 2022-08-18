@@ -42,7 +42,7 @@ As part of the initiative to use inclusive language, there are certain phrases a
 Please also follow this guideline when committing changes to Compute Library.
 It is worth mentioning that the term "master" is still used in some comments but only in reference to external code links that Arm has no governance on.
 
-Futhermore, starting from this release (22.05), 'master' branch will no longer be used, it has been replaced by 'main'. Please update your clone jobs accordingly.
+Futhermore, starting from release (22.05), 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 @section S5_1_coding_standards Coding standards and guidelines
 
 Best practices (as suggested by clang-tidy):
@@ -272,7 +272,7 @@ auto d = vdup_n_u8(0); // NO: It's not obvious what type this function returns.
 
         - No '*' in front of argument names
         - [in], [out] or [in,out] *in front* of arguments
-        - Skip a line between the description and params and between params and @return (If there is a return)
+        - Skip a line between the description and params and between params and \@return (If there is a return)
         - Align params names and params descriptions (Using spaces), and with a single space between the widest column and the next one.
         - Use an upper case at the beginning of the description
 

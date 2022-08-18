@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/CPP/Validate.h"
+#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/AssemblyUtils.h"
 #include "src/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
@@ -156,10 +157,17 @@ public:
                                                                                             const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     bool                             is_configured() const override;
     experimental::MemoryRequirements workspace() const override;
+    bool                             isVarWeightsKernel() const override
+    {
+        if(!_gemm_kernel_asm)
+            return false;
+        const arm_compute::WeightFormat wf = assembly_utils::map_to_arm_compute_weight_format(_gemm_kernel_asm->get_config().weight_format);
+        return wf != arm_compute::WeightFormat::UNSPECIFIED && wf != arm_compute::WeightFormat::ANY;
+    }
 
 private:
     enum AuxTensorIdx
@@ -203,12 +211,12 @@ private:
     /** Indirect buffer */
     std::unique_ptr<const TypeInput *const *, free_delete> _indirect_arg{};
     std::unique_ptr<const TypeInput *, free_delete>        _indirect_buf{};
-    std::vector<TypeInput>           _indirect_pad{};
-    arm_gemm::ConvolutionParameters  _cp{};
-    experimental::MemoryRequirements _aux_mem{ Count };
-    bool                             _B_pretranspose_required{ false };
-    bool                             _is_b_constant{ true };
-    bool                             _is_c_constant{ true };
+    std::vector<TypeInput>                                 _indirect_pad{};
+    arm_gemm::ConvolutionParameters                        _cp{};
+    experimental::MemoryRequirements                       _aux_mem{ Count };
+    bool                                                   _B_pretranspose_required{ false };
+    bool                                                   _is_b_constant{ true };
+    bool                                                   _is_c_constant{ true };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -420,6 +428,8 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
         // Pretranspose B if required
         if(_gemm_kernel_asm->B_pretranspose_required())
         {
+            // Fixed format kernels need no pretranspose.
+            ARM_COMPUTE_ERROR_ON(arm_compute::is_fixed_format(assembly_utils::map_to_arm_compute_weight_format(_gemm_kernel_asm->get_config().weight_format)));
             const int  ldb            = b->info()->strides_in_bytes().y() / sizeof(TypeInput);
             const auto in1_ptr        = reinterpret_cast<const TypeInput *>(b->buffer() + b->info()->offset_first_element_in_bytes());
             const int  multi_stride_b = b->info()->strides_in_bytes().z() / sizeof(TypeInput);
@@ -483,9 +493,51 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
     // Check if B is pre-tranposed and de-reference if not
     if(!_gemm_kernel_asm->B_is_pretransposed())
     {
-        ldb            = b->info()->strides_in_bytes().y() / sizeof(TypeInput);
-        multi_stride_b = b->info()->strides_in_bytes().z() / sizeof(TypeInput);
-        in1_ptr        = reinterpret_cast<const TypeInput *>(b->buffer() + b->info()->offset_first_element_in_bytes());
+        ldb                                = b->info()->strides_in_bytes().y() / sizeof(TypeInput);
+        multi_stride_b                     = b->info()->strides_in_bytes().z() / sizeof(TypeInput);
+        const arm_compute::WeightFormat wf = assembly_utils::map_to_arm_compute_weight_format(_gemm_kernel_asm->get_config().weight_format);
+        if(is_fixed_format(wf))
+        {
+            // The 4D tensor of dimension O'HWI' created for the
+            // OHWIo<interleave_by>i<block_by> format is in reality seen
+            // as a 2D tensor at arm_gemm level, where the rows are
+            // O'/<interleave_by> and the columns are <interleave_by> *
+            // H * W * I'.
+            ITensorInfo      *tensor_info     = b->info();
+            const DataLayout  data_layout     = tensor_info->data_layout();
+            const TensorShape tensor_shape    = tensor_info->tensor_shape();
+            const int         tensor_height   = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
+            const int         tensor_width    = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
+            int               tensor_channels = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)];
+            const int         interleave_by   = arm_compute::interleave_by(wf);
+            const int         blocked_by      = arm_compute::block_by(wf);
+            // We need to find a new stride that is distance from the data for one
+            // set of output channels to the next
+            if(ldb == tensor_channels && multi_stride_b == tensor_channels * tensor_width)
+            {
+                // In this case dimensions that are packed are height, width and channel
+                // so we need to stride it by interleave_by
+                if(tensor_channels % blocked_by != 0)
+                {
+                    // We need to pad
+                    tensor_channels = arm_gemm::iceildiv(tensor_channels, blocked_by) * blocked_by;
+                }
+                ldb = interleave_by * tensor_height * tensor_width * tensor_channels;
+            }
+            else if(multi_stride_b == 0 || (ldb == tensor_width && multi_stride_b == tensor_height * tensor_width))
+            {
+                // In this case dimension that is packed is only height
+                // so we need to stride only height by interleave_by
+                ldb = interleave_by * tensor_height;
+            }
+            else
+            {
+                // If dimensions are not packed as above error is thrown
+                // as at the moment other forms of packing are not supported
+                ARM_COMPUTE_ERROR("Unsupported packing for fixed format kernel");
+            }
+        }
+        in1_ptr = reinterpret_cast<const TypeInput *>(b->buffer() + b->info()->offset_first_element_in_bytes());
     }
 
     // If necessary, run pretranspose every time if either weights or biases are non-constant
@@ -576,7 +628,9 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
     const CPUInfo &ci          = NEScheduler::get().cpu_info();
     unsigned int   num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
+    arm_gemm::GemmConfig cfg;
+    cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fixed_format, info.fast_mode, &cfg);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput>>();
@@ -594,7 +648,9 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fast_mode);
+    arm_gemm::GemmConfig cfg;
+    cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, activation, num_threads, info.fixed_format, info.fast_mode, &cfg);
 
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();
@@ -635,7 +691,8 @@ CpuGemmAssemblyDispatch::CpuGemmAssemblyDispatch()
 {
 }
 
-Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, const AsmGemmInfo &info)
+Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
+                                             const AsmGemmInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_UNUSED(c);
@@ -643,12 +700,14 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
     Params               p           = extract_parameters(a, b, d, info);
     const CPUInfo       &ci          = NEScheduler::get().cpu_info();
     unsigned int         num_threads = NEScheduler::get().num_threads();
-
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads, info.fast_mode);
+    arm_gemm::GemmConfig cfg;
+    cfg.weight_format                           = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
+    arm_gemm::WeightFormat arm_gemm_expected_wf = assembly_utils::map_to_arm_gemm_weight_format(expected_weight_format);
+    arm_gemm::GemmArgs     args(&ci, p.M, p.N, p.K, p.sections, p.batches, p.multis, p.indirect, act, num_threads, info.fixed_format, info.fast_mode, &cfg);
     switch(a->data_type())
     {
         case DataType::F32:
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float, float, arm_gemm::Nothing>(args, {})),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float, float, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                                             "We could not find an optimized kernel for F32 input");
             break;
 #ifdef __aarch64__
@@ -656,12 +715,12 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
         case DataType::QASYMM8:
             if(d->data_type() == DataType::S32)
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(args, {})),
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                                                 "We could not find an optimized kernel for U8/QASYMM8 input and S32 output");
             }
             else
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint8_t, arm_gemm::Requantize32>(args, {})),
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf, args, {})),
                                                 "We could not find an optimized kernel for U8 input and U8 output");
             }
             break;
@@ -669,27 +728,27 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
         case DataType::QASYMM8_SIGNED:
             if(d->data_type() == DataType::S32)
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int32_t, arm_gemm::Nothing>(args, {})),
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int32_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                                                 "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and S32 output");
             }
             else
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int8_t, arm_gemm::Requantize32>(args, {})),
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf, args, {})),
                                                 "We could not find an optimized kernel for S8 input and S32 output");
             }
             break;
 #endif /* __aarch64__ */
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
         case DataType::BFLOAT16:
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(args, {})),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<bfloat16, float, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                                             "We could not find an optimized kernel for BFLOAT16 input and F32 output");
             break;
         }
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(args, {})),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
                                             "We could not find an optimized kernel for BFLOAT16 input and F32 output");
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -697,6 +756,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(const ITensorInfo *a, const ITensor
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Usupported type. Could not find a kernel");
             break;
     }
+    expected_weight_format = assembly_utils::map_to_arm_compute_weight_format(arm_gemm_expected_wf);
 
     return Status{};
 }
@@ -729,7 +789,17 @@ Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::U8 && d->data_type() != DataType::U32, "Only U32 output supported for U8 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::S8 && d->data_type() != DataType::S32, "Only S32 output supported for S8 input");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::QASYMM8 && d->data_type() != DataType::QASYMM8, "Only QASYMM8 output supported for QASYMM8 input");
-    return CpuGemmAssemblyDispatch::has_opt_impl(a, b, c, d, info);
+    arm_compute::WeightFormat expected_weight_format;
+    const Status              ret = CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, a, b, c, d, info);
+    if((bool)ret && expected_weight_format != arm_compute::WeightFormat::ANY)
+    {
+        // Correctness check: if the format expected by the kernel is
+        // not "any", make sure that the one found matches the format
+        // intended by the caller.
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((expected_weight_format != info.weight_format),
+                                        "The format expected by the kernel does not correspond with the one requested by the user.");
+    }
+    return ret;
 }
 
 bool CpuGemmAssemblyDispatch::is_activation_supported(const ActivationLayerInfo &activation)
@@ -778,11 +848,11 @@ void CpuGemmAssemblyDispatch::configure(const ITensorInfo *a, const ITensorInfo 
             }
             break;
 #endif /* __aarch64__ */
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
         case DataType::BFLOAT16:
             create_arm_gemm<bfloat16, float>(_arm_gemm, a, b, c, d, act, info);
             break;
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             create_arm_gemm<float16_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
@@ -801,7 +871,7 @@ void CpuGemmAssemblyDispatch::prepare(ITensorPack &tensors)
 
 bool CpuGemmAssemblyDispatch::is_configured() const
 {
-    return _arm_gemm != nullptr && _arm_gemm->is_configured();
+    return _arm_gemm && _arm_gemm->is_configured();
 }
 
 void CpuGemmAssemblyDispatch::run(ITensorPack &tensors)

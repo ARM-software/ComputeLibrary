@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,6 @@ class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls the following kernels:
  *
- * -# @ref cpu::CpuWinogradConv2dTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref cpu::CpuWinogradConv2dTransformInputKernel
  * -# @ref cpu::CpuWinogradConv2dTransformOutputKernel
  * -# @ref cpu::CpuGemmAssemblyDispatch

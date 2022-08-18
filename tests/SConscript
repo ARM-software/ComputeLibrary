@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2017-2022 Arm Limited.
@@ -67,7 +68,8 @@ Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
 
 # Disable floating-point expression contraction (e.g. fused multiply-add operations)
-test_env.Append(CXXFLAGS = ['-ffp-contract=off'])
+if not 'windows' in env['os']:
+    test_env.Append(CXXFLAGS = ['-ffp-contract=off'])
 
 # Remove -Wnoexcept from tests
 if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:
@@ -83,7 +85,10 @@ if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
     Import("arm_compute_graph_a")
-    test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a, arm_compute_core_a])
+    if env['os']=='windows':
+        test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a])
+    else:
+        test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a, arm_compute_core_a])
     arm_compute_lib = arm_compute_graph_a
 else:
     Import("arm_compute_graph_so")
@@ -156,7 +161,7 @@ if env['neon']:
 extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-elif env['os'] not in ['bare_metal', 'macos']:
+elif env['os'] not in ['windows','bare_metal', 'macos']:
     test_env.Append(LIBS = ["rt"])
     extra_link_flags += ['-fstack-protector-strong']
 
@@ -172,12 +177,16 @@ bm_link_flags = []
 if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
-if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos']:
+if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos','windows']:
     test_env['CXXFLAGS'].append('-fopenmp')
     test_env['LINKFLAGS'].append('-fopenmp')
 
     if 'ndk_above_r21' in env:
         test_env['LINKFLAGS'].append('-static-openmp')
+
+# Testing for fixed format GEMM kernels.
+if env['experimental_fixed_format_kernels'] and test_env['validation_tests']:
+    test_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
 
 if test_env['validation_tests']:
     arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework, arm_compute_core_a])

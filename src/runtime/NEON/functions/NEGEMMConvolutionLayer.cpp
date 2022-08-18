@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
                                        const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+
     _impl->weights = weights;
     _impl->op      = std::make_unique<cpu::CpuGemmConv2d>();
     _impl->op->configure(input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
@@ -77,6 +78,13 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
                                         const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     return cpu::CpuGemmConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+}
+
+Status NEGEMMConvolutionLayer::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+                                            const PadStrideInfo &conv_info,
+                                            const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, const bool enable_fast_math)
+{
+    return cpu::CpuGemmConv2d::has_opt_impl(expected_weight_format, src, weights, biases, dst, conv_info, weights_info, dilation, act_info, enable_fast_math);
 }
 
 void NEGEMMConvolutionLayer::run()

@@ -75,9 +75,9 @@ public:
 
     struct ActivationKernel
     {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        ActivationKernelPtr          ukernel;
+        const char                                *name;
+        const ActivationDataTypeISASelectorDataPtr is_selected;
+        ActivationKernelPtr                        ukernel;
     };
 
     static const std::vector<ActivationKernel> &get_available_kernels();

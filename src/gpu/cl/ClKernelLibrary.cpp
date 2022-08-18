@@ -272,6 +272,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_mv", "common/gemv.cl" },
     { "gemm_mv_quantized", "common/gemv.cl" },
     { "gemm_mm_native", "common/gemm.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt_mmul", "common/gemm_reshaped_only_rhs_mmul.cl" },
+    { "gemm_mm_reshaped_only_rhs_nt_mmul_texture", "common/gemm_reshaped_only_rhs_mmul.cl" },
     { "gemm_mm_native_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "common/gemm.cl" },
@@ -301,6 +303,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "common/gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t", "common/gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "common/gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_mmul", "common/gemmlowp_reshaped_only_rhs_mmul.cl" },
     { "gemmlowp_offset_contribution", "common/gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "common/gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "common/gemmlowp.cl" },
@@ -584,6 +587,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/gemm.clembed"
     },
     {
+        "common/gemm_reshaped_only_rhs_mmul.cl",
+#include "./cl_kernels/common/gemm_reshaped_only_rhs_mmul.clembed"
+    },
+    {
         "common/gemm_utils.cl",
 #include "./cl_kernels/common/gemm_utils.clembed"
     },
@@ -610,6 +617,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemmlowp.cl",
 #include "./cl_kernels/common/gemmlowp.clembed"
+    },
+    {
+        "common/gemmlowp_reshaped_only_rhs_mmul.cl",
+#include "./cl_kernels/common/gemmlowp_reshaped_only_rhs_mmul.clembed"
     },
     {
         "common/gemv.cl",

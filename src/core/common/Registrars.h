@@ -167,10 +167,10 @@
 #define REGISTER_INTEGER_SVE2(func_name) nullptr
 #endif /* defined(ENABLE_INTEGER_KERNELS) */
 
-#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+#if defined(ARM_COMPUTE_ENABLE_BF16)
 #define REGISTER_BF16_NEON(func_name) &(func_name)
-#else /* !(defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16))*/
+#else /* !(defined(ARM_COMPUTE_ENABLE_BF16))*/
 #define REGISTER_BF16_NEON(func_name) nullptr
-#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)*/
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16)*/
 
 #endif /* SRC_CORE_COMMON_REGISTRARS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,10 +101,28 @@ public:
     static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
                            float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
+    /** Indicates whether or not there is an optimal assembly implementation that can be used to process the given parameters.
+     *
+     * This method has the same use of @ref
+     * NEGEMMConvolutionLayer::has_opt_impl, with the only caveat that
+     * the value of arm_compute::WeightFormat need to be passed via the
+     * parameter gemm_info.
+     */
+    static Status has_opt_impl(arm_compute::WeightFormat &weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d,
+                               const GEMMInfo &gemm_info = GEMMInfo());
+
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
     void prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
+
+    /** Indicates if the convolution executes in variable weights mode.
+     *
+     * When ACL executes convolution in variable weights mode, it does
+     * not perform any processing of the weights tensor. Instead, it
+     * utilizes the data as it is given by the user.
+     */
+    bool isVarWeightsKernel() const;
 
 private:
     enum AuxTensorIdx

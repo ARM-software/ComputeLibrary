@@ -47,6 +47,46 @@ enum class GemmMethod
     GEMM_HYBRID_QUANTIZED
 };
 
+enum class WeightFormat
+{
+    UNSPECIFIED    = 0x1,
+    ANY            = 0x2,
+    OHWI           = 0x100100,
+    OHWIo2         = 0x100200,
+    OHWIo4         = 0x100400,
+    OHWIo8         = 0x100800,
+    OHWIo16        = 0x101000,
+    OHWIo32        = 0x102000,
+    OHWIo64        = 0x104000,
+    OHWIo128       = 0x108000,
+    OHWIo4i2       = 0x200400,
+    OHWIo4i2_bf16  = 0x200410,
+    OHWIo8i2       = 0x200800,
+    OHWIo8i2_bf16  = 0x200810,
+    OHWIo16i2      = 0x201000,
+    OHWIo16i2_bf16 = 0x201010,
+    OHWIo32i2      = 0x202000,
+    OHWIo32i2_bf16 = 0x202010,
+    OHWIo64i2      = 0x204000,
+    OHWIo64i2_bf16 = 0x204010,
+    OHWIo4i4       = 0x400400,
+    OHWIo4i4_bf16  = 0x400410,
+    OHWIo8i4       = 0x400800,
+    OHWIo8i4_bf16  = 0x400810,
+    OHWIo16i4      = 0x401000,
+    OHWIo16i4_bf16 = 0x401010,
+    OHWIo32i4      = 0x402000,
+    OHWIo32i4_bf16 = 0x402010,
+    OHWIo64i4      = 0x404000,
+    OHWIo64i4_bf16 = 0x404010,
+    OHWIo2i8       = 0x800200,
+    OHWIo4i8       = 0x800400,
+    OHWIo8i8       = 0x800800,
+    OHWIo16i8      = 0x801000,
+    OHWIo32i8      = 0x802000,
+    OHWIo64i8      = 0x804000
+};
+
 struct KernelDescription
 {
     GemmMethod  method         = GemmMethod::DEFAULT;
@@ -69,6 +109,7 @@ struct GemmConfig
     std::string  filter           = "";
     unsigned int inner_block_size = 0;
     unsigned int outer_block_size = 0;
+    WeightFormat weight_format    = WeightFormat::ANY;
 
     GemmConfig(GemmMethod method)
         : method(method)
@@ -102,24 +143,25 @@ struct GemmArgs
 {
 public:
     const CPUInfo    *_ci;
-    unsigned int      _Msize;
-    unsigned int      _Nsize;
-    unsigned int      _Ksize;
+    unsigned int      _Msize; // num of tiles
+    unsigned int      _Nsize; // output channels
+    unsigned int      _Ksize; // input channels
     unsigned int      _Ksections;
     unsigned int      _nbatches;
-    unsigned int      _nmulti;
+    unsigned int      _nmulti; // n_gemms to be performed
     bool              _indirect_input;
     Activation        _act;
     int               _maxthreads;
+    bool              _fixed_format;
     bool              _fast_mode;
     const GemmConfig *_cfg;
 
     GemmArgs(const CPUInfo *ci, unsigned int M, unsigned int N,
              unsigned int K, unsigned int Ksections, unsigned int nbatches,
              unsigned int nmulti, bool indirect_input, Activation act, const int maxthreads,
-             bool fast_mode = false, const GemmConfig *cfg = nullptr)
-        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _Ksections(Ksections), _nbatches(nbatches), _nmulti(nmulti), _indirect_input(indirect_input), _act(act), _maxthreads(maxthreads), _fast_mode(fast_mode),
-          _cfg(cfg)
+             bool fixed_format = false, bool fast_mode = false, const GemmConfig *cfg = nullptr)
+        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _Ksections(Ksections), _nbatches(nbatches), _nmulti(nmulti), _indirect_input(indirect_input), _act(act), _maxthreads(maxthreads),
+          _fixed_format(fixed_format), _fast_mode(fast_mode), _cfg(cfg)
     {
     }
 };
@@ -188,6 +230,6 @@ template <typename Top, typename Tret, class OutputStage = Nothing>
 std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, const OutputStage & = {});
 
 template <typename Top, typename Tret, class OutputStage = Nothing>
-bool has_opt_gemm(const GemmArgs &args, const OutputStage & = {});
+bool has_opt_gemm(WeightFormat &weight_format, const GemmArgs &args, const OutputStage & = {});
 
 } // namespace arm_gemm

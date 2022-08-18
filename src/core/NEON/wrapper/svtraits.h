@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,10 @@ DEFINE_TYPES(uint64_t)
 DEFINE_TYPES(float16_t)
 DEFINE_TYPES(float32_t)
 DEFINE_TYPES(float64_t)
+
+#if __ARM_FEATURE_SVE_BF16
 DEFINE_TYPES(bfloat16_t)
+#endif // #if __ARM_FEATURE_SVE_BF16
 
 #undef DEFINE_TYPES
 

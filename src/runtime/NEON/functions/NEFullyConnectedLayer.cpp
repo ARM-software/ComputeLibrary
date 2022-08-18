@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
 }
 
 void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
-                                      FullyConnectedLayerInfo fc_info)
+                                      FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -76,7 +76,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     _impl->original_weights = weights;
     _impl->is_prepared      = false;
 
-    _impl->op->configure(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info);
+    _impl->op->configure(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), fc_info, weights_info);
 
     if(_impl->weights_manager != nullptr)
     {
@@ -86,6 +86,13 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
     _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+}
+
+Status NEFullyConnectedLayer::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *input, const ITensorInfo *weights,
+                                           const ITensorInfo *biases, const ITensorInfo *output, const FullyConnectedLayerInfo &fc_info,
+                                           const WeightsInfo &weights_info)
+{
+    return cpu::CpuFullyConnected::has_opt_impl(expected_weight_format, input, weights, biases, output, fc_info, weights_info);
 }
 
 Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,

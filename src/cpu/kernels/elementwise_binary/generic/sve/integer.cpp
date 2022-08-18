@@ -31,7 +31,7 @@ namespace cpu
 template <ArithmeticOperation op>
 void sve_s32_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithmetic_op<op, int32_t>(in1, in2, out, window);
+    return elementwise_arithmetic_op<int32_t>(in1, in2, out, op, window);
 }
 template void sve_s32_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_s32_elementwise_binary<ArithmeticOperation::SUB>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -45,7 +45,7 @@ template void sve_s32_elementwise_binary<ArithmeticOperation::PRELU>(const ITens
 template <ArithmeticOperation op>
 void sve_s16_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_arithmetic_op<op, int16_t>(in1, in2, out, window);
+    return elementwise_arithmetic_op<int16_t>(in1, in2, out, op, window);
 }
 template void sve_s16_elementwise_binary<ArithmeticOperation::ADD>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_s16_elementwise_binary<ArithmeticOperation::SUB>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -59,7 +59,7 @@ template void sve_s16_elementwise_binary<ArithmeticOperation::PRELU>(const ITens
 template <ComparisonOperation op>
 void sve_u8_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comparison_op<op, uint8_t>(in1, in2, out, window);
+    return elementwise_comparison_op<uint8_t>(in1, in2, out, op, window);
 }
 template void sve_u8_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_u8_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -71,7 +71,7 @@ template void sve_u8_comparison_elementwise_binary<ComparisonOperation::LessEqua
 template <ComparisonOperation op>
 void sve_s16_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comparison_op<op, int16_t>(in1, in2, out, window);
+    return elementwise_comparison_op<int16_t>(in1, in2, out, op, window);
 }
 template void sve_s16_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_s16_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
@@ -83,7 +83,7 @@ template void sve_s16_comparison_elementwise_binary<ComparisonOperation::LessEqu
 template <ComparisonOperation op>
 void sve_s32_comparison_elementwise_binary(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-    return elementwise_comparison_op<op, int32_t>(in1, in2, out, window);
+    return elementwise_comparison_op<int32_t>(in1, in2, out, op, window);
 }
 template void sve_s32_comparison_elementwise_binary<ComparisonOperation::Equal>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);
 template void sve_s32_comparison_elementwise_binary<ComparisonOperation::NotEqual>(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window);

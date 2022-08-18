@@ -52,6 +52,9 @@ using namespace utils;
 
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
+/** A reference for comparing against the fusion of a direct convolution with an elementwise addition:
+ *  examples/dynamic_fusion/cl_fused_conv2d_elementwise_add.cpp
+ */
 class ClRefConv2dEltwiseAddExample : public Example
 {
 public:
@@ -69,7 +72,7 @@ public:
         if(argc < 10)
         {
             // Print help
-            std::cout << "Usage:  ./cl_conv2d_elementwise_add ih iw ifm wh ww ofm tuner_choice(0=Disable, 1=Rapid, 2=Normal, 3=Exhaustive)\n";
+            std::cout << "Usage:  ./cl_ref_conv2d_elementwise_add ih iw ifm wh ww ofm tuner_choice(0=Disable, 1=Rapid, 2=Normal, 3=Exhaustive) pad_x pad_y\n";
             std::cout << "Too few or no input_matrices provided. Using shape config = SRGAN_0, tuner_choice=2\n\n";
             ih           = 512;
             iw           = 512;
@@ -126,6 +129,7 @@ public:
         CLScheduler::get().default_init(tuner_to_use);
 
         TICK(startup_time);
+        TICK(configure);
 
         /* Computation:
          * out = add_desc(addend, conv2d1x1(direct_conv)(input, weights, bias))
@@ -133,54 +137,64 @@ public:
         const auto          data_type   = DataType::F32;
         const auto          data_layout = DataLayout::NHWC;
         const PadStrideInfo conv_info{ 1, 1, pad_x, pad_y };
-        // const auto t_input_shape    = TensorShape(384, 12, 12);
-        // const auto t_weight_shape   = TensorShape(384, 1, 1, 64);
-        // const auto t_dst_shape      = TensorShape(64, 12, 12);
-        const auto t_input_shape  = TensorShape(ifm, iw, ih);
-        const auto t_weight_shape = TensorShape(ifm, ww, wh, ofm);
-        const auto t_dst_shape    = misc::shape_calculator::compute_deep_convolution_shape(t_input_shape, data_layout, t_weight_shape, conv_info);
+        const auto          t_input_shape     = TensorShape(ifm, iw, ih);
+        const auto          t_weight_shape    = TensorShape(ifm, ww, wh, ofm);
+        const auto          t_bias_shape      = TensorShape(ofm);
+        const auto          t_l1_addend_shape = TensorShape(ofm, iw);
+        const auto          t_dst_shape       = misc::shape_calculator::compute_deep_convolution_shape(t_input_shape, data_layout, t_weight_shape, conv_info);
         std::cout << "input_shape: " << t_input_shape << std::endl;
         std::cout << "weight_shape: " << t_weight_shape << std::endl;
+        std::cout << "bias_shape: " << t_bias_shape << std::endl;
+        std::cout << "addend_shape: " << t_l1_addend_shape << std::endl;
         std::cout << "dst_shape: " << t_dst_shape << std::endl;
         auto t_input_info     = TensorInfo(t_input_shape, 1, data_type, data_layout);
         auto t_weight_info    = TensorInfo(t_weight_shape, 1, data_type, data_layout);
+        auto t_bias_info      = TensorInfo(t_bias_shape, 1, data_type, data_layout);
         auto t_l0_dst_info    = TensorInfo(t_dst_shape, 1, data_type, data_layout); // Intermediate tensor for cond3
-        auto t_l1_addend_info = TensorInfo(t_dst_shape, 1, data_type, data_layout);
+        auto t_l1_addend_info = TensorInfo(t_l1_addend_shape, 1, data_type, data_layout);
         auto t_dst_info       = TensorInfo(t_dst_shape, 1, data_type, data_layout);
 
         // Init tensors
         {
             t_input.allocator()->init(t_input_info);
             t_weight.allocator()->init(t_weight_info);
+            t_bias.allocator()->init(t_bias_info);
             t_l1_addend.allocator()->init(t_dst_info);
             t_l0_dst.allocator()->init(t_l0_dst_info);
             t_dst.allocator()->init(t_dst_info);
         }
 
-        op0.configure(&t_input, &t_weight, nullptr, &t_l0_dst, conv_info);
+        op0.configure(&t_input, &t_weight, &t_bias, &t_l0_dst, conv_info);
         op1.configure(&t_l0_dst, &t_l1_addend, &t_dst, ConvertPolicy{});
+        TOCK(configure, measurements);
 
+        TICK(tensor_allocation);
         // Construct tensors
         // Allocate and fill tensors
         {
             t_input.allocator()->allocate();
             t_weight.allocator()->allocate();
+            t_bias.allocator()->allocate();
             t_l1_addend.allocator()->allocate();
             t_l0_dst.allocator()->allocate();
             t_dst.allocator()->allocate();
             fill_random_tensor(t_input, -1.f, 1.f);
             fill_random_tensor(t_weight, -1.f, 1.f);
+            fill_random_tensor(t_bias, -1.f, 1.f);
             fill_random_tensor(t_l1_addend, -1.f, 1.f);
         }
+        TOCK(tensor_allocation, measurements);
         // Dummy run for CLTuner
+        TICK(dummy_run);
         op0.run();
-        op1.run();
+        CLScheduler::get().sync();
+        TOCK(dummy_run, measurements);
         TOCK(startup_time, measurements);
         return true;
     }
     void do_run() override
     {
-        // Run the fused op
+        // Run the ops
         op0.run();
         op1.run();
 
@@ -199,6 +213,7 @@ public:
 private:
     CLTensor                 t_input{};
     CLTensor                 t_weight{};
+    CLTensor                 t_bias{};
     CLTensor                 t_l1_addend{};
     CLTensor                 t_l0_dst{};
     CLTensor                 t_dst{};

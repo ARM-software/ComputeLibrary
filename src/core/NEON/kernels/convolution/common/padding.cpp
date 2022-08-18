@@ -81,7 +81,7 @@ template void copy_and_pad_tile(
 
 template void copy_and_pad_tile(
   unsigned int, unsigned int, unsigned int,
-  const float *, unsigned int, unsigned int,
+  float const *, unsigned int, unsigned int,
   float *, unsigned int, unsigned int,
   unsigned int, unsigned int, unsigned int, unsigned int, float
 );

@@ -198,7 +198,7 @@ void force_conv2d_method(OperatorGraph &graph, Operator conv2d, ConvolutionMetho
     node->set_method(method);
 }
 
-Operator add_op_elementwise_add(OperatorGraph &graph, const AddDescriptor &desc, OpTensor lhs, OpTensor rhs, OpTensor dst)
+Operator add_op_elementwise_op(OperatorGraph &graph, const ElementwiseDescriptor &desc, OpTensor lhs, OpTensor rhs, OpTensor dst)
 {
     auto id = graph.impl()->graph.add_operator({ rhs.id(), lhs.id() }, { dst.id() });
     check_dependency_graph_op_success(graph, id.first);
@@ -224,7 +224,36 @@ Operator add_op_elementwise_add(OperatorGraph &graph, const AddDescriptor &desc,
     tensors.add_const_tensor(ACL_SRC_0, graph.impl()->tensors[lhs.id()].get());
     tensors.add_const_tensor(ACL_SRC_1, graph.impl()->tensors[rhs.id()].get());
     tensors.add_const_tensor(ACL_DST_0, graph.impl()->tensors[dst.id()].get());
-    graph.impl()->add_node<AddContent>(id.second, desc, tensors);
+    graph.impl()->add_node<ElementwiseContent>(id.second, desc, tensors);
+    check_multiple_roots(graph);
+
+    return op_node;
+}
+
+Operator add_op_floor(OperatorGraph &graph, const FloorDescriptor &desc, OpTensor src, OpTensor dst)
+{
+    auto id = graph.impl()->graph.add_operator({ src.id() }, { dst.id() });
+    check_dependency_graph_op_success(graph, id.first);
+
+    Operator op_node(id.second);
+
+    // Infer TensorInfo
+    auto             node_src = graph.impl()->tensors[src.id()]->get_tensor_info();
+    OpTensorContent *node_dst = graph.impl()->tensors[dst.id()].get();
+
+    if(node_dst->get_tensor_info()->total_size() == 0)
+    {
+        auto_init_if_empty(*(node_dst->get_tensor_info()), *node_src);
+    }
+
+    // Check execution space
+    auto dst_info = node_dst->get_tensor_info();
+    check_execution_shape(graph, *dst_info);
+
+    ITensorDescPack<OpTensorContent> tensors;
+    tensors.add_const_tensor(ACL_SRC_0, graph.impl()->tensors[src.id()].get());
+    tensors.add_const_tensor(ACL_DST_0, graph.impl()->tensors[dst.id()].get());
+    graph.impl()->add_node<FloorContent>(id.second, desc, tensors);
     check_multiple_roots(graph);
 
     return op_node;

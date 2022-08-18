@@ -27,7 +27,8 @@
 #define ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_CLKERNELCOMPONENTS_H
 
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.h"
-#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseAddKernelComponent.h"
+#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseKernelComponent.h"
+#include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClFloorKernelComponent.h"
 #include "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.h"
 
 #endif //ARM_COMPUTE_EXPERIMENTAL_DYNAMICFUSION_IMPL_CLKERNELCOMPONENTS_H
