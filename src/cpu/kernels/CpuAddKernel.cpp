@@ -41,7 +41,7 @@ namespace kernels
 {
 bool can_interpret_inputs_as_1d_array(const ITensorInfo &src0, const ITensorInfo &src1)
 {
-    return !src0.has_padding() && !src1.has_padding() && src0.tensor_shape() == src1.tensor_shape();
+    return !src0.has_padding() && !src1.has_padding() && src0.tensor_shape() == src1.tensor_shape() && src0.strides_in_bytes() == src1.strides_in_bytes();
 }
 
 namespace
