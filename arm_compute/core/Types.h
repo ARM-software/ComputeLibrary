@@ -1641,7 +1641,8 @@ public:
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
         LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
         IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
-        HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x * relu6(x+3))/6 \f$ ) */
+        HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
+        SWISH,            /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
         GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
     };
 

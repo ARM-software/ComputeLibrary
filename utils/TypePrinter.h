@@ -628,6 +628,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             os << "HARD_SWISH";
             break;
+        case ActivationLayerInfo::ActivationFunction::SWISH:
+            os << "SWISH";
+            break;
         case ActivationLayerInfo::ActivationFunction::GELU:
             os << "GELU";
             break;

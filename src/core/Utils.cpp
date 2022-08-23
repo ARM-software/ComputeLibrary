@@ -178,6 +178,7 @@ const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFu
         { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },
         { ActivationLayerInfo::ActivationFunction::IDENTITY, "IDENTITY" },
         { ActivationLayerInfo::ActivationFunction::HARD_SWISH, "HARD_SWISH" },
+        { ActivationLayerInfo::ActivationFunction::SWISH, "SWISH" },
         { ActivationLayerInfo::ActivationFunction::GELU, "GELU" }
 
     };

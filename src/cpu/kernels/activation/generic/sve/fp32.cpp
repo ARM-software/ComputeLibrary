@@ -113,6 +113,9 @@ void sve_fp32_activation(const ITensor *src, ITensor *dst, const ActivationLayer
                 case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
                     tmp = svmul_f32_z(pg, vin, svmul_f32_z(pg, const_inv_6, svmin_f32_z(pg, const_6, svmax_f32_z(pg, const_0, svadd_f32_z(pg, vin, const_3)))));
                     break;
+                case ActivationLayerInfo::ActivationFunction::SWISH:
+                    tmp = svmul_f32_z(pg, vin, svinv_f32_z(pg, svadd_f32_z(pg, const_1, svexp_f32_z(pg, svneg_f32_z(pg, svmul_f32_z(pg, va, vin))))));
+                    break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");
             }

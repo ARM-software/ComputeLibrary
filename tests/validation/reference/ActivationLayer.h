@@ -84,6 +84,9 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             ret = x * ((std::min(std::max(static_cast<T>(x + 3), static_cast<T>(0.0f)), static_cast<T>(6.0f))) * 0.166666667f);
             break;
+        case ActivationLayerInfo::ActivationFunction::SWISH:
+            ret = static_cast<T>(x) / (static_cast<T>(1) + std::exp(-a*x));
+            break;
         case ActivationLayerInfo::ActivationFunction::GELU:
             ret = x * 0.5f * (1 + erf(x / std::sqrt(2.0f)));
             break;
