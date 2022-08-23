@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020-2021 Arm Limited.
+* Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,11 +53,9 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
     },
     patterns...);
 
-    bool padding_changed = false;
-
     utility::for_each([&](IAccessWindow & w)
     {
-        padding_changed |= w.update_padding_if_needed(win);
+        w.update_padding_if_needed(win);
     },
     patterns...);
 
