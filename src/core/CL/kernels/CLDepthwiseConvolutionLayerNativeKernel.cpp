@@ -211,7 +211,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
         arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(weights->info());
     }
 
-    // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324  
+    // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324
     const GPUTarget gpu_target    = get_target();
     const auto      act_function  = conv_info.act_info.activation();
     const auto      dst_data_type = _output->info()->data_type();

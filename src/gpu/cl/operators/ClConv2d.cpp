@@ -258,14 +258,15 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 // Get dst shape
                 TensorShape output_shape       = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
                 const bool  is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
+                const bool  is_ifm_ge_8        = src->dimension(idx_c) >= 8;
                 const bool  is_ifm_ge_16       = src->dimension(idx_c) >= 16;
                 const bool  is_ofm_lte_8       = weights->dimension(3U) <= 8;
                 const bool  workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
                 const bool  is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
                 const bool  is_m_one           = output_shape[1] * output_shape[2] == 1;
 
-                // Run Winograd if valid and IFM >= 16
-                if(is_wino_valid && is_ifm_ge_16)
+                // Run Winograd if valid and IFM >= 8
+                if(is_wino_valid && is_ifm_ge_8)
                 {
                     if(is_ofm_lte_8)
                     {
