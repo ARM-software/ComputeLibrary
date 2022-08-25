@@ -857,7 +857,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       true,
                                                       true,
                                                       false,
-                                                      false})),
+                                                      true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
    ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
@@ -1338,7 +1338,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       true,
                                                       true,
                                                       false,
-                                                      false})),
+                                                      true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
    ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
