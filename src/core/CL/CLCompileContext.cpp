@@ -232,7 +232,7 @@ void CLCompileContext::set_context(cl::Context context)
 std::string CLCompileContext::generate_build_options(const StringSet &build_options_set, const std::string &kernel_path) const
 {
     std::string concat_str;
-    bool ext_supported = false;
+    bool        ext_supported = false;
     std::string ext_buildopts;
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
@@ -398,5 +398,9 @@ int32_t CLCompileContext::get_ddk_version() const
     }
 
     return -1;
+}
+GPUTarget CLCompileContext::get_gpu_target() const
+{
+    return _device.target();
 }
 } // namespace arm_compute

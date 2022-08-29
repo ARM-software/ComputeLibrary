@@ -310,6 +310,12 @@ public:
      */
     int32_t get_ddk_version() const;
 
+    /** Return the Gpu target of the associated device
+     *
+     * @return GPUTarget
+     */
+    GPUTarget get_gpu_target() const;
+
 private:
     /** Load program and its dependencies.
      *

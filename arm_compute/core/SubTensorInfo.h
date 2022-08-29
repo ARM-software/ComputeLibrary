@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -236,6 +236,17 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->data_layout();
+    }
+    ITensorInfo::Id id() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->id();
+    }
+    ITensorInfo &set_id(ITensorInfo::Id id) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_id(id);
+        return *this;
     }
 
 private:

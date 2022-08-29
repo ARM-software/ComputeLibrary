@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 {
 TensorInfo::TensorInfo()
     : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _dims_state(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
-      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW), _are_values_constant(true)
+      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW), _are_values_constant(true), _id(invalid_tensor_id)
 {
 }
 
@@ -56,8 +56,28 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
     _are_values_constant           = info.are_values_constant();
+    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
 }
 
+TensorInfo::TensorInfo(const TensorInfo &info)
+    : TensorInfo()
+{
+    _total_size                    = info.total_size();
+    _offset_first_element_in_bytes = info.offset_first_element_in_bytes();
+    _strides_in_bytes              = info.strides_in_bytes();
+    _num_channels                  = info.num_channels();
+    _tensor_shape                  = info.tensor_shape();
+    _dims_state                    = info.tensor_dims_state();
+    _data_type                     = info.data_type();
+    _format                        = info.format();
+    _is_resizable                  = info.is_resizable();
+    _valid_region                  = info.valid_region();
+    _padding                       = info.padding();
+    _quantization_info             = info.quantization_info();
+    _data_layout                   = info.data_layout();
+    _are_values_constant           = info.are_values_constant();
+    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
+}
 TensorInfo::TensorInfo(Format format)
     : TensorInfo(TensorShape(), format)
 {
