@@ -25,7 +25,8 @@
 #include "activation_float_helpers.h"
 #include "helpers.h"
 #include "tile_helpers.h"
-
+// *INDENT-OFF*
+// clang-format off
 #if defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
 //! @cond Doxygen_Suppress
 /** OpenCL kernel to compute the depthwise convolution for floating-point data types (F32/F16)
@@ -51,6 +52,7 @@
  *  - M0 = 1, 2, 3, 4, 5, .... n (M0 != 1 with STRIDE_X == 1 && DILATION_X == 1 only)
  *  - N0 = 2, 3, 4, 8, 16 (only 4, 8 and 16 if WEI_TENSOR_TYPE=IMAGE)
  * @note The number of rows to read from the src tensor must be passed at compile time using -DM0_A (e.g., -DM0_A=3). M0_A must be equal to WEI_WIDTH + (M0 - 1)
+ * @note The number of columns to read from the src tensor must be passed at compile time using -DN0_A. It can either be 1 (for DEPTH_MULTIPLIER > 1) or N0 (for DEPTH_MULTIPLIER == 1)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -101,7 +103,7 @@ __kernel void dwc_native_fp_nhwc(
 #define _IWEI_WIDTH WEI_WIDTH
 #define _IWEI_HEIGHT WEI_HEIGHT
 #define _IM0_A M0_A        // _IWEI_WIDTH + (M0 - 1) Rows tile A (If M0 != 1, the tiles overlap of 1 element on the X dimension)
-#define _IN0_A N0          // Cols tile A
+#define _IN0_A N0_A        // Cols tile A. It can be either 1 (for DEPTH_MULTIPLIER > 1) or N0 (for DEPTH_MULTIPLIER == 1)
 #define _IM0_B _IWEI_WIDTH // Rows tile B
 #define _IN0_B N0          // Cols tile B
 #define _IBOUNDARY_CHECK (!((WEI_WIDTH == 1 && WEI_HEIGHT == 1 && PAD_LEFT == 0 && PAD_TOP == 0 && M0 == 1)))
@@ -121,39 +123,34 @@ __kernel void dwc_native_fp_nhwc(
     xi -= PAD_LEFT;
     yi -= PAD_TOP;
 
-    int d = 0;
-#if DEPTH_MULTIPLIER != 1
-    for(; d < DEPTH_MULTIPLIER; d++)
-#endif // DEPTH_MULTIPLIER != 1
-    {
-        TILE(ACC_DATA_TYPE, M0, N0, c);
+    TILE(ACC_DATA_TYPE, M0, N0, c);
 
-        // Reset accumulators
-        LOOP_UNROLLING(int, i, 0, 1, M0,
-        {
-            c[i].v = 0;
-        })
+    // Reset accumulators
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        c[i].v = 0;
+    })
 
 #if _IWEI_HEIGHT < 5
-        LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
+    LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
 #else  // _IWEI_HEIGHT <= 5
-        for(int yk = 0; yk < _IWEI_HEIGHT; yk++)
+    for(int yk = 0; yk < _IWEI_HEIGHT; ++yk)
 #endif // _IWEI_HEIGHT <= 5
-                       {
-                           TILE(SRC_DATA_TYPE, _IM0_A, _IN0_A, a);
+    {
+        TILE(SRC_DATA_TYPE, _IM0_A, _IN0_A, a);
 
-                           LOOP_UNROLLING(int, i, 0, 1, _IM0_A,
+        LOOP_UNROLLING(int, i, 0, 1, _IM0_A,
         {
             a[i].v = 0;
         })
 
         // Load tile from the src tensor (TILE A)
-        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, cout, src_w, src_h, DILATION_X, 1, _IBOUNDARY_CHECK, a);
+        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, (cout / DEPTH_MULTIPLIER), src_w, src_h, DILATION_X, 1, _IBOUNDARY_CHECK, a);
 
         TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 
         // Load tile from the weights tensor (TILE B)
-        T_LOAD(WEI_DATA_TYPE, _IM0_B, _IN0_B, WEI_TENSOR_TYPE, wei, (cout * DEPTH_MULTIPLIER) + d, yk * _IM0_B, 1, wei_stride_y, b);
+        T_LOAD(WEI_DATA_TYPE, _IM0_B, _IN0_B, WEI_TENSOR_TYPE, wei, cout, yk * _IM0_B, 1, wei_stride_y, b);
 
         // Optimized path for STRIDE_X == 1
         // If M0 != 1, we can skip the common loads between the two applied kernels on the X (WIDTH) dimension
@@ -161,47 +158,48 @@ __kernel void dwc_native_fp_nhwc(
         {
             LOOP_UNROLLING(int, xk, 0, 1, _IWEI_WIDTH,
             {
-                c[m0].v += a[xk + m0].v *b[xk].v;
+                c[m0].v = fma(a[xk + m0].v, b[xk].v, c[m0].v);
             })
         })
-                       }
+    }
 #if _IWEI_HEIGHT < 5
                       )
 #endif // _IWEI_HEIGHT <= 5
 
 #if defined(HAS_BIAS)
-        TILE(BIA_DATA_TYPE, 1, N0, bias0);
+    TILE(BIA_DATA_TYPE, 1, N0, bias0);
 
-        T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, (cout * DEPTH_MULTIPLIER) + d, 0, 0, 0, bias0);
+    T_LOAD(BIA_DATA_TYPE, 1, N0, BUFFER, bia, cout, 0, 0, 0, bias0);
 
-        // c = c + bias[broadcasted]
-        T_ELTWISE_BROADCAST_ADD_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
+    // c = c + bias[broadcasted]
+    T_ELTWISE_BROADCAST_ADD_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
 #endif // HAS_BIAS
 
-        T_ACTIVATION(ACC_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, c, c);
+    T_ACTIVATION(ACC_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, c, c);
 
-        TILE(uint, M0, 1, dst_indirect_y);
+    TILE(uint, M0, 1, dst_indirect_y);
 
-        bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
+    bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
-        if(x_cond)
+    if(x_cond)
+    {
+        LOOP_UNROLLING(int, m0, 0, 1, M0,
         {
-            LOOP_UNROLLING(int, m0, 0, 1, M0,
-            {
-                int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
-                VSTORE_PARTIAL(N0, PARTIAL_N0)
-                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
-            })
-        }
-        else
+            int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
+            VSTORE_PARTIAL(N0, PARTIAL_N0)
+            (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + cout * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
+        })
+    }
+    else
+    {
+        LOOP_UNROLLING(int, m0, 0, 1, M0,
         {
-            LOOP_UNROLLING(int, m0, 0, 1, M0,
-            {
-                int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
-                VSTORE(N0)
-                (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + (uint)((cout * DEPTH_MULTIPLIER) + d) * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
-            })
-        }
+            int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
+            VSTORE(N0)
+            (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + cout * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
+        })
     }
 }
 #endif // defined(WEI_WIDTH) && defined(WEI_HEIGHT) && defined(N0) && defined(M0) && defined(DILATION_X) && defined(DILATION_Y) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP)
+// *INDENT-ON*
+// clang-format on

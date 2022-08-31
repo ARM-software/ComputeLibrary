@@ -54,6 +54,11 @@ bool export_weights_to_cl_image_heuristic(const ITensorInfo *weights, unsigned i
     const size_t kernel_w = weights->tensor_shape()[idx_w];
     const size_t kernel_h = weights->tensor_shape()[idx_h];
 
+    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
+    {
+        return false;
+    }
+
     if((kernel_w == 1) && (kernel_h == 1))
     {
         return false;
@@ -61,12 +66,10 @@ bool export_weights_to_cl_image_heuristic(const ITensorInfo *weights, unsigned i
 
     if(depth_multiplier > 1)
     {
-        return false;
-    }
-
-    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-    {
-        return false;
+        if((depth_multiplier % 4) != 0)
+        {
+            return false;
+        }
     }
 
     return true;
@@ -110,7 +113,18 @@ void initialize_dwc_native_compute_info(DWCComputeKernelInfo &dwc_compute_info, 
     }
     else
     {
-        dwc_compute_info.n0 = 1;
+        if((depth_multiplier % 4) == 0)
+        {
+            dwc_compute_info.n0 = 4;
+        }
+        else if((depth_multiplier % 2) == 0)
+        {
+            dwc_compute_info.n0 = 2;
+        }
+        else
+        {
+            dwc_compute_info.n0 = 1;
+        }
     }
 
     dwc_compute_info.n0 = adjust_vec_size(dwc_compute_info.n0, weights->dimension(0));

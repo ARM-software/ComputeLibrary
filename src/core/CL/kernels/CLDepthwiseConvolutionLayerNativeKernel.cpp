@@ -57,11 +57,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.depth_multiplier > 1 && dwc_info.n0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_stride_info.stride().first > 1 && dwc_info.m0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.dilation.x() > 1 && dwc_info.m0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((dwc_info.export_weights_to_cl_image == true) && (export_weights_to_cl_image(weights) == false), "Export to cl_image not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON((dwc_info.export_weights_to_cl_image == true) && (conv_info.depth_multiplier > 1));
     ARM_COMPUTE_RETURN_ERROR_ON((dwc_info.export_weights_to_cl_image == true) && ((dwc_info.n0 % 4) != 0));
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_stride_info.stride().first < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_stride_info.stride().second < 1);
@@ -84,6 +82,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     const ConvolutionInfo info{ conv_info.pad_stride_info, conv_info.depth_multiplier, ActivationLayerInfo(), conv_info.dilation };
     const TensorShape     output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info);
+
+    if(conv_info.depth_multiplier > 1 && dwc_info.n0 > 1)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON((conv_info.depth_multiplier % dwc_info.n0) != 0);
+    }
 
     const bool is_quantized = is_data_type_quantized(input->data_type());
 
@@ -199,7 +202,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     _export_to_cl_image = dwc_info.export_weights_to_cl_image;
     _is_quantized       = is_data_type_quantized(input->info()->data_type());
 
-    const unsigned int n0          = adjust_vec_size(dwc_info.n0, input->info()->dimension(0));
+    const unsigned int n0          = adjust_vec_size(dwc_info.n0, output->info()->dimension(0));
     const unsigned int m0          = std::min(dwc_info.m0, (unsigned int)output->info()->dimension(1));
     std::string        kernel_name = "";
 
@@ -251,7 +254,8 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DM0_A=" + support::cpp11::to_string(_weights->info()->dimension(1) + m0 - 1));
-    build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(_input->info()->dimension(0) % n0));
+    build_opts.add_option_if_else(conv_info.depth_multiplier > 1, "-DN0_A=1", "-DN0_A=" + support::cpp11::to_string(n0));
+    build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(_output->info()->dimension(0) % n0));
     build_opts.add_option_if(_input->info()->num_dimensions() > 3, "-DBATCHED_EXECUTION");
 
     // Force unroll with pragma when any of the following values exceed the maximum number of manual unroll
@@ -348,13 +352,6 @@ void CLDepthwiseConvolutionLayerNativeKernel::run(const Window &window, cl::Comm
     Window window_collapsed = window.collapse(ICLKernel::window(), Window::DimZ);
 
     Window slice = window_collapsed.first_slice_window_4D();
-
-    if(_depth_multiplier != 1)
-    {
-        // If the depth multiplier > 1, we need to use the input channels rather than the output channels
-        ARM_COMPUTE_ERROR_ON(slice.x().step() != 1);
-        slice.set(Window::DimX, Window::Dimension(0, _input->info()->tensor_shape()[0], 1));
-    }
 
     cl::Image2D weights_cl_image;
 

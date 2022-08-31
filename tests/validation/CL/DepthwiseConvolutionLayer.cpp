@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,7 @@ constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**<
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
-const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 5 });
+const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 4 });
 const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
 
 //Activation Functions
