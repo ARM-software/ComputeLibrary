@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,34 +75,46 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     TensorShape shape(output->info()->dimension(idx_width));
     shape.set(1, output->info()->dimension(idx_height), false);
 
-    const TensorInfo tensor_info_dxdy(shape, Format::F32);
-    const TensorInfo tensor_info_offsets(shape, Format::S32);
+    bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(data_layout, input->info()->data_type(), policy_to_use);
 
-    _impl->dx.allocator()->init(tensor_info_dxdy);
-    _impl->dy.allocator()->init(tensor_info_dxdy);
-    _impl->offsets.allocator()->init(tensor_info_offsets);
-    switch(policy_to_use)
+    if(precompute_indices_weights == true)
     {
-        case InterpolationPolicy::NEAREST_NEIGHBOR:
+        const TensorInfo tensor_info_dxdy(shape, Format::F32);
+        const TensorInfo tensor_info_offsets(shape, Format::S32);
+
+        _impl->dx.allocator()->init(tensor_info_dxdy);
+        _impl->dy.allocator()->init(tensor_info_dxdy);
+        _impl->offsets.allocator()->init(tensor_info_offsets);
+        switch(policy_to_use)
         {
-            // Allocate once the configure methods have been called
-            _impl->offsets.allocator()->allocate();
-            break;
+            case InterpolationPolicy::NEAREST_NEIGHBOR:
+            {
+                // Allocate once the configure methods have been called
+                _impl->offsets.allocator()->allocate();
+                break;
+            }
+            case InterpolationPolicy::BILINEAR:
+            {
+                // Allocate once the configure methods have been called
+                _impl->dx.allocator()->allocate();
+                _impl->dy.allocator()->allocate();
+                _impl->offsets.allocator()->allocate();
+                break;
+            }
+            case InterpolationPolicy::AREA:
+            {
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Unsupported interpolation mode");
         }
-        case InterpolationPolicy::BILINEAR:
+    }
+    else
+    {
+        if(policy_to_use != InterpolationPolicy::NEAREST_NEIGHBOR && policy_to_use != InterpolationPolicy::BILINEAR && policy_to_use != InterpolationPolicy::AREA)
         {
-            // Allocate once the configure methods have been called
-            _impl->dx.allocator()->allocate();
-            _impl->dy.allocator()->allocate();
-            _impl->offsets.allocator()->allocate();
-            break;
-        }
-        case InterpolationPolicy::AREA:
-        {
-            break;
-        }
-        default:
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
+        }
     }
 }
 

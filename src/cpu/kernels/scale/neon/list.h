@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,7 +131,7 @@ void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets
 
                 for(; cout < out_dim_ch; ++cout)
                 {
-                    auto out0                                                                                    = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                    auto out0                                            = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
                     *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T))) = out0;
                 }
             }
@@ -322,9 +322,13 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                 const auto a1 = (yi_f - static_cast<float>(yi));
                 const auto b1 = (1.f - a1);
 
-                const auto yi0 = utility::clamp<int>(yi, 0, in_dim_h - 1);
-                const auto yi1 = utility::clamp<int>(yi + 1, 0, in_dim_h - 1);
+                const int yi0 = utility::clamp<int>(yi, 0, in_dim_h - 1);
+                const int yi1 = utility::clamp<int>(yi + 1, 0, in_dim_h - 1);
 
+                const int yi0_offset = yi0 * in_stride_z;
+                const int yi1_offset = yi1 * in_stride_z;
+
+                const int y_offset = yo * out_stride_z;
                 for(int xo = xo_start; xo < xo_end; xo += xo_step)
                 {
                     // Floating-point coordinate
@@ -340,49 +344,46 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                     const auto s10_s = static_cast<T>(b * a1);
                     const auto s11_s = static_cast<T>(a * a1);
 
-                    const auto xi0 = utility::clamp<int>(xi, 0, in_dim_w - 1);
-                    const auto xi1 = utility::clamp<int>(xi + 1, 0, in_dim_w - 1);
+                    const auto s00 = wrapper::vdup_n(s00_s, ExactTagType{});
+                    const auto s01 = wrapper::vdup_n(s01_s, ExactTagType{});
+                    const auto s10 = wrapper::vdup_n(s10_s, ExactTagType{});
+                    const auto s11 = wrapper::vdup_n(s11_s, ExactTagType{});
+
+                    const int xi0 = utility::clamp<int>(xi, 0, in_dim_w - 1);
+                    const int xi1 = utility::clamp<int>(xi + 1, 0, in_dim_w - 1);
+
+                    const int xi0_offset = xi0 * in_stride_y;
+                    const int xi1_offset = xi1 * in_stride_y;
+
+                    const int offset = xo * out_stride_y + y_offset;
 
                     int cout = 0;
                     for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
-                        auto in00 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
-                        auto in01 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
-                        auto in10 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
-                        auto in11 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
-                        in00      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi0) * in_stride_z));
-                        in01      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi0) * in_stride_z));
-                        in10      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi1) * in_stride_z));
-                        in11      = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi1) * in_stride_z));
+                        auto in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        auto in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        auto in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        auto in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
 
-                        const auto s00  = wrapper::vdup_n(s00_s, ExactTagType{});
-                        const auto s01  = wrapper::vdup_n(s01_s, ExactTagType{});
-                        const auto s10  = wrapper::vdup_n(s10_s, ExactTagType{});
-                        const auto s11  = wrapper::vdup_n(s11_s, ExactTagType{});
-                        auto       out0 = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
-                        out0            = wrapper::vmla(out0, in00, s00);
-                        out0            = wrapper::vmla(out0, in01, s01);
-                        out0            = wrapper::vmla(out0, in10, s10);
-                        out0            = wrapper::vmla(out0, in11, s11);
-                        wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T) + xo * out_stride_y + yo * out_stride_z), out0);
+                        auto out0 = wrapper::vmul(in00, s00);
+                        out0      = wrapper::vmla(out0, in01, s01);
+                        out0      = wrapper::vmla(out0, in10, s10);
+                        out0      = wrapper::vmla(out0, in11, s11);
+                        wrapper::vstore(reinterpret_cast<T *>(out_ptr + offset + cout * sizeof(T)), out0);
                     }
 
                     for(; cout < out_dim_ch; ++cout)
                     {
-                        auto in00 = static_cast<T>(0);
-                        auto in01 = static_cast<T>(0);
-                        auto in10 = static_cast<T>(0);
-                        auto in11 = static_cast<T>(0);
-                        in00      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi0) * in_stride_z));
-                        in01      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi0) * in_stride_z));
-                        in10      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi0) * in_stride_y + (yi1) * in_stride_z));
-                        in11      = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + (xi1) * in_stride_y + (yi1) * in_stride_z));
-                        auto out0 = static_cast<T>(0);
-                        out0 += in00 * s00_s;
+                        T in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        T in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        T in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        T in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
+
+                        T out0 = in00 * s00_s;
                         out0 += in01 * s01_s;
                         out0 += in10 * s10_s;
                         out0 += in11 * s11_s;
-                        *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T) + xo * out_stride_y + yo * out_stride_z)) = out0;
+                        *(reinterpret_cast<T *>(out_ptr + offset + cout * sizeof(T))) = out0;
                     }
                 }
             }

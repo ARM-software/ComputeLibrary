@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,17 @@ inline bool is_align_corners_allowed_sampling_policy(SamplingPolicy sampling_pol
 {
     return sampling_policy != SamplingPolicy::CENTER;
 }
+
+/** Returns if precomputation of indices and/or weights is required or/not
+ *
+ * @param[in] data_layout Data layout
+ * @param[in] data_type   Data type
+ * @param[in] policy      Interpolation policy
+ *
+ * @return True if precomputation is required
+ */
+bool is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy);
+
 } // namespace scale_utils
 } // namespace arm_compute
 #endif /* UTILS_CORE_SCALEUTILS_H */

@@ -140,12 +140,12 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const I
     ARM_COMPUTE_RETURN_ERROR_ON(output_width == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output_height == 0);
 
-    if(info.interpolation_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    if(info.interpolation_policy == InterpolationPolicy::NEAREST_NEIGHBOR && offsets != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
     }
 
-    if(info.interpolation_policy == InterpolationPolicy::BILINEAR)
+    if(info.interpolation_policy == InterpolationPolicy::BILINEAR && offsets != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
         if(dx != nullptr && dy != nullptr)

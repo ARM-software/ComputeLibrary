@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "src/core/utils/ScaleUtils.h"
-#include "arm_compute/core/Helpers.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
+
+#include "arm_compute/core/CPP/CPPTypes.h"
+#include "arm_compute/core/TensorInfo.h"
 
 float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
 {
@@ -34,4 +38,14 @@ float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t
     ARM_COMPUTE_ERROR_ON(out == 0);
 
     return static_cast<float>(in) / static_cast<float>(out);
+}
+
+bool arm_compute::scale_utils::is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy)
+{
+    // whether to precompute indices & weights
+    // The Neon™ kernels (which are preferred over SVE when policy is BILINEAR) do not use
+    // precomputed index and weights when data type is FP32/16.
+    // If policy is nearest_neighbor for SVE, then precompute because it's being used
+    // To be revised in COMPMID-5453/5454
+    return data_layout != DataLayout::NHWC || (data_type != DataType::F32 && data_type != DataType::F16) || (CPUInfo::get().get_isa().sve == true && policy == InterpolationPolicy::NEAREST_NEIGHBOR);
 }
