@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -141,6 +141,9 @@ void ClGemmLowpOffsetContributionKernel::configure(const CLCompileContext &compi
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     std::string kernel_name("gemmlowp_offset_contribution");
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());

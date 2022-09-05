@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,6 +95,9 @@ void ClGemmLowpMatrixAReductionKernel::configure(const CLCompileContext &compile
 
     std::string kernel_name = "gemmlowp_matrix_a_reduction" + std::string(is_dot8_supported ? "_dot8" : "");
 
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
@@ -171,8 +174,13 @@ void ClGemmLowpMatrixBReductionKernel::configure(const CLCompileContext &compile
     build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_b->data_type()));
     build_opts.add_option_if(info.mul_by_scalar, "-DSCALAR=" + support::cpp11::to_string(info.scalar));
 
+    const std::string kernel_name = "gemmlowp_matrix_b_reduction";
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     // Create kernel
-    _kernel = create_kernel(compile_context, "gemmlowp_matrix_b_reduction", build_opts.options());
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*vector_sum_col, Steps(num_elems_processed_per_iteration));

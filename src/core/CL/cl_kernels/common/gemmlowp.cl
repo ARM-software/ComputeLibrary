@@ -290,7 +290,7 @@
         (VECTOR_ACC_TYPE, k0, a, b, c);                          \
     })
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#if defined(GEMMLOWP_MM_RESHAPED_LHS_NT_RHS_T)
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices with QASYMM/QASYMM_SIGNED data type.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
@@ -461,10 +461,9 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#endif // defined(GEMMLOWP_MM_RESHAPED_LHS_NT_RHS_T)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
-
+#if defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T_FUSED_OUTPUT_STAGE_FIXEDPOINT) || defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T)
 #if defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
 #define FUSED_OUTPUT_STAGE_FIXED_POINT
 #endif // defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
@@ -548,11 +547,11 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  result_shifts_step_x                             (Optional) output_shifts_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  result_shifts_offset_first_element_in_bytes      (Optional) The offset of the first element in the output shifts vector
  */
-#if defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+#if defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T_FUSED_OUTPUT_STAGE_FIXEDPOINT)
 __kernel void gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint
-#else  // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+#elif defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T) // defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T_FUSED_OUTPUT_STAGE_FIXEDPOINT)
 __kernel void gemmlowp_mm_reshaped_only_rhs_t
-#endif // defined(FUSED_OUTPUT_STAGE_FIXED_POINT)
+#endif                                         // defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T)
 (IMAGE_DECLARATION(lhs),
  IMAGE_DECLARATION(rhs),
  IMAGE_DECLARATION(dst),
@@ -798,9 +797,9 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t
 #undef RHS_STEP_X
 #undef RHS_STEP_LOOP
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#endif // defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T_FUSED_OUTPUT_STAGE_FIXEDPOINT) || defined(GEMMLOWP_MM_RESHAPED_ONLY_RHS_T)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#if defined(GEMMLOWP_MM_NATIVE)
 
 /** This OpenCL kernel computes the matrix multiplication between 2 matrices.
  *  The LHS matrix is NOT reshaped
@@ -983,9 +982,9 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_CONVERT(M0, VEC_DATA_TYPE(int, N0), c, res); // resN = CONVERT(cN, VEC_DATA_TYPE(int, N0));
     STORE_BLOCK_BOUNDARY_AWARE(M0, N0, int, res, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, cond_y, cond_x);
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(K) && defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
+#endif // defined(GEMMLOWP_MM_NATIVE)
 
-#if defined(COLS_A)
+#if defined(GEMMLOWP_MATRIX_A_REDUCTION)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
  * It is also possible to multiply each reduced row by a scalar value, if SCALAR is passed at compile time.
  *
@@ -1049,8 +1048,9 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
 #endif // defined(SCALAR)
     *((__global int *)dst.ptr) = (int)sum_row;
 }
+#endif // defined(GEMMLOWP_MATRIX_A_REDUCTION)
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
+#if defined(GEMMLOWP_MATRIX_A_REDUCTION_DOT8)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A using the arm dot product instruction.
  * It is also possible to multiply each reduced row by a scalar value, if SCALAR is passed at compile time.
  *
@@ -1120,10 +1120,9 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
 #endif // defined(SCALAR)
     *((__global int *)dst.ptr) = (int)sum_row;
 }
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
-#endif // defined(COLS_A)
+#endif // defined(GEMMLOWP_MATRIX_A_REDUCTION_DOT8)
 
-#if defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+#if defined(GEMMLOWP_MATRIX_B_REDUCTION)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
  * It is also possible to multiply each reduced column by a scalar value, if SCALAR is passed at compile time.
  *
@@ -1203,7 +1202,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
 
     STORE_VECTOR_SELECT(res, int, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(COLS_B) && defined(ROWS_B) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
+#endif // defined(GEMMLOWP_MATRIX_B_REDUCTION)
 
 #endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
@@ -1307,6 +1306,7 @@ inline VEC_INT offset_contribution(
     return (VEC_INT)K_OFFSET + a_offset_s32 + b_offset_s32;
 }
 
+#if defined(GEMMLOWP_OFFSET_CONTRIBUTION)
 /* OpenCL kernel used to add the offset contribution after matrix multiplication. The computation is performed in-place
  *
  * This kernel takes a final int32 accumulator value (the output of matrix multiplication),
@@ -1410,8 +1410,9 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
     // Store the result with the offset contribution
     STORE_VECTOR_SELECT(in_s32_, int, mm_result_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
+#endif // defined(GEMMLOWP_OFFSET_CONTRIBUTION)
 
-#if defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT) && defined(OUTPUT_DATA_TYPE)
+#if defined(GEMMLOWP_OFFSET_CONTRIBUTION_QUANTIZE_DOWN)
 /* OpenCL kernel used to add the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel and it quantizes down to uint8.
  *
  * This kernel takes a final int32 accumulator value (the output of @CLGEMMLowpMatrixMultiplyKernel), adds to it the offset contribution of matrix A and matrix B and quantizes to uint8 through the output stage.
@@ -1587,7 +1588,9 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
     // Store the result
     STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
+#endif // defined(GEMMLOWP_OFFSET_CONTRIBUTION_QUANTIZE_DOWN)
 
+#if defined(GEMMLOWP_OFFSET_CONTRIBUTION_QUANTIZE_DOWN_FIXEDPOINT)
 /* OpenCL kernel used to add the offset contribution after matrix multiplication and it quantizes down to uint8.
  *
  * This kernel takes a final int32 accumulator value (the output of matrix multiplication), adds to it the offset contribution of matrix A and matrix B and quantizes to uint8 through the output stage.
@@ -1745,7 +1748,7 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
 #else // defined(PER_CHANNEL_QUANTIZATION)
 
 #if RESULT_SHIFT < 0
-    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
+    in_s32       = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #else  // RESULT_SHIFT >= 0
     in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, VEC_SIZE);
 #endif // RESULT_SHIFT < 0
@@ -1768,13 +1771,13 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
     // Store the result
     STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT) && defined(OUTPUT_DATA_TYPE)
+#endif // defined(GEMMLOWP_OFFSET_CONTRIBUTION_QUANTIZE_DOWN_FIXEDPOINT)
 
 #undef VEC_INT
 
 #endif // defined(K_OFFSET) && defined(VEC_SIZE) && defined(VEC_SIZE_LEFTOVER)
 
-#if defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
+#if defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
  * This kernel takes a final int32 accumulator value and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
@@ -1870,9 +1873,9 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
     // Store the result
     STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
+#endif // defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN)
 
-#if defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
+#if defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FIXEDPOINT)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
  * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
@@ -1967,10 +1970,9 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
     // Store the result
     STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
+#endif // defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FIXEDPOINT)
 
-#if defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
-
+#if defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FIXEDPOINT_QSYMM16)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QSYMM16
  *
  * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QSYMM16 value.
@@ -2059,9 +2061,9 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
     // Store the result
     STORE_VECTOR_SELECT(res, short, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
+#endif // defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FIXEDPOINT_QSYMM16)
 
-#if defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)
+#if defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FLOAT)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
  * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
@@ -2157,4 +2159,4 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
     // Store the result
     STORE_VECTOR_SELECT(res, OUTPUT_DATA_TYPE, dst_addr, VEC_SIZE, VEC_SIZE_LEFTOVER, VEC_SIZE_LEFTOVER != 0 && get_global_id(0) == 0)
 }
-#endif // defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)
+#endif // defined(GEMMLOWP_OUTPUT_STAGE_QUANTIZE_DOWN_FLOAT)

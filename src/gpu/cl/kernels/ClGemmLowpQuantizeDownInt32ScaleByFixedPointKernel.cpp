@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,7 +114,11 @@ void ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel::configure(const CLCompi
 
     // Create kernel
     const std::string kernel_name = (info->output_data_type == DataType::QSYMM16) ? "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16" : "gemmlowp_output_stage_quantize_down_fixedpoint";
-    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win = calculate_max_window(*dst, Steps(num_elems_processed_per_iteration));
