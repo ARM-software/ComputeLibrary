@@ -48,7 +48,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool pretranspose_a = false, bool pretranspose_b = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false, bool pretranspose_a = false, bool pretranspose_b = false, bool run_twice = false>
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
@@ -130,6 +130,18 @@ protected:
             fill(AccessorType(c), 2);
         }
 
+        // Run with variable inputs.
+        if(run_twice)
+        {
+            gemm.run();
+            fill(AccessorType(a), 3); // Fill tensors with new seed after run
+            fill(AccessorType(b), 4);
+            if(!disable_c)
+            {
+                fill(AccessorType(c), 5);
+            }
+        }
+
         // Compute GEMM function
         gemm.run();
 
@@ -195,10 +207,20 @@ protected:
             transpose_matrix<T>(b, b_transposed);
         }
 
+        // Run with variable inputs.
+        if(run_twice)
+        {
+            reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
+            fill((pretranspose_a) ? a_transposed : a, 3);
+            fill((pretranspose_b) ? b_transposed : b, 4);
+            fill(c , 5);
+        }
+
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
         // Use transposed tensors if boolean enabled else use original tensors
-        return reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
+        auto r =  reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
+        return r;
     }
 
     TensorType      _target{};
