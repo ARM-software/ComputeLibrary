@@ -261,9 +261,11 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 const bool  is_ifm_ge_8        = src->dimension(idx_c) >= 8;
                 const bool  is_ifm_ge_16       = src->dimension(idx_c) >= 16;
                 const bool  is_ofm_lte_8       = weights->dimension(3U) <= 8;
+                const bool  is_ofm_lt_64       = weights->dimension(3U) < 64;
                 const bool  workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
                 const bool  is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
                 const bool  is_m_one           = output_shape[1] * output_shape[2] == 1;
+                const bool  is_unit_stride     = (conv2d_info.conv_info.stride().first == 1) && (conv2d_info.conv_info.stride().second == 1);
 
                 // Run Winograd if valid and IFM >= 8
                 if(is_wino_valid && is_ifm_ge_8)
@@ -300,7 +302,23 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                     }
                     else
                     {
-                        if( ((is_large_kernel_sz || is_m_one) && workload_gte_8192) || is_ofm_lte_8 )
+                        // Direct convolution used for the first layer of the network
+                        if(workload_gte_8192 && !is_ifm_ge_16 && !is_unit_stride && is_ofm_lt_64)
+                        {
+                            // In general, the question we should ask for the first convolution layer of a model is:
+                            // when the execution time of im2col + gemm < direct?. Since im2col does not depend on the OFM, it means that
+                            // when OFM is big enough, the contribution of im2col is small and the GEMM approach is preferable.
+                            // From internal experiments, the OFM threshold is 64 (is_ofm_lt_64)
+                            return ConvolutionMethod::DIRECT;
+                        }
+
+                        if((is_large_kernel_sz || is_m_one) && workload_gte_8192 && is_ifm_ge_16)
+                        {
+                            return ConvolutionMethod::DIRECT;
+                        }
+
+                        // Direct convolution used for the last layer of the network
+                        if(is_ofm_lte_8)
                         {
                             return ConvolutionMethod::DIRECT;
                         }
