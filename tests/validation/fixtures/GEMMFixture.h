@@ -152,7 +152,6 @@ protected:
                                       DataType data_type)
     {
         TensorShape shape_a_to_use = shape_a;
-
         if(reinterpret_input_as_3d)
         {
             // Collapse the second and third dimension if the input is 3D
@@ -213,13 +212,13 @@ protected:
             reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
             fill((pretranspose_a) ? a_transposed : a, 3);
             fill((pretranspose_b) ? b_transposed : b, 4);
-            fill(c , 5);
+            fill(c, 5);
         }
 
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
         // Use transposed tensors if boolean enabled else use original tensors
-        auto r =  reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
+        auto r = reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c, alpha, disable_c ? 0.f : beta);
         return r;
     }
 

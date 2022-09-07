@@ -51,15 +51,6 @@ public:
     }
 };
 
-class SmallBatchedGEMMDataset final : public GEMMDataset
-{
-public:
-    SmallBatchedGEMMDataset()
-    {
-        add_config(TensorShape(2U, 4U, 1U, 3U), TensorShape(5U, 2U, 3U), TensorShape(5U), TensorShape(5U, 4U, 1U, 3U), 1.0f, 0.0f);
-    }
-};
-
 class SmallGEMMOutput3DDataset final : public GEMMDataset
 {
 public:

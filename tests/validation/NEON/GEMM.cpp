@@ -319,7 +319,7 @@ template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 template <typename T>
-using NEGEMMFixtureDisabledC = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true>;
+using NEBatchedMatMulFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
 
 TEST_SUITE(Float)
 DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(framework::dataset::make("In0", { TensorShape(21U, 13U),
@@ -379,10 +379,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-TEST_SUITE(DisabledC)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixtureDisabledC<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                                   framework::dataset::make("ReshapeWeights", { true, false })),
 
+TEST_SUITE(BATCHED_MATMUL)
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                   framework::dataset::make("ReshapeWeights", { false })),
                                                                                                            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -390,15 +392,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixtureDisabledC<float>, framework::Datas
 }
 TEST_SUITE_END()
 
-TEST_SUITE(BatchedGEMMDisabledC)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixtureDisabledC<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedGEMMDataset(),
-                                                                                                                   framework::dataset::make("ReshapeWeights", { true, false })),
-
-                                                                                                           framework::dataset::make("DataType", DataType::F32)))
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                  framework::dataset::make("ReshapeWeights", { false })),
+                                                                                                          framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
+TEST_SUITE_END()
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END()
 
 TEST_SUITE_END()
