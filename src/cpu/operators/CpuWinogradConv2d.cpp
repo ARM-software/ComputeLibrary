@@ -163,7 +163,7 @@ void CpuWinogradConv2d::configure(const ITensorInfo *src, const ITensorInfo *wei
                                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, dst, conv_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate(src, weights, biases, dst, conv_info, act_info, enable_fast_math));
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info, enable_fast_math);
     ARM_COMPUTE_UNUSED(biases);
     const DataType data_type = src->data_type();
@@ -293,6 +293,12 @@ Status CpuWinogradConv2d::validate(const ITensorInfo *src, const ITensorInfo *we
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, dst, conv_info));
+
+    // Disable winograd for fp16 if fast math is false.
+    if(!enable_fast_math)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32);
+    }
 
     const Tensor4DShape              kernel_shape{ internal_get_shape(weights) };
     arm_conv::winograd::WinogradImpl winograd_impl{};
