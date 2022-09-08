@@ -477,6 +477,31 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
 
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+                                          framework::dataset::make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F16),
+                                                                                  TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F16)
+                                          }),
+                                          framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F16),
+                                                                                    TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F16)
+                                          })),
+                                          framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F16)
+                                          })),
+                                          framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                                                 PadStrideInfo(1, 1, 0, 0)
+                                          })),
+                                          framework::dataset::make("FastMath", { false, // case fp16 and fast_math False then disable Winograd
+                                                                                 true   // case fp16 and fast_math True then enable Winograd
+                                          })),
+                                                                           framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD })),
+               input_info, weights_info, output_info, conv_info, fast_math, expected)
+{
+    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+
 TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
