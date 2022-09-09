@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -531,11 +531,11 @@ void mul_U8_U8_U8(const ITensor *src1, const ITensor *src2, ITensor *out, const 
             }
             if(is_sat)
             {
-                vst1q_u8(output_ptr, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
+                vst1q_u8(output_ptr + x, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
             }
             else
             {
-                vst1q_u8(output_ptr, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
+                vst1q_u8(output_ptr + x, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
             }
         }
 
@@ -1618,7 +1618,8 @@ void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *
     }
 
     // Configure kernel window
-    Window win = calculate_max_window(out_shape);
+    Window win;
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src1, *src2);
 
     ICpuKernel::configure(win);
 }
