@@ -23,12 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/Tensor.h"
 #include "src/common/utils/Log.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/operators/CpuScale.h"
-#include "support/Rounding.h"
 
 namespace arm_compute
 {
@@ -75,9 +72,9 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     TensorShape shape(output->info()->dimension(idx_width));
     shape.set(1, output->info()->dimension(idx_height), false);
 
-    bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(data_layout, input->info()->data_type(), policy_to_use);
+    bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(data_layout, input->info()->data_type(), policy_to_use, info.border_mode);
 
-    if(precompute_indices_weights == true)
+    if(precompute_indices_weights)
     {
         const TensorInfo tensor_info_dxdy(shape, Format::F32);
         const TensorInfo tensor_info_offsets(shape, Format::S32);

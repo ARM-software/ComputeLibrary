@@ -40,12 +40,26 @@ float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t
     return static_cast<float>(in) / static_cast<float>(out);
 }
 
-bool arm_compute::scale_utils::is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy)
+bool arm_compute::scale_utils::is_precomputation_required(DataLayout data_layout, DataType data_type,
+                                                          InterpolationPolicy policy, BorderMode border_mode)
 {
-    // whether to precompute indices & weights
-    // The Neon™ kernels (which are preferred over SVE when policy is BILINEAR) do not use
-    // precomputed index and weights when data type is FP32/16.
-    // If policy is nearest_neighbor for SVE, then precompute because it's being used
-    // To be revised in COMPMID-5453/5454
-    return data_layout != DataLayout::NHWC || (data_type != DataType::F32 && data_type != DataType::F16) || (CPUInfo::get().get_isa().sve == true && policy == InterpolationPolicy::NEAREST_NEIGHBOR);
+    // Do not calculate precomputed weights and indices if kernel code doesn't use them
+    if(data_layout == DataLayout::NHWC)
+    {
+        switch(data_type)
+        {
+            case DataType::F32:
+            case DataType::F16:
+                return (CPUInfo::get().get_isa().sve == true && policy == InterpolationPolicy::NEAREST_NEIGHBOR);
+            case DataType::U8:
+            case DataType::S8:
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
+                return (border_mode != BorderMode::REPLICATE) || (policy == InterpolationPolicy::NEAREST_NEIGHBOR);
+            default:
+                return true;
+        }
+    }
+
+    return true;
 }

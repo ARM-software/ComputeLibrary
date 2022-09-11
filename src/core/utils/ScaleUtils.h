@@ -26,9 +26,6 @@
 
 #include "arm_compute/core/Types.h"
 
-#include <cstdint>
-#include <cstdlib>
-
 namespace arm_compute
 {
 namespace scale_utils
@@ -59,10 +56,11 @@ inline bool is_align_corners_allowed_sampling_policy(SamplingPolicy sampling_pol
  * @param[in] data_layout Data layout
  * @param[in] data_type   Data type
  * @param[in] policy      Interpolation policy
+ * @param[in] border_mode Border Mode
  *
  * @return True if precomputation is required
  */
-bool is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy);
+bool is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy, BorderMode border_mode);
 
 } // namespace scale_utils
 } // namespace arm_compute

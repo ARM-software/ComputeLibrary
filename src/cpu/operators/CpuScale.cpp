@@ -215,9 +215,9 @@ void CpuScale::prepare(ITensorPack &tensors)
                                             _scale_info.interpolation_policy;
         const SamplingPolicy sampling_policy = _scale_info.sampling_policy;
 
-        bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(_data_layout, src->info()->data_type(), policy_to_use);
+        bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(_data_layout, src->info()->data_type(), policy_to_use, _scale_info.border_mode);
 
-        if(precompute_indices_weights == true)
+        if(precompute_indices_weights)
         {
             switch(policy_to_use)
             {

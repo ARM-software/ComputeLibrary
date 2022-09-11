@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 #include "Scale.h"
 
 #include "Utils.h"
-#include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
@@ -183,14 +182,15 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
 
 template <typename T>
 SimpleTensor<T> scale(const SimpleTensor<T> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value,
-                      SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners)
+                      SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info)
 {
+    ARM_COMPUTE_UNUSED(output_quantization_info);
     return scale_core<T>(src, scale_x, scale_y, policy, border_mode, constant_border_value, sampling_policy, ceil_policy_scale, align_corners);
 }
 
 template <>
 SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value,
-                            SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners)
+                            SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info)
 {
     SimpleTensor<uint8_t> dst;
     if(src.quantization_info().uniform().scale != 0.f)
@@ -198,7 +198,7 @@ SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, flo
         SimpleTensor<float> src_tmp                 = convert_from_asymmetric(src);
         float               constant_border_value_f = dequantize_qasymm8(constant_border_value, src.quantization_info());
         SimpleTensor<float> dst_tmp                 = scale_core<float>(src_tmp, scale_x, scale_y, policy, border_mode, constant_border_value_f, sampling_policy, ceil_policy_scale, align_corners);
-        dst                                         = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
+        dst                                         = convert_to_asymmetric<uint8_t>(dst_tmp, output_quantization_info);
     }
     else
     {
@@ -209,7 +209,7 @@ SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, flo
 
 template <>
 SimpleTensor<int8_t> scale(const SimpleTensor<int8_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, int8_t constant_border_value,
-                           SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners)
+                           SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info)
 {
     SimpleTensor<int8_t> dst;
     if(src.quantization_info().uniform().scale != 0.f)
@@ -217,7 +217,7 @@ SimpleTensor<int8_t> scale(const SimpleTensor<int8_t> &src, float scale_x, float
         SimpleTensor<float> src_tmp                 = convert_from_asymmetric(src);
         float               constant_border_value_f = dequantize_qasymm8_signed(constant_border_value, src.quantization_info());
         SimpleTensor<float> dst_tmp                 = scale_core<float>(src_tmp, scale_x, scale_y, policy, border_mode, constant_border_value_f, sampling_policy, ceil_policy_scale, align_corners);
-        dst                                         = convert_to_asymmetric<int8_t>(dst_tmp, src.quantization_info());
+        dst                                         = convert_to_asymmetric<int8_t>(dst_tmp, output_quantization_info);
     }
     else
     {
@@ -227,11 +227,11 @@ SimpleTensor<int8_t> scale(const SimpleTensor<int8_t> &src, float scale_x, float
 }
 
 template SimpleTensor<int16_t> scale(const SimpleTensor<int16_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, int16_t constant_border_value,
-                                     SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners);
+                                     SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info);
 template SimpleTensor<half> scale(const SimpleTensor<half> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, half constant_border_value,
-                                  SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners);
+                                  SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info);
 template SimpleTensor<float> scale(const SimpleTensor<float> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, float constant_border_value,
-                                   SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners);
+                                   SamplingPolicy sampling_policy, bool ceil_policy_scale, bool align_corners, QuantizationInfo output_quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

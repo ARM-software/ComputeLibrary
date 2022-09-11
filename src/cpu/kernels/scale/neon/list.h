@@ -25,11 +25,8 @@
 #define SRC_CORE_NEON_KERNELS_SCALE_LIST_H
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
 
@@ -44,6 +41,7 @@ namespace cpu
 
 DECLARE_SCALE_KERNEL(s16_neon_scale);
 DECLARE_SCALE_KERNEL(u8_neon_scale);
+DECLARE_SCALE_KERNEL(s8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
 
@@ -360,10 +358,10 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                     int cout = 0;
                     for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
-                        auto in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
-                        auto in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
-                        auto in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
-                        auto in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
+                        const auto in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        const auto in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        const auto in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        const auto in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
 
                         auto out0 = wrapper::vmul(in00, s00);
                         out0      = wrapper::vmla(out0, in01, s01);
@@ -374,10 +372,10 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
 
                     for(; cout < out_dim_ch; ++cout)
                     {
-                        T in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
-                        T in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
-                        T in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
-                        T in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
+                        const T in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        const T in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        const T in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        const T in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
 
                         T out0 = in00 * s00_s;
                         out0 += in01 * s01_s;

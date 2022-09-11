@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace reference
 {
 template <typename T>
 SimpleTensor<T> scale(const SimpleTensor<T> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value = 0,
-                      SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool ceil_policy_scale = false, bool align_corners = false);
+                      SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool ceil_policy_scale = false, bool align_corners = false, QuantizationInfo output_quantization_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1980,8 +1980,8 @@
           "neon": {
             "fp16": [ "src/cpu/kernels/scale/neon/fp16.cpp" ],
             "integer": [ "src/cpu/kernels/scale/neon/integer.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/scale/neon/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/scale/neon/qasymm8_signed.cpp" ]
+            "qasymm8": [ "src/cpu/kernels/scale/neon/qasymm8.cpp", "src/cpu/kernels/scale/neon/integer.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/scale/neon/qasymm8_signed.cpp", "src/cpu/kernels/scale/neon/integer.cpp" ]
           }
         }
       },

@@ -50,8 +50,9 @@ public:
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      * @note Using @p policy Area only supports data layout NCHW and input data type U8.
+     * @note Using S8 data type only supports NHWC, @p border_mode Replicate, and @p policy Bilinear
      *
-     * @param[in]  src     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32.
+     * @param[in]  src     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/U8/S8/S16/F16/F32.
      * @param[in]  dx      Distance x tensor info. Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
      * @param[in]  dy      Distance y tensor info. Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
      * @param[in]  offsets Offset tensor info. Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.

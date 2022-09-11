@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,8 @@ public:
      * @param[in, out] src  Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]     dst  Destination tensor info. Data type supported: Same as @p src. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]      info @ref ScaleKernelInfo to be used for configuration
+     *
+     * @note Using S8 data type only supports NHWC, @p border_mode Replicate, and @p policy Bilinear
      */
     void configure(ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
