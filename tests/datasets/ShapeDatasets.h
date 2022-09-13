@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -203,8 +203,8 @@ public:
                      TensorShape{ 1U, 16U },
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 7U, 7U, 17U, 2U },
-                     // Batch size 4
-                     TensorShape{ 27U, 13U, 2U, 4U },
+                     // Batch size 4 and 2 SIMD iterations
+                     TensorShape{ 33U, 13U, 2U, 4U },
                      // Arbitrary batch size
                      TensorShape{ 11U, 11U, 3U, 5U }
     })

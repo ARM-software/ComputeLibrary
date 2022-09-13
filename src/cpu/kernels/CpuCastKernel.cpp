@@ -288,7 +288,7 @@ void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
                         int x = window_start_x;
                         for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(src.ptr()));
+                            const int8x16_t texels_s8 = vld1q_s8(src_ptr + x);
 
                             const int16x8x2_t texels =
                             {
