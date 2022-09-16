@@ -653,6 +653,17 @@
         })                                                                                                                                                            \
     })
 
+#define T_LOAD2D_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, yi, dst)                \
+    ({                                                                                                                                                                \
+        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA,                                                                                                                      \
+        {                                                                                                                                                             \
+            if(yi[_i].v >= 0)                                                                                                                                     \
+            {                                                                                                                                                         \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[_i].v, STRIDE_Y);                                                               \
+            }                                                                                                                                                         \
+        })                                                                                                                                                            \
+    })
+
 /** Load a tile from global memory (tensor) when the tensor is stored using a NDHWC layout using indirect X, Y and Z coordinates
  *
  * @param[in]  DATA_TYPE     Data type

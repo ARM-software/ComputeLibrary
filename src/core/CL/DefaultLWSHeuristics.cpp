@@ -61,7 +61,14 @@ cl::NDRange get_direct_lws(size_t gws_x, size_t gws_y, size_t gws_z)
 
     if(gws_x < gws_y)
     {
-        return cl::NDRange(4, 16, 1);
+        if(gws_x < 4)
+        {
+            return cl::NDRange(std::min(gws_x, static_cast<size_t>(2u)), 32, 1);
+        }
+        else
+        {
+            return cl::NDRange(std::min(gws_x, static_cast<size_t>(4u)), 8, 1);
+        }
     }
     else
     {

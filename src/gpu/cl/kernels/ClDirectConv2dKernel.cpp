@@ -242,6 +242,12 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(0)));
+        build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(1)));
+        build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(2)));
+        build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(0)));
+        build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(1)));
+        build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(2)));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
         build_options.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
