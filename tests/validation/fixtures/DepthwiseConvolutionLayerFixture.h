@@ -482,6 +482,7 @@ public:
         DWCComputeKernelInfo dwc_info;
         dwc_info.n0                         = _n0;
         dwc_info.m0                         = _conv_info.stride().first == 1 && _dilation.x() == 1 ? 8 : 1;
+        dwc_info.export_input_to_cl_image   = false;
         dwc_info.export_weights_to_cl_image = _export_to_cl_image;
 
         const ConvolutionInfo conv_kernel_info

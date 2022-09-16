@@ -94,7 +94,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
                                             "K0 can only be: 4, 8, and 16");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_weights_to_cl_image(weights),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_to_cl_image(weights),
                                             "Export to CLImage is not supported for this weight configuration");
         }
     }

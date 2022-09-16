@@ -145,7 +145,7 @@ __kernel void dwc_native_fp_nhwc(
         })
 
         // Load tile from the src tensor (TILE A)
-        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, (cout / DEPTH_MULTIPLIER), src_w, src_h, DILATION_X, 1, _IBOUNDARY_CHECK, a);
+        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, (cout / DEPTH_MULTIPLIER), SRC_WIDTH, SRC_HEIGHT, DILATION_X, 1, _IBOUNDARY_CHECK, a);
 
         TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 
@@ -185,7 +185,7 @@ __kernel void dwc_native_fp_nhwc(
     {
         LOOP_UNROLLING(int, m0, 0, 1, M0,
         {
-            int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
+            int xi_out = min(xo + M0 - 1 - m0, (int)(DST_WIDTH) - 1);
             VSTORE_PARTIAL(N0, PARTIAL_N0)
             (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + cout * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
         })
@@ -194,7 +194,7 @@ __kernel void dwc_native_fp_nhwc(
     {
         LOOP_UNROLLING(int, m0, 0, 1, M0,
         {
-            int xi_out = min(xo + M0 - 1 - m0, (int)(dst_w) - 1);
+            int xi_out = min(xo + M0 - 1 - m0, (int)(DST_WIDTH) - 1);
             VSTORE(N0)
             (c[M0 - 1 - m0].v, 0, (__global DST_DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + cout * sizeof(DST_DATA_TYPE) + (uint)xi_out * dst_stride_y + (uint)yo * dst_stride_z + (uint)bout * dst_stride_w));
         })

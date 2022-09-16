@@ -159,7 +159,7 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_
 
         desc.k0 = 8;
 
-        desc.export_weights_to_cl_image = export_weights_to_cl_image(wei);
+        desc.export_weights_to_cl_image = export_to_cl_image(wei);
     }
 
     return desc;
@@ -183,7 +183,7 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_
 
         desc.k0 = 8;
 
-        desc.export_weights_to_cl_image = export_weights_to_cl_image(wei);
+        desc.export_weights_to_cl_image = export_to_cl_image(wei);
     }
 
     return desc;

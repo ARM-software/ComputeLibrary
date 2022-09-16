@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,21 @@ cl::NDRange get_direct_lws(size_t gws_x, size_t gws_y, size_t gws_z)
         return cl::NDRange(8, 4, 1);
     }
 }
+
+cl::NDRange get_dwc_lws(size_t gws_x, size_t gws_y, size_t gws_z)
+{
+    ARM_COMPUTE_UNUSED(gws_y);
+    ARM_COMPUTE_UNUSED(gws_z);
+
+    if(gws_x < 32)
+    {
+        return cl::NDRange(gws_x, 4, 4);
+    }
+    else
+    {
+        return cl::NDRange(8, 4, 2);
+    }
+}
 } // namespace
 
 namespace arm_compute
@@ -91,6 +106,10 @@ cl::NDRange get_default_lws_for_type(CLKernelType kernel_type, cl::NDRange gws)
         case CLKernelType::WINOGRAD:
         {
             return get_winograd_lws(gws_x, gws_y, gws_z);
+        }
+        case CLKernelType::DEPTHWISE:
+        {
+            return get_dwc_lws(gws_x, gws_y, gws_z);
         }
         default:
         {

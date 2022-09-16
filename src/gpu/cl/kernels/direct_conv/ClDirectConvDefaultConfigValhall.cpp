@@ -77,15 +77,15 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(
     if(src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape          = wei->tensor_shape();
-        const TensorShape dst_shape          = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
-        const bool        export_to_cl_image = export_weights_to_cl_image(wei);
+        const TensorShape wei_shape                  = wei->tensor_shape();
+        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
         const int32_t m            = dst_shape[1] * dst_shape[2];
         const bool    is_pointwise = (wei_shape[1] == wei_shape[2]) && wei_shape[1] == 1;
 
-        desc.export_weights_to_cl_image = export_to_cl_image;
+        desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
         if(dst_shape[0] <= 4)
         {
@@ -138,15 +138,15 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
     if(src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape          = wei->tensor_shape();
-        const TensorShape dst_shape          = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
-        const bool        export_to_cl_image = export_weights_to_cl_image(wei);
+        const TensorShape wei_shape                  = wei->tensor_shape();
+        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
         const int32_t m            = dst_shape[1] * dst_shape[2];
         const bool    is_pointwise = (wei_shape[1] == wei_shape[2]) && wei_shape[1] == 1;
 
-        desc.export_weights_to_cl_image = export_to_cl_image;
+        desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
         if(dst_shape[0] <= 4)
         {
@@ -232,14 +232,14 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(
     if(src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape          = wei->tensor_shape();
-        const TensorShape dst_shape          = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
-        const bool        export_to_cl_image = export_weights_to_cl_image(wei);
+        const TensorShape wei_shape                  = wei->tensor_shape();
+        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t m            = dst_shape[1] * dst_shape[2];
         const bool    is_pointwise = (wei_shape[1] == wei_shape[2]) && wei_shape[1] == 1;
 
-        desc.export_weights_to_cl_image = export_to_cl_image;
+        desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
         if(dst_shape[0] <= 4)
         {
@@ -292,15 +292,15 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(
     if(src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape          = wei->tensor_shape();
-        const TensorShape dst_shape          = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
-        const bool        export_to_cl_image = export_weights_to_cl_image(wei);
+        const TensorShape wei_shape                  = wei->tensor_shape();
+        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
         const int32_t m            = dst_shape[1] * dst_shape[2];
         const bool    is_pointwise = (wei_shape[1] == wei_shape[2]) && wei_shape[1] == 1;
 
-        desc.export_weights_to_cl_image = export_to_cl_image;
+        desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
         if(dst_shape[0] <= 4)
         {

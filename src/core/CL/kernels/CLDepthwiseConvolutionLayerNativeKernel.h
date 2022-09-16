@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,7 +103,8 @@ private:
     unsigned int     _depth_multiplier{ 0 };
     const ICLTensor *_output_multipliers{};
     const ICLTensor *_output_shifts{};
-    bool             _export_to_cl_image { true };
+    bool             _export_input_to_cl_image{ false };
+    bool             _export_weights_to_cl_image{ true };
     bool             _is_quantized{ false };
 };
 } // namespace arm_compute
