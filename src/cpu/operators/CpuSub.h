@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,9 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
 };
 } // namespace cpu
 } // namespace arm_compute

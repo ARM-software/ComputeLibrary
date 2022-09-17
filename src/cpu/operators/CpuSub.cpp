@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 
 #include "src/common/utils/Log.h"
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -44,6 +46,13 @@ Status CpuSub::validate(const ITensorInfo *src0, const ITensorInfo *src1, const 
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuSubKernel::validate(src0, src1, dst, policy);
+}
+
+void CpuSub::run(ITensorPack &tensors)
+{
+    const auto split_dimension = static_cast<kernels::CpuSubKernel *>(_kernel.get())->get_split_dimension();
+
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 } // namespace cpu
 } // namespace arm_compute
