@@ -182,10 +182,16 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
 
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
+    ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
 
     const auto uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), activation_info.activation() });
+    if(dst != nullptr)
+    {
+        // dst auto inizialitation if not yet initialized
+        auto_init_if_empty(*dst, *src->clone());
+    }
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
@@ -200,10 +206,20 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 #endif // __aarch64__
     _act_info = activation_info;
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(src, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICPPKernel::configure(win_config.second);
+    Window win;
+
+    if(src->data_layout() != DataLayout::NHWC)
+    {
+        // Use squashed window
+        std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+        ICPPKernel::configure(win);
+    }
+    else
+    {
+        // Configure kernel window
+        win = calculate_max_window(*src, Steps());
+        ICPPKernel::configure(win);
+    }
 }
 
 Status CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)

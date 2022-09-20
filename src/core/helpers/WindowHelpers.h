@@ -176,6 +176,18 @@ inline Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps
     return calculate_max_enlarged_window(info.valid_region(), steps, border_size);
 }
 
+/** Calculate the squashed or maximum window for the given tensor shape.
+ *
+ * If the tensor data resides continuously in the memory, the tensor can be interpreted
+ * as 1D array and all the dimensions can be squashed together into the x-dimension.
+ * Otherwise, generate the max window for the given tensor shape.
+ *
+ * @param[in] src Tensor info object defining the shape of the input tensor.
+ *
+ * @return The maximum window the kernel can be executed on and the preferred split dimension.
+ */
+std::pair<Window, size_t> calculate_squashed_or_max_window(const ITensorInfo &src);
+
 /** Calculate the squashed or maximum window for the given tensor shapes.
  *
  * If the tensor data resides continuously in the memory, the tensor can be interpreted
