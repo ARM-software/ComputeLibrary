@@ -54,7 +54,9 @@ public:
                             ActivationLayerInfo::ActivationFunction::SQUARE,
                             ActivationLayerInfo::ActivationFunction::TANH,
                             ActivationLayerInfo::ActivationFunction::IDENTITY,
+#ifdef __aarch64__
                             ActivationLayerInfo::ActivationFunction::GELU,
+#endif /* __aarch64__ */
     })
     {
     }
