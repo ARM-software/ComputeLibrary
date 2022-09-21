@@ -351,6 +351,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PR
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
+
+TEST_SUITE(BATCHED_MATMUL)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                  framework::dataset::make("ReshapeWeights", { false })),
+                                                                                                          framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+}
+TEST_SUITE_END()
+
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
 
@@ -392,17 +404,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::Datas
 }
 TEST_SUITE_END()
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                  framework::dataset::make("ReshapeWeights", { false })),
-                                                                                                          framework::dataset::make("DataType", DataType::F16)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
-}
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END()
 
 TEST_SUITE_END()
