@@ -304,6 +304,12 @@ public:
     */
     bool is_wbsm_supported() const;
 
+    /** Return the DDK version. If the DDK version cannot be detected, return -1.
+     *
+     * @return The DDK version.
+     */
+    int32_t get_ddk_version() const;
+
 private:
     /** Load program and its dependencies.
      *
