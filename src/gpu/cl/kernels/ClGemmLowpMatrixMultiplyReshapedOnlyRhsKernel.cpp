@@ -376,8 +376,17 @@ void ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::configure(const CLCompileCon
         build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(a_offset * b_offset * src0->dimension(0)));
         build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
         build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(output_stage.gemmlowp_offset));
-        build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multipliers[0]));
-        build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(output_stage.gemmlowp_shifts[0]));
+        // In case of _is_quantized_per_channel, RESULT_MULTIPLIER and RESULT_SHIFT are not utilized, but they are passed as a part of T_QUANTIZE8 macro.
+        if(!_is_quantized_per_channel)
+        {
+            build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multipliers[0]));
+            build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(output_stage.gemmlowp_shifts[0]));
+        }
+        else
+        {
+            build_opts.add_option("-DRESULT_MULTIPLIER=0");
+            build_opts.add_option("-DRESULT_SHIFT=0");
+        }
         build_opts.add_option_if(_is_quantized_per_channel, "-DPER_CHANNEL_QUANTIZATION");
 
         const int min = output_stage.gemmlowp_min_bound;
