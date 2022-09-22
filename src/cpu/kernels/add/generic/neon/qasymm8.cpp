@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/add/generic/neon/impl.h"
 
 namespace arm_compute
 {
@@ -44,7 +45,7 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const int  window_step_x         = 16;
+    constexpr int window_step_x      = 16;
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
     const bool is_broadcast_across_x = src0->info()->tensor_shape().x() != src1->info()->tensor_shape().x();
@@ -53,8 +54,9 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
     const UniformQuantizationInfo iq2_info = src1->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = dst->info()->quantization_info().uniform();
 
-    const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
-    const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
+    const auto scale1 = iq1_info.scale / oq_info.scale;
+    const auto scale2 = iq2_info.scale / oq_info.scale;
+    const auto offset = float(oq_info.offset) - scale1 * float(iq1_info.offset) - scale2 * float(iq2_info.offset);
 
     if(is_broadcast_across_x)
     {
@@ -63,13 +65,10 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
         const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? src1 : src0;
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? src1 : src0;
-        const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
-        const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
 
-        const float32x4_t vscale1  = is_broadcast_input_2 ? vdupq_n_f32(iq1_info.scale) : vdupq_n_f32(iq2_info.scale);
-        const float32x4_t vscale2  = is_broadcast_input_2 ? vdupq_n_f32(iq2_info.scale) : vdupq_n_f32(iq1_info.scale);
-        const int32x4_t   voffset1 = is_broadcast_input_2 ? vdupq_n_s32(iq1_info.offset) : vdupq_n_s32(iq2_info.offset);
-        const int32x4_t   voffset2 = is_broadcast_input_2 ? vdupq_n_s32(iq2_info.offset) : vdupq_n_s32(iq1_info.offset);
+        const auto af_scale = is_broadcast_input_2 ? scale1 : scale2;
+        const auto bf_scale = is_broadcast_input_2 ? scale2 : scale1;
+        const auto vscale1  = vdupq_n_f32(af_scale);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -80,28 +79,26 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
 
         execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
-            const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
+            const auto non_broadcast_input_ptr = non_broadcast_input.ptr();
+            const auto output_ptr              = output.ptr();
 
-            const uint8_t    broadcast_value     = *reinterpret_cast<const uint8_t *>(broadcast_input.ptr());
-            const uint8x16_t broadcast_value_vec = vdupq_n_u8(broadcast_value);
-
-            const auto bf_0 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(broadcast_value_vec))))), voffset2)), vscale2);
-            const auto bf_1 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(broadcast_value_vec))))), voffset2)), vscale2);
-            const auto bf_2 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(broadcast_value_vec))))), voffset2)), vscale2);
-            const auto bf_3 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(broadcast_value_vec))))), voffset2)), vscale2);
-
-            const float bfs = static_cast<int32_t>(broadcast_value - broadcast_qinfo.offset) * broadcast_qinfo.scale;
+            const auto broadcast_value = *broadcast_input.ptr();
+            const auto bf = vdupq_n_f32(float(broadcast_value) * scale2 + offset);
+            const auto bfs = float(broadcast_value) * bf_scale + offset;
 
             // Compute S elements per iteration
             int x = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 const uint8x16_t a    = vld1q_u8(non_broadcast_input_ptr + x);
-                const auto       af_0 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1);
-                const auto       af_1 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1);
-                const auto       af_2 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1);
-                const auto       af_3 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1);
+
+                const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
+                const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
+
+                const auto af_0 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
+                const auto af_1 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
+                const auto af_2 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
+                const auto af_3 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
 
                 int32x4_t rf_0{};
                 int32x4_t rf_1{};
@@ -109,15 +106,15 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
                 int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_0, bf_0), invvscaleo));
-                rf_1 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_1, bf_1), invvscaleo));
-                rf_2 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_2, bf_2), invvscaleo));
-                rf_3 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_3, bf_3), invvscaleo));
+                rf_0 = vcvtnq_s32_f32(af_0);
+                rf_1 = vcvtnq_s32_f32(af_1);
+                rf_2 = vcvtnq_s32_f32(af_2);
+                rf_3 = vcvtnq_s32_f32(af_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_0, bf_0), invvscaleo));
-                rf_1 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_1, bf_1), invvscaleo));
-                rf_2 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_2, bf_2), invvscaleo));
-                rf_3 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_3, bf_3), invvscaleo));
+                rf_0 = vcvtq_s32_f32(af_0);
+                rf_1 = vcvtq_s32_f32(af_1);
+                rf_2 = vcvtq_s32_f32(af_2);
+                rf_3 = vcvtq_s32_f32(af_3);
 #endif //__aarch64__
 
                 const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
@@ -128,8 +125,12 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = quantize_qasymm8((afs + bfs), oq_info);
+                const auto result = float(non_broadcast_input_ptr[x]) * af_scale + bfs;
+#ifdef __aarch64__
+                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
+#else  // __aarch64__
+                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
+#endif  // __aarch64__
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -144,16 +145,15 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
-        const float32x4_t vscale1  = vdupq_n_f32(iq1_info.scale);
-        const float32x4_t vscale2  = vdupq_n_f32(iq2_info.scale);
-        const int32x4_t   voffset1 = vdupq_n_s32(iq1_info.offset);
-        const int32x4_t   voffset2 = vdupq_n_s32(iq2_info.offset);
+        const auto vscale1 = vdupq_n_f32(scale1);
+        const auto vscale2 = vdupq_n_f32(scale2);
+        const auto voffset = vdupq_n_f32(offset);
 
         execute_window_loop(win, [&](const Coordinates &)
         {
-            const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
-            const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
-            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+            const auto input1_ptr = input1.ptr();
+            const auto input2_ptr = input2.ptr();
+            const auto output_ptr = output.ptr();
 
             // Compute S elements per iteration
             int x = window_start_x;
@@ -162,15 +162,20 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
                 const uint8x16_t a = vld1q_u8(input1_ptr + x);
                 const uint8x16_t b = vld1q_u8(input2_ptr + x);
 
-                const auto af_0 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1);
-                const auto af_1 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1);
-                const auto af_2 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1);
-                const auto af_3 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1);
+                const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
+                const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
+                const auto b_u16_0 = vmovl_u8(vget_low_u8(b));
+                const auto b_u16_1 = vmovl_u8(vget_high_u8(b));
 
-                const auto bf_0 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(b))))), voffset2)), vscale2);
-                const auto bf_1 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(b))))), voffset2)), vscale2);
-                const auto bf_2 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(b))))), voffset2)), vscale2);
-                const auto bf_3 = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(b))))), voffset2)), vscale2);
+                const auto af_0 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
+                const auto af_1 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
+                const auto af_2 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
+                const auto af_3 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
+
+                const auto bf_0 = vmlaq_f32(af_0, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_0))), vscale2);
+                const auto bf_1 = vmlaq_f32(af_1, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_0))), vscale2);
+                const auto bf_2 = vmlaq_f32(af_2, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_1))), vscale2);
+                const auto bf_3 = vmlaq_f32(af_3, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_1))), vscale2);
 
                 int32x4_t rf_0{};
                 int32x4_t rf_1{};
@@ -178,15 +183,15 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
                 int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_0, bf_0), invvscaleo));
-                rf_1 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_1, bf_1), invvscaleo));
-                rf_2 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_2, bf_2), invvscaleo));
-                rf_3 = vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_3, bf_3), invvscaleo));
+                rf_0 = vcvtnq_s32_f32(bf_0);
+                rf_1 = vcvtnq_s32_f32(bf_1);
+                rf_2 = vcvtnq_s32_f32(bf_2);
+                rf_3 = vcvtnq_s32_f32(bf_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_0, bf_0), invvscaleo));
-                rf_1 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_1, bf_1), invvscaleo));
-                rf_2 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_2, bf_2), invvscaleo));
-                rf_3 = vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af_3, bf_3), invvscaleo));
+                rf_0 = vcvtq_s32_f32(bf_0);
+                rf_1 = vcvtq_s32_f32(bf_1);
+                rf_2 = vcvtq_s32_f32(bf_2);
+                rf_3 = vcvtq_s32_f32(bf_3);
 #endif //__aarch64__
 
                 const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
@@ -197,9 +202,12 @@ void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, co
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - iq1_info.offset) * iq1_info.scale;
-                const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - iq2_info.offset) * iq2_info.scale;
-                *(output_ptr + x) = quantize_qasymm8((afs + bfs), oq_info);
+                const auto result = float(input1_ptr[x]) * scale1 + float(input2_ptr[x]) * scale2 + offset;
+#ifdef __aarch64__
+                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
+#else  // __aarch64__
+                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
+#endif  // __aarch64__
             }
         },
         input1, input2, output);

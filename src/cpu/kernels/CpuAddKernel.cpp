@@ -49,6 +49,22 @@ namespace
 static const std::vector<CpuAddKernel::AddKernel> available_kernels =
 {
     {
+        "neon_qu8_add_fixedpoint",
+        [](const CpuAddKernelDataTypeISASelectorData & data)
+        {
+            return (data.dt == DataType::QASYMM8) && data.can_use_fixedpoint;
+        },
+        REGISTER_FP32_NEON(arm_compute::cpu::add_q8_neon_fixedpoint<uint8_t>)
+    },
+    {
+        "neon_qs8_add_fixedpoint",
+        [](const CpuAddKernelDataTypeISASelectorData & data)
+        {
+            return (data.dt == DataType::QASYMM8_SIGNED) && data.can_use_fixedpoint;
+        },
+        REGISTER_FP32_NEON(arm_compute::cpu::add_q8_neon_fixedpoint<int8_t>)
+    },
+    {
         "neon_fp32_add_as_1d_array",
         [](const CpuAddKernelDataTypeISASelectorData & data)
         {
@@ -222,8 +238,9 @@ Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, cons
                                         "Wrong shape for dst");
     }
 
+    const auto can_use_fixedpoint = add_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
     const auto uk = CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(CpuAddKernelDataTypeISASelectorData{ src0.data_type(),
-                                                                                          CPUInfo::get().get_isa(), can_interpret_inputs_as_1d_array(src0, src1) });
+                                                                                          CPUInfo::get().get_isa(), can_interpret_inputs_as_1d_array(src0, src1), can_use_fixedpoint });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
@@ -259,8 +276,9 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src0, *src1, *dst, policy));
 
     _can_interpret_inputs_as_1d_array = can_interpret_inputs_as_1d_array(*src0, *src1);
+    const auto can_use_fixedpoint     = add_q8_neon_fixedpoint_possible(src0, src1, dst);
     const auto uk                     = CpuAddKernel::get_implementation<CpuAddKernelDataTypeISASelectorData>(CpuAddKernelDataTypeISASelectorData{ src0->data_type(),
-                                                                                                              CPUInfo::get().get_isa(), _can_interpret_inputs_as_1d_array });
+                                                                                                              CPUInfo::get().get_isa(), _can_interpret_inputs_as_1d_array, can_use_fixedpoint });
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
