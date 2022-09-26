@@ -520,16 +520,14 @@ inline float16x8_t vinvq_f16(float16x8_t x)
 
 inline float16x8_t vtanhq_f16(float16x8_t val)
 {
-    const float16x8_t CONST_1        = vdupq_n_f16(1.f);
-    const float16x8_t CONST_2        = vdupq_n_f16(2.f);
     const float16x8_t CONST_MIN_TANH = vdupq_n_f16(-10.f);
     const float16x8_t CONST_MAX_TANH = vdupq_n_f16(10.f);
-
-    const float16x8_t x     = vminq_f16(vmaxq_f16(val, CONST_MIN_TANH), CONST_MAX_TANH);
-    const float16x8_t exp2x = vexpq_f16(vmulq_f16(CONST_2, x));
-    const float16x8_t num   = vsubq_f16(exp2x, CONST_1);
-    const float16x8_t den   = vaddq_f16(exp2x, CONST_1);
-    const float16x8_t tanh  = vmulq_f16(num, vinvq_f16(den));
+    const float16x8_t x              = vminq_f16(vmaxq_f16(val, CONST_MIN_TANH), CONST_MAX_TANH);
+    const auto        expx           = vexpq_f16(x);
+    const auto        expmx          = vinvq_f16(expx);
+    const auto        ab             = vsubq_f16(expx, expmx);
+    const auto        cd             = vaddq_f16(expx, expmx);
+    const float16x8_t tanh           = vdivq_f16(ab, cd);
     return tanh;
 }
 
