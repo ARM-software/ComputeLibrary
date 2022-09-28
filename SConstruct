@@ -312,7 +312,7 @@ else: # NONE "multi_isa" builds
         elif 'armv8.6-a-sve' == env['arch']:
             env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])
         elif 'armv8.6-a' == env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.6-a'])
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+fp16'])
 
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
         if "disable_mmla_fp" not in env['custom_options']:
