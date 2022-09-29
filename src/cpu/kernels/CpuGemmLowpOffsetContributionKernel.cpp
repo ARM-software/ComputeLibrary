@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,7 +108,9 @@ void run_offset_contribution(const Window &window,
     const int window_end_x   = window.x().end();
     const int window_step_x  = 16;
 
-    Iterator mm_result_it(mm_result, collapsed_window);
+    // if vector_sum_col is nullptr then stride_y is 0, else get stride_y
+    const size_t sum_col_stride_y = (vector_sum_col != nullptr) ? (vector_sum_col->info()->strides_in_bytes().y()) : 0;
+    Iterator     mm_result_it(mm_result, collapsed_window);
 
     if((a_offset != 0) && (b_offset != 0) && (vector_sum_col != nullptr) && (vector_sum_row != nullptr)) // true, true
     {
@@ -133,9 +135,10 @@ void run_offset_contribution(const Window &window,
 
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
-            const int batch_id           = id.z() / depth_input;
-            auto      vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_batch_offset);
-            auto      mm_result_ptr      = reinterpret_cast<int32_t *>(mm_result_it.ptr());
+            const int    batch_id           = id.z() / depth_input;
+            const size_t batch_offset_col   = batch_id * (sum_col_stride_y );
+            auto         vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_offset_col + batch_id * vector_sum_col_batch_offset);
+            auto         mm_result_ptr      = reinterpret_cast<int32_t *>(mm_result_it.ptr());
 
             // Compute the leftover term due to b_offset.
             int32_t b_offset_term_s32 = *(reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y) + id.y() + (id.z() % depth_input) * height_input);
@@ -291,9 +294,10 @@ void run_offset_contribution(const Window &window,
 
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
-            const int batch_id           = id.z() / depth_input;
-            auto      vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_batch_offset);
-            auto      mm_result_ptr      = reinterpret_cast<int32_t *>(mm_result_it.ptr());
+            const int    batch_id           = id.z() / depth_input;
+            const size_t batch_offset_col   = batch_id * (sum_col_stride_y ); // Value to offset vector_sum_col_ptr to allow for iteration of y values in tensor
+            auto         vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_offset_col + batch_id * vector_sum_col_batch_offset);
+            auto         mm_result_ptr      = reinterpret_cast<int32_t *>(mm_result_it.ptr());
 
             int x = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
