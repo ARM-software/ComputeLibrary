@@ -716,7 +716,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             if(d->data_type() == DataType::S32)
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
-                                                "We could not find an optimized kernel for U8/QASYMM8 input and S32 output");
+                                                "We could not find an optimized kernel for U8/QASYMM8 input and U32 output");
             }
             else
             {
@@ -734,7 +734,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             else
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf, args, {})),
-                                                "We could not find an optimized kernel for S8 input and S32 output");
+                                                "We could not find an optimized kernel for S8 input and S8 output");
             }
             break;
 #endif /* __aarch64__ */
@@ -749,7 +749,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
-                                            "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+                                            "We could not find an optimized kernel for F16 input and F16 output");
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
