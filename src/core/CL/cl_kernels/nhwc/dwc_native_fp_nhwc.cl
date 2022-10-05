@@ -158,7 +158,11 @@ __kernel void dwc_native_fp_nhwc(
         {
             LOOP_UNROLLING(int, xk, 0, 1, _IWEI_WIDTH,
             {
+#if GPU_ARCH == GPU_ARCH_MIDGARD
+                c[m0].v += a[xk + m0].v * b[xk].v;
+#else  // GPU_ARCH == GPU_ARCH_MIDGARD
                 c[m0].v = fma(a[xk + m0].v, b[xk].v, c[m0].v);
+#endif // GPU_ARCH == GPU_ARCH_MIDGARD
             })
         })
     }
