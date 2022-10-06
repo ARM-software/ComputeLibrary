@@ -34,6 +34,11 @@
 
 #include <arm_neon.h>
 
+namespace
+{
+    static constexpr size_t default_mws_N1_fp32_neon = 22447;
+    static constexpr size_t default_mws_V1_fp32_neon = 38982;
+}
 namespace arm_compute
 {
 namespace cpu
@@ -1907,6 +1912,47 @@ void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *
     std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src1, *src2);
 
     ICpuKernel::configure(win);
+}
+
+size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(thread_count);
+
+#if defined(ENABLE_FP32_KERNELS)
+    if(this->_func_float == &mul_F32_F32_F32)
+    {
+        size_t mws = ICPPKernel::default_mws;
+        if(platform.get_cpu_model() == CPUModel::N1)
+        {
+            mws = default_mws_N1_fp32_neon;
+        }
+        else if(platform.get_cpu_model() == CPUModel::V1)
+        {
+            mws = default_mws_V1_fp32_neon;
+        }
+        else
+        {
+            return ICPPKernel::default_mws;
+        }
+
+        // tensor is 1D or was re-interpreted as 1D
+        if(this->window().shape().num_dimensions() == 1)
+        {
+            return mws;
+        }
+        else
+        {
+            // scale mws down by the number of elements along all the dimensions (x, z, w, etc) except the one
+            // that we parallelize along (the y dimension). This allows for parallelization when the Y_SIZE is small
+            // but the other sizes are large, which boosts performance.
+            mws = static_cast<size_t>(mws / (this->window().num_iterations_total() / this->window().num_iterations(1)));
+            return std::max(static_cast<size_t>(1), mws);
+        }
+    }
+#else /* ENABLE_FP32_KERNELS */
+    ARM_COMPUTE_UNUSED(platform);
+#endif /* ENABLE_FP32_KERNELS */
+    return ICPPKernel::default_mws;
 }
 
 Status CpuMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy,

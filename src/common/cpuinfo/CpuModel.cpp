@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,7 @@ bool model_supports_fp16(CpuModel model)
         case CpuModel::X1:
         case CpuModel::V1:
         case CpuModel::A64FX:
+        case CpuModel::N1:
             return true;
         default:
             return false;
@@ -69,6 +70,7 @@ bool model_supports_dot(CpuModel model)
         case CpuModel::A510:
         case CpuModel::X1:
         case CpuModel::V1:
+        case CpuModel::N1:
             return true;
         default:
             return false;
@@ -116,9 +118,11 @@ CpuModel midr_to_model(uint32_t midr)
                     model = CpuModel::GENERIC_FP16;
                 }
                 break;
+            case 0xd0c: // N1
+                model = CpuModel::N1;
+                break;
             case 0xd06: // A65
             case 0xd0b: // A76
-            case 0xd0c: // N1
             case 0xd0d: // A77
             case 0xd0e: // A76AE
             case 0xd41: // A78

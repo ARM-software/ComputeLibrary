@@ -85,7 +85,7 @@ public:
      * @param[in] platform     The CPU platform used to create the context.
      * @param[in] thread_count Number of threads in the execution.
      *
-     * @return[out] small_network_mws          Minimum workload size for requsted configuration.
+     * @return[out] mws Minimum workload size for requested configuration.
      */
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
