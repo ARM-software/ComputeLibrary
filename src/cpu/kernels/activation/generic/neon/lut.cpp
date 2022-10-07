@@ -411,11 +411,11 @@ void substitute_bytes_neon(
 #endif // __aarch64__
 } // namespace
 
+#ifdef __aarch64__
 void neon_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(!ActivationLayerInfo::is_lut_supported(act_info.activation(), src->info()->data_type()));
-#ifdef __aarch64__
-    const int window_step_x  = src->info()->tensor_shape().x();
+    const auto window_end_x = window.x().end();
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
     Iterator input(src, win_collapsed);
@@ -424,16 +424,10 @@ void neon_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLa
     {
         const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
         auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
-        substitute_bytes_neon(act_info.lut().data(), 1u, window_step_x, &input_ptr, &output_ptr);
+        substitute_bytes_neon(act_info.lut().data(), 1u, window_end_x, &input_ptr, &output_ptr);
     },
     input, output);
-#else  // #ifdef __aarch64__
-    ARM_COMPUTE_UNUSED(src);
-    ARM_COMPUTE_UNUSED(dst);
-    ARM_COMPUTE_UNUSED(act_info);
-    ARM_COMPUTE_UNUSED(window);
-    ARM_COMPUTE_ERROR("LUT Only supported in aarch64.");
-#endif // __aarch64__
 }
+#endif // __aarch64__
 } // namespace cpu
 } // namespace arm_compute

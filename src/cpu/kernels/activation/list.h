@@ -31,7 +31,10 @@ namespace cpu
 #define DECLARE_ACTIVATION_KERNEL(func_name) \
     void func_name(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 
+#ifdef __aarch64__
 DECLARE_ACTIVATION_KERNEL(neon_q8_activation_lut);
+#endif // __aarch64__
+
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation);
 DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_activation);
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_signed_activation);
