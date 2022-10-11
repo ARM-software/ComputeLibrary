@@ -49,6 +49,24 @@ VQRSHRN_IMPL(uint32x2_t, uint64x2_t, vqrshrn_n, u64)
 
 #undef VQRSHRN_IMPL
 
+#ifdef __aarch64__
+#define VQRSHRN_SCALAR_IMPL(half_vtype, vtype, prefix, postfix) \
+    template <int b>                                            \
+    inline half_vtype vqrshrn(const vtype &a)                   \
+    {                                                           \
+        return prefix##_##postfix(a, b);                        \
+    }
+
+VQRSHRN_SCALAR_IMPL(int8_t, int16_t, vqrshrnh_n, s16)
+VQRSHRN_SCALAR_IMPL(uint8_t, uint16_t, vqrshrnh_n, u16)
+VQRSHRN_SCALAR_IMPL(int16_t, int32_t, vqrshrns_n, s32)
+VQRSHRN_SCALAR_IMPL(uint16_t, uint32_t, vqrshrns_n, u32)
+VQRSHRN_SCALAR_IMPL(int32_t, int64_t, vqrshrnd_n, s64)
+VQRSHRN_SCALAR_IMPL(uint32_t, uint64_t, vqrshrnd_n, u64)
+
+#undef VQRSHRN_SCALAR_IMPL
+#endif // __aarch64__
+
 // This function is the mixed version of VQRSHRN and VQRSHRUN.
 // The input vector is always signed integer, while the returned vector
 // can be either signed or unsigned depending on the signedness of scalar type T.
@@ -72,6 +90,29 @@ VQRSHRN_EX_IMPL(int16x4_t, int32x4_t, vqrshrn_n, vqrshrun_n, s32)
 VQRSHRN_EX_IMPL(int32x2_t, int64x2_t, vqrshrn_n, vqrshrun_n, s64)
 
 #undef VQRSHRN_EX_IMPL
+
+#ifdef __aarch64__
+#define VQRSHRN_EX_SCALAR_IMPL(half_vtype, vtype, prefix_signed, prefix_unsigned, postfix)                       \
+    template <int b, typename T>                                                                                 \
+    inline typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, half_vtype>::type     \
+    vqrshrn_ex(const vtype &a)                                                                                   \
+    {                                                                                                            \
+        return prefix_signed##_##postfix(a, b);                                                                  \
+    }                                                                                                            \
+                                                                                                                 \
+    template <int b, typename T>                                                                                 \
+    inline typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, u##half_vtype>::type \
+    vqrshrn_ex(const vtype &a)                                                                                   \
+    {                                                                                                            \
+        return prefix_unsigned##_##postfix(a, b);                                                                \
+    }
+
+VQRSHRN_EX_SCALAR_IMPL(int8_t, int16_t, vqrshrnh_n, vqrshrunh_n, s16)
+VQRSHRN_EX_SCALAR_IMPL(int16_t, int32_t, vqrshrns_n, vqrshruns_n, s32)
+VQRSHRN_EX_SCALAR_IMPL(int32_t, int64_t, vqrshrnd_n, vqrshrund_n, s64)
+
+#undef VQRSHRN_EX_IMPL
+#endif // __aarch64__
 
 } // namespace wrapper
 } // namespace arm_compute

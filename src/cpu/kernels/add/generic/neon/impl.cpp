@@ -205,6 +205,10 @@ void add_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
         const auto b_scale = is_broadcast_input_1 ? in1_scale : in0_scale;
         const auto a_vscale_6p10 = wrapper::vdup_n(a_scale_6p10, wrapper::traits::vector_64_tag());
 
+#ifndef __aarch64__
+        const auto a_scale = is_broadcast_input_1 ? in0_scale : in1_scale;
+#endif // __aarch64__
+
         // Clear the x dimension on the execution window as we process the whole row each iteration.
         a_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
@@ -219,8 +223,14 @@ void add_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
             const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
 
             const auto b_val = *b_ptr;
-            const auto b_scaled_22p10 = static_cast<int32_t>(support::cpp11::lround(b_scale * b_val * 1024.f));
-            const auto b_vscaled_offseted_22p10 = wrapper::vdup_n(b_scaled_22p10 + offset_22p10, wrapper::traits::vector_128_tag());
+            const auto b_scaled = b_scale * b_val;
+            const auto b_scaled_22p10 = static_cast<int32_t>(support::cpp11::lround(b_scaled * 1024.f));
+            const auto b_scaled_offseted_22p10 = b_scaled_22p10 + offset_22p10;
+            const auto b_vscaled_offseted_22p10 = wrapper::vdup_n(b_scaled_offseted_22p10, wrapper::traits::vector_128_tag());
+
+#ifndef __aarch64__
+            const auto b_scaled_offseted = b_scaled + offset;
+#endif // __aarch64__
 
             int x = window_start_x;
 
@@ -263,7 +273,11 @@ void add_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
             // Process the left-over elements.
             for(; x < window_end_x; ++x)
             {
-                out_ptr[x] = utility::clamp<int32_t, ScalarType>((int32_t(a_ptr[x]) * a_scale_6p10 + b_scaled_22p10 + offset_22p10) >> 10);
+#ifdef __aarch64__
+                out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<2, ScalarType>(int32_t(a_ptr[x]) * a_scale_6p10 + b_scaled_offseted_22p10));
+#else // __aarch64__
+                out_ptr[x] = utility::clamp<int, ScalarType>(support::cpp11::lround(float(a_ptr[x]) * a_scale + b_scaled_offseted));
+#endif // __aarch64__
             }
         },
         b_input_it, a_input_it, out_it);
@@ -337,8 +351,11 @@ void add_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
             // Process the left-over elements.
             for(; x < window_end_x; ++x)
             {
-                out_ptr[x] = utility::clamp<int32_t, ScalarType>(
-                    (int32_t(in0_ptr[x]) * in0_scale_6p10 + int32_t(in1_ptr[x]) * in1_scale_6p10 + offset_22p10) >> 10);
+#ifdef __aarch64__
+                out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<2, ScalarType>(int32_t(in0_ptr[x]) * in0_scale_6p10 + int32_t(in1_ptr[x]) * in1_scale_6p10 + offset_22p10));
+#else // __aarch64__
+                out_ptr[x] = utility::clamp<int, ScalarType>(support::cpp11::lround(float(in0_ptr[x]) * in0_scale + float(in1_ptr[x]) * in1_scale + offset));
+#endif // __aarch64__
             }
         },
         in0_it, in1_it, out_it);
