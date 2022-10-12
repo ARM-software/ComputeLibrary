@@ -124,6 +124,10 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         else:
             obj = cloned_build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
+    if env['mapfile']:
+        if not 'windows' in env['os']:
+            cloned_build_env['LINKFLAGS'].append('-Wl,-Map='+ name + '.map')
+
     obj = install_lib(obj)
     build_env.Default(obj)
     return obj
