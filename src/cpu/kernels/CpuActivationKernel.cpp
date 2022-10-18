@@ -208,18 +208,9 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
 
     Window win;
 
-    if(src->data_layout() != DataLayout::NHWC)
-    {
-        // Use squashed window
-        std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
-        ICPPKernel::configure(win);
-    }
-    else
-    {
-        // Configure kernel window
-        win = calculate_max_window(*src, Steps());
-        ICPPKernel::configure(win);
-    }
+    // Use squashed window
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src);
+    ICPPKernel::configure(win);
 }
 
 Status CpuActivationKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
