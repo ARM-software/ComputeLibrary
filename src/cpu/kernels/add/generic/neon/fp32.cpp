@@ -32,10 +32,5 @@ void add_fp32_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
 {
     return add_same_neon<float>(src0, src1, dst, policy, window);
 }
-
-void add_fp32_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-{
-    return add_same_neon_as_1d_array<float>(src0, src1, dst, policy, window);
-}
 }
 } // namespace arm_compute

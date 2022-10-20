@@ -128,35 +128,6 @@ void add_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
     }
 }
 
-template <typename ScalarType>
-void add_same_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-{
-    const ScalarType *src0_ptr = reinterpret_cast<const ScalarType *>(src0->buffer());
-    const ScalarType *src1_ptr = reinterpret_cast<const ScalarType *>(src1->buffer());
-    ScalarType       *dst_ptr  = reinterpret_cast<ScalarType *>(dst->buffer());
-
-    constexpr int window_step_x  = 16 / sizeof(ScalarType);
-    const auto    window_start_x = static_cast<int>(window.x().start());
-    const auto    window_end_x   = static_cast<int>(window.x().end());
-
-    int x = window_start_x;
-    for(; x <= (window_end_x - window_step_x); x += window_step_x)
-    {
-        const auto val1 = wrapper::vloadq(src0_ptr + x);
-        const auto val2 = wrapper::vloadq(src1_ptr + x);
-        const auto res  = (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
-        wrapper::vstore(dst_ptr + x, res);
-    }
-
-    // Compute left-over elements
-    for(; x < window_end_x; ++x)
-    {
-        const auto val1 = *(src0_ptr + x);
-        const auto val2 = *(src1_ptr + x);
-        *(dst_ptr + x)  = (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
-    }
-}
-
 bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst)
 {
     const auto iq0 = src0->quantization_info().uniform();
@@ -381,15 +352,6 @@ template void add_same_neon<int16_t>(const ITensor *src0, const ITensor *src1, I
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 template void add_same_neon<float16_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-#endif /* (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
-
-template void add_same_neon_as_1d_array<float>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-template void add_same_neon_as_1d_array<uint8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-template void add_same_neon_as_1d_array<int32_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-template void add_same_neon_as_1d_array<int16_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-template void add_same_neon_as_1d_array<float16_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 #endif /* (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
 
 template void add_q8_neon_fixedpoint<int8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);

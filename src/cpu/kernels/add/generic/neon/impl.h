@@ -33,9 +33,6 @@ namespace cpu
 template <typename ScalarType>
 void add_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 
-template <typename ScalarType>
-void add_same_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-
 bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
 
 template <typename ScalarType>

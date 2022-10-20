@@ -87,7 +87,6 @@ struct CpuAddKernelDataTypeISASelectorData
 {
     DataType            dt;
     cpuinfo::CpuIsaInfo isa;
-    bool                can_interpret_inputs_as_1d_array;
     bool                can_use_fixedpoint;
 };
 
