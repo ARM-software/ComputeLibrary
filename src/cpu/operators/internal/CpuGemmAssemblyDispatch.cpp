@@ -157,8 +157,8 @@ public:
                                                                                             const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &tensors) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
     bool                             is_configured() const override;
     experimental::MemoryRequirements workspace() const override;
     bool                             isVarWeightsKernel() const override
@@ -211,12 +211,12 @@ private:
     /** Indirect buffer */
     std::unique_ptr<const TypeInput *const *, free_delete> _indirect_arg{};
     std::unique_ptr<const TypeInput *, free_delete>        _indirect_buf{};
-    std::vector<TypeInput>                                 _indirect_pad{};
-    arm_gemm::ConvolutionParameters                        _cp{};
-    experimental::MemoryRequirements                       _aux_mem{ Count };
-    bool                                                   _B_pretranspose_required{ false };
-    bool                                                   _is_b_constant{ true };
-    bool                                                   _is_c_constant{ true };
+    std::vector<TypeInput>           _indirect_pad{};
+    arm_gemm::ConvolutionParameters  _cp{};
+    experimental::MemoryRequirements _aux_mem{ Count };
+    bool                             _B_pretranspose_required{ false };
+    bool                             _is_b_constant{ true };
+    bool                             _is_c_constant{ true };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -767,6 +767,7 @@ Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(info.reshape_b_only_on_first_run), "Assembly kernel will not be executed when reshape_b_only_on_first_run is false");
 
 #ifndef __aarch64__
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->element_size() == 1, "8bit integer types only supported for aarch64");

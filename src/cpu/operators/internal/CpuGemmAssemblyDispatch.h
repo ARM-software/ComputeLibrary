@@ -54,6 +54,7 @@ struct AsmGemmInfo
     bool                      fast_mode{ false };
     bool                      fixed_format{ false };
     arm_compute::WeightFormat weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
+    bool                      reshape_b_only_on_first_run{ true };
 };
 
 /** Assembly kernel glue */
