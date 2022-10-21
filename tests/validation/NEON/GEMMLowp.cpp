@@ -211,13 +211,6 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
     }
 }
 
-TEST_SUITE(BatchedMatMul)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpBatchedMatMulFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpBatchedMatMulDataset())
-{
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END() // BatchedMatMul
-
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
     // Validate output
@@ -230,20 +223,51 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFixture, framework:
     validate(Accessor(_target), _reference);
 }
 
+constexpr AbsoluteTolerance<float> tolerance_batched(2);
+
+using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedUnsigned =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, uint8_t, uint8_t, true>;
+
+TEST_SUITE(BatchedMatMul)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedUnsigned, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedBatchedMatMulDatasetUnsigned(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                               framework::dataset::make("bool", { false })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8
+
+using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedSigned =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, int8_t, int8_t, true>;
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedSigned, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedBatchedMatMulDatasetSigned(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
+                               framework::dataset::make("bool", { false })))
+{
+    validate(Accessor(_target), _reference, tolerance_batched);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // BatchedMatMul
+
 using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+constexpr AbsoluteTolerance<float> tolerance_quant(1);
+
 TEST_SUITE(FusedOffsetOutput)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
                        framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_quant);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
                        framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_quant);
 }
 TEST_SUITE_END() // FusedOffsetOutput
 TEST_SUITE_END() // MatrixMultiplyCore
