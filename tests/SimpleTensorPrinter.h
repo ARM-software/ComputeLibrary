@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2021 Arm Limited.
+ * Copyright (c) 2017-2018, 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ARM_COMPUTE_TEST_SIMPLE_TENSOR_PRINTER
+#define ARM_COMPUTE_TEST_SIMPLE_TENSOR_PRINTER
 
 #include "arm_compute/core/Error.h"
 
@@ -152,3 +155,4 @@ void print_simpletensor(const SimpleTensor<T> &tensor, const std::string &title,
 #endif // PRINT_TENSOR_LIMIT
 } // namespace test
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_TEST_SIMPLE_TENSOR_PRINTER */

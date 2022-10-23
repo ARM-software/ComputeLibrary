@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 
@@ -133,7 +134,7 @@ using make_unsigned_conditional_t = typename std::conditional<std::is_integral<T
 
 // clang-format on
 // *INDENT-ON*
-}
+} // namespace traits
 
 /** Look up the format corresponding to a channel.
  *
@@ -628,6 +629,14 @@ void set_tensor_static(TensorType &t)
 {
     t.info()->set_tensor_dims_state(construct_static_dims_state());
 }
+
+inline experimental::dynamic_fusion::Conv2dAttributes convert_pad_stride_info_to_conv_attr(const PadStrideInfo &info, const Size2D &dialation)
+{
+    const Padding2D info_pad(info.pad_left(), info.pad_right(), info.pad_top(), info.pad_bottom());
+    const Size2D    info_stride(info.stride().first, info.stride().second);
+    return arm_compute::experimental::dynamic_fusion::Conv2dAttributes().pad(info_pad).stride(info_stride).dilation(dialation);
+}
+
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_UTILS_H */
