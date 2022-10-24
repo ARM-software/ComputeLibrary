@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,10 @@ namespace arm_compute
 class CLTuningParams
 {
 public:
-    CLTuningParams(const CLTuningParams &) = default;
+    CLTuningParams(const CLTuningParams &tuning_params)
+        : _lws(tuning_params._lws), _wbsm(tuning_params._wbsm)
+    {
+    }
 
     CLTuningParams(unsigned int lws_x = 0, unsigned int lws_y = 0, unsigned int lws_z = 0, int wbsm = 0)
         : _lws(lws_x, lws_y, lws_z), _wbsm(wbsm)
@@ -50,6 +53,12 @@ public:
     CLTuningParams(cl_int wbsm)
         : CLTuningParams(cl::NullRange, wbsm)
     {
+    }
+    CLTuningParams& operator=(const CLTuningParams &other)
+    {
+        _lws = other._lws;
+        _wbsm = other._wbsm;
+        return *this;
     }
 
     void set_lws(cl::NDRange lws)
