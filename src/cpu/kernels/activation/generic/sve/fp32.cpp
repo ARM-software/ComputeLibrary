@@ -48,11 +48,12 @@ void sve_fp32_activation(const ITensor *src, ITensor *dst, const ActivationLayer
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    const auto const_1     = svdup_n_f32(1.f);
-    const auto const_0     = svdup_n_f32(0.f);
-    const auto const_6     = svdup_n_f32(6.f);
-    const auto const_3     = svdup_n_f32(3.f);
-    const auto const_inv_6 = svdup_n_f32(0.166666667f);
+    const auto const_1          = svdup_n_f32(1.f);
+    const auto const_0          = svdup_n_f32(0.f);
+    const auto const_6          = svdup_n_f32(6.f);
+    const auto const_3          = svdup_n_f32(3.f);
+    const auto const_inv_6      = svdup_n_f32(0.166666667f);
+    const auto soft_relu_thresh = svdup_n_f32(16.63553047f);
 
     const auto va = svdup_n_f32(act_info.a());
     const auto vb = svdup_n_f32(act_info.b());
@@ -93,7 +94,7 @@ void sve_fp32_activation(const ITensor *src, ITensor *dst, const ActivationLayer
                     tmp = svadd_f32_z(pg, svmul_f32_z(pg, svmin_f32_z(pg, vin, const_0), va), svmax_f32_z(pg, vin, const_0));
                     break;
                 case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-                    tmp = svlog_f32_z(pg, svadd_f32_z(pg, const_1, svexp_f32_z(pg, vin)));
+                    tmp = svsel_f32(svcmpgt_f32(pg, vin, soft_relu_thresh), vin, svlog_f32_z(pg, svadd_f32_z(pg, const_1, svexp_f32_z(pg, vin))));
                     break;
                 case ActivationLayerInfo::ActivationFunction::ELU:
                     tmp = svsel_f32(svcmpgt_f32(pg, vin, const_0), vin, svmul_f32_z(pg, va, svsub_f32_z(pg, svexp_f32_z(pg, vin), const_1)));

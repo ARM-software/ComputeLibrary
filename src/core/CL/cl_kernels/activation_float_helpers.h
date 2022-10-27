@@ -52,7 +52,7 @@
 #define lrelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) ((min(x, (DATA_TYPE)0.0) * (DATA_TYPE)A_VAL) + max(x, (DATA_TYPE)0.0))
 
 // Soft RELU Activation
-#define srelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (log((DATA_TYPE)1.0 + exp(x)))
+#define srelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (select((log((DATA_TYPE)1.0 + exp(x))), x, (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x,(DATA_TYPE)16.63553047)))
 
 // ELU Activation
 #define elu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (select(((DATA_TYPE)A_VAL * (exp(x) - (DATA_TYPE)1.0)), x, (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x, (DATA_TYPE)0.0)))
