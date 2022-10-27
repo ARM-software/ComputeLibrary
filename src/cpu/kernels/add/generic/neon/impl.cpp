@@ -144,7 +144,7 @@ bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo 
     }
 
     const auto offset = float(oq.offset) - scale0 * float(iq0.offset) - scale1 * float(iq1.offset);
-    const auto max_acc = (std::abs(scale0) + std::abs(scale1)) * 1024.f + std::abs(offset);
+    const auto max_acc = (std::abs(scale0) + std::abs(scale1)) * 256.f + std::abs(offset);
 
     if(max_acc > 2097151.f)  // 2^21 - 1
     {
