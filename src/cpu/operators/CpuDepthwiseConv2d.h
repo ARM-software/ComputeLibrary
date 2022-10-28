@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -143,6 +143,7 @@ private:
         bool                                                _permute{ false };
         bool                                                _is_activationlayer_enabled{ false };
         bool                                                _is_prepared{ false };
+        bool                                                _are_weights_const{ true };
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following kernel:
