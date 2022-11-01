@@ -108,6 +108,19 @@ VSHRQ_IMPL(int32x4_t, vshrq_n, s32)
 #undef VSHRQ_IMPL
 
 #ifdef __aarch64__
+#define VSHRQ_SCALAR_IMPL(vtype, prefix, postfix) \
+    template <int b>                              \
+    inline vtype vshrq_n(const vtype &a)          \
+    {                                             \
+        return prefix##_##postfix(a, b);          \
+    }
+VSHRQ_SCALAR_IMPL(uint32_t, vshrd_n, u64)
+VSHRQ_SCALAR_IMPL(int32_t, vshrd_n, s64)
+
+#undef VSHRQ_SCALAR_IMPL
+#endif // __aarch64__
+
+#ifdef __aarch64__
 #define VQRSHRN_EX_SCALAR_IMPL(half_vtype, vtype, prefix_signed, prefix_unsigned, postfix)                       \
     template <int b, typename T>                                                                                 \
     inline typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, half_vtype>::type     \
@@ -115,7 +128,7 @@ VSHRQ_IMPL(int32x4_t, vshrq_n, s32)
     {                                                                                                            \
         return prefix_signed##_##postfix(a, b);                                                                  \
     }                                                                                                            \
-                                                                                                                 \
+    \
     template <int b, typename T>                                                                                 \
     inline typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, u##half_vtype>::type \
     vqrshrn_ex(const vtype &a)                                                                                   \

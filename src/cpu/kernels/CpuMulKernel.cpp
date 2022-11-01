@@ -181,7 +181,8 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
 
         using ExactTagType = typename wrapper::traits::neon_vector<T, window_step_x>::tag_type;
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<T *>(dst.ptr());
@@ -447,7 +448,7 @@ void mul_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
             for(; x < window_end_x; ++x)
             {
 #ifdef __aarch64__
-                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<8, ScalarType>((multiplier_14p18 * (int32_t(a_ptr[x]) - a_offset_16p0) * (int32_t(
+                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>((multiplier_14p18 * (int32_t(a_ptr[x]) - a_offset_16p0) * (int32_t(
                                                                                                              b_val) - b_offset_16p0)) + out_offset_14p18)));
 #else  //__aarch64__
                 out_ptr[x] = utility::clamp<int32_t, ScalarType>(support::cpp11::lround(multiplier * ((float(a_ptr[x]) - a_offset) * (float(b_val) - b_offset)) + float(out_offset)));
@@ -536,7 +537,7 @@ void mul_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *d
             for(; x < window_end_x; ++x)
             {
 #ifdef __aarch64__
-                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<8, ScalarType>((multiplier_14p18 * (int32_t(in0_ptr[x]) - in0_offset_16p0) * (int32_t(
+                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>((multiplier_14p18 * (int32_t(in0_ptr[x]) - in0_offset_16p0) * (int32_t(
                                                                                                              in1_ptr[x]) - in1_offset_16p0)) + out_offset_14p18)));
 #else  //__aarch64__
                 out_ptr[x] = utility::clamp<int32_t, ScalarType>(support::cpp11::lround(multiplier * ((float(in0_ptr[x]) - in0_offset) * (float(in1_ptr[x]) - in1_offset)) + float(out_offset)));
