@@ -855,6 +855,7 @@
             LOOP_UNROLLING(int, _n0, 0, 1, N0, \
             { \
                 SRC_DATA_TYPE _tmp = 0; \
+                SRC_DATA_TYPE _tmp2 = 0; \
                 SRC_DATA_TYPE _src = src[_m0].s[_n0]; \
                 SRC_DATA_TYPE _dst_multiplier = dst_multipliers[0].s[_n0]; \
                 SRC_DATA_TYPE _dst_shift = dst_shifts[0].s[_n0]; \
@@ -869,12 +870,11 @@
                 long nudge = select(mask2, mask1, is_positive_or_zero); \
                 SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
                 _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(_dst_shift >= 0) \
-                { \
-                    long mask = ((((int)1) << _dst_shift) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> _dst_shift) + (int)1 : (_tmp >> _dst_shift); \
-                } \
+                long mask = ((((int)1) << _dst_shift) - (int)1); \
+                long threshold = (mask >> 1) + any(_tmp); \
+                _tmp2 = _tmp >> _dst_shift; \
+                _tmp2 += select(0, 1, (_tmp & mask) > threshold); \
+                _tmp = select(_tmp, _tmp2, _dst_shift >= 0); \
                 _tmp += DST_OFFSET; \
                 dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
             })                                                                                                                                          \
