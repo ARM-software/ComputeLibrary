@@ -35,7 +35,8 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-struct GpuKernelSourceCode;
+/** Forward declaration */
+class GpuKernelSourceCode;
 
 /** OpenCL runtime to run a single kernel */
 class ClKernelRuntime final : public opencl::IClKernel

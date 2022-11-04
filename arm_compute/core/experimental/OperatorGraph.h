@@ -128,21 +128,6 @@ private:
  */
 bool operator<(const Operator &op0, const Operator &op1);
 
-/** Padding information for 2D operations like Conv2dDescriptor
- */
-struct Padding2D
-{
-    Padding2D() = default;
-    Padding2D(size_t left, size_t right, size_t top, size_t bottom)
-        : left(left), right(right), top(top), bottom(bottom)
-    {
-    }
-    size_t left   = { 0 }; /**<  Padding across the width dimension on the left, in elements. */
-    size_t right  = { 0 }; /**<  Padding across the width dimension on the right, in elements. */
-    size_t top    = { 0 }; /**<  Padding across the height dimension on the top, in elements. */
-    size_t bottom = { 0 }; /**<  Padding across the height dimension on the bottom, in elements. */
-};
-
 /** Descriptor for Conv2dDescriptor operation
  */
 struct Conv2dDescriptor

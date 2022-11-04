@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
@@ -87,7 +86,7 @@ bool export_to_cl_image_support(const ITensorInfo *tensor, GPUTarget gpu_target,
     return true;
 }
 
-GpuOperatorType operator_type = GpuOperatorType::Complex;
+constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
 } // namespace
 
 Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,

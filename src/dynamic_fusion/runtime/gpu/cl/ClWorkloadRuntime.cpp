@@ -287,15 +287,20 @@ Status ClWorkloadRuntime::configure(const GpuWorkloadSketch &sketch)
         switch(stage)
         {
             case UnitWorkloadStage::Stage::Run:
+            {
                 _impl->_kernels.emplace(work.id(), std::move(k));
                 break;
+            }
             case UnitWorkloadStage::Stage::Prepare:
+            {
                 _impl->_kernels_prep.emplace(work.id(), std::move(k));
                 break;
+            }
             default:
+            {
                 ARM_COMPUTE_ERROR("Invalid unit workload stage");
+            }
         }
-        break;
     }
     // Create auxiliary tensor objects
     create_aux_tensors(&_impl->_aux_tensors, _impl->_source_code);

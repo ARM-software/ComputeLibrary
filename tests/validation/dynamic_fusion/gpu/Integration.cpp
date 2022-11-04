@@ -155,7 +155,6 @@ TEST_CASE(Multiple_Complex_Ops_0, framework::DatasetMode::ALL)
     const auto data_layout    = DataLayout::NHWC;
     const auto t_input_shape  = TensorShape(384, 12, 12);
     const auto t_weight_shape = TensorShape(384, 1, 1, 16);
-    const auto t_dst_shape    = TensorShape(16, 12, 12);
     auto       t_input_info   = TensorInfo(t_input_shape, 1, data_type, data_layout);
     auto       t_weight_info  = TensorInfo(t_weight_shape, 1, data_type, data_layout);
     auto       t_dst_info     = TensorInfo();
