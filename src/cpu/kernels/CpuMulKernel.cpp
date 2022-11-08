@@ -1941,10 +1941,26 @@ void CpuMulKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
         (*_func_float)(src1, src2, dst, window, _scale);
     }
 }
+
 const char *CpuMulKernel::name() const
 {
     return "CpuMulKernel";
 }
+
+size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return 10240;
+    }
+
+    return default_mws;
+}
+
 namespace
 {
 Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)

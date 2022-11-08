@@ -79,6 +79,7 @@ public:
     // Inherited methods overridden
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
     /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
       *
