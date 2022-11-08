@@ -64,7 +64,7 @@
 /** Tile object
  *  A tile object is a 2D memory block and can be accessed using the following syntax:
  *  -# a[m0].v    = access the the vector at row "m0" (OpenCL vector)
- *  -# a[m0].s[x] = access the scalar element at row "m0" and column "n0" (scalar access)
+ *  -# dst[m0].s[n0] = access the scalar element at row "m0" and column "n0" (scalar access)
  *
  * @param[in] DATA_TYPE Data type of the tile
  * @param[in] H         Number of tile rows

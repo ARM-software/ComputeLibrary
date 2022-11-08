@@ -1874,6 +1874,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation 
         case ArithmeticOperation::POWER:
             os << "POWER";
             break;
+        case ArithmeticOperation::PRELU:
+            os << "PRELU";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -3413,7 +3416,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynami
        << "["
        << "Padding=" << conv2d_attr.pad() << ", "
        << "Size2D=" << conv2d_attr.stride() << ", "
-       << "Dilation=" << conv2d_attr.dilation() << "]";
+       << "Dialation=" << conv2d_attr.dilation() << "]";
 
     return os;
 }

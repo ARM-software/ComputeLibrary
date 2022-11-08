@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_IGPUTEMPLATECOMPONENTWRITER
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_IGPUTEMPLATECOMPONENTWRITER
+#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEELEMENTWISEBINARY
+#define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEELEMENTWISEBINARY
 
-#include "arm_compute/core/CL/CLCompileContext.h"
-#include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/Window.h"
-#include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/components/Types.h"
+#include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
+#include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
 
 namespace arm_compute
 {
@@ -37,49 +36,49 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-/** Forward declaration */
-class GpuKernelComponentGroup;
-class GpuKernelVariableTable;
-
-/** An interface used by @ref ClTemplateWriter to write source code for a kernel component
- */
-class IGpuTemplateComponentWriter
+class ClTemplateElementwiseBinary final : public IGpuTemplateComponentWriter
 {
 public:
-    using ComponentGroup = GpuKernelComponentGroup;
+    using Attributes = ClComponentElementwiseBinary::Attributes;
 
-    /**For now all kernel intermeditate/destination tensors are expected to be of type Tensor_4D_t_Buffer*/
-    static constexpr GpuKernelArgumentInfo::Type common_tensor_type = GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
-
-public:
     /** Constructor
      *
-     * @param[in] id      Component id
-     * @param[in] tensors Tensor arguments to the components
+     * Similar to @ref ClComponentElementwiseBinary::validate()
+     *
+     * @param[in] id         Component id
+     * @param[in] tensors    Tensor arguments to the components
+     * @param[in] attributes Component attributes
      */
-    IGpuTemplateComponentWriter(ComponentId id, const ArgumentPack<ITensorInfo> tensors)
-        : _id{ id }, _tensors{ tensors }
-    {
-    }
-    /** Destructor */
-    virtual ~IGpuTemplateComponentWriter()
-    {
-    }
+    ClTemplateElementwiseBinary(ComponentId                      id,
+                                const ArgumentPack<ITensorInfo> &tensors,
+                                const Attributes                &attributes);
+    /** Prevent instances of this class from being copy constructed */
+    ClTemplateElementwiseBinary(const ClTemplateElementwiseBinary &elementwise) = delete;
+    /** Prevent instances of this class from being copied */
+    ClTemplateElementwiseBinary &operator=(const ClTemplateElementwiseBinary &elementwise) = delete;
+    /** Allow instances of this class to be move constructed */
+    ClTemplateElementwiseBinary(ClTemplateElementwiseBinary &&elementwise) = default;
+    /** Allow instances of this class to be moved */
+    ClTemplateElementwiseBinary &operator=(ClTemplateElementwiseBinary &&elementwise) = default;
+
     /** Generate kernel component name */
-    virtual std::string get_name() const = 0;
+    std::string get_name() const override;
+
     /** Generate kernel component code template
      *
      * @param[in] comp_group Component group of which the component is a part of
      *
      * @return std::string Component code
      */
-    virtual std::string get_component_code(const ComponentGroup &comp_group) const = 0;
+    std::string get_component_code(const ComponentGroup &comp_group) const override;
+
     /** Declare all variables used by the component in the @p vtable
      *
      * @param[out] vtable     Variable table
      * @param[in]  comp_group Component group of which the component is a part of
      */
-    virtual void declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const = 0;
+    void declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const override;
+
     /** Generate the tag look-up table used to instantiate the component code.
      *
      * @param[in] vtable     Variable table
@@ -87,54 +86,32 @@ public:
      *
      * @return TagLUT  Tag lookup table
      */
-    virtual TagLUT get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const = 0;
-    /** Generate additional macros used in the component */
-    virtual std::string get_additional_macros() const
-    {
-        return "";
-    }
+    TagLUT get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const override;
+
     /** Generate the build options used in the component
      *
      * @param[in] comp_group Component group of which the component is a part of
      *
      * @return CLBuildOptions Build options
      */
-    virtual CLBuildOptions get_build_options(const ComponentGroup &comp_group) const
-    {
-        ARM_COMPUTE_UNUSED(comp_group);
-        return CLBuildOptions{};
-    }
+    CLBuildOptions get_build_options(const ComponentGroup &comp_group) const override;
+
     /** Generate the component config id string used for tuning */
-    virtual std::string get_config_id() const
-    {
-        return "";
-    }
+    std::string get_config_id() const override;
+
     /** Generate the header list used in the component */
-    virtual std::set<std::string> get_headers_list() const
-    {
-        return std::set<std::string> {};
-    }
+    std::set<std::string> get_headers_list() const override;
+
     /** Generate the execution window for the component */
-    virtual Window get_window() const
-    {
-        return Window{};
-    }
-    /** Get tensor arguments */
-    ArgumentPack<ITensorInfo> tensors() const
-    {
-        return _tensors;
-    }
-    /** Get component id */
-    ComponentId id() const
-    {
-        return _id;
-    }
+    Window get_window() const override;
 
 private:
-    ComponentId               _id{ -1 };
-    ArgumentPack<ITensorInfo> _tensors{};
+    const ITensorInfo *_lhs;
+    const ITensorInfo *_rhs;
+    const ITensorInfo *_dst;
+    Attributes         _attributes;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_IGPUTEMPLATECOMPONENTWRITER */
+#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEELEMENTWISEBINARY */

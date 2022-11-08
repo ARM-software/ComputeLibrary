@@ -240,7 +240,7 @@ void ClTemplateDirectConv2d::declare_variables(GpuKernelVariableTable &vtable, c
     }
     vtable.declare_variable(
         _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+        GpuKernelArgumentInfo(common_tensor_type),
         comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
@@ -305,7 +305,7 @@ CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &c
     const unsigned int channel_idx = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
     const DataType     data_type   = _src->data_type();
 
-    /// NOTE: For now tile sizes (n0, m0, n0) are set by the execution window. This may change in the future
+    /// NOTE: For now tile sizes (n0, m0, k0) are set by the execution window. This may change in the future
     const auto         root_window      = comp_group.get_root_component()->template_writer()->get_window();
     const unsigned int n0               = root_window.x().step();
     const unsigned int m0               = root_window.y().step();

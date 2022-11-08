@@ -61,7 +61,6 @@ std::string ClTemplateStore::get_component_code(const ComponentGroup &comp_group
 
 void ClTemplateStore::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    // ARM_COMPUTE_UNUSED(comp_group)
     vtable.declare_variable(
         _src,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),

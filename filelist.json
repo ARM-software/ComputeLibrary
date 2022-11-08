@@ -2196,7 +2196,6 @@
     "dynamic_fusion": [
       "src/dynamic_fusion/runtime/gpu/cl/ClKernelRuntime.cpp",
       "src/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.cpp",
-      
       "src/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.cpp",
       "src/dynamic_fusion/sketch/OperatorAttributes.cpp",
       "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.cpp",
@@ -2209,11 +2208,15 @@
       "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.cpp",
       "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDepthwiseConv2d.cpp",
       "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.cpp",
       "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.cpp",
       "src/dynamic_fusion/sketch/gpu/operators/GpuConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/operators/GpuAdd.cpp",
+      "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.cpp",
       "src/dynamic_fusion/sketch/gpu/operators/GpuDepthwiseConv2d.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDepthwiseConv2d.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp"

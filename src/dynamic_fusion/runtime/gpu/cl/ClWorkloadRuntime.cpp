@@ -92,7 +92,7 @@ private:
     {
         const auto t_id             = tensor_info.id();
         auto       find_tensor_pair = _owned_tensors.find(t_id);
-        if(find_tensor_pair == _owned_tensors.end())
+        if(find_tensor_pair != _owned_tensors.end())
         {
             return find_tensor_pair->second.get();
         }
@@ -203,11 +203,22 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
     for(auto tensor : user_tensors)
     {
         const auto t_id = tensor->info()->id();
+
         if(tensor_map.find(t_id) != tensor_map.end())
         {
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Clashing tensor ids");
+            // In case of elementwise in-place: give another Id to the In/Out tensor when passed again
+            std::vector<ITensorInfo::Id> ids;
+            for(auto &t : tensor_map)
+            {
+                ids.push_back(t.first);
+            }
+            ITensorInfo::Id new_id = *std::max_element(ids.begin(), ids.end()) + 1;
+            tensor_map[new_id]     = tensor;
         }
-        tensor_map[t_id] = tensor;
+        else
+        {
+            tensor_map[t_id] = tensor;
+        }
     }
     for(const auto &data : aux_tensors.get_tensors())
     {
@@ -247,6 +258,7 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
             }
         }
     }
+
     return Status{};
 }
 

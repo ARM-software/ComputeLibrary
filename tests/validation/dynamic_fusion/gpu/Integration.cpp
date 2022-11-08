@@ -28,23 +28,13 @@
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-
-#include "src/gpu/cl/operators/ClAdd.h"
-#include "src/gpu/cl/operators/ClConv2d.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/dynamic_fusion/Utils.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
-#include "tests/validation/reference/ElementwiseOperations.h"
 #include "tests/validation/reference/Permute.h"
-
-#ifdef ARM_COMPUTE_ASSERTS_ENABLED
-#include "tests/SimpleTensorPrinter.h"
-#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 
 using namespace arm_compute::experimental::dynamic_fusion;
 using namespace arm_compute::test::validation::utils;

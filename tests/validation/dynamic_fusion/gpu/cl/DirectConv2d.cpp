@@ -22,21 +22,8 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
-
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
-#include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
-#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
-
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
-#include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -46,12 +33,6 @@
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/validation/fixtures/dynamic_fusion/gpu/cl/DirectConv2dFixture.h"
 
-#ifdef ARM_COMPUTE_ASSERTS_ENABLED
-#include "tests/SimpleTensorPrinter.h"
-#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
 namespace arm_compute
 {
 namespace test
@@ -60,7 +41,7 @@ namespace validation
 {
 TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
-TEST_SUITE(GPU_CONV2D)
+TEST_SUITE(CONV2D)
 
 RelativeTolerance<float>            tolerance_f32(0.01f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.1)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
@@ -79,7 +60,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<float>, framework
 }
 TEST_SUITE_END() // FP32
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
@@ -90,9 +70,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<half>, framework:
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END() // FP16
-#endif           //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-TEST_SUITE_END() // GPU_CONV2D
+TEST_SUITE_END() // CONV2D
 TEST_SUITE_END() // DYNAMIC_FUSION
 TEST_SUITE_END() // CL
 } // namespace validation
