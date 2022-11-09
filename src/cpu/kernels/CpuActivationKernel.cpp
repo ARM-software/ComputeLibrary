@@ -233,7 +233,13 @@ size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count
     ARM_COMPUTE_UNUSED(thread_count);
     ARM_COMPUTE_UNUSED(platform);
 
-    return ICPPKernel::default_mws;
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return 1536;
+    }
+    return default_mws;
 }
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
