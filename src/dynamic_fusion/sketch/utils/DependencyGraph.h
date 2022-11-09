@@ -130,6 +130,7 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(!try_add_operator_as_linear(op, inputs, outputs));
         auto success = add_operator(op, inputs, outputs);
+        ARM_COMPUTE_UNUSED(success);
         ARM_COMPUTE_ERROR_ON(!success);
     }
     /** Add a new operator

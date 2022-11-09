@@ -206,7 +206,6 @@ struct FloorDescriptor
 Operator add_op_floor(OperatorGraph &graph, const FloorDescriptor &desc, OpTensor src, OpTensor dst);
 
 bool operator==(const OpTensor &t0, const OpTensor &t1);
-bool operator==(const Padding2D &pad0, const Padding2D &pad1);
 bool operator==(const Conv2dDescriptor &conv2d0, const Conv2dDescriptor &conv2d1);
 bool operator==(const ElementwiseDescriptor &, const ElementwiseDescriptor &);
 bool operator==(const FloorDescriptor &, const FloorDescriptor &);

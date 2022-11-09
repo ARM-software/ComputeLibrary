@@ -79,6 +79,7 @@ void GpuLogicalKernel::add_load_store()
                          tensors);
         _store_components.push_back(std::move(store));
         auto success = _comp_group.add_component(_store_components.back().get());
+        ARM_COMPUTE_UNUSED(success);
         ARM_COMPUTE_ERROR_ON(!success); // It's guaranteed that any load store insertion should be successful
     }
 }

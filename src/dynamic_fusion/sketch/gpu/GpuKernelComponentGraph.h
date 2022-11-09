@@ -76,6 +76,7 @@ public:
         const auto                src_tensor_ids = get_tensor_ids(tensors.get_const_src_tensors());
         const auto                dst_tensor_ids = get_tensor_ids(tensors.get_const_dst_tensors());
         bool                      success        = _dependency_graph.add_operator(comp->id(), src_tensor_ids, dst_tensor_ids);
+        ARM_COMPUTE_UNUSED(success);
         ARM_COMPUTE_ERROR_ON(!success);
         _components[comp->id()] = std::move(comp);
         for(auto t : tensors.get_const_src_tensors())
