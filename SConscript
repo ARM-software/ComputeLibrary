@@ -507,7 +507,6 @@ lib_files = filelist['common']
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
-    arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
 
 # Fixed format GEMM kernels.
 if env['experimental_fixed_format_kernels']:

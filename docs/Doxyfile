@@ -2097,8 +2097,7 @@ PREDEFINED             = DOXYGEN_SKIP_THIS \
                          LOCATE_MIN \
                          LOCATE_MAX \
                          HAS_BIAS \
-                         POOL_AVG \
-                         ENABLE_EXPERIMENTAL_DYNAMIC_FUSION
+                         POOL_AVG
 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

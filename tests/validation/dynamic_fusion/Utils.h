@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_CL_DYNAMICFUSION_UTILS
-#define TESTS_VALIDATION_CL_DYNAMICFUSION_UTILS
+
+#ifndef TESTS_VALIDATION_DYNAMIC_FUSION_UTILS
+#define TESTS_VALIDATION_DYNAMIC_FUSION_UTILS
 
 #include "tests/AssetsLibrary.h"
 #include "utils/Utils.h"
@@ -68,4 +69,5 @@ void fill(U &&tensor, int seed, AssetsLibrary *library)
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif //TESTS_VALIDATION_CL_DYNAMICFUSION_UTILS
+
+#endif /* TESTS_VALIDATION_DYNAMIC_FUSION_UTILS */

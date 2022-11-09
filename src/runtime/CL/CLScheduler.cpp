@@ -27,10 +27,6 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "src/core/CL/ICLKernel.h"
 
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-#include "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.h"
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
 namespace arm_compute
 {
 cl::Context &CLScheduler::context()
@@ -190,34 +186,6 @@ void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, bool f
     flush_queue(flush);
 }
 
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
-void CLScheduler::enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
-                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
-                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
-
-    // ClCompositeKernel is stateless thus alway requires memory injection
-
-    // Tune the kernel if the CLTuner has been provided
-    if(_cl_tuner != nullptr)
-    {
-        _cl_tuner->tune_kernel_dynamic(kernel, tensors, exec_desc);
-    }
-
-    // Run kernel
-    kernel.run_composite_op(tensors, kernel.window(), _queue, exec_desc);
-    if(_job_chaining_enabled)
-    {
-        ++_job_chaining_count;
-    }
-
-    flush_queue(flush);
-}
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
 void CLScheduler::flush_queue(bool flush)
 {
     if(_job_chaining_enabled)
@@ -244,15 +212,6 @@ void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush
 {
     enqueue_common(kernel, tensors, flush);
 }
-
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
-void CLScheduler::enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush)
-{
-    enqueue_common(kernel, tensors, exec_desc, flush);
-}
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
 void CLScheduler::enable_job_chaining(int job_chaining_size)
 {
