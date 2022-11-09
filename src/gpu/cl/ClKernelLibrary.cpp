@@ -448,6 +448,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "space_to_batch_nhwc", "nhwc/space_to_batch.cl" },
     { "space_to_batch_static_nhwc", "nhwc/space_to_batch.cl" },
     { "space_to_depth_nhwc", "nhwc/space_to_depth.cl" },
+    { "transposed_convolution_nhwc", "nhwc/transposed_convolution.cl" },
     { "upsample_layer_nhwc", "nhwc/upsample_layer.cl" },
     { "winograd_filter_transform_4x1_3x1_nhwc", "nhwc/winograd_filter_transform.cl" },
     { "winograd_filter_transform_1x4_1x3_nhwc", "nhwc/winograd_filter_transform.cl" },
@@ -941,6 +942,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "nhwc/space_to_depth.cl",
 #include "./cl_kernels/nhwc/space_to_depth.clembed"
+    },
+    {
+        "nhwc/transposed_convolution.cl",
+#include "./cl_kernels/nhwc/transposed_convolution.clembed"
     },
     {
         "nhwc/winograd_filter_transform.cl",

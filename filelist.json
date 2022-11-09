@@ -337,6 +337,8 @@
         "common": [
           "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.cpp",
           "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.cpp",
+          "src/gpu/cl/kernels/ClTransposedConvolutionKernel.cpp",
+          "src/gpu/cl/operators/ClTransposedConvolution.cpp",
           "src/runtime/CL/functions/CLDeconvolutionLayer.cpp",
           "src/runtime/CL/functions/CLDeconvolutionLayerUpsample.cpp",
           "src/runtime/CL/functions/CLDirectDeconvolutionLayer.cpp",

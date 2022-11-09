@@ -460,6 +460,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_depth.cl',
+                    'src/core/CL/cl_kernels/nhwc/transposed_convolution.cl',
                     'src/core/CL/cl_kernels/nhwc/upsample_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/winograd_filter_transform.cl',
                     'src/core/CL/cl_kernels/nhwc/winograd_input_transform.cl',

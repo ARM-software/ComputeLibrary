@@ -150,8 +150,9 @@ enum class DepthwiseConvolutionFunction
 /** Available DeconvolutionMethod*/
 enum class DeconvolutionMethod
 {
-    GEMM,   /**< Deconvolution using GEMM */
-    DIRECT, /**< Direct deconvolution */
+    GEMM,            /**< Deconvolution using GEMM */
+    DIRECT,          /**< Direct deconvolution */
+    UPSCALE_CONV2D   /**< Deconvolution with Upscaling */
 };
 
 /** Available FuseBatchNormalizationType*/

@@ -549,7 +549,7 @@ public:
     {
         TensorShape{ 5U, 5U, 7U, 4U, 3U },
                      TensorShape{ 5U, 5U, 4U, 13U, 2U },
-                     TensorShape{ 5U, 5U, 3U, 5U , 2U},
+                     TensorShape{ 5U, 5U, 3U, 5U, 2U },
     })
     {
     }
@@ -718,9 +718,23 @@ public:
     SmallDeconvolutionShapes()
         : ShapeDataset("InputShape",
     {
+        // Multiple Vector Loops for FP32
         TensorShape{ 5U, 4U, 3U, 2U },
                      TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 11U, 13U, 4U, 3U }
+    })
+    {
+    }
+};
+
+class SmallDeconvolutionShapesWithLargerChannels final : public ShapeDataset
+{
+public:
+    SmallDeconvolutionShapesWithLargerChannels()
+        : ShapeDataset("InputShape",
+    {
+        // Multiple Vector Loops for all data types
+        TensorShape{ 5U, 5U, 35U }
     })
     {
     }
