@@ -41,6 +41,27 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 
+v22.11 Public major release
+ - New features:
+   - Add new experimental dynamic fusion API.
+   - Add support for CPU and GPU batch matrix multiplication with adj_x = false and adj_y = false.
+   - Add CPU MeanStdDevNorm for QASYMM8.
+   - Add CPU and GPU GELU activation function for FP32 and FP16.
+   - Add CPU swish activation function for FP32 and FP16.
+ - Performance optimizations:
+   - Optimize CPU bilinear scale for FP32, FP16, QASYMM8, QASYMM8_SIGNED, U8 and S8.
+   - Optimize CPU activation functions using LUT-based implementation:
+     - Sigmoid function for QASYMM8 and QASYMM8_SIGNED.
+     - Hard swish function for QASYMM8_SIGNED.
+   - Optimize CPU addition for QASYMM8 and QASYMM8_SIGNED using fixed-point arithmetic.
+   - Optimize CPU multiplication, subtraction and activation layers by considering tensors as 1D.
+   - Optimize GPU depthwise convolution kernel and heuristic.
+   - Optimize GPU Conv2d heuristic.
+   - Optimize CPU MeanStdDevNorm for FP16.
+   - Optimize CPU tanh activation function for FP16 using rational approximation.
+ - Improve GPU GeMMLowp start-up time.
+ - Various optimizations and bug fixes.
+
 v22.08 Public major release
  - Various bug fixes.
  - Disable unsafe FP optimizations causing accuracy issues in:
