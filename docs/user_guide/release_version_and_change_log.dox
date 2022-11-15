@@ -44,7 +44,7 @@ If there is more than one release in a month then an extra sequential number is 
 v22.11 Public major release
  - New features:
    - Add new experimental dynamic fusion API.
-   - Add support for CPU and GPU batch matrix multiplication with adj_x = false and adj_y = false.
+   - Add CPU batch matrix multiplication with adj_x = false and adj_y = false for FP32.
    - Add CPU MeanStdDevNorm for QASYMM8.
    - Add CPU and GPU GELU activation function for FP32 and FP16.
    - Add CPU swish activation function for FP32 and FP16.
