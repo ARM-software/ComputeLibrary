@@ -288,6 +288,7 @@
           "src/gpu/cl/kernels/ClWinogradInputTransformKernel.cpp",
           "src/gpu/cl/kernels/ClWinogradOutputTransformKernel.cpp",
           "src/gpu/cl/kernels/ClIm2ColKernel.cpp",
+          "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.cpp",
           "src/gpu/cl/kernels/ClCol2ImKernel.cpp",
           "src/gpu/cl/operators/ClConv2d.cpp",
           "src/gpu/cl/operators/ClDirectConv2d.cpp",

@@ -449,6 +449,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/dwc_native_fp_nhwc.cl',
                     'src/core/CL/cl_kernels/nhwc/dwc_native_quantized_nhwc.cl',
                     'src/core/CL/cl_kernels/nhwc/im2col.cl',
+                    'src/core/CL/cl_kernels/nhwc/indirect_convolution.cl',
                     'src/core/CL/cl_kernels/nhwc/normalization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
