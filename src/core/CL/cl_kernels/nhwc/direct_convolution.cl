@@ -53,7 +53,7 @@
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
  * @note The zero value must be passed at compile time using -DZERO_VALUE (e.g. -DZERO_VALUE=0)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
- *  - M0 = 1, 2, 3, 4, 5, .... n
+ *  - M0 = 1, 2, 3, 4, 5, 6, 7, and 8
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16 (only 4, 8 and 16 if WEI_TENSOR_TYPE=IMAGE)
  *
@@ -137,16 +137,16 @@ __kernel void direct_convolution_nhwc(
 
     // .v    = access the whole vector (OpenCL vector)
     // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi);
-    TILE(int, M0, 1, yi);
+    TILE(int, 1, M0, xi);
+    TILE(int, 1, M0, yi);
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        xi[i].v = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
-        yi[i].v = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
-        xi[i].v -= PAD_LEFT;
-        yi[i].v -= PAD_TOP;
+        xi[0].s[i] = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
+        yi[0].s[i] = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
+        xi[0].s[i] -= PAD_LEFT;
+        yi[0].s[i] -= PAD_TOP;
     })
 
     // Initialize the accumulators
@@ -162,18 +162,18 @@ __kernel void direct_convolution_nhwc(
         int xk = i % _IWEI_WIDTH;
         int yk = i / _IWEI_WIDTH;
 
-        TILE(int, M0, 1, my);
+        TILE(int, 1, M0, my);
 
         LOOP_UNROLLING(int, i, 0, 1, M0,
         {
-            int x_s = xi[i].v + xk;
-            int y_s = yi[i].v + yk;
-            my[i].v = x_s + y_s *_ISRC_WIDTH;
-            my[i].v = my[i].v + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
-            my[i].v = select(-1, my[i].v, x_s >= 0);
-            my[i].v = select(-1, my[i].v, x_s < _ISRC_WIDTH);
-            my[i].v = select(-1, my[i].v, y_s >= 0);
-            my[i].v = select(-1, my[i].v, y_s < _ISRC_HEIGHT);
+            int x_s    = xi[0].s[i] + xk;
+            int y_s    = yi[0].s[i] + yk;
+            my[0].s[i] = x_s + y_s *_ISRC_WIDTH;
+            my[0].s[i] = my[0].s[i] + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+            my[0].s[i] = select(-1, my[0].s[i], x_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], x_s < _ISRC_WIDTH);
+            my[0].s[i] = select(-1, my[0].s[i], y_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], y_s < _ISRC_HEIGHT);
         })
 
         int ck = 0;
@@ -189,7 +189,7 @@ __kernel void direct_convolution_nhwc(
             })
 
             // Load tile from the src tensor
-            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, my, a);
+            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 
             // Load tile from the weights tensor
             T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
@@ -202,7 +202,6 @@ __kernel void direct_convolution_nhwc(
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
         }
 
-        // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
 #if defined(LEFTOVER_LOOP)
         // Left-over accumulations
@@ -223,7 +222,7 @@ __kernel void direct_convolution_nhwc(
             })
 
             // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 
             // Load tile from the weights tensor
             // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration

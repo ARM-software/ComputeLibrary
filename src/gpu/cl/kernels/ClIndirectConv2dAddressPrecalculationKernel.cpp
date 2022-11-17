@@ -80,8 +80,8 @@ void ClIndirectConv2dAddressPrecalculationKernel::configure(const CLCompileConte
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, dst, conv_info, desc));
 
-    constexpr unsigned int width_idx   = 1;
-    constexpr unsigned int height_idx  = 2;
+    constexpr unsigned int width_idx  = 1;
+    constexpr unsigned int height_idx = 2;
 
     // Get dst shape
     TensorShape output_shape = misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(),
@@ -126,6 +126,9 @@ void ClIndirectConv2dAddressPrecalculationKernel::configure(const CLCompileConte
     build_options.add_option("-DPAD_LEFT=" + support::cpp11::to_string(pad_left));
     build_options.add_option("-DPAD_TOP=" + support::cpp11::to_string(pad_top));
     build_options.add_option("-DM0=" + support::cpp11::to_string(desc.m0));
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_options.add_option("-D" + upper_string(kernel_name.str()));
 
     _kernel = create_kernel(compile_context, kernel_name.str(), build_options.options());
 

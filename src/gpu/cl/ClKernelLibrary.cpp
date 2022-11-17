@@ -433,6 +433,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "im2col3x3_nhwc", "nhwc/im2col.cl" },
     { "im2col9x9_nhwc", "nhwc/im2col.cl" },
     { "im2col_generic_nhwc", "nhwc/im2col.cl" },
+    { "indirect_convolution_nhwc", "nhwc/indirect_convolution.cl" },
     { "indirect_convolution_address_precalculation", "nhwc/indirect_convolution.cl" },
     { "normalization_layer_cross_map_nhwc", "nhwc/normalization_layer.cl" },
     { "normalization_layer_in_map_nhwc", "nhwc/normalization_layer.cl" },

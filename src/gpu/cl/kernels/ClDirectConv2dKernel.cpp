@@ -86,6 +86,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
 
     if(data_layout == DataLayout::NHWC)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.m0 <= 0 || desc.m0 > 8, "M0 can only be greater than 0 and less than or equal to 8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
                                         "N0 can only be: 1, 2, 3, 4, 8, and 16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,

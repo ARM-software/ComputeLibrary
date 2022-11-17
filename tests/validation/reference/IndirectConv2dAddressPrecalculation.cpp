@@ -84,8 +84,7 @@ SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape &sha
                     my            = y_s < src_conv_height ? my : -1;
 
                     const unsigned int addr_out = mi + ki * m0 + y * (dst_width) + z * (dst_width * dst_height);
-
-                    out[addr_out] = my;
+                    out[addr_out]               = my;
                 }
             }
         }

@@ -653,13 +653,27 @@
         })                                                                                                                                                            \
     })
 
-#define T_LOAD2D_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, yi, dst)                \
+/** Load a tile from global memory (tensor) using an indirect buffer for the Y coordinates
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  TILE_AREA     Number of elements to load from Y (height) dimension * Number of elements to load from X (width) dimension
+ * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image). Currently BUFFER only is supported
+ *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  C             Starting C index
+ * @param[in]  STRIDE_Y      Stride Y (in bytes)
+ * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
+ *                           16 is the maximum indirect buffer size.
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD2D_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst)                \
     ({                                                                                                                                                                \
         LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA,                                                                                                                      \
         {                                                                                                                                                             \
-            if(yi[_i].v >= 0)                                                                                                                                     \
+            if(yi[0].s[_i] >= 0)                                                                                                                                     \
             {                                                                                                                                                         \
-                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[_i].v, STRIDE_Y);                                                               \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[0].s[_i], STRIDE_Y);                                                               \
             }                                                                                                                                                         \
         })                                                                                                                                                            \
     })

@@ -114,18 +114,18 @@ __kernel void transposed_convolution_nhwc(
 
     // .v    = access the whole vector (OpenCL vector)
     // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi);
-    TILE(int, M0, 1, yi);
-    TILE(int, M0, 1, xu);
-    TILE(int, M0, 1, yu);
+    TILE(int, 1, M0, xi);
+    TILE(int, 1, M0, yi);
+    TILE(int, 1, M0, xu);
+    TILE(int, 1, M0, yu);
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        xu[i].v = ((mout + i) % _IDST_WIDTH) - PAD_LEFT;
-        yu[i].v = ((mout + i) / _IDST_WIDTH) - PAD_TOP;
-        xi[i].v = ceil(xu[i].v / (float)STRIDE_X);
-        yi[i].v = ceil(yu[i].v / (float)STRIDE_Y);
+        xu[0].s[i] = ((mout + i) % _IDST_WIDTH) - PAD_LEFT;
+        yu[0].s[i] = ((mout + i) / _IDST_WIDTH) - PAD_TOP;
+        xi[0].s[i] = ceil(xu[0].s[i] / (float)STRIDE_X);
+        yi[0].s[i] = ceil(yu[0].s[i] / (float)STRIDE_Y);
     })
 
     // Initialize the accumulators
@@ -137,8 +137,8 @@ __kernel void transposed_convolution_nhwc(
     })
 
     // Flipped indices
-    const int x_start = _IWEI_WIDTH - (xi[0].v * STRIDE_X - xu[0].v) - 1;
-    const int y_start = _IWEI_HEIGHT - (yi[0].v * STRIDE_Y - yu[0].v) - 1;
+    const int x_start = _IWEI_WIDTH - (xi[0].s[0] * STRIDE_X - xu[0].s[0]) - 1;
+    const int y_start = _IWEI_HEIGHT - (yi[0].s[0] * STRIDE_Y - yu[0].s[0]) - 1;
 
     for(int yk = y_start, yi_step = 0; yk >= 0; yk -= STRIDE_Y, ++yi_step)
     {
@@ -146,18 +146,18 @@ __kernel void transposed_convolution_nhwc(
         {
             int weights_y = cout * _IY_MULTIPLIER + yk * _IWEI_WIDTH + xk;
 
-            TILE(int, M0, 1, my);
+            TILE(int, 1, M0, my);
 
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
-                int x_s = xi[i].v + xi_step;
-                int y_s = yi[i].v + yi_step;
-                my[i].v = x_s + y_s *_ISRC_WIDTH;
-                my[i].v = my[i].v + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
-                my[i].v = select(-1, my[i].v, x_s >= 0);
-                my[i].v = select(-1, my[i].v, x_s < _ISRC_WIDTH);
-                my[i].v = select(-1, my[i].v, y_s >= 0);
-                my[i].v = select(-1, my[i].v, y_s < _ISRC_HEIGHT);
+                int x_s    = xi[0].s[i] + xi_step;
+                int y_s    = yi[0].s[i] + yi_step;
+                my[0].s[i] = x_s + y_s *_ISRC_WIDTH;
+                my[0].s[i] = my[0].s[i] + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+                my[0].s[i] = select(-1, my[0].s[i], x_s >= 0);
+                my[0].s[i] = select(-1, my[0].s[i], x_s < _ISRC_WIDTH);
+                my[0].s[i] = select(-1, my[0].s[i], y_s >= 0);
+                my[0].s[i] = select(-1, my[0].s[i], y_s < _ISRC_HEIGHT);
             })
 
             int ck = 0;
@@ -178,7 +178,7 @@ __kernel void transposed_convolution_nhwc(
                 })
 
                 // Load tile from the src tensor
-                T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, my, a);
+                T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 
                 // Load tile from the weights tensor
                 T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, weights_y, _IY_MULTIPLIER, wei_stride_y, b);
@@ -187,7 +187,6 @@ __kernel void transposed_convolution_nhwc(
                 T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
             }
 
-            // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
             // This #if directive should be removed in case of dynamic tensor support
 #if defined(LEFTOVER_LOOP)
             // Left-over accumulations
@@ -204,7 +203,7 @@ __kernel void transposed_convolution_nhwc(
 
                 // Load tile from the src tensor
                 // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
-                T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, 1, BUFFER, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, my, a);
+                T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, 1, BUFFER, src, ck, src_stride_y, my, a);
 
                 // Load tile from the weights tensor
                 // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
