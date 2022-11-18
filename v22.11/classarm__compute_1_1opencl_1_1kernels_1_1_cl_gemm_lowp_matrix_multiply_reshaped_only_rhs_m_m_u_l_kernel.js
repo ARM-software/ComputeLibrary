@@ -1,0 +1,7 @@
+var classarm__compute_1_1opencl_1_1kernels_1_1_cl_gemm_lowp_matrix_multiply_reshaped_only_rhs_m_m_u_l_kernel =
+[
+    [ "ClGemmLowpMatrixMultiplyReshapedOnlyRhsMMULKernel", "classarm__compute_1_1opencl_1_1kernels_1_1_cl_gemm_lowp_matrix_multiply_reshaped_only_rhs_m_m_u_l_kernel.xhtml#aba27a3a48b7b4ea9754e909f90cc8b42", null ],
+    [ "ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE", "classarm__compute_1_1opencl_1_1kernels_1_1_cl_gemm_lowp_matrix_multiply_reshaped_only_rhs_m_m_u_l_kernel.xhtml#aacbe7d211a095adba64034db4efb87a4", null ],
+    [ "configure", "classarm__compute_1_1opencl_1_1kernels_1_1_cl_gemm_lowp_matrix_multiply_reshaped_only_rhs_m_m_u_l_kernel.xhtml#a97bee622b97ee07fae08e377a18c4d0b", null ],
+    [ "run_op", "classarm__compute_1_1opencl_1_1kernels_1_1_cl_gemm_lowp_matrix_multiply_reshaped_only_rhs_m_m_u_l_kernel.xhtml#a2563bcc3dcf9406cbf572d206a99d801", null ]
+];

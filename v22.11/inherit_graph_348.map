@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_transform_weights.xhtml" title="Weights tensor transform interface In order to identify the different reshape functions, each reshape function has to generate a unique id. " alt="" coords="5,46,148,73"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed.xhtml" title="Basic function to manage CLConvertFullyConnectedWeights. " alt="" coords="196,5,436,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1weights__transformations_1_1_n_e_fully_connected_layer_reshape_weights_managed.xhtml" title="Basic function to manage the reshape weights generated from NETranspose. " alt="" coords="201,71,431,112"/>
+</map>

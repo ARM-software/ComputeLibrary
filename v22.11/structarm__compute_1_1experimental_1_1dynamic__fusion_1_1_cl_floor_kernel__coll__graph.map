@@ -1,0 +1,5 @@
+<map id="ClFloorKernel" name="ClFloorKernel">
+<area shape="rect" id="node2" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_kernel.xhtml" title="ClKernel" alt="" coords="5,95,81,121"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_cl_floor_kernel_descriptor.xhtml" title="ClFloorKernelDescriptor" alt="" coords="105,95,280,121"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_floor_descriptor.xhtml" title="Descriptor for Floor operation. " alt="" coords="132,5,253,32"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="src/cpu/kernels/directconv2d/nhwc" name="src/cpu/kernels/directconv2d/nhwc">
+<area shape="rect" id="node2" href="dir_8d67213fc89b942bb887c736560cdcf9.xhtml" title="neon" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="node3" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="16,255,128,303"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000395_000000.xhtml" title="6" alt="" coords="68,228,78,242"/>
+<area shape="rect" id="node4" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="73,159,145,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000395_000023.xhtml" title="4" alt="" coords="97,131,106,146"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000023_000000.xhtml" title="635" alt="" coords="83,233,109,248"/>
+<area shape="rect" id="clust2" href="dir_f0f309bec51ee57c068b104738fc6fbb.xhtml" alt="" coords="27,52,216,121"/>
+<area shape="rect" id="clust1" href="dir_da26c206cb738938134a393072f55968.xhtml" title="directconv2d" alt="" coords="16,16,227,132"/>
+</map>

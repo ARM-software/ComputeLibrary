@@ -1,0 +1,9 @@
+<map id="src/gpu/cl/kernels/direct_conv" name="src/gpu/cl/kernels/direct_conv">
+<area shape="rect" id="node1" href="dir_f458fc9d51796714f2c027c1a839b458.xhtml" title="direct_conv" alt="" coords="27,52,125,100"/>
+<area shape="rect" id="node2" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="19,244,131,292"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000424_000000.xhtml" title="15" alt="" coords="67,217,84,232"/>
+<area shape="rect" id="node3" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml" title="core" alt="" coords="76,148,148,196"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000424_000023.xhtml" title="1" alt="" coords="100,120,109,135"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000023_000000.xhtml" title="635" alt="" coords="86,222,111,237"/>
+<area shape="rect" id="clust1" href="dir_d31afe59158d6d6f352f20563e96492f.xhtml" title="kernels" alt="" coords="16,16,136,111"/>
+</map>

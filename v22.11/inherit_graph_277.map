@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__conv_1_1pooling_1_1_i_depthfirst_strategy.xhtml" title="IDepthfirstStrategy" alt="" coords="5,143,151,170"/>
+<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; TInput, TOutput \&gt;" alt="" coords="243,5,397,47"/>
+<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_generic_depthfirst_wrapper.xhtml" title="GenericDepthfirstWrapper\l\&lt; TInput, TOutput, OutputStage \&gt;" alt="" coords="199,71,441,112"/>
+<area shape="rect" id="node4" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; float, float \&gt;" alt="" coords="249,136,391,177"/>
+<area shape="rect" id="node7" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; int8_t, int8_t \&gt;" alt="" coords="249,201,391,243"/>
+<area shape="rect" id="node9" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title="DepthfirstStrategy\l\&lt; uint8_t, uint8_t \&gt;" alt="" coords="245,267,395,308"/>
+<area shape="rect" id="node5" href="$structarm__conv_1_1pooling_1_1a64__fp32__nhwc__avg__3x3__s1__output2x2__depthfirst.xhtml" title="a64_fp32_nhwc_avg_3x3\l_s1_output2x2_depthfirst" alt="" coords="491,71,678,112"/>
+<area shape="rect" id="node6" href="$structarm__conv_1_1pooling_1_1a64__fp32__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml" title="a64_fp32_nhwc_max_2x2\l_s1_output2x2_depthfirst" alt="" coords="489,136,680,177"/>
+<area shape="rect" id="node8" href="$structarm__conv_1_1pooling_1_1a64__s8__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml" title="a64_s8_nhwc_max_2x2\l_s1_output2x2_depthfirst" alt="" coords="491,201,678,243"/>
+<area shape="rect" id="node10" href="$structarm__conv_1_1pooling_1_1a64__u8__nhwc__max__2x2__s1__output2x2__depthfirst.xhtml" title="a64_u8_nhwc_max_2x2\l_s1_output2x2_depthfirst" alt="" coords="491,267,678,308"/>
+</map>

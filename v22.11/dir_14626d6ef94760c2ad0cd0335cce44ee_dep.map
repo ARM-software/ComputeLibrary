@@ -1,0 +1,8 @@
+<map id="arm_compute/dynamic_fusion/sketch/gpu" name="arm_compute/dynamic_fusion/sketch/gpu">
+<area shape="rect" id="node3" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="95,159,167,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000061_000001.xhtml" title="3" alt="" coords="155,139,165,154"/>
+<area shape="rect" id="node2" href="dir_2d04589ec4a450f8bb275c6c932eac90.xhtml" title="operators" alt="" coords="38,63,122,111"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000062_000001.xhtml" title="1" alt="" coords="112,131,121,145"/>
+<area shape="rect" id="clust2" href="dir_14626d6ef94760c2ad0cd0335cce44ee.xhtml" alt="" coords="27,52,229,121"/>
+<area shape="rect" id="clust1" href="dir_3259c0fb095abc99930fe6844d6dd442.xhtml" title="sketch" alt="" coords="16,16,240,132"/>
+</map>
