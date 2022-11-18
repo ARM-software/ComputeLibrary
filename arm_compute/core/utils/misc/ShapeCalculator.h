@@ -1168,9 +1168,9 @@ inline TensorShape compute_space_to_depth_shape(const ITensorInfo *input, int32_
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int        idx_depth   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_shape);
-    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_shape);
-    output_shape.set(idx_depth, input->tensor_shape()[idx_depth] / (block_shape * block_shape));
+    output_shape.set(idx_width, input->tensor_shape()[idx_width] / block_shape);
+    output_shape.set(idx_height, input->tensor_shape()[idx_height] / block_shape);
+    output_shape.set(idx_depth, input->tensor_shape()[idx_depth] * (block_shape * block_shape));
 
     return output_shape;
 }

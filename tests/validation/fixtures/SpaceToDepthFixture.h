@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_FIXTURE
 #define ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_FIXTURE
 
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
@@ -68,6 +69,12 @@ protected:
         // Create tensors
         TensorType input  = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
         TensorType output = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
+
+        auto calc_out_shape = misc::shape_calculator::compute_space_to_depth_shape(input.info(), block_shape);
+        ARM_COMPUTE_ASSERT(output_shape[0] == calc_out_shape[0]);
+        ARM_COMPUTE_ASSERT(output_shape[1] == calc_out_shape[1]);
+        ARM_COMPUTE_ASSERT(output_shape[2] == calc_out_shape[2]);
+        ARM_COMPUTE_ASSERT(output_shape[3] == calc_out_shape[3]);
 
         // Create and configure function
         FunctionType space_to_depth;
