@@ -42,20 +42,5 @@ void add_s32_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const 
 {
     return add_same_neon<int32_t>(src0, src1, dst, policy, window);
 }
-
-void add_u8_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-{
-    return add_same_neon_as_1d_array<uint8_t>(src0, src1, dst, policy, window);
-}
-
-void add_s16_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-{
-    return add_same_neon_as_1d_array<int16_t>(src0, src1, dst, policy, window);
-}
-
-void add_s32_neon_as_1d_array(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
-{
-    return add_same_neon_as_1d_array<int32_t>(src0, src1, dst, policy, window);
-}
 }
 } // namespace arm_compute

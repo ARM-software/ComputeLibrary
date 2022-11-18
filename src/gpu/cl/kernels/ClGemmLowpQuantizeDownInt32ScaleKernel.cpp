@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,8 +112,13 @@ void ClGemmLowpQuantizeDownInt32ScaleKernel::configure(const CLCompileContext &c
     build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(dst->data_type()));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
+    const std::string kernel_name = "gemmlowp_output_stage_quantize_down";
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     // Create kernel
-    _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down", build_opts.options());
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));

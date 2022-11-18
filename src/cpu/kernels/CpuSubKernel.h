@@ -82,10 +82,16 @@ public:
 
     static const std::vector<SubKernel> &get_available_kernels();
 
+    size_t get_split_dimension() const
+    {
+        return _split_dimension;
+    }
+
 private:
     ConvertPolicy _policy{};
     SubKernelPtr  _run_method{ nullptr };
     std::string   _name{};
+    size_t        _split_dimension{ Window::DimY };
 };
 } // namespace kernels
 } // namespace cpu

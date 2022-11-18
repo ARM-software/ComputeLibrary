@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(GEMMLowp)
 TEST_SUITE(MatrixMultiplyCore)
 using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+using NEGEMMLowpBatchedMatMulFixture      = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, true>;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
                shape_a, shape_b, shape_c, a_offset, b_offset)
@@ -209,6 +210,13 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
         ARM_COMPUTE_EXPECT(((uint8_t *)result_0.buffer())[i] == ((uint8_t *)result_1.buffer())[i], framework::LogLevel::ERRORS);
     }
 }
+
+TEST_SUITE(BatchedMatMul)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpBatchedMatMulFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpBatchedMatMulDataset())
+{
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // BatchedMatMul
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {

@@ -104,13 +104,9 @@ bool operator==(const OpTensor &t0, const OpTensor &t1)
 {
     return std::make_tuple(t0.id()) == std::make_tuple(t1.id());
 }
-bool operator==(const Padding2D &pad0, const Padding2D &pad1)
-{
-    return std::make_tuple(pad0.top, pad0.right, pad0.bottom, pad0.left) == std::make_tuple(pad1.top, pad1.right, pad1.bottom, pad1.left);
-}
 bool operator==(const Conv2dDescriptor &conv2d0, const Conv2dDescriptor &conv2d1)
 {
-    return std::make_tuple(conv2d0.pad, conv2d0.stride, conv2d0.dilation) == std::make_tuple(conv2d1.pad, conv2d1.stride, conv2d1.dilation);
+    return std::make_tuple(conv2d0.stride, conv2d0.dilation) == std::make_tuple(conv2d1.stride, conv2d1.dilation);
 }
 
 bool operator==(const ElementwiseDescriptor &ed0, const ElementwiseDescriptor &ed1)

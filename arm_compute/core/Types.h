@@ -774,12 +774,26 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int                          _pad_left;
-    unsigned int                          _pad_top;
-    unsigned int                          _pad_right;
-    unsigned int                          _pad_bottom;
+    unsigned int _pad_left;
+    unsigned int _pad_top;
+    unsigned int _pad_right;
+    unsigned int _pad_bottom;
 
     DimensionRoundingType _round_type;
+};
+
+/** Padding information for 2D operations like Conv2d */
+struct Padding2D
+{
+    Padding2D() = default;
+    Padding2D(size_t left, size_t right, size_t top, size_t bottom)
+        : left(left), right(right), top(top), bottom(bottom)
+    {
+    }
+    size_t left   = { 0 }; /**<  Padding across the width dimension on the left, in elements. */
+    size_t right  = { 0 }; /**<  Padding across the width dimension on the right, in elements. */
+    size_t top    = { 0 }; /**<  Padding across the height dimension on the top, in elements. */
+    size_t bottom = { 0 }; /**<  Padding across the height dimension on the bottom, in elements. */
 };
 
 /** Padding information for 3D operations like Conv3d */
@@ -919,14 +933,14 @@ public:
     }
 
 private:
-    std::vector<float>   _min_sizes;
-    std::vector<float>   _variances;
-    float                _offset;
-    bool                 _flip;
-    bool                 _clip;
-    std::vector<float>   _max_sizes;
-    std::vector<float>   _aspect_ratios;
-    Coordinates2D        _img_size;
+    std::vector<float> _min_sizes;
+    std::vector<float> _variances;
+    float              _offset;
+    bool               _flip;
+    bool               _clip;
+    std::vector<float> _max_sizes;
+    std::vector<float> _aspect_ratios;
+    Coordinates2D      _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1171,15 +1185,15 @@ public:
     }
 
 private:
-    unsigned int         _max_detections;
-    unsigned int         _max_classes_per_detection;
-    float                _nms_score_threshold;
-    float                _iou_threshold;
-    unsigned int         _num_classes;
+    unsigned int _max_detections;
+    unsigned int _max_classes_per_detection;
+    float        _nms_score_threshold;
+    float        _iou_threshold;
+    unsigned int _num_classes;
     std::array<float, 4> _scales_values;
-    bool                 _use_regular_nms;
-    unsigned int         _detection_per_class;
-    bool                 _dequantize_scores;
+    bool         _use_regular_nms;
+    unsigned int _detection_per_class;
+    bool         _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1612,13 +1626,13 @@ public:
     }
 
 private:
-    float                _img_width;
-    float                _img_height;
-    float                _scale;
-    bool                 _apply_scale;
-    bool                 _correct_transform_coords;
+    float _img_width;
+    float _img_height;
+    float _scale;
+    bool  _apply_scale;
+    bool  _correct_transform_coords;
     std::array<float, 4> _weights;
-    float                _bbox_xform_clip;
+    float _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -1641,7 +1655,9 @@ public:
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
         LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
         IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
-        HARD_SWISH       /**< Hard-swish ( \f$ f(x) = (x * relu6(x+3))/6 \f$ ) */
+        HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
+        SWISH,           /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
+        GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
     };
 
     /** Lookup table  */
@@ -1686,15 +1702,33 @@ public:
         return _lut;
     }
 
-    void init_lut(const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    void init_lut(DataType data_type, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
     {
         if(_act == ActivationFunction::HARD_SWISH)
         {
-            qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+            if(data_type == DataType::QASYMM8)
+            {
+                qasymm8_hard_swish_populate_table(_lut, qi_in, qi_out);
+            }
+            else
+            {
+                qasymm8_signed_hard_swish_populate_table(_lut, qi_in, qi_out);
+            }
         }
         else if(_act == ActivationFunction::LEAKY_RELU)
         {
             qasymm8_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
+        }
+        else if(_act == ActivationFunction::LOGISTIC)
+        {
+            if(data_type == DataType::QASYMM8)
+            {
+                qasymm8_logistic_populate_table(_lut, qi_in, qi_out);
+            }
+            else
+            {
+                qasymm8_signed_logistic_populate_table(_lut, qi_in, qi_out);
+            }
         }
     }
 #endif // __aarch64__
@@ -1702,8 +1736,17 @@ public:
     static inline bool is_lut_supported(ActivationFunction act_func, DataType data_type)
     {
 #ifdef __aarch64__
-        auto supported = (data_type == DataType::QASYMM8 && (act_func == ActivationFunction::HARD_SWISH || act_func == ActivationFunction::LEAKY_RELU));
-        return supported;
+        switch(act_func)
+        {
+            case ActivationFunction::HARD_SWISH:
+                return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
+            case ActivationFunction::LEAKY_RELU:
+                return data_type == DataType::QASYMM8;
+            case ActivationFunction::LOGISTIC:
+                return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
+            default:
+                return false;
+        }
 #else  // __aarch64__
         ARM_COMPUTE_UNUSED(act_func);
         ARM_COMPUTE_UNUSED(data_type);
@@ -1728,11 +1771,35 @@ private:
         }
     }
 
+    static inline void qasymm8_signed_hard_swish_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_signed_hard_swish(i, qi_in, qi_out);
+        }
+    }
+
     static inline void qasymm8_leaky_relu_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out, float alpha)
     {
         for(size_t i = 0; i < lut.size(); ++i)
         {
             lut[i] = qasymm8_leaky_relu(i, qi_in, qi_out, alpha);
+        }
+    }
+
+    static inline void qasymm8_logistic_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_logistic(i, qi_in, qi_out);
+        }
+    }
+
+    static inline void qasymm8_signed_logistic_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_signed_logistic(static_cast<int8_t>(i), qi_in, qi_out);
         }
     }
 #endif // __aarch64__

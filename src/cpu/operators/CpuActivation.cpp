@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "src/cpu/operators/CpuActivation.h"
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/common/IOperator.h"
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
@@ -44,6 +45,13 @@ void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, con
 Status CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
     return kernels::CpuActivationKernel::validate(input, output, activation_info);
+}
+
+void CpuActivation::run(ITensorPack &tensors)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    auto split_dimension = static_cast<kernels::CpuActivationKernel *>(_kernel.get())->get_split_dimension_hint();
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
 std::tuple<IOperator *, StatusCode> CpuContext::create_activation(const AclTensorDescriptor &src, const AclTensorDescriptor &dst, const AclActivationDescriptor &act, bool is_validate)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,6 +91,7 @@ void CLMeanStdDevNormalizationKernel::configure(const CLCompileContext &compile_
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DEPSILON=" + float_to_string_with_full_precision(epsilon));
     build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option_if(input->info()->data_type() == DataType::F16, "-DMEANSTDNORM_HALF");
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
 
     // Create kernel

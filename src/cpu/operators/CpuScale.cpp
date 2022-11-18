@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,6 @@
  */
 #include "src/cpu/operators/CpuScale.h"
 
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/common/utils/Log.h"
 #include "src/core/utils/ScaleUtils.h"
@@ -218,26 +215,38 @@ void CpuScale::prepare(ITensorPack &tensors)
                                             _scale_info.interpolation_policy;
         const SamplingPolicy sampling_policy = _scale_info.sampling_policy;
 
-        switch(policy_to_use)
+        bool precompute_indices_weights = arm_compute::scale_utils::is_precomputation_required(_data_layout, src->info()->data_type(), policy_to_use, _scale_info.border_mode);
+
+        if(precompute_indices_weights)
         {
-            case InterpolationPolicy::NEAREST_NEIGHBOR:
+            switch(policy_to_use)
             {
-                // Pre-compute offsets for nearest interpolation
-                precompute_dx_dy_offsets(nullptr, nullptr, offsets, wr, hr, sampling_policy, is_align_corners_used);
-                break;
+                case InterpolationPolicy::NEAREST_NEIGHBOR:
+                {
+                    // Pre-compute offsets for nearest interpolation
+                    precompute_dx_dy_offsets(nullptr, nullptr, offsets, wr, hr, sampling_policy, is_align_corners_used);
+                    break;
+                }
+                case InterpolationPolicy::BILINEAR:
+                {
+                    // Pre-compute dx, dy and offsets for bilinear interpolation
+                    precompute_dx_dy_offsets(dx, dy, offsets, wr, hr, sampling_policy, is_align_corners_used);
+                    break;
+                }
+                case InterpolationPolicy::AREA:
+                {
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Unsupported interpolation mode");
             }
-            case InterpolationPolicy::BILINEAR:
+        }
+        else
+        {
+            if(policy_to_use != InterpolationPolicy::NEAREST_NEIGHBOR && policy_to_use != InterpolationPolicy::BILINEAR && policy_to_use != InterpolationPolicy::AREA)
             {
-                // Pre-compute dx, dy and offsets for bilinear interpolation
-                precompute_dx_dy_offsets(dx, dy, offsets, wr, hr, sampling_policy, is_align_corners_used);
-                break;
-            }
-            case InterpolationPolicy::AREA:
-            {
-                break;
-            }
-            default:
                 ARM_COMPUTE_ERROR("Unsupported interpolation mode");
+            }
         }
     }
 }

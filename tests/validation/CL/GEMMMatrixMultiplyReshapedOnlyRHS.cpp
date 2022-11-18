@@ -105,6 +105,7 @@ const auto b_values = framework::dataset::make("batch_size", 2);
 const auto act_values = framework::dataset::make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 10.f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** M0 values to test - precommit */

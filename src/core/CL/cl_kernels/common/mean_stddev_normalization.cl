@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,11 @@ __kernel void mean_stddev_normalization(
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     sum = 0.f;
+#ifdef MEANSTDNORM_HALF
+    VEC_DATA_TYPE(float, VEC_SIZE)
+#else  /* MEANSTDNORM_HALF */
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#endif /* MEANSTDNORM_HALF */
     sum_sq = 0.f;
     // Calculate partial sum
     int i = 0;
@@ -73,7 +77,13 @@ __kernel void mean_stddev_normalization(
         data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)offset(&in, i, 0));
 
         sum += data;
+#ifdef MEANSTDNORM_HALF
+        VEC_DATA_TYPE(float, VEC_SIZE)
+        dsq = CONVERT(data * data, VEC_DATA_TYPE(float, VEC_SIZE));
+        sum_sq += dsq;
+#else  /* MEANSTDNORM_HALF */
         sum_sq += data * data;
+#endif /* MEANSTDNORM_HALF */
     }
     // Perform reduction
     sum    = SUM_REDUCE(sum, VEC_SIZE);

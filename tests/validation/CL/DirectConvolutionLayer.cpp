@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,6 +132,56 @@ TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
     validate(CLAccessor(dst), ref_dst);
 }
 
+/** Check whether the case of rectangle kernels i.e. when width and height of the weight_shape are not equal
+ *  would lead to successful run
+ */
+TEST_CASE(NonSquareKernel, framework::DatasetMode::PRECOMMIT)
+{
+    auto           src_shape     = TensorShape(33U, 27U, 3U);
+    auto           weights_shape = TensorShape(5U, 7U, 3U, 4U); // non-square kernel
+    const auto     bias_shape    = TensorShape(4U);
+    auto           dst_shape     = TensorShape(11U, 12U, 4U);
+    constexpr auto dt            = DataType::F32;
+
+    TensorShape src_shape_nhwc(src_shape);
+    TensorShape weights_shape_nhwc(weights_shape);
+    TensorShape dst_shape_nhwc(dst_shape);
+
+    // Non-square shapes are only allowed for NHWC
+    permute(src_shape_nhwc, PermutationVector(2U, 0U, 1U));
+    permute(weights_shape_nhwc, PermutationVector(2U, 0U, 1U));
+    permute(dst_shape_nhwc, PermutationVector(2U, 0U, 1U));
+
+    auto       src       = create_tensor<CLTensor>(src_shape_nhwc, dt, 1, QuantizationInfo(), DataLayout::NHWC);
+    auto       weights   = create_tensor<CLTensor>(weights_shape_nhwc, dt, 1, QuantizationInfo(), DataLayout::NHWC);
+    auto       dst       = create_tensor<CLTensor>(dst_shape_nhwc, dt, 1, QuantizationInfo(), DataLayout::NHWC);
+    const auto conv_info = PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR);
+
+    // Create direct convolution function
+    CLDirectConvolutionLayer conv{};
+    conv.configure(&src, &weights, nullptr, &dst, conv_info);
+
+    src.allocator()->allocate();
+    weights.allocator()->allocate();
+    dst.allocator()->allocate();
+
+    library->fill_tensor_value(CLAccessor(src), 1.f);
+    library->fill_tensor_value(CLAccessor(weights), 1.f);
+
+    conv.run();
+
+    // Compute reference to compare
+    SimpleTensor<float> ref_src{ src_shape, dt };
+    SimpleTensor<float> ref_weights{ weights_shape, dt };
+    SimpleTensor<float> ref_bias{ bias_shape, dt };
+    library->fill_tensor_value(ref_src, 1.f);
+    library->fill_tensor_value(ref_weights, 1.f);
+    // No bias
+    library->fill_tensor_value(ref_bias, 0.f);
+    auto ref_dst = reference::convolution_layer<float>(ref_src, ref_weights, ref_bias, dst_shape, conv_info);
+
+    validate(CLAccessor(dst), ref_dst);
+}
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(

@@ -855,8 +855,14 @@
           "neon": {
             "fp16": [ "src/cpu/kernels/activation/generic/neon/fp16.cpp" ],
             "fp32": [ "src/cpu/kernels/activation/generic/neon/fp32.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/activation/generic/neon/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp" ],
+            "qasymm8": [
+              "src/cpu/kernels/activation/generic/neon/qasymm8.cpp",
+              "src/cpu/kernels/activation/generic/neon/lut.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/cpu/kernels/activation/generic/neon/qasymm8_signed.cpp",
+              "src/cpu/kernels/activation/generic/neon/lut.cpp"
+            ],
             "qsymm16": [ "src/cpu/kernels/activation/generic/neon/qsymm16.cpp" ]
           },
           "sve": {
@@ -1732,7 +1738,8 @@
         "neon":{
           "common":["src/cpu/kernels/meanstddevnorm/generic/neon/impl.cpp"],
           "fp32":["src/cpu/kernels/meanstddevnorm/generic/neon/fp32.cpp"],
-          "fp16":["src/cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp"]
+          "fp16":["src/cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp"],
+          "qasymm8":["src/cpu/kernels/meanstddevnorm/generic/neon/qasymm8.cpp"]
         }
         }
       },
@@ -1973,8 +1980,8 @@
           "neon": {
             "fp16": [ "src/cpu/kernels/scale/neon/fp16.cpp" ],
             "integer": [ "src/cpu/kernels/scale/neon/integer.cpp" ],
-            "qasymm8": [ "src/cpu/kernels/scale/neon/qasymm8.cpp" ],
-            "qasymm8_signed": [ "src/cpu/kernels/scale/neon/qasymm8_signed.cpp" ]
+            "qasymm8": [ "src/cpu/kernels/scale/neon/qasymm8.cpp", "src/cpu/kernels/scale/neon/integer.cpp" ],
+            "qasymm8_signed": [ "src/cpu/kernels/scale/neon/qasymm8_signed.cpp", "src/cpu/kernels/scale/neon/integer.cpp" ]
           }
         }
       },
@@ -2108,20 +2115,25 @@
   },
   "experimental": {
     "dynamic_fusion": [
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingAPI.cpp",
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClDirectConvolutionKernelComponent.cpp",
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClElementwiseKernelComponent.cpp",
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClFloorKernelComponent.cpp",
-      "src/core/experimental/dynamic_fusion/ClKernelBuildingImpl/components/ClStoreKernelComponents.cpp",
-      "src/gpu/cl/kernels/experimental/dynamic_fusion/ClCompositeKernel.cpp",
+      "src/dynamic_fusion/runtime/gpu/cl/ClKernelRuntime.cpp",
+      "src/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.cpp",
 
-      "src/core/experimental/dynamic_fusion/OperatorGraph.cpp",
-      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClWorkload.cpp",
-      "src/gpu/cl/operators/experimental/dynamic_fusion/ClCompositeOperator.cpp",
-      "src/core/experimental/dynamic_fusion/WorkloadImpl/OperatorGraphImpl.cpp",
-      "src/core/experimental/dynamic_fusion/WorkloadImpl/DependencyGraph.cpp",
-      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClKernelGraph.cpp",
-      "src/core/experimental/dynamic_fusion/WorkloadImpl/ClFusedKernelGraph.cpp"
+      "src/dynamic_fusion/sketch/OperatorAttributes.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuKernelComponentStream.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuLogicalKernel.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuOperatorGroup.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuWorkloadContext.cpp",
+      "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.cpp",
+      "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.cpp",
+      "src/dynamic_fusion/sketch/gpu/operators/GpuConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.cpp",
+      "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
+      "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
+      "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp"
     ]
   }
 }

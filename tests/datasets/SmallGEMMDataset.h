@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,15 +51,6 @@ public:
     }
 };
 
-class SmallBatchedGEMMDataset final : public GEMMDataset
-{
-public:
-    SmallBatchedGEMMDataset()
-    {
-        add_config(TensorShape(2U, 4U, 1U, 3U), TensorShape(5U, 2U, 3U), TensorShape(5U), TensorShape(5U, 4U, 1U, 3U), 1.0f, 0.0f);
-    }
-};
-
 class SmallGEMMOutput3DDataset final : public GEMMDataset
 {
 public:
@@ -87,6 +78,22 @@ public:
         add_config(TensorShape(16U, 16U, 5U, 3U), TensorShape(8U, 16U), TensorShape(8U), TensorShape(8U, 16U, 5U, 3U), 1.0f, 0.3f);
     }
 };
+
+class SmallBatchedMatMulDataset final : public GEMMDataset
+{
+public:
+    SmallBatchedMatMulDataset()
+    {
+        add_config(TensorShape(4U, 3U), TensorShape(2U, 4U), TensorShape(2U), TensorShape(2U, 3U), 1.0f, 0.0f);
+        add_config(TensorShape(12U, 15U), TensorShape(7U, 12U), TensorShape(7U), TensorShape(7U, 15U), 1.0f, 0.0f);
+        add_config(TensorShape(59U, 17U), TensorShape(36U, 59U), TensorShape(36U), TensorShape(36U, 17U), 1.0f, 0.0f);
+        add_config(TensorShape(2U, 4U, 3U), TensorShape(5U, 2U, 3U), TensorShape(5U), TensorShape(5U, 4U, 3U), 1.0f, 0.0f);
+        add_config(TensorShape(15U, 7U, 36U), TensorShape(29U, 15U, 36U), TensorShape(29U), TensorShape(29U, 7U, 36U), 1.0f, 0.0f);
+        add_config(TensorShape(56U, 17U, 32U), TensorShape(5U, 56U, 32U), TensorShape(5U), TensorShape(5U, 17U, 32U), 1.0f, 0.0f);
+        add_config(TensorShape(13U, 256U, 32U), TensorShape(19U, 13U, 32U), TensorShape(19U), TensorShape(19U, 256U, 32U), 1.0f, 0.0f);
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

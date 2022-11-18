@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,9 @@ void fp_neon_activation_impl(const ITensor *src, ITensor *dst, const ActivationL
     // In case of aarh64, we call vsqrt directly, so we don't use delta.
 #ifndef __aarch64__
     const auto delta = wrapper::vdup_n(static_cast<T>(P.delta), ExactTagType {});
+#else  /* #ifndef __aarch64__ */
+    const auto const_inv_2      = wrapper::vdup_n(static_cast<T>(0.5f), ExactTagType {});
+    const auto const_inv_sqrt_2 = wrapper::vdup_n(static_cast<T>(0.70710678118f), ExactTagType{});
 #endif /* __aarch64__ */
     const auto      const_1           = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType {});
     const auto      const_0           = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
@@ -146,6 +149,14 @@ void fp_neon_activation_impl(const ITensor *src, ITensor *dst, const ActivationL
                 case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
                     tmp = wrapper::vmul(vin, wrapper::vmul(const_inv_6, wrapper::vmin(const_6, wrapper::vmax(const_0, wrapper::vadd(vin, const_3)))));
                     break;
+                case ActivationLayerInfo::ActivationFunction::SWISH:
+                    tmp = wrapper::vmul(vin, wrapper::vinv(wrapper::vadd(const_1, wrapper::vexpq(wrapper::vneg(wrapper::vmul(va, vin))))));
+                    break;
+#ifdef __aarch64__
+                case ActivationLayerInfo::ActivationFunction::GELU:
+                    tmp = wrapper::vmul(vin, wrapper::vmul(const_inv_2, wrapper::vadd(const_1, wrapper::verf(wrapper::vmul(vin, const_inv_sqrt_2)))));
+                    break;
+#endif /* __aarch64__ */
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");
             }
@@ -199,6 +210,12 @@ void fp_neon_activation_impl(const ITensor *src, ITensor *dst, const ActivationL
                     break;
                 case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
                     tmp = in * ((std::min(std::max((in + 3), 0.0f), 6.0f)) * 0.166666667f);
+                    break;
+                case ActivationLayerInfo::ActivationFunction::SWISH:
+                    tmp = in / (static_cast<T>(1) + std::exp(-a*in));
+                    break;
+                case ActivationLayerInfo::ActivationFunction::GELU:
+                    tmp = in * static_cast<T>(0.5f * (1.0f + erff(static_cast<float>(in) / 1.41421356237f)));
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");

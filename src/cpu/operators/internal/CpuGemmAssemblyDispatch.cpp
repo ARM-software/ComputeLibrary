@@ -157,8 +157,8 @@ public:
                                                                                             const std::vector<int32_t> &multipliers);
 
     // Inherited methods overridden:
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &tensors) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
     bool                             is_configured() const override;
     experimental::MemoryRequirements workspace() const override;
     bool                             isVarWeightsKernel() const override
@@ -211,12 +211,12 @@ private:
     /** Indirect buffer */
     std::unique_ptr<const TypeInput *const *, free_delete> _indirect_arg{};
     std::unique_ptr<const TypeInput *, free_delete>        _indirect_buf{};
-    std::vector<TypeInput>                                 _indirect_pad{};
-    arm_gemm::ConvolutionParameters                        _cp{};
-    experimental::MemoryRequirements                       _aux_mem{ Count };
-    bool                                                   _B_pretranspose_required{ false };
-    bool                                                   _is_b_constant{ true };
-    bool                                                   _is_c_constant{ true };
+    std::vector<TypeInput>           _indirect_pad{};
+    arm_gemm::ConvolutionParameters  _cp{};
+    experimental::MemoryRequirements _aux_mem{ Count };
+    bool                             _B_pretranspose_required{ false };
+    bool                             _is_b_constant{ true };
+    bool                             _is_c_constant{ true };
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -716,7 +716,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             if(d->data_type() == DataType::S32)
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<uint8_t, uint32_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
-                                                "We could not find an optimized kernel for U8/QASYMM8 input and S32 output");
+                                                "We could not find an optimized kernel for U8/QASYMM8 input and U32 output");
             }
             else
             {
@@ -734,7 +734,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
             else
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<int8_t, int8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf, args, {})),
-                                                "We could not find an optimized kernel for S8 input and S32 output");
+                                                "We could not find an optimized kernel for S8 input and S8 output");
             }
             break;
 #endif /* __aarch64__ */
@@ -749,7 +749,7 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(arm_gemm::has_opt_gemm<float16_t, float16_t, arm_gemm::Nothing>(arm_gemm_expected_wf, args, {})),
-                                            "We could not find an optimized kernel for BFLOAT16 input and F32 output");
+                                            "We could not find an optimized kernel for F16 input and F16 output");
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
@@ -767,6 +767,7 @@ Status CpuGemmAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(info.reshape_b_only_on_first_run), "Assembly kernel will not be executed when reshape_b_only_on_first_run is false");
 
 #ifndef __aarch64__
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->element_size() == 1, "8bit integer types only supported for aarch64");

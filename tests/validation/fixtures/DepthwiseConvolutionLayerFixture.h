@@ -59,7 +59,7 @@ public:
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation,
                unsigned int depth_multiplier, DataType input_data_type, DataType weights_data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo weights_quantization_info, QuantizationInfo output_quantization_info,
-               DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false, bool in_place = false)
+               DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false, bool in_place = false, bool run_twice = false)
     {
         ARM_COMPUTE_ERROR_ON(mixed_layout && in_place);
         _mixed_layout              = mixed_layout;
@@ -75,6 +75,7 @@ public:
         _depth_multiplier          = depth_multiplier;
         _dilation                  = dilation;
         _in_place                  = in_place;
+        _run_twice                 = run_twice;
 
         _bias_data_type = is_data_type_quantized(_input_data_type) ? DataType::S32 : _input_data_type;
 
@@ -105,6 +106,9 @@ public:
         // Create tensors
         _src                      = create_tensor<TensorType>(input_shape, _input_data_type, 1, _input_quantization_info, _data_layout);
         _weights                  = create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
+        if(_run_twice) {
+            _weights.info()->set_are_values_constant(false);
+        }
         _biases                   = create_tensor<TensorType>(_biases_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
         TensorType *target_to_use = nullptr;
         if(!_in_place)
@@ -151,6 +155,16 @@ public:
         fill(AccessorType(_weights), 1);
         fill(AccessorType(_biases), 2);
 
+        // Run with variable input
+        if(_run_twice) {
+            _dwc.run();
+
+            // Fill tensors with a new seed
+            fill(AccessorType(_src), 3);
+            fill(AccessorType(_weights), 4);
+            fill(AccessorType(_biases), 5);
+        }
+
         if(_mixed_layout)
         {
             mix_layout(_dwc, _src, _target);
@@ -171,6 +185,16 @@ public:
         fill(src, 0);
         fill(weights, 1);
         fill(biases, 2);
+        if(_run_twice) {
+            SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, _output_shape, _pad_stride_info, _depth_multiplier, _dilation, _output_quantization_info);
+            if(_act_info.enabled()) {
+                reference::activation_layer<T>(depth_out, _act_info);
+            }
+
+            fill(src, 3);
+            fill(weights, 4);
+            fill(biases, 5);
+        }
 
         SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, _output_shape, _pad_stride_info, _depth_multiplier, _dilation, _output_quantization_info);
         _reference                = (_act_info.enabled()) ? reference::activation_layer<T>(depth_out, _act_info) : depth_out;
@@ -258,9 +282,10 @@ protected:
     Size2D              _dilation{};
     bool                _mixed_layout{ false };
     bool                _in_place{ false };
+    bool                _run_twice{ false };
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, bool in_place = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, bool in_place = false, bool run_twice = false>
 class DepthwiseConvolutionLayerValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
@@ -270,7 +295,7 @@ public:
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier,
                                                                                                                data_type, data_type, QuantizationInfo(), QuantizationInfo(), QuantizationInfo(),
-                                                                                                               data_layout, act_info, mixed_layout, in_place);
+                                                                                                               data_layout, act_info, mixed_layout, in_place, run_twice);
     }
 };
 
@@ -482,6 +507,7 @@ public:
         DWCComputeKernelInfo dwc_info;
         dwc_info.n0                         = _n0;
         dwc_info.m0                         = _conv_info.stride().first == 1 && _dilation.x() == 1 ? 8 : 1;
+        dwc_info.export_input_to_cl_image   = false;
         dwc_info.export_weights_to_cl_image = _export_to_cl_image;
 
         const ConvolutionInfo conv_kernel_info

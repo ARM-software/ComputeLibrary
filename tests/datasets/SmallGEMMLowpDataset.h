@@ -76,6 +76,22 @@ public:
         add_config(TensorShape(16U, 16U, 5U, 3U), TensorShape(8U, 16U), TensorShape(8U, 16U, 5U, 3U), -9, 1);
     }
 };
+
+class SmallGEMMLowpBatchedMatMulDataset final : public GEMMLowpDataset
+{
+public:
+    SmallGEMMLowpBatchedMatMulDataset()
+    {
+        add_config(TensorShape(4U, 3U), TensorShape(2U, 4U), TensorShape(2U, 3U), 0, 0);
+        add_config(TensorShape(12U, 15U), TensorShape(7U, 12U), TensorShape(7U, 15U), 0, 0);
+        add_config(TensorShape(59U, 17U), TensorShape(36U, 59U), TensorShape(36U, 17U), -2, 13);
+        add_config(TensorShape(2U, 4U, 3U), TensorShape(5U, 2U, 3U), TensorShape(5U, 4U, 3U), -2, 0);
+        add_config(TensorShape(15U, 7U, 36U), TensorShape(29U, 15U, 36U), TensorShape(29U, 7U, 36U), -9, 1);
+        add_config(TensorShape(56U, 17U, 32U), TensorShape(5U, 56U, 32U), TensorShape(5U, 17U, 32U), -3, 2);
+        add_config(TensorShape(13U, 256U, 32U), TensorShape(19U, 13U, 32U), TensorShape(19U, 256U, 32U), 5, 13);
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

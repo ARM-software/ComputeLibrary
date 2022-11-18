@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,8 +96,8 @@ const auto b_values = framework::dataset::make("batch_size", 1, 3);
 /** Activation values to test */
 const auto act_values = framework::dataset::make("Activation",
 {
-    ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** M0 values to test - Precommit */

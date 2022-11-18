@@ -38,7 +38,7 @@ PROJECT_NAME           = "Compute Library"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 22.08
+PROJECT_NUMBER         = 22.11
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -1551,11 +1551,11 @@ MATHJAX_FORMAT         = HTML-CSS
 # MATHJAX_RELPATH should be ../mathjax. The default value points to the MathJax
 # Content Delivery Network so you can quickly see the result without installing
 # MathJax. However, it is strongly recommended to install a local copy of
-# MathJax from http://www.mathjax.org before deployment.
-# The default value is: http://cdn.mathjax.org/mathjax/latest.
+# MathJax from https://www.mathjax.org before deployment.
+# The default value is: https://cdn.mathjax.org/mathjax/latest.
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
+MATHJAX_RELPATH        = https://cdn.mathjax.org/mathjax/latest
 
 # The MATHJAX_EXTENSIONS tag can be used to specify one or more MathJax
 # extension names that should be enabled during MathJax rendering. For example

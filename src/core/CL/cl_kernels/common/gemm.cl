@@ -436,7 +436,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -792,7 +792,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -1196,7 +1196,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -1516,7 +1516,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -1964,9 +1964,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, N0, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -2240,9 +2240,9 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, N0, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -2740,9 +2740,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, N0, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -3113,9 +3113,9 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 
 #if defined(ACTIVATION_TYPE)
 #if defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, N0, c, A_VAL, B_VAL);
 #else  // defined(MIXED_PRECISION)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
@@ -3504,7 +3504,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, VEC_SIZE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, N0, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     const bool cond_y = y == 0;

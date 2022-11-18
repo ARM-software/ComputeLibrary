@@ -232,7 +232,7 @@ void CLCompileContext::set_context(cl::Context context)
 std::string CLCompileContext::generate_build_options(const StringSet &build_options_set, const std::string &kernel_path) const
 {
     std::string concat_str;
-    bool ext_supported = false;
+    bool        ext_supported = false;
     std::string ext_buildopts;
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
@@ -270,16 +270,9 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
         ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
     }
 
-    if(gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD)
+    if(gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD && get_ddk_version() >= 11)
     {
-        const std::string device_vers = _device.device_version();
-        const std::regex  ddk_regex("r([0-9]*)p[0-9]");
-        std::smatch       ddk_match;
-
-        if(std::regex_search(device_vers, ddk_match, ddk_regex) && std::stoi(ddk_match[1]) >= 11)
-        {
-            concat_str += " -DUNROLL_WITH_PRAGMA ";
-        }
+        concat_str += " -DUNROLL_WITH_PRAGMA ";
     }
 
     std::string build_options = stringify_set(build_options_set, kernel_path) + concat_str;
@@ -391,5 +384,23 @@ std::string CLCompileContext::get_device_version() const
 cl_uint CLCompileContext::get_num_compute_units() const
 {
     return _device.compute_units();
+}
+
+int32_t CLCompileContext::get_ddk_version() const
+{
+    const std::string device_version = _device.device_version();
+    const std::regex  ddk_regex("r([0-9]*)p[0-9]");
+    std::smatch       ddk_match;
+
+    if(std::regex_search(device_version, ddk_match, ddk_regex))
+    {
+        return std::stoi(ddk_match[1]);
+    }
+
+    return -1;
+}
+GPUTarget CLCompileContext::get_gpu_target() const
+{
+    return _device.target();
 }
 } // namespace arm_compute

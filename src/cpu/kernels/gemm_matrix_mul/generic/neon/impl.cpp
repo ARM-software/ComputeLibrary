@@ -856,7 +856,7 @@ void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
     }
     // Set step_x and step_y for matrix B. Scale by a factor of 8 the X range as the input transposed matrix A has 8 times less the cols of the dst matrix
     win_b.set(Window::DimX, Window::Dimension(window.x().start() / 8, window.x().end() / 8, in_b_stride));
-    win_b.set(Window::DimY, Window::Dimension(0, 1, 0));
+    win_b.set(Window::DimY, Window::Dimension(0, 0, 0));
 
     Iterator ina(lhs, win_a);
     Iterator inb(rhs, win_b);

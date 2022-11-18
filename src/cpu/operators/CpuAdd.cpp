@@ -50,14 +50,9 @@ Status CpuAdd::validate(const ITensorInfo *src0, const ITensorInfo *src1, const 
 
 void CpuAdd::run(ITensorPack &tensors)
 {
-    if(static_cast<kernels::CpuAddKernel *>(_kernel.get())->get_can_interpret_inputs_as_1d_array())
-    {
-        NEScheduler::get().schedule_op(_kernel.get(), Window::DimX, _kernel->window(), tensors);
-    }
-    else
-    {
-        ICpuOperator::run(tensors);
-    }
+    const auto split_dimension = static_cast<kernels::CpuAddKernel *>(_kernel.get())->get_split_dimension();
+
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 } // namespace cpu
 } // namespace arm_compute

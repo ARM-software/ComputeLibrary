@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -213,11 +213,9 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()
         }
     }
 
-    int offset        = 0;
     int cur_start_idx = 0;
     for(int b = 0; b < batch_size; ++b)
     {
-        const int num_boxes = _batch_splits_in == nullptr ? 1 : static_cast<int>(*reinterpret_cast<T *>(_batch_splits_in->ptr_to_element(Coordinates(b))));
         // Skip first class if there is more than 1 except if the number of classes is 1.
         const int j_start = (num_classes == 1 ? 0 : 1);
         for(int j = j_start; j < num_classes; ++j)
@@ -333,7 +331,6 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()
             }
         }
 
-        offset += num_boxes;
         cur_start_idx += total_keep_count;
     }
 

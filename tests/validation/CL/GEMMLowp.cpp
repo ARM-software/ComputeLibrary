@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,7 @@ TEST_SUITE(GEMMLowp)
 
 TEST_SUITE(MatrixMultiplyCore)
 using CLGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
+using CLGEMMLowpBatchedMatMulFixture      = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, false, true>;
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
@@ -65,7 +66,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-
+TEST_SUITE(BATCHED_MATMUL)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpBatchedMatMulFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpBatchedMatMulDataset())
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // BATCHED_MATMUL
 TEST_SUITE(FusedOffsetOutput)
 TEST_SUITE(QASYMM8)
 using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;

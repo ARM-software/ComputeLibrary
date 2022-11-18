@@ -83,75 +83,6 @@ void fp32_sve_scale_nearest(const ITensor *src, ITensor *dst, const ITensor *off
     },
     out);
 }
-
-void fp32_sve_scale_bilinear(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                             BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                             bool align_corners, const Window &window)
-{
-    // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
-
-    Iterator  out(dst, window);
-    const int in_stride_c  = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
-    const int in_dim_w     = src->info()->dimension(1);
-    const int in_dim_h     = src->info()->dimension(2);
-    const int in_stride_wc = in_stride_c * (in_dim_w + src->info()->padding().top + src->info()->padding().bottom);
-
-    // Don't increment in Y and Z direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    Iterator in(src, win_in);
-
-    if(border_mode == BorderMode::CONSTANT)
-    {
-        const float const_border_value = static_cast<float>(constant_border_value.get<float>());
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto    offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto    dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int32_t in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
-            const float *in_ptr = reinterpret_cast<const float *>(in.ptr()) + offset * in_stride_c + in_hi * in_stride_wc;
-
-            const auto a00 = (0 <= offset && offset < in_dim_w && 0 <= in_hi && in_hi < in_dim_h) ? *in_ptr : const_border_value;
-            const auto a01 = (-1 <= offset && offset < in_dim_w - 1 && 0 <= in_hi && in_hi < in_dim_h) ? *(in_ptr + in_stride_c) : const_border_value;
-            const auto a10 = (0 <= offset && offset < in_dim_w && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_wc) : const_border_value;
-            const auto a11 = (-1 <= offset && offset < in_dim_w - 1 && -1 <= in_hi && in_hi < in_dim_h - 1) ? *(in_ptr + in_stride_c + in_stride_wc) : const_border_value;
-
-            *reinterpret_cast<float *>(out.ptr()) = static_cast<float>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
-    }
-    else if(border_mode == BorderMode::REPLICATE)
-    {
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            const auto offset = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dx_val = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
-            const auto dy_val = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-            const int  in_hi  = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
-
-            auto clamped_w  = utility::clamp<int>(offset, 0, in_dim_w - 1);
-            auto clamped_w1 = utility::clamp<int>(offset + 1, 0, in_dim_w - 1);
-            auto clamped_h  = utility::clamp<int>(in_hi, 0, in_dim_h - 1);
-            auto clamped_h1 = utility::clamp<int>(in_hi + 1, 0, in_dim_h - 1);
-
-            const auto a00 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w * in_stride_c + clamped_h * in_stride_wc);
-            const auto a01 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h * in_stride_wc);
-            const auto a10 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w * in_stride_c + clamped_h1 * in_stride_wc);
-            const auto a11 = *(reinterpret_cast<const float *>(in.ptr()) + clamped_w1 * in_stride_c + clamped_h1 * in_stride_wc);
-
-            *reinterpret_cast<float *>(out.ptr()) = static_cast<float>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-        },
-        in, out);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not implemented");
-    }
-}
 }
 namespace cpu
 {
@@ -159,13 +90,14 @@ void fp32_sve_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, co
                     InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
                     bool align_corners, const Window &window)
 {
-    if(policy == InterpolationPolicy::BILINEAR)
-    {
-        fp32_sve_scale_bilinear(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
-    }
-    else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    ARM_COMPUTE_UNUSED(dx, dy, border_mode, constant_border_value);
+    if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         fp32_sve_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not implemented");
     }
 }
 } // namespace cpu

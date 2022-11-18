@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,8 +113,13 @@ void ClGemmLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileCon
     build_opts.add_option_if((max < 255), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
+    const std::string kernel_name = "gemmlowp_output_stage_quantize_down_float";
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
+
     // Create kernel
-    _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down_float", build_opts.options());
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*src, Steps(num_elems_processed_per_iteration));

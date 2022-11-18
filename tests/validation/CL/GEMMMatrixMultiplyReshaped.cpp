@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,6 +121,7 @@ const auto b_values = framework::dataset::make("batch_size", 2, 3);
 const auto act_values = framework::dataset::make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** Alpha values to test - Precommit */
@@ -857,7 +858,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       true,
                                                       true,
                                                       false,
-                                                      false})),
+                                                      true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
    ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
@@ -1338,7 +1339,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                       true,
                                                       true,
                                                       false,
-                                                      false})),
+                                                      true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
    ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),

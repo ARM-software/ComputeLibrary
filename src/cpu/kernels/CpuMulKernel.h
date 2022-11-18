@@ -79,6 +79,16 @@ public:
     // Inherited methods overridden
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
+
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+      *
+      * @return The split dimension hint.
+      */
+    size_t get_split_dimension_hint() const
+    {
+        return _split_dimension;
+    }
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
@@ -115,6 +125,7 @@ private:
     MulFunctionQuantized *_func_quantized{ nullptr };
     float                 _scale{ 0 };
     int                   _scale_exponent{ 0 };
+    size_t                _split_dimension{ Window::DimY };
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */

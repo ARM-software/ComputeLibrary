@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -227,6 +227,9 @@ void ClGemmLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &com
     build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
     build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     std::string kernel_name("gemmlowp_mm_native");
+
+    // A macro guard to compile ONLY the kernel of interest
+    build_opts.add_option("-D" + upper_string(kernel_name));
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,11 @@ class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {
 public:
     using TensorDimsState = std::vector<int>;
+    /** An id that uniquely identifies an ITensorInfo within some domain (e.g. a workload)
+     */
+    using Id = int32_t;
+    /** An invalid tensor id within a domain */
+    static constexpr Id invalid_tensor_id = -1;
     /** Get the value representing dynamic dimension state
      *
      * @return Value representing dynamic dimension state
@@ -280,7 +285,20 @@ public:
     * @return A DataLayout containing the layout data information.
     */
     virtual DataLayout data_layout() const = 0;
-
+    /** Get the workload tensor id of the tensor.
+    *
+    * @return Workload tensor id of the tensor
+    */
+    virtual Id id() const = 0;
+    /** Set the tensor id
+    */
+    virtual ITensorInfo &set_id(ITensorInfo::Id id) = 0;
+    /** Check if the tensor id is valid
+     */
+    bool has_valid_id() const
+    {
+        return id() != invalid_tensor_id;
+    }
     /** If infos are broadcast compatible tensor info's, return the broadcasted shape and the intersection of
      * the broadcasted valid regions of the tensors.
      *

@@ -65,7 +65,7 @@ void CpuGemm::configure(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     const cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
     const bool             is_c_bias     = gemm_info.reshape_b_only_on_first_run();
-    bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, (is_c_bias) ? c : nullptr, d, asm_info));
+    bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, (is_c_bias) ? c : nullptr, d, asm_info)) && gemm_info.reshape_b_only_on_first_run();
 
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;

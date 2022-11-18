@@ -441,7 +441,7 @@ void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
     ARM_COMPUTE_ERROR_ON(err != CL_SUCCESS);
 }
 
-bool export_weights_to_cl_image(const ITensorInfo *tensor)
+bool export_to_cl_image(const ITensorInfo *tensor)
 {
     if(tensor->tensor_shape()[0] % 4)
     {

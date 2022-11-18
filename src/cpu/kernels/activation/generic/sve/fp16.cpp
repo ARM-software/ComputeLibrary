@@ -114,6 +114,9 @@ void sve_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayer
                 case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
                     tmp = svmul_f16_z(pg, vin, svmul_f16_z(pg, const_inv_6, svmin_f16_z(pg, const_6, svmax_f16_z(pg, const_0, svadd_f16_z(pg, vin, const_3)))));
                     break;
+                case ActivationLayerInfo::ActivationFunction::SWISH:
+                    tmp = svmul_f16_z(pg, vin, svinv_f16_z(pg, svadd_f16_z(pg, const_1, svexp_f16_z(pg, svneg_f16_z(pg, svmul_f16_z(pg, va, vin))))));
+                    break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");
             }

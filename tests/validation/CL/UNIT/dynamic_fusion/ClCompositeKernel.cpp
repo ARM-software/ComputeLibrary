@@ -171,7 +171,7 @@ TEST_CASE(MoveNet_SubGraph_1_DirectConv2d, framework::DatasetMode::ALL)
     SimpleTensor<float> ref_src_nhwc{ src_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
     SimpleTensor<float> ref_wei_nhwc{ wei_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
     SimpleTensor<float> ref_bia_nhwc{ bia_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
-    SimpleTensor<float> ref_addend_nhwc{ dst_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
+    SimpleTensor<float> ref_addend_nhwc{ addend_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
 
     // Fill reference
     fill<float>(ref_src_nhwc, 0, library.get());

@@ -116,12 +116,12 @@ __kernel void direct_convolution_nhwc(
     // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH WEI_WIDTH
 #define _IWEI_HEIGHT WEI_HEIGHT
-#define _ISRC_WIDTH src_w
-#define _ISRC_HEIGHT src_h
-#define _ISRC_CHANNELS src_c
-#define _IDST_WIDTH dst_w
-#define _IDST_HEIGHT dst_h
-#define _IDST_CHANNELS dst_c
+#define _ISRC_WIDTH SRC_WIDTH
+#define _ISRC_HEIGHT SRC_HEIGHT
+#define _ISRC_CHANNELS SRC_CHANNELS
+#define _IDST_WIDTH DST_WIDTH
+#define _IDST_HEIGHT DST_HEIGHT
+#define _IDST_CHANNELS DST_CHANNELS
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
     // If quantized, the output tile has to be quantized first before being stored to global memory
@@ -159,12 +159,25 @@ __kernel void direct_convolution_nhwc(
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
-        int ck = 0;
         int xk = i % _IWEI_WIDTH;
         int yk = i / _IWEI_WIDTH;
 
-        int k = 0;
-        for(; k <= (_ISRC_CHANNELS - K0); k += K0)
+        TILE(int, M0, 1, my);
+
+        LOOP_UNROLLING(int, i, 0, 1, M0,
+        {
+            int x_s = xi[i].v + xk;
+            int y_s = yi[i].v + yk;
+            my[i].v = x_s + y_s *_ISRC_WIDTH;
+            my[i].v = my[i].v + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+            my[i].v = select(-1, my[i].v, x_s >= 0);
+            my[i].v = select(-1, my[i].v, x_s < _ISRC_WIDTH);
+            my[i].v = select(-1, my[i].v, y_s >= 0);
+            my[i].v = select(-1, my[i].v, y_s < _ISRC_HEIGHT);
+        })
+
+        int ck = 0;
+        for(; ck <= (_ISRC_CHANNELS - K0); ck += K0)
         {
             TILE(SRC_DATA_TYPE, M0, K0, a);
             TILE(WEI_DATA_TYPE, N0, K0, b);
@@ -175,13 +188,8 @@ __kernel void direct_convolution_nhwc(
                 a[i].v = ZERO_VALUE;
             })
 
-            LOOP_UNROLLING(int, i, 0, 1, N0,
-            {
-                b[i].v = ZERO_VALUE;
-            })
-
             // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, my, a);
 
             // Load tile from the weights tensor
             T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
@@ -192,15 +200,13 @@ __kernel void direct_convolution_nhwc(
             // Apply the offset correction (correction usually needed for asymmetric quantized computation)
             // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
-
-            ck += K0;
         }
 
         // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
 #if defined(LEFTOVER_LOOP)
         // Left-over accumulations
-        for(; k < _ISRC_CHANNELS; ++k)
+        for(; ck < _ISRC_CHANNELS; ++ck)
         {
             TILE(SRC_DATA_TYPE, M0, 1, a);
             TILE(WEI_DATA_TYPE, N0, 1, b);
@@ -229,8 +235,6 @@ __kernel void direct_convolution_nhwc(
             // Apply the offset correction (operation usually needed for asymmetric quantized computation)
             // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
-
-            ++ck;
         }
 #endif // defined(LEFTOVER_LOOP)
     }
@@ -249,17 +253,6 @@ __kernel void direct_convolution_nhwc(
 
 #endif // HAS_BIAS
 
-    TILE(uint, M0, 1, dst_indirect_y);
-
-    // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, i, 0, 1, M0,
-    {
-        dst_indirect_y[i].v = (uint)min(mout + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
-        dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
-    })
-
-    bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
-
 #if defined(IS_QUANTIZED)
 
     TILE(DST_DATA_TYPE, M0, N0, cq);
@@ -270,6 +263,17 @@ __kernel void direct_convolution_nhwc(
 
     // Apply activation
     T_ACTIVATION(DST_DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, _IOUTPUT_TILE, _IOUTPUT_TILE);
+
+    TILE(uint, M0, 1, dst_indirect_y);
+
+    // Calculate the destination indirect Y
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        dst_indirect_y[i].v = (uint)min(mout + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
+        dst_indirect_y[i].v += bout * (int)(_IDST_WIDTH * _IDST_HEIGHT);
+    })
+
+    bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
     // _IOUTPUT_TILE: c = fp32/fp16, cq=qasymm8
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones

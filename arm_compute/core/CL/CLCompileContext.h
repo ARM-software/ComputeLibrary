@@ -304,6 +304,18 @@ public:
     */
     bool is_wbsm_supported() const;
 
+    /** Return the DDK version. If the DDK version cannot be detected, return -1.
+     *
+     * @return The DDK version.
+     */
+    int32_t get_ddk_version() const;
+
+    /** Return the Gpu target of the associated device
+     *
+     * @return GPUTarget
+     */
+    GPUTarget get_gpu_target() const;
+
 private:
     /** Load program and its dependencies.
      *

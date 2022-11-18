@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,9 @@ using CLGEMMOutput3DFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM
 
 template <typename T>
 using CLGEMMInputOutput3DFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T, false, true, true>;
+
+template <typename T>
+using CLBatchedMatMulFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T, true, false, false, false, false, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -181,9 +184,31 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMOutput3DFixture<half>, framework::Dataset
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END() // FP16
-
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // OUTPUT_3D
+
+TEST_SUITE(BATCHED_MATMUL)
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { false })),
+                                                                                                            framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallBatchedMatMulDataset(),
+                                                                                                                   framework::dataset::make("ReshapeWeights", { false })),
+                                                                                                           framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() // BATCHED_MATMUL
 
 TEST_SUITE_END() // GEMM
 TEST_SUITE_END() // CL

@@ -73,6 +73,15 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
+    /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
+     *
+     * @return The split dimension hint.
+     */
+    size_t get_split_dimension_hint() const
+    {
+        return _split_dimension;
+    }
+
     struct ActivationKernel
     {
         const char                                *name;
@@ -85,6 +94,7 @@ public:
 private:
     ActivationLayerInfo _act_info{};
     ActivationKernelPtr _run_method{ nullptr };
+    size_t              _split_dimension{ Window::DimY };
     std::string         _name{};
 };
 } // namespace kernels

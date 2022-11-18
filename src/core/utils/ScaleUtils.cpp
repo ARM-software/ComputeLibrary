@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "src/core/utils/ScaleUtils.h"
-#include "arm_compute/core/Helpers.h"
+#include "src/common/cpuinfo/CpuIsaInfo.h"
+
+#include "arm_compute/core/CPP/CPPTypes.h"
+#include "arm_compute/core/TensorInfo.h"
 
 float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
 {
@@ -34,4 +38,28 @@ float arm_compute::scale_utils::calculate_resize_ratio(size_t input_size, size_t
     ARM_COMPUTE_ERROR_ON(out == 0);
 
     return static_cast<float>(in) / static_cast<float>(out);
+}
+
+bool arm_compute::scale_utils::is_precomputation_required(DataLayout data_layout, DataType data_type,
+                                                          InterpolationPolicy policy, BorderMode border_mode)
+{
+    // Do not calculate precomputed weights and indices if kernel code doesn't use them
+    if(data_layout == DataLayout::NHWC)
+    {
+        switch(data_type)
+        {
+            case DataType::F32:
+            case DataType::F16:
+                return (CPUInfo::get().get_isa().sve == true && policy == InterpolationPolicy::NEAREST_NEIGHBOR);
+            case DataType::U8:
+            case DataType::S8:
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
+                return (border_mode != BorderMode::REPLICATE) || (policy == InterpolationPolicy::NEAREST_NEIGHBOR);
+            default:
+                return true;
+        }
+    }
+
+    return true;
 }

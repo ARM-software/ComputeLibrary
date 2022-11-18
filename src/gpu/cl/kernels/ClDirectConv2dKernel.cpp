@@ -94,7 +94,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
                                             "K0 can only be: 4, 8, and 16");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_weights_to_cl_image(weights),
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_to_cl_image(weights),
                                             "Export to CLImage is not supported for this weight configuration");
         }
     }
@@ -242,6 +242,12 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
 
         build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
+        build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(0)));
+        build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(1)));
+        build_options.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(src->dimension(2)));
+        build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(0)));
+        build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(1)));
+        build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(2)));
         build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
         build_options.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
@@ -291,6 +297,11 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
             build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(0));
             build_options.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
             build_options.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
+        }
+
+        if(compile_context.get_ddk_version() >= 30)
+        {
+            build_options.add_option("-fregister-allocation=64");
         }
     }
     else

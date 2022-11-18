@@ -50,7 +50,7 @@ public:
     /** Allow instances of this class to be copy constructed */
     TensorInfo(const ITensorInfo &info);
     /** Allow instances of this class to be copy constructed */
-    TensorInfo(const TensorInfo &) = default;
+    TensorInfo(const TensorInfo &);
     /** Allow instances of this class to be copied */
     TensorInfo &operator=(const TensorInfo &) = default;
     /** Allow instances of this class to be move constructed */
@@ -297,6 +297,15 @@ public:
         _are_values_constant = are_values_constant;
         return *this;
     }
+    ITensorInfo::Id id() const override
+    {
+        return _id;
+    }
+    ITensorInfo &set_id(ITensorInfo::Id id) override
+    {
+        _id = id;
+        return *this;
+    }
     inline friend bool operator==(const TensorInfo &lhs, const TensorInfo &rhs);
 
 private:
@@ -320,6 +329,7 @@ private:
     QuantizationInfo _quantization_info;
     DataLayout       _data_layout;
     bool             _are_values_constant;
+    ITensorInfo::Id  _id;
 };
 
 /** Check whether two tensor info are equal.
@@ -334,7 +344,8 @@ inline bool operator==(const TensorInfo &lhs, const TensorInfo &rhs)
     return (lhs._total_size == rhs._total_size) && (lhs._offset_first_element_in_bytes == rhs._offset_first_element_in_bytes) && (lhs._strides_in_bytes == rhs._strides_in_bytes)
            && (lhs._num_channels == rhs._num_channels) && (lhs._tensor_shape == rhs._tensor_shape) && (lhs._dims_state == rhs._dims_state) && (lhs._data_type == rhs._data_type) && (lhs._format == rhs._format)
            && (lhs._is_resizable == rhs._is_resizable) && (lhs._valid_region == rhs._valid_region) && (lhs._padding == rhs._padding) && (lhs._quantization_info == rhs._quantization_info)
-           && (lhs._data_layout == rhs._data_layout) && (lhs._are_values_constant == rhs._are_values_constant);
+           && (lhs._data_layout == rhs._data_layout) && (lhs._are_values_constant == rhs._are_values_constant)
+           && (lhs._id == rhs._id);
 }
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_TENSORINFO_H */

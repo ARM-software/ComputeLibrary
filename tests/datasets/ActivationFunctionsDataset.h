@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,10 @@ public:
                             ActivationLayerInfo::ActivationFunction::SQRT,
                             ActivationLayerInfo::ActivationFunction::SQUARE,
                             ActivationLayerInfo::ActivationFunction::TANH,
-                            ActivationLayerInfo::ActivationFunction::IDENTITY
+                            ActivationLayerInfo::ActivationFunction::IDENTITY,
+#ifdef __aarch64__
+                            ActivationLayerInfo::ActivationFunction::GELU,
+#endif /* __aarch64__ */
     })
     {
     }

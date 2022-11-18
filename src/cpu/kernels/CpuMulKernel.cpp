@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -531,11 +531,11 @@ void mul_U8_U8_U8(const ITensor *src1, const ITensor *src2, ITensor *out, const 
             }
             if(is_sat)
             {
-                vst1q_u8(output_ptr, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
+                vst1q_u8(output_ptr + x, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
             }
             else
             {
-                vst1q_u8(output_ptr, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
+                vst1q_u8(output_ptr + x, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
             }
         }
 
@@ -1618,7 +1618,8 @@ void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *
     }
 
     // Configure kernel window
-    Window win = calculate_max_window(out_shape);
+    Window win;
+    std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*src1, *src2);
 
     ICpuKernel::configure(win);
 }
@@ -1656,10 +1657,26 @@ void CpuMulKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
         (*_func_float)(src1, src2, dst, window, _scale);
     }
 }
+
 const char *CpuMulKernel::name() const
 {
     return "CpuMulKernel";
 }
+
+size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(platform, thread_count);
+
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return 10240;
+    }
+
+    return default_mws;
+}
+
 namespace
 {
 Status validate_arguments_complex(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)

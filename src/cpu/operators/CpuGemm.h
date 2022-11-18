@@ -76,7 +76,7 @@ public:
      * |:------------|:-----------|:---------|:--------------|
      * |F32          |F32         |F32       |F32            |
      * |F16          |F16         |F16       |F16            |
-     * |BFLOAT16     |BFLOAT16    |BFLOAT16  |BFLOAT16       |
+     * |BFLOAT16     |BFLOAT16    |BFLOAT16  |FP32           |
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.

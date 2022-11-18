@@ -2784,6 +2784,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><td>F16<td>F16
     <tr><td>F32<td>F32
     <tr><td>U8<td>U8
+    <tr><td>S8<td>S8
     <tr><td>S16<td>S16
     </table>
 <tr>

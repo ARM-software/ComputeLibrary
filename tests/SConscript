@@ -121,7 +121,8 @@ files_validation += Glob('validation/CPP/' + filter_pattern)
 if env['opencl']:
     if env['experimental_dynamic_fusion']:
         test_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
-        files_validation += Glob('validation/CL/UNIT/dynamic_fusion/' + filter_pattern)
+        files_validation += Glob('validation/dynamic_fusion/gpu/' + filter_pattern)
+        files_validation += Glob('validation/dynamic_fusion/gpu/cl/' + filter_pattern)
 
     filter_pattern = test_env['test_filter']
 
@@ -290,19 +291,6 @@ if test_env['benchmark_examples']:
                 #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
                 prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'])
                 arm_compute_benchmark_examples += [ prog ]
-
-        # Dynamic fusion examples
-        if env['opencl']:
-            if env['experimental_dynamic_fusion']:
-                for file in Glob("%s/dynamic_fusion/*.cpp" % examples_folder):
-                    example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-                    if env['os'] in ['android', 'macos', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+[load_whole_archive, arm_compute_lib, noload_whole_archive] + bm_link_flags + extra_link_flags)
-                        arm_compute_benchmark_examples += [ prog ]
-                    else:
-                        #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'])
-                        arm_compute_benchmark_examples += [ prog ]
 
     arm_compute_benchmark_examples = install_bin(arm_compute_benchmark_examples)
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)

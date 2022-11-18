@@ -127,6 +127,7 @@ vars.AddVariables(
             └── Neon\n""", "", PathVariable.PathAccept),
     BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
     BoolVariable("experimental_fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
+    BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
@@ -312,7 +313,7 @@ else: # NONE "multi_isa" builds
         elif 'armv8.6-a-sve' == env['arch']:
             env.Append(CXXFLAGS = ['-march=armv8.6-a+sve'])
         elif 'armv8.6-a' == env['arch']:
-            env.Append(CXXFLAGS = ['-march=armv8.6-a'])
+            env.Append(CXXFLAGS = ['-march=armv8.6-a+fp16'])
 
         env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_BF16','ARM_COMPUTE_ENABLE_FP16'])
         if "disable_mmla_fp" not in env['custom_options']:

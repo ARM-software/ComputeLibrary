@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,7 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorI
     _is_nchw      = src->data_layout() == DataLayout::NCHW;
     _permute      = _is_nchw;
     _is_prepared  = false;
+    _are_weights_const = weights->are_values_constant();
 
     // Configure pipeline
     _is_activationlayer_enabled = info.act_info.enabled() && !CpuDepthwiseConv2dAssemblyDispatch::is_activation_supported(info.act_info);
@@ -218,6 +219,25 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::run(ITensorPack &t
 
 void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::prepare(ITensorPack &tensors)
 {
+    // if weights are not constant then we need to repack so that weights
+    // can be updated in-place
+    if(!_are_weights_const)
+    {
+        auto weights        = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+        auto bias           = tensors.get_const_tensor(TensorType::ACL_SRC_2);
+        auto packed_weights = tensors.get_tensor(TensorType::ACL_INT_4);
+
+        ITensorPack pack_opt;
+        pack_opt.add_tensor(TensorType::ACL_SRC_1, weights);
+        pack_opt.add_tensor(TensorType::ACL_SRC_2, bias);
+        pack_opt.add_tensor(TensorType::ACL_INT_1, packed_weights);
+
+        // Prepare optimized function
+        _dwc_optimized_func->prepare(pack_opt);
+
+        return;
+    }
+
     if(!_is_prepared)
     {
         auto weights        = tensors.get_const_tensor(TensorType::ACL_SRC_1);

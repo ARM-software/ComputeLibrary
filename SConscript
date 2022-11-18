@@ -31,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v22.08"
-LIBRARY_VERSION_MAJOR = 28
+VERSION = "v22.11"
+LIBRARY_VERSION_MAJOR = 29
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -123,6 +123,12 @@ def build_library(name, build_env, sources, static=False, libs=[]):
             obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
             obj = cloned_build_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+
+    if env['mapfile']:
+        if not 'windows' in env['os'] and not 'macos' in env['os']:
+            cloned_build_env['LINKFLAGS'].append('"-Wl,-Map='+ name + '.map"')
+        else:
+            cloned_build_env['LINKFLAGS'].append('-Wl,-map,' + name + '.map')
 
     obj = install_lib(obj)
     build_env.Default(obj)

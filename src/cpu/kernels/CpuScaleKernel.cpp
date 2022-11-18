@@ -25,14 +25,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Utility.h"
-#include "src/core/CPP/Validate.h"
-#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/common/Registrars.h"
-#include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/kernels/scale/neon/list.h"
 #include "src/cpu/kernels/scale/sve/list.h"
 #include "support/Rounding.h"
@@ -52,62 +47,85 @@ static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels =
 {
     {
         "sve_fp16_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F16 && data.isa.sve && data.isa.fp16 && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_FP16_SVE(arm_compute::cpu::fp16_sve_scale)
     },
     {
         "sve_fp32_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32 && data.isa.sve; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::F32 && data.isa.sve && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_FP32_SVE(arm_compute::cpu::fp32_sve_scale)
     },
     {
         "sve_qu8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 && data.isa.sve; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8 && data.isa.sve && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_QASYMM8_SVE(arm_compute::cpu::qasymm8_sve_scale)
     },
     {
         "sve_qs8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED && data.isa.sve && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::qasymm8_signed_sve_scale)
     },
     {
         "sve_u8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::U8 && data.isa.sve; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::U8 && data.isa.sve && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_INTEGER_SVE(arm_compute::cpu::u8_sve_scale)
     },
     {
         "sve_s16_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S16 && data.isa.sve; },
+        [](const ScaleKernelDataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::S16 && data.isa.sve && data.interpolation_policy != InterpolationPolicy::BILINEAR;
+        },
         REGISTER_INTEGER_SVE(arm_compute::cpu::s16_sve_scale)
     },
     {
         "neon_fp16_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(arm_compute::cpu::common_neon_scale<float16_t>)
     },
     {
         "neon_fp32_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(arm_compute::cpu::common_neon_scale<float>)
     },
     {
         "neon_qu8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(arm_compute::cpu::qasymm8_neon_scale)
     },
     {
         "neon_qs8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::qasymm8_signed_neon_scale)
     },
     {
         "neon_u8_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::U8; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::U8; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::u8_neon_scale)
     },
     {
+        "neon_s8_scale",
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::S8; },
+        REGISTER_INTEGER_NEON(arm_compute::cpu::s8_neon_scale)
+    },
+    {
         "neon_s16_scale",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::S16; },
+        [](const ScaleKernelDataTypeISASelectorData & data) { return data.dt == DataType::S16; },
         REGISTER_INTEGER_NEON(arm_compute::cpu::s16_neon_scale)
     },
 };
@@ -115,7 +133,7 @@ static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels =
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy,
                           const ITensorInfo *offsets, ITensorInfo *dst, const ScaleKernelInfo &info)
 {
-    const auto *uk = CpuScaleKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk = CpuScaleKernel::get_implementation(ScaleKernelDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), info.interpolation_policy });
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -134,12 +152,15 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const I
     ARM_COMPUTE_RETURN_ERROR_ON(output_width == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output_height == 0);
 
-    if(info.interpolation_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    ARM_COMPUTE_RETURN_ERROR_ON((src->data_type() == DataType::S8) && (data_layout != DataLayout::NHWC || info.interpolation_policy != InterpolationPolicy::BILINEAR
+                                                                       || info.border_mode != BorderMode::REPLICATE));
+
+    if(info.interpolation_policy == InterpolationPolicy::NEAREST_NEIGHBOR && offsets != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
     }
 
-    if(info.interpolation_policy == InterpolationPolicy::BILINEAR)
+    if(info.interpolation_policy == InterpolationPolicy::BILINEAR && offsets != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
         if(dx != nullptr && dy != nullptr)
@@ -174,7 +195,7 @@ void CpuScaleKernel::configure(const ITensorInfo *src, const ITensorInfo *dx, co
                                                   dst,
                                                   info));
 
-    const auto *uk = CpuScaleKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk = CpuScaleKernel::get_implementation(ScaleKernelDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), info.interpolation_policy });
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;

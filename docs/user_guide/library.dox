@@ -54,6 +54,17 @@ When the fast-math flag is enabled, both Arm® Neon™ and CL convolution layers
     - no-fast-math: No Winograd support
     - fast-math: Supports Winograd 3x3,3x1,1x3,5x1,1x5,7x1,1x7,5x5,7x7
 
+@section bf16_acceleration BF16 acceleration
+
+Required toolchain: android-ndk-r23-beta5 or later.
+
+To build for BF16: "neon" flag should be set "=1" and "arch" has to be "=armv8.6-a", "=armv8.6-a-sve", or "=armv8.6-a-sve2". For example:
+
+	scons arch=armv8.6-a-sve neon=1 opencl=0 extra_cxx_flags="-fPIC" benchmark_tests=0 validation_tests=0 validation_examples=1 os=android Werror=0 toolchain_prefix=aarch64-linux-android29
+
+To enable BF16 acceleration when running FP32 "fast-math" has to be enabled and that works only for Neon convolution layer using cpu gemm.
+In this scenario on CPU: the CpuGemmConv2d kernel performs the conversion from FP32, type of input tensor, to BF16 at block level to exploit the arithmetic capabilities dedicated to BF16. Then transforms back to FP32, the output tensor type.
+
 @section architecture_thread_safety Thread-safety
 
 Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.

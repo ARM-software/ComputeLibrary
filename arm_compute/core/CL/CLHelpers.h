@@ -242,13 +242,13 @@ bool get_wbsm_support_info(const cl::Device &device);
  */
 void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint);
 
-/* Helper function to check if we can export the weights to cl_image
+/* Helper function to check if we can export the tensor to cl_image
  *
- * @param[in] tensor Weights tensor
+ * @param[in] input tensor
  *
- * @return true if we can export the weights to cl_image
+ * @return true if we can export the tensor to cl_image
  */
-bool export_weights_to_cl_image(const ITensorInfo *tensor);
+bool export_to_cl_image(const ITensorInfo *tensor);
 
 /* Helper function to force unroll with pragma when any of the input values (iterations) are greater than @ref max_manual_loop_unrolling
  *
