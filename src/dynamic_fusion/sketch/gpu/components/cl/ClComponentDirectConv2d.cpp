@@ -35,26 +35,24 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-using Settings = ClComponentDirectConv2dSettings;
-
-Settings &Settings::export_to_cl_image(bool cl_image)
+ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::export_to_cl_image(bool cl_image)
 {
     _export_to_cl_image = cl_image;
     return *this;
 }
 
-bool Settings::export_to_cl_image() const
+bool ClComponentDirectConv2dSettings::export_to_cl_image() const
 {
     return _export_to_cl_image;
 }
 
-Settings &Settings::fast_relaxed_math(bool fast_relaxed_math)
+ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::fast_relaxed_math(bool fast_relaxed_math)
 {
     _fast_relaxed_math = fast_relaxed_math;
     return *this;
 }
 
-bool Settings::fast_relaxed_math() const
+bool ClComponentDirectConv2dSettings::fast_relaxed_math() const
 {
     return _fast_relaxed_math;
 }

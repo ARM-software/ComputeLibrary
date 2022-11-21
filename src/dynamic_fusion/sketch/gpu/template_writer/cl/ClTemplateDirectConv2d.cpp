@@ -86,11 +86,10 @@ std::string ClTemplateDirectConv2d::get_component_code(const ComponentGroup &com
     code += R"_(
 // OUT(dst, accum)      {{dst}}
 
-// Initialize the accumulators
 TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
+TILE(uint, M0, 1, g_dst_indirect_y);
+
 {
-    // All the tensor dimensions are passed at compile time.
-    // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH {{WEI_WIDTH}}
 #define _IWEI_HEIGHT {{WEI_HEIGHT}}
 #define _ISRC_WIDTH {{src}}_w
@@ -101,8 +100,6 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
 #define _IDST_CHANNELS {{arg_dst}}_c
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
-    // .v    = access the whole vector (OpenCL vector)
-    // .s[x] = access the vector element at position x (scalar access)
     TILE(int, M0, 1, xi);
     TILE(int, M0, 1, yi);
 
@@ -132,7 +129,6 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
             TILE({{SRC_DATA_TYPE}}, M0, K0, a);
             TILE({{WEI_DATA_TYPE}}, N0, K0, b);
 
-            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = {{ZERO_VALUE}};
@@ -143,32 +139,24 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            // Load tile from the src tensor
             T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, K0, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
 
-            // Load tile from the weights tensor
             T_LOAD({{WEI_DATA_TYPE}}, N0, K0, {{WEI_TENSOR_TYPE}}, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
-            // Compute the matrix multiplication between two tiles
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, K0, NT, T, a, b, {{dst}});
 
             ck += K0;
         }
-
-        // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
-        // This #if directive should be removed in case of dynamic tensor support
 )_";
 
     if(leftover_loop)
     {
         code += R"_(
-        // Left-over accumulations
         for(; k < _ISRC_CHANNELS; ++k)
         {
             TILE({{SRC_DATA_TYPE}}, M0, 1, a);
             TILE({{WEI_DATA_TYPE}}, N0, 1, b);
 
-            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = {{ZERO_VALUE}};
@@ -179,14 +167,10 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            // Load tile from the src tensor
             T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, 1, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
 
-            // Load tile from the weights tensor
-            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
             T_LOAD({{WEI_DATA_TYPE}}, N0, 1, BUFFER, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
-            // Compute the matrix multiplication between two tiles
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, 1, NT, T, a, b, {{dst}});
 
             ++ck;
@@ -215,12 +199,16 @@ code += R"_(
 
         T_LOAD({{BIA_DATA_TYPE}}, 1, N0, BUFFER, {{bias}}, g_ind_0, 0, 1, 0, bias0);
 
-        // c = c + bias[broadcasted]
         T_ELTWISE_BROADCAST_ADD_X({{ACC_DATA_TYPE}}, M0, N0, {{dst}}, bias0, {{dst}});
     )_";
 }
 
 code += R"_(
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{arg_dst}}_w * {{arg_dst}}_h) - 1);
+        g_dst_indirect_y[i].v += g_ind_2 * (int)({{arg_dst}}_w * {{arg_dst}}_h);
+    })
 }
 //------------------ END KERNEL {{meta_kernel_id}} ---------------------
 )_";

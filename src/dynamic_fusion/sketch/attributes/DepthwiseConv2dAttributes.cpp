@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
 
 namespace arm_compute
 {
@@ -30,33 +30,56 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Conv2dAttributes &Conv2dAttributes::pad(const Padding2D &pad)
+DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::pad(const Padding2D &pad)
 {
     _pad = pad;
     return *this;
 }
-Padding2D Conv2dAttributes::pad() const
+Padding2D DepthwiseConv2dAttributes::pad() const
 {
     return _pad;
 }
-Conv2dAttributes &Conv2dAttributes::stride(const Size2D &stride)
+DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::stride(const Size2D &stride)
 {
     _stride = stride;
     return *this;
 }
-Size2D Conv2dAttributes::stride() const
+Size2D DepthwiseConv2dAttributes::stride() const
 {
     return _stride;
 }
-Conv2dAttributes &Conv2dAttributes::dilation(const Size2D &dilation)
+DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::dilation(const Size2D &dilation)
 {
     _dilation = dilation;
     return *this;
 }
-Size2D Conv2dAttributes::dilation() const
+Size2D DepthwiseConv2dAttributes::dilation() const
 {
     return _dilation;
 }
+
+DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::depth_multiplier(const uint32_t &depth_multiplier)
+{
+    _depth_multiplier = depth_multiplier;
+    return *this;
+}
+
+uint32_t DepthwiseConv2dAttributes::depth_multiplier() const
+{
+    return _depth_multiplier;
+}
+
+DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::dimension_rounding_type(const DimensionRoundingType &dimension_rounding_type)
+{
+    _dimension_rounding_type = dimension_rounding_type;
+    return *this;
+}
+
+DimensionRoundingType DepthwiseConv2dAttributes::dimension_rounding_type() const
+{
+    return _dimension_rounding_type;
+}
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

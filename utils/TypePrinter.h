@@ -39,6 +39,7 @@
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -3412,7 +3413,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynami
        << "["
        << "Padding=" << conv2d_attr.pad() << ", "
        << "Size2D=" << conv2d_attr.stride() << ", "
-       << "Dialation=" << conv2d_attr.dilation() << "]";
+       << "Dilation=" << conv2d_attr.dilation() << "]";
 
     return os;
 }
@@ -3428,6 +3429,39 @@ inline std::string to_string(const experimental::dynamic_fusion::Conv2dAttribute
     str << conv2d_attr;
     return str.str();
 }
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type.
+ *
+ * @param[out] os             Output stream.
+ * @param[in]  dw_conv2d_attr arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
+{
+    os << "DepthwiseConv2dAttributes="
+       << "["
+       << "Padding=" << dw_conv2d_attr.pad() << ", "
+       << "Size2D=" << dw_conv2d_attr.stride() << ", "
+       << "Depth Multiplier=" << dw_conv2d_attr.depth_multiplier() << ", "
+       << "Dilation=" << dw_conv2d_attr.dilation() << ","
+       << "DimensionRoundingType: " << dw_conv2d_attr.dimension_rounding_type() << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type.
+ *
+ * @param[in] dw_conv2d_attr arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
+{
+    std::stringstream str;
+    str << dw_conv2d_attr;
+    return str.str();
+}
+
 } // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */
