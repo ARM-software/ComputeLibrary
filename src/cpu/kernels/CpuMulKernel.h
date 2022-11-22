@@ -79,7 +79,6 @@ public:
     // Inherited methods overridden
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
-    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
     /** Return minimum workload size of the relevant kernel
      *

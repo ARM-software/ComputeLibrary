@@ -38,6 +38,7 @@ namespace
 {
     static constexpr size_t default_mws_N1_fp32_neon = 22447;
     static constexpr size_t default_mws_V1_fp32_neon = 38982;
+    static constexpr size_t default_mws_other_platforms_1d_tensor = 10240;
 }
 namespace arm_compute
 {
@@ -1932,7 +1933,13 @@ size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
         }
         else
         {
-            return ICPPKernel::default_mws;
+            if(_split_dimension == Window::DimX)
+            {
+                // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+                // This number is loosely chosen as threading overhead in each platform varies wildly.
+                return default_mws_other_platforms_1d_tensor;
+            }
+            return default_mws;
         }
 
         // tensor is 1D or was re-interpreted as 1D
@@ -1952,7 +1959,13 @@ size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 #else /* ENABLE_FP32_KERNELS */
     ARM_COMPUTE_UNUSED(platform);
 #endif /* ENABLE_FP32_KERNELS */
-    return ICPPKernel::default_mws;
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return default_mws_other_platforms_1d_tensor;
+    }
+    return default_mws;
 }
 
 Status CpuMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy,
@@ -1992,20 +2005,6 @@ void CpuMulKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
 const char *CpuMulKernel::name() const
 {
     return "CpuMulKernel";
-}
-
-size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
-{
-    ARM_COMPUTE_UNUSED(platform, thread_count);
-
-    if(_split_dimension == Window::DimX)
-    {
-        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
-        // This number is loosely chosen as threading overhead in each platform varies wildly.
-        return 10240;
-    }
-
-    return default_mws;
 }
 
 namespace
