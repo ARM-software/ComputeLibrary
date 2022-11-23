@@ -34,6 +34,7 @@ namespace experimental
 namespace dynamic_fusion
 {
 /** Forward declaration */
+class GpuWorkloadContext;
 class GpuWorkloadSketch;
 
 /** Operator interface. */
@@ -59,7 +60,7 @@ public:
      * @param[in]     src        Source tensor
      * @param[in]     wei        Weight tensor
      * @param[in]     bia        (Optional) Bias tensor
-     * @param[out]    dst        Destination tensor
+     * @param[out]    dst        Destination tensor. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
      * @param[in]     attributes Operator attributes
      */
     static void create_op(GpuWorkloadSketch &sketch,
@@ -68,7 +69,16 @@ public:
                           ITensorInfo       *bia,
                           ITensorInfo       *dst,
                           const Attributes &attributes);
-    /** Validate the operator and check if it can be fused into the workload sketch.
+    /** Check if the operator configuration is supported, irrespective of fusion
+     * Similar to @ref GpuConv2d::create_op()
+     */
+    static Status is_supported_op(const GpuWorkloadContext &context,
+                                  const ITensorInfo        *src,
+                                  const ITensorInfo        *wei,
+                                  const ITensorInfo        *bia,
+                                  const ITensorInfo        *dst,
+                                  const Attributes         &attributes);
+    /** Check if the operator configuration is supported and if it can be fused into the workload sketch.
      * Similar to @ref GpuConv2d::create_op()
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
