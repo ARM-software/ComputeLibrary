@@ -54,6 +54,8 @@ public:
                            const ArgumentPack<ITensorInfo> &tensors,
                            const Attributes                &attributes,
                            const Settings                  &settings);
+    /** Destructor */
+    ~ClTemplateDirectConv2d() override = default;
     /** Prevent instances of this class from being copy constructed */
     ClTemplateDirectConv2d(const ClTemplateDirectConv2d &direct_conv2d) = delete;
     /** Prevent instances of this class from being copied */

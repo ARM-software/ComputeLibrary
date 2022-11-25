@@ -40,6 +40,7 @@
 #include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
@@ -3492,6 +3493,34 @@ inline std::string to_string(const experimental::dynamic_fusion::DepthwiseConv2d
 {
     std::stringstream str;
     str << dw_conv2d_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ClampAttributes type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  clamp_attr arm_compute::experimental::dynamic_fusion::ClampAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::ClampAttributes &clamp_attr)
+{
+    os << "ClampAttributes="
+       << "["
+       << "Min value=" << clamp_attr.min_val() << ", "
+       << "Max value=" << clamp_attr.max_val() << "]";
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ClampAttributes type.
+ *
+ * @param[in] clamp_attr arm_compute::experimental::dynamic_fusion::ClampAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::ClampAttributes &clamp_attr)
+{
+    std::stringstream str;
+    str << clamp_attr;
     return str.str();
 }
 

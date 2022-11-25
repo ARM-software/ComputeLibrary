@@ -486,6 +486,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 {
 #ifdef EMBEDDED_KERNELS
     {
+        "activation_float_helpers.h",
+#include "./cl_kernels/activation_float_helpers.hembed"
+    },
+    {
+        "activation_quant_helpers.h",
+#include "./cl_kernels/activation_quant_helpers.hembed"
+    },
+    {
         "common/activation_layer.cl",
 #include "./cl_kernels/common/activation_layer.clembed"
     },
