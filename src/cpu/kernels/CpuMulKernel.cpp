@@ -36,8 +36,10 @@
 
 namespace
 {
+#if defined(ENABLE_FP32_KERNELS)
     static constexpr size_t default_mws_N1_fp32_neon = 22447;
     static constexpr size_t default_mws_V1_fp32_neon = 38982;
+#endif /* ENABLE_FP32_KERNELS */
     static constexpr size_t default_mws_other_platforms_1d_tensor = 10240;
 }
 namespace arm_compute

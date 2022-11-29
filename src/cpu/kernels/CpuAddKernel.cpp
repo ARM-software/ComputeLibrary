@@ -33,11 +33,14 @@
 #include "src/cpu/kernels/add/list.h"
 #include <array>
 
+#if defined(ENABLE_FP32_KERNELS)
 namespace
 {
     static constexpr size_t default_mws_N1_fp32_neon = 24536;
     static constexpr size_t default_mws_V1_fp32_neon = 40510;
 }
+#endif /* ENABLE_FP32_KERNELS */
+
 namespace arm_compute
 {
 namespace cpu

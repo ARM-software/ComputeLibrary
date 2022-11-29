@@ -31,11 +31,14 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/sub/neon/list.h"
 
+#if defined(ENABLE_FP32_KERNELS)
 namespace
 {
     static constexpr size_t default_mws_N1_fp32_neon = 24385;
     static constexpr size_t default_mws_V1_fp32_neon = 40520;
 }
+#endif /* ENABLE_FP32_KERNELS */
+
 namespace arm_compute
 {
 namespace cpu

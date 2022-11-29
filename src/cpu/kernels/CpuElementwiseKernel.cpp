@@ -32,6 +32,7 @@
 
 #include <arm_neon.h>
 
+#if defined(ENABLE_FP32_KERNELS)
 namespace
 {
     static constexpr size_t default_min_max_mws_N1_fp32_neon = 25308;
@@ -39,6 +40,7 @@ namespace
     static constexpr size_t default_div_mws_N1_fp32_neon = 19043;
     static constexpr size_t default_div_mws_V1_fp32_neon = 25511;
 }
+#endif /* ENABLE_FP32_KERNELS */
 
 namespace arm_compute
 {
