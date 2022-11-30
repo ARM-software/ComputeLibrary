@@ -21,35 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_VALHALL_H
-#define ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_VALHALL_H
+#ifndef SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVDEFAULTCONFIGBIFROST
+#define SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVDEFAULTCONFIGBIFROST
 
-#include "src/gpu/cl/kernels/direct_conv/IClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
 
 namespace arm_compute
 {
 namespace cl_direct_conv
 {
-/** Valhall based OpenCL direct convolution configuration */
-class ClDirectConvDefaultConfigValhall final : public IClDirectConvKernelConfig
+/** Bifrost based OpenCL direct convolution configuration */
+class ClDirectConvDefaultConfigBifrost final : public IClDirectConvKernelConfig
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    ClDirectConvDefaultConfigValhall(GPUTarget gpu);
+    ClDirectConvDefaultConfigBifrost(GPUTarget gpu);
 
     // Inherited overridden method
     DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) override;
 
 private:
-    DirectConvComputeKernelInfo configure_G78_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G78_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G78_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G57_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G57_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo configure_G71_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo configure_G71_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo configure_G71_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo configure_default_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo configure_default_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_VALHALL_H */
+#endif /* SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVDEFAULTCONFIGBIFROST */

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigValhall.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigValhall.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"

@@ -69,7 +69,7 @@ std::string ClTemplateDirectConv2d::get_component_code(const ComponentGroup &com
     ARM_COMPUTE_UNUSED(comp_group);
 
     const auto channel_idx   = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
-    const auto k0            = adjust_vec_size(is_data_type_quantized(_src->data_type()) ? 16u : 8u, _src->dimension(channel_idx));
+    const auto k0            = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
     const bool leftover_loop = (_src->dimension(channel_idx) % k0) != 0;
 
     std::string code = R"_(
@@ -303,13 +303,11 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
 CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &comp_group) const
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
-    const DataType     data_type   = _src->data_type();
 
-    /// NOTE: For now tile sizes (n0, m0, k0) are set by the execution window. This may change in the future
     const auto         root_window      = comp_group.get_root_component()->template_writer()->get_window();
     const unsigned int n0               = root_window.x().step();
     const unsigned int m0               = root_window.y().step();
-    const unsigned int k0               = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, _src->dimension(channel_idx));
+    const unsigned int k0               = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
     const unsigned int partial_store_n0 = _dst->dimension(0) % n0;
 
     CLBuildOptions build_opts{};
@@ -369,15 +367,16 @@ Window ClTemplateDirectConv2d::get_window() const
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
 
     const auto output_shape = _dst->tensor_shape();
+    const auto desc         = _settings.direct_conv_descriptor();
 
-    const unsigned int vec_size = std::min(static_cast<unsigned int>(output_shape[0]), 4u);
-    const unsigned int num_rows = (_dst->tensor_shape()[0] > 16) ? ((_src->data_type() == DataType::F32) ? 2U : 4U) : 1U;
+    const unsigned int n0 = adjust_vec_size(desc.n0, output_shape[0]);
+    const unsigned int m0 = adjust_vec_size(desc.m0, output_shape[1] * output_shape[2]);
 
     // Create and configure kernel window
-    Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
+    Window win = calculate_max_window(output_shape, Steps(n0, m0));
 
-    const size_t dim_y_collapsed = ceil_to_multiple(output_shape[1] * output_shape[2], num_rows);
-    win.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, num_rows));
+    const size_t dim_y_collapsed = ceil_to_multiple(output_shape[1] * output_shape[2], m0);
+    win.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, m0));
     win.set(Window::DimZ, Window::Dimension(0, output_shape.total_size_upper(3), 1));
 
     return win;

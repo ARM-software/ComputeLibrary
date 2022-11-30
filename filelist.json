@@ -466,8 +466,6 @@
       "deps": [ "Cast" ],
       "files": {
         "common": [
-          "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigBifrost.cpp",
-          "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigValhall.cpp",
           "src/gpu/cl/kernels/gemm/ClGemmHelpers.cpp",
           "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeBifrost.cpp",
           "src/gpu/cl/kernels/gemm/native/ClGemmDefaultConfigNativeMidgard.cpp",
@@ -501,7 +499,9 @@
           "src/runtime/CL/gemm_auto_heuristics/CLGEMMAutoHeuristics.cpp",
           "src/runtime/CL/functions/CLGEMM.cpp",
           "src/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.cpp",
-          "src/runtime/CL/functions/CLGEMMLowpOutputStage.cpp"
+          "src/runtime/CL/functions/CLGEMMLowpOutputStage.cpp",
+          "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigBifrost.cpp",
+          "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigValhall.cpp"
         ]
       }
     },

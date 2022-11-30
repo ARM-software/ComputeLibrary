@@ -21,35 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_BIFROST_H
-#define ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_BIFROST_H
+#ifndef SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVKERNELCONFIG
+#define SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVKERNELCONFIG
 
-#include "src/gpu/cl/kernels/direct_conv/IClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigBifrost.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigValhall.h"
+#include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 namespace cl_direct_conv
 {
-/** Bifrost based OpenCL direct convolution configuration */
-class ClDirectConvDefaultConfigBifrost final : public IClDirectConvKernelConfig
+/** ClDirectConvolution factory class */
+class ClDirectConvKernelConfigurationFactory final
 {
 public:
-    /** Constructor
+    /** Static method to call the ClDirectConvolution kernel configuration class accordingly with the GPU target
      *
      * @param[in] gpu GPU target
+     *
+     * @return IClDirectConvKernelConfig
      */
-    ClDirectConvDefaultConfigBifrost(GPUTarget gpu);
-
-    // Inherited overridden method
-    DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) override;
-
-private:
-    DirectConvComputeKernelInfo configure_G71_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G71_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G71_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_default_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_default_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    static std::unique_ptr<IClDirectConvKernelConfig> create(GPUTarget gpu)
+    {
+        switch(get_arch_from_target(gpu))
+        {
+            case GPUTarget::MIDGARD:
+                return std::make_unique<ClDirectConvDefaultConfigBifrost>(GPUTarget::G71);
+            case GPUTarget::BIFROST:
+                return std::make_unique<ClDirectConvDefaultConfigBifrost>(gpu);
+            case GPUTarget::VALHALL:
+                return std::make_unique<ClDirectConvDefaultConfigValhall>(gpu);
+            default:
+                ARM_COMPUTE_ERROR("Not supported GPU target");
+        }
+    }
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_DIRECT_CONV_DEFAULT_CONFIG_BIFROST_H */
+#endif /* SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVKERNELCONFIG */

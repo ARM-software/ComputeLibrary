@@ -68,11 +68,7 @@ public:
                           ITensorInfo       *rhs,
                           ITensorInfo       *dst);
     /** Check if the operator configuration is supported, irrespective of fusion
-     *
-     * @param[in]  context Workload context within which the operator is running
-     * @param[in]  lhs     Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[in]  rhs     Right hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[out] dst     Destination tensor info. Data types supported: U8/S16/S32/F16/F32. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
+     * Similar to @ref GpuAdd::create_op()
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *lhs,
