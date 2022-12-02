@@ -42,6 +42,7 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -3521,6 +3522,38 @@ inline std::string to_string(const experimental::dynamic_fusion::ClampAttributes
 {
     std::stringstream str;
     str << clamp_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ResizeAttributes type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  resize_attr arm_compute::experimental::dynamic_fusion::ResizeAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::ResizeAttributes &resize_attr)
+{
+    os << "ResizeAttributes="
+       << "["
+       << "AlignCorners=" << resize_attr.align_corners() << ", "
+       << "InterpolationPolicy=" << resize_attr.interpolation_policy() << ", "
+       << "OutputHeight=" << resize_attr.output_height() << ", "
+       << "OutputWidth=" << resize_attr.output_width() << ", "
+       << "SamplingPolicy=" << resize_attr.sampling_policy() << "]";
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ResizeAttributes type.
+ *
+ * @param[in] resize_attr arm_compute::experimental::dynamic_fusion::ResizeAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::ResizeAttributes &resize_attr)
+{
+    std::stringstream str;
+    str << resize_attr;
     return str.str();
 }
 

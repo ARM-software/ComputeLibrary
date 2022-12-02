@@ -330,6 +330,7 @@ CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &c
         // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
         build_opts.add_option("-cl-unsafe-math-optimizations");
     }
+
     build_opts.add_option("-DIS_TILED");
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));

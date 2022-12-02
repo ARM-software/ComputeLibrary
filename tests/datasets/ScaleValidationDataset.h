@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALE_VALIDATION_DATASET
-#define ARM_COMPUTE_TEST_SCALE_VALIDATION_DATASET
+#ifndef TESTS_DATASETS_SCALEVALIDATIONDATASET
+#define TESTS_DATASETS_SCALEVALIDATIONDATASET
 
 #include "arm_compute/core/Types.h"
 #include "tests/datasets/BorderModeDataset.h"
@@ -173,6 +173,11 @@ framework::dataset::make("AlignCorners", { true }));
                     datasets::BorderModes()),                   \
             samping_policy_set)
 
+#define ASSEMBLE_DATASET_DYNAMIC_FUSION(shape, samping_policy_set)                                  \
+    combine(combine(combine((shape), framework::dataset::make("DataLayout", { DataLayout::NHWC })), \
+                    ScaleInterpolationPolicySet),                                                   \
+            samping_policy_set)
+
 #define ASSEMBLE_S8_DATASET(shape, samping_policy_set)                                                           \
     combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),          \
                             framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR })), \
@@ -194,6 +199,13 @@ framework::dataset::make("AlignCorners", { true }));
                     datasets::BorderModes()),                                         \
             sampling_policy_set)
 
+#define ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(shape, sampling_policy_set, quantization_info_set) \
+    combine(combine(combine(combine(shape,                                                           \
+                                    quantization_info_set),                                          \
+                            framework::dataset::make("DataLayout", { DataLayout::NHWC })),           \
+                    ScaleInterpolationPolicySet),                                                    \
+            sampling_policy_set)
+
 /** Generating dataset for quantized data tyeps with the given shapes */
 #define ASSEMBLE_DIFFERENTLY_QUANTIZED_DATASET(shape, sampling_policy_set, input_quant_info_set, output_quant_info_set) \
     combine(combine(combine(combine(combine(combine(shape,                                                              \
@@ -207,4 +219,4 @@ framework::dataset::make("AlignCorners", { true }));
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALE_VALIDATION_DATASET */
+#endif /* TESTS_DATASETS_SCALEVALIDATIONDATASET */
