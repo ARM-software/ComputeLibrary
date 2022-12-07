@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -524,13 +524,14 @@ inline void validate_npy_header(std::ifstream &stream, const std::string &expect
     ARM_COMPUTE_UNUSED(expect_typestr);
     ARM_COMPUTE_UNUSED(expect_shape);
 
-    std::string header = npy::read_header(stream);
+    std::string header_s = npy::read_header(stream);
 
     // Parse header
-    std::vector<unsigned long> shape;
-    bool                       fortran_order = false;
-    std::string                typestr;
-    npy::parse_header(header, typestr, fortran_order, shape);
+    npy::header_t header = npy::parse_header(header_s);
+
+    std::vector<unsigned long> shape         = header.shape;
+    bool                       fortran_order = header.fortran_order;
+    std::string                typestr       = header.dtype.str();
 
     // Check if the typestring matches the given one
     ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
