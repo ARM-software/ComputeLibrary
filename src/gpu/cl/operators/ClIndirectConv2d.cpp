@@ -30,8 +30,8 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
 #include "src/gpu/cl/kernels/ClIndirectConv2dKernel.h"
-#include "src/gpu/cl/kernels/direct_conv/ClDirectConvKernelConfig.h"
-#include "src/gpu/cl/kernels/direct_conv/IClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
