@@ -141,14 +141,14 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
 {
     ARM_COMPUTE_UNUSED(output, bias, weights_info);
 
-    if(input->data_layout() == DataLayout::NHWC && (input->data_type() == DataType::F32 || input->data_type() == DataType::F16))
-    {
-        return DeconvolutionMethod::DIRECT;
-    }
-
     if(is_data_type_quantized_per_channel(weights->data_type()))
     {
         return DeconvolutionMethod::UPSCALE_CONV2D;
+    }
+
+    if(input->data_layout() == DataLayout::NHWC)
+    {
+        return DeconvolutionMethod::DIRECT;
     }
 
     const DataLayout data_layout = input->data_layout();

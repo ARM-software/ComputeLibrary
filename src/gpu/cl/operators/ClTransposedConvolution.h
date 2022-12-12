@@ -57,11 +57,11 @@ public:
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Input tensor info with dimensions [IFM, width, height, batch]
-     *                             Data types supported: F16/F32.
+     *                             Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.
      * @param[in]  weights         Weight tensor info with dimensions [IFM, width, height, OFM].
      *                             Data type supported: Same as @p input
      * @param[in]  biases          (Optional) Biases tensor info. Biases are 1D tensor with dimension [OFM].
-     *                             Data type supported: Should match @p input data type
+     *                             Data type supported: Should match @p input data type if floating point, otherwise S32.
      * @param[out] output          Output tensor info with dimensions [OFM, width, height, batch]
      *                             The 1st dimension must be equal to the 4th dimension of the @p weights tensor.
      *                             Data types supported: Same as @p input.

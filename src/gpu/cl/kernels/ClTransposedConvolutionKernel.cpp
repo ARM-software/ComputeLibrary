@@ -30,6 +30,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
 namespace arm_compute
 {
 namespace opencl
@@ -42,7 +44,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                           const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(weights, DataLayout::NHWC);
@@ -57,7 +59,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(biases != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        if(is_data_type_quantized_asymmetric(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
+
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->dimension(channel_idx) != weights->dimension(batch_idx),
                                         "Biases size and number of dst feature maps should match");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1, "Biases should be one dimensional");
@@ -127,12 +137,12 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     const std::string kernel_name = "transposed_convolution_nhwc";
     CLBuildOptions    build_options;
 
-    const DataType input_data_type = input->data_type();        // Fp32 or Fp16 only
-    const auto     strides         = deconv_info.stride();
+    const DataType    input_data_type = input->data_type();
+    const PaddingInfo strides         = deconv_info.stride();
 
     const unsigned int n0               = 1;
     const unsigned int m0               = 1;
-    const unsigned int k0               = adjust_vec_size(input_data_type == DataType::F32 ? 4 : 8, input_channels);
+    const unsigned int k0               = adjust_vec_size(16 / input->element_size(), input_channels);
     const unsigned int partial_store_n0 = output_channels % n0;
 
     if(biases != nullptr)
@@ -167,7 +177,36 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
     build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
     build_options.add_option_if((input_channels % k0) != 0, "-DLEFTOVER_LOOP");
-    build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(input_data_type));
+
+    if(is_data_type_quantized(output_data_type))
+    {
+        const UniformQuantizationInfo iqinfo = input->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = output->quantization_info().uniform();
+
+        PixelValue zero_value = PixelValue(0, input->data_type(), input->quantization_info());
+        int        zero_value_s32;
+        zero_value.get(zero_value_s32);
+
+        float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        build_options.add_option("-DIS_QUANTIZED");
+        build_options.add_option("-DDST_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_options.add_option("-DDST_SHIFT=" + support::cpp11::to_string(output_shift));
+        build_options.add_option("-DSRC_OFFSET=" + support::cpp11::to_string(-iqinfo.offset));
+        build_options.add_option("-DWEI_OFFSET=" + support::cpp11::to_string(-wqinfo.offset));
+        build_options.add_option("-DDST_OFFSET=" + support::cpp11::to_string(oqinfo.offset));
+        build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(zero_value_s32));
+        build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(DataType::S32));
+    }
+    else
+    {
+        build_options.add_option("-DACC_DATA_TYPE=" + get_cl_type_from_data_type(input_data_type));
+        build_options.add_option("-DZERO_VALUE=" + support::cpp11::to_string(0));
+    }
 
     if(compile_context.get_ddk_version() >= 30)
     {

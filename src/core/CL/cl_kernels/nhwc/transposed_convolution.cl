@@ -29,7 +29,7 @@
 /** OpenCL kernel to compute the transposed convolution.
  *
  * @note Data layout supported: NHWC
- * @note Data type supported: F32/F16
+ * @note Data type supported: F32/F16/QASYMM8/QASYMM8_SIGNED
  * @note The transposed convolution padding (left and top) must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (e.g. -DPAD_LEFT=2, -DPAD_TOP=2)
  * @note The transposed convolution strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y (e.g. -DSTRIDE_X=2, -DSTRIDE_Y=2)
  * @note The spatial dimensions of the weights must be passed at compile time using -DWEI_WIDTH and -DWEI_HEIGHT (e.g. -DWEI_WIDTH=9, -DWEI_HEIGHT=9)
@@ -43,15 +43,26 @@
  * @note The data type of the source tensor must be passed at compile time using -DSRC_DATA_TYPE (e.g. -DSRC_DATA_TYPE=float)
  * @note The data type of the weights tensor must be passed at compile time using -DWEI_DATA_TYPE (e.g. -DWEI_DATA_TYPE=float)
  * @note The data type of the destination tensor must be passed at compile time using -DDST_DATA_TYPE (e.g. -DDST_DATA_TYPE=float)
+ * @note The data type of the destination tensor must be passed at compile time using -DBIA_DATA_TYPE (e.g. -DBIA_DATA_TYPE=float)
  * @note The data type of the accumulators must be passed at compile time using -DACC_DATA_TYPE (e.g. -DACC_DATA_TYPE=float)
  * @note The number of M0 rows (width*height) to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of N0 output channels to process must be passed at compile time using -DN0 (e.g. -DN0=2)
  * @note The number of K0 inner accumulations must be passed at compile time using -DK0 (e.g. -DK0=2)
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
+ * @note If bias exists, the compile time argument -DHAS_BIAS should be passed
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1
  *  - N0 = 1
- *  - K0 = 2, 3, 4, 8
+ *  - K0 = 2, 3, 4, 8, 16
+ *
+ * @note In case of QASYMM8/QASYMM8_SIGNED, the following extra information must be passed at compile time:
+ * - -DIS_QUANTIZED
+ * - The destination quantization multiplier e.g. -DDST_MULTIPLIER=1234
+ * - The destination quantization shift e.g. -DDST_SHIFT=4
+ * - The destination offset e.g. -DDST_OFFSET=4
+ * - The source offset e.g. -DSRC_OFFSET=4
+ * - The weights offset e.g. -DWEI_OFFSET=4
+ * - The quantized zero value e.g. -DZERO_VALUE=4
  *
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
@@ -108,6 +119,12 @@ __kernel void transposed_convolution_nhwc(
 #define _IDST_CHANNELS DST_CHANNELS
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
+#if defined(IS_QUANTIZED)
+#define _IOUTPUT_TILE cq
+#else // defined(IS_QUANTIZED)
+#define _IOUTPUT_TILE c
+#endif // defined(IS_QUANTIZED)
+
     const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
     const int mout = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH x HEIGHT
     const int bout = GET_SPATIAL_IDX(2, 1, 0);           // BATCH SIZE IDX
@@ -144,7 +161,7 @@ __kernel void transposed_convolution_nhwc(
     {
         for(int xk = x_start, xi_step = 0; xk >= 0; xk -= STRIDE_X, ++xi_step)
         {
-            int weights_y = cout * _IY_MULTIPLIER + yk * _IWEI_WIDTH + xk;
+            const int weights_y = cout * _IY_MULTIPLIER + yk * _IWEI_WIDTH + xk;
 
             TILE(int, 1, M0, my);
 
@@ -169,12 +186,12 @@ __kernel void transposed_convolution_nhwc(
                 // Initialize tiles
                 LOOP_UNROLLING(int, i, 0, 1, M0,
                 {
-                    a[i].v = 0.f;
+                    a[i].v = ZERO_VALUE;
                 })
 
                 LOOP_UNROLLING(int, i, 0, 1, N0,
                 {
-                    b[i].v = 0.f;
+                    b[i].v = ZERO_VALUE;
                 })
 
                 // Load tile from the src tensor
@@ -185,6 +202,12 @@ __kernel void transposed_convolution_nhwc(
 
                 // Compute the matrix multiplication between two tiles
                 T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, K0, NT, T, a, b, c);
+
+#if defined(IS_QUANTIZED)
+                // Apply the offset correction (correction usually needed for asymmetric quantized computation)
+                // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+                T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
+#endif // defined(IS_QUANTIZED)
             }
 
             // This #if directive should be removed in case of dynamic tensor support
@@ -198,7 +221,7 @@ __kernel void transposed_convolution_nhwc(
                 // Initialize tiles
                 LOOP_UNROLLING(int, i, 0, 1, M0,
                 {
-                    a[i].v = 0.f;
+                    a[i].v = ZERO_VALUE;
                 })
 
                 // Load tile from the src tensor
@@ -211,10 +234,22 @@ __kernel void transposed_convolution_nhwc(
 
                 // Compute the matrix multiplication between two tiles
                 T_MMUL(SRC_DATA_TYPE, WEI_DATA_TYPE, ACC_DATA_TYPE, M0, N0, 1, NT, T, a, b, c);
+
+#if defined(IS_QUANTIZED)
+                // Apply the offset correction (correction usually needed for asymmetric quantized computation)
+                // The computation is not performed if both SRC_OFFSET and WEI_OFFSET are zero
+                T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, 1, SRC_OFFSET, WEI_OFFSET, a, b, c);
+#endif // defined(IS_QUANTIZED)
             }
 #endif // defined(LEFTOVER_LOOP)
         }
     }
+
+#if defined(IS_QUANTIZED)
+    const int total_pixels = floor((1 + y_start / (float)STRIDE_Y)) * floor(1 + x_start / (float)STRIDE_X);
+
+    T_ADD_CONSTANT(ACC_DATA_TYPE, M0, N0, c, (total_pixels * _ISRC_CHANNELS * SRC_OFFSET * WEI_OFFSET), c);
+#endif // defined(IS_QUANTIZED)
 
 #if defined(HAS_BIAS)
     TILE(BIA_DATA_TYPE, 1, N0, bias0);
@@ -225,6 +260,14 @@ __kernel void transposed_convolution_nhwc(
     T_ELTWISE_BROADCAST_ADD_X(ACC_DATA_TYPE, M0, N0, c, bias0, c);
 
 #endif // HAS_BIAS
+
+#if defined(IS_QUANTIZED)
+
+    TILE(DST_DATA_TYPE, M0, N0, cq);
+
+    // Quantize the tile
+    T_QUANTIZE8_ASYMMETRIC(ACC_DATA_TYPE, DST_DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, c, cq);
+#endif // defined(IS_QUANTIZED)
 
     TILE(uint, M0, 1, dst_indirect_y);
 
@@ -238,7 +281,7 @@ __kernel void transposed_convolution_nhwc(
     bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
     // Store the tile in reverse order so the invalid values are overwritten with the valid ones
-    T_STORE_INDIRECT_WIDTH_SELECT(DST_DATA_TYPE, M0, N0, PARTIAL_N0, DST_TENSOR_TYPE, dst, cout, dst_stride_y, x_cond, c, dst_indirect_y);
+    T_STORE_INDIRECT_WIDTH_SELECT(DST_DATA_TYPE, M0, N0, PARTIAL_N0, DST_TENSOR_TYPE, dst, cout, dst_stride_y, x_cond, _IOUTPUT_TILE, dst_indirect_y);
 
 #undef _IWEI_WIDTH
 #undef _IWEI_HEIGHT
