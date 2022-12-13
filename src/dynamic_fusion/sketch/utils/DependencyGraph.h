@@ -417,6 +417,33 @@ public:
         }
         return tensors;
     }
+    /** Get intermediate tensors of the whole graph.
+     *
+     * @return std::vector<TensorId>
+     */
+    std::vector<TensorId> intermediate_tensors() const
+    {
+        std::vector<TensorId> tensors;
+
+        // If a tensor is used to connect the input of an operator and the output of another operator,
+        // it is not allocated in the memory. The tensor exists as a temporary variable only.
+        for(auto src_tensor : _adj_src_ops)
+        {
+            if(!src_tensor.second.empty())
+            {
+                const auto dst_tensor = _adj_dst_ops.find(src_tensor.first);
+                if(dst_tensor != _adj_dst_ops.end())
+                {
+                    if(!dst_tensor->second.empty())
+                    {
+                        tensors.push_back(src_tensor.first);
+                    }
+                }
+            }
+        }
+
+        return tensors;
+    }
     /** Get all root ops. Root ops can also be referred to as "src ops" of the whole graph
      *
      * @return std::vector<OperatorId>

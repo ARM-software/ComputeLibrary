@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
@@ -108,14 +109,23 @@ protected:
 
         // Create sketch tensors
         TensorInfo src_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type));
-        TensorInfo dst_0_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type));
-        TensorInfo dst_1_info;
+        TensorInfo dst_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type));
 
-        FunctionType::create_op(sketch, &src_info, &dst_0_info, attributes);
+        auto ans_0_info = sketch.create_tensor_info();
+        TensorInfo ans_1_info;
+
+        FunctionType::create_op(sketch, &src_info, &ans_0_info, attributes);
+
         if(_fuse)
         {
-            dst_1_info = sketch.create_tensor_info(shape, 1, _data_type);
-            FunctionType::create_op(sketch, &dst_0_info, &dst_1_info, attributes);
+            ans_1_info = sketch.create_tensor_info();
+
+            FunctionType::create_op(sketch, &ans_0_info, &ans_1_info, attributes);
+            GpuOutput::create_op(sketch, &ans_1_info, &dst_info);
+        }
+        else
+        {
+            GpuOutput::create_op(sketch, &ans_0_info, &dst_info);
         }
 
         // Configure runtime
@@ -124,43 +134,22 @@ protected:
 
         // Construct user tensors
         TensorType t_src{};
-        TensorType t_dst_0{};
-        TensorType t_dst_1{};
+        TensorType t_dst{};
 
         // Initialize user tensors
         t_src.allocator()->init(src_info);
-        t_dst_0.allocator()->init(dst_0_info);
-        if(_fuse)
-        {
-            t_dst_1.allocator()->init(dst_1_info);
-        }
+        t_dst.allocator()->init(dst_info);
 
         // Allocate and fill user tensors
         t_src.allocator()->allocate();
-        t_dst_0.allocator()->allocate();
-        if(_fuse)
-        {
-            t_dst_1.allocator()->allocate();
-        }
+        t_dst.allocator()->allocate();
 
         fill(AccessorType(t_src));
 
         // Run runtime
-        if(_fuse)
-        {
-            runtime.run({ &t_src, &t_dst_1 });
-        }
-        else
-        {
-            runtime.run({ &t_src, &t_dst_0 });
-        }
+        runtime.run({ &t_src, &t_dst });
 
-        if(_fuse)
-        {
-            return t_dst_1;
-        }
-
-        return t_dst_0;
+        return t_dst;
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo act_info)

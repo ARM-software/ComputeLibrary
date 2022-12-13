@@ -42,14 +42,23 @@ namespace
  */
 MemoryDescriptorMap assign_memory_descriptors(const std::map<ITensorInfo::Id, const ITensorInfo *> tensors, const DependencyGraph &graph)
 {
+    const auto all_tensors = graph.all_tensors();
+    const auto src_tensors = graph.global_src_tensors();
+    const auto dst_tensors = graph.global_dst_tensors();
+    const auto interm_tensors = graph.intermediate_tensors();
+
     MemoryDescriptorMap mem_map{};
-    for(auto t_id : graph.all_tensors())
+    for(auto t_id : all_tensors)
     {
         const auto &tensor = tensors.at(t_id);
         // Only global src and dst tensors to the entire component graph are "User" tensors, which are user-specified memories
-        if(is_in(t_id, graph.global_src_tensors()) || is_in(t_id, graph.global_dst_tensors()))
+        if(is_in(t_id, src_tensors) || is_in(t_id, dst_tensors))
         {
             mem_map[t_id] = MemoryDescriptor{ MemoryType::User };
+        }
+        else if(is_in(t_id, interm_tensors))
+        {
+            mem_map[t_id] = MemoryDescriptor { MemoryType::NoAlloc };
         }
         else
         {

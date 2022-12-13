@@ -132,10 +132,11 @@ Status create_aux_tensors(ClAuxTensors *aux_tensors, const GpuWorkloadSourceCode
             ARM_COMPUTE_ERROR_ON(tensor_info.id() != t_id);
             const auto aux_memory_info = workload_arg->memory_descriptor()->aux_memory_info;
             tensor_object              = aux_tensors->add_aux_tensor(tensor_info, aux_memory_info);
-        }
-        if(tensor_object == nullptr)
-        {
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Failed to construct an auxiliary tensor");
+
+            if(tensor_object == nullptr)
+            {
+                return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Failed to construct an auxiliary tensor");
+            }
         }
     }
     return Status{};

@@ -32,6 +32,7 @@
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/CL/CLAccessor.h"
 #include "tests/framework/Fixture.h"
@@ -113,7 +114,11 @@ protected:
         auto weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
         auto bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
         auto dst_info    = sketch.create_tensor_info();
-        FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, &dst_info, conv2d_attr);
+
+        auto ans_info    = sketch.create_tensor_info();
+
+        FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, &ans_info, conv2d_attr);
+        GpuOutput::create_op(sketch, &ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

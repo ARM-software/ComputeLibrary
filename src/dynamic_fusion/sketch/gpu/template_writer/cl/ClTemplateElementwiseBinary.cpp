@@ -110,8 +110,8 @@ R"_(
 R"_(
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{dst}}_w * {{dst}}_h) - 1);
-        g_dst_indirect_y[i].v += g_ind_2 * (int)({{dst}}_w * {{dst}}_h);
+        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{out}}_w * {{out}}_h) - 1);
+        g_dst_indirect_y[i].v += g_ind_2 * (int)({{out}}_w * {{out}}_h);
     })
     }
     //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
@@ -194,6 +194,7 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
         lut["lhs"] = vtable.get_variable(_lhs);
         lut["rhs"] = vtable.get_variable(_rhs);
         lut["dst"] = vtable.get_variable(_dst);
+        lut["out"] = vtable.get_variable(comp_group.get_dst_tensors().front());
     }
     else
     {

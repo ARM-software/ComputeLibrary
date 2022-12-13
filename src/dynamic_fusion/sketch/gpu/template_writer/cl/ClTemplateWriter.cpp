@@ -179,7 +179,11 @@ std::string ClTemplateWriter::write_code()
         code += macros;
     }
 
-    code += write_kernel_signature(_vtable.get_variable_list(_components.get_argument_tensors()));
+    auto arguments = _components.get_argument_tensors();
+    std::sort(arguments.begin(), arguments.end(), [](const ITensorInfo *l, const ITensorInfo *r) {
+        return l->id() < r->id();
+    });
+    code += write_kernel_signature(_vtable.get_variable_list(arguments));
 
     code += "\n{\n\n";
 
@@ -190,6 +194,7 @@ std::string ClTemplateWriter::write_code()
     for(const auto &component_code : component_codes)
     {
         code += component_code;
+        code += "\n";
     }
 
     code += "}\n";

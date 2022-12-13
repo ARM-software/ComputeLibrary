@@ -30,6 +30,7 @@
 #include "arm_compute/dynamic_fusion/runtime/gpu/cl/ClWorkloadRuntime.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/DepthConvertLayer.h"
@@ -121,7 +122,10 @@ protected:
         CastAttributes attributes;
         attributes.convert_policy(policy).data_type(dt_out);
 
-        FunctionType::create_op(sketch, &src_info, &dst_info, attributes);
+        auto ans_info = sketch.create_tensor_info();
+
+        FunctionType::create_op(sketch, &src_info, &ans_info, attributes);
+        GpuOutput::create_op(sketch, &ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

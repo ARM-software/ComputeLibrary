@@ -37,6 +37,7 @@ enum class MemoryType
 {
     User      = 0, /**< Memory coming directly from users, e.g. for argument tensors */
     Auxiliary = 1, /**< Additional memory required by the workload tensor, e.g. for temporary tensors */
+    NoAlloc   = 2, /**< Temporary tile which is not allocated as a whole tensor in the memory */
 };
 
 /** Memory information for tensors with @ref MemoryType::Auxiliary.

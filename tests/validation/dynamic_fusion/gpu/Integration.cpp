@@ -28,6 +28,7 @@
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/CL/CLAccessor.h"
 #include "tests/framework/Macros.h"
@@ -70,8 +71,11 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
     Conv2dAttributes conv2d_attr{};
     auto             input_info  = sketch.create_tensor_info(t_input_shape, 1, data_type, data_layout);
     auto             weight_info = sketch.create_tensor_info(TensorInfo(t_weight_shape, 1, data_type, data_layout));
-    auto             dst_info    = sketch.create_tensor_info();
-    GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, &dst_info, conv2d_attr);
+    auto             ans_info    = sketch.create_tensor_info();
+    GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, &ans_info, conv2d_attr);
+
+    auto dst_info = sketch.create_tensor_info();
+    GpuOutput::create_op(sketch, &ans_info, &dst_info);
 
     // Configure runtime
     ClWorkloadRuntime runtime;
