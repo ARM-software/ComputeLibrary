@@ -203,9 +203,7 @@ std::string ClTemplateWriter::write_code()
 }
 std::string ClTemplateWriter::write_global_section() const
 {
-    const auto dst_tensors = _components.get_dst_tensors();
-    ARM_COMPUTE_ERROR_ON_MSG(dst_tensors.size() != 1, "Only one destination tensor per kernel is allowed");
-    const auto dst_info   = dst_tensors[0];
+    const auto dst_info   = _components.get_any_dst_tensor();
     const auto dst_w      = dst_info->dimension(0);
     const auto tile_w     = std::max(1, get_window().x().step());
     const auto tile_h     = std::max(1, get_window().y().step());

@@ -93,40 +93,19 @@ GpuKernelComponentStream GpuKernelComponentGraph::fuse() const
 {
     // Obtain memory descriptor map
     const auto mem_map = assign_memory_descriptors(_tensors, _dependency_graph);
-    /// @note Fusion constraints (for kernel components) are exactly the same as the invariants of @ref GpuKernelComponentGroup
-    /// Fusion can be framed as a mathematical optimization problem:
-    /// Given fusion constraints, find the "best" fusion patterns possible
-    /// "Best" is ill-defined at the moment. For now we define "best" fusion pattern as one
-    /// which results in the least number of fused kernels ( @ref GpuKernelComponentGroup ) at the end
-
-    /// As the first iteration, we offer a sub-optimal algorithm here which ensures all
-    /// constraints are met, but provides no guarantee that the fusion pattern is optimal
 
     GpuKernelComponentStream stream{ _services, mem_map };
-    // Break down into linear groups of components (constraint 1), preserving topological order
-    const auto linear_graphs = _dependency_graph.topological_partition();
+    const auto op_seq = _dependency_graph.build_operators_sequence();
 
-    // Further divide up the linear groups based on rest of the fusion constraints (rely on component group's invariants)
-    for(const auto &graph : linear_graphs)
+    stream.new_component_group();
+    for(auto op : op_seq)
     {
-        for(unsigned int i = 0; i < graph.size(); ++i)
-        {
-            const auto comp = _components.at(graph[i].op).get();
-            // Each new linear graph signals a new component group in the stream
-            if(i == 0)
-            {
-                stream.new_component_group();
-            }
-            // If it violates the component group's invariant / fusion constraint, breaks up the stream by inserting a new group
-            bool success = stream.add_component(comp);
-            if(!success)
-            {
-                stream.new_component_group();
-                success = stream.add_component(comp);
-                ARM_COMPUTE_ERROR_ON(!success);
-            }
-        }
+        const auto component = _components.at(op.op).get();
+        const auto success = stream.add_component(component);
+        ARM_COMPUTE_ERROR_ON(!success);
+        ARM_COMPUTE_UNUSED(success);
     }
+
     return stream;
 }
 } // namespace dynamic_fusion

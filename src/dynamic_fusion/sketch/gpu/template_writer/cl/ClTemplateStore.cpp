@@ -84,9 +84,9 @@ TagLUT ClTemplateStore::get_tag_lut(const GpuKernelVariableTable &vtable, const 
     // Local build options
     lut["meta_kernel_id"]  = id();
     lut["DST_TENSOR_TYPE"] = "BUFFER";
-    const auto dst_info    = comp_group.get_dst_tensors()[0];
-    lut["DST_DATA_TYPE"]   = dst_info->data_type();
+    lut["DST_DATA_TYPE"]   = _dst->data_type();
 
+    ARM_COMPUTE_UNUSED(comp_group);
     return lut;
 }
 

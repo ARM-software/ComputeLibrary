@@ -28,6 +28,7 @@
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuAdd.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -36,6 +37,7 @@
 #include "tests/validation/dynamic_fusion/Utils.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/Permute.h"
+#include "tests/validation/reference/ElementwiseOperations.h"
 
 using namespace arm_compute::experimental::dynamic_fusion;
 using namespace arm_compute::test::validation::utils;
@@ -136,6 +138,105 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
 
     RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
     validate(CLAccessor(t_dst), ref_t_dst_nchw, tolerance_f32);
+}
+TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
+{
+    /* Computation:
+     *   out_0 = in_0 + in_1
+     *   out_1 = out_0 + in_2
+     */
+    CLScheduler::get().default_reinit();
+
+    const auto data_type      = DataType::F32;
+    const auto t_input_shape  = TensorShape(8, 2, 1);
+
+    // Create a new workload sketch
+    auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
+    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &gpu_ctx };
+
+    auto in_0_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    auto in_1_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    auto in_2_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+
+    auto out_0_info = sketch.create_tensor_info();
+    auto out_1_info = sketch.create_tensor_info();
+
+    auto ans_0_info = sketch.create_tensor_info();
+    auto ans_1_info = sketch.create_tensor_info();
+
+    GpuAdd::create_op(sketch, &in_0_info, &in_1_info, &ans_0_info);
+    GpuOutput::create_op(sketch, &ans_0_info, &out_0_info);
+    GpuAdd::create_op(sketch, &ans_0_info, &in_2_info, &ans_1_info);
+    GpuOutput::create_op(sketch, &ans_1_info, &out_1_info);
+
+    // Configure runtime
+    ClWorkloadRuntime runtime;
+    runtime.configure(sketch);
+
+    // (Important) Allocate auxiliary tensor memory if there are any
+    // Instead of using ACL allocated memory, the user can choose to import memory into the tensors
+    for(auto &data : runtime.get_auxiliary_tensors())
+    {
+        CLTensor     *tensor      = data.first;
+        AuxMemoryInfo aux_mem_req = data.second;
+        tensor->allocator()->init(*data.first->info(), aux_mem_req.alignment);
+        tensor->allocator()->allocate(); // Use ACL allocated memory
+        // auto buf = cl::Buffer();
+        // tensor->allocator()->import_memory(buf);  // Or, import external memory
+    }
+
+    // Construct user tensors
+    CLTensor t_in_0{};
+    CLTensor t_in_1{};
+    CLTensor t_in_2{};
+
+    CLTensor t_out_0{};
+    CLTensor t_out_1{};
+
+    // Initialize user tensors
+    t_in_0.allocator()->init(in_0_info);
+    t_in_1.allocator()->init(in_1_info);
+    t_in_2.allocator()->init(in_2_info);
+
+    t_out_0.allocator()->init(out_0_info);
+    t_out_1.allocator()->init(out_1_info);
+
+    // Allocate and fill user tensors
+    // Instead of using ACL allocator, the user can choose to import memory into the tensors
+    t_in_0.allocator()->allocate();
+    t_in_1.allocator()->allocate();
+    t_in_2.allocator()->allocate();
+
+    t_out_0.allocator()->allocate();
+    t_out_1.allocator()->allocate();
+
+    fill<float>(CLAccessor(t_in_0), 0, library.get());
+    fill<float>(CLAccessor(t_in_1), 1, library.get());
+    fill<float>(CLAccessor(t_in_2), 2, library.get());
+
+    // Run runtime
+    runtime.run({ &t_in_0, &t_in_1, &t_in_2, &t_out_0, &t_out_1 });
+
+    // Create reference
+    SimpleTensor<float> ref_t_in_0{ t_input_shape, data_type, 1, QuantizationInfo() };
+    SimpleTensor<float> ref_t_in_1{ t_input_shape, data_type, 1, QuantizationInfo() };
+    SimpleTensor<float> ref_t_in_2{ t_input_shape, data_type, 1, QuantizationInfo() };
+
+    SimpleTensor<float> ref_t_out_0{ t_input_shape, data_type, 1, QuantizationInfo() };
+    SimpleTensor<float> ref_t_out_1{ t_input_shape, data_type, 1, QuantizationInfo() };
+
+    // Fill reference
+    fill<float>(ref_t_in_0, 0, library.get());
+    fill<float>(ref_t_in_1, 1, library.get());
+    fill<float>(ref_t_in_2, 2, library.get());
+
+    reference::arithmetic_operation(ArithmeticOperation::ADD, ref_t_in_0, ref_t_in_1, ref_t_out_0, ConvertPolicy::WRAP);
+    reference::arithmetic_operation(ArithmeticOperation::ADD, ref_t_out_0, ref_t_in_2, ref_t_out_1, ConvertPolicy::WRAP);
+
+    RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+    validate(CLAccessor(t_out_0), ref_t_out_0, tolerance_f32);
+    validate(CLAccessor(t_out_1), ref_t_out_1, tolerance_f32);
 }
 TEST_SUITE(Invalid_Fusion_Should_Fail)
 TEST_CASE(Multiple_Complex_Ops_0, framework::DatasetMode::ALL)

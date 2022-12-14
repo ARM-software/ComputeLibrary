@@ -81,7 +81,7 @@ Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
 
     const auto group = sketch.implementation().operator_group();
     const auto op = group.new_operator(operator_type, tensors);
-    const auto success = group.try_add_operator(op);
+    const auto success = group.try_add_operator(op, true);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!success, "This operator cannot be fused into the workload.");
     ARM_COMPUTE_UNUSED(success);
@@ -133,7 +133,7 @@ void GpuOutput::create_op(GpuWorkloadSketch &sketch,
     tensors.add_const_tensor(ACL_DST_0, dst);
 
     const Operator op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
-    sketch.implementation().operator_group().add_operator(op);
+    sketch.implementation().operator_group().add_operator(op, true);
 }
 
 } // namespace dynamic_fusion

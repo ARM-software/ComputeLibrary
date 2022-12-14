@@ -44,6 +44,8 @@ GpuWorkloadSourceCode GpuKernelComponentStream::write_workload_code()
     // Traverse through component groups and assemble workload together
     for(auto && group : _component_groups)
     {
+        group.finalize();
+
         // Write kernel code
         GpuLogicalKernel          logical_kernel(_services, group);
         const GpuKernelSourceCode kernel_code = logical_kernel.write_kernel_code();

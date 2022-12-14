@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
+#include <set>
 
 namespace arm_compute
 {
@@ -88,25 +89,16 @@ public:
      * @return false     If the operation fails
      */
     bool add_component(ComponentPtr component);
-    /** Get source tensors of this group */
-    std::vector<const ITensorInfo *> get_src_tensors() const;
-    /** Get destination tensors of this group */
-    std::vector<const ITensorInfo *> get_dst_tensors() const;
+    /** Optimize and pre-compute information about the component group */
+    void finalize();
+    /** Get one of the destination tensors of this group */
+    const ITensorInfo *get_any_dst_tensor() const;
     /** Get tensor argument of this group
      *  A tensor is an argument if it is a source or destination tensor to the group
      */
     std::vector<const ITensorInfo *> get_argument_tensors() const;
     /** Get the root (first) component of this group */
     ComponentPtr get_root_component() const;
-    /** Get the last component of this group */
-    ComponentPtr get_last_component() const;
-    /** Get the previous component to the component with id @p id
-     *
-     * @param[in] id Component id of the component whose previous component is of concern
-     *
-     * @return ComponentPtr  Pointer to the previous component of the one identified by @p id
-     */
-    ComponentPtr get_previous_component(ComponentId id) const;
     /** Check if a @ref ITensorInfo is an "intermediate" tensor of the group
      *
      * An intermediate tensor is any tensor that is not an argument.
@@ -131,11 +123,12 @@ public:
     typename std::vector<ComponentPtr>::const_iterator cend() const;
 
 private:
-    std::vector<const ITensorInfo *> get_interm_tensors() const;
-
-    static bool is_tensor_in(const ITensorInfo *tensor, const std::vector<const ITensorInfo *> tensors);
-
     std::vector<ComponentPtr> _components{};
+
+    bool _finalized{ false };
+    std::vector<const ITensorInfo *> _argument_tensors{};
+    std::set<const ITensorInfo *> _interm_tensors{};
+    const ITensorInfo *_any_output_tensor{ nullptr };
 };
 } // namespace dynamic_fusion
 } // namespace experimental

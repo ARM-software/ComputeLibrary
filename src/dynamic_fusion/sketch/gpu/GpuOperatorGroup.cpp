@@ -68,12 +68,12 @@ ArgumentPack<ITensorInfo> Operator::tensors() const
     return _tensors;
 }
 
-bool GpuOperatorGroup::try_add_operator(const Operator &op) const
+bool GpuOperatorGroup::try_add_operator(const Operator &op, bool is_output) const
 {
     const auto src_tensor_ids = get_tensor_ids(op.tensors().get_const_src_tensors());
     const auto dst_tensor_ids = get_tensor_ids(op.tensors().get_const_dst_tensors());
     // Constraint 1
-    if(!_graph.try_add_operator_as_linear(op.id(), src_tensor_ids, dst_tensor_ids))
+    if(!_graph.try_add_operator_as_linear(op.id(), src_tensor_ids, dst_tensor_ids, is_output))
     {
         return false;
     }
@@ -143,12 +143,12 @@ bool GpuOperatorGroup::try_add_operator(const Operator &op) const
     }
     return true;
 }
-void GpuOperatorGroup::add_operator(const Operator &op)
+void GpuOperatorGroup::add_operator(const Operator &op, bool is_output)
 {
-    ARM_COMPUTE_ERROR_ON(!try_add_operator(op));
+    ARM_COMPUTE_ERROR_ON(!try_add_operator(op, is_output));
     const auto src_tensor_ids = get_tensor_ids(op.tensors().get_const_src_tensors());
     const auto dst_tensor_ids = get_tensor_ids(op.tensors().get_const_dst_tensors());
-    _graph.add_operator_as_linear(op.id(), src_tensor_ids, dst_tensor_ids);
+    _graph.add_operator_as_linear(op.id(), src_tensor_ids, dst_tensor_ids, is_output);
     _operators[op.id()] = op;
 }
 Operator GpuOperatorGroup::new_operator(const GpuOperatorType &operator_type, const ArgumentPack<ITensorInfo> &tensors) const

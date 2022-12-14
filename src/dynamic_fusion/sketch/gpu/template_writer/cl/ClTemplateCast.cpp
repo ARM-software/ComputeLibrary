@@ -137,7 +137,7 @@ TagLUT ClTemplateCast::get_tag_lut(const GpuKernelVariableTable &vtable, const C
     lut["src"] = vtable.get_variable(_src);
     lut["dst"] = vtable.get_variable(_dst);
 
-    const auto dst_argument = vtable.get_variable(comp_group.get_dst_tensors()[0]);
+    const auto dst_argument = vtable.get_variable(comp_group.get_any_dst_tensor());
     lut["arg_dst"]          = dst_argument.uniq_name;
 
     // Local build options
