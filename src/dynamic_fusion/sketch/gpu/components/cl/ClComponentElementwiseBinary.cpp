@@ -38,6 +38,7 @@ namespace
 std::set<ElementwiseBinaryCommonAttributes::ElementwiseOp> supported_ops
 {
     ElementwiseBinaryCommonAttributes::ElementwiseOp::Add,
+    ElementwiseBinaryCommonAttributes::ElementwiseOp::Sub,
     ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul
 };
 }

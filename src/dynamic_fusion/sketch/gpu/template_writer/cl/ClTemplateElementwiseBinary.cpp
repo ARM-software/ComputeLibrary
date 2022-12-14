@@ -185,6 +185,9 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
         case Attributes::ElementwiseOp::Add:
             lut["ELTWISE_OP"] = "ADD";
             break;
+        case Attributes::ElementwiseOp::Sub:
+            lut["ELTWISE_OP"] = "SUB";
+            break;
         case Attributes::ElementwiseOp::Mul:
             lut["ELTWISE_OP"] = "MUL";
             break;

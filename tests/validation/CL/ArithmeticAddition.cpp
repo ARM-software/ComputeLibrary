@@ -41,6 +41,9 @@ namespace test
 {
 namespace validation
 {
+/** Synced with tests/validation/dynamic_fusion/gpu/cl/Add.cpp from the dynamic fusion interface.
+ * Please check there for any differences in the coverage
+ */
 namespace
 {
 /** Input data sets **/

@@ -2241,6 +2241,7 @@
       "src/dynamic_fusion/sketch/gpu/operators/GpuOutput.cpp",
       "src/dynamic_fusion/sketch/gpu/operators/GpuResize.cpp",
       "src/dynamic_fusion/sketch/gpu/operators/GpuSoftmax.cpp",
+      "src/dynamic_fusion/sketch/gpu/operators/GpuSub.cpp",
       "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateCast.cpp",

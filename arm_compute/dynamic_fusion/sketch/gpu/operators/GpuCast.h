@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCAST
 
-#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 
 namespace arm_compute

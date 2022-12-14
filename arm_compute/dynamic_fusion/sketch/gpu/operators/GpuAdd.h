@@ -79,7 +79,7 @@ public:
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *lhs,
                                   const ITensorInfo        *rhs);
-    /**  Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
+    /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
      *
      * Parameters are similar to @ref GpuAdd::create_op()
      *

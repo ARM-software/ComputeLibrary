@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#define SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
 
 // *INDENT-OFF*
 // clang-format off
-#ifndef ARM_COMPUTE_TILE_HELPERS_H
-#define ARM_COMPUTE_TILE_HELPERS_H
 
 #define TILE_VECTOR_SIZE1 1
 #define TILE_VECTOR_SIZE2 2
@@ -1062,6 +1062,7 @@
 #define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 
 #define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
+#define V_SUB(A_VAL, B_VAL) ((A_VAL) - (B_VAL))
 #define V_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
 #define V_MUL(A_VAL, B_VAL) ((A_VAL) * (B_VAL))
 
@@ -1128,6 +1129,9 @@
 #define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_BROADCAST_LHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_BROADCAST_RHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+#define T_ELTWISE_BROADCAST_LHS_X_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 #define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
@@ -1196,6 +1200,7 @@
     })
 
 #define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
@@ -1288,4 +1293,4 @@
         })                                                                                             \
     })
 
-#endif // ARM_COMPUTE_TILE_HELPERS_H
+#endif /* SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */

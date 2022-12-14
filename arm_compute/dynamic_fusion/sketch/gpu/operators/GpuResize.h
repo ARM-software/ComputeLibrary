@@ -25,7 +25,6 @@
 #ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESIZE
 
-#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 
 namespace arm_compute

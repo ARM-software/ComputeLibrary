@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESHAPE
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESHAPE
+#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUSUB
+#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUSUB
 
-#include "arm_compute/dynamic_fusion/sketch/attributes/ReshapeAttributes.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
@@ -40,54 +40,58 @@ class GpuWorkloadContext;
 class GpuWorkloadSketch;
 
 /** Operator interface. */
-class GpuReshape final
+class GpuSub final
 {
 public:
-    /** Attributes are a set of backend-agnostic parameters that define what an operator does */
-    using Attributes = ReshapeAttributes;
-
     /** Create an operator and fuse it into the workload sketch.
      *    @note If @ref validate_op() fails, the creation also fails and may throw an error.
      *    @note If @ref validate_op() fails, @p sketch remains unchanged and valid.
      *
      * Valid data type configurations:
-     * - Any
+     * |lhs            |rhs            |dst           |
+     * |:--------------|:--------------|:-------------|
+     * |F16            |F16            |F16           |
+     * |F32            |F32            |F32           |
+     * |S32            |S32            |S32           |
+     * |S16            |S16            |S16           |
+     * |U8             |U8             |U8            |
      *
      * Valid data layouts:
      * - Any
      *
-     * @param[in,out] sketch     Workload sketch into which the operator will be fused
-     * @param[in]     src        Input tensor info. Data type supported: All
-     * @param[in]     attributes Operator attributes
+     * @param[in,out] sketch Workload sketch into which the operator will be fused
+     * @param[in]     lhs    Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
+     * @param[in]     rhs    Right hand side tensor info. Same as @p lhs.
      *
      * @return Pointer for the destination tensor info
      */
     static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
-                                  ITensorInfo       *src,
-                                  const Attributes &attributes);
+                                  ITensorInfo       *lhs,
+                                  ITensorInfo       *rhs);
+
     /** Check if the operator configuration is supported, irrespective of fusion
      *
-     * @param[in] context    Workload context within which the operator is running
-     * @param[in] src        Input tensor info.
-     * @param[in] attributes Operator attributes
+     * @param[in] context Workload context within which the operator is running
+     * @param[in] lhs     Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
+     * @param[in] rhs     Right hand side tensor info. Same as @p lhs.
      *
      * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *src,
-                                  const Attributes         &attributes);
-    /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
+                                  const ITensorInfo        *lhs,
+                                  const ITensorInfo        *rhs);
+
+    /** Validate the operator and check if its configuration is supported and if it can be fused into the workload sketch.
      *
-     *  Parameters are similar to @ref GpuReshape::create_op()
+     * Parameters are similar to @ref GpuSub::create_op()
      *
      * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
-                              const ITensorInfo       *src,
-                              const Attributes        &attributes);
+                              const ITensorInfo       *rhs,
+                              const ITensorInfo       *lhs);
 };
-
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPURESHAPE */
+#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUSUB */
