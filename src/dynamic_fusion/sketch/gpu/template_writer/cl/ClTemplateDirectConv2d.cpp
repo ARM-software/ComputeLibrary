@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -330,7 +330,6 @@ CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &c
         build_opts.add_option("-cl-unsafe-math-optimizations");
     }
 
-    build_opts.add_option("-DIS_TILED");
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(k0));

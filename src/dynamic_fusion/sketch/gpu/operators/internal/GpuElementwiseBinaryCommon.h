@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,6 @@ public:
                           ITensorInfo                             *dst,
                           const ElementwiseBinaryCommonAttributes &attributes);
     /** Check if the operator configuration is supported, irrespective of fusion
-     * Similar to @ref GpuElementwiseBinaryCommon::create_op()
      *
      * @param[in] context    Workload context within which the operator is running
      * @param[in] lhs        Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.

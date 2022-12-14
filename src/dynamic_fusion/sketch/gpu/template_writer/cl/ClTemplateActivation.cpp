@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
 ClTemplateActivation::ClTemplateActivation(ComponentId                      id,
                                            const ArgumentPack<ITensorInfo> &tensors,
                                            const Attributes                &attributes)
@@ -178,7 +177,7 @@ std::set<std::string> ClTemplateActivation::get_headers_list() const
 Window ClTemplateActivation::get_window() const
 {
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
-    const unsigned int n0  = adjust_vec_size(16 / _src->element_size(), _src->dimension(0));
+    const unsigned int n0  = adjust_vec_size(16 / _dst->element_size(), _dst->dimension(0));
     Window             win = calculate_max_window(*_dst, Steps(n0));
     return win.collapse(win, Window::DimZ);
 }

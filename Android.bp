@@ -1,5 +1,5 @@
 //
-// Copyright © 2020-2022 Arm Ltd. All rights reserved.
+// Copyright © 2020-2023 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 
@@ -591,6 +591,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/attributes/CastAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/ClampAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.cpp",
+        "src/dynamic_fusion/sketch/attributes/ReshapeAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/ResizeAttributes.cpp",
         "src/dynamic_fusion/sketch/attributes/SoftmaxAttributes.cpp",
         "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.cpp",
@@ -607,6 +608,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.cpp",
+        "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentReshape.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentResize.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuAdd.cpp",
@@ -615,6 +617,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/operators/GpuConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuDepthwiseConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuOutput.cpp",
+        "src/dynamic_fusion/sketch/gpu/operators/GpuReshape.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuResize.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp",
@@ -624,6 +627,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.cpp",
+        "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateReshape.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateResize.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
         "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
