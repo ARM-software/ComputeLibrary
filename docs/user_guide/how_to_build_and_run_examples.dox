@@ -396,5 +396,122 @@ OpenCL kernel level debugging can be simplified with the use of printf, this req
 
 SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.
 
+@section S1_8_experimental_builds Experimental Bazel and CMake builds
+
+In addition to the scons build the repository includes experimental Bazel and CMake builds.
+Both are similar to the scons multi_isa build. It compiles all libraries with Neon (TM) support, as well as SVE and SVE2 libraries. The build is CPU only, not including OpenCL support.  Both were successfully built with gcc / g++ version 10.2.
+
+@subsection S1_8_1_bazel_build Bazel build
+
+@subsubsection S1_8_1_1_file_structure File structure
+
+File structure for all files included in the Bazel build:
+
+	.
+	├──  .bazelrc
+	├──  BUILD
+	├──  WORKSPACE
+	├── arm_compute
+	│   └── BUILD
+	├── examples
+	│   └── BUILD
+	├── include
+	│   └── BUILD
+	├── scripts
+	│   ├── print_version_file.py
+	│   └── BUILD
+	├── src
+	│   └── BUILD
+	├── support
+	│   └── BUILD
+	├── tests
+	│   ├── BUILD
+	│   └── framework
+	│       └── BUILD
+	└── utils
+		└── BUILD
+
+@subsubsection S1_8_1_2_build_options Build options
+
+Available build options:
+
+	- debug: Enable ['-O0','-g','-gdwarf-2'] compilation flags
+	- Werror: Enable -Werror compilation flag
+	- logging: Enable logging
+	- cppthreads: Enable C++11 threads backend
+	- openmp: Enable OpenMP backend
+
+@subsubsection S1_8_1_3_example_builds Example builds
+
+Build everything (libraries, examples, tests):
+
+	bazel build //...
+
+Build libraries:
+
+	bazel build //:all
+
+Build arm_compute only:
+
+	bazel build //:arm_compute
+
+Build examples:
+
+	bazel build //examples:all
+
+Build resnet50 example:
+
+	bazel build //examples:graph_resnet50
+
+Build validation and benchmarking:
+
+	bazel build //tests:all
+
+@subsection S1_8_2_cmake_build CMake build
+
+@subsubsection S1_8_2_1_file_structure File structure
+
+File structure for all files included in the CMake build:
+
+	.
+	├──  CMakeLists.txt
+	├── cmake
+	│   ├── Options.cmake
+	│   ├── Version.cmake
+	│   └── toolchains
+	│       └── aarch64_linux_toolchain.cmake
+	├── examples
+	│   └── CMakeLists.txt
+	├── src
+	│   └── CMakeLists.txt
+	└── tests
+		├── CMakeLists.txt
+		├── benchmark
+		│   └── CMakeLists.txt
+		└── validation
+			└── CMakeLists.txt
+
+@subsubsection S1_8_2_2_build_options Build options
+
+Available build options:
+
+	- DEBUG: Enable ['-O0','-g','-gdwarf-2'] compilation flags
+	- WERROR: Enable -Werror compilation flag
+	- EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
+	- LOGGING: Enable logging
+	- BUILD_EXAMPLES: Build examples
+	- BUILD_TESTING: Build tests
+	- CPPTHREADS: Enable C++11 threads backend
+	- OPENMP: Enable OpenMP backend
+
+@subsubsection S1_8_2_3_example_builds Example builds
+
+To build libraries, examples and tests:
+
+	mkdir build
+	cd build
+	cmake .. -DOPENMP=1 -DCPPTHREADS=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	cmake --build . -j32
+
 */
 } // namespace arm_compute

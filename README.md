@@ -108,6 +108,12 @@ Pre-build binaries are generated with the following security / good coding pract
 
 <br>
 
+## Experimental builds
+
+**⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation](https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml) for more details.
+
+<br>
+
 ## How to contribute
 
 Contributions to the Compute Library are more than welcome. If you are interested on contributing, please have a look at our [how to contribute guidelines](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml).
@@ -150,6 +156,12 @@ This project contains code from other projects as listed below. The original lic
 Android is a trademark of Google LLC.
 
 Arm, Cortex, Mali and Neon are registered trademarks or trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+
+Bazel is a trademark of Google LLC., registered in the U.S. and other
+countries.
+
+CMake is a trademark of Kitware, Inc., registered in the U.S. and other
+countries.
 
 Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
 

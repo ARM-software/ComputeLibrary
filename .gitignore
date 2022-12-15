@@ -1,11 +1,13 @@
 # Library builds
 build/
+bazel-*
 
 # Cscope/Ctags files
 *cscope*
 
 # Text files
 *.txt
+!CMakeLists.txt
 *.xml
 *.embed
 *.diff
