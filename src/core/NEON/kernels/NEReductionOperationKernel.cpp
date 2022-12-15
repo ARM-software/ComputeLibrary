@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -401,7 +401,8 @@ struct RedOpX
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_window);
 
-        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
+        execute_window_loop(
+            in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<const T *>(input.ptr());
 
@@ -609,6 +610,8 @@ struct RedOpX_quantized
     {
         using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
 
+        const auto oq_info = out->info()->quantization_info().uniform();
+
         const TensorInfo              in_info = *(in->info());
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
 
@@ -622,7 +625,19 @@ struct RedOpX_quantized
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_window);
 
-        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
+        const float in_offset = static_cast<float>(iq_info.offset);
+        const float in_scale  = iq_info.scale;
+
+        const float out_offset = static_cast<float>(oq_info.offset);
+        const float out_scale  = oq_info.scale;
+
+        const float num_elements = static_cast<float>(in_info.dimension(0));
+
+        const float A = in_scale / (out_scale * num_elements);
+        const float B = out_offset - (in_scale * in_offset) / (out_scale);
+
+        execute_window_loop(
+            in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -844,14 +859,17 @@ struct RedOpX_quantized
 
                     if(op == ReductionOperation::MEAN_SUM)
                     {
-                        res /= static_cast<int32_t>(in_info.dimension(0));
+                        const int32_t resFinal = A * (static_cast<float>(res)) + B;
+
+                        *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(resFinal);
                     }
                     else
                     {
                         // Subtract accumulated offsets
                         res -= (in_info.dimension(0) - 1) * iq_info.offset;
+                        *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
                     }
-                    *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
+
                     break;
                 }
                 default:
@@ -887,7 +905,8 @@ struct RedOpYZW
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_win_no_pad);
 
-        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
+        execute_window_loop(
+            in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -1110,7 +1129,8 @@ struct RedOpYZW_complex
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_win_no_pad);
 
-        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
+        execute_window_loop(
+            in_win_no_pad, [&](const Coordinates &)
         {
             // Compute window_step_x elements per iteration
             int x = window_start_x;
@@ -1169,6 +1189,8 @@ struct RedOpYZW_quantized
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
         using PromotedType                    = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
 
+        const auto oq_info = out->info()->quantization_info().uniform();
+
         const int  window_step_x      = 16 / sizeof(T);
         const auto window_start_x_tmp = static_cast<int>(in_window.x().start());
         const auto window_end_x_tmp   = static_cast<int>(in_window.x().end());
@@ -1197,7 +1219,22 @@ struct RedOpYZW_quantized
         vector_type_f vec_res_value3_f{};
         vector_type_f vec_res_value4_f{};
 
-        execute_window_loop(in_win_no_pad, [&](const Coordinates &)
+        const float in_offset = static_cast<float>(iq_info.offset);
+        const float in_scale  = iq_info.scale;
+
+        const float out_offset = static_cast<float>(oq_info.offset);
+        const float out_scale  = oq_info.scale;
+
+        const float num_elements = static_cast<float>(in_info.dimension(axis));
+
+        const float A = in_scale / (out_scale * num_elements);
+        const float B = out_offset - (in_scale * in_offset) / (out_scale);
+
+        const auto vec_A = wrapper::vdup_n(static_cast<float>(A), wrapper::traits::vector_128_tag{});
+        const auto vec_B = wrapper::vdup_n(static_cast<float>(B), wrapper::traits::vector_128_tag{});
+
+        execute_window_loop(
+            in_win_no_pad, [&](const Coordinates &)
         {
             const auto input_ptr = reinterpret_cast<T *>(input.ptr());
 
@@ -1340,11 +1377,10 @@ struct RedOpYZW_quantized
                     }
                     case ReductionOperation::MEAN_SUM:
                     {
-                        const auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<float>(in_info.dimension(axis)), wrapper::traits::vector_128_tag{}));
-                        vec_res_value1_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value1), vec_width_inv);
-                        vec_res_value2_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value2), vec_width_inv);
-                        vec_res_value3_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value3), vec_width_inv);
-                        vec_res_value4_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value4), vec_width_inv);
+                        vec_res_value1_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value1), vec_A);
+                        vec_res_value2_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value2), vec_A);
+                        vec_res_value3_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value3), vec_A);
+                        vec_res_value4_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value4), vec_A);
 
                         vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
                         vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
@@ -1389,7 +1425,9 @@ struct RedOpYZW_quantized
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                float res_value = 0.f;
+                float   res_value   = 0.f;
+                int32_t res_value_q = 0;
+
                 switch(op)
                 {
                     case ReductionOperation::ARG_IDX_MAX:
@@ -1419,9 +1457,13 @@ struct RedOpYZW_quantized
                     switch(op)
                     {
                         case ReductionOperation::SUM:
-                        case ReductionOperation::MEAN_SUM:
                         {
                             res_value += *in_ptr;
+                            break;
+                        }
+                        case ReductionOperation::MEAN_SUM:
+                        {
+                            res_value_q += *in_ptr;
                             break;
                         }
                         case ReductionOperation::SUM_SQUARE:
@@ -1479,8 +1521,7 @@ struct RedOpYZW_quantized
                 {
                     case ReductionOperation::MEAN_SUM:
                     {
-                        int32_t res = static_cast<int32_t>(res_value);
-                        res /= static_cast<int32_t>(in_info.dimension(axis));
+                        const int32_t res                        = A * (static_cast<float>(res_value_q)) + B;
                         *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res);
                         break;
                     }
@@ -1552,30 +1593,46 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
     switch(axis)
     {
         case 0:
+        {
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
+                {
                     return Reducer<RedOpX_quantized<uint8_t>>::reduceX(window, input, output, RedOpX_quantized<uint8_t>(), op);
+                }
                 case DataType::QASYMM8_SIGNED:
+                {
                     return Reducer<RedOpX_quantized<int8_t>>::reduceX(window, input, output, RedOpX_quantized<int8_t>(), op);
+                }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpX<float16_t, 8>>::reduceX(window, input, output, RedOpX<float16_t, 8>(), op);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F32:
+                {
                     return Reducer<RedOpX<float, 4>>::reduceX(window, input, output, RedOpX<float, 4>(), op);
+                }
                 case DataType::S32:
+                {
                     return Reducer<RedOpX<int32_t, 4>>::reduceX(window, input, output, RedOpX<int32_t, 4>(), op);
+                }
                 default:
+                {
                     ARM_COMPUTE_ERROR("Not supported");
+                }
             }
+        }
         case 1:
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
+                {
                     return Reducer<RedOpYZW_quantized<uint8_t>>::reduceY(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+                }
                 case DataType::QASYMM8_SIGNED:
+                {
                     return Reducer<RedOpYZW_quantized<int8_t>>::reduceY(window, input, output, RedOpYZW_quantized<int8_t>(), op);
+                }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpYZW<float16_t, 8>>::reduceY(window, input, output, RedOpYZW<float16_t, 8>(), op);
@@ -1655,7 +1712,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         if(!is_arg_min_max)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
             ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != output->num_channels());
         }
         else

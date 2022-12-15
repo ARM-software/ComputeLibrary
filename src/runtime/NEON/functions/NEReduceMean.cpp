@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/common/utils/Log.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
@@ -85,14 +83,6 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
         }
         const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
-        const bool requant = is_data_type_quantized(input->data_type()) && input->quantization_info() != output->quantization_info();
-        if(requant)
-        {
-            TensorInfo input_no_quant(input->clone()->set_data_type(DataType::F32));
-            NEDequantizationLayer::validate(input, &input_no_quant);
-            TensorInfo output_no_quant(output->clone()->set_data_type(DataType::F32));
-            NEQuantizationLayer::validate(&output_no_quant, output);
-        }
     }
     return Status{};
 }
@@ -101,8 +91,7 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
 NEReduceMean::~NEReduceMean() = default;
 
 NEReduceMean::NEReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _dequant(), _requant(), _reduction_ops(), _keep_dims(), _do_requant(), _input_no_quant(),
-      _output_no_quant()
+    : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _reduction_ops(), _keep_dims()
 {
 }
 
@@ -121,7 +110,6 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
     const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input->info(), reduction_axis, keep_dims);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
-    _do_requant    = is_data_type_quantized(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info();
     _reduction_ops = reduction_axis.num_dimensions();
     _reduction_kernels.resize(_reduction_ops);
     _reduced_outs.resize(_reduction_ops - (keep_dims ? 1 : 0));
@@ -129,18 +117,6 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
 
     ITensor *tmp_input  = input;
     ITensor *tmp_output = output;
-    if(_do_requant)
-    {
-        _memory_group.manage(&_input_no_quant);
-        _memory_group.manage(&_output_no_quant);
-        TensorInfo output_no_quant_info = input->info()->clone()->set_tensor_shape(output_shape);
-        output_no_quant_info.set_data_type(DataType::F32);
-        auto_init_if_empty(*_output_no_quant.info(), output_no_quant_info);
-        auto_init_if_empty(*_input_no_quant.info(), input->info()->clone()->set_data_type(DataType::F32));
-        _dequant.configure(input, &_input_no_quant);
-        tmp_input  = &_input_no_quant;
-        tmp_output = &_output_no_quant;
-    }
 
     Coordinates axis_local = reduction_axis;
     const int   input_dims = tmp_input->info()->num_dimensions();
@@ -160,7 +136,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
         }
         else
         {
-            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, tmp_input->info()->num_channels(), tmp_input->info()->data_type(), tmp_input->info()->quantization_info()));
+            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, tmp_output->info()->num_channels(), tmp_output->info()->data_type(), tmp_output->info()->quantization_info()));
             _memory_group.manage(&_reduced_outs[i]);
             _reduction_kernels[i].configure(in, &_reduced_outs[i], axis_local[i], ReductionOperation::MEAN_SUM);
         }
@@ -171,7 +147,6 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
     {
         _reduced_outs[i].allocator()->allocate();
     }
-
     // Configure reshape layer if we want to drop the dimensions
     if(!keep_dims)
     {
@@ -186,21 +161,11 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
         auto_init_if_empty(*tmp_output->info(), tmp_input->info()->clone()->set_tensor_shape(out_shape));
         _reshape.configure(&_reduced_outs[_reduction_ops - 1], tmp_output);
     }
-    if(_do_requant)
-    {
-        _requant.configure(&_output_no_quant, output);
-        _input_no_quant.allocator()->allocate();
-        _output_no_quant.allocator()->allocate();
-    }
 }
 
 void NEReduceMean::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
-    if(_do_requant)
-    {
-        _dequant.run();
-    }
     for(auto &kernel : _reduction_kernels)
     {
         kernel.run();
@@ -208,10 +173,6 @@ void NEReduceMean::run()
     if(!_keep_dims)
     {
         _reshape.run();
-    }
-    if(_do_requant)
-    {
-        _requant.run();
     }
 }
 } // namespace arm_compute
