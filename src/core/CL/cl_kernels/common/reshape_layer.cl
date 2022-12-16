@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,20 +51,20 @@ __kernel void reshape_layer(TENSOR3D_DECLARATION(input),
                             int2 input_shape,
                             int2 output_shape)
 {
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    int out_x = get_global_id(0);
+    int out_y = get_global_id(1);
+    int out_z = get_global_id(2);
 
-    int3 id = (int3)(get_global_id(0), get_global_id(1), get_global_id(2));
+    // Compute the output linearized index
+    int out_linear_idx = out_x + out_y * output_shape.x + out_z * output_shape.x * output_shape.y;
 
-    // Linearize index
-    int linear_idx = id.x + id.y * input_shape.x + id.z * input_shape.x * input_shape.y;
-
-    // Translate to output
-    int3 out_id;
-    out_id.x = linear_idx % output_shape.x;
-    out_id.y = (linear_idx / output_shape.x) % output_shape.y;
-    out_id.z = linear_idx / (output_shape.x * output_shape.y);
+    // Translate to intput
+    int in_x = out_linear_idx % input_shape.x;
+    int in_y = (out_linear_idx / input_shape.x) % input_shape.y;
+    int in_z = out_linear_idx / (input_shape.x * input_shape.y);
 
     // Store result
-    *((__global DATA_TYPE *)tensor3D_offset(&out, out_id.x, out_id.y, out_id.z)) = *((__global DATA_TYPE *)in.ptr);
+    input_ptr += input_offset_first_element_in_bytes + in_x * input_stride_x + in_y * input_stride_y + in_z * input_stride_z;
+    output_ptr += output_offset_first_element_in_bytes + out_x * output_stride_x + out_y * output_stride_y + out_z * output_stride_z;
+    *((__global DATA_TYPE *)output_ptr) = *((__global DATA_TYPE *)input_ptr);
 }
