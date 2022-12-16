@@ -188,6 +188,11 @@ __kernel void direct_convolution_nhwc(
                 a[i].v = ZERO_VALUE;
             })
 
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
+            })
+
             // Load tile from the src tensor
             T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 

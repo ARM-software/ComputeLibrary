@@ -106,10 +106,10 @@ TILE(uint, M0, 1, g_dst_indirect_y);
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        xi[i].v = ((g_ind_1 + i) % _IDST_WIDTH) * {{STRIDE_X}};
-        yi[i].v = ((g_ind_1 + i) / _IDST_WIDTH) * {{STRIDE_Y}};
-        xi[i].v -= {{PAD_LEFT}};
-        yi[i].v -= {{PAD_TOP}};
+        xi[0].s[i] = ((g_ind_1 + i) % _IDST_WIDTH) * {{STRIDE_X}};
+        yi[0].s[i] = ((g_ind_1 + i) / _IDST_WIDTH) * {{STRIDE_Y}};
+        xi[0].s[i] -= {{PAD_LEFT}};
+        yi[0].s[i] -= {{PAD_TOP}};
     })
 
     LOOP_UNROLLING(int, i, 0, 1, M0,
@@ -119,12 +119,25 @@ TILE(uint, M0, 1, g_dst_indirect_y);
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
-        int ck = 0;
         int xk = i % _IWEI_WIDTH;
         int yk = i / _IWEI_WIDTH;
 
-        int k = 0;
-        for(; k <= (_ISRC_CHANNELS - K0); k += K0)
+        TILE(int, 1, M0, my);
+
+        LOOP_UNROLLING(int, i, 0, 1, M0,
+        {
+            int x_s    = xi[0].s[i] + xk;
+            int y_s    = yi[0].s[i] + yk;
+            my[0].s[i] = x_s + y_s *_ISRC_WIDTH;
+            my[0].s[i] = my[0].s[i] + g_ind_2 * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+            my[0].s[i] = select(-1, my[0].s[i], x_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], x_s < _ISRC_WIDTH);
+            my[0].s[i] = select(-1, my[0].s[i], y_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], y_s < _ISRC_HEIGHT);
+        })
+
+        int ck = 0;
+        for(; ck <= (_ISRC_CHANNELS - K0); ck += K0)
         {
             TILE({{SRC_DATA_TYPE}}, M0, K0, a);
             TILE({{WEI_DATA_TYPE}}, N0, K0, b);
@@ -139,20 +152,18 @@ TILE(uint, M0, 1, g_dst_indirect_y);
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, K0, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT({{SRC_DATA_TYPE}}, M0, K0, {{SRC_TENSOR_TYPE}}, {{src}}, ck, {{src}}_stride_y, my, a);
 
             T_LOAD({{WEI_DATA_TYPE}}, N0, K0, {{WEI_TENSOR_TYPE}}, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, K0, NT, T, a, b, {{dst}});
-
-            ck += K0;
         }
 )_";
 
     if(leftover_loop)
     {
         code += R"_(
-        for(; k < _ISRC_CHANNELS; ++k)
+        for(; ck < _ISRC_CHANNELS; ++ck)
         {
             TILE({{SRC_DATA_TYPE}}, M0, 1, a);
             TILE({{WEI_DATA_TYPE}}, N0, 1, b);
@@ -167,13 +178,11 @@ TILE(uint, M0, 1, g_dst_indirect_y);
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, 1, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT({{SRC_DATA_TYPE}}, M0, 1, {{SRC_TENSOR_TYPE}}, {{src}}, ck, {{src}}_stride_y, my, a);
 
             T_LOAD({{WEI_DATA_TYPE}}, N0, 1, BUFFER, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, 1, NT, T, a, b, {{dst}});
-
-            ++ck;
         }
     )_";
 }
