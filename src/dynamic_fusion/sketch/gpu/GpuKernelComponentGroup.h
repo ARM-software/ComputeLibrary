@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <vector>
 #include <set>
+#include <map>
 
 namespace arm_compute
 {
@@ -109,6 +110,22 @@ public:
      * @return false  Otherwise
      */
     bool is_intermediate_tensor(const ITensorInfo *tensor) const;
+    /** Check if an @ref ITensorInfo is an input tensor of the group.
+     *
+     * @param[in] tensor @ref ITensorInfo to be looked up.
+     *
+     * @return true if @p tensor is an input tensor of the group, otherwise false.
+     */
+    bool is_input_tensor(const ITensorInfo *tensor) const;
+    /** Get the list of temporary tiles that need to be declared */
+    std::vector<const ITensorInfo *> get_tiles() const;
+    /** Get the shared tile that can be used to store temporary data of the specified tensor.
+     *
+     * @param[in] tensor @ref ITensorInfo to be looked up.
+     *
+     * @return @ref ITensorInfo that is used to store temporary data of @p tensor.
+     **/
+    const ITensorInfo *get_tile_for_tensor(const ITensorInfo *tensor) const;
     /** Get the number of components within the group */
     size_t size() const;
     /** Check if the component group is empty */
@@ -126,9 +143,13 @@ private:
     std::vector<ComponentPtr> _components{};
 
     bool _finalized{ false };
+
     std::vector<const ITensorInfo *> _argument_tensors{};
+    std::set<const ITensorInfo *> _input_tensors{};
     std::set<const ITensorInfo *> _interm_tensors{};
     const ITensorInfo *_any_output_tensor{ nullptr };
+    std::vector<const ITensorInfo *> _tiles{};
+    std::map<const ITensorInfo *, const ITensorInfo *> _tile_map{};
 };
 } // namespace dynamic_fusion
 } // namespace experimental

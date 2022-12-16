@@ -54,7 +54,6 @@ std::string ClTemplateResize::get_component_code(const IGpuTemplateComponentWrit
 
     std::string code = R"_(
 //------------------ START KERNEL {{meta_kernel_id}} ---------------------
-TILE({{DST_DATA_TYPE}}, 1, N0, {{dst}});
 TILE(uint, 1, 1, g_dst_indirect_y);
 {
     const int yo = g_ind_2 % {{arg_dst}}_h;
@@ -180,15 +179,15 @@ TILE(uint, 1, 1, g_dst_indirect_y);
 void ClTemplateResize::declare_variables(GpuKernelVariableTable &vtable, const IGpuTemplateComponentWriter::ComponentGroup &comp_group) const
 {
     vtable.declare_variable(
+        comp_group,
         _src,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_src),
         "src");
 
     vtable.declare_variable(
+        comp_group,
         _dst,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
 

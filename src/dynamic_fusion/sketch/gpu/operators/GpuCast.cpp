@@ -38,7 +38,7 @@ namespace dynamic_fusion
 {
 namespace
 {
-constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
+constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 }
 Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
                                 const ITensorInfo        *src,

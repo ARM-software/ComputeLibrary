@@ -65,94 +65,94 @@ std::string ClTemplateElementwiseBinary::get_component_code(const ComponentGroup
     std::string code;
     const bool  is_broadcast = _lhs->tensor_shape() != _rhs->tensor_shape();
     const bool  is_root      = (comp_group.get_root_component()->id() == this->id());
+    const bool  is_lhs_input = comp_group.is_input_tensor(_lhs);
+    const bool  is_rhs_input = comp_group.is_input_tensor(_rhs);
+
+    code =
+R"_(
+    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
+)_";
 
     if(is_root)
     {
-        code =
+        code +=
 R"_(
-    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
-)_"
-    // IN_0(LHS)            {{lhs}}
-    // IN_1(RHS)            {{rhs}}
-    // OUT(dst, accum)      {{dst}}
-    // dst = lhs + rhs (mix-precision, broadcast, boundary aware)
-R"_(
-    TILE({{DATA_TYPE}}, M0, N0, {{dst}});
     TILE(uint, M0, 1, g_dst_indirect_y);
+)_";
+    }
+
+    if(is_lhs_input)
     {
-        TILE({{DATA_TYPE}}, M0, N0, lhs_tile);
-        TILE({{DATA_TYPE}}, M0, N0, rhs_tile);
-)_"
-        // Assuming un-collapsed window
+        code +=
+R"_(
+    TILE({{DATA_TYPE}}, M0, N0, {{lhs}});
+)_";
+    }
+
+    if(is_rhs_input)
+    {
+        code +=
+R"_(
+    TILE({{DATA_TYPE}}, M0, N0, {{rhs}});
+)_";
+    }
+
+    code +=
+R"_(
+    {
+)_";
+
+    if(is_lhs_input)
+    {
+        code +=
 R"_(
         {{lhs}}_offset_first_element_in_bytes += g_ind_2 * {{lhs}}_stride_z;
+        T_LOAD({{DATA_TYPE}}, {{lhs_m0}}, {{lhs_n0}}, BUFFER, {{lhs}}, {{lhs_start_ind_0}}, {{lhs_start_ind_1}}, 1, {{lhs}}_stride_y, {{lhs}});
+)_";
+    }
+
+    if(is_rhs_input)
+    {
+        code +=
+R"_(
         {{rhs}}_offset_first_element_in_bytes += g_ind_2 * {{rhs}}_stride_z;
-
-        T_LOAD({{DATA_TYPE}}, M0, N0, BUFFER, {{lhs}}, g_ind_0, g_ind_1, 1, {{lhs}}_stride_y, lhs_tile);
-        T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{rhs}}, {{rhs_start_ind_0}}, {{rhs_start_ind_1}}, 1, {{rhs}}_stride_y, rhs_tile);
-)_";
-        if(is_broadcast)
-        {
-            code +=
-R"_(
-        T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
-)_";
-        }
-        else
-        {
-            code +=
-R"_(
-        T_ELTWISE_{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, lhs_tile, rhs_tile, {{dst}});
-)_";
-        }
-    code +=
-    // Calculate the destination indirect Y
-R"_(
-    LOOP_UNROLLING(int, i, 0, 1, M0,
-    {
-        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{out}}_w * {{out}}_h) - 1);
-        g_dst_indirect_y[i].v += g_ind_2 * (int)({{out}}_w * {{out}}_h);
-    })
-    }
-    //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
+        T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{rhs}}, {{rhs_start_ind_0}}, {{rhs_start_ind_1}}, 1, {{rhs}}_stride_y, {{rhs}});
 )_";
     }
 
-    else // non-root
+    if(is_broadcast)
     {
-        code =
-R"_(
-    //------------------ START KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
-)_"
-    // IN_0/Out(Accumulator)   {{acc}}
-    // IN_1(Operand)        {{operand}}
-    // acc = operand + acc (mix-precision, broadcast, boundary aware)
-R"_(
-    {
-        TILE(DATA_TYPE, M0, N0, operand_tile);
-        T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{operand}}, {{rhs_start_ind_0}}, {{rhs_start_ind_1}}, 1, {{operand}}_stride_y, operand_tile);
+        code +=
+            R"_(
+        T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, {{lhs}}, {{rhs}}, {{dst}});
 )_";
+    }
+    else
+    {
+        code +=
+            R"_(
+        T_ELTWISE_{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, {{lhs}}, {{rhs}}, {{dst}});
+)_";
+    }
 
-        if(is_broadcast)
-        {
-            code +=
+    if(is_root)
+    {
+        // Calculate the destination indirect Y
+        code +=
 R"_(
-        T_ELTWISE_BROADCAST_{{ELTWISE_OP}}_X({{DATA_TYPE}}, M0, N0, {{acc}}, operand_tile, {{acc}});
-)_";
-        }
-        else
+        LOOP_UNROLLING(int, i, 0, 1, M0,
         {
-            code +=
-R"_(
-        T_ELTWISE_{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, {{acc}}, operand_tile, {{acc}});
+            g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{arg_dst}}_w * {{arg_dst}}_h) - 1);
+            g_dst_indirect_y[i].v += g_ind_2 * (int)({{arg_dst}}_w * {{arg_dst}}_h);
+        })
 )_";
-        }
+    }
+
     code +=
 R"_(
     }
     //------------------ END KERNEL {{meta_kernel_id}} ELTWISE_OP ---------------------
 )_";
-    }
 
     return code;
 }
@@ -160,62 +160,38 @@ R"_(
 void ClTemplateElementwiseBinary::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
     vtable.declare_variable(
+        comp_group,
         _lhs,
         GpuKernelArgumentInfo(common_tensor_type),
-        comp_group.is_intermediate_tensor(_lhs),
         "lhs");
 
     vtable.declare_variable(
+        comp_group,
         _rhs,
         GpuKernelArgumentInfo(common_tensor_type),
-        comp_group.is_intermediate_tensor(_rhs),
         "rhs");
 
     vtable.declare_variable(
+        comp_group,
         _dst,
         GpuKernelArgumentInfo(common_tensor_type),
-        comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
 
 TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
     TagLUT             lut{};
-    const ITensorInfo *accumulator = _lhs;
-    const ITensorInfo *operand     = _rhs;
 
     // Local build options
     lut["meta_kernel_id"] = id();
     lut["DATA_TYPE"]      = get_cl_type_from_data_type(_lhs->data_type());
     // Arguments and global shared variables
-    const bool is_root = (comp_group.get_root_component()->id() == this->id());
-    if(is_root)
-    {
-        lut["lhs"] = vtable.get_variable(_lhs);
-        lut["rhs"] = vtable.get_variable(_rhs);
-        lut["dst"] = vtable.get_variable(_dst);
-        lut["out"] = vtable.get_variable(comp_group.get_any_dst_tensor());
-    }
-    else
-    {
-        // Determine which tensor is the accumulator
-        if(comp_group.is_intermediate_tensor(_lhs))
-        {
-            accumulator = _lhs;
-            operand     = _rhs;
-        }
-        else if(comp_group.is_intermediate_tensor(_rhs))
-        {
-            accumulator = _rhs;
-            operand     = _lhs;
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR("Invalid elementwise component linking");
-        }
-        lut["acc"]     = vtable.get_variable(accumulator);
-        lut["operand"] = vtable.get_variable(operand);
-    }
+
+    lut["lhs"] = vtable.get_variable(_lhs);
+    lut["rhs"] = vtable.get_variable(_rhs);
+    lut["dst"] = vtable.get_variable(_dst);
+    lut["arg_dst"] = vtable.get_variable(comp_group.get_any_dst_tensor());
+
     switch(_attributes.operation())
     {
         case Attributes::ElementwiseOp::ADD:
@@ -224,22 +200,65 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
         default:
             ARM_COMPUTE_ERROR("Arithmetic Operation not supported");
     }
-    ARM_COMPUTE_ERROR_ON_MSG(detail::have_different_dimensions(accumulator->tensor_shape(), _dst->tensor_shape(), 0), "Only the operand can be broadcast to match the accumulator's shape");
-    const bool is_broadcast = (operand->tensor_shape() != _dst->tensor_shape());
+
+    ARM_COMPUTE_ERROR_ON(
+        comp_group.is_intermediate_tensor(_lhs) &&
+        detail::have_different_dimensions(_lhs->tensor_shape(), _dst->tensor_shape(), 0));
+    ARM_COMPUTE_ERROR_ON(
+        comp_group.is_intermediate_tensor(_rhs) &&
+        detail::have_different_dimensions(_rhs->tensor_shape(), _dst->tensor_shape(), 0));
 
     // Set broadcast parameters
     // PRE: All tensors are broadcast-compatible
-    if(is_broadcast)
+    if(_lhs->tensor_shape() != _dst->tensor_shape())
     {
+        const auto is_broadcast_x = _lhs->dimension(0) == 1U && _dst->dimension(0) != 1U;
+        const auto is_broadcast_y = _lhs->dimension(1) == 1U && _dst->dimension(1) != 1U;
+        const auto is_broadcast_z = _lhs->dimension(2) == 1U && _dst->dimension(2) != 1U;
+
         // Note that n0 maps to input tensor dimension 0, m0 maps to input dimensions 1 and 2 because of our collapse strategy
-        if(operand->dimension(0) == 1U && operand->dimension(1) == 1U && operand->dimension(2) == 1U) // Broadcast in X, Y, Z: collapsed rhs win [M0xN0] = [1x1]
+        if(is_broadcast_x && is_broadcast_y && is_broadcast_z) // Broadcast in X, Y, Z: collapsed lhs win [M0xN0] = [1x1]
+        {
+            lut["lhs_m0"]          = "1";
+            lut["lhs_n0"]          = "1";
+            lut["lhs_start_ind_1"] = "0";
+            lut["lhs_start_ind_0"] = "0";
+        }
+        else if(is_broadcast_y && is_broadcast_z) // Broadcast in Y and Z: collapsed lhs win [M0xN0] = [1xN]
+        {
+            lut["lhs_m0"]          = "1";
+            lut["lhs_n0"]          = "N0";
+            lut["lhs_start_ind_1"] = "0";
+            lut["lhs_start_ind_0"] = "g_ind_0";
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Only support lhs broadcasting in all X, Y, Z dimensions, or just in Y and Z dimensions");
+        }
+    }
+    else
+    {
+        lut["lhs_m0"]          = "M0";
+        lut["lhs_n0"]          = "N0";
+        lut["lhs_start_ind_1"] = "g_ind_1";
+        lut["lhs_start_ind_0"] = "g_ind_0";
+    }
+
+    if(_rhs->tensor_shape() != _dst->tensor_shape())
+    {
+        const auto is_broadcast_x = _rhs->dimension(0) == 1U && _dst->dimension(0) != 1U;
+        const auto is_broadcast_y = _rhs->dimension(1) == 1U && _dst->dimension(1) != 1U;
+        const auto is_broadcast_z = _rhs->dimension(2) == 1U && _dst->dimension(2) != 1U;
+
+        // Note that n0 maps to input tensor dimension 0, m0 maps to input dimensions 1 and 2 because of our collapse strategy
+        if(is_broadcast_x && is_broadcast_y && is_broadcast_z) // Broadcast in X, Y, Z: collapsed rhs win [M0xN0] = [1x1]
         {
             lut["rhs_m0"]          = "1";
             lut["rhs_n0"]          = "1";
             lut["rhs_start_ind_1"] = "0";
             lut["rhs_start_ind_0"] = "0";
         }
-        else if(operand->dimension(1) == 1U && operand->dimension(2) == 1U) // Broadcast in Y and Z: collapsed rhs win [M0xN0] = [1xN]
+        else if(is_broadcast_y && is_broadcast_z) // Broadcast in Y and Z: collapsed rhs win [M0xN0] = [1xN]
         {
             lut["rhs_m0"]          = "1";
             lut["rhs_n0"]          = "N0";
@@ -258,6 +277,7 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
         lut["rhs_start_ind_1"] = "g_ind_1";
         lut["rhs_start_ind_0"] = "g_ind_0";
     }
+
     return lut;
 }
 

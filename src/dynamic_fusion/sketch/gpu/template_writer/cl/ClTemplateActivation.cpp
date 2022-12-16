@@ -67,14 +67,14 @@ std::string ClTemplateActivation::get_component_code(const ComponentGroup &comp_
 // IN(src)              {{src}}
 // OUT(dst, accum)      {{dst}}
 
-TILE({{DATA_TYPE}}, M0, N0, {{dst}});
+TILE({{DATA_TYPE}}, M0, N0, {{src}});
 TILE(uint, M0, 1, g_dst_indirect_y);
 {
     {{src}}_offset_first_element_in_bytes += g_ind_2 * {{src}}_stride_z;
 
-    T_LOAD({{DATA_TYPE}}, M0, N0, {{TENSOR_TYPE}}, {{src}}, g_ind_0, g_ind_1, 1, {{src}}_stride_y, {{dst}});
+    T_LOAD({{DATA_TYPE}}, M0, N0, {{TENSOR_TYPE}}, {{src}}, g_ind_0, g_ind_1, 1, {{src}}_stride_y, {{src}});
 
-    T_ACTIVATION({{DATA_TYPE}}, M0, N0, {{ACT}}, {{A_VAL}}, {{B_VAL}}, {{dst}}, {{dst}});
+    T_ACTIVATION({{DATA_TYPE}}, M0, N0, {{ACT}}, {{A_VAL}}, {{B_VAL}}, {{src}}, {{dst}});
 }
 
 LOOP_UNROLLING(int, i, 0, 1, M0,
@@ -91,7 +91,7 @@ LOOP_UNROLLING(int, i, 0, 1, M0,
 // IN/OUT(src, accum)   {{src}}
 
 {
-    T_ACTIVATION({{DATA_TYPE}}, M0, N0, {{ACT}}, {{A_VAL}}, {{B_VAL}}, {{src}}, {{src}});
+    T_ACTIVATION({{DATA_TYPE}}, M0, N0, {{ACT}}, {{A_VAL}}, {{B_VAL}}, {{src}}, {{dst}});
 }
 )_";
     }
@@ -104,15 +104,15 @@ LOOP_UNROLLING(int, i, 0, 1, M0,
 void ClTemplateActivation::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
     vtable.declare_variable(
+        comp_group,
         _src,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_src),
         "src");
 
     vtable.declare_variable(
+        comp_group,
         _dst,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
 

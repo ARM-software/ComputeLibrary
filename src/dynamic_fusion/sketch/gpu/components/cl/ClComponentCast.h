@@ -120,7 +120,7 @@ public:
     /** Get component type */
     GpuComponentType type() const override
     {
-        return GpuComponentType::Complex;
+        return GpuComponentType::Simple;
     }
 
 private:

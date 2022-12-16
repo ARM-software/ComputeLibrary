@@ -81,7 +81,6 @@ std::string ClTemplateDepthwiseConv2d::get_component_code(const ComponentGroup &
     code += R"_(
 // OUT(dst, accum)      {{dst}}
 
-TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
 TILE(uint, M0, 1, g_dst_indirect_y);
 
 {
@@ -206,9 +205,9 @@ void ClTemplateDepthwiseConv2d::declare_variables(GpuKernelVariableTable &vtable
                                                        GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
 
     vtable.declare_variable(
+        comp_group,
         _src,
         GpuKernelArgumentInfo(input_type),
-        comp_group.is_intermediate_tensor(_src),
         "src");
 
     const GpuKernelArgumentInfo::Type weight_type = _settings.export_weights_to_cl_image() ?
@@ -216,23 +215,23 @@ void ClTemplateDepthwiseConv2d::declare_variables(GpuKernelVariableTable &vtable
                                                         GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
 
     vtable.declare_variable(
+        comp_group,
         _weight,
         GpuKernelArgumentInfo(weight_type),
-        comp_group.is_intermediate_tensor(_weight),
         "weight");
 
     if(_bias != nullptr && _bias->has_valid_id()) // optional bias
     {
         vtable.declare_variable(
+            comp_group,
             _bias,
             GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector),
-            comp_group.is_intermediate_tensor(_bias),
             "bias");
     }
     vtable.declare_variable(
+        comp_group,
         _dst,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
 

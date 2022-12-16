@@ -191,6 +191,26 @@ std::string ClTemplateWriter::write_code()
     code += write_global_section();
     code += "    //------------------ END KERNEL_BUILDER_COORDINATE ---------------------\n";
 
+    {
+        const auto tiles = _components.get_tiles();
+        std::stringstream tiles_ss;
+
+        tiles_ss << "    //------------------ START TILE DECLARATION ---------------------\n";
+
+        for(auto tile : tiles)
+        {
+            const auto var = _vtable.get_variable(tile);
+            const auto data_type = get_cl_type_from_data_type(tile->data_type());
+            const auto var_name = var.uniq_name;
+
+            tiles_ss << "    TILE(" << data_type << ", M0, N0, " << var_name << ");\n";
+        }
+
+        tiles_ss << "    //------------------ END TILE DECLARATION ---------------------\n";
+
+        code += tiles_ss.str();
+    }
+
     for(const auto &component_code : component_codes)
     {
         code += component_code;
