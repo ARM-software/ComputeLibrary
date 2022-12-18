@@ -43,6 +43,7 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -3554,6 +3555,35 @@ inline std::string to_string(const experimental::dynamic_fusion::ResizeAttribute
 {
     std::stringstream str;
     str << resize_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  softmax_attr arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
+{
+    os << "SofmtaxAttributes="
+       << "["
+       << "Beta=" << softmax_attr.beta() << ", "
+       << "Is Log Softmax=" << softmax_attr.is_log_softmax() << ", "
+       << "Axis=" << softmax_attr.axis() << "]";
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type.
+ *
+ * @param[in] softmax_attr arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
+{
+    std::stringstream str;
+    str << softmax_attr;
     return str.str();
 }
 
