@@ -24,10 +24,8 @@
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 
 #include "arm_compute/core/TensorInfo.h"
-#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/CpuCastKernel.h"
 #include "src/cpu/kernels/cast/list.h"
-#include "support/SaturateCast.h"
 
 namespace arm_compute
 {
@@ -38,9 +36,9 @@ void neon_fp32_to_bfloat16_cast(const ITensor *_src, ITensor *_dst, const Thread
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-    const int  window_step_x  = 16;
+    const auto    window_start_x = static_cast<int>(window.x().start());
+    const auto    window_end_x   = static_cast<int>(window.x().end());
+    constexpr int window_step_x  = 8;
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _dst);
     ARM_COMPUTE_ERROR_ON(_src == _dst);
@@ -52,25 +50,23 @@ void neon_fp32_to_bfloat16_cast(const ITensor *_src, ITensor *_dst, const Thread
 
     Iterator src(_src, win);
     Iterator dst(_dst, win);
-
     /* Down-conversion F32 -> BFLOAT16 */
     execute_window_loop(win, [&](const Coordinates &)
     {
-        const auto src_ptr = reinterpret_cast<const float *>(src.ptr());
-        const auto dst_ptr = reinterpret_cast<bfloat16 *>(dst.ptr());
-
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        const auto src_ptr     = reinterpret_cast<const float *>(src.ptr());
+        const auto dst_ptr     = reinterpret_cast<bfloat16_t *>(dst.ptr());
+        int        x           = window_start_x;
+        const int  right_bound = (window_end_x - window_step_x);
+        for(; x <= right_bound; x += window_step_x)
         {
-            wrapper::vcvt_bf16_f32(reinterpret_cast<float *>(src.ptr()),
-                                   reinterpret_cast<uint16_t *>(dst.ptr()));
-            wrapper::vcvt_bf16_f32(reinterpret_cast<float *>(src.ptr()) + 8,
-                                   reinterpret_cast<uint16_t *>(dst.ptr()) + 8);
+            const auto vbf16_0 = vcombine_bf16(
+                                     vcvt_bf16_f32(vld1q_f32(src_ptr + x)),
+                                     vcvt_bf16_f32(vld1q_f32(src_ptr + x + 4)));
+            vst1q_bf16(dst_ptr + x, vbf16_0);
         }
-
         for(; x < window_end_x; ++x)
         {
-            *(dst_ptr + x) = *(src_ptr + x);
+            *(reinterpret_cast<bfloat16 *>(dst.ptr()) + x) = *(src_ptr + x);
         }
     },
     src, dst);
@@ -81,9 +77,9 @@ void neon_bfloat16_to_fp32_cast(const ITensor *_src, ITensor *_dst, const Thread
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(_policy);
 
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
-    const int  window_step_x  = 16;
+    const auto    window_start_x = static_cast<int>(window.x().start());
+    const auto    window_end_x   = static_cast<int>(window.x().end());
+    constexpr int window_step_x  = 8;
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _dst);
     ARM_COMPUTE_ERROR_ON(_src == _dst);
@@ -95,48 +91,26 @@ void neon_bfloat16_to_fp32_cast(const ITensor *_src, ITensor *_dst, const Thread
 
     Iterator src(_src, win);
     Iterator dst(_dst, win);
-    switch(_dst->info()->data_type())
+    /* Up-conversion BFLOAT16 -> F32 */
+    execute_window_loop(win, [&](const Coordinates &)
     {
-        case DataType::F32:
+        const auto src_ptr = reinterpret_cast<const bfloat16_t *>(src.ptr());
+        const auto dst_ptr = reinterpret_cast<float *>(dst.ptr());
+
+        int       x = window_start_x;
+        const int right_bound(window_end_x - window_step_x);
+        for(; x <= right_bound; x += window_step_x)
         {
-            /* Up-conversion BFLOAT16 -> F32 */
-            execute_window_loop(win, [&](const Coordinates &)
-            {
-                const auto src_ptr = reinterpret_cast<const bfloat16 *>(src.ptr());
-                const auto dst_ptr = reinterpret_cast<float *>(dst.ptr());
-
-                int x = window_start_x;
-                for(; x <= (window_end_x - window_step_x); x += window_step_x)
-                {
-                    const uint16x8x2_t texels =
-                    {
-                        {
-                            vld1q_u16(reinterpret_cast<uint16_t *>(src.ptr())),
-                            vld1q_u16(reinterpret_cast<uint16_t *>(src.ptr()) + 8)
-                        }
-                    };
-
-                    vst1q_f32(reinterpret_cast<float *>(dst.ptr()),
-                              vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_low_u16(texels.val[0])), 16)));
-                    vst1q_f32(reinterpret_cast<float *>(dst.ptr()) + 4,
-                              vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_high_u16(texels.val[0])), 16)));
-                    vst1q_f32(reinterpret_cast<float *>(dst.ptr()) + 8,
-                              vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_low_u16(texels.val[1])), 16)));
-                    vst1q_f32(reinterpret_cast<float *>(dst.ptr()) + 12,
-                              vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_high_u16(texels.val[1])), 16)));
-                }
-
-                for(; x < window_end_x; ++x)
-                {
-                    *(dst_ptr + x) = float(*(src_ptr + x));
-                }
-            },
-            src, dst);
-            break;
+            const bfloat16x8_t vinput = vld1q_bf16(src_ptr + x);
+            vst1q_f32(dst_ptr + x, vcvt_f32_bf16(vget_low_bf16(vinput)));
+            vst1q_f32(dst_ptr + x + 4, vcvt_f32_bf16(vget_high_bf16(vinput)));
         }
-        default:
-            ARM_COMPUTE_ERROR("dst data type unsupported");
-    }
+        for(; x < window_end_x; ++x)
+        {
+            *(dst_ptr + x) = float(*(reinterpret_cast<const bfloat16 *>(src_ptr) + x));
+        }
+    },
+    src, dst);
 }
 
 } // namespace cpu
