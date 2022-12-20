@@ -37,7 +37,8 @@ namespace kernels
 class CpuSubKernel : public ICpuKernel<CpuSubKernel>
 {
 private:
-    using SubKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    using SubKernelPtr                           = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    using CpuSubKernelDataTypeISASelectorDataPtr = CpuAddKernelDataTypeISASelectorDataPtr;
 
 public:
     CpuSubKernel() = default;
@@ -70,7 +71,7 @@ public:
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Return minimum workload size of the relevant kernel
@@ -84,9 +85,9 @@ public:
 
     struct SubKernel
     {
-        const char                  *name;
-        const DataTypeISASelectorPtr is_selected;
-        SubKernelPtr                 ukernel;
+        const char                                  *name;
+        const CpuSubKernelDataTypeISASelectorDataPtr is_selected;
+        SubKernelPtr                                 ukernel;
     };
 
     static const std::vector<SubKernel> &get_available_kernels();
