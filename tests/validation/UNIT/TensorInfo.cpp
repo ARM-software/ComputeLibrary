@@ -184,8 +184,17 @@ TEST_CASE(SymmPerChannelQuantizationInfo, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(info.quantization_info().offset().empty(), framework::LogLevel::ERRORS);
 }
 
-TEST_SUITE_END() // TensorInfoValidation
-TEST_SUITE_END()
+/** Validates lock paddings flag*/
+TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
+{
+    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    tensor_info.set_lock_paddings(true);
+
+    // Now lock padding is set to true, therefore the extend padding would fail
+    ARM_COMPUTE_EXPECT_THROW(tensor_info.extend_padding(PaddingSize(2, 1)), framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END() // TensorInfo
+TEST_SUITE_END() // UNIT
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

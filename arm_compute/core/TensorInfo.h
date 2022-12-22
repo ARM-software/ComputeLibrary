@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -201,6 +201,8 @@ public:
     ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo &reset_padding() override;
     bool         auto_padding() override;
+    ITensorInfo &set_lock_paddings(bool flag) override;
+    bool lock_paddings() const override;
     bool extend_padding(const PaddingSize &padding) override;
     size_t dimension(size_t index) const override
     {
@@ -330,6 +332,7 @@ private:
     DataLayout       _data_layout;
     bool             _are_values_constant;
     ITensorInfo::Id  _id;
+    bool             _lock_paddings;
 };
 
 /** Check whether two tensor info are equal.
