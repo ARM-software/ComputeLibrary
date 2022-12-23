@@ -94,7 +94,7 @@ public:
 private:
     const ITensorInfo *_src;
     const ITensorInfo *_dst;
-    const Attributes   _attributes;
+    Attributes         _attributes;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -74,6 +74,7 @@ Status GpuElementwiseBinaryCommon::is_supported_op(const GpuWorkloadContext     
     {
         const auto cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
+
         // Validate ElementwiseBinary Component
         {
             ArgumentPack<ITensorInfo> arguments;
@@ -149,8 +150,7 @@ void GpuElementwiseBinaryCommon::create_op(GpuWorkloadSketch                    
 
     if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
-        const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
-        ARM_COMPUTE_ERROR_ON(cl_compile_ctx == nullptr);
+        ARM_COMPUTE_ERROR_ON_NULLPTR(sketch_ctx->cl_compile_context());
 
         // Add ElementwiseBinary Component
         {

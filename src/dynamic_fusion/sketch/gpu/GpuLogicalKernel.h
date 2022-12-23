@@ -65,7 +65,6 @@ public:
     GpuKernelSourceCode write_kernel_code();
 
 private:
-    GpuComponentServices                             *_services;
     GpuKernelComponentGroup                           _comp_group{};
     std::vector<std::unique_ptr<IGpuKernelComponent>> _store_components{};
 };

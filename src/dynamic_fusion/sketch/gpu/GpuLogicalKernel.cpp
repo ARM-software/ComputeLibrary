@@ -38,8 +38,9 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, const GpuKernelComponentGroup &components)
-    : _services{ services }, _comp_group{ components }, _store_components{}
+    : _comp_group{ components }, _store_components{}
 {
+    ARM_COMPUTE_UNUSED(services);
 }
 
 GpuKernelSourceCode GpuLogicalKernel::write_kernel_code()

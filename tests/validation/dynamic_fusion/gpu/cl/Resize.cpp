@@ -88,8 +88,6 @@ const auto default_output_shape = TensorShape{ 4, 6, 3, 2 };
 
 constexpr auto default_data_type            = DataType::U8;
 constexpr auto default_data_layout          = DataLayout::NHWC;
-constexpr auto default_interpolation_policy = InterpolationPolicy::NEAREST_NEIGHBOR;
-constexpr bool default_use_padding          = false;
 
 TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 {
