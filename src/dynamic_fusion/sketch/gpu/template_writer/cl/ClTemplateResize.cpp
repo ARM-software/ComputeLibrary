@@ -66,15 +66,15 @@ TILE(uint, 1, 1, g_dst_indirect_y);
         if(_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
         {
             code += R"_(
-    float xi_f = (g_ind_1 * SCALE_X);
-    float yi_f = (yo * SCALE_Y);
+    float xi_f = (g_ind_1 * {{SCALE_X}});
+    float yi_f = (yo * {{SCALE_Y}});
 )_";
         }
         else
         {
             code += R"_(
-    float xi_f = ((g_ind_1 + 0.5f) * SCALE_X);
-    float yi_f = ((yo + 0.5f) * SCALE_Y);
+    float xi_f = ((g_ind_1 + 0.5f) * {{SCALE_X}});
+    float yi_f = ((yo + 0.5f) * {{SCALE_Y}});
 )_";
         }
 
@@ -98,15 +98,15 @@ TILE(uint, 1, 1, g_dst_indirect_y);
         if(_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
         {
             code += R"_(
-    float xi_f = (g_ind_1 * SCALE_X);
-    float yi_f = (yo * SCALE_Y);
+    float xi_f = (g_ind_1 * {{SCALE_X}});
+    float yi_f = (yo * {{SCALE_Y}});
 )_";
         }
         else
         {
             code += R"_(
-    float xi_f = ((g_ind_1 + 0.5f) * SCALE_X - 0.5f);
-    float yi_f = ((yo + 0.5f) * SCALE_Y - 0.5f);
+    float xi_f = ((g_ind_1 + 0.5f) * {{SCALE_X}} - 0.5f);
+    float yi_f = ((yo + 0.5f) * {{SCALE_Y}} - 0.5f);
 )_";
         }
 
@@ -150,37 +150,16 @@ TILE(uint, 1, 1, g_dst_indirect_y);
         else
         {
             code += R"_(
-    TILE(float, 1, N0, out_f);
-    TILE(float, 1, N0, in00_f);
-    TILE(float, 1, N0, in01_f);
-    TILE(float, 1, N0, in10_f);
-    TILE(float, 1, N0, in11_f);
-
     const float a  = (xi_f - (float)xi);
     const float b  = (1.f - a);
     const float a1 = (yi_f - (float)yi);
     const float b1 = (1.f - a1);
-)_"
-                    // Dequantize
-                    R"_(
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        in00_f[0].s[n0] = ((float)in00[0].s[n0] - (float){{OFFSET}}) * (float){{SCALE}};
-        in01_f[0].s[n0] = ((float)in01[0].s[n0] - (float){{OFFSET}}) * (float){{SCALE}};
-        in10_f[0].s[n0] = ((float)in10[0].s[n0] - (float){{OFFSET}}) * (float){{SCALE}};
-        in11_f[0].s[n0] = ((float)in11[0].s[n0] - (float){{OFFSET}}) * (float){{SCALE}};
-    })
-)_"
-                    // Calculate the output in the floating-point domain
-                    R"_(
-    out_f[0].v = ((in00_f[0].v * b * b1) + (in01_f[0].v * a * b1) + (in10_f[0].v * b * a1) + (in11_f[0].v * a * a1));
-)_"
-                    // Quantize
-                    R"_(
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        {{dst}}[0].s[n0] = CONVERT_SAT(out_f[0].s[n0] / (float){{SCALE}} + (float){{OFFSET}}, {{DST_DATA_TYPE}});
-    })
+
+    {{dst}}[0].v = CONVERT_SAT(
+        (CONVERT(in00[0].v, VEC_DATA_TYPE(float, N0)) * b * b1) + 
+        (CONVERT(in01[0].v, VEC_DATA_TYPE(float, N0)) * a * b1) +
+        (CONVERT(in10[0].v, VEC_DATA_TYPE(float, N0)) * b * a1) + 
+        (CONVERT(in11[0].v, VEC_DATA_TYPE(float, N0)) * a * a1), VEC_DATA_TYPE({{DST_DATA_TYPE}}, N0));
 )_";
         }
     }
@@ -231,20 +210,11 @@ TagLUT ClTemplateResize::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["DST_DATA_TYPE"]   = get_cl_type_from_data_type(_dst->data_type());
     lut["CONSTANT_VALUE"]  = string_from_pixel_value(0, _src->data_type());
 
-    const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(_src->data_type())
-                                    && _attributes.interpolation_policy() == InterpolationPolicy::BILINEAR;
+    const float scale_x = scale_utils::calculate_resize_ratio(_src->dimension(1), _dst->dimension(1), _attributes.align_corners());
+    const float scale_y = scale_utils::calculate_resize_ratio(_src->dimension(2), _dst->dimension(2), _attributes.align_corners());
 
-    if(is_qasymm_bilinear)
-    {
-        const UniformQuantizationInfo qinfo = _src->quantization_info().uniform();
-        lut["SCALE"]                        = support::cpp11::to_string(qinfo.scale);
-        lut["OFFSET"]                       = support::cpp11::to_string(qinfo.offset);
-    }
-    else
-    {
-        lut["SCALE"]  = support::cpp11::to_string(1);
-        lut["OFFSET"] = support::cpp11::to_string(0);
-    }
+    lut["SCALE_X"] = float_to_string_with_full_precision(scale_x);
+    lut["SCALE_Y"] = float_to_string_with_full_precision(scale_y);
 
     return lut;
 }
@@ -256,16 +226,11 @@ CLBuildOptions ClTemplateResize::get_build_options(const IGpuTemplateComponentWr
     const unsigned int m0          = root_window.y().step();
     const unsigned int partial_n0  = _dst->dimension(0) % n0;
 
-    const float scale_x = scale_utils::calculate_resize_ratio(_src->dimension(1), _dst->dimension(1), _attributes.align_corners());
-    const float scale_y = scale_utils::calculate_resize_ratio(_src->dimension(2), _dst->dimension(2), _attributes.align_corners());
-
     CLBuildOptions build_opts;
 
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_n0));
-    build_opts.add_option("-DSCALE_X=" + float_to_string_with_full_precision(scale_x));
-    build_opts.add_option("-DSCALE_Y=" + float_to_string_with_full_precision(scale_y));
 
     return build_opts;
 }

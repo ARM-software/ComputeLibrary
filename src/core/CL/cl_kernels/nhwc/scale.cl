@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -218,34 +218,17 @@ __kernel void scale_bilinear_nhwc(
     // Calculate the output
     out[0].v = ((in00[0].v * b * b1) + (in01[0].v * a * b1) + (in10[0].v * b * a1) + (in11[0].v * a * a1));
 #else  // defined(IS_FLOATING_POINT)
-    TILE(float, 1, N0, out_f);
-    TILE(float, 1, N0, in00_f);
-    TILE(float, 1, N0, in01_f);
-    TILE(float, 1, N0, in10_f);
-    TILE(float, 1, N0, in11_f);
 
     const float a  = (xi_f - (float)xi);
     const float b  = (1.f - a);
     const float a1 = (yi_f - (float)yi);
     const float b1 = (1.f - a1);
 
-    // Dequantize
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        in00_f[0].s[n0] = ((float)in00[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in01_f[0].s[n0] = ((float)in01[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in10_f[0].s[n0] = ((float)in10[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in11_f[0].s[n0] = ((float)in11[0].s[n0] - (float)OFFSET) * (float)SCALE;
-    })
-
-    // Calculate the output in the floating-point domain
-    out_f[0].v = ((in00_f[0].v * b * b1) + (in01_f[0].v * a * b1) + (in10_f[0].v * b * a1) + (in11_f[0].v * a * a1));
-
-    // Quantize
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        out[0].s[n0] = CONVERT_SAT(out_f[0].s[n0] / (float)SCALE + (float)OFFSET, DST_DATA_TYPE);
-    })
+    out[0].v = CONVERT_SAT((CONVERT(in00[0].v, VEC_DATA_TYPE(float, N0)) * b * b1) + 
+                   (CONVERT(in01[0].v, VEC_DATA_TYPE(float, N0)) * a * b1) + 
+                   (CONVERT(in10[0].v, VEC_DATA_TYPE(float, N0)) * b * a1) + 
+                   (CONVERT(in11[0].v, VEC_DATA_TYPE(float, N0)) * a * a1), 
+                VEC_DATA_TYPE(DST_DATA_TYPE, N0));
 #endif // defined(IS_FLOATING_POINT)
 
     TILE(uint, 1, 1, dst_indirect_y);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,7 +102,6 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
     float scale_x = 0.f;
     float scale_y = 0.f;
     std::tie(scale_x, scale_y) = calculate_scale_factors(src, dst, _data_layout, info.align_corners);
-    const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     auto interpolation_policy_to_use = info.interpolation_policy;
@@ -141,17 +140,6 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
         build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
         build_opts.add_option_if(is_data_type_float(src->data_type()), "-DIS_FLOATING_POINT");
         build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
-        if(is_qasymm_bilinear)
-        {
-            const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
-            build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
-            build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
-        }
-        else
-        {
-            build_opts.add_option("-DSCALE=" + support::cpp11::to_string(1));
-            build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(0));
-        }
     }
     else if(_data_layout == DataLayout::NCHW)
     {
@@ -169,6 +157,8 @@ void ClScaleKernel::configure(const CLCompileContext &compile_context, ITensorIn
         build_opts.add_option_if(info.border_mode == BorderMode::CONSTANT, "-DBORDER_MODE_CONSTANT");
         build_opts.add_option_if(info.align_corners, "-DALIGN_CORNERS");
         build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+
+        const bool is_qasymm_bilinear = is_data_type_quantized_asymmetric(src->data_type()) && info.interpolation_policy == InterpolationPolicy::BILINEAR;
         if(is_qasymm_bilinear)
         {
             const UniformQuantizationInfo qinfo = src->quantization_info().uniform();
