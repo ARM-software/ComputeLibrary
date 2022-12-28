@@ -130,8 +130,13 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
     Window win;
     output_shape.collapse(2U, 1U); // Collapse width and height into single dimension
 
+    const unsigned int n0               = adjust_vec_size(16 / output->element_size(), output_channels);
+    const unsigned int m0               = 1;
+    const unsigned int k0               = adjust_vec_size(16 / input->element_size(), input_channels);
+    const unsigned int partial_store_n0 = output_channels % n0;
+
     // Create window and update padding
-    win = calculate_max_window(output_shape, Steps(1, 1));
+    win = calculate_max_window(output_shape, Steps(n0, m0));
     ICLKernel::configure_internal(win);
 
     const std::string kernel_name = "transposed_convolution_nhwc";
@@ -139,11 +144,6 @@ void ClTransposedConvolutionKernel::configure(const CLCompileContext &compile_co
 
     const DataType    input_data_type = input->data_type();
     const PaddingInfo strides         = deconv_info.stride();
-
-    const unsigned int n0               = 1;
-    const unsigned int m0               = 1;
-    const unsigned int k0               = adjust_vec_size(16 / input->element_size(), input_channels);
-    const unsigned int partial_store_n0 = output_channels % n0;
 
     if(biases != nullptr)
     {

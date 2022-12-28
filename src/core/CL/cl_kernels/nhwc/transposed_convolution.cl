@@ -52,8 +52,8 @@
  * @note If bias exists, the compile time argument -DHAS_BIAS should be passed
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1
- *  - N0 = 1
- *  - K0 = 2, 3, 4, 8, 16
+ *  - N0 = 1, 2, 3, 4, 8, 16
+ *  - K0 = 1, 2, 3, 4, 8, 16
  *
  * @note In case of QASYMM8/QASYMM8_SIGNED, the following extra information must be passed at compile time:
  * - -DIS_QUANTIZED
