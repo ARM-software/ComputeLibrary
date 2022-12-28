@@ -27,18 +27,17 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/helpers/AutoConfiguration.h"
 #include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
 #include "src/gpu/cl/kernels/ClIndirectConv2dKernel.h"
-#include "src/runtime/heuristics/direct_conv/ClDirectConvKernelConfig.h"
-#include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/indirect_conv/ClIndirectConvKernelConfig.h"
+#include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 
 #include "src/common/utils/Log.h"
 
-using namespace arm_compute::cl_direct_conv;
+using namespace arm_compute::cl_indirect_conv;
 
 namespace arm_compute
 {
@@ -48,12 +47,12 @@ using namespace arm_compute::experimental;
 
 namespace
 {
-DirectConvComputeKernelInfo config_direct_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo config_indirect_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
 {
     // Get GPU target
     GPUTarget gpu_target = CLScheduler::get().target();
 
-    std::unique_ptr<IClDirectConvKernelConfig> t = ClDirectConvKernelConfigurationFactory::create(gpu_target);
+    std::unique_ptr<IClIndirectConvKernelConfig> t = ClIndirectConvKernelConfigurationFactory::create(gpu_target);
 
     return t->configure(src, weights, conv_info);
 }
@@ -67,7 +66,7 @@ void ClIndirectConv2d::configure(const CLCompileContext &compile_context, ITenso
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, conv_info, act_info);
 
     // Reuse the direct convolution descriptor
-    const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, weights, conv_info);
+    const DirectConvComputeKernelInfo desc = config_indirect_convolution_nhwc(src, weights, conv_info);
 
     // Configure indirect convolution kernels
     auto k0 = std::make_unique<kernels::ClIndirectConv2dAddressPrecalculationKernel>();
@@ -94,7 +93,7 @@ Status ClIndirectConv2d::validate(const ITensorInfo *src, const ITensorInfo *wei
                                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     // Initialize the direct convolution descriptor
-    const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, weights, conv_info);
+    const DirectConvComputeKernelInfo desc = config_indirect_convolution_nhwc(src, weights, conv_info);
 
     TensorShape ind_buffer_shape = misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(),
                                                                                          src->data_layout(),

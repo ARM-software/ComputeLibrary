@@ -38,6 +38,7 @@ namespace opencl
  *
  * -# @ref opencl::ClGemmConv2d
  * -# @ref opencl::ClWinogradConv2d
+ * -# @ref opencl::ClIndirectConv2d
  * -# @ref opencl::ClDirectConv2d
  * -# @ref CLFFTConvolutionLayer
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,6 +87,7 @@ void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLT
     {
         case ConvolutionMethod::WINOGRAD:
         case ConvolutionMethod::DIRECT:
+        case ConvolutionMethod::INDIRECT:
         case ConvolutionMethod::GEMM:
         {
             auto f = std::make_unique<opencl::ClConv2d>();
@@ -138,6 +139,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     {
         case ConvolutionMethod::WINOGRAD:
         case ConvolutionMethod::DIRECT:
+        case ConvolutionMethod::INDIRECT:
         case ConvolutionMethod::GEMM:
         {
             ARM_COMPUTE_RETURN_ON_ERROR(opencl::ClConv2d::validate(input, weights, biases, output, conv2d_info, weights_info));

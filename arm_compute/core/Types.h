@@ -136,6 +136,7 @@ enum class ConvolutionMethod
     GEMM,        /**< Convolution using GEMM */
     GEMM_CONV2D, /**< Direct 2D GEMM convolution */
     DIRECT,      /**< Direct convolution */
+    INDIRECT,    /**< Indirect convolution */
     WINOGRAD,    /**< Convolution using Winograd */
     FFT          /**< Convolution using FFT */
 };
