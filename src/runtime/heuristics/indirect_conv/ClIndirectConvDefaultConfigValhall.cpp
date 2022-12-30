@@ -157,5 +157,5 @@ DirectConvComputeKernelInfo ClIndirectConvDefaultConfigValhall::configure_G77_f1
 
     return desc;
 }
-} // namespace opencl
+} // namespace cl_indirect_conv
 } // namespace arm_compute

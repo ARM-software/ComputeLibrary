@@ -21,41 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG
+#ifndef SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG
+#define SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG
 
-#include "src/runtime/heuristics/indirect_conv/ClIndirectConvDefaultConfigValhall.h"
-#include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
+#include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigBifrost.h"
+#include "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigValhall.h"
+#include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-namespace cl_indirect_conv
+namespace cl_dwc
 {
-/** ClIndirectConvolution factory class */
-class ClIndirectConvKernelConfigurationFactory final
+/** ClDWCNativeKernelConfigurationFactory factory class */
+class ClDWCNativeKernelConfigurationFactory final
 {
 public:
-    /** Static method to call the ClIndirectConvolution kernel configuration class accordingly with the GPU target
+    /** Static method to call the ClDWCNative kernel configuration class accordingly with the GPU target
      *
      * @param[in] gpu GPU target
      *
-     * @return IClIndirectConvKernelConfig
+     * @return IClDWCNativeKernelConfig
      */
-    static std::unique_ptr<IClIndirectConvKernelConfig> create(GPUTarget gpu)
+    static std::unique_ptr<IClDWCNativeKernelConfig> create(GPUTarget gpu)
     {
         switch(get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
+                // The heuristic for Midgard is the same as the one used for Arm Mali-G71
+                return std::make_unique<ClDWCNativeDefaultConfigBifrost>(GPUTarget::G71);
             case GPUTarget::BIFROST:
+                return std::make_unique<ClDWCNativeDefaultConfigBifrost>(gpu);
             case GPUTarget::VALHALL:
-                return std::make_unique<ClIndirectConvDefaultConfigValhall>(gpu);
+                return std::make_unique<ClDWCNativeDefaultConfigValhall>(gpu);
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }
     }
 };
-} // namespace cl_indirect_conv
+} // namespace cl_dwc
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVKERNELCONFIG */
+#endif /* SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEKERNELCONFIG */

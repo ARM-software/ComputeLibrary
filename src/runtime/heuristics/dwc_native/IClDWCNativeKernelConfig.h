@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_ICLINDIRECTCONVKERNELCONFIG
-#define SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_ICLINDIRECTCONVKERNELCONFIG
+#ifndef SRC_RUNTIME_HEURISTICS_DWC_NATIVE_ICLDWCNATIVEKERNELCONFIG
+#define SRC_RUNTIME_HEURISTICS_DWC_NATIVE_ICLDWCNATIVEKERNELCONFIG
 
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -31,30 +31,33 @@
 
 namespace arm_compute
 {
-namespace cl_indirect_conv
+namespace cl_dwc
 {
-/** Basic container for the OpenCL indirect convolution configuration functions */
+/** Basic container for the OpenCL depthwise convolution configuration functions */
 template <class T>
-class ClIndirectConvConfigArray
+class ClDWCNativeConfigArray
 {
 public:
     /** Alias for F32 index */
     static constexpr size_t DT_F32 = 0;
     /** Alias for F16 index */
     static constexpr size_t DT_F16 = 1;
+    /** Alias for Int8 index */
+    static constexpr size_t DT_INT8 = 2;
 
     /** Constructor
      *
-     * @param[in] func_f32 Function to call for indirect convolution F32
-     * @param[in] func_f16 Function to call for indirect convolution F16
+     * @param[in] func_f32  Function to call for depthwise convolution F32
+     * @param[in] func_f16  Function to call for depthwise convolution F16
+     * @param[in] func_int8 Function to call for depthwise convolution Int8 (QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL)
      *
      */
-    ClIndirectConvConfigArray(T func_f32, T func_f16)
-        : _configs{ func_f32, func_f16}
+    ClDWCNativeConfigArray(T func_f32, T func_f16, T func_int8)
+        : _configs{ func_f32, func_f16, func_int8 }
     {
     }
 
-    /** Method to return the indirect convolution configuration function based on data type
+    /** Method to return the depthwise convolution configuration function based on data type
      *
      * @param[in] data_type Input data type
      *
@@ -68,41 +71,48 @@ public:
                 return _configs.at(DT_F32);
             case DataType::F16:
                 return _configs.at(DT_F16);
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
+            case DataType::QSYMM8_PER_CHANNEL:
+                return _configs.at(DT_INT8);
             default:
                 return nullptr;
         }
     }
 
 private:
-    std::array<T, 2> _configs;
+    std::array<T, 3> _configs;
 };
 
-/** Basic interface for the indirect convolution kernel configuration */
-class IClIndirectConvKernelConfig
+/** Basic interface for the depthwise convolution kernel configuration */
+class IClDWCNativeKernelConfig
 {
 public:
     /** Constructor
      *
      * @param[in] arch GPU target
      */
-    IClIndirectConvKernelConfig(GPUTarget arch)
+    IClDWCNativeKernelConfig(GPUTarget arch)
         : _target(arch)
     {
     }
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(IClIndirectConvKernelConfig);
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(IClDWCNativeKernelConfig);
     /** Virtual destructor */
-    virtual ~IClIndirectConvKernelConfig() = default;
-    /** This method returns the @ref DirectConvComputeKernelInfo for the given inputs
+    virtual ~IClDWCNativeKernelConfig() = default;
+    /** This method returns the @ref DWCComputeKernelInfo for the given inputs
      *
-     * @param[in] src       Source tensor (activation tensor)
-     * @param[in] wei       Weights tensor
-     * @param[in] conv_info Convolution info
+     * @param[in] src              Source tensor (activation tensor)
+     * @param[in] wei              Weights tensor
+     * @param[in] conv_info        Convolution info
+     * @param[in] dilation         Kernel dilation
+     * @param[in] depth_multiplier Output feature maps multiplier
      */
-    virtual DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) = 0;
+    virtual DWCComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                           unsigned int depth_multiplier) = 0;
 
 protected:
     GPUTarget _target;
 };
-} // namespace cl_indirect_conv
+} // namespace cl_dwc
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_ICLINDIRECTCONVKERNELCONFIG */
+#endif /* SRC_RUNTIME_HEURISTICS_DWC_NATIVE_ICLDWCNATIVEKERNELCONFIG */

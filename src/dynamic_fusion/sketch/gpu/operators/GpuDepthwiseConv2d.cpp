@@ -31,6 +31,8 @@
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDepthwiseConv2d.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
+#include "src/runtime/heuristics/dwc_native/ClDWCNativeKernelConfig.h"
+#include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
 
 namespace arm_compute
 {
@@ -40,115 +42,6 @@ namespace dynamic_fusion
 {
 namespace
 {
-bool export_weights_to_cl_image_heuristic(const ITensorInfo *weights, unsigned int depth_multiplier, GPUTarget gpu_target)
-{
-    if(!export_to_cl_image(weights))
-    {
-        return false;
-    }
-
-    const size_t idx_w    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t kernel_w = weights->tensor_shape()[idx_w];
-    const size_t kernel_h = weights->tensor_shape()[idx_h];
-
-    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-    {
-        return false;
-    }
-
-    if((kernel_w == 1) && (kernel_h == 1))
-    {
-        return false;
-    }
-
-    if(depth_multiplier > 1)
-    {
-        if((depth_multiplier % 4) != 0)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void initialize_dwc_native_compute_info(DWCComputeKernelInfo &dwc_compute_info, const ITensorInfo *input, const ITensorInfo *weights,
-                                        const DepthwiseConv2dAttributes &attributes, const GPUTarget gpu_target)
-{
-    const unsigned int depth_multiplier = attributes.depth_multiplier();
-
-    // Floating point path
-    // First check if we can export to cl_image.
-    dwc_compute_info.export_input_to_cl_image   = false;
-    dwc_compute_info.export_weights_to_cl_image = export_weights_to_cl_image_heuristic(weights, depth_multiplier, gpu_target);
-
-    // Set n0
-    if(depth_multiplier == 1)
-    {
-        if(dwc_compute_info.export_weights_to_cl_image == false && weights->data_type() == DataType::F16)
-        {
-            dwc_compute_info.n0 = 8;
-        }
-        else
-        {
-            dwc_compute_info.n0 = 4;
-        }
-    }
-    else
-    {
-        if((depth_multiplier % 4) == 0)
-        {
-            dwc_compute_info.n0 = 4;
-        }
-        else if((depth_multiplier % 2) == 0)
-        {
-            dwc_compute_info.n0 = 2;
-        }
-        else
-        {
-            dwc_compute_info.n0 = 1;
-        }
-    }
-
-    dwc_compute_info.n0 = adjust_vec_size(dwc_compute_info.n0, weights->dimension(0));
-
-    // Set m0 only if stride_x == 1 and dilation_x == 1
-    if(attributes.stride().x() == 1 && attributes.dilation().x() == 1)
-    {
-        const size_t idx_w    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
-        const size_t kernel_w = weights->tensor_shape()[idx_w];
-
-        if((kernel_w >= 9) || (kernel_w == 1))
-        {
-            dwc_compute_info.m0 = 1;
-        }
-        else
-        {
-            if(weights->data_type() == DataType::F16)
-            {
-                if((input->dimension(1) % 5) == 0)
-                {
-                    dwc_compute_info.m0 = 5;
-                }
-                else
-                {
-                    dwc_compute_info.m0 = 4;
-                }
-            }
-            else
-            {
-                dwc_compute_info.m0 = 2;
-            }
-        }
-    }
-    else
-    {
-        dwc_compute_info.m0 = 1;
-    }
-    return;
-}
-
 void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, const ITensorInfo *wei, const DepthwiseConv2dAttributes &attributes)
 {
     if(dst->total_size() == 0U)
@@ -202,8 +95,13 @@ Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &cont
             const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
             auto       settings   = ClComponentDepthwiseConv2d::Settings();
 
-            DWCComputeKernelInfo dwc_info;
-            initialize_dwc_native_compute_info(dwc_info, src, wei, attributes, gpu_target);
+            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
+                                                 attributes.pad().right,
+                                                 attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
+
+            // Get the depthwise convolution compute parameters
+            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.fast_relaxed_math(
                 (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
@@ -294,8 +192,13 @@ void GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sketch,
             const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
             auto       settings   = ClComponentDepthwiseConv2d::Settings();
 
-            DWCComputeKernelInfo dwc_info;
-            initialize_dwc_native_compute_info(dwc_info, src, wei, attributes, gpu_target);
+            const PadStrideInfo legacy_conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
+                                                 attributes.pad().right,
+                                                 attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
+
+            // Get the depthwise convolution compute parameters
+            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.is_fma_available(get_arch_from_target(gpu_target) != GPUTarget::MIDGARD)
             .m0(dwc_info.m0)

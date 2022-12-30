@@ -21,32 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVDEFAULTCONFIGVALHALL
-#define SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVDEFAULTCONFIGVALHALL
-
-#include "src/runtime/heuristics/indirect_conv/IClIndirectConvKernelConfig.h"
+#ifndef SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEHEURISTICSHELPERS
+#define SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEHEURISTICSHELPERS
 
 namespace arm_compute
 {
-namespace cl_indirect_conv
-{
-/** Valhall based OpenCL indirect convolution configuration */
-class ClIndirectConvDefaultConfigValhall final : public IClIndirectConvKernelConfig
-{
-public:
-    /** Constructor
-     *
-     * @param[in] gpu GPU target
-     */
-    ClIndirectConvDefaultConfigValhall(GPUTarget gpu);
+// Forward declaration
+class ITensorInfo;
 
-    // Inherited overridden method
-    DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) override;
+namespace cl_dwc
+{
+/** Utility function to know whether we can use the cl image storage for the weights of depthwise convolution to get better performance
+ *
+ * @param[in] weights          Weights TensorInfo of the depthwise convolution
+ * @param[in] depth_multiplier Depth multiplier
+ *
+ * @return true if the weights of depthwise convolution can be kept in the cl image storage to improve the performance
+ */
+bool use_cl_image_for_weights(const ITensorInfo *weights, unsigned int depth_multiplier);
 
-private:
-    DirectConvComputeKernelInfo configure_G77_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G77_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-};
-} // namespace cl_indirect_conv
+} // namespace cl_dwc
 } // namespace arm_compute
-#endif /* SRC_RUNTIME_HEURISTICS_INDIRECT_CONV_CLINDIRECTCONVDEFAULTCONFIGVALHALL */
+#endif /* SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEHEURISTICSHELPERS */

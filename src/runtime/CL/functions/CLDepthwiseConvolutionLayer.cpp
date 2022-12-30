@@ -23,15 +23,15 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
+#include "src/runtime/heuristics/dwc_native/ClDWCNativeKernelConfig.h"
+#include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
 
 #include "src/common/utils/Log.h"
 
@@ -39,137 +39,7 @@ namespace arm_compute
 {
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
-
-namespace
-{
-bool export_weights_to_cl_image_heuristic(const ITensorInfo *weights, unsigned int depth_multiplier, GPUTarget gpu_target)
-{
-    if(!export_to_cl_image(weights))
-    {
-        return false;
-    }
-
-    const size_t idx_w    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t kernel_w = weights->tensor_shape()[idx_w];
-    const size_t kernel_h = weights->tensor_shape()[idx_h];
-
-    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-    {
-        return false;
-    }
-
-    if((kernel_w == 1) && (kernel_h == 1))
-    {
-        return false;
-    }
-
-    if(depth_multiplier > 1)
-    {
-        if((depth_multiplier % 4) != 0)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void initialize_dwc_native_compute_info(DWCComputeKernelInfo &dwc_compute_info, const ITensorInfo *input, const ITensorInfo *weights, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                        unsigned int depth_multiplier,
-                                        GPUTarget gpu_target)
-{
-    ARM_COMPUTE_UNUSED(input);
-
-    if(!is_data_type_float(weights->data_type()))
-    {
-        dwc_compute_info.export_weights_to_cl_image = false;
-        dwc_compute_info.n0                         = (depth_multiplier == 1) ? 4 : 1;
-        if(conv_info.stride().first == 1 && dilation.x() == 1 && depth_multiplier == 1)
-        {
-            dwc_compute_info.m0 = 2;
-        }
-        else
-        {
-            dwc_compute_info.m0 = 1;
-        }
-
-        return;
-    }
-
-    // Floating point path
-
-    // First check if we can export to cl_image.
-    dwc_compute_info.export_input_to_cl_image   = false;
-    dwc_compute_info.export_weights_to_cl_image = export_weights_to_cl_image_heuristic(weights, depth_multiplier, gpu_target);
-
-    // Set n0
-    if(depth_multiplier == 1)
-    {
-        if(dwc_compute_info.export_weights_to_cl_image == false && weights->data_type() == DataType::F16)
-        {
-            dwc_compute_info.n0 = 8;
-        }
-        else
-        {
-            dwc_compute_info.n0 = 4;
-        }
-    }
-    else
-    {
-        if((depth_multiplier % 4) == 0)
-        {
-            dwc_compute_info.n0 = 4;
-        }
-        else if((depth_multiplier % 2) == 0)
-        {
-            dwc_compute_info.n0 = 2;
-        }
-        else
-        {
-            dwc_compute_info.n0 = 1;
-        }
-    }
-
-    dwc_compute_info.n0 = adjust_vec_size(dwc_compute_info.n0, weights->dimension(0));
-
-    // Set m0 only if stride_x == 1 and dilation_x == 1
-    if(conv_info.stride().first == 1 && dilation.x() == 1)
-    {
-        const size_t idx_w    = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
-        const size_t kernel_w = weights->tensor_shape()[idx_w];
-
-        if((kernel_w >= 9) || (kernel_w == 1))
-        {
-            dwc_compute_info.m0 = 1;
-        }
-        else
-        {
-            if(weights->data_type() == DataType::F16)
-            {
-                if((input->dimension(1) % 5) == 0)
-                {
-                    dwc_compute_info.m0 = 5;
-                }
-                else
-                {
-                    dwc_compute_info.m0 = 4;
-                }
-            }
-            else
-            {
-                dwc_compute_info.m0 = 2;
-            }
-        }
-    }
-    else
-    {
-        dwc_compute_info.m0 = 1;
-    }
-    return;
-}
-
-} // namespace
+using namespace arm_compute::cl_dwc;
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
@@ -261,8 +131,9 @@ void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_cont
         output_shifts_to_use      = &_output_shifts;
     }
 
-    DWCComputeKernelInfo dwc_native_compute_info;
-    initialize_dwc_native_compute_info(dwc_native_compute_info, input->info(), weights_to_use->info(), conv_info, dilation, depth_multiplier, gpu_target);
+    // Get the depthwise convolution compute parameters
+    auto t = ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+    const DWCComputeKernelInfo dwc_native_compute_info = t->configure(input_to_use->info(), weights_to_use->info(), conv_info, dilation, depth_multiplier);
 
     const ConvolutionInfo conv_kernel_info{ conv_info, depth_multiplier, act_info, dilation };
 
@@ -346,8 +217,9 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
         ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(input, &permuted_input, PermutationVector(2U, 0U, 1U)));
         ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(weights, &permuted_weights, PermutationVector(2U, 0U, 1U)));
 
-        DWCComputeKernelInfo dwc_native_compute_info;
-        initialize_dwc_native_compute_info(dwc_native_compute_info, input, &permuted_weights, conv_info, dilation, depth_multiplier, gpu_target);
+        // Get the depthwise convolution compute parameters
+        auto t = ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+        const DWCComputeKernelInfo dwc_native_compute_info = t->configure(&permuted_input, &permuted_weights, conv_info, dilation, depth_multiplier);
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerNativeKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output,
                                                                                       dwc_native_compute_info, conv_kernel_info, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
@@ -355,8 +227,9 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     }
     else
     {
-        DWCComputeKernelInfo dwc_native_compute_info;
-        initialize_dwc_native_compute_info(dwc_native_compute_info, input, weights, conv_info, dilation, depth_multiplier, gpu_target);
+        // Get the depthwise convolution compute parameters
+        auto t = ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+        const DWCComputeKernelInfo dwc_native_compute_info = t->configure(input, weights, conv_info, dilation, depth_multiplier);
         ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerNativeKernel::validate(input, weights, biases, output, dwc_native_compute_info, conv_kernel_info, &output_multipliers_shifts_info,
                                                                                       &output_multipliers_shifts_info));
     }
