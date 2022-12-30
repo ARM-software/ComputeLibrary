@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,7 +84,9 @@ public:
 public:
     DataLayout    _data_layout{};
     PadStrideInfo _conv_info{};
-    bool          _export_to_cl_image{ false };
+    bool          _export_weights_to_cl_image{ false };
+    bool          _export_output_to_cl_image{ false };
+    bool          _export_input_to_cl_image{ false };
 };
 } // namespace kernels
 } // namespace opencl

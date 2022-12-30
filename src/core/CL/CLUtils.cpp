@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 
 namespace arm_compute
 {
-cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch)
+cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType type)
 {
     cl_channel_type cl_data_type;
 
@@ -61,7 +61,17 @@ cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer 
     desc.image_width     = shape2d[0];
     desc.image_height    = shape2d[1];
 
-    cl_image = clCreateImage(ctx(), CL_MEM_READ_ONLY, &format, &desc, nullptr, &err);
+    switch(type)
+    {
+        case CLImage2DType::ReadOnly:
+            cl_image = clCreateImage(ctx(), CL_MEM_READ_ONLY, &format, &desc, nullptr, &err);
+            break;
+        case CLImage2DType::WriteOnly:
+            cl_image = clCreateImage(ctx(), CL_MEM_WRITE_ONLY, &format, &desc, nullptr, &err);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported CLImage2DType");
+    }
 
     ARM_COMPUTE_UNUSED(err);
     ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Error during the creation of CL image from buffer");

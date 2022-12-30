@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,9 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != src->dimension(channel_idx), "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.export_input_to_cl_image == true, "Export to CLImage is not supported for the input tensor");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.export_output_to_cl_image == true, "Export to CLImage is not supported for the output tensor");
 
     if(data_layout == DataLayout::NCHW)
     {
@@ -210,12 +213,24 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         const unsigned int pad_left         = conv_info.pad_left();
         const unsigned int pad_top          = conv_info.pad_top();
 
-        _export_to_cl_image = desc.export_weights_to_cl_image;
+        _export_weights_to_cl_image = desc.export_weights_to_cl_image;
+        _export_input_to_cl_image   = desc.export_input_to_cl_image;
+        _export_output_to_cl_image  = desc.export_output_to_cl_image;
 
         // Update the padding for the weights tensor if we can export to cl_image
-        if(_export_to_cl_image)
+        if(_export_weights_to_cl_image)
         {
             gemm::update_padding_for_cl_image(weights);
+        }
+
+        if(_export_output_to_cl_image)
+        {
+            gemm::update_padding_for_cl_image(dst);
+        }
+
+        if(_export_input_to_cl_image)
+        {
+            gemm::update_padding_for_cl_image(src);
         }
 
         if(biases != nullptr)
@@ -241,7 +256,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
             build_options.add_option("-cl-fast-relaxed-math");
         }
 
-        build_options.add_option("-DSRC_TENSOR_TYPE=BUFFER");
+        build_options.add_option_if_else(_export_input_to_cl_image, "-DSRC_TENSOR_TYPE=IMAGE", "-DSRC_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DSRC_DATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
         build_options.add_option("-DSRC_CHANNELS=" + support::cpp11::to_string(src->dimension(0)));
         build_options.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(src->dimension(1)));
@@ -249,9 +264,9 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
         build_options.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(0)));
         build_options.add_option("-DDST_WIDTH=" + support::cpp11::to_string(dst->dimension(1)));
         build_options.add_option("-DDST_HEIGHT=" + support::cpp11::to_string(dst->dimension(2)));
-        build_options.add_option("-DDST_TENSOR_TYPE=BUFFER");
+        build_options.add_option_if_else(_export_output_to_cl_image, "-DDST_TENSOR_TYPE=IMAGE", "-DDST_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DDST_DATA_TYPE=" + get_cl_type_from_data_type(dst_data_type));
-        build_options.add_option_if_else(_export_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
+        build_options.add_option_if_else(_export_weights_to_cl_image, "-DWEI_TENSOR_TYPE=IMAGE", "-DWEI_TENSOR_TYPE=BUFFER");
         build_options.add_option("-DWEI_WIDTH=" + support::cpp11::to_string(weights->dimension(width_idx)));
         build_options.add_option("-DWEI_HEIGHT=" + support::cpp11::to_string(weights->dimension(height_idx)));
         build_options.add_option("-DWEI_DATA_TYPE=" + get_cl_type_from_data_type(weights->data_type()));
@@ -307,7 +322,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     }
     else
     {
-        _export_to_cl_image = false;
+        _export_weights_to_cl_image = false;
 
         kernel_name << "direct_convolution_nchw";
         build_options.add_option_if(biases != nullptr, std::string("-DHAS_BIAS"));
@@ -399,8 +414,10 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
     if(_data_layout == DataLayout::NHWC)
     {
         cl::Image2D weights_cl_image;
+        cl::Image2D output_cl_image;
+        cl::Image2D input_cl_image;
 
-        if(_export_to_cl_image)
+        if(_export_weights_to_cl_image)
         {
             const size_t      image_w = weights->info()->dimension(0) / 4;
             const size_t      image_h = weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
@@ -408,13 +425,43 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
             const size_t      image_row_pitch = weights->info()->strides_in_bytes()[1];
 
             // Export cl_buffer to cl_image
-            weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch);
+            weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+        }
+
+        if(_export_output_to_cl_image)
+        {
+            const size_t      image_w = dst->info()->dimension(0) / 4;
+            const size_t      image_h = dst->info()->dimension(1) * dst->info()->dimension(2) * dst->info()->dimension(3);
+            const TensorShape shape2d(image_w, image_h);
+            const size_t      image_row_pitch = dst->info()->strides_in_bytes()[1];
+
+            // Export cl_buffer to cl_image
+            output_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), dst->cl_buffer(), shape2d, dst->info()->data_type(), image_row_pitch, CLImage2DType::WriteOnly);
+        }
+
+        if(_export_input_to_cl_image)
+        {
+            const size_t      image_w = src->info()->dimension(0) / 4;
+            const size_t      image_h = src->info()->dimension(1) * src->info()->dimension(2) * src->info()->dimension(3);
+            const TensorShape shape2d(image_w, image_h);
+            const size_t      image_row_pitch = src->info()->strides_in_bytes()[1];
+
+            // Export cl_buffer to cl_image
+            input_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), src->cl_buffer(), shape2d, src->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
         }
 
         unsigned int idx = 0;
+        if(_export_input_to_cl_image)
+        {
+            _kernel.setArg(idx++, input_cl_image);
+        }
         add_4d_tensor_nhwc_argument(idx, src);
+        if(_export_output_to_cl_image)
+        {
+            _kernel.setArg(idx++, output_cl_image);
+        }
         add_4d_tensor_nhwc_argument(idx, dst);
-        if(_export_to_cl_image)
+        if(_export_weights_to_cl_image)
         {
             _kernel.setArg(idx++, weights_cl_image);
         }

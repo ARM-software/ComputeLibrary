@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -282,7 +282,7 @@ void ClIndirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, 
         const size_t      image_row_pitch = weights->info()->strides_in_bytes()[1];
 
         // Export cl_buffer to cl_image
-        weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch);
+        weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
     }
 
     unsigned int idx = 0;

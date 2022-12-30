@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@
  * - The weights offset e.g. -DWEI_OFFSET=4
  * - The quantized zero value e.g. -DZERO_VALUE=4
  *
- *
+ * @param[in]  src_img                           (Not supported) Read only cl_image object for the source tensor. Included when SRC_TENSOR_TYPE=IMAGE
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
@@ -73,6 +73,7 @@
  * @param[in]  src_w                             The size of the width dimension of the source tensor
  * @param[in]  src_h                             The size of the height dimension of the source tensor
  * @param[in]  src_n                             The size of the batches dimension of the source tensor
+ * @param[out] dst_img                           (Not supported) Write only cl_image object for the destination tensor. Included when DST_TENSOR_TYPE=IMAGE
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data type: same as @p src_ptr
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
@@ -82,6 +83,7 @@
  * @param[in]  dst_h                             The size of the height dimension of the destination tensor
  * @param[in]  dst_n                             The size of the batches dimension of the destination tensor
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  wei_img                           (Not supported) Read only cl_image object for the weights tensor. Included when WEI_TENSOR_TYPE=IMAGE
  * @param[in]  wei_ptr                           Pointer to the weights tensor. Supported data type: same as @p src_ptr
  * @param[in]  wei_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
  * @param[in]  wei_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
@@ -98,9 +100,9 @@
  */
 //! @endcond
 __kernel void transposed_convolution_nhwc(
-    TENSOR4D_T(src, SRC_TENSOR_TYPE),
-    TENSOR4D_T(dst, DST_TENSOR_TYPE),
-    TENSOR4D_T(wei, WEI_TENSOR_TYPE)
+    TENSOR4D_RO_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_WO_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_RO_T(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bia)

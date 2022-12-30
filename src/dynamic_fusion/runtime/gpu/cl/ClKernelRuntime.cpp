@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
         {
             const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch);
+            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             break;
@@ -105,7 +105,7 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
         {
             const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch);
+            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
@@ -135,7 +135,7 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
             const size_t image_stride_y = tensor->info()->strides_in_bytes()[1];
 
             cl::Image2D tensor_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(),
-                                                                    TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y);
+                                                                    TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
 
             _kernel.setArg(idx++, tensor_image2d);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -377,7 +377,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::run(const Window &window, cl::Comm
             const size_t      image_h = _input->info()->dimension(1) * _input->info()->dimension(2) * _input->info()->dimension(3);
             const TensorShape shape2d(image_w, image_h);
             const size_t      image_row_pitch = _input->info()->strides_in_bytes()[1];
-            input_cl_image                    = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input->cl_buffer(), shape2d, _input->info()->data_type(), image_row_pitch);
+            input_cl_image                    = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input->cl_buffer(), shape2d, _input->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
         }
 
         if(_export_weights_to_cl_image)
@@ -386,7 +386,8 @@ void CLDepthwiseConvolutionLayerNativeKernel::run(const Window &window, cl::Comm
             const size_t      image_h = _weights->info()->dimension(1) * _weights->info()->dimension(2) * _weights->info()->dimension(3);
             const TensorShape shape2d(image_w, image_h);
             const size_t      image_row_pitch = _weights->info()->strides_in_bytes()[1];
-            weights_cl_image                  = create_image2d_from_buffer(CLKernelLibrary::get().context(), _weights->cl_buffer(), shape2d, _weights->info()->data_type(), image_row_pitch);
+            weights_cl_image                  = create_image2d_from_buffer(CLKernelLibrary::get().context(), _weights->cl_buffer(), shape2d, _weights->info()->data_type(), image_row_pitch,
+                                                                           CLImage2DType::ReadOnly);
         }
     }
 
@@ -401,7 +402,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::run(const Window &window, cl::Comm
     {
         _kernel.setArg(idx++, weights_cl_image);
     }
-    add_4D_tensor_argument(idx, _weights, slice);
+    add_4d_tensor_nhwc_argument(idx, _weights);
     if(_is_quantized)
     {
         add_1D_tensor_argument(idx, _output_multipliers, slice);

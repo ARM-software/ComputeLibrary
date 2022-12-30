@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,36 +66,36 @@
  * - The weights offset e.g. -DWEI_OFFSET=4
  * - The quantized zero value e.g. -DZERO_VALUE=4
  *
+ * @param[in]  src_img                           (Not supported) Read only cl_image object for the source tensor. Included when SRC_TENSOR_TYPE=IMAGE
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32/QASYMM8
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
- * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  src_c                             The size of the channels dimension of the source tensor
+ * @param[in]  src_w                             The size of the width dimension of the source tensor
+ * @param[in]  src_h                             The size of the height dimension of the source tensor
+ * @param[in]  src_n                             The size of the batches dimension of the source tensor
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_img                           (Not supported) Write only cl_image object for the destination tensor. Included when DST_TENSOR_TYPE=IMAGE
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data type: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
- * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  dst_c                             The size of the channels dimension of the destination tensor
+ * @param[in]  dst_w                             The size of the width dimension of the destination tensor
+ * @param[in]  dst_h                             The size of the height dimension of the destination tensor
+ * @param[in]  dst_n                             The size of the batches dimension of the destination tensor
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  wei_img                           (Optional) Read only cl_image object for the weights tensor. Included when WEI_TENSOR_TYPE=IMAGE
  * @param[in]  wei_ptr                           Pointer to the weights tensor. Supported data type: same as @p src_ptr
- * @param[in]  wei_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  wei_step_x                        wei_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  wei_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  wei_step_y                        wei_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  wei_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  wei_step_z                        wei_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  wei_stride_w                      Stride of the weights tensor in W dimension (in bytes)
- * @param[in]  wei_step_w                        wei_stride_w * number of elements along W processed per workitem(in bytes)
- * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the bias matrix
+ * @param[in]  wei_c                             The size of the channels dimension of the weights tensor
+ * @param[in]  wei_w                             The size of the width dimension of the weights tensor
+ * @param[in]  wei_h                             The size of the height dimension of the weights tensor
+ * @param[in]  wei_n                             The size of the batches dimension of the weights tensor
+ * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the weights matrix
  * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr (if F32/F16) or S32 (if QASYMM8/QASYMM8_SIGNED)
  * @param[in]  bia_stride_x                      (Optional) Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bia_step_x                        (Optional) bia_stride_x * number of elements along X processed per workitem(in bytes)
@@ -103,9 +103,9 @@
  */
 //! @endcond
 __kernel void direct_convolution_nhwc(
-    TENSOR4D_T(src, SRC_TENSOR_TYPE),
-    TENSOR4D_T(dst, DST_TENSOR_TYPE),
-    TENSOR4D_T(wei, WEI_TENSOR_TYPE)
+    TENSOR4D_RO_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_WO_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_RO_T(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bia)
