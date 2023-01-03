@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,9 @@
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorGroup.h"
 
+#include <memory>
+#include <vector>
+
 namespace arm_compute
 {
 namespace experimental
@@ -48,7 +51,8 @@ public:
         : _context{ context },
           _comp_services{},
           _component_graph{ &_comp_services },
-          _operator_group{}
+          _operator_group{},
+          _interm_tensor_info_list{ std::vector<std::unique_ptr<TensorInfo>>() }
     {
     }
     /** Prevent instances of this class from being copy constructed */
@@ -97,13 +101,25 @@ public:
     {
         return component_graph().fuse().write_workload_code();
     }
+    /** Create an intermediate tensor info and save it
+     *
+     * @return ITensorInfo  The created intermediate tensor info object pointer
+     */
+    ITensorInfo *create_intermediate_tensor()
+    {
+        auto uptr = std::make_unique<TensorInfo>();
+        uptr->set_id(-allocate_new_tensor_id()); // intermediate tensors must have negative id
+        _interm_tensor_info_list.emplace_back(std::move(uptr));
+        return _interm_tensor_info_list.back().get();
+    }
 
 private:
-    Context                *_context;
-    GpuComponentServices    _comp_services;
-    GpuKernelComponentGraph _component_graph;
-    GpuOperatorGroup        _operator_group;
-    ITensorInfo::Id         _next_id{ ITensorInfo::invalid_tensor_id };
+    Context                                 *_context;
+    GpuComponentServices                     _comp_services;
+    GpuKernelComponentGraph                  _component_graph;
+    GpuOperatorGroup                         _operator_group;
+    ITensorInfo::Id                          _next_id{ ITensorInfo::invalid_tensor_id };
+    std::vector<std::unique_ptr<TensorInfo>> _interm_tensor_info_list;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

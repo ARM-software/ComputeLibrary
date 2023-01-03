@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,13 @@
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
-#include "src/core/helpers/AutoConfiguration.h"
 #include "src/common/utils/Log.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.h"
+#include "src/dynamic_fusion/utils/Utils.h"
 
 namespace arm_compute
 {
@@ -65,7 +66,7 @@ Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
-    ARM_COMPUTE_RETURN_ERROR_ON(!dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_user_tensor(dst));
 
     // Initialize the destination tensor info.
     TensorInfo dst_to_validate = *dst;
@@ -79,12 +80,11 @@ Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
     tensors.add_const_tensor(ACL_SRC_0, src);
     tensors.add_const_tensor(ACL_DST_0, &dst_to_validate);
 
-    const auto group = sketch.implementation().operator_group();
-    const auto op = group.new_operator(operator_type, tensors);
+    const auto group   = sketch.implementation().operator_group();
+    const auto op      = group.new_operator(operator_type, tensors);
     const auto success = group.try_add_operator(op, true);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!success, "This operator cannot be fused into the workload.");
-    ARM_COMPUTE_UNUSED(success);
 
     const auto status = is_supported_op(*sketch.gpu_context(), src, dst);
     return status;
@@ -101,7 +101,7 @@ void GpuOutput::create_op(GpuWorkloadSketch &sketch,
     auto_init_if_empty(*dst, *src);
 
     // Translate into components and add to component graph
-    auto &comp_graph = sketch.implementation().component_graph();
+    auto      &comp_graph = sketch.implementation().component_graph();
     const auto sketch_ctx = sketch.implementation().context();
 
     if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)

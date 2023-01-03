@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,7 @@ public:
      */
     TensorInfo create_tensor_info(const ITensorInfo &tensor_info);
     /** Create a default @ref TensorInfo associated with the workload sketch
-     * It is usually used by a destination tensor whose @ref ITensorInfo is to be inferred automatically
+     * It is usually used by user input or output tensors
      *
      * @return TensorInfo   Newly created tensor info
      */

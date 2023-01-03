@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 #include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
-#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuAdd.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuCast.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -38,9 +38,9 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/dynamic_fusion/Utils.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
-#include "tests/validation/reference/Permute.h"
-#include "tests/validation/reference/ElementwiseOperations.h"
 #include "tests/validation/reference/DepthConvertLayer.h"
+#include "tests/validation/reference/ElementwiseOperations.h"
+#include "tests/validation/reference/Permute.h"
 
 using namespace arm_compute::experimental::dynamic_fusion;
 using namespace arm_compute::test::validation::utils;
@@ -74,13 +74,13 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
 
     // Fuse conv2d
     Conv2dAttributes conv2d_attr{};
-    auto             input_info  = sketch.create_tensor_info(t_input_shape, 1, data_type, data_layout);
-    auto             weight_info = sketch.create_tensor_info(TensorInfo(t_weight_shape, 1, data_type, data_layout));
-    auto             ans_info    = sketch.create_tensor_info();
-    GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, &ans_info, conv2d_attr);
+    TensorInfo       input_info  = sketch.create_tensor_info(t_input_shape, 1, data_type, data_layout);
+    TensorInfo       weight_info = sketch.create_tensor_info(TensorInfo(t_weight_shape, 1, data_type, data_layout));
 
-    auto dst_info = sketch.create_tensor_info();
-    GpuOutput::create_op(sketch, &ans_info, &dst_info);
+    ITensorInfo *conv_out_info = GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, conv2d_attr);
+
+    TensorInfo dst_info = sketch.create_tensor_info();
+    GpuOutput::create_op(sketch, conv_out_info, &dst_info);
 
     // Configure runtime
     ClWorkloadRuntime runtime;
@@ -150,8 +150,8 @@ TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
      */
     CLScheduler::get().default_reinit();
 
-    const auto data_type      = DataType::F32;
-    const auto t_input_shape  = TensorShape(33, 3, 2);
+    const auto data_type     = DataType::F32;
+    const auto t_input_shape = TensorShape(33, 3, 2);
 
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -249,8 +249,8 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
      */
     CLScheduler::get().default_reinit();
 
-    const auto data_type      = DataType::F32;
-    const auto t_input_shape  = TensorShape(3, 8, 5);
+    const auto data_type     = DataType::F32;
+    const auto t_input_shape = TensorShape(3, 8, 5);
 
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -335,8 +335,8 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     SimpleTensor<float> ref_t_in_1{ t_input_shape, data_type, 1, QuantizationInfo() };
     SimpleTensor<float> ref_t_in_2{ t_input_shape, data_type, 1, QuantizationInfo() };
 
-    SimpleTensor<float>   ref_t_out_0{ t_input_shape, data_type, 1, QuantizationInfo() };
-    SimpleTensor<float>   ref_t_ans_1{ t_input_shape, data_type, 1, QuantizationInfo() };
+    SimpleTensor<float> ref_t_out_0{ t_input_shape, data_type, 1, QuantizationInfo() };
+    SimpleTensor<float> ref_t_ans_1{ t_input_shape, data_type, 1, QuantizationInfo() };
 
     // Fill reference
     fill<float>(ref_t_in_0, 0, library.get());
@@ -377,28 +377,30 @@ TEST_CASE(Multiple_Complex_Ops_0, framework::DatasetMode::ALL)
     GpuWorkloadSketch sketch{ &gpu_ctx };
 
     // Create tensor infos
-    auto input_info  = sketch.create_tensor_info(t_input_shape, 1, data_type, data_layout);
-    auto weight_info = sketch.create_tensor_info(TensorInfo(t_weight_shape, 1, data_type, data_layout));
-    auto dst_info    = sketch.create_tensor_info();
+    TensorInfo   input_info  = sketch.create_tensor_info(t_input_shape, 1, data_type, data_layout);
+    TensorInfo   weight_info = sketch.create_tensor_info(TensorInfo(t_weight_shape, 1, data_type, data_layout));
+    ITensorInfo *dst_info;
 
     // Fuse conv2d into the workload
     {
         // Validate operator
-        const auto success = GpuConv2d::validate_op(sketch, &input_info, &weight_info, nullptr, &dst_info, conv2d_attr);
+        const Status success = GpuConv2d::validate_op(sketch, &input_info, &weight_info, nullptr, conv2d_attr);
         ARM_COMPUTE_EXPECT(bool(success), framework::LogLevel::ERRORS);
 
-        GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, &dst_info, conv2d_attr);
+        dst_info = GpuConv2d::create_op(sketch, &input_info, &weight_info, nullptr, conv2d_attr);
     }
 
     // Create tensor infos
-    auto weight_info_2 = sketch.create_tensor_info(t_weight_info);
-    auto dst_info_2    = sketch.create_tensor_info();
+    TensorInfo weight_info_2 = sketch.create_tensor_info(t_weight_info);
 
     // Fuse conv2d into the workload
     {
         // Validate operator, should fail
-        const auto success = GpuConv2d::validate_op(sketch, &dst_info, &weight_info_2, nullptr, &dst_info_2, conv2d_attr);
+        const Status success            = GpuConv2d::validate_op(sketch, dst_info, &weight_info_2, nullptr, conv2d_attr);
+        const auto   expected_error_str = "Operator fusion test failed. This operator cannot be fused into the workload";
+
         ARM_COMPUTE_EXPECT(!bool(success), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT((success.error_description().find(expected_error_str) != std::string::npos), framework::LogLevel::ERRORS);
     }
 }
 TEST_SUITE_END() // Invalid_Fusion_Should_Fail

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,33 +111,29 @@ void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, c
     }
 }
 
-constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
-} // namespace
-
-Status GpuConv2d::is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *src,
-                                  const ITensorInfo        *wei,
-                                  const ITensorInfo        *bia,
-                                  const ITensorInfo        *dst,
-                                  const Conv2dAttributes   &attributes)
+/* A helper method to reduce the duplication in dst tensor initialization
+*  when calling validate()
+*/
+Status is_supported_op_helper(const GpuWorkloadContext &context,
+                              const ITensorInfo        *src,
+                              const ITensorInfo        *wei,
+                              const ITensorInfo        *bia,
+                              const ITensorInfo        *dst,
+                              const Conv2dAttributes   &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei, dst);
-    // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
-    const auto data_layout          = src->data_layout();
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
 
+    TensorInfo         dst_info_to_validate;
+    const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
+
+    const DataLayout data_layout = src->data_layout();
+    if(dst != nullptr)
     {
-        auto shape = misc::shape_calculator::compute_deep_convolution_shape(src->tensor_shape(), data_layout, wei->tensor_shape(),
-                                                                            PadStrideInfo(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
-                                                                                          attributes.pad().right,
-                                                                                          attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR)); // use the default DimensionRoundingType
-
-        // Checks performed when dst is configured
-        if(dst->total_size() != 0)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), shape);
-        }
-        auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(shape));
+        dst_info_to_validate_ptr = dst;
+    }
+    else
+    {
+        calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
     }
 
     // Check support level
@@ -147,7 +143,7 @@ Status GpuConv2d::is_supported_op(const GpuWorkloadContext &context,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
 
     // Check components
-    const auto gpu_target  = context.gpu_target();
+    const auto gpu_target = context.gpu_target();
     if(context.gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = context.cl_compile_context();
@@ -162,13 +158,13 @@ Status GpuConv2d::is_supported_op(const GpuWorkloadContext &context,
 
             settings.fast_relaxed_math(
                 (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-                && (dst_info_to_validate.data_type() == DataType::F32 || dst_info_to_validate.data_type() == DataType::F16));
+                && (dst_info_to_validate_ptr->data_type() == DataType::F32 || dst_info_to_validate_ptr->data_type() == DataType::F16));
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
             arguments.add_const_tensor(ACL_SRC_1, wei);
             arguments.add_const_tensor(ACL_SRC_2, bia);
-            arguments.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
+            arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
             ARM_COMPUTE_RETURN_ON_ERROR(ClComponentDirectConv2d::validate(properties, arguments, attributes, settings));
         }
     }
@@ -179,25 +175,40 @@ Status GpuConv2d::is_supported_op(const GpuWorkloadContext &context,
     return Status{};
 }
 
+constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
+} // namespace
+
+Status GpuConv2d::is_supported_op(const GpuWorkloadContext &context,
+                                  const ITensorInfo        *src,
+                                  const ITensorInfo        *wei,
+                                  const ITensorInfo        *bia,
+                                  const Conv2dAttributes   &attributes)
+{
+    return is_supported_op_helper(context, src, wei, bia, nullptr, attributes);
+}
+
 Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
                               const ITensorInfo       *wei,
                               const ITensorInfo       *bia,
-                              const ITensorInfo       *dst,
                               const Conv2dAttributes &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
 
     // Check if tensors have valid id. I.e. they are created from a sketch
-    ARM_COMPUTE_RETURN_ERROR_ON(
-        !src->has_valid_id() || !wei->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
     if(bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(!bia->has_valid_id());
     }
 
+    // This tensor info will have invalid id but because all the existing tensors in the
+    // sketch have valid ids and the DependencyGraph implementation has no notion of validness
+    // regarding tensor ids, it'll be just another tensor id and will validate
+    // Additionally, a new dst id is added every time in create_op, thus there's no need to validate it
+    TensorInfo dst_info_to_validate;
+
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
     calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
 
     // Perform fusion test
@@ -212,25 +223,26 @@ Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, wei, bia, &dst_info_to_validate, attributes);
+    return is_supported_op_helper(*sketch.gpu_context(), src, wei, bia, &dst_info_to_validate, attributes);
 }
 
-void GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
-                          ITensorInfo            *src,
-                          ITensorInfo            *wei,
-                          ITensorInfo            *bia,
-                          ITensorInfo            *dst,
-                          const Conv2dAttributes &attributes)
+ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
+                                  ITensorInfo            *src,
+                                  ITensorInfo            *wei,
+                                  ITensorInfo            *bia,
+                                  const Conv2dAttributes &attributes)
 {
-    ARM_COMPUTE_LOG_PARAMS(src, wei, bia, dst, attributes);
+    ARM_COMPUTE_LOG_PARAMS(src, wei, bia, attributes);
     PadStrideInfo conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
                             attributes.pad().right,
                             attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
     // Initialize the direct convolution descriptor
     const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, wei, conv_info);
 
+    ITensorInfo *dst = sketch.implementation().create_intermediate_tensor();
+
     // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuConv2d::validate_op(sketch, src, wei, bia, dst, attributes));
+    ARM_COMPUTE_ERROR_THROW_ON(GpuConv2d::validate_op(sketch, src, wei, bia, attributes));
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, wei, dst);
 
     // Auto initialize dst tensor
@@ -295,6 +307,8 @@ void GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
 
     const auto op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 
 } // namespace dynamic_fusion

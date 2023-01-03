@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,15 +110,13 @@ protected:
         GpuWorkloadSketch sketch{ &gpu_ctx };
 
         // Create sketch tensors
-        auto input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
-        auto weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
-        auto bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
-        auto dst_info    = sketch.create_tensor_info();
+        TensorInfo input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
+        TensorInfo weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
+        TensorInfo bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
+        TensorInfo dst_info    = sketch.create_tensor_info();
 
-        auto ans_info    = sketch.create_tensor_info();
-
-        FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, &ans_info, conv2d_attr);
-        GpuOutput::create_op(sketch, &ans_info, &dst_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, conv2d_attr);
+        GpuOutput::create_op(sketch, ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ void GpuKernelVariableTable::declare_variable(const GpuKernelComponentGroup &com
     {
         // Declare variable associated with the tensor
         std::stringstream ss;
-        ss << alias << "_t" << tensor->id();
+        ss << alias << "_t" << abs(tensor->id());
         const auto     uniq_name = ss.str();
         TensorVariable var{ tensor->id(), uniq_name, argument_info };
 
