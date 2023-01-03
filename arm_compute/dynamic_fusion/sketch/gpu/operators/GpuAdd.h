@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ public:
     /** Create an operator and fuse it into the workload sketch.
      *    @note If @ref validate_op() fails, the creation also fails and may throw an error.
      *    @note If @ref validate_op() fails, @p sketch remains unchanged and valid.
-     *    @note Batching is not supported yet
      *
      * Valid data type configurations:
      * |lhs            |rhs            |dst           |

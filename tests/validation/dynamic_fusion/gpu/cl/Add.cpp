@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,9 +54,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),    // S16 is valid data type for Add
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),    // S32 is valid data type for Add
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
-                                                        TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32),    // Broadcasting not allowed for lhs
+                                                        TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32),    // Broadcasting allowed for lhs
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32), // Batching not supported
+                                                        TensorInfo(TensorShape(15U, 23U, 3U), 1, DataType::F32),    // Broadcast Y dimension is not allowed
+                                                        TensorInfo(TensorShape( 3U,  8U, 9U), 1, DataType::S16),    // Broadcast Z dimension is not allowed
+                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32), // Batching is allowed
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
@@ -65,7 +67,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32),    // Broadcasting allowed for rhs
-                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32), // Batching not supported
+                                                       TensorInfo(TensorShape(15U,  1U, 3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape( 3U,  8U, 1U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32),
                                                       })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
@@ -74,9 +78,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(15U, 23U, 3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape( 3U,  8U, 9U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32),
                                                       })),
-               framework::dataset::make("Expected", { true, false, true, true, false, false, true, false})),
+               framework::dataset::make("Expected", { true, false, true, true, false, true, true, false, false, true})),
                input1_info, input2_info, output_info, expected)
 {
     // Create a new workload sketch

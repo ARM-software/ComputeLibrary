@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1059,6 +1059,9 @@
     })
 
 #define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_LHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
 #define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 /** Element-wise scale with a constant value
@@ -1098,6 +1101,27 @@
         LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
         {                                                   \
             dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
+        })                                                  \
+    })
+
+/** Element-wise operation with LHS broadcasted (LHS has the X dimension only)
+ *
+ * @note Performs: LHS[broadcasted] OP RHS = DST
+ * @note Both tiles must have same data type
+ *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of RHS rows
+ * @param[in]  N0            Number of RHS columns
+ * @param[in]  lhs           LHS tile
+ * @param[in]  rhs           RHS tile
+ * @param[out] dst           DST tile
+ */
+#define T_ELTWISE_BROADCAST_LHS_X(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
         })                                                  \
     })
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -308,13 +308,21 @@ public:
         : ZipDataset<ShapeDataset, ShapeDataset>(
               ShapeDataset("Shape0",
     {
-        TensorShape{ 9U, 9U, 5U },
-                     TensorShape{ 27U, 13U, 2U },
+        TensorShape{ 1U, 3U, 4U, 2U },  // LHS broadcast X
+        TensorShape{ 6U, 4U, 2U, 3U },  // RHS broadcast X
+        TensorShape{ 7U, 1U, 1U, 4U },  // LHS broadcast Y, Z
+        TensorShape{ 8U, 5U, 6U, 3U },  // RHS broadcast Y, Z
+        TensorShape{ 1U, 1U, 1U, 2U },  // LHS broadcast X, Y, Z
+        TensorShape{ 2U, 6U, 4U, 3U },  // RHS broadcast X, Y, Z
     }),
     ShapeDataset("Shape1",
     {
-        TensorShape{ 1U, 1U, 1U },  // Broadcast in X, Y, Z
-        TensorShape{ 27U, 1U, 1U }, // Broadcast in Y and Z
+        TensorShape{ 5U, 3U, 4U, 2U },
+        TensorShape{ 1U, 4U, 2U, 3U },
+        TensorShape{ 7U, 2U, 3U, 4U },
+        TensorShape{ 8U, 1U, 1U, 3U },
+        TensorShape{ 4U, 7U, 3U, 2U },
+        TensorShape{ 1U, 1U, 1U, 3U },
     }))
     {
     }
