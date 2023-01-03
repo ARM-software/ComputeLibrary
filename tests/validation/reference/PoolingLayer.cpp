@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,6 @@ using namespace arm_compute::misc::shape_calculator;
 template <typename T, typename ACC_T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info, SimpleTensor<uint32_t> *indices, DataLayout data_layout)
 {
-    ARM_COMPUTE_ERROR_ON(info.is_global_pooling && (src.shape().x() != src.shape().y()));
     // Create reference
     SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type()), info), src.data_type(), 1 };
     auto            pooled_shape = compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type()), info);

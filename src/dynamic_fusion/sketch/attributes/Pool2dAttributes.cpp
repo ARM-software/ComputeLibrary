@@ -21,11 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_UTILS_UTILS
-#define SRC_DYNAMIC_FUSION_UTILS_UTILS
 
-#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
+#include "arm_compute/core/Size2D.h"
 
 namespace arm_compute
 {
@@ -33,39 +31,60 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-inline bool is_user_tensor(const ITensorInfo *tensor_info)
+PoolingType Pool2dAttributes::pool_type() const
 {
-    return tensor_info->id() > ITensorInfo::invalid_tensor_id;
+    return _pool_type;
 }
 
-inline bool is_intermediate_tensor(const ITensorInfo *tensor_info)
+Pool2dAttributes Pool2dAttributes::pool_type(PoolingType pool_type)
 {
-    return tensor_info->id() < ITensorInfo::invalid_tensor_id;
+    _pool_type = pool_type;
+    return *this;
 }
 
-inline bool is_valid_tensor(const ITensorInfo *tensor_info)
+Padding2D Pool2dAttributes::pad() const
 {
-    return tensor_info->has_valid_id();
+    return _pad;
 }
 
-inline bool is_invalid_tensor(const ITensorInfo *tensor_info)
+Pool2dAttributes Pool2dAttributes::pad(const Padding2D &pad)
 {
-    return !is_valid_tensor(tensor_info);
+    _pad = pad;
+    return *this;
 }
 
-/** Inline function to convert @ref Pool2dAttributes to PoolingLayerInfo
-*/
-inline PoolingLayerInfo convert_pool_attr_to_pool_info(const Pool2dAttributes &pool_attr, bool mixed_precision = false, DataLayout data_layout = DataLayout::NHWC)
+Size2D Pool2dAttributes::pool_size() const
 {
-    // Create PadStrideInfo
-    const Size2D        stride  = pool_attr.stride();
-    const Padding2D     padding = pool_attr.pad();
-    const PadStrideInfo pad_stride(stride.x(), stride.y(), padding.left, padding.top, arm_compute::DimensionRoundingType::FLOOR);
-
-    return PoolingLayerInfo(pool_attr.pool_type(), pool_attr.pool_size(), data_layout, pad_stride, pool_attr.exclude_padding(), mixed_precision);
-}
-}
-}
+    return _pool_size;
 }
 
-#endif /* SRC_DYNAMIC_FUSION_UTILS_UTILS */
+Pool2dAttributes Pool2dAttributes::pool_size(const Size2D &pool_size)
+{
+    _pool_size = pool_size;
+    return *this;
+}
+
+Size2D Pool2dAttributes::stride() const
+{
+    return _stride;
+}
+
+Pool2dAttributes Pool2dAttributes::stride(const Size2D &stride)
+{
+    _stride = stride;
+    return *this;
+}
+
+bool Pool2dAttributes::exclude_padding() const
+{
+    return _exclude_padding;
+}
+
+Pool2dAttributes Pool2dAttributes::exclude_padding(bool exclude_padding)
+{
+    _exclude_padding = exclude_padding;
+    return *this;
+}
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute

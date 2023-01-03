@@ -42,8 +42,10 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -3407,6 +3409,65 @@ inline std::string to_string(const Padding2D &padding2d)
     return str.str();
 }
 
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::Pool2dAttributes type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  pool2d_attr arm_compute::experimental::dynamic_fusion::Pool2dAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::Pool2dAttributes &pool2d_attr)
+{
+    os << "Pool2dAttributes="
+       << "["
+       << "PoolingType=" << pool2d_attr.pool_type() << ","
+       << "PoolSize=" << pool2d_attr.pool_size() << ","
+       << "Padding=" << pool2d_attr.pad() << ","
+       << "Stride=" << pool2d_attr.stride() << ","
+       << "ExcludePadding" << pool2d_attr.exclude_padding() << "]";
+
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::Pool2dAttributes type.
+ *
+ * @param[in] pool2d_attr arm_compute::experimental::dynamic_fusion::Pool2dAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::Pool2dAttributes &pool2d_attr)
+{
+    std::stringstream str;
+    str << pool2d_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type
+ *
+ * @param[out] os       Output stream
+ * @param[in]  settings arm_compute::dynamic_fusion::GpuPool2dSettings type to output
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::GpuPool2dSettings &settings)
+{
+    os << "Settings="
+       << "["
+       << "FPMixedPrecision=" << settings.mixed_precision() << "]";
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type.
+ *
+ * @param[in] settings arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::GpuPool2dSettings &settings)
+{
+    std::stringstream str;
+    str << settings;
+    return str.str();
+}
+
 /** Formatted output of the arm_compute::experimental::dynamic_fusion::Conv2dAttributes type.
  *
  * @param[out] os          Output stream.
@@ -3424,6 +3485,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynami
 
     return os;
 }
+
 /** Formatted output of the arm_compute::experimental::dynamic_fusion::Conv2dAttributes type.
  *
  * @param[in] conv2d_attr arm_compute::experimental::dynamic_fusion::Conv2dAttributes type to output.
