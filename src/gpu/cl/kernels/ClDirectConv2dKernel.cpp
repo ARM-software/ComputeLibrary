@@ -73,7 +73,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5 || weights->dimension(width_idx) == 9) && std::get<0>(conv_info.stride()) > 2,
                                         "Strides larger than 2 not supported for 3x3, 5x5, 9x9 convolution.");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_data_type_float(src->data_type()) && act_info.enabled(), "Activation supported only for floating point and NHWC.");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled(), "Fused activation is not supported for NCHW layout");
 
         if(is_data_type_quantized(src->data_type()))
         {
@@ -89,6 +89,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
 
     if(data_layout == DataLayout::NHWC)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && !is_data_type_float(src->data_type()), "Fused activation in NHWC is only supported for floating point.");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.m0 <= 0 || desc.m0 > 8, "M0 can only be greater than 0 and less than or equal to 8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
                                         "N0 can only be: 1, 2, 3, 4, 8, and 16");
