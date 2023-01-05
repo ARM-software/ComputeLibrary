@@ -421,8 +421,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" <<
-       gemm_info.export_to_cl_image << "})";
+    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" << gemm_info.export_to_cl_image << "})";
     return os;
 }
 
@@ -475,8 +474,7 @@ inline std::string to_string(const GEMMKernelInfo &gemm_info)
 inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
 {
     auto weights = bbox_info.weights();
-    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
-       "})";
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] << "})";
     return os;
 }
 
@@ -3305,46 +3303,46 @@ inline std::string to_string(const Conv3dInfo &conv3d_info)
 inline std::string to_string(const WeightFormat wf)
 {
 #define __CASE_WEIGHT_FORMAT(wf) \
-case WeightFormat::wf:       \
-    return #wf;
+    case WeightFormat::wf:       \
+        return #wf;
     switch(wf)
     {
-            __CASE_WEIGHT_FORMAT(UNSPECIFIED)
-            __CASE_WEIGHT_FORMAT(ANY)
-            __CASE_WEIGHT_FORMAT(OHWI)
-            __CASE_WEIGHT_FORMAT(OHWIo2)
-            __CASE_WEIGHT_FORMAT(OHWIo4)
-            __CASE_WEIGHT_FORMAT(OHWIo8)
-            __CASE_WEIGHT_FORMAT(OHWIo16)
-            __CASE_WEIGHT_FORMAT(OHWIo32)
-            __CASE_WEIGHT_FORMAT(OHWIo64)
-            __CASE_WEIGHT_FORMAT(OHWIo128)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo2i8)
-            __CASE_WEIGHT_FORMAT(OHWIo4i8)
-            __CASE_WEIGHT_FORMAT(OHWIo8i8)
-            __CASE_WEIGHT_FORMAT(OHWIo16i8)
-            __CASE_WEIGHT_FORMAT(OHWIo32i8)
-            __CASE_WEIGHT_FORMAT(OHWIo64i8)
+        __CASE_WEIGHT_FORMAT(UNSPECIFIED)
+        __CASE_WEIGHT_FORMAT(ANY)
+        __CASE_WEIGHT_FORMAT(OHWI)
+        __CASE_WEIGHT_FORMAT(OHWIo2)
+        __CASE_WEIGHT_FORMAT(OHWIo4)
+        __CASE_WEIGHT_FORMAT(OHWIo8)
+        __CASE_WEIGHT_FORMAT(OHWIo16)
+        __CASE_WEIGHT_FORMAT(OHWIo32)
+        __CASE_WEIGHT_FORMAT(OHWIo64)
+        __CASE_WEIGHT_FORMAT(OHWIo128)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo2i8)
+        __CASE_WEIGHT_FORMAT(OHWIo4i8)
+        __CASE_WEIGHT_FORMAT(OHWIo8i8)
+        __CASE_WEIGHT_FORMAT(OHWIo16i8)
+        __CASE_WEIGHT_FORMAT(OHWIo32i8)
+        __CASE_WEIGHT_FORMAT(OHWIo64i8)
         default:
             return "invalid value";
     }
@@ -3629,7 +3627,7 @@ inline std::string to_string(const experimental::dynamic_fusion::ResizeAttribute
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
 {
-    os << "SofmtaxAttributes="
+    os << "SoftmaxAttributes="
        << "["
        << "Beta=" << softmax_attr.beta() << ", "
        << "Is Log Softmax=" << softmax_attr.is_log_softmax() << ", "

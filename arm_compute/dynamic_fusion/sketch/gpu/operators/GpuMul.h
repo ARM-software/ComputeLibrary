@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD
+#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUMUL
+#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUMUL
 
 #include "arm_compute/core/Error.h"
 
@@ -40,7 +40,7 @@ class GpuWorkloadContext;
 class GpuWorkloadSketch;
 
 /** Operator interface. */
-class GpuAdd final
+class GpuMul final
 {
 public:
     /** Create an operator and fuse it into the workload sketch.
@@ -52,36 +52,35 @@ public:
      * |:--------------|:--------------|:-------------|
      * |F16            |F16            |F16           |
      * |F32            |F32            |F32           |
-     * |S32            |S32            |S32           |
-     * |S16            |S16            |S16           |
-     * |U8             |U8             |U8            |
      *
      * Valid data layouts:
      * - Any
      *
      * @param[in,out] sketch Workload sketch into which the operator will be fused
-     * @param[in]     lhs    Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[in]     rhs    Right hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
+     * @param[in]     lhs    Left hand side tensor info. Data types supported: F16/F32.
+     * @param[in]     rhs    Right hand side tensor info. Data types supported: Same as @p lhs.
      *
      * @return Pointer for the destination tensor info
      */
     static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
                                   ITensorInfo       *lhs,
                                   ITensorInfo       *rhs);
+
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context Workload context within which the operator is running
-     * @param[in] lhs     Left hand side tensor info.
-     * @param[in] rhs     Right hand side tensor info.
+     * @param[in] lhs     Left hand side tensor info. Data types supported: F16/F32.
+     * @param[in] rhs     Right hand side tensor info. Data types supported: Same as @p lhs.
      *
      * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *lhs,
                                   const ITensorInfo        *rhs);
-    /**  Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
+
+    /** Validate the operator and check if the configuration is supported and if it can be fused into the workload sketch.
      *
-     * Parameters are similar to @ref GpuAdd::create_op()
+     * Parameters are similar to @ref GpuMul::create_op()
      *
      * @return Status
      */
@@ -89,7 +88,8 @@ public:
                               const ITensorInfo       *rhs,
                               const ITensorInfo       *lhs);
 };
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUADD */
+#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUMUL */

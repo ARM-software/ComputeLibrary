@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuAdd.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuMul.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
@@ -32,42 +32,41 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status GpuAdd::validate_op(const GpuWorkloadSketch &sketch,
+Status GpuMul::validate_op(const GpuWorkloadSketch &sketch,
                            const ITensorInfo       *lhs,
                            const ITensorInfo       *rhs)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32, DataType::U8, DataType::S16, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs->data_type() != rhs->data_type(), "Input tensors must be the same data type");
 
-    // Set the elementwise operation to Add then call the elementwise common validate_op
+    // Set the elementwise operation to Mul then call the elementwise common validate_op
     ElementwiseBinaryCommonAttributes common_attributes{};
-    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Add);
+    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul);
     return GpuElementwiseBinaryCommon::validate_op(sketch, lhs, rhs, common_attributes);
 }
 
-Status GpuAdd::is_supported_op(const GpuWorkloadContext &context,
+Status GpuMul::is_supported_op(const GpuWorkloadContext &context,
                                const ITensorInfo        *lhs,
                                const ITensorInfo        *rhs)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32, DataType::U8, DataType::S16, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs->data_type() != rhs->data_type(), "Input tensors must be the same data type");
 
-    // Set the elementwise operation to Add then call the elementwise common is_supported_op
+    // Set the elementwise operation to Mul then call the elementwise common is_supported_op
     ElementwiseBinaryCommonAttributes common_attributes{};
-    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Add);
+    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul);
     return GpuElementwiseBinaryCommon::is_supported_op(context, lhs, rhs, common_attributes);
 }
 
-ITensorInfo *GpuAdd::create_op(GpuWorkloadSketch &sketch,
+ITensorInfo *GpuMul::create_op(GpuWorkloadSketch &sketch,
                                ITensorInfo       *lhs,
                                ITensorInfo       *rhs)
 {
-    // No need to log or validate as they'll be handled inside GpuElementwiseBinaryCommon::create_op()
-    // Set the elementwise operation to Add then call the elementwise common create_op
+    // Set the elementwise operation to Mul then call the elementwise common create_op
     ElementwiseBinaryCommonAttributes common_attributes{};
-    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Add);
+    common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::Mul);
     return GpuElementwiseBinaryCommon::create_op(sketch, lhs, rhs, common_attributes);
 }
 

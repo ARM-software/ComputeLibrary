@@ -25,11 +25,12 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_INTERNAL_GPUELEMENTWISEBINARYCOMMON
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/ITensorInfo.h"
 
 namespace arm_compute
 {
+/** Forward declaration */
 class ITensorInfo;
+
 namespace experimental
 {
 namespace dynamic_fusion
@@ -39,14 +40,15 @@ class ElementwiseBinaryCommonAttributes
 public:
     enum class ElementwiseOp
     {
-        ADD,          /**< (x + y) */
-        SUB,          /**< (x - y) */
-        DIV,          /**< (x / y) */
-        MIN,          /**< Min(x, y) */
-        MAX,          /**< Max(x, y) */
-        SQUARED_DIFF, /**< (x - y)^2 */
-        POWER,        /**< x ^ y */
-        PRELU,        /**< y*x if x < 0, x otherwise */
+        Add,         /**< (x + y) */
+        Sub,         /**< (x - y) */
+        Div,         /**< (x / y) */
+        Mul,         /**< (x * y) */
+        Min,         /**< Min(x, y) */
+        Max,         /**< Max(x, y) */
+        SquaredDiff, /**< (x - y)^2 */
+        Power,       /**< x ^ y */
+        Prelu,       /**< y*x if x < 0, x otherwise */
     };
     /** Set operation*/
     ElementwiseBinaryCommonAttributes &operation(const ElementwiseBinaryCommonAttributes::ElementwiseOp &operation);

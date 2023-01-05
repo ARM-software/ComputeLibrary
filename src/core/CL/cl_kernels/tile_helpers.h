@@ -1063,6 +1063,7 @@
 
 #define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
 #define V_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
+#define V_MUL(A_VAL, B_VAL) ((A_VAL) * (B_VAL))
 
 /** Element-wise activation for quantized types
  *
@@ -1130,6 +1131,9 @@
 
 #define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
+#define T_ELTWISE_BROADCAST_LHS_X_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
 /** Element-wise scale with a constant value
  *
  * @note Performs: LHS * constant = DST
@@ -1193,6 +1197,7 @@
 
 #define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 /** Element-wise operation between two tiles (LHS and RHS)
  *

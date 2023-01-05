@@ -619,6 +619,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/operators/GpuClamp.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuDepthwiseConv2d.cpp",
+        "src/dynamic_fusion/sketch/gpu/operators/GpuMul.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuOutput.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuPool2d.cpp",
         "src/dynamic_fusion/sketch/gpu/operators/GpuReshape.cpp",
