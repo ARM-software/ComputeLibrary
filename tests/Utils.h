@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 

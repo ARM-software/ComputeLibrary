@@ -25,10 +25,10 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_INTERNAL_GPUELEMENTWISEBINARYCOMMON
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 
 namespace arm_compute
 {
+class ITensorInfo;
 namespace experimental
 {
 namespace dynamic_fusion

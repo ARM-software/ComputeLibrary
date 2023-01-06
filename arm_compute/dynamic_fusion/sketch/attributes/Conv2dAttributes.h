@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_ATTRIBUTES_CONV2DATTRIBUTES
+#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_ATTRIBUTES_CONV2DATTRIBUTES
 
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/Types.h"
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -30,33 +34,32 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Conv2dAttributes &Conv2dAttributes::pad(const Padding2D &pad)
+/** Attributes are backend-agnostic parameters (in addition to the input/output tensors) of an operator.
+ */
+
+/** Conv2d attributes */
+class Conv2dAttributes
 {
-    _pad = pad;
-    return *this;
-}
-Padding2D Conv2dAttributes::pad() const
-{
-    return _pad;
-}
-Conv2dAttributes &Conv2dAttributes::stride(const Size2D &stride)
-{
-    _stride = stride;
-    return *this;
-}
-Size2D Conv2dAttributes::stride() const
-{
-    return _stride;
-}
-Conv2dAttributes &Conv2dAttributes::dilation(const Size2D &dilation)
-{
-    _dilation = dilation;
-    return *this;
-}
-Size2D Conv2dAttributes::dilation() const
-{
-    return _dilation;
-}
+public:
+    /** Set padding */
+    Conv2dAttributes &pad(const Padding2D &pad);
+    /** Get padding */
+    Padding2D pad() const;
+    /** Set stride */
+    Conv2dAttributes &stride(const Size2D &stride);
+    /** Get stride */
+    Size2D stride() const;
+    /** Set dilation */
+    Conv2dAttributes &dilation(const Size2D &dilation);
+    /** Get dilation */
+    Size2D dilation() const;
+
+private:
+    Padding2D _pad{};              /**< Padding */
+    Size2D    _stride{ 1U, 1U };   /**< Stride */
+    Size2D    _dilation{ 1U, 1U }; /**< Dilation */
+};
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_ATTRIBUTES_CONV2DATTRIBUTES */

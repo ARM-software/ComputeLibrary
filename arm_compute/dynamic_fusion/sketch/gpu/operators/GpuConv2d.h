@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCONV2D
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 
 namespace arm_compute
 {

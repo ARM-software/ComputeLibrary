@@ -24,7 +24,6 @@
 #include "ClComponentElementwiseBinary.h"
 
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.h"
 

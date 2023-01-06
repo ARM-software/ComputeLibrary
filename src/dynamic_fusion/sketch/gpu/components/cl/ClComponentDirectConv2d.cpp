@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.h"
 

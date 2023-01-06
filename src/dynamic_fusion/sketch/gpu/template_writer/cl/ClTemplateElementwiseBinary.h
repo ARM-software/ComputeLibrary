@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEELEMENTWISEBINARY
 
 #include "arm_compute/core/experimental/Types.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
