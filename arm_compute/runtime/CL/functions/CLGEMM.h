@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,9 @@ public:
      * @note All tensors must have the same data type.
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
+     *
+     * @note Batched GEMM only allows RHS tensor's rank to be <= 3
+     * @note Batched GEMM only supports broadcasting cases where RHS rank < LHS rank but not the other way around
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  a               First input tensor  (Matrix or Vector A). Data types supported: F16/F32
