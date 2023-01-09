@@ -1203,6 +1203,7 @@
               "src/core/NEON/kernels/convolution/common/qsymm8.cpp",
               "src/core/NEON/kernels/convolution/common/utils.cpp",
               "src/core/NEON/kernels/arm_conv/addressing.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/depthwise_common.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/depthwise_strategies_common.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp",

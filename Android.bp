@@ -301,6 +301,7 @@ cc_library_static {
         "src/core/NEON/kernels/NEStridedSliceKernel.cpp",
         "src/core/NEON/kernels/NETileKernel.cpp",
         "src/core/NEON/kernels/arm_conv/addressing.cpp",
+        "src/core/NEON/kernels/arm_conv/depthwise/depthwise_common.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp16.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_fp32.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_s8q.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -248,6 +248,7 @@ class DepthwiseDepthfirstGeneric : public DepthwiseDepthfirstCommon<TInput, TWei
 
   protected:
   void compute_tile_padded(
+    const DepthwiseArgs &args,
     unsigned int output_i, unsigned int output_j,
     unsigned int channel_start, unsigned int channel_end,
     const TensorSpec<const TInput *> &input,
@@ -259,24 +260,24 @@ class DepthwiseDepthfirstGeneric : public DepthwiseDepthfirstCommon<TInput, TWei
     // Get the working space
     WorkingSpace *ws = reinterpret_cast<WorkingSpace *>(working_space_raw);
 
-    const int ii = static_cast<int>(output_i * this->m_args.stride_rows) - this->m_args.padding.top;
+    const int ii = static_cast<int>(output_i * args.stride_rows) - args.padding.top;
     const auto input_pad_top = static_cast<unsigned int>(ii < 0 ? -ii : 0);
     const auto input_i = static_cast<unsigned int>(ii < 0 ? 0 : ii);
 
-    const int ij = static_cast<int>(output_j * this->m_args.stride_cols) - this->m_args.padding.left;
+    const int ij = static_cast<int>(output_j * args.stride_cols) - args.padding.left;
     const auto input_pad_left = static_cast<unsigned int>(ij < 0 ? -ij : 0);
     const auto input_j = static_cast<unsigned int>(ij < 0 ? 0 : ij);
 
     fill_pointer_array_generic_kernel<const TInput>(
       ws->inptr_array,
       this->m_strat->get_output_rows(), this->m_strat->get_output_cols(),
-      this->m_args.kernel_rows, this->m_args.kernel_cols,
-      this->m_args.stride_rows, this->m_args.stride_cols,
+      args.kernel_rows, args.kernel_cols,
+      args.stride_rows, args.stride_cols,
       input.base + input_i*input.ld_row + input_j*input.ld_col + channel_start,
       input.ld_row, input.ld_col,
       ws->input_buffer,
-      input_pad_top, this->m_args.input_rows - input_i,
-      input_pad_left, this->m_args.input_cols - input_j
+      input_pad_top, args.input_rows - input_i,
+      input_pad_left, args.input_cols - input_j
     );
 
     // Compute the output pointer array
@@ -285,15 +286,15 @@ class DepthwiseDepthfirstGeneric : public DepthwiseDepthfirstCommon<TInput, TWei
       output.base + output_i*output.ld_row + output_j*output.ld_col + channel_start,
       output.ld_row, output.ld_col,
       ws->output_buffer,
-      0, this->m_args.output_rows - output_i, // Top padding, # valid rows
-      0, this->m_args.output_cols - output_j  // Left padding, # valid columns
+      0, args.output_rows - output_i, // Top padding, # valid rows
+      0, args.output_cols - output_j  // Left padding, # valid columns
     );
 
     // Execute the kernel
     DepthwiseDepthfirstGenericKernelCall<OutputStage>::execute(
       reinterpret_cast<const StratType *>(this->m_strat.get()), ws,
       this->get_output_stage(), m_bias, parameters,
-      this->m_args.kernel_rows * this->m_args.kernel_cols,
+      args.kernel_rows * args.kernel_cols,
       channel_end - channel_start
     );
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -367,6 +367,7 @@ class DepthwiseDepthfirst
 
   protected:
   void compute_tile_padded(
+    const DepthwiseArgs &args,
     unsigned int output_i, unsigned int output_j,
     unsigned int output_channel_start, unsigned int output_channel_end,
     const TensorSpec<const TInput *> &input,
@@ -379,13 +380,13 @@ class DepthwiseDepthfirst
     auto ws = reinterpret_cast<WorkingSpace *>(working_space_raw);
 
     // Compute the input pointer array
-    const auto input_channel_start = output_channel_start / this->m_args.channel_multiplier;
+    const auto input_channel_start = output_channel_start / args.channel_multiplier;
 
-    const int ii = static_cast<int>(output_i * this->m_args.stride_rows) - this->m_args.padding.top;
+    const int ii = static_cast<int>(output_i * args.stride_rows) - args.padding.top;
     const auto input_pad_top = static_cast<unsigned int>(ii < 0 ? -ii : 0);
     const auto input_i = static_cast<unsigned int>(ii < 0 ? 0 : ii);
 
-    const int ij = static_cast<int>(output_j * this->m_args.stride_cols) - this->m_args.padding.left;
+    const int ij = static_cast<int>(output_j * args.stride_cols) - args.padding.left;
     const auto input_pad_left = static_cast<unsigned int>(ij < 0 ? -ij : 0);
     const auto input_j = static_cast<unsigned int>(ij < 0 ? 0 : ij);
 
@@ -394,8 +395,8 @@ class DepthwiseDepthfirst
       input.base + input_i*input.ld_row + input_j*input.ld_col + input_channel_start,
       input.ld_row, input.ld_col,
       ws->input_buffer,
-      input_pad_top, this->m_args.input_rows - input_i,
-      input_pad_left, this->m_args.input_cols - input_j
+      input_pad_top, args.input_rows - input_i,
+      input_pad_left, args.input_cols - input_j
     );
 
     // Compute the output pointer array
@@ -404,8 +405,8 @@ class DepthwiseDepthfirst
       output.base + output_i*output.ld_row + output_j*output.ld_col + output_channel_start,
       output.ld_row, output.ld_col,
       ws->output_buffer,
-      0, this->m_args.output_rows - output_i, // Top padding, # valid rows
-      0, this->m_args.output_cols - output_j  // Left padding, # valid columns
+      0, args.output_rows - output_i, // Top padding, # valid rows
+      0, args.output_cols - output_j  // Left padding, # valid columns
     );
 
     // Execute the kernel
@@ -416,6 +417,7 @@ class DepthwiseDepthfirst
   }
 
   void compute_row_padded_tile_row(
+    const DepthwiseArgs &args,
     const unsigned int output_i, unsigned int output_j, unsigned int n_tile_cols,
     const unsigned int output_channel_start, const unsigned int output_channel_end,
     const TensorSpec<const TInput *> &input,
@@ -430,19 +432,19 @@ class DepthwiseDepthfirst
     const auto os = this->get_output_stage();
 
     // Compute top and bottom padding; hence fill in the initial pointer arrays.
-    const auto input_channel_start = output_channel_start / this->m_args.channel_multiplier;
-    const int ii = static_cast<int>(output_i * this->m_args.stride_rows) - this->m_args.padding.top;
+    const auto input_channel_start = output_channel_start / args.channel_multiplier;
+    const int ii = static_cast<int>(output_i * args.stride_rows) - args.padding.top;
     const auto input_pad_top = static_cast<unsigned int>(ii < 0 ? -ii : 0);
 
     const auto input_i = static_cast<unsigned int>(ii < 0 ? 0 : ii);
-    const auto input_j = output_j * this->m_args.stride_cols - this->m_args.padding.left;
+    const auto input_j = output_j * args.stride_cols - args.padding.left;
 
     // Valid input rows is the smallest of the input rows that aren't padding for this tile, and the number of rows
     // available.
-    const auto valid_input_rows = std::min(strat->get_input_rows() - input_pad_top, this->m_args.input_rows - input_i);
-    const auto valid_output_rows = std::min(strat->get_output_rows(), this->m_args.output_rows - output_i);
+    const auto valid_input_rows = std::min(strat->get_input_rows() - input_pad_top, args.input_rows - input_i);
+    const auto valid_output_rows = std::min(strat->get_output_rows(), args.output_rows - output_i);
 
-    const auto input_point_stride = input.ld_col * this->m_strat->get_output_cols() * this->m_args.stride_cols;
+    const auto input_point_stride = input.ld_col * this->m_strat->get_output_cols() * args.stride_cols;
     const auto output_point_stride = output.ld_col * this->m_strat->get_output_cols();
 
     fill_pointer_array<const TInput>(
@@ -450,8 +452,8 @@ class DepthwiseDepthfirst
       input.base + input_i*input.ld_row + input_j*input.ld_col + input_channel_start,
       input.ld_row, input.ld_col,
       ws->input_buffer,
-      input_pad_top, this->m_args.input_rows - input_i,
-      0, this->m_args.input_cols - input_j  // No left padding
+      input_pad_top, args.input_rows - input_i,
+      0, args.input_cols - input_j  // No left padding
     );
 
     fill_pointer_array(
@@ -459,8 +461,8 @@ class DepthwiseDepthfirst
       output.base + output_i*output.ld_row + output_j*output.ld_col + output_channel_start,
       output.ld_row, output.ld_col,
       ws->output_buffer,
-      0, this->m_args.output_rows - output_i,  // Top padding, # valid rows
-      0, this->m_args.output_cols - output_j  // Left padding, # valid columns
+      0, args.output_rows - output_i,  // Top padding, # valid rows
+      0, args.output_cols - output_j  // Left padding, # valid columns
     );
 
     for (; n_tile_cols; n_tile_cols--)
@@ -492,6 +494,7 @@ class DepthwiseDepthfirst
   }
 
   void compute_tiles_unpadded(
+    const DepthwiseArgs &args,
     unsigned int output_i, const unsigned int output_j,
     unsigned int n_tile_rows, unsigned int n_tile_cols,
     unsigned int output_channel_start, unsigned int output_channel_end,
@@ -511,8 +514,8 @@ class DepthwiseDepthfirst
       // If the direct kernel is supported, then use it.
       // Compute the base pointers we'll use in the tile.
       auto outptr = output.base + output_channel_start + output_i * output.ld_row + output_j * output.ld_col;
-      const int start_input_i = output_i * this->m_args.stride_rows - this->m_args.padding.top;
-      const int start_input_j = output_j * this->m_args.stride_cols - this->m_args.padding.left;
+      const int start_input_i = output_i * args.stride_rows - args.padding.top;
+      const int start_input_j = output_j * args.stride_cols - args.padding.left;
       auto inptr = input.base + output_channel_start + start_input_i * input.ld_row + start_input_j * input.ld_col;
 
       // Execute the kernel
@@ -528,10 +531,10 @@ class DepthwiseDepthfirst
     {
       // Otherwise, we repeatedly call the padded kernel but use our knowledge
       // of the tensor structure to avoid recomputing the pointer array.
-      const auto input_channel_start = output_channel_start / this->m_args.channel_multiplier;
+      const auto input_channel_start = output_channel_start / args.channel_multiplier;
 
       const auto n_input_pointers = this->m_strat->get_input_rows() * this->m_strat->get_input_cols();
-      const auto input_point_stride = input.ld_col * this->m_strat->get_output_cols() * this->m_args.stride_cols;
+      const auto input_point_stride = input.ld_col * this->m_strat->get_output_cols() * args.stride_cols;
       const auto n_output_pointers = this->m_strat->get_output_rows() * this->m_strat->get_output_cols();
       const auto output_point_stride = output.ld_col * this->m_strat->get_output_cols();
 
@@ -539,16 +542,16 @@ class DepthwiseDepthfirst
       // each subsequent tile we simply update the pointers.
       for (unsigned int tile_i = 0; tile_i < n_tile_rows; tile_i++)
       {
-        const int input_i = static_cast<int>(output_i * this->m_args.stride_rows) - this->m_args.padding.top;
-        const int input_j = static_cast<int>(output_j * this->m_args.stride_cols) - this->m_args.padding.left;
+        const int input_i = static_cast<int>(output_i * args.stride_rows) - args.padding.top;
+        const int input_j = static_cast<int>(output_j * args.stride_cols) - args.padding.left;
 
         fill_pointer_array<const TInput>(
           ws->inptr_array, this->m_strat->get_input_rows(), this->m_strat->get_input_cols(),
           input.base + input_i*input.ld_row + input_j*input.ld_col + input_channel_start,
           input.ld_row, input.ld_col,
           ws->input_buffer,
-          0, this->m_args.input_rows,
-          0, this->m_args.input_cols
+          0, args.input_rows,
+          0, args.input_cols
         );
 
         // Compute the output pointer array
@@ -557,8 +560,8 @@ class DepthwiseDepthfirst
           output.base + output_i*output.ld_row + output_j*output.ld_col + output_channel_start,
           output.ld_row, output.ld_col,
           ws->output_buffer,
-          0, this->m_args.output_rows,
-          0, this->m_args.output_cols
+          0, args.output_rows,
+          0, args.output_cols
         );
 
         for (unsigned int tile_j = 0; tile_j < n_tile_cols; tile_j++)

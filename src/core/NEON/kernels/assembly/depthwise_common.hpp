@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include "arm_gemm.hpp"
 #include "common.hpp"
+#include <cstddef>
+#include <tuple>
 
 namespace arm_conv
 {
@@ -63,6 +65,9 @@ class IDepthwiseCommon
 {
 public:
     virtual ~IDepthwiseCommon() = default;
+
+    // Get the name of the depthwise implementation
+    virtual std::string name() const = 0;
 
     // Determine the amount of storage space required for the rearranged weights
     // and bias.
@@ -126,6 +131,26 @@ public:
         unsigned int thread_id,
         unsigned int n_threads) const = 0;
 };
+
+// To handle a dilation factor of D execute the kernel once for each d in
+// [0..D). Each `d` corresponds to a portion or "view" of the input and output
+// tensors. The output view corresponds to every Dth pixel starting from `d`;
+// this function computes how many pixels are covered. The input view consists
+// of an amount of before padding, every Dth pixel starting from an offset, and
+// some after padding.  This function computes the start padding, input offset,
+// number of valid input pixels, and the after padding.
+//
+// Returns
+// - Number of valid output pixels corresponding to `d`
+// - Number of valid input pixels corresponding to `d`
+// - Offset of the first pixel corresponding to `d`
+// - Amount of padding in the view for `d`
+std::tuple<size_t, size_t, size_t, size_t, size_t>
+get_reduced_view_for_dilation(
+    size_t out_size, size_t in_size,
+    size_t d, size_t dilation_factor,
+    size_t kernel_size, size_t stride,
+    size_t pad_before);
 
 } // namespace depthwise
 } // namespace arm_conv
