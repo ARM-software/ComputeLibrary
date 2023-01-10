@@ -108,7 +108,6 @@ __kernel void dwc_native_fp_nhwc(
 #define _IN0_A N0_A        // Cols tile A. It can be either 1 (for DEPTH_MULTIPLIER > 1) or N0 (for DEPTH_MULTIPLIER == 1)
 #define _IM0_B _IWEI_WIDTH // Rows tile B
 #define _IN0_B N0          // Cols tile B
-#define _IBOUNDARY_CHECK (!((WEI_WIDTH == 1 && WEI_HEIGHT == 1 && PAD_LEFT == 0 && PAD_TOP == 0 && M0 == 1)))
 
     const int cout = GET_SPATIAL_IDX(0, N0, PARTIAL_N0); // OFM
     const int xo   = GET_SPATIAL_IDX(1, M0, 0);          // WIDTH
@@ -146,8 +145,22 @@ __kernel void dwc_native_fp_nhwc(
             a[i].v = 0;
         })
 
+        TILE(int, 1, _IM0_A, mi);
+
+        LOOP_UNROLLING(int, xk_i, 0, 1, _IM0_A,
+        {
+            int x_s    = xi + xk_i * (DILATION_X);
+            int y_s    = yi + yk   * (DILATION_Y);
+            mi[0].s[xk_i] = x_s + y_s * SRC_WIDTH;
+            mi[0].s[xk_i] = mi[0].s[xk_i] + bout * (int)(SRC_WIDTH * SRC_HEIGHT);
+            mi[0].s[xk_i] = select(-1, mi[0].s[xk_i], x_s >= 0);
+            mi[0].s[xk_i] = select(-1, mi[0].s[xk_i], x_s < SRC_WIDTH);
+            mi[0].s[xk_i] = select(-1, mi[0].s[xk_i], y_s >= 0);
+            mi[0].s[xk_i] = select(-1, mi[0].s[xk_i], y_s < SRC_HEIGHT);
+        })
+
         // Load tile from the src tensor (TILE A)
-        T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, (cout / DEPTH_MULTIPLIER), SRC_WIDTH, SRC_HEIGHT, DILATION_X, 1, _IBOUNDARY_CHECK, a);
+        T_LOAD2D_INDIRECT(SRC_DATA_TYPE, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, (cout / DEPTH_MULTIPLIER), src_stride_y, mi, a);
 
         TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 
