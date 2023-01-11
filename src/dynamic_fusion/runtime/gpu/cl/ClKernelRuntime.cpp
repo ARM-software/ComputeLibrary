@@ -41,7 +41,7 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
     // Create kernel from kernel source string
     opencl::ClKernelLibrary &klib = opencl::ClKernelLibrary::get();
     _kernel                       = static_cast<cl::Kernel>(compile_ctx.create_kernel(code.name(),
-                                                                                      "" /* Program name: Used to as part of a unique string for built kernel cache. Not needed */,
+                                                                                      code.name(), // program name has to be provided to differentiate between different unfusable components' kernels.
                                                                                       code.code(),
                                                                                       klib.kernel_path() /* Kernel path: Used in cases of embedded kernels */,
                                                                                       code.build_options().options(),

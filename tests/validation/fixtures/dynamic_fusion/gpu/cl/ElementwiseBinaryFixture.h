@@ -131,10 +131,11 @@ protected:
         // (Important) Allocate auxiliary tensor memory if there are any
         for(auto &data : runtime.get_auxiliary_tensors())
         {
-            TensorType   *tensor      = data.first;
-            AuxMemoryInfo aux_mem_req = data.second;
-            tensor->allocator()->init(*data.first->info(), aux_mem_req.alignment);
-            tensor->allocator()->allocate();
+            CLTensor     *tensor      = std::get<0>(data);
+            TensorInfo    info        = std::get<1>(data);
+            AuxMemoryInfo aux_mem_req = std::get<2>(data);
+            tensor->allocator()->init(info, aux_mem_req.alignment);
+            tensor->allocator()->allocate(); // Use ACL allocated memory
         }
 
         // Construct user tensors

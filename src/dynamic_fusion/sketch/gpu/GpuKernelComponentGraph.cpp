@@ -59,8 +59,13 @@ GpuKernelComponentStream GpuKernelComponentGraph::fuse(const MemoryDescriptorMap
     {
         const auto component = _components.at(op.op).get();
         const auto success   = stream.add_component(component);
-        ARM_COMPUTE_ERROR_ON(!success);
-        ARM_COMPUTE_UNUSED(success);
+        if(!success) // Assume first failure was because the root component is unfusable
+        {
+            stream.new_component_group();
+            const auto success = stream.add_component(component);
+            ARM_COMPUTE_ERROR_ON(!success);
+            ARM_COMPUTE_UNUSED(success);
+        }
     }
 
     return stream;

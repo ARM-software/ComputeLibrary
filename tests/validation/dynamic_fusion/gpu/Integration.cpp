@@ -90,9 +90,10 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
     // Instead of using ACL allocated memory, the user can choose to import memory into the tensors
     for(auto &data : runtime.get_auxiliary_tensors())
     {
-        CLTensor     *tensor      = data.first;
-        AuxMemoryInfo aux_mem_req = data.second;
-        tensor->allocator()->init(*data.first->info(), aux_mem_req.alignment);
+        CLTensor     *tensor      = std::get<0>(data);
+        TensorInfo    info        = std::get<1>(data);
+        AuxMemoryInfo aux_mem_req = std::get<2>(data);
+        tensor->allocator()->init(info, aux_mem_req.alignment);
         tensor->allocator()->allocate(); // Use ACL allocated memory
         // auto buf = cl::Buffer();
         // tensor->allocator()->import_memory(buf);  // Or, import external memory
@@ -178,9 +179,10 @@ TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
     // Instead of using ACL allocated memory, the user can choose to import memory into the tensors
     for(auto &data : runtime.get_auxiliary_tensors())
     {
-        CLTensor     *tensor      = data.first;
-        AuxMemoryInfo aux_mem_req = data.second;
-        tensor->allocator()->init(*data.first->info(), aux_mem_req.alignment);
+        CLTensor     *tensor      = std::get<0>(data);
+        TensorInfo    info        = std::get<1>(data);
+        AuxMemoryInfo aux_mem_req = std::get<2>(data);
+        tensor->allocator()->init(info, aux_mem_req.alignment);
         tensor->allocator()->allocate(); // Use ACL allocated memory
         // auto buf = cl::Buffer();
         // tensor->allocator()->import_memory(buf);  // Or, import external memory
@@ -282,9 +284,10 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     // Instead of using ACL allocated memory, the user can choose to import memory into the tensors
     for(auto &data : runtime.get_auxiliary_tensors())
     {
-        CLTensor     *tensor      = data.first;
-        AuxMemoryInfo aux_mem_req = data.second;
-        tensor->allocator()->init(*data.first->info(), aux_mem_req.alignment);
+        CLTensor     *tensor      = std::get<0>(data);
+        TensorInfo    info        = std::get<1>(data);
+        AuxMemoryInfo aux_mem_req = std::get<2>(data);
+        tensor->allocator()->init(info, aux_mem_req.alignment);
         tensor->allocator()->allocate(); // Use ACL allocated memory
         // auto buf = cl::Buffer();
         // tensor->allocator()->import_memory(buf);  // Or, import external memory

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
+namespace
+{
+    constexpr unsigned int serial_vector_size = 8;
+} // namespace
 ClTemplateLogits1DMaxShiftExpSum::ClTemplateLogits1DMaxShiftExpSum(ComponentId                      id,
                                                                    const ArgumentPack<ITensorInfo> &tensors,
                                                                    const Attributes                &attributes)
@@ -46,7 +50,9 @@ ClTemplateLogits1DMaxShiftExpSum::ClTemplateLogits1DMaxShiftExpSum(ComponentId  
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _sum = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_1);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _sum, _dst);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_src);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_sum);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_dst);
 }
 
 std::string ClTemplateLogits1DMaxShiftExpSum::get_name() const
@@ -65,7 +71,6 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
 {
     __global uchar *src_addr = {{src}}_ptr + {{src}}_offset_first_element_in_bytes + g_ind_1 * {{src}}_stride_y + g_ind_2 * {{src}}_stride_z;
     __global uchar *dst_addr = {{dst}}_ptr + {{dst}}_offset_first_element_in_bytes + g_ind_1 * {{dst}}_stride_y + g_ind_2 * {{dst}}_stride_z;
-
     Image sum = CONVERT_TENSOR3D_TO_IMAGE_STRUCT({{sum}});
     VEC_TYPE max_val_vec = (VEC_TYPE)({{MINVAL}});
 )_";
@@ -139,44 +144,41 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_component_code(const Component
     sum1D += data;
 )_";
     }
-    else
-    {
-        code += R"_(
+    code += R"_(
     for(uint i = PARTIAL_N0; i < {{SRC_WIDTH}}; i += N0)
     {
         VEC_TYPE data = VLOAD(N0)(0, (__global {{DATA_TYPE}} *)(src_addr + i * sizeof({{DATA_TYPE}})));
         data -= max_val;
 )_";
 
-        if(beta_defined)
-        {
-            code += R"_(
-        data *= beta;
-)_";
-        }
-
-        if(_attributes.is_log_softmax())
-        {
-            code += R"_(
-        VSTORE(N0)
-        (data, 0, (__global {{DATA_TYPE}} *)(dst_addr + i * sizeof({{DATA_TYPE}})));
-        data = exp(data);
-)_";
-        }
-        else
-        {
-            code += R"_(
-        data = exp(data);
-        VSTORE(N0)
-        (data, 0, (__global {{DATA_TYPE}} *)(dst_addr + i * sizeof({{DATA_TYPE}})));
-)_";
-        }
-
+    if(beta_defined)
+    {
         code += R"_(
-        sum1D += data;
-    }
+    data *= beta;
 )_";
     }
+
+    if(_attributes.is_log_softmax())
+    {
+        code += R"_(
+    VSTORE(N0)
+    (data, 0, (__global {{DATA_TYPE}} *)(dst_addr + i * sizeof({{DATA_TYPE}})));
+    data = exp(data);
+)_";
+    }
+    else
+    {
+        code += R"_(
+    data = exp(data);
+    VSTORE(N0)
+    (data, 0, (__global {{DATA_TYPE}} *)(dst_addr + i * sizeof({{DATA_TYPE}})));
+)_";
+    }
+
+    code += R"_(
+    sum1D += data;
+    }
+)_";
 
     code += R"_(
     *((__global {{DATA_TYPE}} *)sum.ptr) = SUM_REDUCE(sum1D, N0);
@@ -192,19 +194,19 @@ void ClTemplateLogits1DMaxShiftExpSum::declare_variables(GpuKernelVariableTable 
     vtable.declare_variable(
         comp_group,
         _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
         "src");
 
     vtable.declare_variable(
         comp_group,
         _sum,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
         "sum");
 
     vtable.declare_variable(
         comp_group,
         _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
         "dst");
 }
 
@@ -237,7 +239,6 @@ CLBuildOptions ClTemplateLogits1DMaxShiftExpSum::get_build_options(const Compone
     ARM_COMPUTE_UNUSED(comp_group);
     CLBuildOptions build_opts{};
 
-    constexpr unsigned int serial_vector_size = 8;
     const unsigned int     reduction_dim_size = _src->dimension(0);
     const unsigned int     vector_size        = adjust_vec_size(serial_vector_size, reduction_dim_size);
 
@@ -261,7 +262,7 @@ std::string ClTemplateLogits1DMaxShiftExpSum::get_config_id() const
 
 std::set<std::string> ClTemplateLogits1DMaxShiftExpSum::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h" };
+    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
 }
 
 Window ClTemplateLogits1DMaxShiftExpSum::get_window() const

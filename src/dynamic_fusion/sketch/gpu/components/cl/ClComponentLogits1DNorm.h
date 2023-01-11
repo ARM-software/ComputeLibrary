@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DMAXSHIFTEXPSUM
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DMAXSHIFTEXPSUM
+#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DNORM
+#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DNORM
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
@@ -40,23 +40,20 @@ template <typename T>
 class ArgumentPack;
 
 /** Forward declaration */
-class ClTemplateLogits1DMaxShiftExpSum;
+class ClTemplateLogits1DNorm;
 
-/** Component to calculate max-shifted exponentials and their sum
+/** Component to calculate the final step of the Softmax Layer
+ * where each logit value is multiplied by the inverse of the sum of the logits.
  *
  *  1D example:
- *      input:  [x1, x2, ... , xn], shape: (1 x d)
  *
- *      Let max(x1...xn) = m
+ *      (input)  src: [x1 x2 ... xn], shape: (1 x d)
+ *      (input)  sum: [x1 + x2 + ... + xn], shape: (1 x 1)
+ *      (output) dst: [x1/sum x2/sum ... xn/sum], shape: (1 x d)
  *
- *      (output) sum: [exp(x1-m) + ... + exp(xn-m)], shape: (1 x 1)
- *      (output) dst: [exp(x1-m) ... exp(xn-m)], shape: (1 x d)
- *
- *  This component is used by the softmax operator. The subsequent
- *  operation normalizes dst with sum, therefore the max-shifting
- *  since exp(m) will be cancelled in numerator and denominator.
+ *  This component is used by the softmax operator to get the final result.
 */
-class ClComponentLogits1DMaxShiftExpSum final : public IGpuKernelComponent
+class ClComponentLogits1DNorm final : public IGpuKernelComponent
 {
 public:
     /** Attributes are a set of backend-agnostic parameters that define what a component does */
@@ -72,19 +69,19 @@ public:
      *
      * Tensor argument names:
      * - ACL_SRC_0: Input
+     * - ACL_SRC_1: Input
      * - ACL_DST_0: Output
-     * - ACL_DST_1: Output
      *
      * Tensor argument constness:
      * - ACL_SRC_0: Const
+     * - ACL_SRC_1: Const
      * - ACL_DST_0: Const
-     * - ACL_DST_1: Const
      *
      * Valid data layouts:
      * - All
      *
      ** Valid data type configurations:
-     * |ACL_SRC_0  |ACL_DST_0  |ACL_DST_1  |
+     * |ACL_SRC_0  |ACL_SRC_1  |ACL_DST_0  |
      * |:----------|:----------|:----------|
      * |F16        | F16       | F16       |
      * |F32        | F32       | F32       |
@@ -96,23 +93,23 @@ public:
 
     /** Constructor
      *
-     * Similar to @ref ClComponentLogits1DMaxShiftExpSum::validate()
+     * Similar to @ref ClComponentLogits1DNorm::validate()
      */
-    ClComponentLogits1DMaxShiftExpSum(ComponentId                      id,
-                                      const Properties                &properties,
-                                      const ArgumentPack<ITensorInfo> &tensors,
-                                      const Attributes                &attributes);
+    ClComponentLogits1DNorm(ComponentId                      id,
+                            const Properties                &properties,
+                            const ArgumentPack<ITensorInfo> &tensors,
+                            const Attributes                &attributes);
 
     /** Destructor */
-    ~ClComponentLogits1DMaxShiftExpSum() override;
+    ~ClComponentLogits1DNorm() override;
     /** Prevent instances of this class from being copy constructed */
-    ClComponentLogits1DMaxShiftExpSum(const ClComponentLogits1DMaxShiftExpSum &component) = delete;
+    ClComponentLogits1DNorm(const ClComponentLogits1DNorm &component) = delete;
     /** Prevent instances of this class from being copied */
-    ClComponentLogits1DMaxShiftExpSum &operator=(const ClComponentLogits1DMaxShiftExpSum &component) = delete;
+    ClComponentLogits1DNorm &operator=(const ClComponentLogits1DNorm &component) = delete;
     /** Allow instances of this class to be move constructed */
-    ClComponentLogits1DMaxShiftExpSum(ClComponentLogits1DMaxShiftExpSum &&component) = default;
+    ClComponentLogits1DNorm(ClComponentLogits1DNorm &&component) = default;
     /** Allow instances of this class to be moved */
-    ClComponentLogits1DMaxShiftExpSum &operator=(ClComponentLogits1DMaxShiftExpSum &&component) = default;
+    ClComponentLogits1DNorm &operator=(ClComponentLogits1DNorm &&component) = default;
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
     /** Get component type */
@@ -122,10 +119,10 @@ public:
     }
 
 private:
-    std::unique_ptr<ClTemplateLogits1DMaxShiftExpSum> _component_writer;
+    std::unique_ptr<ClTemplateLogits1DNorm> _component_writer;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DMAXSHIFTEXPSUM */
+#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DNORM */

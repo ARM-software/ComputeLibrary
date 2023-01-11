@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -355,12 +355,12 @@ Status ClWorkloadRuntime::run(const std::vector<CLTensor *> &tensors)
     return Status{};
 }
 
-std::vector<std::pair<CLTensor *, AuxMemoryInfo>> ClWorkloadRuntime::get_auxiliary_tensors()
+std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> ClWorkloadRuntime::get_auxiliary_tensors()
 {
-    std::vector<std::pair<CLTensor *, AuxMemoryInfo>> aux_tensors;
+    std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> aux_tensors;
     for(const auto &data : _impl->_aux_tensors.get_tensors())
     {
-        aux_tensors.emplace_back(data.tensor, data.memory_info);
+        aux_tensors.emplace_back(data.tensor, data.tensor_info, data.memory_info);
     }
     return aux_tensors;
 }

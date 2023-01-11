@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DMaxShiftExpSum.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentLogits1DNorm.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
 #include "src/core/CL/CLValidate.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.h"
+#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DNorm.h"
 
 namespace arm_compute
 {
@@ -37,7 +37,7 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentLogits1DMaxShiftExpSum::validate(
+Status ClComponentLogits1DNorm::validate(
     const Properties                &properties,
     const ArgumentPack<ITensorInfo> &tensors,
     const Attributes                &attributes)
@@ -45,8 +45,8 @@ Status ClComponentLogits1DMaxShiftExpSum::validate(
     ARM_COMPUTE_UNUSED(properties, attributes);
 
     const ITensorInfo *src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
-    const ITensorInfo *sum = tensors.get_const_tensor(TensorType::ACL_DST_0);
-    const ITensorInfo *dst = tensors.get_const_tensor(TensorType::ACL_DST_1);
+    const ITensorInfo *sum = tensors.get_const_tensor(TensorType::ACL_SRC_1);
+    const ITensorInfo *dst = tensors.get_const_tensor(TensorType::ACL_DST_0);
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum);
@@ -62,6 +62,8 @@ Status ClComponentLogits1DMaxShiftExpSum::validate(
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
 
+    ARM_COMPUTE_RETURN_ERROR_ON(attributes.is_log_softmax() && !is_data_type_float(src->data_type()));
+
     // Device requirements are met
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
 
@@ -71,20 +73,20 @@ Status ClComponentLogits1DMaxShiftExpSum::validate(
     return Status{};
 }
 
-ClComponentLogits1DMaxShiftExpSum::ClComponentLogits1DMaxShiftExpSum(ComponentId                      id,
-                                                                     const Properties                &properties,
-                                                                     const ArgumentPack<ITensorInfo> &tensors,
-                                                                     const Attributes                &attributes)
+ClComponentLogits1DNorm::ClComponentLogits1DNorm(ComponentId                      id,
+                                                 const Properties                &properties,
+                                                 const ArgumentPack<ITensorInfo> &tensors,
+                                                 const Attributes                &attributes)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateLogits1DMaxShiftExpSum>(id, tensors, attributes) }
+      _component_writer{ std::make_unique<ClTemplateLogits1DNorm>(id, tensors, attributes) }
 {
 }
 
-ClComponentLogits1DMaxShiftExpSum::~ClComponentLogits1DMaxShiftExpSum()
+ClComponentLogits1DNorm::~ClComponentLogits1DNorm()
 {
 }
 
-const IGpuTemplateComponentWriter *ClComponentLogits1DMaxShiftExpSum::template_writer() const
+const IGpuTemplateComponentWriter *ClComponentLogits1DNorm::template_writer() const
 {
     return _component_writer.get();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -180,7 +180,8 @@ std::string ClTemplateWriter::write_code()
     }
 
     auto arguments = _components.get_argument_tensors();
-    std::sort(arguments.begin(), arguments.end(), [](const ITensorInfo *l, const ITensorInfo *r) {
+    std::sort(arguments.begin(), arguments.end(), [](const ITensorInfo * l, const ITensorInfo * r)
+    {
         return l->id() < r->id();
     });
     code += write_kernel_signature(_vtable.get_variable_list(arguments));
@@ -192,16 +193,16 @@ std::string ClTemplateWriter::write_code()
     code += "    //------------------ END KERNEL_BUILDER_COORDINATE ---------------------\n";
 
     {
-        const auto tiles = _components.get_tiles();
+        const auto        tiles = _components.get_tiles();
         std::stringstream tiles_ss;
 
         tiles_ss << "    //------------------ START TILE DECLARATION ---------------------\n";
 
         for(auto tile : tiles)
         {
-            const auto var = _vtable.get_variable(tile);
+            const auto var       = _vtable.get_variable(tile);
             const auto data_type = get_cl_type_from_data_type(tile->data_type());
-            const auto var_name = var.uniq_name;
+            const auto var_name  = var.uniq_name;
 
             tiles_ss << "    TILE(" << data_type << ", M0, N0, " << var_name << ");\n";
         }
@@ -274,6 +275,11 @@ std::string ClTemplateWriter::write_argument_declaration(const GpuKernelVariable
         case GpuKernelArgumentInfo::Type::Tensor_4D_t_Image:
         {
             code += "\n    TENSOR4D_T(" + var.uniq_name + ", IMAGE)";
+            break;
+        }
+        case GpuKernelArgumentInfo::Type::Tensor_3D:
+        {
+            code += "\n    TENSOR3D_DECLARATION(" + var.uniq_name + ")";
             break;
         }
         default:
