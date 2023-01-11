@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,9 @@ public:
      * @param[in]  src    The source tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[out] dst    The destination tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
+     *
+     * @deprecated Support for BFLOAT16 will be removed in 23.05 release
+     *
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration

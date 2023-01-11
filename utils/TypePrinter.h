@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -482,7 +482,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransform
 inline ::std::ostream &operator<<(::std::ostream &os, const bfloat16 &v)
 {
     std::stringstream str;
-    str << static_cast<float>(v);
+    str << v;
     os << str.str();
     return os;
 }

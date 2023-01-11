@@ -5,7 +5,7 @@
                 "cxxflags": ["-march=armv8.2-a"]
             },
             "armv8.2-a": {
-                "cxxflags": ["-march=armv8.2-a+fp16+bf16"],
+                "cxxflags": ["-march=armv8.2-a+fp16"],
                 "cppdefines": ["ARM_COMPUTE_ENABLE_FP16"]
             },
             "armv8.2-a-sve": {

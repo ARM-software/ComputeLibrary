@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 Arm Limited.
+ * Copyright (c) 2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,6 +87,26 @@ vcvta(const float32x4_t &a)
     return vcvtaq_s32_f32(a);
 }
 #endif //__aarch64__
+
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+/** Convert 2x128-bit floating point vectors into 1x128-bit bfloat16 vector
+ *
+ * @param[in]     inptr  Pointer to the input memory to load values from
+ * @param[in,out] outptr Pointer to the output memory to store values to
+ */
+inline void vcvt_bf16_f32(const float *inptr, uint16_t *outptr)
+{
+    __asm __volatile(
+        "ldp    q0, q1, [%[inptr]]\n"
+        ".inst  0xea16800\n"  // BFCVTN v0, v0
+        ".inst  0x4ea16820\n" // BFCVTN2 v0, v1
+        "str    q0, [%[outptr]]\n"
+        : [inptr] "+r"(inptr)
+        : [outptr] "r"(outptr)
+        : "v0", "v1", "memory");
+}
+#endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
+
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_WRAPPER_CVT_H */
