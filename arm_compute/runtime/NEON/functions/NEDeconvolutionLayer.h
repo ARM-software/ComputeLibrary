@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,25 +103,34 @@ public:
      * |QASYMM8_SIGNED |QASYMM8_SIGNED     |S32    |QASYMM8_SIGNED |
      * |QASYMM8_SIGNED |QSYMM8_PER_CHANNEL |S32    |QASYMM8_SIGNED |
      *
-     * @param[in,out] input   Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
-     * @param[in]     weights The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in]     bias    Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
-     * @param[out]    output  Output tensor. The output has the same number of dimensions as the @p input.
-     * @param[in]     info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in,out] input            Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
+     *                                 Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
+     * @param[in]     weights          The 4d weights with dimensions [width, height, IFM, OFM].
+     *                                 Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     * @param[in]     bias             Optional, ignored if NULL. The biases have one dimension.
+     *                                 Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
+     * @param[out]    output           Output tensor. The output has the same number of dimensions as the @p input.
+     * @param[in]     info             Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in]     enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *                                            available which may introduce a drop of accuracy as well. Default is false
      *
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info);
+    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info, bool enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
      *
-     * @param[in] input   Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
-     * @param[in] weights The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] bias    (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
-     * @param[in] output  Output tensor info. The output has the same number of dimensions as the @p input.
-     * @param[in] info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in] input            Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
+     *                             Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED.
+     * @param[in] weights          The 4d weights info with dimensions [width, height, IFM, OFM].
+     *                             Data type supported: Same as @p input, also could be QSYMM8_PER_CHANNEL if input is QASYMM8/QASYMM8_SIGNED.
+     * @param[in] bias             (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8/QASYMM8_SIGNED input, F32 for F32 input, F16 for F16 input.
+     * @param[in] output           Output tensor info. The output has the same number of dimensions as the @p input.
+     * @param[in] info             Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *                                        available which may introduce a drop of accuracy as well. Default is false
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info, bool enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;
