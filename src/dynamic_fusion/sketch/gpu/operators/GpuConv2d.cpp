@@ -239,7 +239,7 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
     // Initialize the direct convolution descriptor
     const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, wei, conv_info);
 
-    ITensorInfo *dst = sketch.implementation().create_intermediate_tensor();
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
 
     // Assert validation
     ARM_COMPUTE_ERROR_THROW_ON(GpuConv2d::validate_op(sketch, src, wei, bia, attributes));

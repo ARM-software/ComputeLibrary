@@ -66,7 +66,7 @@ Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
-    ARM_COMPUTE_RETURN_ERROR_ON(!is_user_tensor(dst));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_alloc_tensor(dst));
 
     // Initialize the destination tensor info.
     TensorInfo dst_to_validate = *dst;

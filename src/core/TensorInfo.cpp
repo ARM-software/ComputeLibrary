@@ -56,7 +56,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
     _are_values_constant           = info.are_values_constant();
-    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
+    _id                            = info.id();
     _lock_paddings                 = info.lock_paddings();
 }
 
@@ -77,7 +77,7 @@ TensorInfo::TensorInfo(const TensorInfo &info)
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
     _are_values_constant           = info.are_values_constant();
-    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
+    _id                            = info.id();
     _lock_paddings                 = false;
 }
 TensorInfo::TensorInfo(Format format)

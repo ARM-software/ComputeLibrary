@@ -70,18 +70,9 @@ public:
     TensorInfo create_tensor_info(Args &&... args)
     {
         auto tensor_info = TensorInfo(std::forward<Args>(args)...);
-        tensor_info.set_id(allocate_new_tensor_id());
+        register_new_tensor(tensor_info);
         return tensor_info;
     }
-    /** Create a @ref TensorInfo associated with the workload sketch by copying from an existing tensor info
-     * @note The newly copied tensor will have a different identity within the workload than the one copied from
-     *       To copy the identity of @p tensor_info as well, use @ref TensorInfo 's copy constructors instead
-     *
-     * @param[in] tensor_info @ref ITensorInfo to copy from
-     *
-     * @return TensorInfo   Newly created tensor info
-     */
-    TensorInfo create_tensor_info(const ITensorInfo &tensor_info);
     /** Create a default @ref TensorInfo associated with the workload sketch
      * It is usually used by user input or output tensors
      *
@@ -90,7 +81,11 @@ public:
     TensorInfo create_tensor_info();
 
 private:
-    ITensorInfo::Id                 allocate_new_tensor_id();
+    /** Register a new tensor by setting a new id to it and register its memory descriptor in the sketch
+     *
+     * @param[in,out] tensor_info @ref ITensorInfo that will be registered
+     */
+    void register_new_tensor(ITensorInfo &tensor_info);
     std::unique_ptr<Implementation> _impl; /**< Internal opaque implementation*/
 };
 

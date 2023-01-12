@@ -33,21 +33,29 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-inline bool is_user_tensor(const ITensorInfo *tensor_info)
+/** Tensor should have backing memory. @ref MemoryType
+ */
+inline bool is_alloc_tensor(const ITensorInfo *tensor_info)
 {
     return tensor_info->id() > ITensorInfo::invalid_tensor_id;
 }
 
-inline bool is_intermediate_tensor(const ITensorInfo *tensor_info)
+/** Tensor should not have backing memory. @ref MemoryType
+ */
+inline bool is_noalloc_tensor(const ITensorInfo *tensor_info)
 {
     return tensor_info->id() < ITensorInfo::invalid_tensor_id;
 }
 
+/** @ref ITensorInfo has valid id
+ */
 inline bool is_valid_tensor(const ITensorInfo *tensor_info)
 {
     return tensor_info->has_valid_id();
 }
 
+/** @ref ITensorInfo has invalid id
+ */
 inline bool is_invalid_tensor(const ITensorInfo *tensor_info)
 {
     return !is_valid_tensor(tensor_info);

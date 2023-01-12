@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,8 +89,12 @@ public:
         }
     }
     /** Perform component fusion and serialize the graph into a stream of component groups
+     *
+     * @param[in] mem_map MemoryDescriptorMap for all the tensors in the component graph
+     *
+     * @return GpuKernelComponentStream
      */
-    GpuKernelComponentStream fuse() const;
+    GpuKernelComponentStream fuse(const MemoryDescriptorMap &mem_map) const;
 
 private:
     static std::vector<DependencyGraph::TensorId> get_tensor_ids(const std::vector<const ITensorInfo *> tensors);
