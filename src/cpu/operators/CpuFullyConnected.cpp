@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,7 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
     return Status{};
 }
 
-Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act, bool enable_fast_math)
+Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act, bool enable_fast_math, WeightFormat weight_format)
 {
     if(is_data_type_quantized_asymmetric(src->data_type()))
     {
@@ -137,6 +137,8 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
     else
     {
         GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+        gemm_info.set_weight_format(weight_format);
+        gemm_info.set_fixed_format(weight_format != WeightFormat::UNSPECIFIED);
         gemm_info.set_fast_math(enable_fast_math);
         ARM_COMPUTE_RETURN_ON_ERROR(CpuGemm::validate(src, weights, biases, dst, 1.f, 1.0f, gemm_info));
     }
@@ -240,7 +242,8 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                                            weights,
                                                            biases != nullptr ? biases : nullptr,
                                                            dst,
-                                                           fc_info));
+                                                           fc_info,
+                                                           weights_info));
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, fc_info);
 
     _needs_weights_conversion = false;
@@ -352,12 +355,23 @@ Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weigh
 }
 
 Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                   FullyConnectedLayerInfo fc_info)
+                                   FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights, dst);
+
+    if (is_fixed_format_fast_math(weights_info.weight_format()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(src, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(weights, DataType::BFLOAT16);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights, dst);
+    }
+
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
@@ -436,7 +450,7 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != weights_to_use->dimension(1));
     }
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info, fc_info.enable_fast_math));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info, fc_info.enable_fast_math, weights_info.weight_format()));
 
     return Status{};
 }

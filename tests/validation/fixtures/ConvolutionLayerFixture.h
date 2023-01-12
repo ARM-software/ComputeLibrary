@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -416,8 +416,21 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_comput
     const int Ip            = arm_gemm::roundup<unsigned int>(C, block_by);      // C'=I'
     const int Op            = arm_gemm::roundup<unsigned int>(N, interleave_by); // O'=N'
 
+    arm_compute::Strides strides_in_bytes = tensor_info.strides_in_bytes();
+    strides_in_bytes.set(1, Ip * interleave_by * H * W * tensor_info.element_size());
+    strides_in_bytes.set(2, Ip * Op * tensor_info.element_size());
+
+    const size_t offset_first_element_in_bytes = tensor_info.offset_first_element_in_bytes();
+
+    // Total size needs to include padded dimensions
+    const size_t total_size_in_bytes = Op * H * W * Ip * tensor_info.element_size();
+
     const TensorShape TS(Ip, W, H, Op);
-    return TensorInfo(TS, 1 /*num_channels*/, data_type, data_layout);
+
+    TensorInfo new_tensor_info = tensor_info;
+    new_tensor_info.init(TS, 1 /*num_channels, deprecated*/, data_type, strides_in_bytes,
+        offset_first_element_in_bytes, total_size_in_bytes);
+    return new_tensor_info;
 }
 
 template <typename ScalarType, typename AccessorType>
