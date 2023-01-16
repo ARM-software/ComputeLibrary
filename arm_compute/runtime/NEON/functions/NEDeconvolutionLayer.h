@@ -148,6 +148,7 @@ private:
     ITensor           *_input;
     PadStrideInfo      _info;
     bool               _is_prepared;
+    bool               _do_upsampling;
 };
 } // arm_compute
 #endif /* ARM_COMPUTE_NEDECONVOLUTIONLAYER_H */
