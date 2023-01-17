@@ -180,22 +180,8 @@ __kernel void dwc_native_quantized_nhwc(
         a[i].v = ZERO_VALUE;
     })
 
-    TILE(int, 1, _IM0_A, my);
-
-    LOOP_UNROLLING(int, xk_i, 0, 1, _IM0_A,
-    {
-        int x_s    = xi + xk_i * (DILATION_X);
-        int y_s    = yi + yk   * (DILATION_Y);
-        my[0].s[xk_i] = x_s + y_s * SRC_WIDTH;
-        my[0].s[xk_i] = my[0].s[xk_i] + bout * (int)(SRC_WIDTH * SRC_HEIGHT);
-        my[0].s[xk_i] = select(-1, my[0].s[xk_i], x_s >= 0);
-        my[0].s[xk_i] = select(-1, my[0].s[xk_i], x_s < SRC_WIDTH);
-        my[0].s[xk_i] = select(-1, my[0].s[xk_i], y_s >= 0);
-        my[0].s[xk_i] = select(-1, my[0].s[xk_i], y_s < SRC_HEIGHT);
-    })
-
-    // Load tile from the src tensor
-    T_LOAD2D_INDIRECT(SRC_DATA_TYPE, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, (cout / DEPTH_MULTIPLIER), src_stride_y, my, a);
+    // Load tile from the src tensor (TILE A)
+    T_LOAD_NHWC_WITH_DILATION(SRC_DATA_TYPE, 1, _IM0_A, _IN0_A, SRC_TENSOR_TYPE, src, bout, yi + yk * DILATION_Y, xi, (cout / DEPTH_MULTIPLIER), src_w, src_h, DILATION_X, 1, _IBOUNDARY_CHECK, a);
 
     TILE(WEI_DATA_TYPE, _IM0_B, _IN0_B, b);
 

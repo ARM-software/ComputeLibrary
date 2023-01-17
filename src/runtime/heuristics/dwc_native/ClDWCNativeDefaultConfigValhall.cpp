@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -283,30 +283,15 @@ DWCComputeKernelInfo ClDWCNativeDefaultConfigValhall::configure_G77_f16(const IT
         desc.n0 = adjust_vec_size(desc.n0, kernel_c);
 
         // Set m0 only if stride_x == 1 and dilation_x == 1
-        // m0 affects the number of rows to load from the input tensor. In fact, when depth_multiplier = 1, the number of rows
-        // loaded from the input tensors are -> kernel_width - (M0 - 1)
-        // The bigger the kernel_width, the smaller the M0 to avoid register spilling.
         if(conv_info.stride().first == 1 && dilation.x() == 1)
         {
-            // When the kernel width and kernel height are unit, it means that we have a pointwise multiplication. Therefore, M0 can be 1
             if((kernel_w >= 9) || (kernel_w == 1))
             {
                 desc.m0 = 1;
             }
             else
             {
-                switch(kernel_w)
-                {
-                    case 3:
-                        desc.m0 = 4;
-                        break;
-                    case 5:
-                        desc.m0 = 3;
-                        break;
-                    default:
-                        desc.m0 = 2;
-                        break;
-                }
+                desc.m0 = 2;
             }
         }
         else
