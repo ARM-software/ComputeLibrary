@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,16 +10,16 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 #ifdef ARM_COMPUTE_ENABLE_SVE
 
@@ -52,39 +52,39 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
     __asm__ __volatile__(
       "ptrue p0.b\n"
       "1:"  // Height loop
-      "ldr x26, [%x[args_ptr], %[offsetof_Bpanel]]\n"
-      "ldr x25, [%x[args_ptr], %[offsetof_N]]\n"
-      "str x26, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "mov x24, %x[Apanel]\n"
+      "ldr x25, [%x[args_ptr], %[offsetof_Bpanel]]\n"
+      "ldr x24, [%x[args_ptr], %[offsetof_N]]\n"
+      "str x25, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "mov x23, %x[Apanel]\n"
       "2:"  // Width loop
-      "ldr x26, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "ldr x20, [%x[args_ptr], %[offsetof_B_stride]]\n"
-      "cnth x23, ALL, MUL #2\n"
-      "add x22, x26, x20, LSL #1\n"
-      "add x21, x22, x20, LSL #1\n"
-      "add x20, x21, x20, LSL #1\n"
-      "cmp x25, x23\n"
-      "str x20, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "mov %x[Apanel], x24\n"
+      "ldr x25, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "ldr x19, [%x[args_ptr], %[offsetof_B_stride]]\n"
+      "cnth x22, ALL, MUL #2\n"
+      "add x21, x25, x19, LSL #1\n"
+      "add x20, x21, x19, LSL #1\n"
+      "add x19, x20, x19, LSL #1\n"
+      "cmp x24, x22\n"
+      "str x19, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "mov %x[Apanel], x23\n"
       "bgt 3f\n"
-      "dech x23\n"
-      "cmp x25, x23\n"
-      "mov x21, x26\n"
+      "dech x22\n"
+      "cmp x24, x22\n"
+      "mov x20, x25\n"
       "bgt 3f\n"
-      "mov x22, x26\n"
+      "mov x21, x25\n"
       "3:"  // B setup done
-      "ldr x20, [%x[args_ptr], %[offsetof_K]]\n"
-      "cmp x20, #0x2\n"
+      "ldr x19, [%x[args_ptr], %[offsetof_K]]\n"
+      "cmp x19, #0x2\n"
       "mov z8.b, #0x0\n"
       "mov z9.b, #0x0\n"
       "mov z10.b, #0x0\n"
-      "ld1h { z0.h }, p0/Z, [x26]\n"
+      "ld1h { z0.h }, p0/Z, [x25]\n"
       "mov z11.b, #0x0\n"
       "mov z12.b, #0x0\n"
-      "ld1h { z1.h }, p0/Z, [x22]\n"
+      "ld1h { z1.h }, p0/Z, [x21]\n"
       "mov z13.b, #0x0\n"
       "mov z14.b, #0x0\n"
-      "ld1h { z2.h }, p0/Z, [x21]\n"
+      "ld1h { z2.h }, p0/Z, [x20]\n"
       "mov z15.b, #0x0\n"
       "mov z16.b, #0x0\n"
       "ld1rh { z3.h }, p0/Z, [%x[Apanel]]\n"
@@ -110,7 +110,7 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "4:"  // main loop head
       "fmla z8.h, p0/M, z0.h, z3.h\n"
       "fmla z9.h, p0/M, z1.h, z3.h\n"
-      "sub x20, x20, #0x2\n"
+      "sub x19, x19, #0x2\n"
       "fmla z10.h, p0/M, z2.h, z3.h\n"
       "ld1rh { z3.h }, p0/Z, [%x[Apanel], #8]\n"
       "fmla z11.h, p0/M, z0.h, z4.h\n"
@@ -119,7 +119,7 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "ld1rh { z4.h }, p0/Z, [%x[Apanel], #10]\n"
       "fmla z14.h, p0/M, z0.h, z5.h\n"
       "fmla z15.h, p0/M, z1.h, z5.h\n"
-      "cmp x20, #0x2\n"
+      "cmp x19, #0x2\n"
       "fmla z16.h, p0/M, z2.h, z5.h\n"
       "ld1rh { z5.h }, p0/Z, [%x[Apanel], #12]\n"
       "fmla z17.h, p0/M, z0.h, z6.h\n"
@@ -139,11 +139,11 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "fmla z28.h, p0/M, z2.h, z5.h\n"
       "ld1rh { z5.h }, p0/Z, [%x[Apanel], #20]\n"
       "fmla z29.h, p0/M, z0.h, z6.h\n"
-      "ld1h { z0.h }, p0/Z, [x26, #1, MUL VL]\n"
+      "ld1h { z0.h }, p0/Z, [x25, #1, MUL VL]\n"
       "fmla z30.h, p0/M, z1.h, z6.h\n"
       "fmla z31.h, p0/M, z2.h, z6.h\n"
-      "ld1h { z1.h }, p0/Z, [x22, #1, MUL VL]\n"
-      "ld1h { z2.h }, p0/Z, [x21, #1, MUL VL]\n"
+      "ld1h { z1.h }, p0/Z, [x21, #1, MUL VL]\n"
+      "ld1h { z2.h }, p0/Z, [x20, #1, MUL VL]\n"
       "fmla z8.h, p0/M, z0.h, z3.h\n"
       "ld1rh { z6.h }, p0/Z, [%x[Apanel], #22]\n"
       "fmla z9.h, p0/M, z1.h, z3.h\n"
@@ -155,15 +155,15 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "ld1rh { z4.h }, p0/Z, [%x[Apanel], #26]\n"
       "fmla z14.h, p0/M, z0.h, z5.h\n"
       "fmla z15.h, p0/M, z1.h, z5.h\n"
-      "addvl x26, x26, #2\n"
+      "addvl x25, x25, #2\n"
       "fmla z16.h, p0/M, z2.h, z5.h\n"
       "ld1rh { z5.h }, p0/Z, [%x[Apanel], #28]\n"
       "fmla z17.h, p0/M, z0.h, z6.h\n"
       "fmla z18.h, p0/M, z1.h, z6.h\n"
       "fmla z19.h, p0/M, z2.h, z6.h\n"
       "ld1rh { z6.h }, p0/Z, [%x[Apanel], #30]\n"
-      "addvl x22, x22, #2\n"
       "addvl x21, x21, #2\n"
+      "addvl x20, x20, #2\n"
       "add %x[Apanel], %x[Apanel], #0x20\n"
       "fmla z20.h, p0/M, z0.h, z3.h\n"
       "fmla z21.h, p0/M, z1.h, z3.h\n"
@@ -178,17 +178,17 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "fmla z28.h, p0/M, z2.h, z5.h\n"
       "ld1rh { z5.h }, p0/Z, [%x[Apanel], #4]\n"
       "fmla z29.h, p0/M, z0.h, z6.h\n"
-      "ld1h { z0.h }, p0/Z, [x26]\n"
+      "ld1h { z0.h }, p0/Z, [x25]\n"
       "fmla z30.h, p0/M, z1.h, z6.h\n"
       "fmla z31.h, p0/M, z2.h, z6.h\n"
-      "ld1h { z1.h }, p0/Z, [x22]\n"
-      "ld1h { z2.h }, p0/Z, [x21]\n"
+      "ld1h { z1.h }, p0/Z, [x21]\n"
+      "ld1h { z2.h }, p0/Z, [x20]\n"
       "ld1rh { z6.h }, p0/Z, [%x[Apanel], #6]\n"
       "bge 4b\n"
       "5:"  // main loop skip
       "fmla z8.h, p0/M, z0.h, z3.h\n"
       "fmla z9.h, p0/M, z1.h, z3.h\n"
-      "addvl x26, x26, #1\n"
+      "addvl x25, x25, #1\n"
       "fmla z10.h, p0/M, z2.h, z3.h\n"
       "ld1rh { z3.h }, p0/Z, [%x[Apanel], #8]\n"
       "fmla z11.h, p0/M, z0.h, z4.h\n"
@@ -197,7 +197,7 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "ld1rh { z4.h }, p0/Z, [%x[Apanel], #10]\n"
       "fmla z14.h, p0/M, z0.h, z5.h\n"
       "fmla z15.h, p0/M, z1.h, z5.h\n"
-      "addvl x22, x22, #1\n"
+      "addvl x21, x21, #1\n"
       "fmla z16.h, p0/M, z2.h, z5.h\n"
       "ld1rh { z5.h }, p0/Z, [%x[Apanel], #12]\n"
       "fmla z17.h, p0/M, z0.h, z6.h\n"
@@ -206,7 +206,7 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "ld1rh { z6.h }, p0/Z, [%x[Apanel], #14]\n"
       "fmla z20.h, p0/M, z0.h, z3.h\n"
       "fmla z21.h, p0/M, z1.h, z3.h\n"
-      "addvl x21, x21, #1\n"
+      "addvl x20, x20, #1\n"
       "fmla z22.h, p0/M, z2.h, z3.h\n"
       "fmla z23.h, p0/M, z0.h, z4.h\n"
       "add %x[Apanel], %x[Apanel], #0x10\n"
@@ -218,10 +218,10 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "fmla z29.h, p0/M, z0.h, z6.h\n"
       "fmla z30.h, p0/M, z1.h, z6.h\n"
       "fmla z31.h, p0/M, z2.h, z6.h\n"
-      "cbz x20, 6f\n"
-      "ld1h { z0.h }, p0/Z, [x26]\n"
-      "ld1h { z1.h }, p0/Z, [x22]\n"
-      "ld1h { z2.h }, p0/Z, [x21]\n"
+      "cbz x19, 6f\n"
+      "ld1h { z0.h }, p0/Z, [x25]\n"
+      "ld1h { z1.h }, p0/Z, [x21]\n"
+      "ld1h { z2.h }, p0/Z, [x20]\n"
       "ld1rh { z3.h }, p0/Z, [%x[Apanel]]\n"
       "fmla z8.h, p0/M, z0.h, z3.h\n"
       "ld1rh { z4.h }, p0/Z, [%x[Apanel], #2]\n"
@@ -256,9 +256,9 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "fmla z30.h, p0/M, z1.h, z6.h\n"
       "fmla z31.h, p0/M, z2.h, z6.h\n"
       "6:"  // multiply loop done
-      "dech x25, ALL, MUL #3\n"
+      "dech x24, ALL, MUL #3\n"
       "st1h { z8.h }, p0, [%x[Cpanel]]\n"
-      "cmp x25, XZR\n"
+      "cmp x24, XZR\n"
       "st1h { z9.h }, p0, [%x[Cpanel], #1, MUL VL]\n"
       "st1h { z10.h }, p0, [%x[Cpanel], #2, MUL VL]\n"
       "st1h { z11.h }, p0, [%x[Cpanel], #3, MUL VL]\n"
@@ -289,7 +289,7 @@ void sve_ffinterleaved_fp16_mla_8x3VL_a64fx(
       "bne 1b\n"
       : [Apanel] "+&r" (Apanel), [Cpanel] "+&r" (Cpanel), [ablocks] "+&r" (ablocks)
       : [args_ptr] "r" (&ka), [offsetof_B_stride] "I" (offsetof(KernelArgs, B_stride)), [offsetof_Bpanel] "I" (offsetof(KernelArgs, Bpanel)), [offsetof_K] "I" (offsetof(KernelArgs, K)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_cur_B_ptr] "I" (offsetof(KernelArgs, cur_B_ptr))
-      : "cc", "memory", "p0", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : "cc", "memory", "p0", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 

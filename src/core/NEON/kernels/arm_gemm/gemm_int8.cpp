@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@
 #include "kernels/sve_hybrid_s8s32_mmla_6x4VL.hpp"
 #include "kernels/sve_interleaved_s8s32_dot_8x3VL.hpp"
 #include "kernels/sve_interleaved_s8s32_mmla_8x3VL.hpp"
+#include "kernels/sve_smallK_hybrid_s8s32_dot_8x1VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_SVE
 
 namespace arm_gemm {
@@ -96,6 +97,13 @@ GemmImplementation<int8_t, int32_t>::with_estimate(
     [](const GemmArgs &args) { return GemmInterleaved<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int32_t>::estimate_cycles<int32_t>(args); },
     [](const GemmArgs &args) { return new GemmInterleaved<cls_sve_interleaved_s8s32_mmla_8x3VL, int8_t, int32_t>(args); }
 ),
+{
+    GemmMethod::GEMM_HYBRID,
+    "sve_smallK_hybrid_s8s32_dot_8x1VL",
+    [](const GemmArgs &args) { return args._ci->has_svei8mm() && args._Ksize<=64 && !args._indirect_input; },
+    [](const GemmArgs &args) { return !(args._ci->has_svei8mm() || args._ci->has_i8mm()); },
+    [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_s8s32_dot_8x1VL, int8_t, int32_t>(args); }
+},
 GemmImplementation<int8_t, int32_t>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8s32_dot_6x4VL",

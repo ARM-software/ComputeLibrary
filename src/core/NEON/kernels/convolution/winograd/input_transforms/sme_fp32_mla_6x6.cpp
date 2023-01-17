@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ void sme_fp32_mla_6x6(
       "lsl x22, %x[input_col_1_stride], #0x2\n"
       "lsl x21, %x[output_col_1_stride], #0x2\n"
       "add x20, x22, %x[input_col_1_stride]\n"
-      "add x8, x21, %x[output_col_1_stride]\n"
+      "add x19, x21, %x[output_col_1_stride]\n"
       "whilelt p0.s, XZR, %x[num_channels]\n"
       "beq 2f\n"
       "1:"  // channel_loop
@@ -156,7 +156,7 @@ void sme_fp32_mla_6x6(
       "st1w { z27.s }, p0, [%x[output_row_0], x25, LSL #2]\n"
       "st1w { z8.s }, p0, [%x[output_row_0], x23, LSL #2]\n"
       "st1w { z25.s }, p0, [%x[output_row_0], x21, LSL #2]\n"
-      "st1w { z28.s }, p0, [%x[output_row_0], x8, LSL #2]\n"
+      "st1w { z28.s }, p0, [%x[output_row_0], x19, LSL #2]\n"
       "incb %x[output_row_0]\n"
       "ld1w { z19.s }, p0/Z, [x16]\n"
       "ld1w { z7.s }, p0/Z, [x16, %x[input_col_1_stride], LSL #2]\n"
@@ -283,10 +283,10 @@ void sme_fp32_mla_6x6(
       "fneg z10.s, p1/M, z10.s\n"
       "fadd z10.s, z10.s, z31.s\n"
       "fadd z17.s, z13.s, z15.s\n"
-      "st1w { z17.s }, p0, [x11, x8, LSL #2]\n"
+      "st1w { z17.s }, p0, [x11, x19, LSL #2]\n"
       "fsub z17.s, z15.s, z13.s\n"
       "incb x11\n"
-      "st1w { z17.s }, p0, [x9, x8, LSL #2]\n"
+      "st1w { z17.s }, p0, [x9, x19, LSL #2]\n"
       "fadd z17.s, z10.s, z14.s\n"
       "fsub z14.s, z14.s, z10.s\n"
       "st1w { z22.s }, p0, [x15]\n"
@@ -300,9 +300,9 @@ void sme_fp32_mla_6x6(
       "st1w { z4.s }, p0, [x13, x23, LSL #2]\n"
       "st1w { z18.s }, p0, [x15, x21, LSL #2]\n"
       "st1w { z30.s }, p0, [x13, x21, LSL #2]\n"
-      "st1w { z17.s }, p0, [x15, x8, LSL #2]\n"
+      "st1w { z17.s }, p0, [x15, x19, LSL #2]\n"
       "incb x15\n"
-      "st1w { z14.s }, p0, [x13, x8, LSL #2]\n"
+      "st1w { z14.s }, p0, [x13, x19, LSL #2]\n"
       "incb x13\n"
       "ld1w { z23.s }, p0/Z, [x28]\n"
       "ld1w { z22.s }, p0/Z, [x28, %x[input_col_1_stride], LSL #2]\n"
@@ -344,7 +344,7 @@ void sme_fp32_mla_6x6(
       "st1w { z6.s }, p0, [x27, x25, LSL #2]\n"
       "st1w { z28.s }, p0, [x27, x23, LSL #2]\n"
       "st1w { z8.s }, p0, [x27, x21, LSL #2]\n"
-      "st1w { z7.s }, p0, [x27, x8, LSL #2]\n"
+      "st1w { z7.s }, p0, [x27, x19, LSL #2]\n"
       "incb x27\n"
       "whilelt p0.s, XZR, %x[num_channels]\n"
       "bne 1b\n"
@@ -352,7 +352,7 @@ void sme_fp32_mla_6x6(
       ".inst 0xd503467f  // SMSTOP\n"
       : [input_row_0] "+&r" (input), [num_channels] "+&r" (long_channels), [output_row_0] "+&r" (output)
       : [B_values] "r" (B_values), [input_col_1_stride] "r" ((long) input_col_stride), [input_row_stride] "r" ((long) input_row_stride), [output_col_1_stride] "r" ((long) output_col_stride), [output_row_stride] "r" (6 * (long) output_col_stride)
-      : "cc", "memory", "p0", "p1", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x8", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : "cc", "memory", "p0", "p1", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
   );
 }
 

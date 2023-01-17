@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,7 @@
 #include "kernels/sve_interleaved_bf16fp32_mmla_8x3VL.hpp"
 #include "kernels/sve_interleaved_fp32_mla_8x3VL.hpp"
 #include "kernels/sve_interleaved_fp32_mmla_8x3VL.hpp"
+#include "kernels/sve_smallK_hybrid_fp32_mla_8x1VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_SVE
 
 namespace arm_gemm {
@@ -218,6 +219,13 @@ GemmImplementation<float, float>::with_estimate(
 },
 #endif // ARM_COMPUTE_ENABLE_SVEF32MM
 // SVE kernels
+{
+    GemmMethod::GEMM_HYBRID,
+    "sve_smallK_hybrid_fp32_mla_8x1VL",
+    [](const GemmArgs &args) { return args._ci->has_sve() && args._Ksize <= 24 && !args._indirect_input; },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmHybrid<cls_sve_smallK_hybrid_fp32_mla_8x1VL, float, float>(args); }
+},
 {
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp32_mla_8x1VL",
