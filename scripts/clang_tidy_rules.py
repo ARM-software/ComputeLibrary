@@ -70,6 +70,9 @@ def filter_clang_tidy_lines( lines ):
         if "/arm_gemm/" in line:
             continue
 
+        if "compute_kernel_writer/" in line:
+            continue
+
         if "/convolution/" in line:
             continue
 
