@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,31 +53,29 @@ constexpr float                     tolerance_num = 0.02f;                /**< T
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(zip(
-                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Mismatching data type input/weights
-                                                        TensorInfo(TensorShape(3U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Mismatching input feature maps
-                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Mismatching depth multiplier
-                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Invalid biases size
-                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Invalid biases dimensions
-                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // Invalid output size
-                                                        TensorInfo(TensorShape(8U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // patch size bigger than input width
-                                                        TensorInfo(TensorShape(8U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),    // dilation < 1
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(                                                                  // Explanations of failing tests
+                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // Mismatching data type input/weights
+                                                        TensorInfo(TensorShape(3U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // Mismatching input feature maps
+                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // Mismatching depth multiplier
+                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // Invalid biases size
+                                                        TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // Invalid biases dimensions
+                                                        TensorInfo(TensorShape(8U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),                  // dilation < 1
                                                         TensorInfo(TensorShape(8U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM16, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM8, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM8_PER_CHANNEL, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM16, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U8, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S8, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U16, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S16, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U32, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S32, DataLayout::NHWC),    // Unsupported data type
-                                                        TensorInfo(TensorShape(32U, 13U, 8U), 1, DataType::F32, DataLayout::NCHW),    // Unsupported data layout
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM8, DataLayout::NHWC),              // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),       // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM16, DataLayout::NHWC),              // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM8, DataLayout::NHWC),               // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QSYMM8_PER_CHANNEL, DataLayout::NHWC),   // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::QASYMM16, DataLayout::NHWC),             // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U8, DataLayout::NHWC),                   // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S8, DataLayout::NHWC),                   // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U16, DataLayout::NHWC),                  // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S16, DataLayout::NHWC),                  // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::U32, DataLayout::NHWC),                  // Unsupported data type
+                                                        TensorInfo(TensorShape(8U, 32U, 13U), 1, DataType::S32, DataLayout::NHWC),                  // Unsupported data type
+                                                        TensorInfo(TensorShape(32U, 13U, 8U), 1, DataType::F32, DataLayout::NCHW),                  // Unsupported data layout
                                                         TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                        TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC), // weight dimension > 3
+                                                        TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),              // weight dimension > 3
                                                         TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),
                                                         TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),
                                                         TensorInfo(TensorShape(8U, 32U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),
@@ -87,8 +85,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                           TensorInfo(TensorShape(2U, 3U, 3U, 2U), 1, DataType::F32, DataLayout::NHWC),
                                                           TensorInfo(TensorShape(2U, 3U, 3U, 2U), 1, DataType::F32, DataLayout::NHWC),
                                                           TensorInfo(TensorShape(2U, 3U, 3U, 2U), 1, DataType::F32, DataLayout::NHWC),
-                                                          TensorInfo(TensorShape(2U, 3U, 3U, 2U), 1, DataType::F32, DataLayout::NHWC),
-                                                          TensorInfo(TensorShape(16U, 3U, 3U), 1, DataType::F32, DataLayout::NHWC),
                                                           TensorInfo(TensorShape(16U, 3U, 3U), 1, DataType::F32, DataLayout::NHWC),
                                                           TensorInfo(TensorShape(16U, 3U, 3U), 1, DataType::F32, DataLayout::NHWC),
                                                           TensorInfo(TensorShape(24U, 3U, 3U), 1, DataType::QASYMM8, DataLayout::NHWC),
@@ -115,8 +111,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                          TensorInfo(TensorShape(2U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(2U, 2U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(16U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(16U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(16U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(24U), 1, DataType::S32, DataLayout::NHWC),
@@ -138,37 +132,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                          TensorInfo(TensorShape(24U), 1, DataType::F32, DataLayout::NHWC),
                                                          TensorInfo(TensorShape(24U), 1, DataType::F32, DataLayout::NHWC),
                                                        })),
-                framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(16U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(16U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(16U, 25U, 11U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QASYMM8, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QSYMM16, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QSYMM8, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QSYMM8_PER_CHANNEL, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::QASYMM16, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::U8, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::S8, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::U16, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::S16, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::U32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U), 1, DataType::S32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(32U, 11U, 24U), 1, DataType::F32, DataLayout::NCHW),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 32U, 11U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 33U, 14U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 17U, 5U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                         TensorInfo(TensorShape(24U, 15U, 4U, 4U), 1, DataType::F32, DataLayout::NHWC),
-                                                       })),
                 framework::dataset::make("Padding", {  Padding2D(0, 0, 0, 0),
-                                                       Padding2D(0, 0, 0, 0),
-                                                       Padding2D(0, 0, 0, 0),
                                                        Padding2D(0, 0, 0, 0),
                                                        Padding2D(0, 0, 0, 0),
                                                        Padding2D(0, 0, 0, 0),
@@ -217,8 +181,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                        Size2D(1, 1),
                                                        Size2D(1, 1),
                                                        Size2D(1, 1),
-                                                       Size2D(1, 1),
-                                                       Size2D(1, 1),
                                                        Size2D(2, 3),
                                                        Size2D(2, 3),
                                                       })),
@@ -227,8 +189,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                               3,
                                                               1,
                                                               1,
-                                                              1,
-                                                              2,
                                                               2,
                                                               2,
                                                               3,
@@ -255,8 +215,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                               Size2D(1U, 1U),
                                                               Size2D(1U, 1U),
                                                               Size2D(1U, 1U),
-                                                              Size2D(1U, 1U),
-                                                              Size2D(20U, 1U),
                                                               Size2D(0U, 1U),
                                                               Size2D(1U, 1U),
                                                               Size2D(1U, 1U),
@@ -278,10 +236,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                               Size2D(1U, 1U),
                                                               Size2D(2U, 3U),
                                                              })),
-                framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, true, false,
+                framework::dataset::make("Expected", { false, false, false, false, false, false, true, false,
                                                        false, false, false, false, false, false, false, false, false, false,
                                                        false, false, true, false, true, true, true })),
-                input_info, weights_info, biases_info, output_info, padding, stride, depth_multiplier, dilation, expected)
+                input_info, weights_info, biases_info, padding, stride, depth_multiplier, dilation, expected)
 {
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
     GpuWorkloadContext gpu_ctx = GpuWorkloadContext{ &cl_compile_ctx };
@@ -290,7 +248,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
     const TensorInfo sketch_input_info   = sketch.create_tensor_info(input_info);
     const TensorInfo sketch_weights_info = sketch.create_tensor_info(weights_info);
     const TensorInfo sketch_biases_info  = sketch.create_tensor_info(biases_info);
-    const TensorInfo sketch_output_info  = sketch.create_tensor_info(output_info);
 
     DepthwiseConv2dAttributes attributes {};
     attributes.pad(padding)
@@ -298,7 +255,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
               .dilation(dilation)
               .depth_multiplier(depth_multiplier);
 
-    const Status status = GpuDepthwiseConv2d::validate_op(sketch, &sketch_input_info, &sketch_weights_info, &sketch_biases_info, &sketch_output_info, attributes);
+    const Status status = GpuDepthwiseConv2d::validate_op(sketch, &sketch_input_info, &sketch_weights_info, &sketch_biases_info, attributes);
     const bool res = bool(status);
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }

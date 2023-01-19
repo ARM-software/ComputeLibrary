@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,10 +122,8 @@ protected:
         CastAttributes attributes;
         attributes.convert_policy(policy).data_type(dt_out);
 
-        auto ans_info = sketch.create_tensor_info();
-
-        FunctionType::create_op(sketch, &src_info, &ans_info, attributes);
-        GpuOutput::create_op(sketch, &ans_info, &dst_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, &src_info, attributes);
+        GpuOutput::create_op(sketch, ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

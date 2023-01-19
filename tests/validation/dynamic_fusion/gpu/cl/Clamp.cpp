@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,33 +51,21 @@ TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(CLAMP)
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                 framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Minimum value larger than maximum value
                                                     }),
-                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
-                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
-                                                    })),
                 framework::dataset::make("MinVal", { 0.2f,
                                                      1.5f,
-                                                     0.1f,
-                                                     3.0f,
                                                      9.0f,
                                                     })),
                 framework::dataset::make("MaxVal", { 0.5f,
                                                      2.0f,
                                                      1.0f,
-                                                     4.0f,
-                                                     1.0f,
                                                     })),
-                framework::dataset::make("Expected", { true, true, false, false, false })),
-                input_info, output_info, min_val, max_val, expected)
+                framework::dataset::make("Expected", { true, true, false })),
+                input_info, min_val, max_val, expected)
 {
     // Create a new workload sketch
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -86,13 +74,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
     // Fuse Clamp
     const TensorInfo src_info = sketch.create_tensor_info(input_info);
-    const TensorInfo dst_info = sketch.create_tensor_info(output_info);
 
     ClampAttributes attributes {};
     attributes.min_val(min_val)
               .max_val(max_val);
 
-    const bool res = static_cast<bool>(GpuClamp::validate_op(sketch, &src_info, &dst_info, attributes));
+    const bool res = static_cast<bool>(GpuClamp::validate_op(sketch, &src_info, attributes));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

@@ -56,11 +56,6 @@ Status ClComponentElementwiseBinary::validate(const ArgumentPack<ITensorInfo> &t
     //Check data type for different elementwise operators
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16, DataType::S32, DataType::S16, DataType::U8);
 
-    const bool rhs_in_place = (rhs == dst);
-    const bool lhs_in_place = (lhs == dst);
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_in_place && lhs_in_place, "Both LHS and RHS cannot be in-place at same time for any elementwise operation.");
-
     // dst shape is correct
     const TensorShape out_shape = TensorShape::broadcast_shape(lhs->tensor_shape(), rhs->tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");

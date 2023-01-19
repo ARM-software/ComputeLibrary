@@ -48,7 +48,7 @@ TEST_SUITE(ADD)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid data type combination
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),    // S16 is valid data type for Add
@@ -71,41 +71,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape( 3U,  8U, 1U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32),
                                                       })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
-                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(15U, 23U, 3U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape( 3U,  8U, 9U), 1, DataType::S16),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2), 1, DataType::F32),
-                                                      })),
                framework::dataset::make("Expected", { true, false, true, true, false, true, true, false, false, true})),
-               input1_info, input2_info, output_info, expected)
-{
-    // Create a new workload sketch
-    auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
-
-    // Fuse Elementwise Add
-    auto          lhs_info         = sketch.create_tensor_info(input1_info);
-    auto          rhs_info         = sketch.create_tensor_info(input2_info);
-    auto          dst_info         = sketch.create_tensor_info(output_info);
-    bool res = bool(GpuAdd::validate_op(sketch, &lhs_info, &rhs_info, &dst_info));
-    ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
-}
-
-DATA_TEST_CASE(ValidateRhsInplace, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32), // Broadcasting allowed for lhs
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                      }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32), // Broadcasting not allowed for rhs
-                                                      })),
-               framework::dataset::make("Expected", { true, false})),
                input1_info, input2_info, expected)
 {
     // Create a new workload sketch
@@ -116,29 +82,8 @@ DATA_TEST_CASE(ValidateRhsInplace, framework::DatasetMode::ALL, zip(zip(
     // Fuse Elementwise Add
     auto          lhs_info         = sketch.create_tensor_info(input1_info);
     auto          rhs_info         = sketch.create_tensor_info(input2_info);
-    bool res = bool(GpuAdd::validate_op(sketch, &lhs_info, &rhs_info, &rhs_info));
-    ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
-}
 
-DATA_TEST_CASE(ValidateLhsInplace, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32), // Broadcasting not allowed for lhs
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                      }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U,  1U, 1U), 1, DataType::F32), // Broadcasting allowed for rhs
-                                                      })),
-               framework::dataset::make("Expected", { false, true})),
-               input1_info, input2_info, expected)
-{
-    // Create a new workload sketch
-    auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
-
-    // Fuse Elementwise Add
-    auto          lhs_info         = sketch.create_tensor_info(input1_info);
-    auto          rhs_info         = sketch.create_tensor_info(input2_info);
-    bool res = bool(GpuAdd::validate_op(sketch, &lhs_info, &rhs_info, &lhs_info));
+    bool res = bool(GpuAdd::validate_op(sketch, &lhs_info, &rhs_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

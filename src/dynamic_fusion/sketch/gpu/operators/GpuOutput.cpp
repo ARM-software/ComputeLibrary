@@ -41,7 +41,7 @@ namespace dynamic_fusion
 namespace
 {
 constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
-}
+} // namespace
 
 Status GpuOutput::is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,

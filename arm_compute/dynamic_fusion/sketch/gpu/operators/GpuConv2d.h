@@ -62,7 +62,7 @@ public:
      * @param[in]     bia        (Optional) Bias tensor
      * @param[in]     attributes Operator attributes
      *
-     * @return        pointer for the destination tensor
+     * @return Pointer for the destination tensor info
      */
     static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
                                   ITensorInfo       *src,
@@ -76,6 +76,8 @@ public:
      * @param[in] wei        Weight tensor
      * @param[in] bia        (Optional) Bias tensor
      * @param[in] attributes Operator attributes
+     *
+     * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,
@@ -83,7 +85,10 @@ public:
                                   const ITensorInfo        *bia,
                                   const Attributes         &attributes);
     /** Check if the operator configuration is supported and if it can be fused into the workload sketch.
-     *  Similar to @ref GpuConv2d::create_op()
+     *
+     * Parameters are similar to @ref GpuConv2d::create_op()
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,

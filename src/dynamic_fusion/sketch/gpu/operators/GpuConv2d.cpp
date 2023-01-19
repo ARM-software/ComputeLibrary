@@ -131,10 +131,8 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     {
         dst_info_to_validate_ptr = dst;
     }
-    else
-    {
-        calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
-    }
+
+    calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
 
     // Check support level
     // Data type

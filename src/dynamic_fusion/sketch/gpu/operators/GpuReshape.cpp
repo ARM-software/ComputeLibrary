@@ -37,15 +37,21 @@ namespace dynamic_fusion
 {
 namespace
 {
-GpuOperatorType operator_type = GpuOperatorType::Complex;
-}
-
-Status GpuReshape::is_supported_op(const GpuWorkloadContext &context,
-                                   const ITensorInfo        *src,
-                                   const ITensorInfo        *dst,
-                                   const Attributes         &attributes)
+Status is_supported_op_helper(const GpuWorkloadContext &context,
+                              const ITensorInfo        *src,
+                              const ITensorInfo        *dst,
+                              const ReshapeAttributes &attributes)
 {
-    TensorInfo dst_info_to_validate = *dst;
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+
+    TensorInfo         dst_info_to_validate;
+    const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
+
+    if(dst != nullptr)
+    {
+        dst_info_to_validate_ptr = dst;
+    }
+
     auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(attributes.shape()));
 
     // Check components
@@ -57,7 +63,7 @@ Status GpuReshape::is_supported_op(const GpuWorkloadContext &context,
         // Validate GpuReshape Component
         ArgumentPack<ITensorInfo> arguments;
         arguments.add_const_tensor(ACL_SRC_0, src);
-        arguments.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
+        arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
 
         ARM_COMPUTE_RETURN_ON_ERROR(ClComponentReshape::validate(arguments));
     }
@@ -68,16 +74,28 @@ Status GpuReshape::is_supported_op(const GpuWorkloadContext &context,
 
     return Status{};
 }
+
+GpuOperatorType operator_type = GpuOperatorType::Complex;
+} // namespace
+
+Status GpuReshape::is_supported_op(const GpuWorkloadContext &context,
+                                   const ITensorInfo        *src,
+                                   const Attributes         &attributes)
+{
+    return is_supported_op_helper(context, src, nullptr, attributes);
+}
+
 Status GpuReshape::validate_op(const GpuWorkloadSketch &sketch,
                                const ITensorInfo       *src,
-                               const ITensorInfo       *dst,
                                const Attributes        &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
+
+    // Refer to GpuConv2d::validate_op() for id-validness of this TensorInfo object
+    TensorInfo dst_info_to_validate;
 
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
     auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(attributes.shape()));
 
     // Perform fusion test
@@ -90,17 +108,20 @@ Status GpuReshape::validate_op(const GpuWorkloadSketch &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
+    return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-void GpuReshape::create_op(GpuWorkloadSketch &sketch,
-                           ITensorInfo       *src,
-                           ITensorInfo       *dst,
-                           const Attributes &attributes)
+ITensorInfo *GpuReshape::create_op(GpuWorkloadSketch &sketch,
+                                   ITensorInfo       *src,
+                                   const Attributes &attributes)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_LOG_PARAMS(src, dst, attributes.shape());
-    ARM_COMPUTE_ERROR_THROW_ON(GpuReshape::validate_op(sketch, src, dst, attributes));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, attributes.shape());
+    ARM_COMPUTE_ERROR_THROW_ON(GpuReshape::validate_op(sketch, src, attributes));
+
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
+    ARM_COMPUTE_ERROR_ON_NULLPTR(dst);
+
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(attributes.shape()));
 
     // Translate into components and add to component graph
@@ -136,6 +157,8 @@ void GpuReshape::create_op(GpuWorkloadSketch &sketch,
 
     const auto op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
 /** Forward declaration */
 class GpuWorkloadContext;
 class GpuWorkloadSketch;
@@ -66,6 +65,8 @@ public:
      * @param[in] context Workload context within which the operator is running.
      * @param[in] src     Source tensor info.
      * @param[in] dst     Destination tensor info.
+     *
+     * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,
@@ -73,7 +74,9 @@ public:
 
     /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
      *
-     *  Similar to @ref GpuOutput::create_op().
+     * Parameters are similar to @ref GpuOutput::create_op().
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,

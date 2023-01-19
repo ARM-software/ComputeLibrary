@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,18 +38,22 @@ namespace dynamic_fusion
 {
 namespace
 {
-constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
-}
-Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
-                                const ITensorInfo        *src,
-                                const ITensorInfo        *dst,
-                                const CastAttributes     &attributes)
+Status is_supported_op_helper(const GpuWorkloadContext &context,
+                              const ITensorInfo        *src,
+                              const ITensorInfo        *dst,
+                              const CastAttributes     &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
-    // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
+    TensorInfo         dst_info_to_validate;
+    const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
+
+    if(dst != nullptr)
+    {
+        dst_info_to_validate_ptr = dst;
+    }
+
     auto_init_if_empty(dst_info_to_validate, src->clone()->set_data_type(attributes.data_type()));
 
     // Check support level
@@ -59,7 +63,7 @@ Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
                                                          DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst_info_to_validate,
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst_info_to_validate_ptr,
                                                          1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
@@ -76,7 +80,7 @@ Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
-            arguments.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
+            arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
             ARM_COMPUTE_RETURN_ON_ERROR(ClComponentCast::validate(properties, arguments, attributes, settings));
         }
     }
@@ -87,17 +91,27 @@ Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
 
     return Status{};
 }
+constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
+} // namespace
+
+Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
+                                const ITensorInfo        *src,
+                                const CastAttributes     &attributes)
+{
+    return is_supported_op_helper(context, src, nullptr, attributes);
+}
 
 Status GpuCast::validate_op(const GpuWorkloadSketch &sketch,
                             const ITensorInfo       *src,
-                            const ITensorInfo       *dst,
                             const CastAttributes    &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
+
+    // Refer to GpuConv2d::validate_op() for id-validness of this TensorInfo object
+    TensorInfo dst_info_to_validate;
 
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
     auto_init_if_empty(dst_info_to_validate, src->clone()->set_data_type(attributes.data_type()));
 
     // Perform fusion test
@@ -110,18 +124,19 @@ Status GpuCast::validate_op(const GpuWorkloadSketch &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
+    return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-void GpuCast::create_op(GpuWorkloadSketch    &sketch,
-                        ITensorInfo          *src,
-                        ITensorInfo          *dst,
-                        const CastAttributes &attributes)
+ITensorInfo *GpuCast::create_op(GpuWorkloadSketch    &sketch,
+                                ITensorInfo          *src,
+                                const CastAttributes &attributes)
 {
-    // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuCast::validate_op(sketch, src, dst, attributes));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_LOG_PARAMS(src, dst, attributes);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, attributes);
+    ARM_COMPUTE_ERROR_THROW_ON(GpuCast::validate_op(sketch, src, attributes));
+
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
+    ARM_COMPUTE_ERROR_ON_NULLPTR(dst);
 
     // Auto initialize dst tensor info if empty
     auto_init_if_empty(*dst, src->clone()->set_data_type(attributes.data_type()));
@@ -160,6 +175,8 @@ void GpuCast::create_op(GpuWorkloadSketch    &sketch,
 
     const Operator op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 
 } // namespace dynamic_fusion

@@ -44,17 +44,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
-    TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F16), // mismatching types
 }),
-framework::dataset::make("OutputInfo",
+framework::dataset::make("OutputShape",
 {
-    TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
-    TensorInfo(TensorShape(8U, 24U, 4U), 1, DataType::F32),
-    TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
-    TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
+    TensorShape(9U, 5U, 21U),
+    TensorShape(8U, 24U, 4U),
+    TensorShape(192U, 192U),
 })),
-framework::dataset::make("Expected", { true, true, false, false })),
-input_info, output_info, expected)
+framework::dataset::make("Expected", { true, true, false })),
+input_info, output_shape, expected)
 {
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
@@ -62,13 +60,12 @@ input_info, output_info, expected)
     GpuWorkloadSketch sketch{ &gpu_ctx };
 
     // Create sketch tensors
-    auto              input_shape  = input_info.tensor_shape();
-    auto              output_shape = output_info.tensor_shape();
-    auto              src_info     = sketch.create_tensor_info(input_info);
-    auto              dst_info     = sketch.create_tensor_info(output_info);
+    TensorShape input_shape = input_info.tensor_shape();
+    TensorInfo  src_info    = sketch.create_tensor_info(input_info);
+
     ReshapeAttributes attributes;
     attributes.shape(output_shape);
-    Status status = GpuReshape::validate_op(sketch, &src_info, &dst_info, attributes);
+    Status status = GpuReshape::validate_op(sketch, &src_info, attributes);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 

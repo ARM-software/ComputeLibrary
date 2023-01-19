@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,28 +105,23 @@ protected:
         GpuWorkloadSketch sketch{ &gpu_ctx };
 
         // Fuse first element wise binary Op
-        auto       lhs_info = sketch.create_tensor_info(shape0, 1, _data_type);
-        auto       rhs_info = sketch.create_tensor_info(TensorInfo(shape1, 1, _data_type));
-
-        auto ans_info = sketch.create_tensor_info();
-        auto dst_info = sketch.create_tensor_info();
+        TensorInfo lhs_info = sketch.create_tensor_info(shape0, 1, _data_type);
+        TensorInfo rhs_info = sketch.create_tensor_info(TensorInfo(shape1, 1, _data_type));
+        TensorInfo dst_info = sketch.create_tensor_info();
 
         TensorInfo rhs_info_fuse;
-        TensorInfo ans2_info;
 
-        FunctionType::create_op(sketch, &lhs_info, &rhs_info, &ans_info);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, &lhs_info, &rhs_info);
 
         if(_fuse)
         {
-            rhs_info_fuse = sketch.create_tensor_info(shape2, 1, _data_type);
-            ans2_info = sketch.create_tensor_info();
-
-            FunctionType::create_op(sketch, &ans_info, &rhs_info_fuse, &ans2_info);
-            GpuOutput::create_op(sketch, &ans2_info, &dst_info);
+            rhs_info_fuse          = sketch.create_tensor_info(shape2, 1, _data_type);
+            ITensorInfo *ans2_info = FunctionType::create_op(sketch, ans_info, &rhs_info_fuse);
+            GpuOutput::create_op(sketch, ans2_info, &dst_info);
         }
         else
         {
-            GpuOutput::create_op(sketch, &ans_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_info, &dst_info);
         }
 
         // Configure runtime

@@ -75,13 +75,13 @@ protected:
         GpuWorkloadSketch sketch{ &gpu_ctx };
 
         // Create sketch tensors
-        auto              src_info = sketch.create_tensor_info(TensorInfo(input_shape, 1, data_type));
-        auto              ans_info = sketch.create_tensor_info(TensorInfo(output_shape, 1, data_type));
-        auto              dst_info = sketch.create_tensor_info(TensorInfo(output_shape, 1, data_type));
+        TensorInfo        src_info = sketch.create_tensor_info(TensorInfo(input_shape, 1, data_type));
+        TensorInfo        dst_info = sketch.create_tensor_info(TensorInfo(output_shape, 1, data_type));
         ReshapeAttributes attributes;
         attributes.shape(output_shape);
-        FunctionType::create_op(sketch, &src_info, &ans_info, attributes);
-        GpuOutput::create_op(sketch, &ans_info, &dst_info);
+
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, &src_info, attributes);
+        GpuOutput::create_op(sketch, ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

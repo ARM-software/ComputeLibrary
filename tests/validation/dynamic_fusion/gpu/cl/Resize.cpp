@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Arm Limited.
+* Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,8 +86,8 @@ TEST_SUITE(Validate)
 const auto default_input_shape  = TensorShape{ 2, 3, 3, 2 };
 const auto default_output_shape = TensorShape{ 4, 6, 3, 2 };
 
-constexpr auto default_data_type            = DataType::U8;
-constexpr auto default_data_layout          = DataLayout::NHWC;
+constexpr auto default_data_type   = DataType::U8;
+constexpr auto default_data_layout = DataLayout::NHWC;
 
 TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 {
@@ -98,15 +98,10 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
     GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-    const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
     // nullptr is given as input
-    Status status = GpuResize::validate_op(sketch, nullptr, &sketch_output_info, ResizeAttributes());
-    ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
-
-    // nullptr is given as output
-    status = GpuResize::validate_op(sketch, &sketch_input_info, nullptr, ResizeAttributes());
+    Status status = GpuResize::validate_op(sketch, nullptr, ResizeAttributes());
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
 }
 
@@ -137,18 +132,19 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
 
     for(auto &kv : supported_data_types)
     {
-        const TensorInfo input_info  = TensorInfo{ default_input_shape, 1, kv.first, default_data_layout };
-        const TensorInfo output_info = TensorInfo{ default_output_shape, 1, kv.first, default_data_layout };
+        const TensorInfo input_info = TensorInfo{ default_input_shape, 1, kv.first, default_data_layout };
 
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
         GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
         GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-        const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-        const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+        const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
-        // nullptr is given as input
-        Status status = GpuResize::validate_op(sketch, &sketch_input_info, &sketch_output_info, ResizeAttributes());
+        ResizeAttributes attributes;
+        attributes.output_width(default_output_shape[0]); // shape is not important unless it's empty
+        attributes.output_height(default_output_shape[1]);
+
+        Status status = GpuResize::validate_op(sketch, &sketch_input_info, attributes);
         ARM_COMPUTE_EXPECT(bool(status) == kv.second, framework::LogLevel::ERRORS);
     }
 }
@@ -164,10 +160,9 @@ TEST_CASE(MismatchingDataType, framework::DatasetMode::ALL)
     GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-    const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
-    Status status = GpuResize::validate_op(sketch, &sketch_input_info, &sketch_output_info, ResizeAttributes());
+    Status status = GpuResize::validate_op(sketch, &sketch_input_info, ResizeAttributes());
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
 }
 
@@ -185,15 +180,14 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
     GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-    const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy)
     .sampling_policy(sampling_policy)
     .align_corners(align_corners);
 
-    Status status = GpuResize::validate_op(sketch, &sketch_input_info, &sketch_output_info, attributes);
+    Status status = GpuResize::validate_op(sketch, &sketch_input_info, attributes);
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
 }
 
@@ -207,13 +201,12 @@ TEST_CASE(UnsupportedInterpolationPolicy, framework::DatasetMode::ALL)
     GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-    const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy);
 
-    Status status = GpuResize::validate_op(sketch, &sketch_input_info, &sketch_output_info, attributes);
+    Status status = GpuResize::validate_op(sketch, &sketch_input_info, attributes);
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
 }
 
@@ -227,13 +220,12 @@ TEST_CASE(UnsupportedLayout, framework::DatasetMode::ALL)
     GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch  sketch{ &gpu_ctx };
 
-    const TensorInfo sketch_input_info  = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_output_info = sketch.create_tensor_info(output_info);
+    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy);
 
-    Status status = GpuResize::validate_op(sketch, &sketch_input_info, &sketch_output_info, attributes);
+    Status status = GpuResize::validate_op(sketch, &sketch_input_info, attributes);
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
 }
 

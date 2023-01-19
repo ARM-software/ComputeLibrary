@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,17 +54,21 @@ void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, c
     }
 }
 
-constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
-}
-Status GpuResize::is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *src,
-                                  const ITensorInfo        *dst,
-                                  const Attributes         &attributes)
+Status is_supported_op_helper(const GpuWorkloadContext &context,
+                              const ITensorInfo        *src,
+                              const ITensorInfo        *dst,
+                              const ResizeAttributes   &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
-    // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
+    TensorInfo         dst_info_to_validate;
+    const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
+
+    if(dst != nullptr)
+    {
+        dst_info_to_validate_ptr = dst;
+    }
+
     calculate_and_init_dst_if_empty(&dst_info_to_validate, src, attributes);
 
     // Check support level
@@ -88,7 +92,7 @@ Status GpuResize::is_supported_op(const GpuWorkloadContext &context,
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
-            arguments.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
+            arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
             ARM_COMPUTE_RETURN_ON_ERROR(ClComponentResize::validate(properties, arguments, attributes));
         }
     }
@@ -100,16 +104,27 @@ Status GpuResize::is_supported_op(const GpuWorkloadContext &context,
     return Status{};
 }
 
+constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
+} // namespace
+
+Status GpuResize::is_supported_op(const GpuWorkloadContext &context,
+                                  const ITensorInfo        *src,
+                                  const Attributes         &attributes)
+{
+    return is_supported_op_helper(context, src, nullptr, attributes);
+}
+
 Status GpuResize::validate_op(const GpuWorkloadSketch     &sketch,
                               const ITensorInfo           *src,
-                              const ITensorInfo           *dst,
                               const GpuResize::Attributes &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
 
-    // Auto initialize dst tensor info if empty
-    TensorInfo dst_info_to_validate = *dst;
+    // Refer to GpuConv2d::validate_op() for id-validness of this TensorInfo object
+    TensorInfo dst_info_to_validate;
+
+    // Auto initialize dst tensor info
     calculate_and_init_dst_if_empty(&dst_info_to_validate, src, attributes);
 
     // Perform fusion test
@@ -123,18 +138,19 @@ Status GpuResize::validate_op(const GpuWorkloadSketch     &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
+    return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-void GpuResize::create_op(GpuWorkloadSketch           &sketch,
-                          ITensorInfo                 *src,
-                          ITensorInfo                 *dst,
-                          const GpuResize::Attributes &attributes)
+ITensorInfo *GpuResize::create_op(GpuWorkloadSketch           &sketch,
+                                  ITensorInfo                 *src,
+                                  const GpuResize::Attributes &attributes)
 {
-    // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuResize::validate_op(sketch, src, dst, attributes));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_LOG_PARAMS(src, dst, attributes);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_LOG_PARAMS(src, attributes);
+    ARM_COMPUTE_ERROR_THROW_ON(GpuResize::validate_op(sketch, src, attributes));
+
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
+    ARM_COMPUTE_ERROR_ON_NULLPTR(dst);
 
     // Auto initialize dst tensor info if empty
     calculate_and_init_dst_if_empty(dst, src, attributes);
@@ -172,6 +188,8 @@ void GpuResize::create_op(GpuWorkloadSketch           &sketch,
 
     const Operator op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 
 } // namespace dynamic_fusion

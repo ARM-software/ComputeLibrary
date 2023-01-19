@@ -60,30 +60,32 @@ public:
      * @param[in,out] sketch Workload sketch into which the operator will be fused
      * @param[in]     lhs    Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
      * @param[in]     rhs    Right hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[out]    dst    Destination tensor info. Data types supported: U8/S16/S32/F16/F32. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
+     *
+     * @return Pointer for the destination tensor info
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *lhs,
-                          ITensorInfo       *rhs,
-                          ITensorInfo       *dst);
+    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
+                                  ITensorInfo       *lhs,
+                                  ITensorInfo       *rhs);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context Workload context within which the operator is running
      * @param[in] lhs     Left hand side tensor info.
      * @param[in] rhs     Right hand side tensor info.
-     * @param[in] dst     Destination tensor info. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
+     *
+     * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *lhs,
-                                  const ITensorInfo        *rhs,
-                                  const ITensorInfo        *dst);
+                                  const ITensorInfo        *rhs);
     /**  Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
-     *   Similar to @ref GpuAdd::create_op()
+     *
+     * Parameters are similar to @ref GpuAdd::create_op()
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *rhs,
-                              const ITensorInfo       *lhs,
-                              const ITensorInfo       *dst);
+                              const ITensorInfo       *lhs);
 };
 } // namespace dynamic_fusion
 } // namespace experimental

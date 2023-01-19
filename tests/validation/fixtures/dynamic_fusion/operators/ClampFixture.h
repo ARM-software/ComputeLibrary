@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,8 +94,8 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        float min_bound                = 0;
-        float max_bound                = 0;
+        float min_bound = 0;
+        float max_bound = 0;
         std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, _data_type);
         library->fill_static_values(tensor, get_boundary_values(static_cast<T>(min_bound), static_cast<T>(max_bound)));
     }
@@ -111,21 +111,15 @@ protected:
         TensorInfo src_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type));
         TensorInfo dst_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type));
 
-        auto ans_0_info = sketch.create_tensor_info();
-        TensorInfo ans_1_info;
-
-        FunctionType::create_op(sketch, &src_info, &ans_0_info, attributes);
-
+        ITensorInfo *ans_0_info = FunctionType::create_op(sketch, &src_info, attributes);
         if(_fuse)
         {
-            ans_1_info = sketch.create_tensor_info();
-
-            FunctionType::create_op(sketch, &ans_0_info, &ans_1_info, attributes);
-            GpuOutput::create_op(sketch, &ans_1_info, &dst_info);
+            ITensorInfo *ans_1_info = FunctionType::create_op(sketch, ans_0_info, attributes);
+            GpuOutput::create_op(sketch, ans_1_info, &dst_info);
         }
         else
         {
-            GpuOutput::create_op(sketch, &ans_0_info, &dst_info);
+            GpuOutput::create_op(sketch, ans_0_info, &dst_info);
         }
 
         // Configure runtime

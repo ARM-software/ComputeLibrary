@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_INTERNAL_GPUELEMENTWISEBINARYCOMMON
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/ITensorInfo.h"
 
 namespace arm_compute
 {
@@ -76,34 +77,36 @@ public:
      * @param[in,out] sketch     Workload sketch into which the operator will be fused
      * @param[in]     lhs        Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
      * @param[in]     rhs        Right hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[out]    dst        Destination tensor info. Data types supported: U8/S16/S32/F16/F32. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
      * @param[in]     attributes ElementwiseBinaryCommonAttributes containing the operator type: ADD, SUB, DIV, ... etc.
+     *
+     * @return Pointer for the destination tensor info
      */
-    static void create_op(GpuWorkloadSketch                       &sketch,
-                          ITensorInfo                             *lhs,
-                          ITensorInfo                             *rhs,
-                          ITensorInfo                             *dst,
-                          const ElementwiseBinaryCommonAttributes &attributes);
+    static ITensorInfo *create_op(GpuWorkloadSketch                       &sketch,
+                                  ITensorInfo                             *lhs,
+                                  ITensorInfo                             *rhs,
+                                  const ElementwiseBinaryCommonAttributes &attributes);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context    Workload context within which the operator is running
      * @param[in] lhs        Left hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
      * @param[in] rhs        Right hand side tensor info. Data types supported: U8/S16/S32/F16/F32.
-     * @param[in] dst        Destination tensor info. Data types supported: U8/S16/S32/F16/F32. If an uninitialized ITensorInfo is passed in, it will be auto-initialized
      * @param[in] attributes ElementwiseBinaryCommonAttributes containing the operator type: ADD, SUB, DIV, ... etc.
+     *
+     * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext                &context,
                                   const ITensorInfo                       *lhs,
                                   const ITensorInfo                       *rhs,
-                                  const ITensorInfo                       *dst,
                                   const ElementwiseBinaryCommonAttributes &attributes);
     /** Validate the operator and check if it can be fused into the workload sketch.
-     * Similar to @ref GpuElementwiseBinaryCommon::create_op()
+     *
+     * Parameters are similar to @ref GpuElementwiseBinaryCommon::create_op()
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch                 &sketch,
                               const ITensorInfo                       *rhs,
                               const ITensorInfo                       *lhs,
-                              const ITensorInfo                       *dst,
                               const ElementwiseBinaryCommonAttributes &attributes);
 };
 } // namespace dynamic_fusion

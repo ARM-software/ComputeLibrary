@@ -158,20 +158,17 @@ TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
     auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch sketch{ &gpu_ctx };
 
-    auto in_0_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
-    auto in_1_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
-    auto in_2_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_0_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_1_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_2_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
 
-    auto out_0_info = sketch.create_tensor_info();
-    auto out_1_info = sketch.create_tensor_info();
+    TensorInfo out_0_info = sketch.create_tensor_info();
+    TensorInfo out_1_info = sketch.create_tensor_info();
 
-    auto ans_0_info = sketch.create_tensor_info();
-    auto ans_1_info = sketch.create_tensor_info();
-
-    GpuAdd::create_op(sketch, &in_0_info, &in_1_info, &ans_0_info);
-    GpuOutput::create_op(sketch, &ans_0_info, &out_0_info);
-    GpuAdd::create_op(sketch, &ans_0_info, &in_2_info, &ans_1_info);
-    GpuOutput::create_op(sketch, &ans_1_info, &out_1_info);
+    ITensorInfo *ans_0_info = GpuAdd::create_op(sketch, &in_0_info, &in_1_info);
+    GpuOutput::create_op(sketch, ans_0_info, &out_0_info);
+    ITensorInfo *ans_1_info = GpuAdd::create_op(sketch, ans_0_info, &in_2_info);
+    GpuOutput::create_op(sketch, ans_1_info, &out_1_info);
 
     // Configure runtime
     ClWorkloadRuntime runtime;
@@ -257,17 +254,12 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
     GpuWorkloadSketch sketch{ &gpu_ctx };
 
-    auto in_0_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
-    auto in_1_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
-    auto in_2_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_0_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_1_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
+    TensorInfo in_2_info = sketch.create_tensor_info(t_input_shape, 1, data_type);
 
-    auto out_0_info = sketch.create_tensor_info();
-    auto out_1_info = sketch.create_tensor_info();
-
-    auto ans_0_info = sketch.create_tensor_info();
-    auto ans_1_info = sketch.create_tensor_info();
-    auto ans_2_info = sketch.create_tensor_info();
-    auto ans_3_info = sketch.create_tensor_info();
+    TensorInfo out_0_info = sketch.create_tensor_info();
+    TensorInfo out_1_info = sketch.create_tensor_info();
 
     CastAttributes cast_0_attr;
     cast_0_attr.data_type(DataType::S32).convert_policy(ConvertPolicy::SATURATE);
@@ -275,12 +267,12 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     CastAttributes cast_1_attr;
     cast_1_attr.data_type(DataType::F32).convert_policy(ConvertPolicy::SATURATE);
 
-    GpuAdd::create_op(sketch, &in_0_info, &in_1_info, &ans_0_info);
-    GpuOutput::create_op(sketch, &ans_0_info, &out_0_info);
-    GpuAdd::create_op(sketch, &ans_0_info, &in_2_info, &ans_1_info);
-    GpuCast::create_op(sketch, &ans_1_info, &ans_2_info, cast_0_attr);
-    GpuCast::create_op(sketch, &ans_2_info, &ans_3_info, cast_1_attr);
-    GpuOutput::create_op(sketch, &ans_3_info, &out_1_info);
+    ITensorInfo *ans_0_info = GpuAdd::create_op(sketch, &in_0_info, &in_1_info);
+    GpuOutput::create_op(sketch, ans_0_info, &out_0_info);
+    ITensorInfo *ans_1_info = GpuAdd::create_op(sketch, ans_0_info, &in_2_info);
+    ITensorInfo *ans_2_info = GpuCast::create_op(sketch, ans_1_info, cast_0_attr);
+    ITensorInfo *ans_3_info = GpuCast::create_op(sketch, ans_2_info, cast_1_attr);
+    GpuOutput::create_op(sketch, ans_3_info, &out_1_info);
 
     // Configure runtime
     ClWorkloadRuntime runtime;

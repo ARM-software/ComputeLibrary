@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Arm Limited.
+* Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,10 +148,8 @@ protected:
         ResizeAttributes attributes;
         attributes.align_corners(_align_corners).sampling_policy(_sampling_policy).interpolation_policy(_interpolation_policy).output_width(_output_width).output_height(_output_height);
 
-        TensorInfo scale_result_info = sketch.create_tensor_info();
-
-        FunctionType::create_op(sketch, &src_info, &scale_result_info, attributes);
-        GpuOutput::create_op(sketch, &scale_result_info, &dst_info);
+        ITensorInfo *scale_result_info = FunctionType::create_op(sketch, &src_info, attributes);
+        GpuOutput::create_op(sketch, scale_result_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;

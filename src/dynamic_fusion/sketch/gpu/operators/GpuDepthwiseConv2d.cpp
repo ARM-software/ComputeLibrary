@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,20 +61,26 @@ void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, c
     }
 }
 
-constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
-} // namespace
-
-Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &context,
-                                           const ITensorInfo               *src,
-                                           const ITensorInfo               *wei,
-                                           const ITensorInfo               *bia,
-                                           const ITensorInfo               *dst,
-                                           const DepthwiseConv2dAttributes &attributes)
+/* A helper method to reduce the duplication in dst tensor initialization
+*  when calling validate()
+*/
+Status is_supported_op_helper(const GpuWorkloadContext        &context,
+                              const ITensorInfo               *src,
+                              const ITensorInfo               *wei,
+                              const ITensorInfo               *bia,
+                              const ITensorInfo               *dst,
+                              const DepthwiseConv2dAttributes &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
 
-    // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
+    TensorInfo         dst_info_to_validate;
+    const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
+
+    if(dst != nullptr)
+    {
+        dst_info_to_validate_ptr = dst;
+    }
+
     calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
 
     // Check support level
@@ -100,12 +106,12 @@ Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &cont
                                                  attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
 
             // Get the depthwise convolution compute parameters
-            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            auto                       t        = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
             const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.fast_relaxed_math(
                 (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-                && (dst_info_to_validate.data_type() == DataType::F32 || dst_info_to_validate.data_type() == DataType::F16));
+                && (dst_info_to_validate_ptr->data_type() == DataType::F32 || dst_info_to_validate_ptr->data_type() == DataType::F16));
 
             settings.is_fma_available(get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
             .m0(dwc_info.m0)
@@ -117,7 +123,7 @@ Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &cont
             arguments.add_const_tensor(ACL_SRC_0, src);
             arguments.add_const_tensor(ACL_SRC_1, wei);
             arguments.add_const_tensor(ACL_SRC_2, bia);
-            arguments.add_const_tensor(ACL_DST_0, &dst_info_to_validate);
+            arguments.add_const_tensor(ACL_DST_0, dst_info_to_validate_ptr);
             ARM_COMPUTE_RETURN_ON_ERROR(ClComponentDepthwiseConv2d::validate(properties, arguments, attributes, settings));
         }
     }
@@ -129,23 +135,36 @@ Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &cont
     return Status{};
 }
 
+constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
+} // namespace
+
+Status GpuDepthwiseConv2d::is_supported_op(const GpuWorkloadContext        &context,
+                                           const ITensorInfo               *src,
+                                           const ITensorInfo               *wei,
+                                           const ITensorInfo               *bia,
+                                           const DepthwiseConv2dAttributes &attributes)
+{
+    return is_supported_op_helper(context, src, wei, bia, nullptr, attributes);
+}
+
 Status GpuDepthwiseConv2d::validate_op(const GpuWorkloadSketch         &sketch,
                                        const ITensorInfo               *src,
                                        const ITensorInfo               *wei,
                                        const ITensorInfo               *bia,
-                                       const ITensorInfo               *dst,
                                        const DepthwiseConv2dAttributes &attributes)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
 
     if(bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(!bia->has_valid_id());
     }
 
+    // Refer to GpuConv2d::validate_op() for id-validness of this TensorInfo object
+    TensorInfo dst_info_to_validate;
+
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
     calculate_and_init_dst_if_empty(&dst_info_to_validate, src, wei, attributes);
 
     // Perform fusion test
@@ -161,20 +180,21 @@ Status GpuDepthwiseConv2d::validate_op(const GpuWorkloadSketch         &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, wei, bia, &dst_info_to_validate, attributes);
+    return is_supported_op_helper(*sketch.gpu_context(), src, wei, bia, &dst_info_to_validate, attributes);
 }
 
-void GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sketch,
-                                   ITensorInfo                     *src,
-                                   ITensorInfo                     *wei,
-                                   ITensorInfo                     *bia,
-                                   ITensorInfo                     *dst,
-                                   const DepthwiseConv2dAttributes &attributes)
+ITensorInfo *GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sketch,
+                                           ITensorInfo                     *src,
+                                           ITensorInfo                     *wei,
+                                           ITensorInfo                     *bia,
+                                           const DepthwiseConv2dAttributes &attributes)
 {
-    // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuDepthwiseConv2d::validate_op(sketch, src, wei, bia, dst, attributes));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, wei, dst);
-    ARM_COMPUTE_LOG_PARAMS(src, wei, bia, dst, attributes);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(src, wei);
+    ARM_COMPUTE_LOG_PARAMS(src, wei, bia, attributes);
+    ARM_COMPUTE_ERROR_THROW_ON(GpuDepthwiseConv2d::validate_op(sketch, src, wei, bia, attributes));
+
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
+    ARM_COMPUTE_ERROR_ON_NULLPTR(dst);
 
     calculate_and_init_dst_if_empty(dst, src, wei, attributes);
 
@@ -197,7 +217,7 @@ void GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sketch,
                                                  attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
 
             // Get the depthwise convolution compute parameters
-            auto t = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
+            auto                       t        = arm_compute::cl_dwc::ClDWCNativeKernelConfigurationFactory::create(gpu_target);
             const DWCComputeKernelInfo dwc_info = t->configure(src, wei, legacy_conv_info, attributes.dilation(), attributes.depth_multiplier());
 
             settings.is_fma_available(get_arch_from_target(gpu_target) != GPUTarget::MIDGARD)
@@ -241,6 +261,8 @@ void GpuDepthwiseConv2d::create_op(GpuWorkloadSketch               &sketch,
 
     const Operator op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 
 } // namespace dynamic_fusion

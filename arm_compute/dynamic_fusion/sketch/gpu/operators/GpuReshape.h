@@ -55,30 +55,32 @@ public:
      *
      * @param[in,out] sketch     Workload sketch into which the operator will be fused
      * @param[in]     src        Input tensor info. Data type supported: All
-     * @param[out]    dst        Output info. Data type supported: Same as @p src
      * @param[in]     attributes Operator attributes
+     *
+     * @return Pointer for the destination tensor info
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *dst,
-                          const Attributes &attributes);
+    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
+                                  ITensorInfo       *src,
+                                  const Attributes &attributes);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context    Workload context within which the operator is running
      * @param[in] src        Input tensor info.
-     * @param[in] dst        Output info.
      * @param[in] attributes Operator attributes
+     *
+     * @return Status
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,
-                                  const ITensorInfo        *dst,
                                   const Attributes         &attributes);
     /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
-     *  Similar to @ref GpuReshape::create_op()
+     *
+     *  Parameters are similar to @ref GpuReshape::create_op()
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
-                              const ITensorInfo       *dst,
                               const Attributes        &attributes);
 };
 

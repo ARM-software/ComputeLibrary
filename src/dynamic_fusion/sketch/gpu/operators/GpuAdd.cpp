@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
 
-#include "src/common/utils/Log.h"
-
 namespace arm_compute
 {
 namespace experimental
@@ -36,37 +34,33 @@ namespace dynamic_fusion
 {
 Status GpuAdd::validate_op(const GpuWorkloadSketch &sketch,
                            const ITensorInfo       *lhs,
-                           const ITensorInfo       *rhs,
-                           const ITensorInfo       *dst)
+                           const ITensorInfo       *rhs)
 {
+    // Set the elementwise operation to ADD then call the elementwise common validate_op
     ElementwiseBinaryCommonAttributes common_attributes{};
     common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::ADD);
-    return GpuElementwiseBinaryCommon::validate_op(sketch, lhs, rhs, dst, common_attributes);
+    return GpuElementwiseBinaryCommon::validate_op(sketch, lhs, rhs, common_attributes);
 }
 
 Status GpuAdd::is_supported_op(const GpuWorkloadContext &context,
                                const ITensorInfo        *lhs,
-                               const ITensorInfo        *rhs,
-                               const ITensorInfo        *dst)
+                               const ITensorInfo        *rhs)
 {
+    // Set the elementwise operation to ADD then call the elementwise common is_supported_op
     ElementwiseBinaryCommonAttributes common_attributes{};
     common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::ADD);
-    return GpuElementwiseBinaryCommon::is_supported_op(context, lhs, rhs, dst, common_attributes);
+    return GpuElementwiseBinaryCommon::is_supported_op(context, lhs, rhs, common_attributes);
 }
 
-void GpuAdd::create_op(GpuWorkloadSketch &sketch,
-                       ITensorInfo       *lhs,
-                       ITensorInfo       *rhs,
-                       ITensorInfo       *dst)
+ITensorInfo *GpuAdd::create_op(GpuWorkloadSketch &sketch,
+                               ITensorInfo       *lhs,
+                               ITensorInfo       *rhs)
 {
-    // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuAdd::validate_op(sketch, lhs, rhs, dst));
-    ARM_COMPUTE_LOG_PARAMS(lhs, rhs, dst);
-
+    // No need to log or validate as they'll be handled inside GpuElementwiseBinaryCommon::create_op()
     // Set the elementwise operation to ADD then call the elementwise common create_op
     ElementwiseBinaryCommonAttributes common_attributes{};
     common_attributes.operation(ElementwiseBinaryCommonAttributes::ElementwiseOp::ADD);
-    GpuElementwiseBinaryCommon::create_op(sketch, lhs, rhs, dst, common_attributes);
+    return GpuElementwiseBinaryCommon::create_op(sketch, lhs, rhs, common_attributes);
 }
 
 } // namespace dynamic_fusion
