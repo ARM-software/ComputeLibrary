@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -352,7 +352,7 @@ CpuInfo CpuInfo::build()
     CpuInfo               info(isa, cpus_model);
     return info;
 #elif defined(__aarch64__) && defined(__APPLE__) /* #elif(BARE_METAL) && defined(__aarch64__) */
-    int                   ncpus = get_hw_capability("hw.logicalcpu");
+    int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
     isainfo.neon = get_hw_capability("hw.optional.neon");
