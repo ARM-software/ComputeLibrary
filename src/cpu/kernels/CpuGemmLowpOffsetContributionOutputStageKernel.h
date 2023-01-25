@@ -73,8 +73,10 @@ public:
      *
      * @param[in]  mm_result      Input tensor info containing the result of @ref CpuGemmLowpMatrixMultiplyKernel. Data type supported: S32
      * @param[in]  vector_sum_col Input row-vector tensor info of sums of all the entries in each column of matrix B.
+     *                            Can be a 1D or 2D tensor, in case of 2D, y dim is the batch dimension
      *                            Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
      * @param[in]  vector_sum_row Input row-vector tensor info of sums of all the entries in each row of matrix A.
+     *                            Can be a 1D or 2D tensor, in case of 2D, y dim is the batch dimension
      * @param[in]  bias           Biases tensor info. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
      *                            Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p mm_result.
      * @param[out] dst            Output tensor info containing the final quantized result. Data type supported: QASYMM8/QASYMM8_SIGNED
@@ -105,7 +107,7 @@ private:
     int32_t                 _a_offset{ 0 };
     int32_t                 _b_offset{ 0 };
     int32_t                 _k_offset{ 0 };
-    bool                    _slide_vector_sum_col{ true };
+    bool                    _is_vector_sum_col_batched{ true };
     GEMMLowpOutputStageInfo _output_stage{ GEMMLowpOutputStageInfo() };
 };
 } // namespace kernels

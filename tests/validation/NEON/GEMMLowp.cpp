@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -223,7 +223,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFixture, framework:
     validate(Accessor(_target), _reference);
 }
 
-constexpr AbsoluteTolerance<float> tolerance_batched(2);
+constexpr AbsoluteTolerance<float> tolerance_batched(1);
 
 using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedUnsigned =
     GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore, false, false, uint8_t, uint8_t, true>;
