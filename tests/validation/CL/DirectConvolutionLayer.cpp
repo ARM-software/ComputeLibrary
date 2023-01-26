@@ -35,6 +35,9 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DirectConvolutionLayerFixture.h"
 
+/** Synced with tests/validation/dynamic_fusion/gpu/cl/DirectConv2d.cpp
+ *  Please check there for any differences in the coverage
+ */
 namespace arm_compute
 {
 namespace test

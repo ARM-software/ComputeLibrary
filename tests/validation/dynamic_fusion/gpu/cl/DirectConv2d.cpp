@@ -41,14 +41,29 @@ namespace validation
 {
 namespace
 {
+/** Tolerances from tests/validation/CL/DirectConvolutionLayer.cpp
+ */
 RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                     abs_tolerance_f32(0.0001f);           /**< Absolute tolerance for FP32 tests*/
-constexpr float                     tolerance_num = 0.02f;                /**< Tolerance number */
+constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
+/** Synced with tests/validation/CL/ConvolutionLayer.cpp
+ *
+ * Difference                       | Why the difference
+ * f32 tolerance here is smaller    | To use the same tolerance as that of DirectConv2d; lowering tolerance is safe
+ * No quantized tests               | Not supported yet
+ * No grouped CNN tests             | Not supported yet
+ * No mixed layout tests            | Not needed; only NHWC is supported
+ * No activation/post op tests      | Not needed in fusion
+ * No ValidateConvolutionMethod     | Only a single method (direct conv2d) is supported
+ * No ReshapeWeights = true tests   | Not applicable yet. This parameter only concerns gemm-based conv2d
+ * No RunSmallWithPadding tests     | Padding is removed
+ *
+ */
 TEST_SUITE(CONV2D)
 
 template <typename T>
@@ -76,6 +91,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, DynamicFusionGpuConv2dFixture<half>, framework:
 TEST_SUITE_END() // FP16
 
 // Tests for specific conv2d methods
+/** Synced with tests/validation/CL/DirectConvolutionLayer.cpp
+ *
+ * Difference                       | Why the difference
+ * No quantized tests               | Not supported yet
+ * No Invalid output size test      | Not applicable. Output is removed from the interface
+ * No mixed layout/NCHW tests       | Not needed; only NHWC is supported
+ * No activation tests              | Not needed in fusion
+ */
 TEST_SUITE(DIRECT_CONV2D)
 
 // *INDENT-OFF*
