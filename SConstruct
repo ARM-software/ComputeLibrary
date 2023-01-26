@@ -499,6 +499,8 @@ if env['os'] == 'windows':
     env.Append(CXXFLAGS = [ '-Wno-float-conversion', '-Wno-switch-enum','-Wno-comma'])
     env.Append(CXXFLAGS = [ '-Wno-implicit-float-conversion', '-Wno-deprecated-declarations','-Wno-old-style-cast'])
     env.Append(CXXFLAGS = [ '-Wno-zero-as-null-pointer-constant', '-Wno-inconsistent-missing-destructor-override'])
+    env.Append(CXXFLAGS = [ '-Wno-asm-operand-widths'])
+
 
 if env['specs_file'] != "":
     env.Append(LINKFLAGS = ['-specs='+env['specs_file']])

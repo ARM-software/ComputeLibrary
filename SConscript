@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2022 Arm Limited.
+# Copyright (c) 2016-2023 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -490,7 +490,11 @@ arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
-    arm_compute_env.Append(LIBS = ['dl'])
+    if env['os'] == 'windows':
+        arm_compute_env.Append(LIBS = [])
+    else:
+        arm_compute_env.Append(LIBS = ['dl'])
+
 
 # Load build definitions file
 with (open(Dir('#').path + '/filedefs.json')) as fd:
