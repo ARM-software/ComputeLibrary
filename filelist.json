@@ -922,6 +922,21 @@
           }
         }
       },
+      "AddMulAdd": {
+        "files": {
+          "common": [
+            "src/cpu/operators/CpuAddMulAdd.cpp",
+            "src/cpu/kernels/CpuAddMulAddKernel.cpp",
+            "src/runtime/NEON/functions/NEAddMulAdd.cpp"
+          ],
+          "neon": {
+            "fp32":["src/cpu/kernels/addmuladd/generic/neon/fp32.cpp"],
+            "fp16":["src/cpu/kernels/addmuladd/generic/neon/fp16.cpp"],
+            "qasymm8": ["src/cpu/kernels/addmuladd/generic/neon/qasymm8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/addmuladd/generic/neon/qasymm8_signed.cpp"]
+          }
+        }
+      },
       "BatchNormalize": {
         "files": {
           "common": [

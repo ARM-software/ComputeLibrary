@@ -645,6 +645,7 @@ target_sources(
 	cpu/CpuTensor.cpp
 	cpu/kernels/CpuActivationKernel.cpp
 	cpu/kernels/CpuAddKernel.cpp
+	cpu/kernels/CpuAddMulAddKernel.cpp
 	cpu/kernels/CpuCastKernel.cpp
 	cpu/kernels/CpuCol2ImKernel.cpp
 	cpu/kernels/CpuConcatenateBatchKernel.cpp
@@ -702,6 +703,10 @@ target_sources(
 	cpu/kernels/add/generic/neon/qasymm8.cpp
 	cpu/kernels/add/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/add/generic/neon/qsymm16.cpp
+	cpu/kernels/addmuladd/generic/neon/fp16.cpp
+	cpu/kernels/addmuladd/generic/neon/fp32.cpp
+	cpu/kernels/addmuladd/generic/neon/qasymm8.cpp
+	cpu/kernels/addmuladd/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/fp16.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/impl.cpp
@@ -802,6 +807,7 @@ target_sources(
 	cpu/kernels/sub/neon/qsymm16.cpp
 	cpu/operators/CpuActivation.cpp
 	cpu/operators/CpuAdd.cpp
+	cpu/operators/CpuAddMulAdd.cpp
 	cpu/operators/CpuCast.cpp
 	cpu/operators/CpuConcatenate.cpp
 	cpu/operators/CpuConv2d.cpp
@@ -859,6 +865,7 @@ target_sources(
 	runtime/NEON/INESimpleFunction.cpp
 	runtime/NEON/INESimpleFunctionNoBorder.cpp
 	runtime/NEON/functions/NEActivationLayer.cpp
+	runtime/NEON/functions/NEAddMulAdd.cpp
 	runtime/NEON/functions/NEArgMinMaxLayer.cpp
 	runtime/NEON/functions/NEArithmeticAddition.cpp
 	runtime/NEON/functions/NEArithmeticSubtraction.cpp
