@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,12 +33,12 @@ namespace weight_transform {
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 #endif  // defined(__aarch64__)
-void *arm_fp32_4x4_3x3(unsigned int, const float *, size_t, size_t, float *, size_t);
-void *arm_fp32_2x2_3x3(unsigned int, const float *, size_t, size_t, float *, size_t);
-void *arm_fp32_2x2_5x5(unsigned int, const float *, size_t, size_t, float *, size_t);
-void *cpp_fp32_1x6_1x3(unsigned int, const float *, size_t, size_t, float *, size_t);
-void *cpp_fp32_1x4_1x5(unsigned int, const float *, size_t, size_t, float *, size_t);
-void *cpp_fp32_1x2_1x7(unsigned int, const float *, size_t, size_t, float *, size_t);
+void arm_fp32_4x4_3x3(unsigned int, const float *, size_t, size_t, float *, size_t);
+void arm_fp32_2x2_3x3(unsigned int, const float *, size_t, size_t, float *, size_t);
+void arm_fp32_2x2_5x5(unsigned int, const float *, size_t, size_t, float *, size_t);
+void cpp_fp32_1x6_1x3(unsigned int, const float *, size_t, size_t, float *, size_t);
+void cpp_fp32_1x4_1x5(unsigned int, const float *, size_t, size_t, float *, size_t);
+void cpp_fp32_1x2_1x7(unsigned int, const float *, size_t, size_t, float *, size_t);
 
 #define IMPL(KERN_ROWS, KERN_COLS, TRANS_ROWS, TRANS_COLS, KERN) \
   new Transform<float>(#KERN, KERN_ROWS, KERN_COLS, TRANS_ROWS, TRANS_COLS, KERN)

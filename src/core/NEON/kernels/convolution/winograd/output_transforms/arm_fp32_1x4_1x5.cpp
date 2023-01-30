@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,13 +33,13 @@ namespace output_transform {
 void arm_fp32_1x4_1x5(
   unsigned int n_channels,
   const float* inptr,
-  const size_t matrix_stride,
+  size_t matrix_stride,
   const float* bptr,
   float *outptr,
   size_t,  // No need to stride across rows
-  const size_t output_col_stride,
-  const float output_min,
-  const float output_max
+  size_t output_col_stride,
+  float output_min,
+  float output_max
 )
 {
   constexpr auto inner_tile_cols = 8u, output_tile_cols = 4u;
