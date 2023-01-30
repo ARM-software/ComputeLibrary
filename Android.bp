@@ -27,6 +27,7 @@ opencl_srcs = [
         "src/core/CL/cl_kernels/common/elementwise_operation.cl",
         "src/core/CL/cl_kernels/common/elementwise_operation_quantized.cl",
         "src/core/CL/cl_kernels/common/elementwise_unary.cl",
+        "src/core/CL/cl_kernels/common/elementwise_unary_quantized.cl",
         "src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h",
         "src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
         "src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl",

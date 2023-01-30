@@ -369,6 +369,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/elementwise_operation.cl',
                        'src/core/CL/cl_kernels/common/elementwise_operation_quantized.cl',
                        'src/core/CL/cl_kernels/common/elementwise_unary.cl',
+                       'src/core/CL/cl_kernels/common/elementwise_unary_quantized.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
