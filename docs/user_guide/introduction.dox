@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2022 Arm Limited.
+/// Copyright (c) 2017-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -63,7 +63,7 @@ Several builds of the library are available using various configurations:
 <tr>
   <td rowspan="2">Android
   <td>armv8a
-  <td rowspan="2">NDK r18b
+  <td rowspan="2">NDK r20b
   <tr>
   <td>armv8.2-a
 <tr>

@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2022 Arm Limited.
+/// Copyright (c) 2017-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -184,7 +184,7 @@ For Android, the library was successfully built and tested using Google's standa
  - clang++ from NDK r20b for armv8a
  - clang++ from NDK r20b for armv8.2-a with FP16 support
 
-For NDK r18 or older, here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>:
+(From 23.02, NDK >= r20b is highly recommended) For NDK r18 or older, here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>:
 - Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html to directory $NDK
 - Make sure you have Python 2.7 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands to your toolchain directory $MY_TOOLCHAINS:
