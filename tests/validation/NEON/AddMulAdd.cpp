@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifdef __aarch64__
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEAddMulAdd.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -228,3 +230,5 @@ TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // __aarch64__
