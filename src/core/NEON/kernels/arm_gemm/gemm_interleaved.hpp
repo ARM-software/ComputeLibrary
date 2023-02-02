@@ -818,8 +818,8 @@ public:
                             (last_pass ? _act : Activation()), !first_pass,
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (multi * _Nsize),
-                            // Accumulation buffer (not yet implemented on this path)
-                            static_cast<Tab *>(nullptr));
+                            // Accumulation buffer
+                            get_accumulation_buffer(start_row, start_x, batch, multi));
 
                         /* Increment to the next block */
                         start_row += strategy::out_height();
