@@ -839,7 +839,7 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         }
 
         // Check Tensor Rank of vector_sum_row
-        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_row->num_dimensions() > 2);
+        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_row->num_dimensions() > 3);
     }
 
     if(output->total_size() != 0)
