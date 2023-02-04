@@ -11,9 +11,6 @@
         <tab type="user" url="@ref operators_list" title="Operator List"/>
         <tab type="user" url="@ref tests" title="Validation and benchmarks"/>
         <tab type="user" url="@ref advanced" title="Advanced"/>
-        <tab type="usergroup" title="Examples">
-            <tab type="user" url="@ref example_dynamic_fusion_cl_conv2d_elementwise_add" title="(Experimental) Fuse conv2d with elementwise addition"/>
-        </tab>
         <tab type="user" url="@ref versions_changelogs" title="Release Versions and Changelog"/>
         <tab type="user" url="@ref errata" title="Errata"/>
     </tab>
