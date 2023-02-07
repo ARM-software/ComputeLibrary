@@ -150,10 +150,12 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
 
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_n = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+    const size_t ofm   = weights->tensor_shape()[idx_n];
 
     if(weights->dimension(idx_w) != deconv_info.stride().first || weights->dimension(idx_h) != deconv_info.stride().second)
     {
-        if(input->data_layout() == DataLayout::NHWC)
+        if(input->data_layout() == DataLayout::NHWC && ofm <= 16)
         {
             return DeconvolutionMethod::DIRECT;
         }
