@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -625,13 +625,13 @@ struct RedOpX_quantized
         Iterator input(in, in_win_no_pad);
         Iterator output(out, out_window);
 
-        const float in_offset = static_cast<float>(iq_info.offset);
+        const auto  in_offset = static_cast<float>(iq_info.offset);
         const float in_scale  = iq_info.scale;
 
-        const float out_offset = static_cast<float>(oq_info.offset);
+        const auto  out_offset = static_cast<float>(oq_info.offset);
         const float out_scale  = oq_info.scale;
 
-        const float num_elements = static_cast<float>(in_info.dimension(0));
+        const auto num_elements = static_cast<float>(in_info.dimension(0));
 
         const float A = in_scale / (out_scale * num_elements);
         const float B = out_offset - (in_scale * in_offset) / (out_scale);
@@ -1382,10 +1382,17 @@ struct RedOpYZW_quantized
                         vec_res_value3_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value3), vec_A);
                         vec_res_value4_f = wrapper::vmla(vec_B, wrapper::vcvt<float>(vec_res_value4), vec_A);
 
-                        vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
-                        vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
-                        vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
-                        vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
+#ifdef __aarch64__
+                        vec_res_value1 = wrapper::vcvta<PromotedType>(vec_res_value1_f);
+                        vec_res_value2 = wrapper::vcvta<PromotedType>(vec_res_value2_f);
+                        vec_res_value3 = wrapper::vcvta<PromotedType>(vec_res_value3_f);
+                        vec_res_value4 = wrapper::vcvta<PromotedType>(vec_res_value4_f);
+#else  // defined(__aarch64__)
+                        vec_res_value1 = wrapper::vcvt<PromotedType>(vec_res_value1_f);
+                        vec_res_value2 = wrapper::vcvt<PromotedType>(vec_res_value2_f);
+                        vec_res_value3 = wrapper::vcvt<PromotedType>(vec_res_value3_f);
+                        vec_res_value4 = wrapper::vcvt<PromotedType>(vec_res_value4_f);
+#endif // __aarch64__
 
                         const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
                         const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
@@ -1521,7 +1528,12 @@ struct RedOpYZW_quantized
                 {
                     case ReductionOperation::MEAN_SUM:
                     {
+                        // Apply previously calculated coefficients (with rounding on aarch64)
+#ifdef  __aarch64__
+                        const int32_t res                        = arm_compute::support::cpp11::round(A * (static_cast<float>(res_value_q)) + B);
+#else   // defined(__aarch64__)
                         const int32_t res                        = A * (static_cast<float>(res_value_q)) + B;
+#endif  // __aarch64__
                         *reinterpret_cast<T *>(output.ptr() + x) = utils::cast::saturate_cast<T>(res);
                         break;
                     }

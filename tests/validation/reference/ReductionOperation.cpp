@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "ReductionOperation.h"
-
 #include "tests/validation/Helpers.h"
 
 #include <algorithm>
@@ -39,7 +38,7 @@ namespace reference
 namespace
 {
 template <typename T, typename OT>
-OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, int stride)
+OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, int stride, RoundingPolicy policy)
 {
     using type = typename std::remove_cv<OT>::type;
     T res;
@@ -99,7 +98,14 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
         }
         if(op == ReductionOperation::MEAN_SUM && reduce_elements > 0)
         {
-            int_res /= reduce_elements;
+            // Only use rounding in aarch64 to be consistent with kernel
+#ifdef __aarch64__
+            // Divide in float format, then rounded to nearest and implicitly cast back to int
+            int_res = round(static_cast<float>(int_res) / static_cast<float>(reduce_elements), policy);
+#else  // defined(__aarch64__)
+            ARM_COMPUTE_UNUSED(policy);
+            int_res /= reduce_elements; // Legacy compatibility
+#endif // __aarch64
         }
         res = static_cast<type>(int_res);
     }
@@ -175,7 +181,7 @@ OT reduce_operation_arg_min_max(const T *ptr, int reduce_elements, ReductionOper
 } // namespace
 
 template <typename T, typename OT>
-SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op)
+SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, RoundingPolicy policy)
 {
     // Create reference
     const bool         is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
@@ -197,7 +203,7 @@ SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const T
                 const T *src_row_ptr = src.data() + du * reduce_elems;
                 dst[du]              = is_arg_min_max ?
                                        reduce_operation_arg_min_max<T, OT>(src_row_ptr, reduce_elems, op, 1) :
-                                       reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, 1);
+                                       reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, 1, policy);
             }
         }
         break;
@@ -213,7 +219,7 @@ SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const T
                     const T *src_row_ptr = src.data() + in_offset;
                     dst[out_offset]       = is_arg_min_max ?
                                             reduce_operation_arg_min_max<T, OT>(src_row_ptr, reduce_elems, op, src_width) :
-                                            reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width);
+                                            reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width, policy);
                 }
             }
         }
@@ -232,7 +238,7 @@ SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const T
                         const T *src_row_ptr = src.data() + in_offset;
                         dst[out_offset]       = is_arg_min_max ?
                                                 reduce_operation_arg_min_max<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height) :
-                                                reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height);
+                                                reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height, policy);
                     }
                 }
             }
@@ -254,7 +260,7 @@ SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const T
                             const T *src_row_ptr = src.data() + in_offset;
                             dst[out_offset]       = is_arg_min_max ?
                                                     reduce_operation_arg_min_max<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height * src_depth) :
-                                                    reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height * src_depth);
+                                                    reduce_operation<T, OT>(src_row_ptr, reduce_elems, op, src_width * src_height * src_depth, policy);
                         }
                     }
                 }
@@ -269,21 +275,21 @@ SimpleTensor<OT> compute_reduction_operation(const SimpleTensor<T> &src, const T
 }
 
 template <typename T, typename OT>
-SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output)
+SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output, RoundingPolicy policy)
 {
     ARM_COMPUTE_UNUSED(quantization_info_output);
-    return compute_reduction_operation<T, OT>(src, dst_shape, axis, op);
+    return compute_reduction_operation<T, OT>(src, dst_shape, axis, op, policy);
 }
 
 template <>
-SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output)
+SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output, RoundingPolicy policy)
 {
     if(src.data_type() == DataType::QASYMM8)
     {
         // If the operation is MEAN_SUM, we can directly use the uint8 implementation without taking into account scale and offset
         if(op == ReductionOperation::MEAN_SUM && src.quantization_info() == quantization_info_output)
         {
-            return compute_reduction_operation<uint8_t, uint8_t>(src, dst_shape, axis, op);
+            return compute_reduction_operation<uint8_t, uint8_t>(src, dst_shape, axis, op, policy);
         }
         else
         {
@@ -294,19 +300,19 @@ SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, cons
     }
     else
     {
-        return compute_reduction_operation<uint8_t, uint8_t>(src, dst_shape, axis, op);
+        return compute_reduction_operation<uint8_t, uint8_t>(src, dst_shape, axis, op, policy);
     }
 }
 
 template <>
-SimpleTensor<int8_t> reduction_operation(const SimpleTensor<int8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output)
+SimpleTensor<int8_t> reduction_operation(const SimpleTensor<int8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info_output, RoundingPolicy policy)
 {
     if(src.data_type() == DataType::QASYMM8_SIGNED)
     {
         // If the operation is MEAN_SUM, we can directly use the int8 implementation without taking into account scale and offset
         if(op == ReductionOperation::MEAN_SUM && src.quantization_info() == quantization_info_output)
         {
-            return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op);
+            return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op, policy);
         }
         else
         {
@@ -317,25 +323,25 @@ SimpleTensor<int8_t> reduction_operation(const SimpleTensor<int8_t> &src, const 
     }
     else
     {
-        return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op);
+        return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op, policy);
     }
 }
 
 template SimpleTensor<float> reduction_operation(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                 QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                 QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 template SimpleTensor<half> reduction_operation(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 
 template SimpleTensor<int32_t> reduction_operation(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                   QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                   QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 template SimpleTensor<int32_t> reduction_operation(const SimpleTensor<int32_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                   QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                   QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 template SimpleTensor<int32_t> reduction_operation(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                   QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                   QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 template SimpleTensor<int32_t> reduction_operation(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                   QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                   QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 template SimpleTensor<int32_t> reduction_operation(const SimpleTensor<int8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                                   QuantizationInfo quantization_info_output = QuantizationInfo());
+                                                   QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 
 } // namespace reference
 } // namespace validation
