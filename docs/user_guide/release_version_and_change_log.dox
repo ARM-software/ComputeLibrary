@@ -46,11 +46,8 @@ v23.02 Public major release
    - Add the following operators to the experimental dynamic fusion API:
      - GpuAdd, GpuCast, GpuClamp, GpuDepthwiseConv2d, GpuMul, GpuOutput, GpuPool2d, GpuReshape, GpuResize, GpuSoftmax, GpuSub.
    - Add SME/SME2 kernels for GeMM, Winograd convolution, Depthwise convolution and Pooling.
+   - Add new CPU operator AddMulAdd for float and quantized types.
    - Add new flag @ref ITensorInfo::lock_paddings() to tensors to prevent extending tensor paddings.
-   - Add new OpenCL kernel to compute indirect convolution:
-     - \link opencl::kernels::ClIndirectConv2dKernel ClIndirectConv2dKernel \endlink
-   - Add new OpenCL kernel to compute transposed convolution:
-     - \link opencl::kernels::ClTransposedConvolutionKernel ClTransposedConvolutionKernel \endlink
    - Add experimental support for CPU only Bazel and CMake builds.
  - Performance optimizations:
    - Optimize CPU base-e exponential functions for FP32.
@@ -58,6 +55,11 @@ v23.02 Public major release
    - Optimize CPU quantized Subtraction by reusing the quantized Addition kernel.
    - Optimize CPU ReduceMean by removing quantization steps and performing the operation in integer domain.
    - Optimize GPU Scale and Dynamic Fusion GpuResize by removing quantization steps and performing the operation in integer domain.
+   - Update the heuristic for CLDepthwiseConvolutionNative kernel.
+   - Add new optimized OpenCL kernel to compute indirect convolution:
+     - \link opencl::kernels::ClIndirectConv2dKernel ClIndirectConv2dKernel \endlink
+   - Add new optimized OpenCL kernel to compute transposed convolution:
+     - \link opencl::kernels::ClTransposedConvolutionKernel ClTransposedConvolutionKernel \endlink
  - Update recommended/minimum NDK version to r20b.
  - Various optimizations and bug fixes.
 
