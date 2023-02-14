@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,9 +170,9 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
         int       pool_stride_x   = 0;
         int       pool_stride_y   = 0;
         std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
-        const int upper_bound_w = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_right);
-        const int upper_bound_h = src->info()->dimension(2) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-
+        const int   upper_bound_w = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_right);
+        const int   upper_bound_h = src->info()->dimension(2) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+        const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
         float32x4_t vres;
 
         execute_window_loop(window_out, [&](const Coordinates & id)
@@ -223,7 +223,7 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
                 }
                 else
                 {
-                    vres = vdupq_n_f32(-std::numeric_limits<float>::infinity());
+                    vres = vdupq_n_f32(min_value);
                     for(int y = pool_start_y; y < pool_end_y; ++y)
                     {
                         for(int x = pool_start_x; x < pool_end_x; ++x)
@@ -285,7 +285,7 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
                 }
                 else
                 {
-                    res = -std::numeric_limits<float>::infinity();
+                    res = min_value;
                     for(int y = pool_start_y; y < pool_end_y; ++y)
                     {
                         for(int x = pool_start_x; x < pool_end_x; ++x)

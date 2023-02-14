@@ -87,7 +87,7 @@ SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const Pooling
                         int hend     = std::min(hstart + pool_size_y, h_src);
                         wstart       = std::max(wstart, 0);
                         hstart       = std::max(hstart, 0);
-                        auto max_val = -std::numeric_limits<ACC_T>::infinity();
+                        auto max_val = info.use_inf_as_limit ? -std::numeric_limits<ACC_T>::infinity() : std::numeric_limits<ACC_T>::lowest();
                         int  max_index{ 0 };
                         for(int y = hstart; y < hend; ++y)
                         {

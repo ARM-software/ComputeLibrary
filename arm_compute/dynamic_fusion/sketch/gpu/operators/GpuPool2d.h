@@ -48,8 +48,15 @@ public:
     /* Set mixed_precision */
     GpuPool2dSettings &mixed_precision(bool mixed_precision);
 
+    /* Get using -infinity as limit flag */
+    bool use_inf_as_limit() const;
+
+    /* Set using -infinity as limit flag */
+    GpuPool2dSettings use_inf_as_limit(bool use_inf_as_limit);
+
 private:
     bool _mixed_precision{ false };
+    bool _use_inf_as_limit{ true };
 };
 
 /** Operator interface. */

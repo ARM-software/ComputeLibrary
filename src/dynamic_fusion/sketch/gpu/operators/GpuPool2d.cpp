@@ -60,6 +60,17 @@ bool GpuPool2dSettings::mixed_precision() const
     return _mixed_precision;
 }
 
+GpuPool2dSettings GpuPool2dSettings::use_inf_as_limit(bool use_inf_as_limit)
+{
+    _use_inf_as_limit = use_inf_as_limit;
+    return *this;
+}
+
+bool GpuPool2dSettings::use_inf_as_limit() const
+{
+    return _use_inf_as_limit;
+}
+
 Status GpuPool2d::validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
                               const ITensorInfo       *dst,

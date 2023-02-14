@@ -1209,7 +1209,8 @@ struct PoolingLayerInfo
           pad_stride_info(PadStrideInfo()),
           exclude_padding(false),
           is_global_pooling(false),
-          fp_mixed_precision(false)
+          fp_mixed_precision(false),
+          use_inf_as_limit(true)
     {
     }
     /** Constructor
@@ -1222,20 +1223,23 @@ struct PoolingLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
                               DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
-                              bool          fp_mixed_precision = false)
+                              bool          fp_mixed_precision = false,
+                              bool          use_inf_as_limit   = true)
         : pool_type(pool_type),
           pool_size(Size2D(pool_size, pool_size)),
           data_layout(data_layout),
           pad_stride_info(pad_stride_info),
           exclude_padding(exclude_padding),
           is_global_pooling(false),
-          fp_mixed_precision(fp_mixed_precision)
+          fp_mixed_precision(fp_mixed_precision),
+          use_inf_as_limit(use_inf_as_limit)
     {
     }
 
@@ -1249,20 +1253,23 @@ struct PoolingLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
                               DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
-                              bool          fp_mixed_precision = false)
+                              bool          fp_mixed_precision = false,
+                              bool          use_inf_as_limit   = true)
         : pool_type(pool_type),
           pool_size(pool_size),
           data_layout(data_layout),
           pad_stride_info(pad_stride_info),
           exclude_padding(exclude_padding),
           is_global_pooling(false),
-          fp_mixed_precision(fp_mixed_precision)
+          fp_mixed_precision(fp_mixed_precision),
+          use_inf_as_limit(use_inf_as_limit)
     {
     }
 
@@ -1280,7 +1287,8 @@ struct PoolingLayerInfo
           pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
           exclude_padding(false),
           is_global_pooling(true),
-          fp_mixed_precision(false)
+          fp_mixed_precision(false),
+          use_inf_as_limit(true)
     {
     }
 
@@ -1291,6 +1299,7 @@ struct PoolingLayerInfo
     bool          exclude_padding;
     bool          is_global_pooling;
     bool          fp_mixed_precision;
+    bool          use_inf_as_limit;
 };
 
 /** Pooling Layer Information struct*/
