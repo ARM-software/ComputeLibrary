@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,13 @@ class TensorShape;
 class CLBuildOptions;
 class ITensorInfo;
 
+/** OpenCL Image2D types */
+enum class CLImage2DType
+{
+    ReadOnly,
+    WriteOnly
+};
+
 /** Create a cl::Image2D object from an OpenCL buffer
  *
  * @note The following conditions are required to create a OpenCL image object from OpenCL buffer,
@@ -49,10 +56,11 @@ class ITensorInfo;
  * @param[in] shape2d         2D tensor shape
  * @param[in] data_type       DataType to use. Only supported: F32,F16
  * @param[in] image_row_pitch Image row pitch (a.k.a. stride Y) to be used in the image2d object
+ * @param[in] image_type      Image 2D type (@ref CLImage2DType)
  *
  * @return cl::Image2D object
  */
-cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch);
+cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType image_type);
 
 namespace experimental
 {

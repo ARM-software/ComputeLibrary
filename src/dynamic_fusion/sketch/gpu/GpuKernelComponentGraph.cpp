@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,37 +31,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-namespace
-{
-/** Automatically create memory descriptors for all tensors in the graph
- *
- * @param[in] tensors @ref ITensorInfo map
- * @param[in] graph   @ref DependencyGraph of which the @p tensors are a part
- *
- * @return MemoryDescriptorMap  An assignment map of @ref MemoryDescriptors for each ITensorInfo in the graph
- */
-MemoryDescriptorMap assign_memory_descriptors(const std::map<ITensorInfo::Id, const ITensorInfo *> tensors, const DependencyGraph &graph)
-{
-    MemoryDescriptorMap mem_map{};
-    for(auto t_id : graph.all_tensors())
-    {
-        const auto &tensor = tensors.at(t_id);
-        // Only global src and dst tensors to the entire component graph are "User" tensors, which are user-specified memories
-        if(is_in(t_id, graph.global_src_tensors()) || is_in(t_id, graph.global_dst_tensors()))
-        {
-            mem_map[t_id] = MemoryDescriptor{ MemoryType::User };
-        }
-        else
-        {
-            AuxMemoryInfo aux_mem_info{ tensor->total_size() };
-            mem_map[t_id] = MemoryDescriptor{ MemoryType::Auxiliary, aux_mem_info };
-        }
-    }
-    return mem_map;
-}
-
-} // namespace
-
 std::vector<DependencyGraph::TensorId> GpuKernelComponentGraph::get_tensor_ids(const std::vector<const ITensorInfo *> tensors)
 {
     std::vector<DependencyGraph::TensorId> tensor_ids{};
@@ -80,44 +49,25 @@ GpuKernelComponentGraph::GpuKernelComponentGraph(GpuComponentServices *services)
 {
 }
 
-GpuKernelComponentStream GpuKernelComponentGraph::fuse() const
+GpuKernelComponentStream GpuKernelComponentGraph::fuse(const MemoryDescriptorMap &mem_map) const
 {
-    // Obtain memory descriptor map
-    const auto mem_map = assign_memory_descriptors(_tensors, _dependency_graph);
-    /// @note Fusion constraints (for kernel components) are exactly the same as the invariants of @ref GpuKernelComponentGroup
-    /// Fusion can be framed as a mathematical optimization problem:
-    /// Given fusion constraints, find the "best" fusion patterns possible
-    /// "Best" is ill-defined at the moment. For now we define "best" fusion pattern as one
-    /// which results in the least number of fused kernels ( @ref GpuKernelComponentGroup ) at the end
-
-    /// As the first iteration, we offer a sub-optimal algorithm here which ensures all
-    /// constraints are met, but provides no guarantee that the fusion pattern is optimal
-
     GpuKernelComponentStream stream{ _services, mem_map };
-    // Break down into linear groups of components (constraint 1), preserving topological order
-    const auto linear_graphs = _dependency_graph.topological_partition();
+    const auto               op_seq = _dependency_graph.build_operators_sequence();
 
-    // Further divide up the linear groups based on rest of the fusion constraints (rely on component group's invariants)
-    for(const auto &graph : linear_graphs)
+    stream.new_component_group();
+    for(auto op : op_seq)
     {
-        for(unsigned int i = 0; i < graph.size(); ++i)
+        const auto component = _components.at(op.op).get();
+        const auto success   = stream.add_component(component);
+        if(!success) // Assume first failure was because the root component is unfusable
         {
-            const auto comp = _components.at(graph[i].op).get();
-            // Each new linear graph signals a new component group in the stream
-            if(i == 0)
-            {
-                stream.new_component_group();
-            }
-            // If it violates the component group's invariant / fusion constraint, breaks up the stream by inserting a new group
-            bool success = stream.add_component(comp);
-            if(!success)
-            {
-                stream.new_component_group();
-                success = stream.add_component(comp);
-                ARM_COMPUTE_ERROR_ON(!success);
-            }
+            stream.new_component_group();
+            const auto success = stream.add_component(component);
+            ARM_COMPUTE_ERROR_ON(!success);
+            ARM_COMPUTE_UNUSED(success);
         }
     }
+
     return stream;
 }
 } // namespace dynamic_fusion

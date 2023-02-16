@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,7 +98,7 @@ void ClReshapeKernel::configure(const CLCompileContext &compile_context, const I
     _kernel.setArg<cl_int2>(idx++, dst_shape);
 
     // Configure kernel window
-    Window win = calculate_max_window(*src);
+    Window win = calculate_max_window(*dst);
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));

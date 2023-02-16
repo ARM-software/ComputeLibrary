@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_REDUCTION_OPERATION_H
 
 #include "tests/SimpleTensor.h"
+#include "arm_compute/core/Rounding.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -37,7 +38,7 @@ namespace reference
 {
 template <typename T, typename OT>
 SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
-                                     QuantizationInfo quantization_info_output = QuantizationInfo());
+                                     QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 } // namespace reference
 } // namespace validation
 } // namespace test

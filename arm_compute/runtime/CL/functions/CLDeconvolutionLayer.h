@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,8 @@ class CLDeconvolutionLayer : public IFunction
 public:
     /** Default constructor */
     CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+
+    ~CLDeconvolutionLayer();
 
     /** Set the input, weights, biases and output tensors.
      *
@@ -105,6 +107,9 @@ public:
 private:
     std::shared_ptr<IMemoryManager> _memory_manager;
     std::unique_ptr<IFunction>      _function;
+
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLDECONVOLUTIONLAYER_H */

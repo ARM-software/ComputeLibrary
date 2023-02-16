@@ -27,6 +27,8 @@
 #include "arm_compute/core/Validate.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
+#include <algorithm>
+
 namespace arm_compute
 {
 namespace experimental
@@ -35,6 +37,9 @@ namespace dynamic_fusion
 {
 bool GpuKernelComponentGroup::add_component(ComponentPtr component)
 {
+    ARM_COMPUTE_ERROR_ON_MSG(
+        _finalized, "The component group has been finalized and cannot be altered.");
+
     // note: Constraint 1 is guaranteed as a precondition
     // Constraint 2
     if(component->type() != GpuComponentType::Output && _components.size() >= max_fused_components)
@@ -48,11 +53,6 @@ bool GpuKernelComponentGroup::add_component(ComponentPtr component)
     }
     // Constraint 3.2
     if(!_components.empty() && (component->type() != GpuComponentType::Simple && component->type() != GpuComponentType::Output))
-    {
-        return false;
-    }
-    // Constraint 3.3: Disallow multiple output components
-    if(!_components.empty() && get_last_component()->type() == GpuComponentType::Output && component->type() == GpuComponentType::Output)
     {
         return false;
     }
@@ -124,55 +124,182 @@ bool GpuKernelComponentGroup::add_component(ComponentPtr component)
     return true;
 }
 
-std::vector<const ITensorInfo *> GpuKernelComponentGroup::get_src_tensors() const
+void GpuKernelComponentGroup::finalize()
 {
-    if(_components.empty())
+    if(_finalized)
     {
-        return {};
-    }
-    auto src_tensors     = _components[0]->tensors().get_const_src_tensors();
-    auto prev_dst_tensor = _components[0]->tensors().get_const_dst_tensors()[0]; // PRE: Only one dst tensor per component
-    for(unsigned int i = 1; i < _components.size(); ++i)
-    {
-        auto cur_src_tensors = _components[i]->tensors().get_const_src_tensors();
-        for(const auto src_tensor : cur_src_tensors)
-        {
-            if(src_tensor->id() == prev_dst_tensor->id())
-            {
-                continue; // Skip "intermediate" tensors. I.e. tensors that are used to link between two components
-            }
-            src_tensors.push_back(src_tensor);
-        }
-        prev_dst_tensor = _components[i]->tensors().get_const_dst_tensors()[0]; // PRE: Only one dst tensor per component
+        return;
     }
 
-    return src_tensors;
+    _finalized = true;
+
+    std::set<const ITensorInfo *> output_tensors;
+    std::map<const ITensorInfo *, std::vector<const ITensorInfo *>> possible_tile_map;
+    std::map<const ITensorInfo *, int32_t> tile_usages;
+
+    for(auto component : _components)
+    {
+        const auto tensors = component->tensors();
+        const auto src_tensors = tensors.get_const_src_tensors();
+        const auto dst_tensors = tensors.get_const_dst_tensors();
+
+        // Detect input, output and intermediate tensors.
+        for(auto tensor : src_tensors)
+        {
+            const auto output_tensors_it = output_tensors.find(tensor);
+
+            if(output_tensors_it != output_tensors.end())
+            {
+                // This tensor is the output of another operator.
+                // It must be marked as intermediate tensor.
+                output_tensors.erase(output_tensors_it);
+                _interm_tensors.insert(tensor);
+            }
+            else if(_interm_tensors.find(tensor) == _interm_tensors.end())
+            {
+                _input_tensors.insert(tensor);
+
+                tile_usages[tensor] = 0;
+                possible_tile_map.emplace(tensor, std::vector<const ITensorInfo *>());
+            }
+        }
+
+        for(auto tensor : dst_tensors)
+        {
+            ARM_COMPUTE_ERROR_ON(_input_tensors.find(tensor) != _input_tensors.end());
+            ARM_COMPUTE_ERROR_ON(output_tensors.find(tensor) != output_tensors.end());
+            ARM_COMPUTE_ERROR_ON(_interm_tensors.find(tensor) != _interm_tensors.end());
+            output_tensors.insert(tensor);
+
+            tile_usages[tensor] = 0;
+            possible_tile_map.emplace(tensor, std::vector<const ITensorInfo *>());
+        }
+
+        // Check if the output can overwrite the input tile.
+        const auto component_type = component->type();
+        if(component_type == GpuComponentType::Simple || component_type == GpuComponentType::Output)
+        {
+            ARM_COMPUTE_ERROR_ON(dst_tensors.size() != 1);
+
+            const auto dst_tensor = dst_tensors[0];
+            const auto &dst_shape = dst_tensor->tensor_shape();
+            const auto &dst_type = dst_tensor->data_type();
+
+            tile_usages[dst_tensor] = 0;
+
+            for(auto src_tensor : src_tensors)
+            {
+                const auto &src_shape = src_tensor->tensor_shape();
+                const auto &src_type = src_tensor->data_type();
+
+                if(src_shape == dst_shape && src_type == dst_type)
+                {
+                    const auto tile_usages_it = tile_usages.find(src_tensor);
+                    ARM_COMPUTE_ERROR_ON(tile_usages_it == tile_usages.end());
+
+                    if(component_type == GpuComponentType::Simple || tile_usages_it->second > 0)
+                    {
+                        // Increase the number of tile usages unless this component is an output
+                        // and the tile has not been shared with any component.
+                        // (Reason: output component doesn't change the content of the tile)
+                        ++tile_usages_it->second;
+                    }
+
+                    possible_tile_map[dst_tensor].push_back(src_tensor);
+                }
+            }
+        }
+        else
+        {
+            // Outputs of complex and unfusable components need dedicated tile.
+            for(auto tensor : dst_tensors)
+            {
+                tile_usages[tensor] = 0;
+            }
+        }
+    }
+
+    // Find the smallest list of tiles that the intermediate tensors need to write to.
+    for(auto tensor : _input_tensors)
+    {
+        _tile_map[tensor] = tensor;
+    }
+
+    for(auto component : _components)
+    {
+        const auto dst_tensors = component->tensors().get_const_dst_tensors();
+
+        for(auto tensor : dst_tensors)
+        {
+            const auto target_tiles = possible_tile_map.at(tensor);
+            _tile_map[tensor] = tensor;
+
+            for(auto target : target_tiles)
+            {
+                const auto num_usage = tile_usages[target];
+
+                if(num_usage <= 1)
+                {
+                    // The target tile is consumed by only this operator, so we can reuse it
+                    // for the destination tensor data.
+                    _tile_map[tensor] = _tile_map.at(target);
+                    break;
+                }
+            }
+        }
+    }
+
+    for(auto tensor : output_tensors)
+    {
+        _tile_map[tensor] = tensor;
+    }
+
+    // All intermediate tensors that cannot be shared with any previous tensor
+    // will need to be declared as tile variable.
+    for(auto tensor_tile : _tile_map)
+    {
+        if(tensor_tile.first == tensor_tile.second &&
+           _interm_tensors.find(tensor_tile.first) != _interm_tensors.end())
+        {
+            _tiles.push_back(tensor_tile.first);
+        }
+    }
+
+    std::set_union(
+        _input_tensors.begin(), _input_tensors.end(),
+        output_tensors.begin(), output_tensors.end(),
+        std::back_inserter(_argument_tensors));
+    _any_output_tensor = *output_tensors.begin();
 }
 
-std::vector<const ITensorInfo *> GpuKernelComponentGroup::get_dst_tensors() const
+std::vector<const ITensorInfo *> GpuKernelComponentGroup::get_tiles() const
 {
-    if(_components.empty())
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+    return _tiles;
+}
+
+const ITensorInfo *GpuKernelComponentGroup::get_tile_for_tensor(const ITensorInfo *tensor) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+
+    if(_tile_map.find(tensor) != _tile_map.end())
     {
-        return {};
+        return _tile_map.at(tensor);
     }
-    const auto                       dst_tensor_ptrs = _components[_components.size() - 1]->tensors().get_const_dst_tensors();
-    std::vector<const ITensorInfo *> dst_tensors;
-    for(auto tensor_ptr : dst_tensor_ptrs)
-    {
-        dst_tensors.push_back(tensor_ptr);
-    }
-    return dst_tensors;
+
+    return tensor;
+}
+
+const ITensorInfo *GpuKernelComponentGroup::get_any_dst_tensor() const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+    return _any_output_tensor;
 }
 
 std::vector<const ITensorInfo *> GpuKernelComponentGroup::get_argument_tensors() const
 {
-    std::vector<const ITensorInfo *> arguments;
-    const auto                       src_tensors = get_src_tensors();
-    const auto                       dst_tensors = get_dst_tensors();
-    arguments.reserve(src_tensors.size() + dst_tensors.size());
-    arguments.insert(arguments.end(), src_tensors.begin(), src_tensors.end());
-    arguments.insert(arguments.end(), dst_tensors.begin(), dst_tensors.end());
-    return arguments;
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+    return _argument_tensors;
 }
 
 GpuKernelComponentGroup::ComponentPtr GpuKernelComponentGroup::get_root_component() const
@@ -184,41 +311,16 @@ GpuKernelComponentGroup::ComponentPtr GpuKernelComponentGroup::get_root_componen
     return _components[0];
 }
 
-GpuKernelComponentGroup::ComponentPtr GpuKernelComponentGroup::get_last_component() const
-{
-    if(empty())
-    {
-        return nullptr;
-    }
-    return _components[_components.size() - 1];
-}
-
-GpuKernelComponentGroup::ComponentPtr GpuKernelComponentGroup::get_previous_component(ComponentId id) const
-{
-    if(empty())
-    {
-        return nullptr;
-    }
-    // Get the index of the requested component
-    size_t ind = 0;
-    for(const auto c : _components)
-    {
-        if(c->id() == id)
-        {
-            break;
-        }
-        ind++;
-    }
-    if(ind == 0 || ind >= _components.size())
-    {
-        return nullptr;
-    }
-    return _components[ind - 1];
-}
-
 bool GpuKernelComponentGroup::is_intermediate_tensor(const ITensorInfo *tensor) const
 {
-    return is_tensor_in(tensor, get_interm_tensors());
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+    return _interm_tensors.find(tensor) != _interm_tensors.end();
+}
+
+bool GpuKernelComponentGroup::is_input_tensor(const ITensorInfo *tensor) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!_finalized, "The component group must have been finalized.");
+    return _input_tensors.find(tensor) != _input_tensors.end();
 }
 
 size_t GpuKernelComponentGroup::size() const
@@ -260,30 +362,6 @@ typename std::vector<GpuKernelComponentGroup::ComponentPtr>::const_iterator GpuK
 typename std::vector<GpuKernelComponentGroup::ComponentPtr>::const_iterator GpuKernelComponentGroup::cend() const
 {
     return _components.cend();
-}
-
-std::vector<const ITensorInfo *> GpuKernelComponentGroup::get_interm_tensors() const
-{
-    std::vector<const ITensorInfo *> interm_tensors{};
-    for(unsigned int i = 0; i + 1 < _components.size(); ++i)
-    {
-        auto interm_tensor = _components[i]->tensors().get_const_dst_tensors()[0];
-        interm_tensors.push_back(interm_tensor); // PRE: Only one dst tensor per component
-    }
-
-    return interm_tensors;
-}
-
-bool GpuKernelComponentGroup::is_tensor_in(const ITensorInfo *tensor, const std::vector<const ITensorInfo *> tensors)
-{
-    for(auto t : tensors)
-    {
-        if(tensor->id() == t->id())
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 } // namespace dynamic_fusion

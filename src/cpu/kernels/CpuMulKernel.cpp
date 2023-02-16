@@ -34,6 +34,14 @@
 
 #include <arm_neon.h>
 
+namespace
+{
+#if defined(ENABLE_FP32_KERNELS)
+    static constexpr size_t default_mws_N1_fp32_neon = 22447;
+    static constexpr size_t default_mws_V1_fp32_neon = 38982;
+#endif /* ENABLE_FP32_KERNELS */
+    static constexpr size_t default_mws_other_platforms_1d_tensor = 10240;
+}
 namespace arm_compute
 {
 namespace cpu
@@ -181,7 +189,8 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
 
         using ExactTagType = typename wrapper::traits::neon_vector<T, window_step_x>::tag_type;
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<T *>(dst.ptr());
@@ -241,7 +250,8 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
         Iterator input2(src2, input2_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
@@ -290,6 +300,262 @@ void mul_saturate_quantized_8(const ITensor *src1, const ITensor *src2, ITensor 
     }
 }
 
+bool mul_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, float scale)
+{
+    const auto iq0 = src0->quantization_info().uniform();
+    const auto iq1 = src1->quantization_info().uniform();
+    const auto oq  = dst->quantization_info().uniform();
+
+    const auto multiplier = ((iq0.scale * iq1.scale) / oq.scale) * scale;
+
+    if(multiplier < -8191.f || multiplier > 8191.f)
+    {
+        //The multiplier cannot be stored as a 14.18 signed fixed-point number
+        return false;
+    }
+
+    const auto offset_out = float(oq.offset);
+
+    const auto max_result = multiplier * (256) * (256) + offset_out;
+
+    if(max_result > 8191.f)
+    {
+        //It might not be possible to store the result as a 14.18 signed fixed-point number.
+        return false;
+    }
+
+    return true;
+}
+
+template <typename ScalarType>
+void mul_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *dst, const Window &window, float scale)
+{
+    const auto in0_info = src0->info();
+    const auto in1_info = src1->info();
+
+    const auto &in0_shape = in0_info->tensor_shape();
+    const auto &in1_shape = in1_info->tensor_shape();
+
+    // Create input windows.
+    Window in0_win = window.broadcast_if_dimension_le_one(in0_shape);
+    Window in1_win = window.broadcast_if_dimension_le_one(in1_shape);
+
+    // Clear the x dimension on the execution window as we process the whole row each iteration.
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    constexpr int window_step_x         = 16;
+    const auto    window_start_x        = window.x().start();
+    const auto    window_end_x          = window.x().end();
+    const auto    is_broadcast_across_x = in0_shape.x() != in1_shape.x();
+
+    const auto iq0_info = in0_info->quantization_info().uniform();
+    const auto iq1_info = in1_info->quantization_info().uniform();
+    const auto oq_info  = dst->info()->quantization_info().uniform();
+
+    const auto in0_offset = iq0_info.offset;
+    const auto in1_offset = iq1_info.offset;
+    const auto out_offset = oq_info.offset;
+    const auto multiplier = ((iq0_info.scale * iq1_info.scale) / oq_info.scale) * scale;
+
+    constexpr int32_t two_pwr18i = 262144;
+    constexpr float   two_pwr18f = 262144.f;
+
+    const auto in0_offset_16p0  = static_cast<int16_t>(in0_offset);
+    const auto in1_offset_16p0  = static_cast<int16_t>(in1_offset);
+    const auto out_offset_14p18 = static_cast<int32_t>(out_offset * two_pwr18i);
+    const auto multiplier_14p18 = static_cast<int32_t>(multiplier * two_pwr18f);
+
+    if(is_broadcast_across_x)
+    {
+        // Prefix: a = non-broadcast, b = broadcast.
+
+        const auto is_broadcast_input_1 = in1_win.x().step() == 0;
+        auto       a_win                = is_broadcast_input_1 ? in0_win : in1_win;
+        auto       b_win                = is_broadcast_input_1 ? in1_win : in0_win;
+        const auto a_tensor             = is_broadcast_input_1 ? src0 : src1;
+        const auto b_tensor             = is_broadcast_input_1 ? src1 : src0;
+
+        const auto a_offset_16p0 = is_broadcast_input_1 ? in0_offset_16p0 : in1_offset_16p0;
+        const auto b_offset_16p0 = is_broadcast_input_1 ? in1_offset : in0_offset;
+#ifndef __aarch64__
+        const auto a_offset = is_broadcast_input_1 ? in0_offset : in1_offset;
+        const auto b_offset = is_broadcast_input_1 ? in1_offset : in0_offset;
+#endif //__aarch64__
+        const auto a_voffset_16p0 = wrapper::vdup_n(a_offset_16p0, wrapper::traits::vector_64_tag());
+
+        // Clear the x dimension on the execution window as we process the whole row each iteration.
+        a_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator a_input_it(a_tensor, a_win);
+        Iterator b_input_it(b_tensor, b_win);
+        Iterator out_it(dst, win);
+
+        execute_window_loop(
+            win, [&](const Coordinates &)
+        {
+            const auto a_ptr   = reinterpret_cast<const ScalarType *>(a_input_it.ptr());
+            const auto b_ptr   = reinterpret_cast<const ScalarType *>(b_input_it.ptr());
+            const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
+
+            const auto b_val            = *b_ptr;
+            const auto b_offseted_32p0  = static_cast<int32_t>(b_val - b_offset_16p0);
+            const auto b_voffseted_32p0 = wrapper::vdup_n(b_offseted_32p0, wrapper::traits::vector_128_tag());
+
+            const auto vmultiplier_14p18 = wrapper::vdup_n(multiplier_14p18, wrapper::traits::vector_128_tag());
+            const auto voffsetout_14p18  = wrapper::vdup_n(out_offset_14p18, wrapper::traits::vector_128_tag());
+
+            int x = window_start_x;
+
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                // Load the inputs.
+                const auto a_vin_8p0 = wrapper::vloadq(a_ptr + x);
+
+                // Widen the non-broadcast elements to signed 16-bit regardless of the input signedness.
+                const auto a_vin_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(a_vin_8p0)));
+                const auto a_vin_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(a_vin_8p0)));
+
+                const auto voffseted_32p0_00 = wrapper::vsubl(wrapper::vgetlow(a_vin_16p0_0), a_voffset_16p0);
+                const auto voffseted_32p0_01 = wrapper::vsubl(wrapper::vgethigh(a_vin_16p0_0), a_voffset_16p0);
+                const auto voffseted_32p0_10 = wrapper::vsubl(wrapper::vgetlow(a_vin_16p0_1), a_voffset_16p0);
+                const auto voffseted_32p0_11 = wrapper::vsubl(wrapper::vgethigh(a_vin_16p0_1), a_voffset_16p0);
+
+                const auto vinnermul_32p0_00 = wrapper::vmul(voffseted_32p0_00, b_voffseted_32p0);
+                const auto vinnermul_32p0_01 = wrapper::vmul(voffseted_32p0_01, b_voffseted_32p0);
+                const auto vinnermul_32p0_10 = wrapper::vmul(voffseted_32p0_10, b_voffseted_32p0);
+                const auto vinnermul_32p0_11 = wrapper::vmul(voffseted_32p0_11, b_voffseted_32p0);
+
+                const auto vout_14p18_00 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_00, vmultiplier_14p18);
+                const auto vout_14p18_01 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_01, vmultiplier_14p18);
+                const auto vout_14p18_10 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_10, vmultiplier_14p18);
+                const auto vout_14p18_11 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_11, vmultiplier_14p18);
+
+                // These shift rights are to revert the multiplication by twopwr18. Hard limit of a maximum shift by 8 requires multiple shift instructions to achieve this.
+                const auto vout_15p1_00 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_00));
+                const auto vout_15p1_01 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_01));
+                const auto vout_15p1_10 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_10));
+                const auto vout_15p1_11 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_11));
+
+                const auto vout_15p1_0 = wrapper::vcombine(
+                                             vout_15p1_00,
+                                             vout_15p1_01);
+
+                const auto vout_15p1_1 = wrapper::vcombine(
+                                             vout_15p1_10,
+                                             vout_15p1_11);
+                const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
+
+                const auto vout_8p0 = wrapper::vcombine(
+                                          wrapper::vqrshrn<2>(vout_15p1_0),
+                                          wrapper::vqrshrn<2>(vout_15p1_1));
+                wrapper::vstore(out_ptr + x, vout_8p0);
+            }
+
+            //Process the left-over elements.
+            for(; x < window_end_x; ++x)
+            {
+#ifdef __aarch64__
+                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>((multiplier_14p18 * (int32_t(a_ptr[x]) - a_offset_16p0) * (int32_t(
+                                                                                                             b_val) - b_offset_16p0)) + out_offset_14p18)));
+#else  //__aarch64__
+                out_ptr[x] = utility::clamp<int32_t, ScalarType>(support::cpp11::lround(multiplier * ((float(a_ptr[x]) - a_offset) * (float(b_val) - b_offset)) + float(out_offset)));
+#endif //__aarch64__
+            }
+        },
+        a_input_it, b_input_it, out_it);
+    }
+    else
+    {
+        const auto voffset0_16p0     = wrapper::vdup_n(in0_offset_16p0, wrapper::traits::vector_64_tag());
+        const auto voffset1_16p0     = wrapper::vdup_n(in1_offset_16p0, wrapper::traits::vector_64_tag());
+        const auto voffsetout_14p18  = wrapper::vdup_n(out_offset_14p18, wrapper::traits::vector_128_tag());
+        const auto vmultiplier_14p18 = wrapper::vdup_n(multiplier_14p18, wrapper::traits::vector_128_tag());
+
+        // Clear the x dimension on the execution window as we process the whole row each iteration.
+        in0_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        in1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator in0_it(src0, in0_win);
+        Iterator in1_it(src1, in1_win);
+        Iterator out_it(dst, win);
+
+        execute_window_loop(
+            win, [&](const Coordinates &)
+        {
+            const auto in0_ptr = reinterpret_cast<const ScalarType *>(in0_it.ptr());
+            const auto in1_ptr = reinterpret_cast<const ScalarType *>(in1_it.ptr());
+            const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
+
+            int x = window_start_x;
+
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                // Load the inputs.
+                const auto vin0_8p0 = wrapper::vloadq(in0_ptr + x);
+                const auto vin1_8p0 = wrapper::vloadq(in1_ptr + x);
+
+                // Widen the input elements to signed 16-bit regardless of the input signedness.
+                const auto vin0_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin0_8p0)));
+                const auto vin0_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin0_8p0)));
+                const auto vin1_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin1_8p0)));
+                const auto vin1_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin1_8p0)));
+
+                const auto voffseted0_32p0_00 = wrapper::vsubl(wrapper::vgetlow(vin0_16p0_0), voffset0_16p0);
+                const auto voffseted0_32p0_01 = wrapper::vsubl(wrapper::vgethigh(vin0_16p0_0), voffset0_16p0);
+                const auto voffseted0_32p0_10 = wrapper::vsubl(wrapper::vgetlow(vin0_16p0_1), voffset0_16p0);
+                const auto voffseted0_32p0_11 = wrapper::vsubl(wrapper::vgethigh(vin0_16p0_1), voffset0_16p0);
+
+                const auto voffseted1_32p0_00 = wrapper::vsubl(wrapper::vgetlow(vin1_16p0_0), voffset1_16p0);
+                const auto voffseted1_32p0_01 = wrapper::vsubl(wrapper::vgethigh(vin1_16p0_0), voffset1_16p0);
+                const auto voffseted1_32p0_10 = wrapper::vsubl(wrapper::vgetlow(vin1_16p0_1), voffset1_16p0);
+                const auto voffseted1_32p0_11 = wrapper::vsubl(wrapper::vgethigh(vin1_16p0_1), voffset1_16p0);
+
+                const auto vinnermul_32p0_00 = wrapper::vmul(voffseted0_32p0_00, voffseted1_32p0_00);
+                const auto vinnermul_32p0_01 = wrapper::vmul(voffseted0_32p0_01, voffseted1_32p0_01);
+                const auto vinnermul_32p0_10 = wrapper::vmul(voffseted0_32p0_10, voffseted1_32p0_10);
+                const auto vinnermul_32p0_11 = wrapper::vmul(voffseted0_32p0_11, voffseted1_32p0_11);
+
+                const auto vout_14p18_00 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_00, vmultiplier_14p18);
+                const auto vout_14p18_01 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_01, vmultiplier_14p18);
+                const auto vout_14p18_10 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_10, vmultiplier_14p18);
+                const auto vout_14p18_11 = wrapper::vmla(voffsetout_14p18, vinnermul_32p0_11, vmultiplier_14p18);
+
+                // These shift rights are to revert the multiplication by twopwr18. Hard limit of a maximum shift by 8 requires multiple shift instructions to achieve this.
+                const auto vout_14p2_00 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_00));
+                const auto vout_14p2_01 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_01));
+                const auto vout_14p2_10 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_10));
+                const auto vout_14p2_11 = wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>(vout_14p18_11));
+
+                const auto vout_14p2_0 = wrapper::vcombine(
+                                             vout_14p2_00,
+                                             vout_14p2_01);
+
+                const auto vout_14p2_1 = wrapper::vcombine(
+                                             vout_14p2_10,
+                                             vout_14p2_11);
+
+                const auto vout_8p0 = wrapper::vcombine(
+                                          wrapper::vqrshrn<2>(vout_14p2_0),
+                                          wrapper::vqrshrn<2>(vout_14p2_1));
+                wrapper::vstore(out_ptr + x, vout_8p0);
+            }
+
+            //Process the left-over elements.
+            for(; x < window_end_x; ++x)
+            {
+#ifdef __aarch64__
+                out_ptr[x] = wrapper::vqrshrn<2>(wrapper::vqrshrn_ex<8, ScalarType>(wrapper::vshrq_n<8>((multiplier_14p18 * (int32_t(in0_ptr[x]) - in0_offset_16p0) * (int32_t(
+                                                                                                             in1_ptr[x]) - in1_offset_16p0)) + out_offset_14p18)));
+#else  //__aarch64__
+                out_ptr[x] = utility::clamp<int32_t, ScalarType>(support::cpp11::lround(multiplier * ((float(in0_ptr[x]) - in0_offset) * (float(in1_ptr[x]) - in1_offset)) + float(out_offset)));
+#endif //__aarch64__
+            }
+        },
+        in0_it, in1_it, out_it);
+    }
+}
+
 void mul_saturate_QSYMM16_QSYMM16_QSYMM16(const ITensor *src1, const ITensor *src2, ITensor *out, const Window &window, float scale)
 {
     const UniformQuantizationInfo input1_qua_info = src1->info()->quantization_info().uniform();
@@ -316,7 +582,8 @@ void mul_saturate_QSYMM16_QSYMM16_QSYMM16(const ITensor *src1, const ITensor *sr
 
     const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const qsymm16_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const qsymm16_t *>(input2.ptr());
@@ -397,7 +664,8 @@ void mul_QSYMM16_QSYMM16_S32(const ITensor *src1, const ITensor *src2, ITensor *
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const qsymm16_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const qsymm16_t *>(input2.ptr());
@@ -488,7 +756,8 @@ void mul_U8_U8_U8(const ITensor *src1, const ITensor *src2, ITensor *out, const 
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
@@ -653,7 +922,8 @@ void mul_S16_S16_S16(const ITensor *src1, const ITensor *src2, ITensor *out, con
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const int16_t *>(input2.ptr());
@@ -716,7 +986,7 @@ void mul_S16_S16_S16(const ITensor *src1, const ITensor *src2, ITensor *out, con
     input1, input2, dst);
 }
 
-template <bool   is_sat>
+template <bool is_sat>
 inline int32x4_t mul_S32_S32_S32_n_loop(const int32x4_t &src1, const int32x4_t &src2, int n)
 {
     const int32x2_t input1_1 = vget_low_s32(src1);
@@ -756,7 +1026,7 @@ inline int32x4_t mul_S32_S32_S32_n_loop(const int32x4_t &src1, const int32x4_t &
     }
 }
 
-template <bool     is_sat>
+template <bool is_sat>
 inline int32x4x2_t mul_S32_S32_S32_n_k(const int32x4x2_t &src1, const int32x4x2_t &src2, int n)
 {
     const int32x4x2_t result =
@@ -803,7 +1073,8 @@ void mul_S32_S32_S32(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const int32_t *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<int32_t *>(dst.ptr());
@@ -868,7 +1139,8 @@ void mul_S32_S32_S32(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator input2(src2, input2_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const int32_t *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const int32_t *>(input2.ptr());
@@ -955,7 +1227,8 @@ void mul_F32_F32_F32(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const float *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<float *>(dst.ptr());
@@ -992,7 +1265,8 @@ void mul_F32_F32_F32(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator input2(src2, input2_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const float *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const float *>(input2.ptr());
@@ -1053,7 +1327,8 @@ void c_mul_F32_F32_F32_n(const ITensor *src1, const ITensor *src2, ITensor *out,
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const float *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<float *>(dst.ptr());
@@ -1106,7 +1381,8 @@ void c_mul_F32_F32_F32_n(const ITensor *src1, const ITensor *src2, ITensor *out,
         Iterator input2(src2, input2_win);
         Iterator dst(out, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const float *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const float *>(input2.ptr());
@@ -1180,12 +1456,13 @@ void mul_F16_F16_F16(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator broadcast_input(broadcast_tensor, broadcast_win);
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator dst(out, win);
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto          non_broadcast_input_ptr = reinterpret_cast<const float16_t *>(non_broadcast_input.ptr());
             const auto          output_ptr              = reinterpret_cast<float16_t *>(dst.ptr());
             const auto          broadcast_value         = *reinterpret_cast<const float16_t *>(broadcast_input.ptr());
-            const float16x8x2_t broadcast_value_vec =
+            const float16x8x2_t broadcast_value_vec     =
             {
                 {
                     vdupq_n_f16(broadcast_value),
@@ -1230,7 +1507,8 @@ void mul_F16_F16_F16(const ITensor *src1, const ITensor *src2, ITensor *out, con
         Iterator input1(src1, input1_win);
         Iterator input2(src2, input2_win);
         Iterator dst(out, win);
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const float16_t *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const float16_t *>(input2.ptr());
@@ -1254,7 +1532,7 @@ void mul_F16_F16_F16(const ITensor *src1, const ITensor *src2, ITensor *out, con
                     }
                 };
                 const float16x8_t   scale_vec = vdupq_n_f16(scale);
-                const float16x8x2_t result =
+                const float16x8x2_t result    =
                 {
                     {
                         vmulq_f16(vmulq_f16(ta1.val[0], ta2.val[0]), scale_vec),
@@ -1298,7 +1576,8 @@ void mul_U8_U8_S16(const ITensor *src1, const ITensor *src2, ITensor *out, const
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
@@ -1396,7 +1675,8 @@ void mul_S16_U8_S16(const ITensor *src1, const ITensor *src2, ITensor *out, cons
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates &)
+    execute_window_loop(
+        win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
@@ -1520,14 +1800,27 @@ void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *
         case DataType::QASYMM8:
             if(dt_input2 == DataType::QASYMM8 && dt_output == DataType::QASYMM8)
             {
-                _func_quantized = &mul_saturate_quantized_8<uint8_t>;
+                if(mul_q8_neon_fixedpoint_possible(src1, src2, dst, scale))
+                {
+                    _func_quantized = &mul_q8_neon_fixedpoint<uint8_t>;
+                }
+                else
+                {
+                    _func_quantized = &mul_saturate_quantized_8<uint8_t>;
+                }
             }
             break;
         case DataType::QASYMM8_SIGNED:
             if(dt_input2 == DataType::QASYMM8_SIGNED)
             {
-                _func_quantized = &mul_saturate_quantized_8<int8_t>;
-                ;
+                if(mul_q8_neon_fixedpoint_possible(src1, src2, dst, scale))
+                {
+                    _func_quantized = &mul_q8_neon_fixedpoint<int8_t>;
+                }
+                else
+                {
+                    _func_quantized = &mul_saturate_quantized_8<int8_t>;
+                }
             }
             break;
         case DataType::QSYMM16:
@@ -1624,6 +1917,59 @@ void CpuMulKernel::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *
     ICpuKernel::configure(win);
 }
 
+size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
+{
+    ARM_COMPUTE_UNUSED(thread_count);
+
+#if defined(ENABLE_FP32_KERNELS)
+    if(this->_func_float == &mul_F32_F32_F32)
+    {
+        size_t mws = ICPPKernel::default_mws;
+        if(platform.get_cpu_model() == CPUModel::N1)
+        {
+            mws = default_mws_N1_fp32_neon;
+        }
+        else if(platform.get_cpu_model() == CPUModel::V1)
+        {
+            mws = default_mws_V1_fp32_neon;
+        }
+        else
+        {
+            if(_split_dimension == Window::DimX)
+            {
+                // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+                // This number is loosely chosen as threading overhead in each platform varies wildly.
+                return default_mws_other_platforms_1d_tensor;
+            }
+            return default_mws;
+        }
+
+        // tensor is 1D or was re-interpreted as 1D
+        if(this->window().shape().num_dimensions() == 1)
+        {
+            return mws;
+        }
+        else
+        {
+            // scale mws down by the number of elements along all the dimensions (x, z, w, etc) except the one
+            // that we parallelize along (the y dimension). This allows for parallelization when the Y_SIZE is small
+            // but the other sizes are large, which boosts performance.
+            mws = static_cast<size_t>(mws / (this->window().num_iterations_total() / this->window().num_iterations(1)));
+            return std::max(static_cast<size_t>(1), mws);
+        }
+    }
+#else /* ENABLE_FP32_KERNELS */
+    ARM_COMPUTE_UNUSED(platform);
+#endif /* ENABLE_FP32_KERNELS */
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return default_mws_other_platforms_1d_tensor;
+    }
+    return default_mws;
+}
+
 Status CpuMulKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy,
                               RoundingPolicy rounding_policy)
 {
@@ -1661,20 +2007,6 @@ void CpuMulKernel::run_op(ITensorPack &tensors, const Window &window, const Thre
 const char *CpuMulKernel::name() const
 {
     return "CpuMulKernel";
-}
-
-size_t CpuMulKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
-{
-    ARM_COMPUTE_UNUSED(platform, thread_count);
-
-    if(_split_dimension == Window::DimX)
-    {
-        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
-        // This number is loosely chosen as threading overhead in each platform varies wildly.
-        return 10240;
-    }
-
-    return default_mws;
 }
 
 namespace

@@ -176,7 +176,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 });
 
 const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(),
-    framework::dataset::make("ActivationFunction", {ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::SWISH}));
+                                                   framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::SWISH }));
 
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
@@ -313,7 +313,7 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
     cpu_isa.sve2 = (cpu_ext == "SVE2");
     cpu_isa.fp16 = (data_type == DataType::F16);
 
-    const auto *selected_impl = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{data_type, cpu_isa,ActivationLayerInfo::ActivationFunction::BOUNDED_RELU}, cpu::KernelSelectionType::Preferred);
+    const auto *selected_impl = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{data_type, CPUModel::GENERIC, cpu_isa,ActivationLayerInfo::ActivationFunction::BOUNDED_RELU}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
 

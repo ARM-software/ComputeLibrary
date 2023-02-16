@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ TEST_CASE(SubTensorCreation, framework::DatasetMode::ALL)
  *  - A) Extend padding when SubTensor XY does not match parent tensor should fail
  *    B) Extend with zero padding when SubTensor XY does not match parent tensor should succeed
  *  - C) Extend padding when SubTensor XY matches parent tensor should succeed
+ *  - D) Set lock padding to true, so that extend padding would fail
  */
 TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
 {
@@ -94,6 +95,14 @@ TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
         ARM_COMPUTE_EXPECT_NO_THROW(sub_tensor_info.extend_padding(PaddingSize(2, 1)), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(tensor_info.padding().top == 2, framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(tensor_info.padding().right == 1, framework::LogLevel::ERRORS);
+    }
+
+    // Test D
+    {
+        TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+        SubTensorInfo sub_tensor_info(&tensor_info, TensorShape(4U, 3U, 1U), Coordinates(5, 2, 1));
+        sub_tensor_info.set_lock_paddings(true);
+        ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.extend_padding(PaddingSize(2, 1)), framework::LogLevel::ERRORS);
     }
 }
 

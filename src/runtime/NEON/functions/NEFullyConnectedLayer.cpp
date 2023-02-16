@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,7 +69,8 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                                weights->info(),
                                                                biases != nullptr ? biases->info() : nullptr,
                                                                output->info(),
-                                                               fc_info));
+                                                               fc_info,
+                                                               weights_info));
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, fc_info);
 
     _impl->op               = std::make_unique<cpu::CpuFullyConnected>();
@@ -96,9 +97,9 @@ Status NEFullyConnectedLayer::has_opt_impl(arm_compute::WeightFormat &expected_w
 }
 
 Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                       FullyConnectedLayerInfo fc_info)
+                                       FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
 {
-    return cpu::CpuFullyConnected::validate(input, weights, biases, output, fc_info);
+    return cpu::CpuFullyConnected::validate(input, weights, biases, output, fc_info, weights_info);
 }
 
 void NEFullyConnectedLayer::run()

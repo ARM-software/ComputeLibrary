@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -438,6 +438,16 @@
 #define read_image2d_halfx4(img, x_coord, y_coord) (half16)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)), read_imageh(img, (int2)(x_coord + 2, y_coord)), read_imageh(img, (int2)(x_coord + 3, y_coord)));
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 
+#define write_image2d_floatx1(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values));
+#define write_image2d_floatx2(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values.s0123), write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567));
+#define write_image2d_floatx4(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values.s0123), write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567), write_imagef(img, (int2)(x_coord + 2, y_coord), values.s89AB), write_imagef(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
+
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
+#define write_image2d_halfx1(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values));
+#define write_image2d_halfx2(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values.s0123), write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567));
+#define write_image2d_halfx4(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values.s0123), write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567), write_imageh(img, (int2)(x_coord + 2, y_coord), values.s89AB), write_imageh(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
+
 /** Utility macro to read a 2D OpenCL image object.
  *
  * @note Coordinates are not normalized
@@ -453,6 +463,22 @@
  */
 #define READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord) read_image2d_##data_type##x##n0(img, x_coord, y_coord)
 #define READ_IMAGE2D(data_type, n0, img, x_coord, y_coord) READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord)
+
+/** Utility macro to write a 2D OpenCL image object.
+ *
+ * @note Coordinates are not normalized
+ *
+ * @param[in] data_type Data type
+ * @param[in] n0        Number of pixel to write. Only 1,2 and 4 is supported
+ * @param[in] img       OpenCL image object
+ * @param[in] x_coord   The x coordinate for the top-left pixel
+ * @param[in] y_coord   The y coordinate for the top-left pixel
+ * @param[in] values    Values to write
+ *
+ * @{
+ */
+#define WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values) write_image2d_##data_type##x##n0(img, x_coord, y_coord, values)
+#define WRITE_IMAGE2D(data_type, n0, img, x_coord, y_coord, values) WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values)
 
 #define VSTORE_STR(size) vstore##size
 #define VSTORE(size) VSTORE_STR(size)

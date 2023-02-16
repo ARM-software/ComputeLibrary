@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,6 +97,21 @@ VQSUB_IMPL(float32x4_t, float32x4_t, vsubq, f32)
 VQSUB_IMPL(float16x8_t, float16x8_t, vsubq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #undef VQSUB_IMPL
+
+#define VSUBL_IMPL(rtype, vtype, prefix, postfix)      \
+    inline rtype vsubl(const vtype &a, const vtype &b) \
+    {                                                  \
+        return prefix##_##postfix(a, b);               \
+    }
+
+VSUBL_IMPL(int16x8_t, int8x8_t, vsubl, s8)
+VSUBL_IMPL(int32x4_t, int16x4_t, vsubl, s16)
+VSUBL_IMPL(int64x2_t, int32x2_t, vsubl, s32)
+VSUBL_IMPL(uint16x8_t, uint8x8_t, vsubl, u8)
+VSUBL_IMPL(uint32x4_t, uint16x4_t, vsubl, u16)
+VSUBL_IMPL(uint64x2_t, uint32x2_t, vsubl, u32)
+
+#undef VSUB_IMPL
 
 } // namespace wrapper
 } // namespace arm_compute

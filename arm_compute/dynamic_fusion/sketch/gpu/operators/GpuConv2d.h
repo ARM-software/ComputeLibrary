@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUCONV2D
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 
 namespace arm_compute
 {
@@ -34,6 +34,7 @@ namespace experimental
 namespace dynamic_fusion
 {
 /** Forward declaration */
+class GpuWorkloadContext;
 class GpuWorkloadSketch;
 
 /** Operator interface. */
@@ -59,23 +60,40 @@ public:
      * @param[in]     src        Source tensor
      * @param[in]     wei        Weight tensor
      * @param[in]     bia        (Optional) Bias tensor
-     * @param[out]    dst        Destination tensor
      * @param[in]     attributes Operator attributes
+     *
+     * @return Pointer for the destination tensor info
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *wei,
-                          ITensorInfo       *bia,
-                          ITensorInfo       *dst,
-                          const Attributes &attributes);
-    /** Validate the operator and check if it can be fused into the workload sketch.
-     * Similar to @ref GpuConv2d::create_op()
+    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
+                                  ITensorInfo       *src,
+                                  ITensorInfo       *wei,
+                                  ITensorInfo       *bia,
+                                  const Attributes &attributes);
+    /** Check if the operator configuration is supported, irrespective of fusion
+     *
+     * @param[in] context    Workload context within which the operator is running
+     * @param[in] src        Source tensor
+     * @param[in] wei        Weight tensor
+     * @param[in] bia        (Optional) Bias tensor
+     * @param[in] attributes Operator attributes
+     *
+     * @return Status
+     */
+    static Status is_supported_op(const GpuWorkloadContext &context,
+                                  const ITensorInfo        *src,
+                                  const ITensorInfo        *wei,
+                                  const ITensorInfo        *bia,
+                                  const Attributes         &attributes);
+    /** Check if the operator configuration is supported and if it can be fused into the workload sketch.
+     *
+     * Parameters are similar to @ref GpuConv2d::create_op()
+     *
+     * @return Status
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
                               const ITensorInfo       *wei,
                               const ITensorInfo       *bia,
-                              const ITensorInfo       *dst,
                               const Attributes        &attributes);
 };
 } // namespace dynamic_fusion

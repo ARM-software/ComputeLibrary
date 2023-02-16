@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2022 Arm Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#ifndef SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEDEFAULTCONFIGVALHALL
+#define SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEDEFAULTCONFIGVALHALL
+
+#include "src/runtime/heuristics/dwc_native/IClDWCNativeKernelConfig.h"
+
+namespace arm_compute
+{
+namespace cl_dwc
+{
+/** Valhall based OpenCL depthwise convolution configuration */
+class ClDWCNativeDefaultConfigValhall final : public IClDWCNativeKernelConfig
+{
+public:
+    /** Constructor
+     *
+     * @param[in] gpu GPU target
+     */
+    ClDWCNativeDefaultConfigValhall(GPUTarget gpu);
+
+    // Inherited overridden method
+    DWCComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                   unsigned int depth_multiplier) override;
+
+private:
+    DWCComputeKernelInfo configure_G78_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                           unsigned int depth_multiplier);
+    DWCComputeKernelInfo configure_G78_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                           unsigned int depth_multiplier);
+    DWCComputeKernelInfo configure_G78_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                          unsigned int depth_multiplier);
+    DWCComputeKernelInfo configure_G77_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
+                                           unsigned int depth_multiplier);
+};
+} // namespace cl_dwc
+} // namespace arm_compute
+#endif /* SRC_RUNTIME_HEURISTICS_DWC_NATIVE_CLDWCNATIVEDEFAULTCONFIGVALHALL */

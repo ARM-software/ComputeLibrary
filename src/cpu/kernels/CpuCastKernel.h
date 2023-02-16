@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,8 @@ public:
      * @param[in]  src    The src tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/BFLOAT16/F16/F32.
      * @param[out] dst    The dst tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/BFLOAT16/F16/F32.
      * @param[in]  policy Conversion policy.
+     *
+     * @deprecated Support for BFLOAT16 will be removed in 23.05 release
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration

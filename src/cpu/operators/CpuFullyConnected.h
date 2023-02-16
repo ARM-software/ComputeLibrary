@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,12 +89,12 @@ public:
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CpuFullyConnected
      *
-     * Similar to @ref CpuFullyConnected
+     * Similar to @ref CpuFullyConnected::configure()
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                           FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
+                           FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(), const WeightsInfo &weights_info = WeightsInfo());
 
     /** Static function that queries whether there exists fixed-format kernel and if it exists it will return in the first argument in what format
      * weights are expected to be reshaped as defined by WeightFormat class. Apart from the first argument the rest of the arguments are the same

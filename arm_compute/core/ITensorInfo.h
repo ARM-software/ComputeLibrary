@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ public:
      */
     using Id = int32_t;
     /** An invalid tensor id within a domain */
-    static constexpr Id invalid_tensor_id = -1;
+    static constexpr Id invalid_tensor_id = 0;
     /** Get the value representing dynamic dimension state
      *
      * @return Value representing dynamic dimension state
@@ -142,6 +142,17 @@ public:
      * @return True if the strides or the offset to the first element have changed.
      */
     virtual bool auto_padding() = 0;
+    /** Set the lock paddings flag of the tensor.
+     * It should be set to True, when the tensor could be mapped to camera or frame buffer.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_lock_paddings(bool flag) = 0;
+    /** Get the lock paddings flag value
+     *
+     * @return lock paddings flag value
+     */
+    virtual bool lock_paddings() const = 0;
     /** Update the offset to the first element, the strides and the total size.
      *
      * @note This function can only increase the offset, strides and total size.

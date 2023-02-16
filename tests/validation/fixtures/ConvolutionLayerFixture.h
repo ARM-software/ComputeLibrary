@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,9 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/graph/Utils.h"
+#ifdef ARM_COMPUTE_OPENCL_ENABLED
+#include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
+#endif // ARM_COMPUTE_OPENCL_ENABLED
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/graph/mutators/MutatorUtils.h"
@@ -43,6 +46,7 @@
 #include "tests/validation/reference/Utils.h"
 
 #include <random>
+#include <type_traits>
 
 namespace arm_compute
 {
@@ -53,13 +57,30 @@ namespace validation
 namespace detail
 {
 template <typename ConvolutionFunction, typename TensorType>
-void configure_conv_function(ConvolutionFunction &func,
+#ifdef ARM_COMPUTE_OPENCL_ENABLED
+std::enable_if_t<!std::is_same<ConvolutionFunction, CLGEMMConvolutionLayer>::value, void>
+#else // ARM_COMPUTE_OPENCL_ENABLED
+void
+#endif // ARM_COMPUTE_OPENCL_ENABLED
+configure_conv_function(ConvolutionFunction &func,
+                             TensorType *src, const TensorType *weights, const TensorType *bias, TensorType *dst,
+                             const PadStrideInfo &info, const WeightsInfo &weights_info,
+                             const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+{
+    func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, false /* enable_fast_math */, num_groups);
+}
+
+#ifdef ARM_COMPUTE_OPENCL_ENABLED
+template <typename ConvolutionFunction, typename TensorType>
+std::enable_if_t<std::is_same<ConvolutionFunction, CLGEMMConvolutionLayer>::value, void>
+configure_conv_function(ConvolutionFunction &func,
                              TensorType *src, const TensorType *weights, const TensorType *bias, TensorType *dst,
                              const PadStrideInfo &info, const WeightsInfo &weights_info,
                              const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, num_groups);
 }
+#endif // ARM_COMPUTE_OPENCL_ENABLED
 } // namespace detail
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW>
@@ -416,8 +437,21 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_comput
     const int Ip            = arm_gemm::roundup<unsigned int>(C, block_by);      // C'=I'
     const int Op            = arm_gemm::roundup<unsigned int>(N, interleave_by); // O'=N'
 
+    arm_compute::Strides strides_in_bytes = tensor_info.strides_in_bytes();
+    strides_in_bytes.set(1, Ip * interleave_by * H * W * tensor_info.element_size());
+    strides_in_bytes.set(2, Ip * Op * tensor_info.element_size());
+
+    const size_t offset_first_element_in_bytes = tensor_info.offset_first_element_in_bytes();
+
+    // Total size needs to include padded dimensions
+    const size_t total_size_in_bytes = Op * H * W * Ip * tensor_info.element_size();
+
     const TensorShape TS(Ip, W, H, Op);
-    return TensorInfo(TS, 1 /*num_channels*/, data_type, data_layout);
+
+    TensorInfo new_tensor_info = tensor_info;
+    new_tensor_info.init(TS, 1 /*num_channels, deprecated*/, data_type, strides_in_bytes,
+        offset_first_element_in_bytes, total_size_in_bytes);
+    return new_tensor_info;
 }
 
 template <typename ScalarType, typename AccessorType>

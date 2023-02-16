@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2022 Arm Limited.
+/// Copyright (c) 2017-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -40,6 +40,28 @@ If there is more than one release in a month then an extra sequential number is 
 @note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+v23.02 Public major release
+ - New features:
+   - Rework the experimental dynamic fusion interface by identifying auxiliary and intermediate tensors, and specifying an explicit output operator.
+   - Add the following operators to the experimental dynamic fusion API:
+     - GpuAdd, GpuCast, GpuClamp, GpuDepthwiseConv2d, GpuMul, GpuOutput, GpuPool2d, GpuReshape, GpuResize, GpuSoftmax, GpuSub.
+   - Add SME/SME2 kernels for GeMM, Winograd convolution, Depthwise convolution and Pooling.
+   - Add new CPU operator AddMulAdd for float and quantized types.
+   - Add new flag @ref ITensorInfo::lock_paddings() to tensors to prevent extending tensor paddings.
+   - Add experimental support for CPU only Bazel and CMake builds.
+ - Performance optimizations:
+   - Optimize CPU base-e exponential functions for FP32.
+   - Optimize CPU StridedSlice by copying first dimension elements in bulk where possible.
+   - Optimize CPU quantized Subtraction by reusing the quantized Addition kernel.
+   - Optimize CPU ReduceMean by removing quantization steps and performing the operation in integer domain.
+   - Optimize GPU Scale and Dynamic Fusion GpuResize by removing quantization steps and performing the operation in integer domain.
+   - Update the heuristic for CLDepthwiseConvolutionNative kernel.
+   - Add new optimized OpenCL kernel to compute indirect convolution:
+     - \link opencl::kernels::ClIndirectConv2dKernel ClIndirectConv2dKernel \endlink
+   - Add new optimized OpenCL kernel to compute transposed convolution:
+     - \link opencl::kernels::ClTransposedConvolutionKernel ClTransposedConvolutionKernel \endlink
+ - Update recommended/minimum NDK version to r20b.
+ - Various optimizations and bug fixes.
 
 v22.11 Public major release
  - New features:

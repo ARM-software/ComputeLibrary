@@ -25,9 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_UTILS_DEPENDENCYGRAPH
 
 #include "arm_compute/core/Error.h"
-#include <algorithm>
 #include <cstdint>
-#include <deque>
 #include <map>
 #include <set>
 #include <tuple>
@@ -84,40 +82,84 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const DependencyGraph &);
 
     /** Try adding an operator (without actually adding it), while keeping the graph as a "linear sequence" / list
-     * @note The list is expected to only grow from head to tail
+     *
+     * Rule: If the new operator is not the first operator, at least one input tensor must be
+     *       the output tensor of the last non-output operator. All other input tensors must be
+     *       the global input of the graph (i.e. not the output of any operator).
+     *
+     * Rule: The output tensor of the new operator must not be the input tensor of any previously
+     *       added operator.
      *
      * PRECONDITION: The current graph is already linear
      *
      * @return true  If the operator can be added while keeping the graph as a linear sequence
      * @return false  Otherwise
      */
-    bool try_add_operator_as_linear(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs) const
+    bool try_add_operator_as_linear(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs, bool is_output = false) const
     {
-        ARM_COMPUTE_UNUSED(op, outputs);
+        ARM_COMPUTE_UNUSED(op, is_output);
         if(all_ops().empty())
         {
             return true;
         }
-        std::vector<TensorId> common_tensors{};
-        auto                  existing_tensors = all_tensors();
-        std::sort(existing_tensors.begin(), existing_tensors.end()); // To use std::set_intersection, both input sets must be sorted
-        std::vector<TensorId> sorted_inputs{ inputs };
-        std::sort(sorted_inputs.begin(), sorted_inputs.end());
-        std::set_intersection(existing_tensors.begin(), existing_tensors.end(),
-                              sorted_inputs.begin(), sorted_inputs.end(), std::back_inserter(common_tensors));
-        if(common_tensors.size() != 1U)
-        {
-            return false;
-        }
-        const auto linked_tensor = common_tensors[0];
-        const auto tail_ops      = get_dst_ops();
-        ARM_COMPUTE_ERROR_ON(tail_ops.size() != 1U); // PRECONDITION
-        const auto tail = tail_ops[0];
 
-        if(!is_in(linked_tensor, dst_tensors(tail)))
+        // If the new operator is not the first operator, at least one input tensor must be
+        // the output tensor of the last non-output operator. All other input tensors must be
+        // the global input of the graph (i.e. not the output of any operator).
+        if(_last_op_available)
         {
-            return false;
+            auto use_input_from_last_op = false;
+
+            for(auto src_tensor : inputs)
+            {
+                const auto src_ops = _adj_src_ops.find(src_tensor);
+
+                if(src_ops != _adj_src_ops.end())
+                {
+                    ARM_COMPUTE_ERROR_ON(src_ops->second.size() > 1);
+
+                    if(!src_ops->second.empty())
+                    {
+                        const auto src_op = src_ops->second[0];
+
+                        if(src_op == _last_op)
+                        {
+                            if(use_input_from_last_op)
+                            {
+                                // To be safe, we also forbid using the output tensor
+                                // of the last operator twice.
+                                return false;
+                            }
+
+                            use_input_from_last_op = true;
+                        }
+                        else
+                        {
+                            // The input tensor of this operator must not be the output tensor
+                            // of any other operator except the last non-output operator.
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            if(!use_input_from_last_op)
+            {
+                // At least one input tensor must be the output tensor of the last non-output operator.
+                return false;
+            }
         }
+
+        // The output tensor of the new operator must not be the input tensor of any previously
+        // added operator.
+        for(auto dst_tensor : outputs)
+        {
+            if(_adj_dst_ops.find(dst_tensor) != _adj_dst_ops.end())
+            {
+                return false;
+            }
+        }
+
         return true;
     }
     /** Add an operator, while keeping the graph as a "linear sequence"
@@ -126,10 +168,9 @@ public:
      * INVARIANT: The list can only grow from head to tail
      * INVARIANT: POSTCONDITION: The graph is linear
      */
-    void add_operator_as_linear(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs)
+    void add_operator_as_linear(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs, bool is_output = false)
     {
-        ARM_COMPUTE_ERROR_ON(!try_add_operator_as_linear(op, inputs, outputs));
-        auto success = add_operator(op, inputs, outputs);
+        const auto success = add_operator(op, inputs, outputs, is_output);
         ARM_COMPUTE_UNUSED(success);
         ARM_COMPUTE_ERROR_ON(!success);
     }
@@ -137,11 +178,12 @@ public:
      *  Return invalid if it violates the DAG invariant
      *  Invalid operation will not change the graph
      *
-     * @param[in] op      Operator to add
-     * @param[in] inputs  Input tensors to the operator
-     * @param[in] outputs Output tensors to the operator
+     * @param[in] op        Operator to add
+     * @param[in] inputs    Input tensors to the operator
+     * @param[in] outputs   Output tensors to the operator
+     * @param[in] is_output Whether this is an output operator
      */
-    bool add_operator(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs)
+    bool add_operator(OperatorId op, const std::vector<TensorId> &inputs, const std::vector<TensorId> &outputs, bool is_output = false)
     {
         if(operator_exists(op))
         {
@@ -169,182 +211,41 @@ public:
             }
         }
 
+        if(!is_output)
+        {
+            _last_op_available = true;
+            _last_op = op;
+        }
+
         return true;
     }
 
-    /** Sort the graph in a topological order
+    /** Build a sequence of operators from the acyclic graph of operators.
      *
-     * @return std::vector<OpPack>
+     * The graph will be visited in depth-first strategy. The operator can only be added to
+     * the sequence when all operators that supply the input tensors have been added. Otherwise,
+     * the operator will be ignored and later visited again. In other words, the dependency between
+     * operators will be preserved in the sequence.
      */
-    std::vector<OpPack> topological_sort() const
+    std::vector<OpPack> build_operators_sequence() const
     {
-        // Incident degree (number of source operators to an op)
-        std::map<OperatorId, unsigned int> in_degree{};
-        std::set<OperatorId>   visited_ops{};
-        std::deque<OperatorId> zero_in_degree_ops{};
-        std::vector<OpPack>    sorted_op_packs{};
-        for(auto op : all_ops())
+        std::vector<OpPack> ops_seq;
+        std::set<Id> done_ops;
+        std::set<Id> done_tensors;
+
+        const auto input_tensors = global_src_tensors();
+
+        for(auto tensor : input_tensors)
         {
-            const auto degree = src_ops(op).size();
-            in_degree[op]     = degree;
-            if(degree == 0)
+            done_tensors.insert(tensor);
+
+            for(auto op : _adj_dst_ops.at(tensor))
             {
-                zero_in_degree_ops.push_back(op);
-                visited_ops.insert(op);
+                build_operators_sequence_from_op(op, ops_seq, done_ops, done_tensors);
             }
         }
 
-        while(!zero_in_degree_ops.empty())
-        {
-            const OperatorId op = zero_in_degree_ops.front();
-            zero_in_degree_ops.pop_front();
-            sorted_op_packs.push_back(OpPack{ op, src_tensors(op), dst_tensors(op) });
-
-            for(const auto next_op : dst_ops(op))
-            {
-                if(in_degree[next_op] > 0)
-                {
-                    in_degree[next_op]--;
-                }
-                if(in_degree[next_op] == 0 && visited_ops.find(next_op) == visited_ops.end())
-                {
-                    zero_in_degree_ops.push_back(next_op);
-                    visited_ops.insert(op);
-                }
-            }
-        }
-
-        return sorted_op_packs;
-    }
-
-    void find_independent_paths_util(OperatorId op, std::vector<std::vector<OperatorId>> &paths, std::vector<OperatorId> cur_path,
-                                     const std::map<OperatorId, unsigned int> &in_degree) const
-    {
-        // We have found an unresolved dependency
-        if(in_degree.at(op) > 1)
-        {
-            paths.push_back(cur_path);
-            return;
-        }
-        const auto child_ops = dst_ops(op);
-
-        cur_path.push_back(op);
-        // Hit the leaf op
-        if(child_ops.empty())
-        {
-            paths.push_back(cur_path);
-            return;
-        }
-        for(const auto child_op : child_ops)
-        {
-            find_independent_paths_util(child_op, paths, cur_path, in_degree);
-        }
-    }
-    /** Find all independent linear paths from op, which doesn't depend on any other op
-     *
-     * @return std::vector<OpPack>
-     */
-    std::vector<std::vector<OperatorId>> find_independent_paths(OperatorId op,
-                                                                const std::map<OperatorId, unsigned int> &in_degree) const
-    {
-        std::vector<std::vector<OperatorId>> paths;
-        std::vector<OperatorId>              cur_path;
-        find_independent_paths_util(op, paths, cur_path, in_degree);
-        return paths;
-    }
-    /** Find a longest linear path from op, which doesn't depend on any other op
-     *
-     * @return std::vector<OpPack>
-     */
-    std::vector<OperatorId> find_longest_independent_path(OperatorId op,
-                                                          const std::map<OperatorId, unsigned int> &in_degree) const
-    {
-        const auto &paths = find_independent_paths(op, in_degree);
-        ARM_COMPUTE_ERROR_ON(paths.empty());
-        size_t                         max_len  = 0;
-        const std::vector<OperatorId> *max_path = nullptr;
-
-        for(const auto &path : paths)
-        {
-            if(path.size() >= max_len)
-            {
-                max_path = &path;
-                max_len  = path.size();
-            }
-        }
-        return *max_path;
-    }
-    std::vector<OperatorId> propose_next_path(std::set<OperatorId> &candidate_ops,
-                                              const std::map<OperatorId, unsigned int> &in_degree) const
-    {
-        if(candidate_ops.empty())
-        {
-            return {};
-        }
-        size_t                  max_len = 0;
-        std::vector<OperatorId> max_path;
-        OperatorId              chosen_op{};
-        for(auto op : candidate_ops)
-        {
-            const auto path = find_longest_independent_path(op, in_degree);
-            if(path.size() >= max_len)
-            {
-                chosen_op = op;
-                max_path  = path;
-                max_len   = path.size();
-            }
-        }
-        candidate_ops.erase(chosen_op);
-        return max_path;
-    }
-    /** Partition the graph into a list of linear sub-"graphs", while preserving the topological order, and trying to minimize
-     *  the number of partitions
-     */
-    std::vector<std::vector<OpPack>> topological_partition() const
-    {
-        // Initialize zero incident degree and zero in degree ops
-        std::map<OperatorId, unsigned int> in_degree{};
-        std::set<OperatorId> candidate_ops{};
-        for(auto op : all_ops())
-        {
-            const auto degree = src_ops(op).size();
-            in_degree[op]     = degree;
-            if(degree == 0)
-            {
-                candidate_ops.insert(op);
-            }
-        }
-
-        std::vector<std::vector<OpPack>> sorted_partitions{};
-        while(!candidate_ops.empty())
-        {
-            // generate_longest_path_from_zero_indegree_ops(in_degree, visited_ops, candidate_ops)
-            const auto path = propose_next_path(candidate_ops, in_degree);
-
-            // Append to sorted_partitions
-            std::vector<OpPack> path_op_pack{};
-            for(auto op : path)
-            {
-                path_op_pack.push_back(OpPack{ op, src_tensors(op), dst_tensors(op) });
-            }
-            sorted_partitions.push_back(path_op_pack);
-            // Remove whole path (Update in_degree, visited_ops, candidate_ops)
-            for(auto op : path)
-            {
-                for(const auto next_op_child : dst_ops(op))
-                {
-                    if(in_degree[next_op_child] > 0)
-                    {
-                        in_degree[next_op_child]--;
-                    }
-                    if(in_degree[next_op_child] == 0 && !is_in(next_op_child, path)) // We do not want to put the proposed path back into candidates
-                    {
-                        candidate_ops.insert(next_op_child);
-                    }
-                }
-            }
-        }
-        return sorted_partitions;
+        return ops_seq;
     }
 
     /** Strict equality comparison (all internal ids and order of insertion matter).
@@ -415,6 +316,33 @@ public:
                 tensors.push_back(tensor_dst_ops.first);
             }
         }
+        return tensors;
+    }
+    /** Get intermediate tensors of the whole graph.
+     *
+     * @return std::vector<TensorId>
+     */
+    std::vector<TensorId> intermediate_tensors() const
+    {
+        std::vector<TensorId> tensors;
+
+        // If a tensor is used to connect the input of an operator and the output of another operator,
+        // it is not allocated in the memory. The tensor exists as a temporary variable only.
+        for(auto src_tensor : _adj_src_ops)
+        {
+            if(!src_tensor.second.empty())
+            {
+                const auto dst_tensor = _adj_dst_ops.find(src_tensor.first);
+                if(dst_tensor != _adj_dst_ops.end())
+                {
+                    if(!dst_tensor->second.empty())
+                    {
+                        tensors.push_back(src_tensor.first);
+                    }
+                }
+            }
+        }
+
         return tensors;
     }
     /** Get all root ops. Root ops can also be referred to as "src ops" of the whole graph
@@ -646,11 +574,74 @@ private:
         return false;
     }
 
+    void build_operators_sequence_from_op(
+        Id op,
+        std::vector<OpPack> &ops_seq,
+        std::set<Id> &done_ops,
+        std::set<Id> &done_tensors) const
+    {
+        while(true)
+        {
+            // If the operator has been added to the sequence, ignore it.
+            if(done_ops.find(op) != done_ops.end())
+            {
+                return;
+            }
+
+            // If not all the input tensors of the operator are available, this operator cannot be
+            // added to the sequence for now. It will be visited again after the source operator
+            // is added to the sequence.
+            const auto src_tensors = _adj_src_tensors.at(op);
+
+            for(auto src : src_tensors)
+            {
+                if(done_tensors.find(src) == done_tensors.end())
+                {
+                    return;
+                }
+            }
+
+            // This operator is ready to be added to the sequence.
+            const auto dst_tensors = _adj_dst_tensors.at(op);
+
+            done_ops.insert(op);
+
+            OpPack pack{ op, src_tensors, dst_tensors };
+            ops_seq.push_back(pack);
+
+            done_tensors.insert(dst_tensors.begin(), dst_tensors.end());
+
+            // Visit all the sink operators.
+            // Call this function recursively unless there is only one sink.
+            if(dst_tensors.size() == 1 && _adj_dst_ops.at(dst_tensors[0]).size() == 1)
+            {
+                op = _adj_dst_ops.at(dst_tensors[0])[0];
+            }
+            else
+            {
+                for(auto dst_tensor : dst_tensors)
+                {
+                    const auto dst_ops = _adj_dst_ops.at(dst_tensor);
+
+                    for(auto dst_op : dst_ops)
+                    {
+                        build_operators_sequence_from_op(dst_op, ops_seq, done_ops, done_tensors);
+                    }
+                }
+
+                return;
+            }
+        }
+    }
+
 private:
     AdjList _adj_src_tensors{};
     AdjList _adj_dst_tensors{};
     AdjList _adj_src_ops{};
     AdjList _adj_dst_ops{};
+
+    bool _last_op_available{ false };
+    OperatorId _last_op{ 0 };
 };
 
 } // namespace dynamic_fusion

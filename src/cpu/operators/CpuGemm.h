@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,8 @@ public:
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.
+     *
+     * @note Batched GEMM only supports broadcasting cases where RHS rank < LHS rank but not the other way around
      *
      * @param[in]  a         First input tensor info (Matrix A or Vector A). Data type supported: BFLOAT16/F16/F32
      * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a

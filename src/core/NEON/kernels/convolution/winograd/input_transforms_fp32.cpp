@@ -34,6 +34,9 @@ namespace input_transform {
 
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+void sme_fp32_mla_6x6(unsigned int, const float *, size_t, size_t, float *, size_t);
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 void sve_fp32_6x6(unsigned int, const float *, size_t, size_t, float *, size_t);
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
 void a64_fp32_6x6(unsigned int, const float *, size_t, size_t, float *, size_t);
@@ -48,6 +51,9 @@ void arm_fp32_1x8(unsigned int, const float *, size_t, size_t, float *, size_t);
 static const TransformImplementation<float> transforms_fp32[] = {
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+  { IMPL(6, 6, sme_fp32_mla_6x6, Unpadded), MethodConstraints::RequiresSME },
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
   { IMPL(6, 6, sve_fp32_6x6, Unpadded), MethodConstraints::RequiresSVE },
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
   { IMPL(6, 6, a64_fp32_6x6, Unpadded) },

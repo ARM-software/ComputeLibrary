@@ -66,13 +66,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE(BATCHED_MATMUL)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpBatchedMatMulFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpBatchedMatMulDataset())
+
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedUnsigned =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, false, uint8_t, uint8_t, true>;
+TEST_SUITE(BatchedMatMul)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedUnsigned, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedBatchedMatMulDatasetUnsigned(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                               framework::dataset::make("bool", { false })))
 {
-    // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_quant);
 }
-TEST_SUITE_END() // BATCHED_MATMUL
+TEST_SUITE_END() // QASYMM8
+
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedSigned =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, false, int8_t, int8_t, true>;
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixtureBatchedSigned, framework::DatasetMode::ALL,
+                       combine(combine(datasets::SmallGEMMLowpFusedBatchedMatMulDatasetSigned(),
+                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
+                               framework::dataset::make("bool", { false })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_quant);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // BatchedMatMul
+
 TEST_SUITE(FusedOffsetOutput)
 TEST_SUITE(QASYMM8)
 using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;

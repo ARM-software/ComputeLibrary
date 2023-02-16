@@ -69,6 +69,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLGather.h"
 #include "arm_compute/runtime/CL/functions/CLGenerateProposalsLayer.h"
+#include "arm_compute/runtime/CL/functions/CLIndirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"

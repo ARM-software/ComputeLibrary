@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEDIRECTCONV2D
 
 #include "arm_compute/core/experimental/Types.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
@@ -54,6 +54,8 @@ public:
                            const ArgumentPack<ITensorInfo> &tensors,
                            const Attributes                &attributes,
                            const Settings                  &settings);
+    /** Destructor */
+    ~ClTemplateDirectConv2d() override = default;
     /** Prevent instances of this class from being copy constructed */
     ClTemplateDirectConv2d(const ClTemplateDirectConv2d &direct_conv2d) = delete;
     /** Prevent instances of this class from being copied */

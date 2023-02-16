@@ -120,7 +120,6 @@ files_validation += Glob('validation/CPP/' + filter_pattern)
 
 if env['opencl']:
     if env['experimental_dynamic_fusion']:
-        test_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
         files_validation += Glob('validation/dynamic_fusion/gpu/' + filter_pattern)
         files_validation += Glob('validation/dynamic_fusion/gpu/cl/' + filter_pattern)
 

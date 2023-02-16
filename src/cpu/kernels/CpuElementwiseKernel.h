@@ -72,8 +72,8 @@ protected:
     static Status validate_arguments_common(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst);
 
 protected:
-    std::function<ElementwiseFunction> _run_method{ nullptr };
-    std::string                        _name{};
+    ElementwiseKernelPtr _run_method{ nullptr };
+    std::string          _name{};
 };
 
 class CpuArithmeticKernel : public CpuElementwiseKernel<CpuArithmeticKernel>
@@ -100,6 +100,15 @@ public:
 
     static const std::vector<CpuElementwiseKernel<CpuArithmeticKernel>::ElementwiseKernel> &get_available_kernels();
 
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] mws Minimum workload size for requested configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
+
 protected:
     /** Commmon configure function for element-wise operators with no additional options (e.g. Min, Max, SquaredDiff)
      */
@@ -108,16 +117,6 @@ protected:
     static Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst);
 
     ArithmeticOperation _op{};
-
-private:
-    /** Function to get the micro kernel implementation
-     *
-     * @param[in] src0 First input tensor information
-     * @param[in] src1 Second input tensor information
-     * @param[in] dst  Output tensor information
-     *
-     * @return the function instance for the micro kernel
-     */
 };
 
 class CpuDivisionKernel : public CpuArithmeticKernel
@@ -140,6 +139,15 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst);
+
+    /** Return minimum workload size of the relevant kernel
+     *
+     * @param[in] platform     The CPU platform used to create the context.
+     * @param[in] thread_count Number of threads in the execution.
+     *
+     * @return[out] mws Minimum workload size for requested configuration.
+     */
+    size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
 protected:
     // Inherited methods overridden:

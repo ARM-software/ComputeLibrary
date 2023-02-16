@@ -48,7 +48,8 @@ struct CpuIsaInfo;
     X(A510)                        \
     X(X1)                          \
     X(V1)                          \
-    X(A64FX)
+    X(A64FX)                       \
+    X(N1)
 
 /** CPU models types
  *
@@ -84,57 +85,57 @@ public:
 
     /** Checks if the cpu model supports fp16.
      *
-     * @return true of the cpu supports fp16, false otherwise
+     * @return true if the cpu supports fp16, false otherwise
      */
     bool has_fp16() const;
     /** Checks if the cpu model supports bf16.
      *
-     * @return true of the cpu supports bf16, false otherwise
+     * @return true if the cpu supports bf16, false otherwise
      */
     bool has_bf16() const;
     /** Checks if the cpu model supports bf16.
      *
-     * @return true of the cpu supports bf16, false otherwise
+     * @return true if the cpu supports bf16, false otherwise
      */
     bool has_svebf16() const;
     /** Checks if the cpu model supports dot product.
      *
-     * @return true of the cpu supports dot product, false otherwise
+     * @return true if the cpu supports dot product, false otherwise
      */
     bool has_dotprod() const;
     /** Checks if the cpu model supports floating-point matrix multiplication.
      *
-     * @return true of the cpu supports floating-point matrix multiplication, false otherwise
+     * @return true if the cpu supports floating-point matrix multiplication, false otherwise
      */
     bool has_svef32mm() const;
     /** Checks if the cpu model supports integer matrix multiplication.
      *
-     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     * @return true if the cpu supports integer matrix multiplication, false otherwise
      */
     bool has_i8mm() const;
     /** Checks if the cpu model supports integer matrix multiplication.
      *
-     * @return true of the cpu supports integer matrix multiplication, false otherwise
+     * @return true if the cpu supports integer matrix multiplication, false otherwise
      */
     bool has_svei8mm() const;
     /** Checks if the cpu model supports sve.
      *
-     * @return true of the cpu supports sve, false otherwise
+     * @return true if the cpu supports sve, false otherwise
      */
     bool has_sve() const;
     /** Checks if the cpu model supports sve2.
      *
-     * @return true of the cpu supports sve2, false otherwise
+     * @return true if the cpu supports sve2, false otherwise
      */
     bool has_sve2() const;
     /** Checks if the cpu model supports sme.
      *
-     * @return true of the cpu supports sme, false otherwise
+     * @return true if the cpu supports sme, false otherwise
      */
     bool has_sme() const;
     /** Checks if the cpu model supports sme2.
      *
-     * @return true of the cpu supports sme2, false otherwise
+     * @return true if the cpu supports sme2, false otherwise
      */
     bool has_sme2() const;
     /** Gets the cpu model for a given cpuid.

@@ -35,19 +35,6 @@
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-namespace arm_compute
-{
-namespace experimental
-{
-namespace dynamic_fusion
-{
-struct ClExecutionDescriptor;
-} // namespace dynamic_fusion
-} // namespace experimental
-} // namespace arm_compute
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
 namespace arm_compute
 {
 class ICLKernel;
@@ -108,20 +95,6 @@ public:
      * @param[in] flush   (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
      */
     void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, bool flush = true);
-
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
-    /** Schedule the execution of the passed kernel if possible.
-     *
-     * @param[in] kernel    Kernel to execute.
-     * @param[in] tensors   Map containing the tensors to operate on.
-     * @param[in] exec_desc Execution descriptor
-     * @param[in] flush     (Optional) Specifies if the command queue will be flushed after running the kernel. This will be ignored if job chaining is enabled.
-     */
-    void enqueue_op(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush = true);
-
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-
     /** Initialises the context and command queue to be used by the scheduler.
      *
      * @param[in] context         A CL context.
@@ -213,10 +186,6 @@ private:
      * @param[in] flush Flush the command queue. Ignored when job chain is enabled.
      */
     void flush_queue(bool flush);
-
-#if defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
-    void enqueue_common(ICLKernel &kernel, ITensorPack &tensors, const experimental::dynamic_fusion::ClExecutionDescriptor &exec_desc, bool flush);
-#endif // defined(ENABLE_EXPERIMENTAL_DYNAMIC_FUSION)
 
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;

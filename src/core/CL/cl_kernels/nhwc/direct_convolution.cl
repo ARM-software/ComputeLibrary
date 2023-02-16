@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@
  * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_N0 (e.g. -DPARTIAL_N0=1)
  * @note The zero value must be passed at compile time using -DZERO_VALUE (e.g. -DZERO_VALUE=0)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
- *  - M0 = 1, 2, 3, 4, 5, .... n
+ *  - M0 = 1, 2, 3, 4, 5, 6, 7, and 8
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16 (only 4, 8 and 16 if WEI_TENSOR_TYPE=IMAGE)
  *
@@ -66,36 +66,36 @@
  * - The weights offset e.g. -DWEI_OFFSET=4
  * - The quantized zero value e.g. -DZERO_VALUE=4
  *
+ * @param[in]  src_img                           (Not supported) Read only cl_image object for the source tensor. Included when SRC_TENSOR_TYPE=IMAGE
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: F16/F32/QASYMM8
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
- * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  src_c                             The size of the channels dimension of the source tensor
+ * @param[in]  src_w                             The size of the width dimension of the source tensor
+ * @param[in]  src_h                             The size of the height dimension of the source tensor
+ * @param[in]  src_n                             The size of the batches dimension of the source tensor
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_img                           (Not supported) Write only cl_image object for the destination tensor. Included when DST_TENSOR_TYPE=IMAGE
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data type: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
- * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  dst_c                             The size of the channels dimension of the destination tensor
+ * @param[in]  dst_w                             The size of the width dimension of the destination tensor
+ * @param[in]  dst_h                             The size of the height dimension of the destination tensor
+ * @param[in]  dst_n                             The size of the batches dimension of the destination tensor
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  wei_img                           (Optional) Read only cl_image object for the weights tensor. Included when WEI_TENSOR_TYPE=IMAGE
  * @param[in]  wei_ptr                           Pointer to the weights tensor. Supported data type: same as @p src_ptr
- * @param[in]  wei_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  wei_step_x                        wei_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  wei_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  wei_step_y                        wei_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  wei_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  wei_step_z                        wei_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  wei_stride_w                      Stride of the weights tensor in W dimension (in bytes)
- * @param[in]  wei_step_w                        wei_stride_w * number of elements along W processed per workitem(in bytes)
- * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the bias matrix
+ * @param[in]  wei_c                             The size of the channels dimension of the weights tensor
+ * @param[in]  wei_w                             The size of the width dimension of the weights tensor
+ * @param[in]  wei_h                             The size of the height dimension of the weights tensor
+ * @param[in]  wei_n                             The size of the batches dimension of the weights tensor
+ * @param[in]  wei_offset_first_element_in_bytes The offset of the first element in the weights matrix
  * @param[in]  bia_ptr                           (Optional) Pointer to the bias tensor Supported data type: same as @p src_ptr (if F32/F16) or S32 (if QASYMM8/QASYMM8_SIGNED)
  * @param[in]  bia_stride_x                      (Optional) Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bia_step_x                        (Optional) bia_stride_x * number of elements along X processed per workitem(in bytes)
@@ -103,9 +103,9 @@
  */
 //! @endcond
 __kernel void direct_convolution_nhwc(
-    TENSOR4D_T(src, SRC_TENSOR_TYPE),
-    TENSOR4D_T(dst, DST_TENSOR_TYPE),
-    TENSOR4D_T(wei, WEI_TENSOR_TYPE)
+    TENSOR4D_RO_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_WO_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_RO_T(wei, WEI_TENSOR_TYPE)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bia)
@@ -137,16 +137,16 @@ __kernel void direct_convolution_nhwc(
 
     // .v    = access the whole vector (OpenCL vector)
     // .s[x] = access the vector element at position x (scalar access)
-    TILE(int, M0, 1, xi);
-    TILE(int, M0, 1, yi);
+    TILE(int, 1, M0, xi);
+    TILE(int, 1, M0, yi);
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        xi[i].v = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
-        yi[i].v = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
-        xi[i].v -= PAD_LEFT;
-        yi[i].v -= PAD_TOP;
+        xi[0].s[i] = ((mout + i) % _IDST_WIDTH) * STRIDE_X;
+        yi[0].s[i] = ((mout + i) / _IDST_WIDTH) * STRIDE_Y;
+        xi[0].s[i] -= PAD_LEFT;
+        yi[0].s[i] -= PAD_TOP;
     })
 
     // Initialize the accumulators
@@ -162,18 +162,18 @@ __kernel void direct_convolution_nhwc(
         int xk = i % _IWEI_WIDTH;
         int yk = i / _IWEI_WIDTH;
 
-        TILE(int, M0, 1, my);
+        TILE(int, 1, M0, my);
 
         LOOP_UNROLLING(int, i, 0, 1, M0,
         {
-            int x_s = xi[i].v + xk;
-            int y_s = yi[i].v + yk;
-            my[i].v = x_s + y_s *_ISRC_WIDTH;
-            my[i].v = my[i].v + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
-            my[i].v = select(-1, my[i].v, x_s >= 0);
-            my[i].v = select(-1, my[i].v, x_s < _ISRC_WIDTH);
-            my[i].v = select(-1, my[i].v, y_s >= 0);
-            my[i].v = select(-1, my[i].v, y_s < _ISRC_HEIGHT);
+            int x_s    = xi[0].s[i] + xk;
+            int y_s    = yi[0].s[i] + yk;
+            my[0].s[i] = x_s + y_s *_ISRC_WIDTH;
+            my[0].s[i] = my[0].s[i] + bout * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+            my[0].s[i] = select(-1, my[0].s[i], x_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], x_s < _ISRC_WIDTH);
+            my[0].s[i] = select(-1, my[0].s[i], y_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], y_s < _ISRC_HEIGHT);
         })
 
         int ck = 0;
@@ -188,8 +188,13 @@ __kernel void direct_convolution_nhwc(
                 a[i].v = ZERO_VALUE;
             })
 
+            LOOP_UNROLLING(int, i, 0, 1, N0,
+            {
+                b[i].v = ZERO_VALUE;
+            })
+
             // Load tile from the src tensor
-            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, my, a);
+            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, K0, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 
             // Load tile from the weights tensor
             T_LOAD(WEI_DATA_TYPE, N0, K0, WEI_TENSOR_TYPE, wei, ck, cout * _IY_MULTIPLIER + i, _IY_MULTIPLIER, wei_stride_y, b);
@@ -202,7 +207,6 @@ __kernel void direct_convolution_nhwc(
             T_OFFSET_CORRECTION(ACC_DATA_TYPE, M0, N0, K0, SRC_OFFSET, WEI_OFFSET, a, b, c);
         }
 
-        // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
         // This #if directive should be removed in case of dynamic tensor support
 #if defined(LEFTOVER_LOOP)
         // Left-over accumulations
@@ -223,7 +227,7 @@ __kernel void direct_convolution_nhwc(
             })
 
             // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, bout, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, src_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT(SRC_DATA_TYPE, M0, 1, SRC_TENSOR_TYPE, src, ck, src_stride_y, my, a);
 
             // Load tile from the weights tensor
             // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration

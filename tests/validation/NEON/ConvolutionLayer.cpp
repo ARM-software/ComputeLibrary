@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -756,9 +756,8 @@ DATA_TEST_CASE(PrepareWeightShape, framework::DatasetMode::ALL,
     const DataType                  DT             = DataType::F32;
     const DataLayout                DL             = DataLayout::NHWC;
     const auto                      TI             = TensorInfo(input_shape, 1 /*num_channels, deprecated*/, DT, DL);
-    const TensorInfo                computed       = ::arm_compute::test::validation::prepare_weights(TI, wf);
-    const TensorInfo                expected       = TensorInfo(expected_shape, 1 /*num_channels, deprecated*/, DT, DL);
-    ARM_COMPUTE_EXPECT_EQUAL(computed, expected, framework::LogLevel::ERRORS);
+    const TensorInfo                computed_info  = ::arm_compute::test::validation::prepare_weights(TI, wf);
+    ARM_COMPUTE_EXPECT_EQUAL(computed_info.tensor_shape(), expected_shape, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END() // VariableWeightUtils

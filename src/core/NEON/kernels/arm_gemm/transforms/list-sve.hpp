@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifdef ARM_COMPUTE_ENABLE_SME
+#include "sme_transpose_interleave_16VL_1x4.hpp"
+#include "sme_transpose_interleave_16VL_2x2_fp32bf16.hpp"
+#include "sme_transpose_interleave_16VL_2x2.hpp"
+#include "sme_transpose_interleave_16VL.hpp"
+#include "sme_transpose_interleave_1VL_1x4.hpp"
+#include "sme_transpose_interleave_1VL_2x2_fp32bf16.hpp"
+#include "sme_transpose_interleave_1VL_2x2.hpp"
+#include "sme_transpose_interleave_1VL.hpp"
+#include "sme_transpose_interleave_2VL_1x4.hpp"
+#include "sme_transpose_interleave_2VL_2x2.hpp"
+#include "sme_transpose_interleave_2VL_2x2_fp32bf16.hpp"
+#include "sme_transpose_interleave_2VL.hpp"
+#include "sme_transpose_interleave_4VL_1x4.hpp"
+#include "sme_transpose_interleave_4VL_2x2.hpp"
+#include "sme_transpose_interleave_4VL_2x2_fp32bf16.hpp"
+#include "sme_transpose_interleave_4VL.hpp"
+#endif // ARM_COMPUTE_ENABLE_SME
 #include "sve_transpose_interleave_12VL_2x4_fp32bf16.hpp"
 #include "sve_transpose_interleave_1VL_1x4.hpp"
 #include "sve_transpose_interleave_1VL.hpp"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,42 +74,70 @@ inline svfloat32_t svinv_f32_z(svbool_t pg, svfloat32_t x)
     return recip;
 }
 
+static const uint32_t svexp_f32_coeff[] = {
+    0x3f7ffff6, // x^1: 0x1.ffffecp-1f
+    0x3efffedb, // x^2: 0x1.fffdb6p-2f
+    0x3e2aaf33, // x^3: 0x1.555e66p-3f
+    0x3d2b9f17, // x^4: 0x1.573e2ep-5f
+    0x3c072010, // x^5: 0x1.0e4020p-7f
+};
+
 inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
 {
-    const auto CONST_LN2          = svdup_n_f32(0.6931471805f); // ln(2)
-    const auto CONST_INV_LN2      = svdup_n_f32(1.4426950408f); // 1/ln(2)
-    const auto CONST_INF          = svdup_n_f32(std::numeric_limits<float>::infinity());
-    const auto CONST_MAX_INPUT    = svdup_n_f32(88.7f);
-    const auto CONST_0            = svdup_n_f32(0.f);
-    const auto CONST_NEGATIVE_126 = svdup_n_s32(-126);
+    const auto c1 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[0]));
+    const auto c2 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[1]));
+    const auto c3 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[2]));
+    const auto c4 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[3]));
+    const auto c5 = svreinterpret_f32_u32(svdup_n_u32(svexp_f32_coeff[4]));
 
-    /** Exponent polynomial coefficients */
-    const svfloat32_t exp_tab_1 = svdup_n_f32(1.f);
-    const svfloat32_t exp_tab_2 = svdup_n_f32(0.0416598916054f);
-    const svfloat32_t exp_tab_3 = svdup_n_f32(0.500000596046f);
-    const svfloat32_t exp_tab_4 = svdup_n_f32(0.0014122662833f);
-    const svfloat32_t exp_tab_5 = svdup_n_f32(1.00000011921f);
-    const svfloat32_t exp_tab_6 = svdup_n_f32(0.00833693705499f);
-    const svfloat32_t exp_tab_7 = svdup_n_f32(0.166665703058f);
-    const svfloat32_t exp_tab_8 = svdup_n_f32(0.000195780929062f);
+    const auto shift   = svreinterpret_f32_u32(svdup_n_u32(0x4b00007f));  // 2^23 + 127 = 0x1.0000fep23f
+    const auto inv_ln2 = svreinterpret_f32_u32(svdup_n_u32(0x3fb8aa3b));  // 1 / ln(2) = 0x1.715476p+0f
+    const auto neg_ln2_hi  = svreinterpret_f32_u32(svdup_n_u32(0xbf317200));  // -ln(2) from bits  -1 to -19: -0x1.62e400p-1f
+    const auto neg_ln2_lo  = svreinterpret_f32_u32(svdup_n_u32(0xb5bfbe8e));  // -ln(2) from bits -20 to -42: -0x1.7f7d1cp-20f
 
-    // Perform range reduction [-log(2),log(2)]
-    auto m   = svcvt_s32_f32_z(pg, svmul_f32_z(pg, x, CONST_INV_LN2));
-    auto val = svmls_f32_z(pg, x, svcvt_f32_s32_z(pg, m), CONST_LN2);
+    const auto inf       = svdup_n_f32(std::numeric_limits<float>::infinity());
+    const auto max_input = svdup_n_f32(88.7f);   // Approximately ln(0x1.fffffep+127)
+    const auto zero      = svdup_n_f32(0.f);
+    const auto min_input = svdup_n_f32(-86.6f);  // Approximately ln(2^-125)
 
-    // Polynomial Approximation
-    auto poly = svtaylor_poly_f32_z(pg, val, exp_tab_1, exp_tab_2, exp_tab_3, exp_tab_4, exp_tab_5, exp_tab_6, exp_tab_7, exp_tab_8);
+    // Range reduction:
+    //   e^x = 2^n * e^r
+    // where:
+    //   n = floor(x / ln(2))
+    //   r = x - n * ln(2)
+    //
+    // By adding x / ln(2) with 2^23 + 127 (shift):
+    //   * As FP32 fraction part only has 23-bits, the addition of 2^23 + 127 forces decimal part
+    //     of x / ln(2) out of the result. The integer part of x / ln(2) (i.e. n) + 127 will occupy
+    //     the whole fraction part of z in FP32 format.
+    //     Subtracting 2^23 + 127 (shift) from z will result in the integer part of x / ln(2)
+    //     (i.e. n) because the decimal part has been pushed out and lost.
+    //   * The addition of 127 makes the FP32 fraction part of z ready to be used as the exponent
+    //     in FP32 format. Left shifting z by 23 bits will result in 2^n.
+    const auto z = svmla_f32_z(pg, shift, x, inv_ln2);
+    const auto n = svsub_f32_z(pg, z, shift);
+    const auto scale = svreinterpret_f32_u32(svlsl_n_u32_z(pg, svreinterpret_u32_f32(z), 23));  // 2^n
 
-    // Reconstruct
-    poly = svreinterpret_f32_s32(svqadd_s32(svreinterpret_s32_f32(poly), svlsl_n_s32_z(pg, m, 23)));
+    // The calculation of n * ln(2) is done using 2 steps to achieve accuracy beyond FP32.
+    // This outperforms longer Taylor series (3-4 tabs) both in term of accuracy and performance.
+    const auto r_hi = svmla_f32_z(pg, x, n, neg_ln2_hi);
+    const auto r = svmla_f32_z(pg, r_hi, n, neg_ln2_lo);
 
-    // Handle underflow
-    svbool_t ltpg = svcmplt_s32(pg, m, CONST_NEGATIVE_126);
-    poly          = svsel_f32(ltpg, CONST_0, poly);
+    // Compute the truncated Taylor series of e^r.
+    //   poly = scale * (1 + c1 * r + c2 * r^2 + c3 * r^3 + c4 * r^4 + c5 * r^5)
+    const auto r2 = svmul_f32_z(pg, r, r);
 
-    // Handle overflow
-    svbool_t gtpg = svcmpgt_f32(pg, x, CONST_MAX_INPUT);
-    poly          = svsel_f32(gtpg, CONST_INF, poly);
+    const auto p1 = svmul_f32_z(pg, c1, r);
+    const auto p23 = svmla_f32_z(pg, c2, c3, r);
+    const auto p45 = svmla_f32_z(pg, c4, c5, r);
+    const auto p2345 = svmla_f32_z(pg, p23, p45, r2);
+    const auto p12345 = svmla_f32_z(pg, p1, p2345, r2);
+
+    auto poly = svmla_f32_z(pg, scale, p12345, scale);
+
+    // Handle underflow and overflow.
+    poly = svsel_f32(svcmplt_f32(pg, x, min_input), zero, poly);
+    poly = svsel_f32(svcmpgt_f32(pg, x, max_input), inf, poly);
 
     return poly;
 }

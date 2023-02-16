@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -179,7 +179,12 @@ std::string ClTemplateWriter::write_code()
         code += macros;
     }
 
-    code += write_kernel_signature(_vtable.get_variable_list(_components.get_argument_tensors()));
+    auto arguments = _components.get_argument_tensors();
+    std::sort(arguments.begin(), arguments.end(), [](const ITensorInfo * l, const ITensorInfo * r)
+    {
+        return l->id() < r->id();
+    });
+    code += write_kernel_signature(_vtable.get_variable_list(arguments));
 
     code += "\n{\n\n";
 
@@ -187,9 +192,30 @@ std::string ClTemplateWriter::write_code()
     code += write_global_section();
     code += "    //------------------ END KERNEL_BUILDER_COORDINATE ---------------------\n";
 
+    {
+        const auto        tiles = _components.get_tiles();
+        std::stringstream tiles_ss;
+
+        tiles_ss << "    //------------------ START TILE DECLARATION ---------------------\n";
+
+        for(auto tile : tiles)
+        {
+            const auto var       = _vtable.get_variable(tile);
+            const auto data_type = get_cl_type_from_data_type(tile->data_type());
+            const auto var_name  = var.uniq_name;
+
+            tiles_ss << "    TILE(" << data_type << ", M0, N0, " << var_name << ");\n";
+        }
+
+        tiles_ss << "    //------------------ END TILE DECLARATION ---------------------\n";
+
+        code += tiles_ss.str();
+    }
+
     for(const auto &component_code : component_codes)
     {
         code += component_code;
+        code += "\n";
     }
 
     code += "}\n";
@@ -198,9 +224,7 @@ std::string ClTemplateWriter::write_code()
 }
 std::string ClTemplateWriter::write_global_section() const
 {
-    const auto dst_tensors = _components.get_dst_tensors();
-    ARM_COMPUTE_ERROR_ON_MSG(dst_tensors.size() != 1, "Only one destination tensor per kernel is allowed");
-    const auto dst_info   = dst_tensors[0];
+    const auto dst_info   = _components.get_any_dst_tensor();
     const auto dst_w      = dst_info->dimension(0);
     const auto tile_w     = std::max(1, get_window().x().step());
     const auto tile_h     = std::max(1, get_window().y().step());
@@ -251,6 +275,11 @@ std::string ClTemplateWriter::write_argument_declaration(const GpuKernelVariable
         case GpuKernelArgumentInfo::Type::Tensor_4D_t_Image:
         {
             code += "\n    TENSOR4D_T(" + var.uniq_name + ", IMAGE)";
+            break;
+        }
+        case GpuKernelArgumentInfo::Type::Tensor_3D:
+        {
+            code += "\n    TENSOR3D_DECLARATION(" + var.uniq_name + ")";
             break;
         }
         default:

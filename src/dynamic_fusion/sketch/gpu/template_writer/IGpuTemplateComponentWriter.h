@@ -48,13 +48,16 @@ class IGpuTemplateComponentWriter
 public:
     using ComponentGroup = GpuKernelComponentGroup;
 
+    /**For now all kernel intermeditate/destination tensors are expected to be of type Tensor_4D_t_Buffer*/
+    static constexpr GpuKernelArgumentInfo::Type common_tensor_type = GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
+
 public:
     /** Constructor
      *
      * @param[in] id      Component id
      * @param[in] tensors Tensor arguments to the components
      */
-    IGpuTemplateComponentWriter(ComponentId id, const ArgumentPack<ITensorInfo> tensors)
+    IGpuTemplateComponentWriter(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
         : _id{ id }, _tensors{ tensors }
     {
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#define SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
 
 // *INDENT-OFF*
 // clang-format off
-#ifndef ARM_COMPUTE_TILE_HELPERS_H
-#define ARM_COMPUTE_TILE_HELPERS_H
 
 #define TILE_VECTOR_SIZE1 1
 #define TILE_VECTOR_SIZE2 2
@@ -64,7 +64,7 @@
 /** Tile object
  *  A tile object is a 2D memory block and can be accessed using the following syntax:
  *  -# a[m0].v    = access the the vector at row "m0" (OpenCL vector)
- *  -# a[m0].s[x] = access the scalar element at row "m0" and column "n0" (scalar access)
+ *  -# dst[m0].s[n0] = access the scalar element at row "m0" and column "n0" (scalar access)
  *
  * @param[in] DATA_TYPE Data type of the tile
  * @param[in] H         Number of tile rows
@@ -130,7 +130,43 @@
     uint        name##_offset_first_element_in_bytes
 
 #define TENSOR4D_T_STR(name, type) TENSOR4D_T_##type(name)
+
+/** Legacy tensor 4D arguments
+ *
+ * @param[in] name Tensor name. The tensor name is the prefix of the tensor components
+ * @param[in] type Tensor type (BUFFER or IMAGE)
+ */
 #define TENSOR4D_T(name, type) TENSOR4D_T_STR(name, type)
+
+#define TENSOR4D_RO_T_IMAGE(name)          \
+    __read_only image2d_t name##_img, \
+    TENSOR4D_T_BUFFER(name)
+
+#define TENSOR4D_RO_T_BUFFER(name) TENSOR4D_T_BUFFER(name)
+
+#define TENSOR4D_RO_T_STR(name, type) TENSOR4D_RO_T_##type(name)
+
+/** Read-Only (RO) tensor 4D.
+ *
+ * @param[in] name Tensor name. The tensor name is the prefix of the tensor components
+ * @param[in] type Tensor type (BUFFER or IMAGE)
+ */
+#define TENSOR4D_RO_T(name, type) TENSOR4D_RO_T_STR(name, type)
+
+#define TENSOR4D_WO_T_IMAGE(name)          \
+    __write_only image2d_t name##_img, \
+    TENSOR4D_T_BUFFER(name)
+
+#define TENSOR4D_WO_T_BUFFER(name) TENSOR4D_T_BUFFER(name)
+
+#define TENSOR4D_WO_T_STR(name, type) TENSOR4D_WO_T_##type(name)
+
+/** Write-Only (WO) tensor 4D.
+ *
+ * @param[in] name Tensor name. The tensor name is the prefix of the tensor components
+ * @param[in] type Tensor type (BUFFER or IMAGE)
+ */
+#define TENSOR4D_WO_T(name, type) TENSOR4D_WO_T_STR(name, type)
 
 #define TENSOR3D_T_IMAGE(name)          \
     __read_only image2d_t name##_img, \
@@ -457,6 +493,25 @@
     (0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y) * (STRIDE_Y)))
 #define V_LOAD_IMAGE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y) READ_IMAGE2D(DATA_TYPE, CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(WIDTH), TENSOR##_img, (X) / 4, (Y))
 
+/** Store a vector in global memory (tensor)
+ *
+ * @param[in] DATA_TYPE   Data type
+ * @param[in] WIDTH       Number of dst columns
+ * @param[in] TENSOR_TYPE Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
+ *                        In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
+ * @param[in] TENSOR      Tensor basename
+ * @param[in] X           Starting X position
+ * @param[in] Y           Starting Y position
+ * @param[in] STRIDE_Y    Stride Y (in bytes)
+ * @param[in] VALUES      Values to store in memory
+ */
+#define V_STORE(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y, VALUES) V_STORE_STR(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y, VALUES)
+#define V_STORE_STR(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, Y, STRIDE_Y, VALUES) V_STORE_##TENSOR_TYPE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y, VALUES)
+#define V_STORE_BUFFER(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y, VALUES) \
+    VSTORE(WIDTH)                                                \
+    (VALUES, 0, (__global DATA_TYPE *)(TENSOR##_ptr + TENSOR##_offset_first_element_in_bytes + (X) * sizeof(DATA_TYPE) + (Y) * (STRIDE_Y)))
+#define V_STORE_IMAGE(DATA_TYPE, WIDTH, TENSOR, X, Y, STRIDE_Y, VALUES) WRITE_IMAGE2D(DATA_TYPE, CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(WIDTH), TENSOR##_img, (X) / 4, (Y), VALUES)
+
 /** Load a tile from global memory (tensor)
  *
  * @param[in]  DATA_TYPE     Data type
@@ -653,15 +708,40 @@
         })                                                                                                                                                            \
     })
 
-#define T_LOAD2D_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, B, Y, X, C, TENSOR_WIDTH, TENSOR_HEIGHT, STRIDE_Y, yi, dst)                \
-    ({                                                                                                                                                                \
-        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA,                                                                                                                      \
-        {                                                                                                                                                             \
-            if(yi[_i].v >= 0)                                                                                                                                     \
-            {                                                                                                                                                         \
-                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[_i].v, STRIDE_Y);                                                               \
-            }                                                                                                                                                         \
-        })                                                                                                                                                            \
+/** Load a tile from global memory (tensor) using an indirect buffer for the Y coordinates
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  TILE_AREA     Number of elements to load from Y (height) dimension * Number of elements to load from X (width) dimension
+ * @param[in]  TILE_CHANNELS Number of elements to load from C (channel) dimension
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
+ *                           When TENSOR_TYPE=IMAGE, the if condition for the out-of-bound check can be skipped
+ *                           In case of cl_image, only TILE_CHANNELS multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  C             Starting C index
+ * @param[in]  STRIDE_Y      Stride Y (in bytes)
+ * @param[out] yi            A tile with (TILE_WIDTH x TILE_HEIGHT) values with the indirect Y coordinate
+ *                           16 is the maximum indirect buffer size.
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD2D_INDIRECT(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst) T_LOAD2D_INDIRECT_STR(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst)
+#define T_LOAD2D_INDIRECT_STR(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst) T_LOAD2D_INDIRECT_##TENSOR_TYPE(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst)
+#define T_LOAD2D_INDIRECT_BUFFER(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst) \
+    ({ \
+        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA, \
+        { \
+            if(yi[0].s[_i] >= 0) \
+            { \
+                dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[0].s[_i], STRIDE_Y); \
+            } \
+        }) \
+    })
+
+#define T_LOAD2D_INDIRECT_IMAGE(DATA_TYPE, TILE_AREA, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, STRIDE_Y, yi, dst) \
+    ({ \
+        LOOP_UNROLLING(int, _i, 0, 1, TILE_AREA, \
+        { \
+            dst[_i].v = V_LOAD(DATA_TYPE, TILE_CHANNELS, TENSOR_TYPE, TENSOR, C, yi[0].s[_i], STRIDE_Y); \
+        }) \
     })
 
 /** Load a tile from global memory (tensor) when the tensor is stored using a NDHWC layout using indirect X, Y and Z coordinates
@@ -855,6 +935,7 @@
             LOOP_UNROLLING(int, _n0, 0, 1, N0, \
             { \
                 SRC_DATA_TYPE _tmp = 0; \
+                SRC_DATA_TYPE _tmp2 = 0; \
                 SRC_DATA_TYPE _src = src[_m0].s[_n0]; \
                 SRC_DATA_TYPE _dst_multiplier = dst_multipliers[0].s[_n0]; \
                 SRC_DATA_TYPE _dst_shift = dst_shifts[0].s[_n0]; \
@@ -869,12 +950,11 @@
                 long nudge = select(mask2, mask1, is_positive_or_zero); \
                 SRC_DATA_TYPE ab_x2_high32 = CONVERT((ab_64 + nudge) / (long)(1ll << 31), SRC_DATA_TYPE); \
                 _tmp = select(ab_x2_high32, (SRC_DATA_TYPE)INT_MAX, overflow); \
-                if(_dst_shift >= 0) \
-                { \
-                    long mask = ((((int)1) << _dst_shift) - (int)1); \
-                    long threshold = _tmp < (int)0 ? (mask >> 1) + (long)1 : (mask >> 1) + 0; \
-                    _tmp = (_tmp & mask) > threshold ? (_tmp >> _dst_shift) + (int)1 : (_tmp >> _dst_shift); \
-                } \
+                long mask = ((((int)1) << _dst_shift) - (int)1); \
+                long threshold = (mask >> 1) + any(_tmp); \
+                _tmp2 = _tmp >> _dst_shift; \
+                _tmp2 += select(0, 1, (_tmp & mask) > threshold); \
+                _tmp = select(_tmp, _tmp2, _dst_shift >= 0); \
                 _tmp += DST_OFFSET; \
                 dst[_m0].s[_n0] = CONVERT_SAT(_tmp, DST_DATA_TYPE);                                                                            \
             })                                                                                                                                          \
@@ -982,7 +1062,9 @@
 #define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
 
 #define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
+#define V_SUB(A_VAL, B_VAL) ((A_VAL) - (B_VAL))
 #define V_DIV(A_VAL, B_VAL) ((A_VAL) / (B_VAL))
+#define V_MUL(A_VAL, B_VAL) ((A_VAL) * (B_VAL))
 
 /** Element-wise activation for quantized types
  *
@@ -1045,7 +1127,16 @@
     })
 
 #define T_ELTWISE_BROADCAST_ADD_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_LHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+#define T_ELTWISE_BROADCAST_LHS_X_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
 #define T_ELTWISE_BROADCAST_DIV_X(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+
+#define T_ELTWISE_BROADCAST_LHS_X_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_LHS_X(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_BROADCAST_RHS_X_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE_BROADCAST_X(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 /** Element-wise scale with a constant value
  *
@@ -1087,8 +1178,31 @@
         })                                                  \
     })
 
+/** Element-wise operation with LHS broadcasted (LHS has the X dimension only)
+ *
+ * @note Performs: LHS[broadcasted] OP RHS = DST
+ * @note Both tiles must have same data type
+ *
+ * @param[in]  T_ELWISE_OP   Elementwise operator to perform
+ * @param[in]  DST_DATA_TYPE DST data type
+ * @param[in]  M0            Number of RHS rows
+ * @param[in]  N0            Number of RHS columns
+ * @param[in]  lhs           LHS tile
+ * @param[in]  rhs           RHS tile
+ * @param[out] dst           DST tile
+ */
+#define T_ELTWISE_BROADCAST_LHS_X(T_ELWISE_OP, DST_DATA_TYPE, M0, N0, lhs, rhs, dst) \
+    ({                                                      \
+        LOOP_UNROLLING(int, _m0, 0, 1, M0,                  \
+        {                                                   \
+            dst[_m0].v = T_ELWISE_OP(CONVERT(lhs[0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)), CONVERT(rhs[_m0].v, VEC_DATA_TYPE(DST_DATA_TYPE, N0)));             \
+        })                                                  \
+    })
+
 #define T_ELTWISE_ADD(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_ADD, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_SUB(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_SUB, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 #define T_ELTWISE_DIV(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_DIV, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
+#define T_ELTWISE_MUL(DST_DATA_TYPE, M0, N0, lhs, rhs, dst) T_ELTWISE(V_MUL, DST_DATA_TYPE, M0, N0, lhs, rhs, dst)
 
 /** Element-wise operation between two tiles (LHS and RHS)
  *
@@ -1179,4 +1293,4 @@
         })                                                                                             \
     })
 
-#endif // ARM_COMPUTE_TILE_HELPERS_H
+#endif /* SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */

@@ -23,15 +23,13 @@
  */
 #include "src/gpu/cl/operators/ClConv2d.h"
 
-#include "arm_compute/core/PixelValue.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "src/gpu/cl/operators/ClDirectConv2d.h"
 #include "src/gpu/cl/operators/ClGemmConv2d.h"
+#include "src/gpu/cl/operators/ClIndirectConv2d.h"
 #include "src/gpu/cl/operators/ClWinogradConv2d.h"
 
 #include "src/common/utils/Log.h"
@@ -107,6 +105,15 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
             _operator = std::move(f);
             break;
         }
+        case ConvolutionMethod::INDIRECT:
+        {
+            ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
+            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
+            auto f = std::make_unique<ClIndirectConv2d>();
+            f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info);
+            _operator = std::move(f);
+            break;
+        }
         case ConvolutionMethod::GEMM:
         {
             auto f = std::make_unique<ClGemmConv2d>();
@@ -145,6 +152,14 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClDirectConv2d is not supported");
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClDirectConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClDirectConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info));
+            break;
+        }
+        case ConvolutionMethod::INDIRECT:
+        {
+            // Validate indirect convolution layer
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClIndirectConv2d is not supported");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClIndirectConv2d does not support PostOps");
+            ARM_COMPUTE_RETURN_ON_ERROR(ClIndirectConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info));
             break;
         }
         case ConvolutionMethod::GEMM:
@@ -266,6 +281,7 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                 const bool  is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
                 const bool  is_m_one           = output_shape[1] * output_shape[2] == 1;
                 const bool  is_unit_stride     = (conv2d_info.conv_info.stride().first == 1) && (conv2d_info.conv_info.stride().second == 1);
+                const int32_t kernel_sz        = weights->dimension(idx_w) * weights->dimension(idx_h);
 
                 // Run Winograd if valid and IFM >= 8
                 if(is_wino_valid && is_ifm_ge_8)
@@ -302,25 +318,40 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                     }
                     else
                     {
-                        // Direct convolution used for the first layer of the network
+                        ConvolutionMethod preferred_conv_method = ConvolutionMethod::DIRECT;
+
+                        const bool is_indirect_valid = bool(ClIndirectConv2d::validate(src, weights, nullptr, dst, conv_info, act_info));
+
+                        // indirect conv2d should be called when:
+                        // 1- When the kernel size is greater than 1x1 and less than or equal to 9x9 (81)
+                        // 2- When the kernel size is odd
+                        // 3- When the Gpu target is Arm Mali-G77
+                        if(is_indirect_valid)
+                        {
+                            const bool is_kernel_sz_odd = kernel_sz % 2;
+                            const bool is_g77           = gpu_target == GPUTarget::G77;
+                            preferred_conv_method = (kernel_sz > 1) && (kernel_sz <= 81) && is_kernel_sz_odd && is_g77? ConvolutionMethod::INDIRECT : ConvolutionMethod::DIRECT;
+                        }
+
+                        // Direct/indirect convolution used for the first layer of the network
                         if(workload_gte_8192 && !is_ifm_ge_16 && !is_unit_stride && is_ofm_lt_64)
                         {
                             // In general, the question we should ask for the first convolution layer of a model is:
                             // when the execution time of im2col + gemm < direct?. Since im2col does not depend on the OFM, it means that
                             // when OFM is big enough, the contribution of im2col is small and the GEMM approach is preferable.
                             // From internal experiments, the OFM threshold is 64 (is_ofm_lt_64)
-                            return ConvolutionMethod::DIRECT;
+                            return preferred_conv_method;
                         }
 
                         if((is_large_kernel_sz || is_m_one) && workload_gte_8192 && is_ifm_ge_16)
                         {
-                            return ConvolutionMethod::DIRECT;
+                            return preferred_conv_method;
                         }
 
                         // Direct convolution used for the last layer of the network
                         if(is_ofm_lte_8)
                         {
-                            return ConvolutionMethod::DIRECT;
+                            return preferred_conv_method;
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -617,6 +617,9 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     const unsigned int n                       = b->dimension(0);
     const unsigned int k                       = a->dimension(0);
     const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
+
+    // Check data type early because the auto_select_gemm_kernel has assertions on supported data types
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16);
 
     // Select GEMMType
     CLGEMMKernelType gemm_kernel_type = auto_select_gemm_kernel(auto_heuristics::CommonQuery

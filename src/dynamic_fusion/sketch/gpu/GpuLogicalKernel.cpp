@@ -38,9 +38,9 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuLogicalKernel::GpuLogicalKernel(GpuComponentServices *services, const GpuKernelComponentGroup &components)
-    : _services{ services }, _comp_group{ components }, _store_components{}
+    : _comp_group{ components }, _store_components{}
 {
-    add_load_store();
+    ARM_COMPUTE_UNUSED(services);
 }
 
 GpuKernelSourceCode GpuLogicalKernel::write_kernel_code()
@@ -56,32 +56,6 @@ GpuKernelSourceCode GpuLogicalKernel::write_kernel_code()
     code.window(writer.get_window());
 
     return code;
-}
-
-void GpuLogicalKernel::add_load_store()
-{
-    const auto dst_tensors = _comp_group.get_dst_tensors();
-    // Each dst tensor from the component group requires exactly one store component
-    for(const auto &dst_tensor : dst_tensors)
-    {
-        ArgumentPack<ITensorInfo> tensors;
-        // Pass same destination tensor to both source and destination of the store component
-        // In other words, the addition of a store component does not create a new dst tensor
-        // This way we avoid the issue of the dst tensor of the component group differs from that of a logical kernel
-        // This may seem to violate the acyclic-ness of the component graph. But it is fine because at the point of
-        // the construction of the logical kernel, we do not need a graph representation of components anymore
-        // (the graph has been serialized)
-        tensors.add_const_tensor(ACL_SRC_0, dst_tensor);
-        tensors.add_const_tensor(ACL_DST_0, dst_tensor);
-
-        auto store = _services->component_factory().create<ClComponentStore>(
-                         _comp_group.get_root_component()->properties(), // Store component share the same properties as that of the root component
-                         tensors);
-        _store_components.push_back(std::move(store));
-        auto success = _comp_group.add_component(_store_components.back().get());
-        ARM_COMPUTE_UNUSED(success);
-        ARM_COMPUTE_ERROR_ON(!success); // It's guaranteed that any load store insertion should be successful
-    }
 }
 } // namespace dynamic_fusion
 } // namespace experimental

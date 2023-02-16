@@ -30,10 +30,10 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/gpu/cl/kernels/ClActivationKernel.h"
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
-#include "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigBifrost.h"
-#include "src/gpu/cl/kernels/direct_conv/ClDirectConvDefaultConfigValhall.h"
-#include "src/gpu/cl/kernels/direct_conv/ClDirectConvKernelConfig.h"
-#include "src/gpu/cl/kernels/direct_conv/IClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigBifrost.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvDefaultConfigValhall.h"
+#include "src/runtime/heuristics/direct_conv/ClDirectConvKernelConfig.h"
+#include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
 
 #include "src/common/utils/Log.h"
 

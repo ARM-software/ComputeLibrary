@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/experimental/PostOps.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -414,8 +421,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" <<
-       gemm_info.export_to_cl_image << "})";
+    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" << gemm_info.export_to_cl_image << "})";
     return os;
 }
 
@@ -468,8 +474,7 @@ inline std::string to_string(const GEMMKernelInfo &gemm_info)
 inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
 {
     auto weights = bbox_info.weights();
-    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
-       "})";
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] << "})";
     return os;
 }
 
@@ -1872,6 +1877,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation 
             break;
         case ArithmeticOperation::POWER:
             os << "POWER";
+            break;
+        case ArithmeticOperation::PRELU:
+            os << "PRELU";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -3295,46 +3303,46 @@ inline std::string to_string(const Conv3dInfo &conv3d_info)
 inline std::string to_string(const WeightFormat wf)
 {
 #define __CASE_WEIGHT_FORMAT(wf) \
-case WeightFormat::wf:       \
-    return #wf;
+    case WeightFormat::wf:       \
+        return #wf;
     switch(wf)
     {
-            __CASE_WEIGHT_FORMAT(UNSPECIFIED)
-            __CASE_WEIGHT_FORMAT(ANY)
-            __CASE_WEIGHT_FORMAT(OHWI)
-            __CASE_WEIGHT_FORMAT(OHWIo2)
-            __CASE_WEIGHT_FORMAT(OHWIo4)
-            __CASE_WEIGHT_FORMAT(OHWIo8)
-            __CASE_WEIGHT_FORMAT(OHWIo16)
-            __CASE_WEIGHT_FORMAT(OHWIo32)
-            __CASE_WEIGHT_FORMAT(OHWIo64)
-            __CASE_WEIGHT_FORMAT(OHWIo128)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo2i8)
-            __CASE_WEIGHT_FORMAT(OHWIo4i8)
-            __CASE_WEIGHT_FORMAT(OHWIo8i8)
-            __CASE_WEIGHT_FORMAT(OHWIo16i8)
-            __CASE_WEIGHT_FORMAT(OHWIo32i8)
-            __CASE_WEIGHT_FORMAT(OHWIo64i8)
+        __CASE_WEIGHT_FORMAT(UNSPECIFIED)
+        __CASE_WEIGHT_FORMAT(ANY)
+        __CASE_WEIGHT_FORMAT(OHWI)
+        __CASE_WEIGHT_FORMAT(OHWIo2)
+        __CASE_WEIGHT_FORMAT(OHWIo4)
+        __CASE_WEIGHT_FORMAT(OHWIo8)
+        __CASE_WEIGHT_FORMAT(OHWIo16)
+        __CASE_WEIGHT_FORMAT(OHWIo32)
+        __CASE_WEIGHT_FORMAT(OHWIo64)
+        __CASE_WEIGHT_FORMAT(OHWIo128)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo2i8)
+        __CASE_WEIGHT_FORMAT(OHWIo4i8)
+        __CASE_WEIGHT_FORMAT(OHWIo8i8)
+        __CASE_WEIGHT_FORMAT(OHWIo16i8)
+        __CASE_WEIGHT_FORMAT(OHWIo32i8)
+        __CASE_WEIGHT_FORMAT(OHWIo64i8)
         default:
             return "invalid value";
     }
@@ -3399,6 +3407,65 @@ inline std::string to_string(const Padding2D &padding2d)
     return str.str();
 }
 
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::Pool2dAttributes type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  pool2d_attr arm_compute::experimental::dynamic_fusion::Pool2dAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::Pool2dAttributes &pool2d_attr)
+{
+    os << "Pool2dAttributes="
+       << "["
+       << "PoolingType=" << pool2d_attr.pool_type() << ","
+       << "PoolSize=" << pool2d_attr.pool_size() << ","
+       << "Padding=" << pool2d_attr.pad() << ","
+       << "Stride=" << pool2d_attr.stride() << ","
+       << "ExcludePadding" << pool2d_attr.exclude_padding() << "]";
+
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::Pool2dAttributes type.
+ *
+ * @param[in] pool2d_attr arm_compute::experimental::dynamic_fusion::Pool2dAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::Pool2dAttributes &pool2d_attr)
+{
+    std::stringstream str;
+    str << pool2d_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type
+ *
+ * @param[out] os       Output stream
+ * @param[in]  settings arm_compute::dynamic_fusion::GpuPool2dSettings type to output
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::GpuPool2dSettings &settings)
+{
+    os << "Settings="
+       << "["
+       << "FPMixedPrecision=" << settings.mixed_precision() << "]";
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type.
+ *
+ * @param[in] settings arm_compute::experimental::dynamic_fusion::GpuPool2dSettings type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::GpuPool2dSettings &settings)
+{
+    std::stringstream str;
+    str << settings;
+    return str.str();
+}
+
 /** Formatted output of the arm_compute::experimental::dynamic_fusion::Conv2dAttributes type.
  *
  * @param[out] os          Output stream.
@@ -3416,6 +3483,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynami
 
     return os;
 }
+
 /** Formatted output of the arm_compute::experimental::dynamic_fusion::Conv2dAttributes type.
  *
  * @param[in] conv2d_attr arm_compute::experimental::dynamic_fusion::Conv2dAttributes type to output.
@@ -3428,6 +3496,157 @@ inline std::string to_string(const experimental::dynamic_fusion::Conv2dAttribute
     str << conv2d_attr;
     return str.str();
 }
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::CastAttributes type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  cast_attr arm_compute::experimental::dynamic_fusion::CastAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::CastAttributes &cast_attr)
+{
+    os << "CastAttributes="
+       << "["
+       << "Data Type=" << cast_attr.data_type() << ", "
+       << "Convert Policy=" << cast_attr.convert_policy() << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::CastAttributes type.
+ *
+ * @param[in] cast_attr arm_compute::experimental::dynamic_fusion::CastAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::CastAttributes &cast_attr)
+{
+    std::stringstream str;
+    str << cast_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type.
+ *
+ * @param[out] os             Output stream.
+ * @param[in]  dw_conv2d_attr arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
+{
+    os << "DepthwiseConv2dAttributes="
+       << "["
+       << "Padding=" << dw_conv2d_attr.pad() << ", "
+       << "Size2D=" << dw_conv2d_attr.stride() << ", "
+       << "Depth Multiplier=" << dw_conv2d_attr.depth_multiplier() << ", "
+       << "Dilation=" << dw_conv2d_attr.dilation() << ","
+       << "DimensionRoundingType: " << dw_conv2d_attr.dimension_rounding_type() << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type.
+ *
+ * @param[in] dw_conv2d_attr arm_compute::experimental::dynamic_fusion::DepthwiseConv2dAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
+{
+    std::stringstream str;
+    str << dw_conv2d_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ClampAttributes type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  clamp_attr arm_compute::experimental::dynamic_fusion::ClampAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::ClampAttributes &clamp_attr)
+{
+    os << "ClampAttributes="
+       << "["
+       << "Min value=" << clamp_attr.min_val() << ", "
+       << "Max value=" << clamp_attr.max_val() << "]";
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ClampAttributes type.
+ *
+ * @param[in] clamp_attr arm_compute::experimental::dynamic_fusion::ClampAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::ClampAttributes &clamp_attr)
+{
+    std::stringstream str;
+    str << clamp_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ResizeAttributes type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  resize_attr arm_compute::experimental::dynamic_fusion::ResizeAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::ResizeAttributes &resize_attr)
+{
+    os << "ResizeAttributes="
+       << "["
+       << "AlignCorners=" << resize_attr.align_corners() << ", "
+       << "InterpolationPolicy=" << resize_attr.interpolation_policy() << ", "
+       << "OutputHeight=" << resize_attr.output_height() << ", "
+       << "OutputWidth=" << resize_attr.output_width() << ", "
+       << "SamplingPolicy=" << resize_attr.sampling_policy() << "]";
+    return os;
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::ResizeAttributes type.
+ *
+ * @param[in] resize_attr arm_compute::experimental::dynamic_fusion::ResizeAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::ResizeAttributes &resize_attr)
+{
+    std::stringstream str;
+    str << resize_attr;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  softmax_attr arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
+{
+    os << "SoftmaxAttributes="
+       << "["
+       << "Beta=" << softmax_attr.beta() << ", "
+       << "Is Log Softmax=" << softmax_attr.is_log_softmax() << ", "
+       << "Axis=" << softmax_attr.axis() << "]";
+    return os;
+}
+/** Formatted output of the arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type.
+ *
+ * @param[in] softmax_attr arm_compute::experimental::dynamic_fusion::SoftmaxAttributes type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
+{
+    std::stringstream str;
+    str << softmax_attr;
+    return str.str();
+}
+
 } // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */

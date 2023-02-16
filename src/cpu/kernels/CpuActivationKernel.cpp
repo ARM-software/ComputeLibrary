@@ -45,6 +45,13 @@ namespace
 {
 static const std::vector<CpuActivationKernel::ActivationKernel> available_kernels =
 {
+#ifdef ARM_COMPUTE_ENABLE_SVE
+    {
+        "sve_q8_activation_lut",
+        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt) && data.cpumodel == CPUModel::A510 && data.isa.sve; },
+        REGISTER_QASYMM8_SVE(arm_compute::cpu::sve_q8_activation_lut)
+    },
+#endif // ARM_COMPUTE_ENABLE_SVE
 #ifdef __aarch64__
     {
         // Neon LUT implementantion takes precedence
@@ -131,8 +138,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const auto *uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), activation_info.activation() });
-
+    const auto *uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_cpu_model(), CPUInfo::get().get_isa(), activation_info.activation() });
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     const DataType                                data_type = src->data_type();
@@ -186,7 +192,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, activation_info));
 
-    const auto uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), activation_info.activation() });
+    const auto uk = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_cpu_model(), CPUInfo::get().get_isa(), activation_info.activation() });
     if(dst != nullptr)
     {
         // dst auto inizialitation if not yet initialized
@@ -227,7 +233,13 @@ size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count
     ARM_COMPUTE_UNUSED(thread_count);
     ARM_COMPUTE_UNUSED(platform);
 
-    return ICPPKernel::default_mws;
+    if(_split_dimension == Window::DimX)
+    {
+        // Don't split the work load too small if the tensor has been reinterpreted as 1D.
+        // This number is loosely chosen as threading overhead in each platform varies wildly.
+        return 1536;
+    }
+    return default_mws;
 }
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)

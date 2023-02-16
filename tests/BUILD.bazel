@@ -1,0 +1,92 @@
+# Copyright (c) 2023 Arm Limited.
+#
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+#---------------------------------------------------------------------
+# Validation Framework Library
+
+cc_library(
+    name = "validation_framework",
+    srcs = glob([
+        "validation/reference/*.cpp",
+        "validation/*.cpp",
+        "*.h",
+    ]),
+    hdrs = glob([
+        "validation/reference/*.h",
+        "validation/**/*.h",
+    ]),
+    copts = [
+        "-march=armv8.2-a+fp16",
+    ],
+    linkstatic = True,
+    deps = [
+        "//:arm_compute",
+        "//:common_defines",
+        "//tests/framework",
+    ],
+)
+
+#---------------------------------------------------------------------
+# Validation Binary
+cc_binary(
+    name = "arm_compute_validation",
+    srcs = glob([
+        "validation/UNIT/**/*.cpp",
+        "validation/CPP/**/*.cpp",
+        "NEON/*.h",
+        "validation/NEON/**/*.cpp",
+        "validation/NEON/**/*.h",
+        "*.cpp",
+        "datasets/*.h",
+        "instruments/*.h",
+    ]),
+    copts = [
+        "-march=armv8.2-a+fp16",
+        "-ffp-contract=off",
+    ],
+    linkstatic = True,
+    deps = [
+        ":validation_framework",
+        "//:arm_compute",
+        "//:arm_compute_graph",
+        "//:common_defines",
+        "//tests/framework",
+    ],
+)
+
+#---------------------------------------------------------------------
+# Benchmark Binary
+cc_binary(
+    name = "arm_benchmark",
+    srcs = glob([
+        "benchmark/fixtures/*.h",
+        "benchmark/NEON/*.cpp",
+        "*.cpp",
+    ]),
+    copts = ["-march=armv8.2-a+fp16"],
+    linkstatic = True,
+    deps = [
+        ":arm_compute_validation",
+        ":validation_framework",
+        "//:arm_compute",
+    ],
+)

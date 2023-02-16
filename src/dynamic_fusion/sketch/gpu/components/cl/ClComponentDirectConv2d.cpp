@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/dynamic_fusion/sketch/OperatorAttributes.h"
+#include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDirectConv2d.h"
 
@@ -35,28 +35,37 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-using Settings = ClComponentDirectConv2dSettings;
-
-Settings &Settings::export_to_cl_image(bool cl_image)
+ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::export_to_cl_image(bool cl_image)
 {
     _export_to_cl_image = cl_image;
     return *this;
 }
 
-bool Settings::export_to_cl_image() const
+bool ClComponentDirectConv2dSettings::export_to_cl_image() const
 {
     return _export_to_cl_image;
 }
 
-Settings &Settings::fast_relaxed_math(bool fast_relaxed_math)
+ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::fast_relaxed_math(bool fast_relaxed_math)
 {
     _fast_relaxed_math = fast_relaxed_math;
     return *this;
 }
 
-bool Settings::fast_relaxed_math() const
+bool ClComponentDirectConv2dSettings::fast_relaxed_math() const
 {
     return _fast_relaxed_math;
+}
+
+ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::direct_conv_descriptor(const DirectConvComputeKernelInfo &desc)
+{
+    _desc = desc;
+    return *this;
+}
+
+DirectConvComputeKernelInfo ClComponentDirectConv2dSettings::direct_conv_descriptor() const
+{
+    return _desc;
 }
 
 Status ClComponentDirectConv2d::validate(
@@ -65,7 +74,7 @@ Status ClComponentDirectConv2d::validate(
     const Attributes                &attributes,
     const Settings                  &settings)
 {
-    ARM_COMPUTE_UNUSED(properties, settings);
+    ARM_COMPUTE_UNUSED(properties);
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const auto wei = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     const auto bia = tensors.get_const_tensor(TensorType::ACL_SRC_2);
@@ -127,6 +136,11 @@ Status ClComponentDirectConv2d::validate(
     // Data layout
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
 
+    const auto desc = settings.direct_conv_descriptor();
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
+                                    "N0 can only be: 1, 2, 3, 4, 8, and 16");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
+                                    "K0 can only be: 1, 2, 3, 4, 8, and 16");
     return Status{};
 }
 

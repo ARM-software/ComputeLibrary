@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -212,6 +212,25 @@ public:
     }
 };
 
+/** Data set containing small tensor shapes. */
+class SmallShapesNoBatches final : public ShapeDataset
+{
+public:
+    SmallShapesNoBatches()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 3U, 11U },
+                     TensorShape{ 1U, 16U },
+                     TensorShape{ 27U, 13U, 7U },
+                     TensorShape{ 7U, 7U, 17U },
+                     TensorShape{ 33U, 13U, 2U },
+                     TensorShape{ 11U, 11U, 3U }
+    })
+    {
+    }
+};
+
 /** Data set containing pairs of tiny tensor shapes that are broadcast compatible. */
 class TinyShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
 {
@@ -277,6 +296,52 @@ public:
         TensorShape{ 9U, 9U, 3U, 5U },
         TensorShape{ 1U, 1U, 1U, 1U, 128U },
         TensorShape{ 128U }
+    }))
+    {
+    }
+};
+
+class TemporaryLimitedSmallShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    TemporaryLimitedSmallShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 1U, 3U, 4U, 2U },  // LHS broadcast X
+        TensorShape{ 6U, 4U, 2U, 3U },  // RHS broadcast X
+        TensorShape{ 7U, 1U, 1U, 4U },  // LHS broadcast Y, Z
+        TensorShape{ 8U, 5U, 6U, 3U },  // RHS broadcast Y, Z
+        TensorShape{ 1U, 1U, 1U, 2U },  // LHS broadcast X, Y, Z
+        TensorShape{ 2U, 6U, 4U, 3U },  // RHS broadcast X, Y, Z
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 5U, 3U, 4U, 2U },
+        TensorShape{ 1U, 4U, 2U, 3U },
+        TensorShape{ 7U, 2U, 3U, 4U },
+        TensorShape{ 8U, 1U, 1U, 3U },
+        TensorShape{ 4U, 7U, 3U, 2U },
+        TensorShape{ 1U, 1U, 1U, 3U },
+    }))
+    {
+    }
+};
+
+class TemporaryLimitedLargeShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    TemporaryLimitedLargeShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 127U, 25U, 5U },
+                     TensorShape{ 485, 40U, 10U }
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 1U, 1U, 1U },   // Broadcast in X, Y, Z
+        TensorShape{ 485U, 1U, 1U }, // Broadcast in Y, Z
     }))
     {
     }
@@ -354,6 +419,19 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 582U, 131U, 1U, 4U },
+    })
+    {
+    }
+};
+
+/** Data set containing large tensor shapes. */
+class LargeShapesNoBatches final : public ShapeDataset
+{
+public:
+    LargeShapesNoBatches()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 582U, 131U, 2U },
     })
     {
     }
@@ -549,7 +627,7 @@ public:
     {
         TensorShape{ 5U, 5U, 7U, 4U, 3U },
                      TensorShape{ 5U, 5U, 4U, 13U, 2U },
-                     TensorShape{ 5U, 5U, 3U, 5U , 2U},
+                     TensorShape{ 5U, 5U, 3U, 5U, 2U },
     })
     {
     }
@@ -718,9 +796,23 @@ public:
     SmallDeconvolutionShapes()
         : ShapeDataset("InputShape",
     {
+        // Multiple Vector Loops for FP32
         TensorShape{ 5U, 4U, 3U, 2U },
                      TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 11U, 13U, 4U, 3U }
+    })
+    {
+    }
+};
+
+class SmallDeconvolutionShapesWithLargerChannels final : public ShapeDataset
+{
+public:
+    SmallDeconvolutionShapesWithLargerChannels()
+        : ShapeDataset("InputShape",
+    {
+        // Multiple Vector Loops for all data types
+        TensorShape{ 5U, 5U, 35U }
     })
     {
     }

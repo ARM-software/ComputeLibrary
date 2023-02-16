@@ -46,31 +46,14 @@ std::string ClTemplateStore::get_name() const
 std::string ClTemplateStore::get_component_code(const ComponentGroup &comp_group) const
 {
     ARM_COMPUTE_UNUSED(comp_group);
+
     return R"_(
 //------------------ START KERNEL {{meta_kernel_id}} STORE ---------------------
 {
-// This also follows NHWC layout
-// g_ind_0 maps to global_id(0) maps to Channel
-// g_ind_1 maps to global_id(1) maps to Height and Weight (Collapsed Window)
-// g_ind_2 maps to global_id(2) maps to N / Batch
-#define _IDST_WIDTH {{dst}}_w
-#define _IDST_HEIGHT {{dst}}_h
-    TILE(uint, M0, 1, dst_indirect_y);
-
-    // Calculate the destination indirect Y
-    LOOP_UNROLLING(int, i, 0, 1, M0,
-    {
-        dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)(_IDST_WIDTH * _IDST_HEIGHT) - 1);
-        dst_indirect_y[i].v += g_ind_2 * (int)(_IDST_WIDTH * _IDST_HEIGHT);
-    })
-
     bool x_cond = PARTIAL_N0 != 0 && get_global_id(0) == 0;
 
-    T_STORE_INDIRECT_WIDTH_SELECT({{DST_DATA_TYPE}}, M0, N0, PARTIAL_N0, {{DST_TENSOR_TYPE}}, {{dst}}, g_ind_0, {{dst}}_stride_y, x_cond, {{src}}, dst_indirect_y);
-
-#undef _IDST_WIDTH
-#undef _IDST_HEIGHT
-    //------------------ END KERNEL {{meta_kernel_id}} STORE ---------------------
+    T_STORE_INDIRECT_WIDTH_SELECT({{DST_DATA_TYPE}}, M0, N0, PARTIAL_N0, {{DST_TENSOR_TYPE}}, {{dst}}, g_ind_0, {{dst}}_stride_y, x_cond, {{src}}, g_dst_indirect_y);
+//------------------ END KERNEL {{meta_kernel_id}} STORE ---------------------
 }
 
 )_";
@@ -78,16 +61,15 @@ std::string ClTemplateStore::get_component_code(const ComponentGroup &comp_group
 
 void ClTemplateStore::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    // ARM_COMPUTE_UNUSED(comp_group)
     vtable.declare_variable(
+        comp_group,
         _src,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_src),
         "src");
     vtable.declare_variable(
+        comp_group,
         _dst,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_dst),
         "dst");
 }
 
@@ -102,9 +84,9 @@ TagLUT ClTemplateStore::get_tag_lut(const GpuKernelVariableTable &vtable, const 
     // Local build options
     lut["meta_kernel_id"]  = id();
     lut["DST_TENSOR_TYPE"] = "BUFFER";
-    const auto dst_info    = comp_group.get_dst_tensors()[0];
-    lut["DST_DATA_TYPE"]   = dst_info->data_type();
+    lut["DST_DATA_TYPE"]   = _dst->data_type();
 
+    ARM_COMPUTE_UNUSED(comp_group);
     return lut;
 }
 

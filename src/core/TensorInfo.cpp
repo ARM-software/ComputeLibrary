@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace arm_compute
 {
 TensorInfo::TensorInfo()
     : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _dims_state(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
-      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW), _are_values_constant(true), _id(invalid_tensor_id)
+      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW), _are_values_constant(true), _id(invalid_tensor_id), _lock_paddings(false)
 {
 }
 
@@ -56,7 +56,8 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
     _are_values_constant           = info.are_values_constant();
-    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
+    _id                            = info.id();
+    _lock_paddings                 = info.lock_paddings();
 }
 
 TensorInfo::TensorInfo(const TensorInfo &info)
@@ -76,7 +77,8 @@ TensorInfo::TensorInfo(const TensorInfo &info)
     _quantization_info             = info.quantization_info();
     _data_layout                   = info.data_layout();
     _are_values_constant           = info.are_values_constant();
-    _id                            = invalid_tensor_id; // Tensor Id has to be explicitly set, instead of being copied
+    _id                            = info.id();
+    _lock_paddings                 = false;
 }
 TensorInfo::TensorInfo(Format format)
     : TensorInfo(TensorShape(), format)
@@ -264,8 +266,20 @@ std::tuple<Strides, size_t, size_t> TensorInfo::calculate_padding_requirements(c
     return std::make_tuple(required_strides, required_offset_first_element, required_total_size);
 }
 
+ITensorInfo &TensorInfo::set_lock_paddings(bool flag)
+{
+    _lock_paddings = flag;
+    return *this;
+}
+
+bool TensorInfo::lock_paddings() const
+{
+    return _lock_paddings;
+}
+
 bool TensorInfo::extend_padding(const PaddingSize &padding)
 {
+    ARM_COMPUTE_ERROR_ON(_lock_paddings);
     ARM_COMPUTE_ERROR_ON(!_is_resizable);
 
     bool updated = false;

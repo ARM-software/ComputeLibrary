@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,8 @@ namespace cpu
 #define DECLARE_SUB_KERNEL(func_name) \
     void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 
+DECLARE_SUB_KERNEL(sub_qasymm8_neon_fixedpoint);
+DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon_fixedpoint);
 DECLARE_SUB_KERNEL(sub_qasymm8_neon);
 DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon);
 DECLARE_SUB_KERNEL(sub_qsymm16_neon);
@@ -81,7 +83,8 @@ void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<T *>(output.ptr());
@@ -127,7 +130,8 @@ void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
         Iterator input2(src1, input2_win);
         Iterator output(dst, win);
 
-        execute_window_loop(win, [&](const Coordinates &)
+        execute_window_loop(
+            win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());

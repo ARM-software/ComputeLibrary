@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,7 +116,13 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->auto_padding();
     };
+
+    ITensorInfo &set_lock_paddings(bool flag) override;
+
+    bool lock_paddings() const override;
+
     bool extend_padding(const PaddingSize &padding) override;
+
     size_t dimension(size_t index) const override
     {
         return _tensor_shape[index];
@@ -256,6 +262,7 @@ private:
     Coordinates     _coords;
     ValidRegion     _valid_region;
     bool            _extend_parent;
+    bool            _lock_paddings;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_SUBTENSORINFO_H */

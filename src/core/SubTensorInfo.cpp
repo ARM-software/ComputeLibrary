@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,12 +56,12 @@ TensorShape extend_parent_shape(TensorShape parent_shape, TensorShape shape, Coo
 } // namespace
 
 SubTensorInfo::SubTensorInfo()
-    : _parent(nullptr), _tensor_shape(), _dims_state(), _coords(), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(false)
+    : _parent(nullptr), _tensor_shape(), _dims_state(), _coords(), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(false), _lock_paddings(false)
 {
 }
 
 SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent)
-    : _parent(parent), _tensor_shape(tensor_shape), _dims_state(), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(extend_parent)
+    : _parent(parent), _tensor_shape(tensor_shape), _dims_state(), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(extend_parent), _lock_paddings(false)
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
 
@@ -114,8 +114,20 @@ ITensorInfo &SubTensorInfo::set_tensor_dims_state(const TensorDimsState &state)
     return *this;
 }
 
+ITensorInfo &SubTensorInfo::set_lock_paddings(bool flag)
+{
+    _lock_paddings = flag;
+    return *this;
+}
+
+bool SubTensorInfo::lock_paddings() const
+{
+    return _lock_paddings;
+}
+
 bool SubTensorInfo::extend_padding(const PaddingSize &padding)
 {
+    ARM_COMPUTE_ERROR_ON(_lock_paddings);
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
     ARM_COMPUTE_ERROR_ON(!_parent->is_resizable());
     ARM_COMPUTE_ERROR_ON(_parent->total_size() == 0);

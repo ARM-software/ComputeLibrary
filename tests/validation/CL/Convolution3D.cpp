@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,11 +38,12 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half>              tolerance_fp16(half(0.2));  /**< Tolerance for floating point tests */
-RelativeTolerance<float>             tolerance_fp32(0.05f);      /**< Tolerance for floating point tests */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);       /**< Tolerance for quantized tests */
-constexpr float                      abs_tolerance_f32(0.0001f); /**< Absolute tolerance for FP32 tests*/
-constexpr float                      tolerance_num = 0.07f;      /**< Tolerance number */
+const RelativeTolerance<half>        rel_tolerance_fp16(half(0.2)); /**< Relative tolerance for FP16 tests */
+constexpr float                      abs_tolerance_fp16(0.02f);     /**< Absolute tolerance for FP16 tests */
+constexpr RelativeTolerance<float>   rel_tolerance_fp32(0.05f);     /**< Relative tolerance for FP32 tests */
+constexpr float                      abs_tolerance_fp32(0.0001f);   /**< Absolute tolerance for FP32 tests*/
+constexpr AbsoluteTolerance<uint8_t> abs_tolerance_qasymm8(1);      /**< Absolute tolerance for quantized tests */
+constexpr float                      tolerance_num = 0.07f;         /**< Tolerance number */
 } // namespace
 
 TEST_SUITE(CL)
@@ -193,7 +194,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DFixture<half>, framework::
                        framework::dataset::make("DataType", DataType::F16)),
                        framework::dataset::make("DataLayout", DataLayout::NDHWC)))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
+    validate(CLAccessor(_target), _reference, rel_tolerance_fp16, tolerance_num, abs_tolerance_fp16);
 }
 
 TEST_SUITE_END() // FP16
@@ -221,7 +222,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DFixture<float>, framework:
                        framework::dataset::make("DataType", DataType::F32)),
                        framework::dataset::make("DataLayout", DataLayout::NDHWC)))
 {
-    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.0, abs_tolerance_f32);
+    validate(CLAccessor(_target), _reference, rel_tolerance_fp32, 0.0, abs_tolerance_fp32);
 }
 
 // clang-format on
@@ -254,7 +255,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<uint8_t>,
                                        framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
                                framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
 }
 
 TEST_SUITE_END() // QASYMM8
@@ -285,7 +286,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolution3DQuantizedFixture<int8_t>, 
                                        framework::dataset::make("WeightsQuantizationInfo", QuantizationInfo(0.3f, 20))),
                                framework::dataset::make("DstQuantizationInfo", QuantizationInfo(0.2f, 5))))
 {
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
 }
 
 TEST_SUITE_END() // QASYMM8_SIGNED

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -220,14 +220,14 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/weights
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching input feature maps
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching data type input/weights
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching input feature maps
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported kernel width
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non-rectangular weights dimensions
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported non-rectangular weights dimensions
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid weights dimensions
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid stride
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases size
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases dimensions
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported stride
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported biases size
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported biases dimensions
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid output size
                                               }),
         framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,7 +92,7 @@ private:
     {
         const auto t_id             = tensor_info.id();
         auto       find_tensor_pair = _owned_tensors.find(t_id);
-        if(find_tensor_pair == _owned_tensors.end())
+        if(find_tensor_pair != _owned_tensors.end())
         {
             return find_tensor_pair->second.get();
         }
@@ -132,10 +132,11 @@ Status create_aux_tensors(ClAuxTensors *aux_tensors, const GpuWorkloadSourceCode
             ARM_COMPUTE_ERROR_ON(tensor_info.id() != t_id);
             const auto aux_memory_info = workload_arg->memory_descriptor()->aux_memory_info;
             tensor_object              = aux_tensors->add_aux_tensor(tensor_info, aux_memory_info);
-        }
-        if(tensor_object == nullptr)
-        {
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Failed to construct an auxiliary tensor");
+
+            if(tensor_object == nullptr)
+            {
+                return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Failed to construct an auxiliary tensor");
+            }
         }
     }
     return Status{};
@@ -203,11 +204,22 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
     for(auto tensor : user_tensors)
     {
         const auto t_id = tensor->info()->id();
+
         if(tensor_map.find(t_id) != tensor_map.end())
         {
-            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Clashing tensor ids");
+            // In case of elementwise in-place: give another Id to the In/Out tensor when passed again
+            std::vector<ITensorInfo::Id> ids;
+            for(auto &t : tensor_map)
+            {
+                ids.push_back(t.first);
+            }
+            ITensorInfo::Id new_id = *std::max_element(ids.begin(), ids.end()) + 1;
+            tensor_map[new_id]     = tensor;
         }
-        tensor_map[t_id] = tensor;
+        else
+        {
+            tensor_map[t_id] = tensor;
+        }
     }
     for(const auto &data : aux_tensors.get_tensors())
     {
@@ -247,6 +259,7 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
             }
         }
     }
+
     return Status{};
 }
 
@@ -342,12 +355,12 @@ Status ClWorkloadRuntime::run(const std::vector<CLTensor *> &tensors)
     return Status{};
 }
 
-std::vector<std::pair<CLTensor *, AuxMemoryInfo>> ClWorkloadRuntime::get_auxiliary_tensors()
+std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> ClWorkloadRuntime::get_auxiliary_tensors()
 {
-    std::vector<std::pair<CLTensor *, AuxMemoryInfo>> aux_tensors;
+    std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> aux_tensors;
     for(const auto &data : _impl->_aux_tensors.get_tensors())
     {
-        aux_tensors.emplace_back(data.tensor, data.memory_info);
+        aux_tensors.emplace_back(data.tensor, data.tensor_info, data.memory_info);
     }
     return aux_tensors;
 }

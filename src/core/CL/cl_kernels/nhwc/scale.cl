@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,8 +61,8 @@
  */
 //! @endcond
 __kernel void scale_nearest_neighbour_nhwc(
-    TENSOR4D_T(src, SRC_TENSOR_TYPE),
-    TENSOR4D_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_RO_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_WO_T(dst, DST_TENSOR_TYPE),
     const float scale_x,
     const float scale_y)
 {
@@ -128,31 +128,33 @@ __kernel void scale_nearest_neighbour_nhwc(
  * - The source offset e.g. -DOFFSET=4
  * - The source scale e.g. -DSCALE=4
  *
- * @param[in] src_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32.
- * @param[in] src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_stride_w                      Stride of the source tensor in W dimension (in bytes)
- * @param[in] src_c                             The size of the channels dimension of the source tensor
- * @param[in] src_w                             The size of the width dimension of the source tensor
- * @param[in] src_h                             The size of the height dimension of the source tensor
- * @param[in] src_n                             The size of the batches dimension of the source tensor
- * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: U8/S16/F16/F32.
- * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in] dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
- * @param[in] dst_c                             The size of the channels dimension of the destination tensor
- * @param[in] dst_w                             The size of the width dimension of the destination tensor
- * @param[in] dst_h                             The size of the height dimension of the destination tensor
- * @param[in] dst_n                             The size of the batches dimension of the destination tensor
- * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in] scale_x                           The scale value to apply on the source width
- * @param[in] scale_y                           The scale value to apply on the source height
+ * @param[in]  src_img                           (Not supported) Read only cl_image object for the source tensor. Included when SRC_TENSOR_TYPE=IMAGE
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32.
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_c                             The size of the channels dimension of the source tensor
+ * @param[in]  src_w                             The size of the width dimension of the source tensor
+ * @param[in]  src_h                             The size of the height dimension of the source tensor
+ * @param[in]  src_n                             The size of the batches dimension of the source tensor
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_img                           (Not supported) Write only cl_image object for the destination tensor. Included when DST_TENSOR_TYPE=IMAGE
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: U8/S16/F16/F32.
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
+ * @param[in]  dst_c                             The size of the channels dimension of the destination tensor
+ * @param[in]  dst_w                             The size of the width dimension of the destination tensor
+ * @param[in]  dst_h                             The size of the height dimension of the destination tensor
+ * @param[in]  dst_n                             The size of the batches dimension of the destination tensor
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  scale_x                           The scale value to apply on the source width
+ * @param[in]  scale_y                           The scale value to apply on the source height
  */
 //! @endcond
 __kernel void scale_bilinear_nhwc(
-    TENSOR4D_T(src, SRC_TENSOR_TYPE),
-    TENSOR4D_T(dst, DST_TENSOR_TYPE),
+    TENSOR4D_RO_T(src, SRC_TENSOR_TYPE),
+    TENSOR4D_WO_T(dst, DST_TENSOR_TYPE),
     const float scale_x,
     const float scale_y)
 {
@@ -218,34 +220,17 @@ __kernel void scale_bilinear_nhwc(
     // Calculate the output
     out[0].v = ((in00[0].v * b * b1) + (in01[0].v * a * b1) + (in10[0].v * b * a1) + (in11[0].v * a * a1));
 #else  // defined(IS_FLOATING_POINT)
-    TILE(float, 1, N0, out_f);
-    TILE(float, 1, N0, in00_f);
-    TILE(float, 1, N0, in01_f);
-    TILE(float, 1, N0, in10_f);
-    TILE(float, 1, N0, in11_f);
 
     const float a  = (xi_f - (float)xi);
     const float b  = (1.f - a);
     const float a1 = (yi_f - (float)yi);
     const float b1 = (1.f - a1);
 
-    // Dequantize
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        in00_f[0].s[n0] = ((float)in00[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in01_f[0].s[n0] = ((float)in01[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in10_f[0].s[n0] = ((float)in10[0].s[n0] - (float)OFFSET) * (float)SCALE;
-        in11_f[0].s[n0] = ((float)in11[0].s[n0] - (float)OFFSET) * (float)SCALE;
-    })
-
-    // Calculate the output in the floating-point domain
-    out_f[0].v = ((in00_f[0].v * b * b1) + (in01_f[0].v * a * b1) + (in10_f[0].v * b * a1) + (in11_f[0].v * a * a1));
-
-    // Quantize
-    LOOP_UNROLLING(int, n0, 0, 1, N0,
-    {
-        out[0].s[n0] = CONVERT_SAT(out_f[0].s[n0] / (float)SCALE + (float)OFFSET, DST_DATA_TYPE);
-    })
+    out[0].v = CONVERT_SAT((CONVERT(in00[0].v, VEC_DATA_TYPE(float, N0)) * b * b1) +
+                           (CONVERT(in01[0].v, VEC_DATA_TYPE(float, N0)) * a * b1) +
+                           (CONVERT(in10[0].v, VEC_DATA_TYPE(float, N0)) * b * a1) +
+                           (CONVERT(in11[0].v, VEC_DATA_TYPE(float, N0)) * a * a1),
+                           VEC_DATA_TYPE(DST_DATA_TYPE, N0));
 #endif // defined(IS_FLOATING_POINT)
 
     TILE(uint, 1, 1, dst_indirect_y);

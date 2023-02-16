@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,6 +91,9 @@ public:
         add_config(TensorShape(15U, 7U, 36U), TensorShape(29U, 15U, 36U), TensorShape(29U), TensorShape(29U, 7U, 36U), 1.0f, 0.0f);
         add_config(TensorShape(56U, 17U, 32U), TensorShape(5U, 56U, 32U), TensorShape(5U), TensorShape(5U, 17U, 32U), 1.0f, 0.0f);
         add_config(TensorShape(13U, 256U, 32U), TensorShape(19U, 13U, 32U), TensorShape(19U), TensorShape(19U, 256U, 32U), 1.0f, 0.0f);
+        // Broadcast in RHS's batch dimension
+        add_config(TensorShape(15U, 7U, 36U), TensorShape(29U, 15U), TensorShape(29U), TensorShape(29U, 7U, 36U), 1.0f, 0.0f);
+        add_config(TensorShape(15U, 7U, 36U, 2U), TensorShape(29U, 15U), TensorShape(29U), TensorShape(29U, 7U, 36U, 2U), 1.0f, 0.0f);
     }
 };
 

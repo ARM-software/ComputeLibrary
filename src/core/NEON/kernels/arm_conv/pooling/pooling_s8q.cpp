@@ -28,6 +28,10 @@
 #include "pooling_depthfirst_generic.hpp"
 
 #if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+#include "kernels/sme_s8q_nhwc_avg_generic_depthfirst.hpp"
+#include "kernels/sme_s8q_nhwc_max_generic_depthfirst.hpp"
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_s8q_nhwc_avg_generic_depthfirst.hpp"
 #include "kernels/sve_s8q_nhwc_max_generic_depthfirst.hpp"
@@ -43,6 +47,32 @@ namespace pooling {
 
 static const PoolingImplementation<int8_t, int8_t, Requantize32> pooling_s8q_methods[] = {
 #if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_SME)
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_s8q_nhwc_avg_generic_depthfirst",
+    [] (const PoolingArgs &args, const Requantize32 &) -> bool {
+      return args.cpu_info->has_sme2() && args.pool_type == PoolingType::AVERAGE;
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<int8_t, int8_t> * {
+      auto strat = new sme_s8q_nhwc_avg_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<int8_t, int8_t, Requantize32>(strat, args, rq);
+    },
+  },
+  {
+    PoolingMethod::DEPTHFIRST,
+    "sme_s8q_nhwc_max_generic_depthfirst",
+    [] (const PoolingArgs &args, const Requantize32 &) -> bool {
+      return args.cpu_info->has_sme2() && args.pool_type == PoolingType::MAX;
+    },
+    nullptr,
+    [] (const PoolingArgs &args, const Requantize32 &rq) -> PoolingCommon<int8_t, int8_t> * {
+      auto strat = new sme_s8q_nhwc_max_generic_depthfirst(args.cpu_info);
+      return new PoolingDepthfirstGeneric<int8_t, int8_t, Requantize32>(strat, args, rq);
+    },
+  },
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
   {
     PoolingMethod::DEPTHFIRST,

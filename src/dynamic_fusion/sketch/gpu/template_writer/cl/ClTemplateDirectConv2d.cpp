@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,7 +69,7 @@ std::string ClTemplateDirectConv2d::get_component_code(const ComponentGroup &com
     ARM_COMPUTE_UNUSED(comp_group);
 
     const auto channel_idx   = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
-    const auto k0            = adjust_vec_size(is_data_type_quantized(_src->data_type()) ? 16u : 8u, _src->dimension(channel_idx));
+    const auto k0            = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
     const bool leftover_loop = (_src->dimension(channel_idx) % k0) != 0;
 
     std::string code = R"_(
@@ -86,11 +86,9 @@ std::string ClTemplateDirectConv2d::get_component_code(const ComponentGroup &com
     code += R"_(
 // OUT(dst, accum)      {{dst}}
 
-// Initialize the accumulators
-TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
+TILE(uint, M0, 1, g_dst_indirect_y);
+
 {
-    // All the tensor dimensions are passed at compile time.
-    // In case of dynamic tensor support, the following dimensions should be passed as function argument.
 #define _IWEI_WIDTH {{WEI_WIDTH}}
 #define _IWEI_HEIGHT {{WEI_HEIGHT}}
 #define _ISRC_WIDTH {{src}}_w
@@ -101,18 +99,16 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
 #define _IDST_CHANNELS {{arg_dst}}_c
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
-    // .v    = access the whole vector (OpenCL vector)
-    // .s[x] = access the vector element at position x (scalar access)
     TILE(int, M0, 1, xi);
     TILE(int, M0, 1, yi);
 
     // Convert the linear index to coordinate
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        xi[i].v = ((g_ind_1 + i) % _IDST_WIDTH) * {{STRIDE_X}};
-        yi[i].v = ((g_ind_1 + i) / _IDST_WIDTH) * {{STRIDE_Y}};
-        xi[i].v -= {{PAD_LEFT}};
-        yi[i].v -= {{PAD_TOP}};
+        xi[0].s[i] = ((g_ind_1 + i) % _IDST_WIDTH) * {{STRIDE_X}};
+        yi[0].s[i] = ((g_ind_1 + i) / _IDST_WIDTH) * {{STRIDE_Y}};
+        xi[0].s[i] -= {{PAD_LEFT}};
+        yi[0].s[i] -= {{PAD_TOP}};
     })
 
     LOOP_UNROLLING(int, i, 0, 1, M0,
@@ -122,17 +118,29 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
 
     for(int i = 0; i < (_IWEI_WIDTH * _IWEI_HEIGHT); ++i)
     {
-        int ck = 0;
         int xk = i % _IWEI_WIDTH;
         int yk = i / _IWEI_WIDTH;
 
-        int k = 0;
-        for(; k <= (_ISRC_CHANNELS - K0); k += K0)
+        TILE(int, 1, M0, my);
+
+        LOOP_UNROLLING(int, i, 0, 1, M0,
+        {
+            int x_s    = xi[0].s[i] + xk;
+            int y_s    = yi[0].s[i] + yk;
+            my[0].s[i] = x_s + y_s *_ISRC_WIDTH;
+            my[0].s[i] = my[0].s[i] + g_ind_2 * (int)(_ISRC_WIDTH * _ISRC_HEIGHT);
+            my[0].s[i] = select(-1, my[0].s[i], x_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], x_s < _ISRC_WIDTH);
+            my[0].s[i] = select(-1, my[0].s[i], y_s >= 0);
+            my[0].s[i] = select(-1, my[0].s[i], y_s < _ISRC_HEIGHT);
+        })
+
+        int ck = 0;
+        for(; ck <= (_ISRC_CHANNELS - K0); ck += K0)
         {
             TILE({{SRC_DATA_TYPE}}, M0, K0, a);
             TILE({{WEI_DATA_TYPE}}, N0, K0, b);
 
-            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = {{ZERO_VALUE}};
@@ -143,32 +151,22 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, K0, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT({{SRC_DATA_TYPE}}, M0, K0, {{SRC_TENSOR_TYPE}}, {{src}}, ck, {{src}}_stride_y, my, a);
 
-            // Load tile from the weights tensor
             T_LOAD({{WEI_DATA_TYPE}}, N0, K0, {{WEI_TENSOR_TYPE}}, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
-            // Compute the matrix multiplication between two tiles
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, K0, NT, T, a, b, {{dst}});
-
-            ck += K0;
         }
-
-        // We voluntarily use SRC_CHANNELS rather than _DSRC_CHANNELS
-        // This #if directive should be removed in case of dynamic tensor support
 )_";
 
     if(leftover_loop)
     {
         code += R"_(
-        // Left-over accumulations
-        for(; k < _ISRC_CHANNELS; ++k)
+        for(; ck < _ISRC_CHANNELS; ++ck)
         {
             TILE({{SRC_DATA_TYPE}}, M0, 1, a);
             TILE({{WEI_DATA_TYPE}}, N0, 1, b);
 
-            // Initialize tiles
             LOOP_UNROLLING(int, i, 0, 1, M0,
             {
                 a[i].v = {{ZERO_VALUE}};
@@ -179,17 +177,11 @@ TILE({{ACC_DATA_TYPE}}, M0, N0, {{dst}});
                 b[i].v = {{ZERO_VALUE}};
             })
 
-            // Load tile from the src tensor
-            T_LOAD_NHWC_INDIRECT({{SRC_DATA_TYPE}}, M0, 1, {{SRC_TENSOR_TYPE}}, {{src}}, g_ind_2, yk, xk, ck, _ISRC_WIDTH, _ISRC_HEIGHT, {{src}}_stride_y, xi, yi, a);
+            T_LOAD2D_INDIRECT({{SRC_DATA_TYPE}}, M0, 1, {{SRC_TENSOR_TYPE}}, {{src}}, ck, {{src}}_stride_y, my, a);
 
-            // Load tile from the weights tensor
-            // The T_LOAD for the left-over elements can only use BUFFER because we load one element per iteration
             T_LOAD({{WEI_DATA_TYPE}}, N0, 1, BUFFER, {{weight}}, ck, g_ind_0 * _IY_MULTIPLIER + i, _IY_MULTIPLIER, {{weight}}_stride_y, b);
 
-            // Compute the matrix multiplication between two tiles
             T_MMUL({{SRC_DATA_TYPE}}, {{WEI_DATA_TYPE}}, {{ACC_DATA_TYPE}}, M0, N0, 1, NT, T, a, b, {{dst}});
-
-            ++ck;
         }
     )_";
 }
@@ -215,12 +207,16 @@ code += R"_(
 
         T_LOAD({{BIA_DATA_TYPE}}, 1, N0, BUFFER, {{bias}}, g_ind_0, 0, 1, 0, bias0);
 
-        // c = c + bias[broadcasted]
         T_ELTWISE_BROADCAST_ADD_X({{ACC_DATA_TYPE}}, M0, N0, {{dst}}, bias0, {{dst}});
     )_";
 }
 
 code += R"_(
+    LOOP_UNROLLING(int, i, 0, 1, M0,
+    {
+        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{arg_dst}}_w * {{arg_dst}}_h) - 1);
+        g_dst_indirect_y[i].v += g_ind_2 * (int)({{arg_dst}}_w * {{arg_dst}}_h);
+    })
 }
 //------------------ END KERNEL {{meta_kernel_id}} ---------------------
 )_";
@@ -230,30 +226,30 @@ code += R"_(
 void ClTemplateDirectConv2d::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
     vtable.declare_variable(
+        comp_group,
         _src,
         GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_src),
         "src");
 
     const GpuKernelArgumentInfo::Type weight_type = _settings.export_to_cl_image() ? GpuKernelArgumentInfo::Type::Tensor_4D_t_Image : GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
     vtable.declare_variable(
+        comp_group,
         _weight,
         GpuKernelArgumentInfo(weight_type),
-        comp_group.is_intermediate_tensor(_weight),
         "weight");
 
     if(_bias && _bias->has_valid_id()) // optional bias
     {
         vtable.declare_variable(
+            comp_group,
             _bias,
             GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector),
-            comp_group.is_intermediate_tensor(_bias),
             "bias");
     }
     vtable.declare_variable(
+        comp_group,
         _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        comp_group.is_intermediate_tensor(_dst),
+        GpuKernelArgumentInfo(common_tensor_type),
         "dst");
 }
 
@@ -271,7 +267,7 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
     }
     lut["dst"] = vtable.get_variable(_dst);
 
-    const auto dst_argument = vtable.get_variable(comp_group.get_dst_tensors()[0]);
+    const auto dst_argument = vtable.get_variable(comp_group.get_any_dst_tensor());
     lut["arg_dst"]          = dst_argument.uniq_name;
 
     // Local build options
@@ -315,13 +311,11 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
 CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &comp_group) const
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(_src->data_layout(), DataLayoutDimension::CHANNEL);
-    const DataType     data_type   = _src->data_type();
 
-    /// NOTE: For now tile sizes (n0, m0, n0) are set by the execution window. This may change in the future
     const auto         root_window      = comp_group.get_root_component()->template_writer()->get_window();
     const unsigned int n0               = root_window.x().step();
     const unsigned int m0               = root_window.y().step();
-    const unsigned int k0               = adjust_vec_size(is_data_type_quantized(data_type) ? 16u : 8u, _src->dimension(channel_idx));
+    const unsigned int k0               = adjust_vec_size(_settings.direct_conv_descriptor().k0, _src->dimension(channel_idx));
     const unsigned int partial_store_n0 = _dst->dimension(0) % n0;
 
     CLBuildOptions build_opts{};
@@ -335,7 +329,7 @@ CLBuildOptions ClTemplateDirectConv2d::get_build_options(const ComponentGroup &c
         // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
         build_opts.add_option("-cl-unsafe-math-optimizations");
     }
-    build_opts.add_option("-DIS_TILED");
+
     build_opts.add_option("-DN0=" + support::cpp11::to_string(n0));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(m0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(k0));
@@ -381,15 +375,16 @@ Window ClTemplateDirectConv2d::get_window() const
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
 
     const auto output_shape = _dst->tensor_shape();
+    const auto desc         = _settings.direct_conv_descriptor();
 
-    const unsigned int vec_size = std::min(static_cast<unsigned int>(output_shape[0]), 4u);
-    const unsigned int num_rows = (_dst->tensor_shape()[0] > 16) ? ((_src->data_type() == DataType::F32) ? 2U : 4U) : 1U;
+    const unsigned int n0 = adjust_vec_size(desc.n0, output_shape[0]);
+    const unsigned int m0 = adjust_vec_size(desc.m0, output_shape[1] * output_shape[2]);
 
     // Create and configure kernel window
-    Window win = calculate_max_window(output_shape, Steps(vec_size, num_rows));
+    Window win = calculate_max_window(output_shape, Steps(n0, m0));
 
-    const size_t dim_y_collapsed = ceil_to_multiple(output_shape[1] * output_shape[2], num_rows);
-    win.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, num_rows));
+    const size_t dim_y_collapsed = ceil_to_multiple(output_shape[1] * output_shape[2], m0);
+    win.set(Window::DimY, Window::Dimension(0, dim_y_collapsed, m0));
     win.set(Window::DimZ, Window::Dimension(0, output_shape.total_size_upper(3), 1));
 
     return win;

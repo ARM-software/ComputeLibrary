@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -336,22 +336,23 @@ CpuInfo CpuInfo::build()
 #elif(BARE_METAL) && defined(__aarch64__)        /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
 
     // Assume single CPU in bare metal mode.  Just read the ID register and feature bits directly.
-    uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, svefr0 = 0, midr = 0;
+    uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, pfr1 = 0, svefr0 = 0, midr = 0;
     ARM_COMPUTE_GET_FEATURE_REG(isar0, ID_AA64ISAR0_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(isar1, ID_AA64ISAR1_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(pfr0, ID_AA64PFR0_EL1);
+    ARM_COMPUTE_GET_FEATURE_REG(pfr1, ID_AA64PFR1_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(midr, MIDR_EL1);
     if((pfr0 >> 32) & 0xf)
     {
         svefr0 = get_sve_feature_reg();
     }
 
-    CpuIsaInfo            isa = init_cpu_isa_from_regs(isar0, isar1, pfr0, svefr0, midr);
+    CpuIsaInfo            isa = init_cpu_isa_from_regs(isar0, isar1, pfr0, pfr1, svefr0, midr);
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
 #elif defined(__aarch64__) && defined(__APPLE__) /* #elif(BARE_METAL) && defined(__aarch64__) */
-    int                   ncpus = get_hw_capability("hw.logicalcpu");
+    int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
     isainfo.neon = get_hw_capability("hw.optional.neon");

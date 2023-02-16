@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEFUNCTIONS_H
 
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEAddMulAdd.h"
 #include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"

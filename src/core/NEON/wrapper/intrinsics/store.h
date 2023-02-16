@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,8 +44,6 @@ VSTORE_IMPL(uint16_t, uint16x4_t, vst1, u16)
 VSTORE_IMPL(int16_t, int16x4_t, vst1, s16)
 VSTORE_IMPL(uint32_t, uint32x2_t, vst1, u32)
 VSTORE_IMPL(int32_t, int32x2_t, vst1, s32)
-//VSTORE_IMPL(uint64_t, 1, vst1, u64)
-//VSTORE_IMPL(int64_t, 1, vst1, s64)
 VSTORE_IMPL(float, float32x2_t, vst1, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VSTORE_IMPL(float16_t, float16x4_t, vst1, f16)
@@ -57,8 +55,6 @@ VSTORE_IMPL(uint16_t, uint16x8_t, vst1q, u16)
 VSTORE_IMPL(int16_t, int16x8_t, vst1q, s16)
 VSTORE_IMPL(uint32_t, uint32x4_t, vst1q, u32)
 VSTORE_IMPL(int32_t, int32x4_t, vst1q, s32)
-//VSTORE_IMPL(uint64_t, 2, vst1q, u64)
-//VSTORE_IMPL(int64_t, 2, vst1q, s64)
 VSTORE_IMPL(float, float32x4_t, vst1q, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VSTORE_IMPL(float16_t, float16x8_t, vst1q, f16)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,8 +104,8 @@ struct GEMMKernelInfo
 /** Compute descriptor used by the depthwise convolution native kernel */
 struct DWCComputeKernelInfo
 {
-    unsigned int n0{ 0 };                             /**< Number of columns processed by each thread */
-    unsigned int m0{ 0 };                             /**< Number of rows processed by each thread */
+    unsigned int n0{ 1 };                             /**< Number of columns processed by each thread */
+    unsigned int m0{ 1 };                             /**< Number of rows processed by each thread */
     bool         export_input_to_cl_image{ false };   /**< Export input to cl_image */
     bool         export_weights_to_cl_image{ false }; /**< Export the weights to cl_image */
 };
@@ -117,6 +117,8 @@ struct DirectConvComputeKernelInfo
     int32_t n0{ 1 };                             /**< Number of columns to be processed by the kernel */
     int32_t k0{ 1 };                             /**< Number of partial accumulations to be processed in a single iteration by the kernel */
     bool    export_weights_to_cl_image{ false }; /**< Flag to export the weights to cl_image */
+    bool    export_output_to_cl_image{ false };  /**< Flag to export the output to cl_image */
+    bool    export_input_to_cl_image{ false };   /**< Flag to export the input to cl_image */
 };
 
 /** Descriptor used by the softmax kernels */

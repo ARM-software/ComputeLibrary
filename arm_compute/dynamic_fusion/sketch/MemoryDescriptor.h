@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,11 +32,31 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-/** Type of memory used by a workload tensor */
+/** Type of memory used by a workload tensor
+ *
+ *  We can classify tensors in 2 dimensions: Topology (where they are in a workload) and Memory allocation:
+ * Topology:
+ *      Argument tensors: "Outer" tensors exposed to the users as inputs and outputs (arguments)
+ *      Intermediate tensors: "Inner" tensors hidden from the users as links between operators
+ * Memory allocation:
+ *      Alloc: Tensors that need to be allocated real backing memory
+ *      No-Alloc: Tensors that don't need to be allocated real backing memory
+ *
+ * We end up with 3 MemoryType based on the product of these two classifications
+ *          |    Argument    |   Intermediate    |
+ * ---------*----------------*-------------------*
+ * Alloc    |     User       |   Auxiliary       |
+ * ---------*----------------*-------------------*
+ * No-Alloc *     N/A        |    Virtual        |
+ * ---------*----------------*-------------------*
+ */
 enum class MemoryType
 {
+    /** Both User and Auxiliary types are of Alloc type. Since they require memory allocation */
     User      = 0, /**< Memory coming directly from users, e.g. for argument tensors */
-    Auxiliary = 1, /**< Additional memory required by the workload tensor, e.g. for temporary tensors */
+    Auxiliary = 1, /**< Additional memory required by the workload tensor, e.g. for tensors holding temporary results between kernels */
+    /** Virtual type is of No-Alloc type. Since it doesn't require memory allocation */
+    Virtual = 2, /**< Temporary tile which is not allocated as a whole tensor in the memory. It is mainly used at sketch time to link operators; there should be no Virtual tensors at runtime */
 };
 
 /** Memory information for tensors with @ref MemoryType::Auxiliary.

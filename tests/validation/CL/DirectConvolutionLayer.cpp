@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,9 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DirectConvolutionLayerFixture.h"
 
+/** Synced with tests/validation/dynamic_fusion/gpu/cl/DirectConv2d.cpp
+ *  Please check there for any differences in the coverage
+ */
 namespace arm_compute
 {
 namespace test
@@ -185,25 +188,17 @@ TEST_CASE(NonSquareKernel, framework::DatasetMode::PRECOMMIT)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/weights
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching input feature maps
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported kernel width
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non-rectangular weights dimensions
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching data type input/weights
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid: Mismatching input feature maps
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid weights dimensions
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid stride
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases dimensions
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported biases size
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported biases dimensions
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid output size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
                                                        TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(11U, 11U, 2U, 4U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U, 3U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
@@ -212,12 +207,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                      })),
@@ -226,19 +217,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(26U, 11U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("ConvInfo",  { PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(1, 1, 0, 0),
-                                                       PadStrideInfo(3, 3, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
@@ -247,14 +230,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                       })),
                        framework::dataset::make("ActivationInfo",
 {
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
 })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, true })),
                input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)
 {
     bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, act_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using CLDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
@@ -270,6 +261,46 @@ template <typename T>
 using CLDirectConvolutionValidationWithTensorShapesQuantizedFixture = DirectConvolutionValidationWithTensorShapesQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 
 TEST_SUITE(NHWC)
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", {
+                                                       TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC), // Arbitrary weight sizes for NHWC are supported
+                                                       TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC), // Non-rectangular weights dimensions for NHWC are supported
+                                                       TensorInfo(TensorShape(2U, 27U, 13U), 1, DataType::F32, DataLayout::NHWC), // Strides > 2 for any kernel sizes for NHWC are supported
+                                                     }),
+               framework::dataset::make("WeightsInfo",{
+                                                        TensorInfo(TensorShape(2U, 13U, 13U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                                                        TensorInfo(TensorShape(2U, 5U, 3U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                                                        TensorInfo(TensorShape(2U, 3U, 3U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                                                     })),
+               framework::dataset::make("BiasesInfo",{
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NHWC),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NHWC),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NHWC),
+                                                     })),
+               framework::dataset::make("OutputInfo",{
+                                                       TensorInfo(TensorShape(4U, 15U, 1U), 1, DataType::F32, DataLayout::NHWC),
+                                                       TensorInfo(TensorShape(4U, 23U, 11U), 1, DataType::F32, DataLayout::NHWC),
+                                                       TensorInfo(TensorShape(4U, 9U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                                                     })),
+               framework::dataset::make("ConvInfo",  {
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(3, 3, 0, 0),
+                                                      })),
+                       framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+})),
+               framework::dataset::make("Expected", { true, true, true })),
+               input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)
+{
+    bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, act_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                combine(combine(combine(zip(zip(zip(zip(zip(zip(
@@ -479,9 +510,48 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // NHWC
 
+TEST_SUITE(NCHW)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", {
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, DataLayout::NCHW), // Unsupported kernel width
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, DataLayout::NCHW), // Non-rectangular weights dimensions are unsupported
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, DataLayout::NCHW)  // Unsupported stride
+                                                     }),
+               framework::dataset::make("WeightsInfo",{
+                                                        TensorInfo(TensorShape(11U, 11U, 2U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                                        TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, DataLayout::NCHW)
+                                                     })),
+               framework::dataset::make("BiasesInfo",{
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NCHW),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NCHW),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, DataLayout::NCHW)
+                                                     })),
+               framework::dataset::make("OutputInfo",{
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                                       TensorInfo(TensorShape(23U, 11U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, DataLayout::NCHW)
+                                                     })),
+               framework::dataset::make("ConvInfo",  {
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(3, 3, 0, 0)
+                                                      })),
+                       framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
+})),
+               framework::dataset::make("Expected", { false, false, false})),
+               input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)
+{
+    bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, act_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
 // clang-format on
 // *INDENT-ON*
-TEST_SUITE(NCHW)
+
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType", DataType::F16)),

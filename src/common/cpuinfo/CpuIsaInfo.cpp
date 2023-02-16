@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021-2022 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEBF16 (1 << 12)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM (1 << 13)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16 (1 << 14)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME (1 << 23)
 
 namespace arm_compute
 {
@@ -69,6 +70,10 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     isa.sve  = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE);
     isa.sve2 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2);
 
+    // Detection of SME from type HWCAP2 in the auxillary vector
+    isa.sme   = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME);
+    isa.sme2  = isa.sme; // Needs to be set properly
+
     // Data-type support
     isa.fp16    = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP | ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP);
     isa.bf16    = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16);
@@ -87,7 +92,7 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
 }
 #endif /* defined(__aarch64__) */
 
-void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, const uint64_t pfr0, const uint64_t svefr0)
+void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, const uint64_t pfr0, const uint64_t pfr1, const uint64_t svefr0)
 {
     auto is_supported = [](uint64_t feature_reg, uint8_t feature_pos) -> bool
     {
@@ -97,6 +102,8 @@ void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, co
     // High-level SIMD support
     isa.sve  = is_supported(pfr0, 32);
     isa.sve2 = is_supported(svefr0, 0);
+    isa.sme  = is_supported(pfr1, 24);
+    isa.sme2 = (((pfr1 >> 24) & 0xf) > 1);
 
     // Data-type support
     isa.fp16    = is_supported(pfr0, 16);
@@ -140,11 +147,11 @@ CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t 
     return isa;
 }
 
-CpuIsaInfo init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t svefr0, uint64_t midr)
+CpuIsaInfo init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr)
 {
     CpuIsaInfo isa;
 
-    decode_regs(isa, isar0, isar1, pfr0, svefr0);
+    decode_regs(isa, isar0, isar1, pfr0, pfr1, svefr0);
 
     const CpuModel model = midr_to_model(midr);
     allowlisted_model_features(isa, model);

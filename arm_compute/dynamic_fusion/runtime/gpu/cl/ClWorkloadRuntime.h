@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME
 #define ARM_COMPUTE_DYNAMIC_FUSION_RUNTIME_GPU_CL_CLWORKLOADRUNTIME
 
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
-
 #include <map>
 #include <memory>
 
@@ -63,7 +63,7 @@ public:
     Status run(const std::vector<CLTensor *> &tensors);
     /** Get auxiliary tensors of the workload and their memory requirement
      */
-    std::vector<std::pair<CLTensor *, AuxMemoryInfo>> get_auxiliary_tensors();
+    std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> get_auxiliary_tensors();
 
 private:
     /** Enqueue prepare workload

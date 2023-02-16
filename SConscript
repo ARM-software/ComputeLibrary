@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2022 Arm Limited.
+# Copyright (c) 2016-2023 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -31,8 +31,8 @@ import zlib
 import json
 import codecs
 
-VERSION = "v22.11"
-LIBRARY_VERSION_MAJOR = 29
+VERSION = "v23.02"
+LIBRARY_VERSION_MAJOR = 30
 LIBRARY_VERSION_MINOR =  0
 LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
@@ -449,6 +449,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/dwc_native_fp_nhwc.cl',
                     'src/core/CL/cl_kernels/nhwc/dwc_native_quantized_nhwc.cl',
                     'src/core/CL/cl_kernels/nhwc/im2col.cl',
+                    'src/core/CL/cl_kernels/nhwc/indirect_convolution.cl',
                     'src/core/CL/cl_kernels/nhwc/normalization_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/normalize_planar_yuv_layer_quantized.cl',
@@ -460,6 +461,7 @@ if env['opencl'] and env['embed_kernels']:
                     'src/core/CL/cl_kernels/nhwc/scale.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_batch.cl',
                     'src/core/CL/cl_kernels/nhwc/space_to_depth.cl',
+                    'src/core/CL/cl_kernels/nhwc/transposed_convolution.cl',
                     'src/core/CL/cl_kernels/nhwc/upsample_layer.cl',
                     'src/core/CL/cl_kernels/nhwc/winograd_filter_transform.cl',
                     'src/core/CL/cl_kernels/nhwc/winograd_input_transform.cl',
@@ -488,7 +490,11 @@ arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
-    arm_compute_env.Append(LIBS = ['dl'])
+    if env['os'] == 'windows':
+        arm_compute_env.Append(LIBS = [])
+    else:
+        arm_compute_env.Append(LIBS = ['dl'])
+
 
 # Load build definitions file
 with (open(Dir('#').path + '/filedefs.json')) as fd:
@@ -506,7 +512,6 @@ lib_files = filelist['common']
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
-    arm_compute_env.Append(CPPDEFINES = ['ENABLE_EXPERIMENTAL_DYNAMIC_FUSION'])
 
 # Fixed format GEMM kernels.
 if env['experimental_fixed_format_kernels']:
