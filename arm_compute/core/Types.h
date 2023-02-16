@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -2693,6 +2693,50 @@ struct IOFormatInfo
     std::string row_delim;
     /** Align columns */
     bool align_columns;
+};
+
+/** Class for holding information related to matrix multiplication function
+ */
+class MatMulInfo
+{
+public:
+    /* Get Adjoint LHS flag value */
+    bool adj_lhs() const
+    {
+        return _adj_lhs;
+    }
+    /* Get Adjoint RHS flag value */
+    bool adj_rhs() const
+    {
+        return _adj_rhs;
+    }
+    /* Get Fused Activation Layer Info */
+    ActivationLayerInfo fused_activation() const
+    {
+        return _fused_act;
+    }
+    /* Set Adjoint LHS flag */
+    MatMulInfo& adj_lhs(bool adj_lhs)
+    {
+        _adj_lhs = adj_lhs;
+        return *this;
+    }
+    /* Set Adjoint RHS flag */
+    MatMulInfo& adj_rhs(bool adj_rhs)
+    {
+        _adj_rhs = adj_rhs;
+        return *this;
+    }
+    /* Set Fused Activation Layer Info */
+    MatMulInfo& fused_activation(const ActivationLayerInfo& act_info)
+    {
+        _fused_act = act_info;
+        return *this;
+    }
+private:
+    bool _adj_lhs{false};
+    bool _adj_rhs{false};
+    ActivationLayerInfo _fused_act{}; // disabled by default
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */
