@@ -1,0 +1,4 @@
+<map id="sme_s8q_nhwc_avg_generic_depthfirst" name="sme_s8q_nhwc_avg_generic_depthfirst">
+<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_i_generic_depthfirst_strategy.xhtml" title="IGenericDepthfirstStrategy\l\&lt; int8_t, int8_t, Requantize32 \&gt;" alt="" coords="11,109,242,151"/>
+<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_i_generic_depthfirst_strategy.xhtml" title="IGenericDepthfirstStrategy\l\&lt; TInput, TOutput, OutputStage \&gt;" alt="" coords="5,5,248,47"/>
+</map>
