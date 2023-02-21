@@ -125,17 +125,14 @@ target_sources(
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_5x5_s1_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp32bf16fp32_planar_5x5_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s1_4rows_dot_za/generic.cpp
-	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s2_2rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_3x3_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_5x5_s1_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_s8q_planar_5x5_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s1_4rows_dot_za/generic.cpp
-	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s2_2rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_3x3_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_5x5_s1_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8q_planar_5x5_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s1_4rows_dot_za/generic.cpp
-	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s2_2rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_3x3_s2_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_5x5_s1_4rows_dot_za/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_u8s8u8q_planar_5x5_s2_4rows_dot_za/generic.cpp
@@ -149,10 +146,8 @@ target_sources(
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst/generic_indirect.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_direct.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst/generic_indirect.cpp
-	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp
-	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output2x2_mla_depthfirst_strided/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_direct.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output3x3_mla_depthfirst/generic_indirect.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sve_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst/generic_direct.cpp
@@ -284,9 +279,6 @@ target_sources(
 	core/NEON/kernels/arm_gemm/kernels/sve_interleaved_u8u32_dot_8x3VL/a64fx.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_interleaved_u8u32_dot_8x3VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sve_interleaved_u8u32_mmla_8x3VL/generic.cpp
-	core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_fp32_mla_8x1VL/generic.cpp
-	core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_s8s32_dot_8x1VL/generic.cpp
-	core/NEON/kernels/arm_gemm/kernels/sve_smallK_hybrid_u8u32_dot_8x1VL/generic.cpp
 	core/NEON/kernels/arm_gemm/mergeresults-sve.cpp
 	core/NEON/kernels/arm_gemm/misc-sve.cpp
 	core/NEON/kernels/arm_gemm/transform-sve.cpp
@@ -410,6 +402,7 @@ target_sources(
 	core/NEON/kernels/NEStridedSliceKernel.cpp
 	core/NEON/kernels/NETileKernel.cpp
 	core/NEON/kernels/arm_conv/addressing.cpp
+	core/NEON/kernels/arm_conv/depthwise/depthwise_common.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_fp16.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_fp32.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_s8q.cpp
