@@ -320,24 +320,24 @@ To cross-compile the library with Arm® Neon™ support for baremetal armv8a:
 
 Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
 
-@section S1_6_windows_host Building on a Windows host system (cross-compile)
+@section S1_6_windows_host Building on a Windows® host system (cross-compile)
 
-Using `scons` directly from the Windows command line is known to cause
+Using `scons` directly from the Windows® command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
-it gets confused about Windows style paths (using backslashes). Thus it is
+it gets confused about Windows® style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows (cross-compile)
+@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows® (cross-compile)
 
 The best and easiest option is to use
-<a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>.
+<a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows®</a>.
 This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
-Ubuntu on Windows* shell and following the general guidelines given above.
+Ubuntu on Windows®* shell and following the general guidelines given above.
 
 @subsection S1_6_2_cygwin Cygwin (cross-compile)
 
-If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
+If the Windows® subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
 can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
 to the default packages installed by Cygwin `scons` has to be selected in the installer. (`git` might
 also be useful but is not strictly required if you already have got the source
@@ -348,15 +348,15 @@ compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
 
-@subsection S1_6_3_WoA Windows on ARM (native build)
+@subsection S1_6_3_WoA Windows® on Arm™ (native build)
 
-    Native builds on Windows are experimental and some features from the library interacting with the OS are missing.
+    Native builds on Windows® are experimental and some features from the library interacting with the OS are missing.
 
-It's possible to build Compute Library natively on a windows system running on ARM.
+It's possible to build Compute Library natively on a Windows® system running on Arm™.
 
-Windows on ARM(WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
+Windows® on Arm™ (WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
 
-Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows.
+Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows®.
 
 Native arm64 toolchain installation for WoA:
 - LLVM+Clang-12 which can be downloaded from: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/LLVM-12.0.0-woa64.exe
@@ -372,7 +372,7 @@ There are some additional tools we need to install to build Compute Library:
 - python 3 https://www.python.org/downloads/windows/
 - scons can be installed with pip install scons
 
-In order to use clang to build windows binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
+In order to use clang to build Windows® binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
 
     cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsx86_arm64.bat"
 

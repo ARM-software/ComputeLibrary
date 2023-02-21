@@ -176,3 +176,4 @@ countries.
 
 Tizen is a registered trademark of The Linux Foundation.
 
+Windows® is a trademark of the Microsoft group of companies.
