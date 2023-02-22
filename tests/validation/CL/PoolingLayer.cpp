@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -181,11 +181,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::Datase
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),
                                                                                                                         combine(PoolingLayerDatasetFPIndicesSmall,
                                                                                                                                 framework::dataset::make("DataType",
                                                                                                                                         DataType::F32))),
-                                                                                                                        pool_data_layout_dataset))
+                                                                                                                        pool_data_layout_dataset),framework::dataset::make("UseKernelIndices", { false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -250,11 +250,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMixedPrecesionPoolingLayerFixture<half>, fram
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmallIndices, CLPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),
                                                                                                                        combine(PoolingLayerDatasetFPIndicesSmall,
                                                                                                                                framework::dataset::make("DataType",
                                                                                                                                        DataType::F16))),
-                                                                                                                       pool_data_layout_dataset))
+                                                                                                                       pool_data_layout_dataset), framework::dataset::make("UseKernelIndices", { false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

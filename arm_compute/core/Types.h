@@ -1210,7 +1210,8 @@ struct PoolingLayerInfo
           exclude_padding(false),
           is_global_pooling(false),
           fp_mixed_precision(false),
-          use_inf_as_limit(true)
+          use_inf_as_limit(true),
+          use_kernel_indices(false)
     {
     }
     /** Constructor
@@ -1224,6 +1225,7 @@ struct PoolingLayerInfo
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
+     * @param[in] use_kernel_indices (Optional) Use kernel indices instead of using source indices while computing indices tensor.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
@@ -1231,7 +1233,8 @@ struct PoolingLayerInfo
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false,
-                              bool          use_inf_as_limit   = true)
+                              bool          use_inf_as_limit   = true,
+                              bool          use_kernel_indices = false)
         : pool_type(pool_type),
           pool_size(Size2D(pool_size, pool_size)),
           data_layout(data_layout),
@@ -1239,7 +1242,8 @@ struct PoolingLayerInfo
           exclude_padding(exclude_padding),
           is_global_pooling(false),
           fp_mixed_precision(fp_mixed_precision),
-          use_inf_as_limit(use_inf_as_limit)
+          use_inf_as_limit(use_inf_as_limit),
+          use_kernel_indices(use_kernel_indices)
     {
     }
 
@@ -1254,6 +1258,7 @@ struct PoolingLayerInfo
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
+     * @param[in] use_kernel_indices (Optional) Use kernel indices instead of using source indices while computing indices tensor.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
@@ -1261,7 +1266,8 @@ struct PoolingLayerInfo
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false,
-                              bool          use_inf_as_limit   = true)
+                              bool          use_inf_as_limit   = true,
+                              bool          use_kernel_indices = false)
         : pool_type(pool_type),
           pool_size(pool_size),
           data_layout(data_layout),
@@ -1269,7 +1275,8 @@ struct PoolingLayerInfo
           exclude_padding(exclude_padding),
           is_global_pooling(false),
           fp_mixed_precision(fp_mixed_precision),
-          use_inf_as_limit(use_inf_as_limit)
+          use_inf_as_limit(use_inf_as_limit),
+          use_kernel_indices(use_kernel_indices)
     {
     }
 
@@ -1288,7 +1295,8 @@ struct PoolingLayerInfo
           exclude_padding(false),
           is_global_pooling(true),
           fp_mixed_precision(false),
-          use_inf_as_limit(true)
+          use_inf_as_limit(true),
+          use_kernel_indices(false)
     {
     }
 
@@ -1300,6 +1308,7 @@ struct PoolingLayerInfo
     bool          is_global_pooling;
     bool          fp_mixed_precision;
     bool          use_inf_as_limit;
+    bool          use_kernel_indices;
 };
 
 /** Pooling Layer Information struct*/

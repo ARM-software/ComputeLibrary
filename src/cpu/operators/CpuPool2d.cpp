@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "src/common/utils/Log.h"
-#include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/cpu/kernels/CpuPool2dKernel.h"
 #include "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
 
@@ -41,6 +40,7 @@ CpuPool2d::CpuPool2d()
     : _pooling_layer_kernel(),
       _asm_glue(),
       _is_global_pooling_layer(false),
+      _use_kernel_indices(false),
       _data_layout(DataLayout::NCHW),
       _aux_mem(1)
 {
@@ -62,6 +62,7 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
     const unsigned int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     _is_global_pooling_layer      = (src->dimension(idx_width) == pool_info.pool_size.width) && (src->dimension(idx_height) == pool_info.pool_size.height);
+    _use_kernel_indices           = pool_info.use_kernel_indices;
 
     if(run_optimised)
     {
@@ -117,7 +118,7 @@ void CpuPool2d::run(ITensorPack &tensors)
                 NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), _is_global_pooling_layer ? Window::DimZ : Window::DimY, _pooling_layer_kernel->window(), tensors);
                 break;
             case DataLayout::NHWC:
-                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), Window::DimX, _pooling_layer_kernel->window(), tensors);
+                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), (_use_kernel_indices ? Window::DimY : Window::DimX), _pooling_layer_kernel->window(), tensors);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data layout not supported");

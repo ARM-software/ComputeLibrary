@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@ private:
     std::unique_ptr<INEKernel> _asm_glue;
 
     bool                             _is_global_pooling_layer;
+    bool                             _use_kernel_indices;
     DataLayout                       _data_layout;
     experimental::MemoryRequirements _aux_mem{};
 };
