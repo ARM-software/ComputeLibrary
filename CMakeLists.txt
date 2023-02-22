@@ -101,7 +101,12 @@ set(COMMON_CXX_FLAGS
     -Wsign-promo
     -Weffc++
     -Wno-overlength-strings
-    -Wno-ignored-attributes)
+    -Wno-ignored-attributes
+    -Wlogical-op
+    -Wnoexcept
+    -Wstrict-null-sentinel
+    -Wno-misleading-indentation
+    -O3)
 
 # Disable note popups on compiler ABI changes
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -143,9 +148,7 @@ endif()
 add_library(arm_compute_sve "")
 target_compile_options(arm_compute_sve
                        PRIVATE "-march=armv8.2-a+sve+fp16+dotprod")
-target_compile_definitions(arm_compute_sve PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_SVE)
-
+target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_BF16)
 target_include_directories(
   arm_compute_sve
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -165,10 +168,8 @@ target_include_directories(
 add_library(arm_compute_sve2 "")
 target_compile_options(arm_compute_sve2
                        PRIVATE "-march=armv8.6-a+sve2+fp16+dotprod")
-target_compile_definitions(arm_compute_sve2 PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE)
 target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE2)
-
+target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_BF16)
 target_include_directories(
   arm_compute_sve2
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -187,6 +188,7 @@ target_include_directories(
 
 add_library(arm_compute_core "")
 target_compile_options(arm_compute_core PRIVATE "-march=armv8.2-a+fp16")
+target_compile_definitions(arm_compute_core PRIVATE ARM_COMPUTE_ENABLE_BF16)
 target_include_directories(
   arm_compute_core
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -201,6 +203,8 @@ target_include_directories(
 target_compile_options(arm_compute_core PUBLIC ${COMMON_CXX_FLAGS})
 
 add_library(ArmCompute::Core ALIAS arm_compute_core)
+target_link_libraries(
+  arm_compute_core PUBLIC arm_compute_sve arm_compute_sve2)
 
 # ---------------------------------------------------------------------
 # Graph Library
@@ -255,7 +259,9 @@ if(BUILD_TESTING)
 
   add_executable(arm_compute_validation "")
   target_compile_options(arm_compute_validation PRIVATE "-march=armv8.2-a+fp16")
-
+  if(ENABLE_BF16_VALIDATION)
+    target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_BF16)
+  endif()
   add_subdirectory(tests/validation)
   target_compile_options(arm_compute_validation PUBLIC ${COMMON_CXX_FLAGS})
   set_target_properties(

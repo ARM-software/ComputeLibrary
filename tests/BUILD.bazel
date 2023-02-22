@@ -35,8 +35,23 @@ cc_library(
         "validation/**/*.h",
     ]),
     copts = [
-        "-march=armv8.2-a+fp16",
-    ],
+                "-march=armv8.2-a+fp16",
+            ] + select({
+                "//:debug_flag": [
+                    "-O0",
+                    "-g",
+                    "-gdwarf-2",
+                ],
+                "//conditions:default": ["-O3"],
+            }) +
+            select({
+                "//:openmp_flag": ["-fopenmp"],
+                "//conditions:default": [],
+            }) +
+            select({
+                "//:Werror_flag": ["-Werror"],
+                "//conditions:default": [],
+            }),
     linkstatic = True,
     deps = [
         "//:arm_compute",
@@ -60,9 +75,23 @@ cc_binary(
         "instruments/*.h",
     ]),
     copts = [
-        "-march=armv8.2-a+fp16",
-        "-ffp-contract=off",
-    ],
+                "-march=armv8.2-a+fp16",
+            ] + select({
+                "//:debug_flag": [
+                    "-O0",
+                    "-g",
+                    "-gdwarf-2",
+                ],
+                "//conditions:default": ["-O3"],
+            }) +
+            select({
+                "//:openmp_flag": ["-fopenmp"],
+                "//conditions:default": [],
+            }) +
+            select({
+                "//:Werror_flag": ["-Werror"],
+                "//conditions:default": [],
+            }),
     linkstatic = True,
     deps = [
         ":validation_framework",
@@ -71,6 +100,13 @@ cc_binary(
         "//:common_defines",
         "//tests/framework",
     ],
+    local_defines = [] + 
+        select({
+                "//:bf16_validation_flag": [
+                "ARM_COMPUTE_ENABLE_BF16",
+                ],
+                "//conditions:default": [],
+              })
 )
 
 #---------------------------------------------------------------------
@@ -82,7 +118,24 @@ cc_binary(
         "benchmark/NEON/*.cpp",
         "*.cpp",
     ]),
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = [
+                "-march=armv8.2-a+fp16",
+            ] + select({
+                "//:debug_flag": [
+                    "-O0",
+                    "-g",
+                    "-gdwarf-2",
+                ],
+                "//conditions:default": ["-O3"],
+            }) +
+            select({
+                "//:openmp_flag": ["-fopenmp"],
+                "//conditions:default": [],
+            }) +
+            select({
+                "//:Werror_flag": ["-Werror"],
+                "//conditions:default": [],
+            }),
     linkstatic = True,
     deps = [
         ":arm_compute_validation",

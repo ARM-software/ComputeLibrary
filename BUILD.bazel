@@ -66,6 +66,12 @@ bool_flag(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "enable_bf16_validation",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
 #---------------------------------------------------------------------
 # Flag variables
 config_setting(
@@ -103,6 +109,14 @@ config_setting(
     },
 )
 
+config_setting(
+    name = "bf16_validation_flag",
+    flag_values = {
+        ":enable_bf16_validation": "true",
+    },
+)
+
+
 #---------------------------------------------------------------------
 # Common defines used for all targets
 cc_library(
@@ -112,7 +126,6 @@ cc_library(
                   "ARM_COMPUTE_CPU_ENABLED",
                   "ARM_COMPUTE_ENABLE_NEON",
                   "ARM_COMPUTE_ENABLE_FP16",
-                  "ARM_COMPUTE_ENABLE_BF16",
                   "ARM_COMPUTE_ENABLE_I8MM",
                   "ENABLE_FP16_KERNELS",
                   "ENABLE_FP32_KERNELS",
@@ -125,6 +138,9 @@ cc_library(
                   "DARM_COMPUTE_GRAPH_ENABLED",
                   "ARM_COMPUTE_ENABLE_SVEF32MM",
                   "ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS",
+                  "ENABLE_SVE",
+                  "ARM_COMPUTE_ENABLE_SVE",
+                  "_GLIBCXX_USE_NANOSLEEP"
               ] + select({
                   "//:debug_flag": [
                       "ARM_COMPUTE_DEBUG_ENABLED",
@@ -227,9 +243,8 @@ cc_library(
         "//conditions:default": [],
     }),
     local_defines = [
-        "ENABLE_SVE",
-        "ARM_COMPUTE_ENABLE_SVE",
         "ARM_COMPUTE_ENABLE_SVE2",
+        "ARM_COMPUTE_ENABLE_BF16"
     ],
     deps = [
         "//:common_defines",
@@ -277,8 +292,7 @@ cc_library(
         "//conditions:default": [],
     }),
     local_defines = [
-        "ENABLE_SVE",
-        "ARM_COMPUTE_ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_BF16",
     ],
     deps = [
         "//:common_defines",
@@ -333,6 +347,9 @@ cc_library(
         "//:openmp_flag": ["-fopenmp"],
         "//conditions:default": [],
     }),
+    local_defines = [
+        "ARM_COMPUTE_ENABLE_BF16",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//:common_defines",
@@ -342,6 +359,8 @@ cc_library(
         "//include",
         "//support",
         "//utils",
+        "//:arm_compute_sve",
+        "//:arm_compute_sve2"
     ],
     alwayslink = True,
 )
