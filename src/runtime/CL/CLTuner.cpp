@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "src/common/utils/Log.h"
 #include "src/core/CL/ICLKernel.h"
 #include "support/StringSupport.h"
 
@@ -199,10 +200,18 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
     };
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
 
-    cl::NDRange gws = ICLKernel::gws_from_window(kernel.window());
-
     // Run the kernel with default lws to be used as baseline
     data->do_run(kernel, queue_profiler);
+
+    /// Get the cached gws used by the kernel
+    /// NOTE: The window configured inside configure() is usually changed in run(). Thus we should not calculate gws
+    /// from this static window. Instead we get the real gws used (and cached) by run() in the previous step.
+    /// This is only a temporary workaround. An ideal solution involves decoupling the execution window from run() / run_op()
+    /// Please see COMPMID-5934
+    cl::NDRange gws = kernel.get_cached_gws();
+    ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(arm_compute::logging::LogLevel::INFO,
+                                        "[CLTuner] Kernel with config_id '%s' uses %s as the upper-bound for lws search",
+                                        kernel.config_id().c_str(), to_string(gws).c_str());
 
     queue_profiler.finish();
 
@@ -236,6 +245,9 @@ CLTuningParams CLTuner::find_optimal_tuning_params(ICLKernel &kernel, IKernelDat
             cl_int wbsm_test = tuning_test.get_wbsm();
             kernel.set_wbsm_hint(wbsm_test);
         }
+        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(arm_compute::logging::LogLevel::INFO,
+                                            "[CLTuner] Trying LWS: %s, WBSM: %d",
+                                            to_string(kernel.lws_hint()).c_str(), kernel.wbsm_hint());
 
         // Run the kernel
         data->do_run(kernel, queue_profiler);

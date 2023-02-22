@@ -1437,6 +1437,36 @@ inline std::string to_string(ICLTensor *cl_tensor)
 {
     return to_string(static_cast<const ICLTensor *>(cl_tensor));
 }
+
+/** Formatted output of the cl::NDRange type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  nd_range cl::NDRange to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const cl::NDRange &nd_range)
+{
+    os << "{"
+       << nd_range[0] << ","
+       << nd_range[1] << ","
+       << nd_range[2]
+       << "}";
+    return os;
+}
+
+/** Formatted output of the cl::NDRange type
+ *
+ * @param[in] nd_Range Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const cl::NDRange &nd_range)
+{
+    std::stringstream str;
+    str << nd_range;
+    return str.str();
+}
 #endif /* ARM_COMPUTE_OPENCL_ENABLED */
 
 /** Formatted output of the Dimensions type.

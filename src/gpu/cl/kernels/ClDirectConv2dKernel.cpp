@@ -367,6 +367,7 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     _kernel = create_kernel(compile_context, kernel_name.str(), build_options.options());
 
     // Set config_id for enabling LWS tuning
+    // config_id should include the variables used to parameterize the kernel
     _config_id = kernel_name.str();
     _config_id += "_";
     _config_id += lower_string(string_from_data_type(data_type));
@@ -384,6 +385,16 @@ void ClDirectConv2dKernel::configure(const CLCompileContext &compile_context, IT
     _config_id += support::cpp11::to_string(conv_stride_x);
     _config_id += "_";
     _config_id += support::cpp11::to_string(conv_stride_y);
+    // SRC_CHANNELS, SRC_WIDTH, SRC_HEIGHT
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src->dimension(channel_idx));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src->dimension(width_idx));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(src->dimension(height_idx));
+    _config_id += "_";
+    // DST_CHANNELS, DST_WIDTH, DST_HEIGHT
+    _config_id += support::cpp11::to_string(dst->dimension(channel_idx));
     _config_id += "_";
     _config_id += support::cpp11::to_string(dst->dimension(width_idx));
     _config_id += "_";
