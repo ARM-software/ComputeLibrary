@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,16 @@ public:
      */
     Iterator(const ITensor *tensor, const Window &window);
 
+    /** Create a container iterator for the tensor with the specified number of dimensions, stride, buffer pointer and window.
+     *
+     * @param[in] num_dims The number of dimensions.
+     * @param[in] strides  The strides in bytes.
+     * @param[in] buffer   The data buffer.
+     * @param[in] offset   The offset in bytes from the beginning of the buffer to the first element of the tensor.
+     * @param[in] window   The window which will be used to iterate over the tensor.
+     */
+    Iterator(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &window);
+
     /** Increment the iterator along the specified dimension of the step value associated to the dimension.
      *
      * @warning It is the caller's responsibility to call increment(dimension+1) when reaching the end of a dimension, the iterator will not check for overflow.
@@ -86,6 +96,17 @@ public:
     void reset(size_t dimension);
 
 private:
+
+    /** Initialize a container iterator for the tensor with the specified number of dimensions, stride, buffer pointer and window.
+     *
+     * @param[in] num_dims The number of dimensions.
+     * @param[in] strides  The strides in bytes.
+     * @param[in] buffer   The data buffer.
+     * @param[in] offset   The offset in bytes from the beginning of the buffer to the first element of the tensor.
+     * @param[in] window   The window which will be used to iterate over the tensor.
+     */
+    void initialize(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &window);
+
     uint8_t *_ptr;
 
     class Dimension

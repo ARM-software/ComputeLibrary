@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, 2022 Arm Limited.
+ * Copyright (c) 2018-2019, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,6 +116,13 @@ public:
         add_config(TensorShape(15U, 15U), TensorShape(2U, 11U), 1);
         add_config(TensorShape(5U, 3U, 4U), TensorShape(2U, 7U), 1);
         add_config(TensorShape(1U, 5U, 3U), TensorShape(1U, 7U, 3U), 1);
+
+        add_config(TensorShape(3U, 5U), TensorShape(2U, 3U), 0);
+        add_config(TensorShape(9U), TensorShape(3U, 2U, 4U), 0);
+        add_config(TensorShape(5U, 3U, 4U), TensorShape(5U, 6U), 0);
+
+        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U), 2);
+        add_config(TensorShape(8U, 2U, 3U), TensorShape(4U, 2U, 5U), 2);
     }
 };
 

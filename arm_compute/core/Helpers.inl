@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,13 +98,23 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win)
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
 
-    const ITensorInfo *info    = tensor->info();
-    const Strides     &strides = info->strides_in_bytes();
+    initialize(tensor->info()->num_dimensions(), tensor->info()->strides_in_bytes(), tensor->buffer(), tensor->info()->offset_first_element_in_bytes(), win);
+}
 
-    _ptr = tensor->buffer() + info->offset_first_element_in_bytes();
+inline Iterator::Iterator(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &win)
+    : Iterator()
+{
+    initialize(num_dims, strides, buffer, offset, win);
+}
+
+inline void Iterator::initialize(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &win)
+{
+    ARM_COMPUTE_ERROR_ON(buffer == nullptr);
+
+    _ptr = buffer + offset;
 
     //Initialize the stride for each dimension and calculate the position of the first element of the iteration:
-    for(unsigned int n = 0; n < info->num_dimensions(); ++n)
+    for(unsigned int n = 0; n < num_dims; ++n)
     {
         _dims[n]._stride = win[n].step() * strides[n];
         std::get<0>(_dims)._dim_start += static_cast<size_t>(strides[n]) * win[n].start();
@@ -116,7 +126,7 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win)
         _dims[n]._dim_start = std::get<0>(_dims)._dim_start;
     }
 
-    ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(win, info->num_dimensions());
+    ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(win, num_dims);
 }
 
 inline void Iterator::increment(const size_t dimension)
