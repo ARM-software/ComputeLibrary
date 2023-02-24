@@ -393,7 +393,7 @@ uint32_t num_threads_hint()
 {
     unsigned int num_threads_hint = 1;
 
-#if !defined(BARE_METAL) && !defined(_WIN64)
+#if !defined(BARE_METAL) && !defined(_WIN64) && !defined(ARM_COMPUTE_DISABLE_THREADS_HINT)
     std::vector<std::string> cpus;
     cpus.reserve(64);
 
@@ -440,7 +440,7 @@ uint32_t num_threads_hint()
 
     // Set thread hint
     num_threads_hint = cpus.empty() ? std::thread::hardware_concurrency() : least_frequent_cpu_occurences(cpus);
-#endif /* !defined(BARE_METAL) */
+#endif /* !defined(BARE_METAL) && !defined(_WIN64) && !defined(ARM_COMPUTE_DISABLE_THREADS_HINT) */
 
     return num_threads_hint;
 }
