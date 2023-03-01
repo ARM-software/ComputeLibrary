@@ -91,12 +91,12 @@ TILE(uint, M0, 1, g_dst_indirect_y);
 {
 #define _IWEI_WIDTH {{WEI_WIDTH}}
 #define _IWEI_HEIGHT {{WEI_HEIGHT}}
-#define _ISRC_WIDTH {{src}}_w
-#define _ISRC_HEIGHT {{src}}_h
-#define _ISRC_CHANNELS {{src}}_c
-#define _IDST_WIDTH {{arg_dst}}_w
-#define _IDST_HEIGHT {{arg_dst}}_h
-#define _IDST_CHANNELS {{arg_dst}}_c
+#define _ISRC_WIDTH {{SRC_WIDTH}}
+#define _ISRC_HEIGHT {{SRC_HEIGHT}}
+#define _ISRC_CHANNELS {{SRC_CHANNELS}}
+#define _IDST_WIDTH {{DST_WIDTH}}
+#define _IDST_HEIGHT {{DST_HEIGHT}}
+#define _IDST_CHANNELS {{DST_CHANNELS}}
 #define _IY_MULTIPLIER (_IWEI_WIDTH * _IWEI_HEIGHT)
 
     TILE(int, M0, 1, xi);
@@ -214,8 +214,8 @@ code += R"_(
 code += R"_(
     LOOP_UNROLLING(int, i, 0, 1, M0,
     {
-        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{arg_dst}}_w * {{arg_dst}}_h) - 1);
-        g_dst_indirect_y[i].v += g_ind_2 * (int)({{arg_dst}}_w * {{arg_dst}}_h);
+        g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{DST_WIDTH}} * {{DST_HEIGHT}}) - 1);
+        g_dst_indirect_y[i].v += g_ind_2 * (int)({{DST_WIDTH}} * {{DST_HEIGHT}});
     })
 }
 //------------------ END KERNEL {{meta_kernel_id}} ---------------------
@@ -294,8 +294,18 @@ TagLUT ClTemplateDirectConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
     }
     const auto width_idx  = 1;
     const auto height_idx = 2;
+    const auto channel_idx = 0;
+
+    lut["SRC_WIDTH"] = _src->dimension(width_idx);
+    lut["SRC_HEIGHT"] = _src->dimension(height_idx);
+    lut["SRC_CHANNELS"] = _src->dimension(channel_idx);
+
     lut["WEI_WIDTH"]      = _weight->dimension(width_idx);
     lut["WEI_HEIGHT"]     = _weight->dimension(height_idx);
+
+    lut["DST_WIDTH"] = _dst->dimension(width_idx);
+    lut["DST_HEIGHT"] = _dst->dimension(height_idx);
+    lut["DST_CHANNELS"] = _dst->dimension(channel_idx);
 
     lut["STRIDE_X"] = _attributes.stride().x();
     lut["STRIDE_Y"] = _attributes.stride().y();
