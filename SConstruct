@@ -140,6 +140,9 @@ vars.AddVariables(
     ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
 )
 
+if version_at_least(SCons.__version__, "4.0"):
+    vars.Add(BoolVariable("export_compile_commands", "Export compile_commands.json file.", False))
+
 
 env = Environment(variables=vars, ENV = os.environ)
 
@@ -180,6 +183,11 @@ Export('install_lib')
 Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
+
+# Export compile_commands.json file
+if env.get("export_compile_commands", False):
+    env.Tool("compilation_db")
+    env.CompilationDatabase("%s/compile_commands.json" % build_path)
 
 if 'armv7a' in env['arch'] and env['os'] == 'android':
     print("WARNING: armv7a on Android is no longer maintained")
