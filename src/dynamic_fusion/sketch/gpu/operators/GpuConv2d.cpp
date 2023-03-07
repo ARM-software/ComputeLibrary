@@ -204,12 +204,13 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
 
     const auto sketch_ctx = sketch.implementation().context();
 
-    const auto gpu_target  = sketch_ctx->gpu_target();
+    const auto gpu_target = sketch_ctx->gpu_target();
 
     if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
         ARM_COMPUTE_ERROR_ON(cl_compile_ctx == nullptr);
+        ARM_COMPUTE_UNUSED(cl_compile_ctx);
 
         // Add Direct Conv2d Component
         {

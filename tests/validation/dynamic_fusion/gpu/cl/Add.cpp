@@ -100,8 +100,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.0001f);  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f(0.0001f);    /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 and DataType::F16 */
 constexpr float                    tolerance_num = 0.0001f; /**< Tolerance number */
 
 template <typename T>
@@ -123,7 +122,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeOneOp,
                        DynamicFusionCLAddFixture<float>,
@@ -134,7 +133,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f);
 }
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                        DynamicFusionCLAddBroadcastFixture<float>,
@@ -145,7 +144,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLargeBroadcastOneOp,
@@ -157,7 +156,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeBroadcastOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f);
 }
 FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                        DynamicFusionCLAddTwoOpsFixture<float>,
@@ -169,7 +168,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
                                framework::dataset::make("FuseTwoOps", { true })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f);
 }
 TEST_SUITE_END() // FP32
 
@@ -183,7 +182,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+    validate(CLAccessor(_target), _reference, tolerance_f, tolerance_num);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
@@ -195,7 +194,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcastOneOp,
                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+    validate(CLAccessor(_target), _reference, tolerance_f, tolerance_num);
 }
 
 TEST_SUITE_END() // FP16

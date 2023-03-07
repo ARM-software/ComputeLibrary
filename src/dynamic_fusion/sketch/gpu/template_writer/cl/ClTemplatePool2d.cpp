@@ -40,11 +40,10 @@ namespace dynamic_fusion
 namespace
 {
 // Shape indexes for NHWC Datalayout
-constexpr static int32_t batch_idx   = 3;
 constexpr static int32_t height_idx  = 2;
 constexpr static int32_t width_idx   = 1;
 constexpr static int32_t channel_idx = 0;
-}
+} // namespace
 ClTemplatePool2d::ClTemplatePool2d(ComponentId                      id,
                                    const ArgumentPack<ITensorInfo> &tensors,
                                    const Attributes                &attributes,
@@ -390,12 +389,12 @@ TagLUT ClTemplatePool2d::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["meta_kernel_id"] = id();
 
     // Retrieve relevant data
-    const auto  padding                 = _attributes.pad();
-    const auto  stride                  = _attributes.stride();
-    const auto  pool_size               = _attributes.pool_size();
-    const auto  data_type               = _src->data_type();
-    const auto  use_fp_mixed_precision  = (_src->data_type() == DataType::F16) && _settings.mixed_precision() && _attributes.pool_type() != PoolingType::MAX;
-    const std::string max_initial_value = _settings.use_inf_as_limit() ? "(-INFINITY)" : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());
+    const auto        padding                = _attributes.pad();
+    const auto        stride                 = _attributes.stride();
+    const auto        pool_size              = _attributes.pool_size();
+    const auto        data_type              = _src->data_type();
+    const auto        use_fp_mixed_precision = (_src->data_type() == DataType::F16) && _settings.mixed_precision() && _attributes.pool_type() != PoolingType::MAX;
+    const std::string max_initial_value      = _settings.use_inf_as_limit() ? "(-INFINITY)" : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());
 
     // pool specific
     lut["STRIDE_X"]    = stride.x();

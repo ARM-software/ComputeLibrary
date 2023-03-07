@@ -38,12 +38,9 @@ TEST_SUITE(CL)
 TEST_SUITE(DYNAMIC_FUSION)
 TEST_SUITE(RESHAPE)
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-                                                              framework::dataset::make("InputInfo",
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(framework::dataset::make("InputInfo",
 {
-    TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
-    TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
-    TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
+    TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32), TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32) /*mismatching dimensions*/,
 }),
 framework::dataset::make("OutputShape",
 {
@@ -61,7 +58,8 @@ input_info, output_shape, expected)
 
     // Create sketch tensors
     TensorShape input_shape = input_info.tensor_shape();
-    TensorInfo  src_info    = sketch.create_tensor_info(input_info);
+    ARM_COMPUTE_UNUSED(input_shape);
+    TensorInfo src_info = sketch.create_tensor_info(input_info);
 
     ReshapeAttributes attributes;
     attributes.shape(output_shape);
