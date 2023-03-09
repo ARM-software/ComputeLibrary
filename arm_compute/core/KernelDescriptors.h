@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
-#define ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
+#ifndef ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS
+#define ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -223,5 +223,19 @@ struct ScaleKernelInfo
     bool                align_corners;         /**< Align corners of input and output */
     DataLayout          data_layout;           /**< Data layout to use */
 };
+
+struct MatMulKernelInfo
+{
+    MatMulKernelInfo(bool adj_lhs = false, bool adj_rhs = false, int m0 = 1, int n0 = 1, int k0 = 1, bool export_rhs_to_cl_image = false)
+        : adj_lhs{ adj_lhs }, adj_rhs{ adj_rhs }, m0{ m0 }, n0{ n0 }, k0{ k0 }, export_rhs_to_cl_image{ export_rhs_to_cl_image }
+    {
+    }
+    bool adj_lhs{ false };                /**< Get Adjoint LHS flag value */
+    bool adj_rhs{ false };                /**< Get Adjoint RHS flag value */
+    int  m0{ 1 };                         /**< Number of output rows processed by each work-item*/
+    int  n0{ 1 };                         /**< Number of output columns processed by each work-item*/
+    int  k0{ 1 };                         /**< Number of inner accumulations */
+    bool export_rhs_to_cl_image{ false }; /**< Flag to know whether the RHS tensor should be exported to cl_image*/
+};
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */
+#endif /* ACL_ARM_COMPUTE_CORE_KERNELDESCRIPTORS */

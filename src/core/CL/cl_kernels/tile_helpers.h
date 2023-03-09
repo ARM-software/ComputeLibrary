@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
-#define SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#ifndef ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#define ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
 
 // *INDENT-OFF*
 // clang-format off
@@ -1282,6 +1282,21 @@
         })                                                                                \
     }
 
+#define T_MMUL_NT_NT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                                                    \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                                                \
+        {                                                                                                                \
+            LOOP_UNROLLING(int, _k, 0, 1, K0,                                                                            \
+            {                                                                                                            \
+                dst[_m].v = fma((DST_DATA_TYPE)(lhs[_m].s[_k]), (rhs[_k].v), dst[_m].v);                                 \
+            })                                                                                                           \
+        })                                                                                                               \
+    }
+
 #define T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
     ({ \
         LOOP_UNROLLING(int, _m, 0, 1, M0, \
@@ -1293,4 +1308,4 @@
         })                                                                                             \
     })
 
-#endif /* SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */
+#endif /* ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */

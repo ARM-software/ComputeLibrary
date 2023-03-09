@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -358,6 +358,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "strided_slice", "common/slice_ops.cl" },
     { "tile", "common/tile.cl" },
     { "transpose", "common/transpose.cl" },
+    { "mat_mul_native_nt_nt", "common/mat_mul.cl" },
+    { "mat_mul_native_nt_t", "common/mat_mul.cl" },
 #ifdef ENABLE_NCHW_KERNELS
     { "batch_to_space_nchw", "nchw/batch_to_space.cl" },
     { "batch_to_space_static_nchw", "nchw/batch_to_space.cl" },
@@ -780,6 +782,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/unpooling_layer.cl",
 #include "./cl_kernels/common/unpooling_layer.clembed"
+    },
+    {
+        "common/mat_mul.cl",
+#include "./cl_kernels/common/mat_mul.clembed"
     },
 #ifdef ENABLE_NCHW_KERNELS
     {

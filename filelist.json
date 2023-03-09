@@ -509,6 +509,13 @@
         ]
       }
     },
+    "MatMul": {
+      "files": {
+        "common": [
+          "src/gpu/cl/kernels/ClNativeMatMulKernel.cpp"
+        ]
+      }
+    },
     "GenerateProposals": {
       "deps": [ "BoundingBoxTransform", "Dequantize", "Pad", "Permute", "Quantize", "Reshape" ],
       "files": {
