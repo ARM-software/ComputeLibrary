@@ -155,4 +155,17 @@ void Transform<4, 2, true, VLType::SME>(
     );
 }
 
+template<>
+void Transform<4, 2, true, VLType::SME>(
+    __fp16 *out, const __fp16 *in, int stride, int x0, int xmax, int k0, int kmax)
+{
+    sme_transpose_interleave_4VL_2x2(
+        reinterpret_cast<uint16_t *>(out),
+        reinterpret_cast<const uint16_t *>(in + k0 * stride + x0),
+        (xmax-x0) * sizeof(__fp16) / 2,
+        stride * sizeof(__fp16),
+        (kmax-k0)
+    );
+}
+
 #endif
