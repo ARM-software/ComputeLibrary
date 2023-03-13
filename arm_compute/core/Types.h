@@ -151,9 +151,9 @@ enum class DepthwiseConvolutionFunction
 /** Available DeconvolutionMethod*/
 enum class DeconvolutionMethod
 {
-    GEMM,            /**< Deconvolution using GEMM */
-    DIRECT,          /**< Direct deconvolution */
-    UPSCALE_CONV2D   /**< Deconvolution with Upscaling */
+    GEMM,          /**< Deconvolution using GEMM */
+    DIRECT,        /**< Direct deconvolution */
+    UPSCALE_CONV2D /**< Deconvolution with Upscaling */
 };
 
 /** Available FuseBatchNormalizationType*/
@@ -2734,27 +2734,31 @@ public:
         return _fused_act;
     }
     /* Set Adjoint LHS flag */
-    MatMulInfo& adj_lhs(bool adj_lhs)
+    MatMulInfo &adj_lhs(bool adj_lhs)
     {
         _adj_lhs = adj_lhs;
         return *this;
     }
     /* Set Adjoint RHS flag */
-    MatMulInfo& adj_rhs(bool adj_rhs)
+    MatMulInfo &adj_rhs(bool adj_rhs)
     {
         _adj_rhs = adj_rhs;
         return *this;
     }
     /* Set Fused Activation Layer Info */
-    MatMulInfo& fused_activation(const ActivationLayerInfo& act_info)
+    MatMulInfo &fused_activation(const ActivationLayerInfo &act_info)
     {
         _fused_act = act_info;
         return *this;
     }
+
 private:
-    bool _adj_lhs{false};
-    bool _adj_rhs{false};
+    bool                _adj_lhs{ false };
+    bool                _adj_rhs{ false };
     ActivationLayerInfo _fused_act{}; // disabled by default
 };
+
+/** Class for holding information related to cropping */
+using CropInfo = Padding2D;
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */

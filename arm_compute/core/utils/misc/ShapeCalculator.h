@@ -1072,13 +1072,14 @@ inline TensorShape compute_slice_shape(const TensorShape &input_shape, const Coo
 
 /** Calculate the batch to space output shape of a tensor
  *
- * @param[in] input   Input tensor info
- * @param[in] block_x Block shape x value
- * @param[in] block_y Block shape y value
+ * @param[in] input     Input tensor info
+ * @param[in] block_x   Block shape x value
+ * @param[in] block_y   Block shape y value
+ * @param[in] crop_info Information about how the output shape is cropped after batch to space is performed
  *
  * @return the calculated shape
  */
-inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)
+inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y, const CropInfo &crop_info = CropInfo{})
 {
     ARM_COMPUTE_ERROR_ON(block_x <= 0 || block_y <= 0);
 
@@ -1088,8 +1089,18 @@ inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const 
     const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
     TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x);
-    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y);
+
+    auto       new_width   = input->tensor_shape()[idx_width] * block_x;
+    auto       new_height  = input->tensor_shape()[idx_height] * block_y;
+    const auto width_crop  = crop_info.left + crop_info.right;
+    const auto height_crop = crop_info.top + crop_info.bottom;
+    ARM_COMPUTE_ERROR_ON(new_width <= width_crop);
+    ARM_COMPUTE_ERROR_ON(new_height <= height_crop);
+    new_width -= width_crop;
+    new_height -= height_crop;
+
+    output_shape.set(idx_width, new_width);
+    output_shape.set(idx_height, new_height);
     output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
 
     return output_shape;
@@ -1537,14 +1548,14 @@ inline TensorShape compute_pool3d_shape(const TensorShape &src, Pooling3dLayerIn
  */
 inline TensorShape compute_gather_shape(const TensorShape &input_shape, const TensorShape &indices_shape, uint32_t actual_axis)
 {
-    const auto input_num_dims = input_shape.num_dimensions();
+    const auto input_num_dims   = input_shape.num_dimensions();
     const auto indices_num_dims = indices_shape.num_dimensions();
 
     ARM_COMPUTE_ERROR_ON(actual_axis >= input_num_dims);
     ARM_COMPUTE_ERROR_ON(input_num_dims + indices_num_dims - 1 > Coordinates::num_max_dimensions);
 
     TensorShape output_shape;
-    size_t dim_no = 0;
+    size_t      dim_no = 0;
 
     for(; dim_no < actual_axis; ++dim_no)
     {

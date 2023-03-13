@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,24 +67,27 @@ public:
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info   Information about how the output shape is cropped after batch to space is performed
      */
-    void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
+    void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info       Information about how the output shape is cropped after batch to space is performed
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
     /** Set the input and output tensors. (Static block shape).
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info     Information about how the output shape is cropped after batch to space is performed
      */
-    void configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output);
+    void configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
     /** Set the input and output tensors. (Static block shape).
      *
      * @param[in]  compile_context The compile context to be used.
@@ -92,27 +95,30 @@ public:
      * @param[in]  block_shape_x   Block shape x value.
      * @param[in]  block_shape_y   Block shape y value.
      * @param[out] output          Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info       Information about how the output shape is cropped after batch to space is performed
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer
      *
      * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape block shape tensor info with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output info. Data types supported: same as @p input
+     * @param[in]  crop_info   Information about how the output shape is cropped after batch to space is performed
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output, const CropInfo &crop_info = CropInfo{});
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer (Static block shape).
      *
      * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output info. Data types supported: same as @p input
+     * @param[in]  crop_info     Information about how the output shape is cropped after batch to space is performed
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info = CropInfo{});
 
     // Inherited methods overridden:
     void run() override;
