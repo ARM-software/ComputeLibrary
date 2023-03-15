@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,19 +73,23 @@ __kernel void gather(
 
 #if AXIS == 0
     const uint index                 = *(__global const uint *)vector_offset(&indices, px);
-    __global const uchar *input_addr = tensor4D_offset(&input, index, py, pz, pw);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, safe_index, py, pz, pw);
 #elif AXIS == 1
     const uint index                 = *(__global const uint *)vector_offset(&indices, py);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, index, pz, pw);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, safe_index, pz, pw);
 #elif AXIS == 2
     const uint index                 = *(__global const uint *)vector_offset(&indices, pz);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, py, index, pw);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, py, safe_index, pw);
 #elif AXIS == 3
     const uint index                 = *(__global const uint *)vector_offset(&indices, pw);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, py, pz, index);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, py, pz, safe_index);
 #endif //AXIS
 
-    *(__global DATA_TYPE *)output.ptr = *((__global const DATA_TYPE *)input_addr);
+    *(__global DATA_TYPE *)output.ptr = select((DATA_TYPE)0, *((__global const DATA_TYPE *)input_addr), (DATA_TYPE)(index < INDEX_LIMIT));
 }
 
 #endif //defined(DATA_TYPE) && defined(AXIS)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,10 @@ protected:
         std::mt19937 gen(library->seed());
         uint32_t    *indices_ptr = static_cast<uint32_t *>(indices.data());
 
-        std::uniform_int_distribution<uint32_t> dist_index(0, input_shape[actual_axis] - 1);
+        // 10% of the time the index is out-of-range.
+        uint32_t max_index = input_shape[actual_axis] + input_shape[actual_axis] / 9 + 1;
+
+        std::uniform_int_distribution<uint32_t> dist_index(0, max_index - 1);
         //Let's consider 1D indices
         for(unsigned int ind = 0; ind < indices_shape[0]; ind++)
         {

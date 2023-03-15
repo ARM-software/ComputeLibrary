@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,7 @@ void CLGatherKernel::configure(const CLCompileContext &compile_context, const IC
     build_opts.add_option("-DOUTPUT_DIM_Z=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option("-DINPUT_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
     build_opts.add_option("-DAXIS=" + support::cpp11::to_string(_axis));
+    build_opts.add_option("-DINDEX_LIMIT=" + support::cpp11::to_string(input->info()->tensor_shape()[_axis]));
 
     // Create kernel
     _kernel = create_kernel(compile_context, "gather", build_opts.options());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
      * |All            |All            |
      *
      * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: All
-     * @param[in]  indices Indices tensor. Supported tensor rank: up to 3. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
+     * @param[in]  indices Indices tensor. Supported tensor rank: up to 3. Must be one of the following type: U32/S32. Each value must be in range [0, input.shape[@p axis]), otherwise the result will become unpredictable.
      *                     @note The "axis" must be in the range [0, input.rank -1] when indices is a vector, and must be 1 when indices is a 2D or 3D tensor.
      * @param[out] output  Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Defaults to 0

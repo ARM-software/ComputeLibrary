@@ -37,26 +37,6 @@ namespace arm_compute
 {
 namespace
 {
-/** Validate the indices
- *
- * Validate that indices are not negative
- *
- * @param[in] indices Indices tensor info.
- */
-
-template <typename U>
-void validate_indices(const ITensor *indices)
-{
-    Window window;
-    window.use_tensor_dimensions(indices->info()->tensor_shape());
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto i = *(reinterpret_cast<int32_t *>(indices->ptr_to_element(id)));
-        ARM_COMPUTE_UNUSED(i);
-        ARM_COMPUTE_ERROR_ON(i < 0);
-    });
-}
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
@@ -108,6 +88,8 @@ void NEGatherKernel::gather_common(const Window &window, const ThreadInfo &info)
     const auto window_end_x = window.x().end();
     auto window_size_x = src_info->element_size();
 
+    const auto idx_limit = static_cast<TIndex>(src_info->tensor_shape()[_axis]);
+
     if(_axis != 0)
     {
         dst_win.set(0, Window::Dimension(window_start_x, window_start_x + 1, 1));
@@ -131,9 +113,17 @@ void NEGatherKernel::gather_common(const Window &window, const ThreadInfo &info)
 
     execute_window_loop(dst_win, [&](const Coordinates &) {
         const auto idx = *reinterpret_cast<const TIndex *>(idx_it.ptr());
-        const auto src_ptr = src_it.ptr() + idx * chunk_stride;
 
-        std::copy_n(src_ptr, window_size_x, dst_it.ptr());
+        if(idx >= 0 && idx < idx_limit)
+        {
+            const auto src_ptr = src_it.ptr() + idx * chunk_stride;
+
+            std::copy_n(src_ptr, window_size_x, dst_it.ptr());
+        }
+        else
+        {
+            std::fill_n(dst_it.ptr(), window_size_x, 0);
+        }
     }, src_it, idx_it, dst_it);
 }
 
@@ -213,21 +203,6 @@ void NEGatherKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
-
-    switch(_indices->info()->data_type())
-    {
-        case DataType::U32:
-            validate_indices<uint32_t>(_indices);
-            break;
-
-        case DataType::S32:
-            validate_indices<int32_t>(_indices);
-            break;
-
-        default:
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-    }
 
     (this->*_func)(window, info);
 }
