@@ -1,6 +1,6 @@
 
 > **⚠ Important**
-> From release 22.05: 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml#S5_0_inc_lang).
+> From release 22.05: 'master' branch has been replaced with 'main' following our inclusive language update, more information [here](https://arm-software.github.io/ComputeLibrary/v23.02.1/contribution_guidelines.xhtml#S5_0_inc_lang).
 
 > **⚠ Important**
 > From release 22.08: armv7a with Android build will no longer be tested or maintained.
@@ -44,7 +44,7 @@ Key Features:
 <br>
 
 ## Documentation
-[![Documentation](https://img.shields.io/badge/documentation-23.02.1-green)](https://arm-software.github.io/ComputeLibrary/latest)
+[![Documentation](https://img.shields.io/badge/documentation-23.02.1-green)](https://arm-software.github.io/ComputeLibrary/v23.02.1)
 
 > Note: The documentation includes the reference API, changelogs, build guide, contribution guide, errata, etc.
 
@@ -116,13 +116,13 @@ Pre-build binaries are generated with the following security / good coding pract
 
 ## Experimental builds
 
-**⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation](https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml) for more details.
+**⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation](https://arm-software.github.io/ComputeLibrary/v23.02.1/how_to_build.xhtml) for more details.
 
 <br>
 
 ## How to contribute
 
-Contributions to the Compute Library are more than welcome. If you are interested on contributing, please have a look at our [how to contribute guidelines](https://arm-software.github.io/ComputeLibrary/latest/contribution_guidelines.xhtml).
+Contributions to the Compute Library are more than welcome. If you are interested on contributing, please have a look at our [how to contribute guidelines](https://arm-software.github.io/ComputeLibrary/v23.02.1/contribution_guidelines.xhtml).
 
 ### Developer Certificate of Origin (DCO)
 Before the Compute Library accepts your contribution, you need to certify its origin and give us your permission. To manage this process we use the Developer Certificate of Origin (DCO) V1.1 (https://developercertificate.org/)
