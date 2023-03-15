@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,9 +96,9 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
     const auto neg_ln2_lo  = svreinterpret_f32_u32(svdup_n_u32(0xb5bfbe8e));  // -ln(2) from bits -20 to -42: -0x1.7f7d1cp-20f
 
     const auto inf       = svdup_n_f32(std::numeric_limits<float>::infinity());
-    const auto max_input = svdup_n_f32(88.7f);   // Approximately ln(0x1.fffffep+127)
+    const auto max_input = svdup_n_f32(88.37f);  // Approximately ln(2^127.5)
     const auto zero      = svdup_n_f32(0.f);
-    const auto min_input = svdup_n_f32(-86.6f);  // Approximately ln(2^-125)
+    const auto min_input = svdup_n_f32(-86.64f);  // Approximately ln(2^-125)
 
     // Range reduction:
     //   e^x = 2^n * e^r

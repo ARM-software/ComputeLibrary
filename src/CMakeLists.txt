@@ -305,6 +305,8 @@ target_sources(
 	cpu/kernels/elementwise_unary/generic/sve/fp32.cpp
 	cpu/kernels/elementwise_unary/generic/sve/impl.cpp
 	cpu/kernels/elementwise_unary/generic/sve/integer.cpp
+	cpu/kernels/elementwise_unary/generic/sve/q8.cpp
+	cpu/kernels/lut/generic/sve/u8.cpp
 	cpu/kernels/scale/sve/fp16.cpp
 	cpu/kernels/scale/sve/fp32.cpp
 	cpu/kernels/scale/sve/integer.cpp
@@ -730,6 +732,7 @@ target_sources(
 	cpu/kernels/elementwise_unary/generic/neon/fp32.cpp
 	cpu/kernels/elementwise_unary/generic/neon/impl.cpp
 	cpu/kernels/elementwise_unary/generic/neon/integer.cpp
+	cpu/kernels/elementwise_unary/generic/neon/q8.cpp
 	cpu/kernels/floor/neon/fp16.cpp
 	cpu/kernels/floor/neon/fp32.cpp
 	cpu/kernels/fuse_batch_normalization/generic/fp16.cpp
@@ -754,6 +757,7 @@ target_sources(
 	cpu/kernels/instancenorm/generic/neon/impl.cpp
 	cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.cpp
 	cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp
+	cpu/kernels/lut/generic/neon/u8.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp16.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp32.cpp
 	cpu/kernels/l2normlayer/generic/neon/impl.cpp
@@ -957,4 +961,3 @@ target_sources(
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
 )
-    

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,17 @@ RelativeTolerance<float> tolerance_fp32(0.000001f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<float> tolerance_fp16(0.01f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(0);
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(LogLayer)
 
 template <typename T>
 using NELogLayerFixture = LogValidationFixture<Tensor, Accessor, NELogLayer, T>;
+
+template <typename T>
+using NELogLayerQuantizedFixture = LogQuantizedValidationFixture<Tensor, Accessor, NELogLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -88,6 +93,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NELogLayerFixture<float>, framework::DatasetMod
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(5, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.75, -128) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(12.5, -2) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // LogLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

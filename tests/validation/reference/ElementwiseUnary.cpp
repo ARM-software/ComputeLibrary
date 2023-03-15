@@ -88,8 +88,21 @@ SimpleTensor<int8_t> elementwise_unary(const SimpleTensor<int8_t> &src, SimpleTe
                        dst_tmp[i] = (127.0f - dst.quantization_info().uniform().offset)  * dst.quantization_info().uniform().scale ;
                     }
                     break;
+
+                case ElementWiseUnary::LOG:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = std::log(src_tmp[i]);
+                    }
+                    else
+                    {
+                       dst_tmp[i] = (-128.0f - dst.quantization_info().uniform().offset)  * dst.quantization_info().uniform().scale ;
+                    }
+                    break;
+
                 default:
-                    ARM_COMPUTE_ERROR("Not implemented");
+                    elementwise_unary(src_tmp, dst_tmp, op);
+                    break;
             }
         }
         dst = convert_to_asymmetric<int8_t>(dst_tmp, dst.quantization_info());
@@ -122,8 +135,21 @@ SimpleTensor<uint8_t> elementwise_unary(const SimpleTensor<uint8_t> &src, Simple
                         dst_tmp[i] = (255.0f - dst.quantization_info().uniform().offset)* dst.quantization_info().uniform().scale;
                     }
                     break;
+
+                case ElementWiseUnary::LOG:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = std::log(src_tmp[i]);
+                    }
+                    else
+                    {
+                        dst_tmp[i] = -dst.quantization_info().uniform().offset * dst.quantization_info().uniform().scale;
+                    }
+                    break;
+
                 default:
-                    ARM_COMPUTE_ERROR("Not implemented");
+                    elementwise_unary(src_tmp, dst_tmp, op);
+                    break;
             }
         }
         dst = convert_to_asymmetric<uint8_t>(dst_tmp, dst.quantization_info());

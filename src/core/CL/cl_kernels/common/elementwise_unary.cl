@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,13 +37,13 @@
 #define fabs_op(input) fabs(input)
 // Calculate natural_log
 #define natural_log_op(input) log(input)
-// Calculate round (Cannot use round function as it rounds halfway cases away from zero).
+// Calculate round using round to nearest even rounding mode
+#define round_op(input) rint(input)
+
 #if defined(VEC_SIZE)
 #define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, VEC_DATA_TYPE(int, VEC_SIZE), rte), VEC_TYPE)
 #define logical_not_op(input) CONVERT(CONVERT(!input, VEC_TYPE) & ((VEC_TYPE)0x1), VEC_TYPE)
 #else // defined(VEC_SIZE)
-#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, int, rte), DATA_TYPE)
 #define logical_not_op(input) ((!input) & 0x1)
 #endif // defined(VEC_SIZE)
 

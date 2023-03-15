@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,8 @@ namespace kernels
 class CpuElementwiseUnaryKernel : public ICpuKernel<CpuElementwiseUnaryKernel>
 {
 private:
-    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary)>::type;
+    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary, const uint8_t *)>::type;
+    using ElementwiseUnaryPreparePtr = std::add_pointer<std::unique_ptr<uint8_t[]>(ElementWiseUnary op, const ITensorInfo *, const ITensorInfo *)>::type;
 
 public:
     CpuElementwiseUnaryKernel() = default;
@@ -72,6 +73,7 @@ public:
         const char                  *name;
         const DataTypeISASelectorPtr is_selected;
         ElementwiseUnaryUkernelPtr   ukernel;
+        ElementwiseUnaryPreparePtr   prepare_func;
     };
 
     static const std::vector<ElementwiseUnaryKernel> &get_available_kernels();
@@ -80,6 +82,7 @@ private:
     ElementWiseUnary           _op{};
     ElementwiseUnaryUkernelPtr _run_method{ nullptr };
     std::string                _name{};
+    std::unique_ptr<uint8_t[]> _lut{};
 };
 } // namespace kernels
 } // namespace cpu

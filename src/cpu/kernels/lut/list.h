@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-#include "arm_compute/core/Helpers.h"
-#include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
+
+#ifndef SRC_CORE_NEON_KERNELS_LUT_LIST_H
+#define SRC_CORE_NEON_KERNELS_LUT_LIST_H
+
+#include <cstddef>
+#include <cstdint>
 
 namespace arm_compute
 {
 namespace cpu
 {
-void sve_fp16_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
-{
-    ARM_COMPUTE_UNUSED(lut);
-    return elementwise_sve_op<float16_t>(in, out, window, op);
-}
-}
+
+#ifdef __aarch64__
+#define DECLARE_LUT_KERNEL(func_name) \
+    void func_name( \
+        const uint8_t        *table, \
+        size_t                num_strings, \
+        size_t                string_length, \
+        const uint8_t *const *input, \
+        uint8_t *const       *output)
+
+DECLARE_LUT_KERNEL(lut_u8_neon);
+DECLARE_LUT_KERNEL(lut_u8_sve);
+
+#undef DECLARE_LUT_KERNEL
+#endif // __aarch64__
+
+} // namespace cpu
 } // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+
+#endif // SRC_CORE_NEON_KERNELS_LUT_LIST_H

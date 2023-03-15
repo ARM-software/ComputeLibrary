@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,14 +32,16 @@ namespace arm_compute
 namespace cpu
 {
 #define DECLARE_ELEMETWISE_UNARY_KERNEL(func_name) \
-    void func_name(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
+    void func_name(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp16_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_s32_elementwise_unary);
+DECLARE_ELEMETWISE_UNARY_KERNEL(sve_q8_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp16_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_s32_elementwise_unary);
+DECLARE_ELEMETWISE_UNARY_KERNEL(neon_q8_elementwise_unary);
 
 #undef DECLARE_ELEMETWISE_UNARY_KERNEL
 
