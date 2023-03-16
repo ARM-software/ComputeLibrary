@@ -36,3 +36,4 @@ build --flag_alias=debug=//:debug
 build --flag_alias=logging=//:logging
 build --flag_alias=openmp=//:openmp
 build --flag_alias=cppthreads=//:cppthreads
+build --flag_alias=enable_bf16_validation=//:enable_bf16_validation

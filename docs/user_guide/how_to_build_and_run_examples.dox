@@ -510,7 +510,7 @@ To build libraries, examples and tests:
 
 	mkdir build
 	cd build
-	cmake .. -DOPENMP=1 -DCPPTHREADS=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	cmake .. -DOPENMP=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
 	cmake --build . -j32
 
 */

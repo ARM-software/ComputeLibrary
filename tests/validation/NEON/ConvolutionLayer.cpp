@@ -530,6 +530,7 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // WinogradLayer
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+TEST_SUITE(FIXED_FORMAT_KERNELS)
 TEST_SUITE(VariableWeightUtils)
 
 // UC2_1_* tests: the user requests a specific fixed format, but there is no kernel that supports it.
@@ -588,6 +589,8 @@ FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath
     ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo4, framework::LogLevel::ERRORS);
 }
 
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+
 FIXTURE_DATA_TEST_CASE(UC2_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::OHWIo8i4_bf16 })))
@@ -603,6 +606,8 @@ FIXTURE_DATA_TEST_CASE(UC2_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureF
     ARM_COMPUTE_EXPECT(_kernel_found, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(_computed_weight_format == arm_compute::WeightFormat::OHWIo8i4_bf16, framework::LogLevel::ERRORS);
 }
+
+#endif // ARM_COMPUTE_ENABLE_BF16
 
 // UC3_1_* tests: the user queries for ANY fixed format, but there is
 // no kernel that support the use case specified by the user (for
@@ -664,6 +669,8 @@ FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer, HasOptImplFixtureNoFastMath
     ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
 }
 
+#if defined(ARM_COMPUTE_ENABLE_BF16)
+
 FIXTURE_DATA_TEST_CASE(UC3_2_CpuGemmConv2d_FastMath, HasOptImplFixtureFastMath<cpu::CpuGemmConv2d>, framework::DatasetMode::ALL,
                        combine(framework::dataset::make("DataType", { DataType::F32 }),
                                framework::dataset::make("QueryWeightFormat", { arm_compute::WeightFormat::ANY })))
@@ -683,6 +690,8 @@ FIXTURE_DATA_TEST_CASE(UC3_2_NEGEMMConvolutionLayer_FastMath, HasOptImplFixtureF
     ARM_COMPUTE_EXPECT(_computed_weight_format != arm_compute::WeightFormat::UNSPECIFIED, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format_fast_math(_computed_weight_format), framework::LogLevel::ERRORS);
 }
+
+#endif // ARM_COMPUTE_ENABLE_BF16
 
 namespace
 {
@@ -839,6 +848,7 @@ FIXTURE_DATA_TEST_CASE(NEGEMMRunSmallFloatFastMath, NEGEMMVarWidthFastMath<float
 #endif // ARM_COMPUTE_ENABLE_BF16
 
 TEST_SUITE_END() // ExperimentalNEAPIVariableWeightWithFixtures
+TEST_SUITE_END() // FIXED_FORMAT_KERNELS
 
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
