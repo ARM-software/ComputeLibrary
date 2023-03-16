@@ -1,0 +1,6 @@
+<map id="src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst" name="src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst">
+<area shape="rect" id="node1" href="dir_aacd01f21199a505ec8fc75d8101d326.xhtml" title="a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst" alt="" coords="27,52,371,100"/>
+<area shape="rect" id="node2" href="dir_2c61f424fd391396db977702a2beee9a.xhtml" title="cpu" alt="" coords="163,148,235,196"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000111_000369.xhtml" title="1" alt="" coords="202,122,212,137"/>
+<area shape="rect" id="clust1" href="dir_032f7aa13c62ebf44c0c8538051c1ee7.xhtml" title="kernels" alt="" coords="16,16,381,111"/>
+</map>

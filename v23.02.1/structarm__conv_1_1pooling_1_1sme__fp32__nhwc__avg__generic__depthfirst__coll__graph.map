@@ -1,0 +1,4 @@
+<map id="sme_fp32_nhwc_avg_generic_depthfirst" name="sme_fp32_nhwc_avg_generic_depthfirst">
+<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_i_generic_depthfirst_strategy.xhtml" title="IGenericDepthfirstStrategy\l\&lt; float, float \&gt;" alt="" coords="29,109,224,151"/>
+<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_i_generic_depthfirst_strategy.xhtml" title="IGenericDepthfirstStrategy\l\&lt; TInput, TOutput, OutputStage \&gt;" alt="" coords="5,5,248,47"/>
+</map>

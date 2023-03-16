@@ -1,0 +1,15 @@
+<map id="src/core/NEON/kernels/batchnormalization/impl" name="src/core/NEON/kernels/batchnormalization/impl">
+<area shape="rect" id="node2" href="dir_4e353c318ce11c6ca294f8188327497f.xhtml" title="NEON" alt="" coords="79,63,151,111"/>
+<area shape="rect" id="node4" href="dir_8224aa485683c095eaa3fd7faa788467.xhtml" title="wrapper" alt="" coords="5,255,80,303"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000404_000030.xhtml" title="2" alt="" coords="44,229,53,244"/>
+<area shape="rect" id="node5" href="dir_47c52b626b579a630a004d74c906e8a5.xhtml" title="detail" alt="" coords="65,159,137,207"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000404_000458.xhtml" title="2" alt="" coords="111,134,120,149"/>
+<area shape="rect" id="node6" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml" title="arm_compute" alt="" coords="119,255,231,303"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000404_000000.xhtml" title="6" alt="" coords="172,228,181,242"/>
+<area shape="rect" id="node3" href="dir_9fe9119c5d521e66716787efc7a5a7e3.xhtml" title="SVE" alt="" coords="175,63,247,111"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000405_000000.xhtml" title="6" alt="" coords="190,232,199,246"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000458_000030.xhtml" title="2" alt="" coords="70,236,79,250"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000458_000000.xhtml" title="3" alt="" coords="147,227,156,242"/>
+<area shape="rect" id="clust2" href="dir_cb95619f2cb225dbc45806f4593be807.xhtml" alt="" coords="68,52,353,121"/>
+<area shape="rect" id="clust1" href="dir_f5eb3f990fb66d2a1104d2728906b7d4.xhtml" title="batchnormalization" alt="" coords="57,16,364,132"/>
+</map>

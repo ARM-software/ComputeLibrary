@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__conv_1_1pooling_1_1_i_generic_depthfirst_strategy.xhtml" title="IGenericDepthfirstStrategy\l\&lt; int8_t, int8_t \&gt;" alt="" coords="5,39,200,80"/>
+<area shape="rect" id="node2" href="$structarm__conv_1_1pooling_1_1sme__s8__nhwc__avg__generic__depthfirst.xhtml" title="sme_s8_nhwc_avg_generic\l_depthfirst" alt="" coords="251,5,449,47"/>
+<area shape="rect" id="node3" href="$structarm__conv_1_1pooling_1_1sme__s8__nhwc__max__generic__depthfirst.xhtml" title="sme_s8_nhwc_max_generic\l_depthfirst" alt="" coords="248,71,452,112"/>
+</map>

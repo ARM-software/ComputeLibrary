@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['padlayer',['PadLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a979ac8e70d367e1e442d76f00b6f0ad1',1,'arm_compute::graph']]],
+  ['permutelayer',['PermuteLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16aa84a001cb23ac473e7aae73a9eaf369a',1,'arm_compute::graph']]],
+  ['persistent',['Persistent',['../namespacearm__compute_1_1experimental.xhtml#a90cbc7f3fa8bbc097dfd0429b31efb83a5fe7b9358c9cb1b9eaa8d5aec000def4',1,'arm_compute::experimental']]],
+  ['pmu',['PMU',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ab31212eaa6bb6d27e51301ef753dd4a8',1,'arm_compute::test::framework']]],
+  ['pmu_5fcycle_5fcounter',['PMU_CYCLE_COUNTER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ae84d32a2737edd67fcd3616cf7a674f7',1,'arm_compute::test::framework']]],
+  ['pmu_5finstruction_5fcounter',['PMU_INSTRUCTION_COUNTER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ae6848a94f594156fc477885835034257',1,'arm_compute::test::framework']]],
+  ['pool',['POOL',['../namespacearm__compute.xhtml#a6df16a1b3b5af590a14f55e983d3428eafd5dc07b8d30d1ad403905c85f9ba741',1,'arm_compute']]],
+  ['poolinglayer',['PoolingLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16aea068ae5aae640d018c4300bc7619575',1,'arm_compute::graph']]],
+  ['power',['Power',['../classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_elementwise_binary_common_attributes.xhtml#a62f68d1b8c7ffe90f85b3a7a7a677dd1add4fe0cc913f704600b97d1f5dd285de',1,'arm_compute::experimental::dynamic_fusion::ElementwiseBinaryCommonAttributes::Power()'],['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeac9c9c146c630ca5ef9197c73c032f4a6',1,'arm_compute::POWER()']]],
+  ['ppm',['PPM',['../namespacearm__compute_1_1utils.xhtml#a3154c405c975616503bac23f51b78fc0a4bb1ebdeeb70354069bc644b9c94ee5f',1,'arm_compute::utils']]],
+  ['precommit',['PRECOMMIT',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfab829534c7b40afdbd3c3ffea05202a97',1,'arm_compute::test::framework']]],
+  ['preferred',['Preferred',['../namespacearm__compute_1_1cpu.xhtml#afa3ebf7e0ea95c0c9cadb30c62bad67aaa054ccb4ff684c73cbc2d272d45e32df',1,'arm_compute::cpu']]],
+  ['prelu',['Prelu',['../classarm__compute_1_1experimental_1_1dynamic__fusion_1_1_elementwise_binary_common_attributes.xhtml#a62f68d1b8c7ffe90f85b3a7a7a677dd1a0c5967f09e0669c840ebb1ed0da85e32',1,'arm_compute::experimental::dynamic_fusion::ElementwiseBinaryCommonAttributes::Prelu()'],['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f',1,'arm_compute::PRELU()']]],
+  ['prelulayer',['PReluLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a44da30946f36dcb01ca8be92a1420536',1,'arm_compute::graph']]],
+  ['prepare',['Prepare',['../structarm__compute_1_1experimental_1_1dynamic__fusion_1_1_unit_workload_stage.xhtml#aca8133200c1122e29b87b314d82604ebaf8199556cf6a62ca9268aa50c99b34a1',1,'arm_compute::experimental::dynamic_fusion::UnitWorkloadStage::Prepare()'],['../namespacearm__compute_1_1experimental.xhtml#a90cbc7f3fa8bbc097dfd0429b31efb83af8199556cf6a62ca9268aa50c99b34a1',1,'arm_compute::experimental::Prepare()']]],
+  ['pretty',['PRETTY',['../namespacearm__compute_1_1test_1_1framework.xhtml#a043aa97de3c71ad015852f46ec4cc6ada2b908e3bfd5ebc739a3ce26d5045b76f',1,'arm_compute::test::framework']]],
+  ['printlayer',['PrintLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a415d76e29ed6d61c9f71cc6f7cf3f656',1,'arm_compute::graph']]],
+  ['priorboxlayer',['PriorBoxLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a77329845031ba38f828a884f40beb69c',1,'arm_compute::graph']]],
+  ['prod',['PROD',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45bac8074bb318fb85693233e64acc64c1ed',1,'arm_compute']]]
+];

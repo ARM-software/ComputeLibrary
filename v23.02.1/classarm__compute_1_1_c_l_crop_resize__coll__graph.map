@@ -1,0 +1,5 @@
+<map id="CLCropResize" name="CLCropResize">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="5,81,85,108"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor. " alt="" coords="109,81,192,108"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for CPU tensor. " alt="" coords="117,5,185,32"/>
+</map>

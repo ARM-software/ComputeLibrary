@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1cl__indirect__conv_1_1_i_cl_indirect_conv_kernel_config.xhtml" title="Basic interface for the indirect convolution kernel configuration. " alt="" coords="5,13,208,39"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__indirect__conv_1_1_cl_indirect_conv_default_config_valhall.xhtml" title="Valhall based OpenCL indirect convolution configuration. " alt="" coords="256,5,463,47"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_i_cl_gemm_kernel_config.xhtml" title="Basic interface for the GEMM kernel configuration. " alt="" coords="5,209,171,235"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_bifrost.xhtml" title="Bifrost based OpenCL GEMMNative configuration. " alt="" coords="229,5,439,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_midgard.xhtml" title="Midgard based OpenCL GEMMNative configuration. " alt="" coords="229,71,439,112"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_native_valhall.xhtml" title="Valhall based OpenCL GEMMNative configuration. " alt="" coords="229,136,439,177"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_bifrost.xhtml" title="Bifrost based OpenCL GEMMReshaped configuration. " alt="" coords="219,201,449,243"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_bifrost.xhtml" title="Bifrost based OpenCL GEMMReshapedOnlyRHS configuration. " alt="" coords="219,267,449,308"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_rhs_only_valhall.xhtml" title="Valhall based OpenCL GEMMReshapedOnlyRHS configuration. " alt="" coords="219,332,449,373"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1opencl_1_1kernels_1_1gemm_1_1_cl_gemm_default_config_reshaped_valhall.xhtml" title="Valhall based OpenCL GEMMReshaped configuration. " alt="" coords="219,397,449,439"/>
+</map>
