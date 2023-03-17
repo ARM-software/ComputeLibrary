@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_DATASETS_SMALLBATCHMATMULDATASET
-#define ACL_TESTS_DATASETS_SMALLBATCHMATMULDATASET
+#ifndef ACL_TESTS_DATASETS_LARGEMATMULDATASET
+#define ACL_TESTS_DATASETS_LARGEMATMULDATASET
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "tests/datasets/BatchMatMulDataset.h"
+#include "tests/datasets/MatMulDataset.h"
 
 namespace arm_compute
 {
@@ -34,19 +34,27 @@ namespace test
 {
 namespace datasets
 {
-class SmallBatchMatMulDataset final : public BatchMatMulDataset
+class LargeMatMulDataset final : public MatMulDataset
 {
 public:
-    SmallBatchMatMulDataset()
+    LargeMatMulDataset()
     {
-        add_config(TensorShape(3U, 4U, 2U, 2U), TensorShape(2U, 3U, 2U, 2U), TensorShape(2U, 4U, 2U, 2U));
-        add_config(TensorShape(9U, 6U), TensorShape(5U, 9U), TensorShape(5U, 6U));
-        add_config(TensorShape(31U, 1U), TensorShape(23U, 31U), TensorShape(23U, 1U));
-        add_config(TensorShape(8U, 4U, 2U), TensorShape(16U, 8U, 2U), TensorShape(16U, 4U, 2U));
-        add_config(TensorShape(32U, 2U), TensorShape(17U, 32U), TensorShape(17U, 2U));
+        add_config(TensorShape(21U, 13U, 3U, 2U), TensorShape(33U, 21U, 3U, 2U), TensorShape(33U, 13U, 3U, 2U));
+        add_config(TensorShape(38U, 12U, 1U, 5U), TensorShape(21U, 38U, 1U, 5U), TensorShape(21U, 12U, 1U, 5U));
+        add_config(TensorShape(45U, 38U, 3U, 2U), TensorShape(21U, 45U, 3U, 2U), TensorShape(21U, 38U, 3U, 2U));
     }
 };
+
+class HighDimensionalMatMulDataset final : public MatMulDataset
+{
+public:
+    HighDimensionalMatMulDataset()
+    {
+        add_config(TensorShape(5U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 5U, 2U, 2U, 2U, 2U)); // 6D tensor
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_DATASETS_SMALLBATCHMATMULDATASET */
+#endif /* ACL_TESTS_DATASETS_LARGEMATMULDATASET */

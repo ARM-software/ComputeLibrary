@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_FIXTURES_BATCHMATMULFIXTURE
-#define ACL_TESTS_VALIDATION_FIXTURES_BATCHMATMULFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE
+#define ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
@@ -44,7 +44,7 @@ namespace validation
 using namespace arm_compute::opencl::kernels;
 
 template <typename T>
-class BatchMatMulValidationFixture : public framework::Fixture
+class MatMulKernelValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -96,7 +96,7 @@ protected:
         CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1);
         CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1);
 
-        CLSynthetizeOperator<ClNativeMatMulKernel> batchMatMul{};
+        CLSynthetizeOperator<ClNativeMatMulKernel> matMul{};
         MatMulKernelInfo                           matmul_info;
         matmul_info.adj_lhs = pretranspose_a;
         matmul_info.adj_rhs = pretranspose_b;
@@ -104,7 +104,7 @@ protected:
         matmul_info.n0      = N0;
         matmul_info.k0      = K0;
 
-        batchMatMul.configure(a.info(), b.info(), dst.info(), matmul_info);
+        matMul.configure(a.info(), b.info(), dst.info(), matmul_info);
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
         ARM_COMPUTE_ASSERT(b.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
@@ -122,12 +122,12 @@ protected:
         fill(CLAccessor(a), 0);
         fill(CLAccessor(b), 1);
 
-        // Compute batchMatMul kernel
+        // Compute matMul kernel
         ITensorPack tensors_pack({ { ACL_SRC_0, &a },
             { ACL_SRC_1, &b },
             { ACL_DST, &dst }
         });
-        batchMatMul.run(tensors_pack);
+        matMul.run(tensors_pack);
 
         return dst;
     }
@@ -200,4 +200,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_FIXTURES_BATCHMATMULFIXTURE */
+#endif /* ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE */

@@ -1014,7 +1014,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
  *
  * @return the calculated shape
  */
-inline TensorShape compute_batchmatmul_shape(const TensorShape &input0, const TensorShape &input1, const MatMulKernelInfo &matmul_info)
+inline TensorShape compute_matmul_shape(const TensorShape &input0, const TensorShape &input1, const MatMulKernelInfo &matmul_info)
 {
     TensorShape output_shape{ input0 };
 

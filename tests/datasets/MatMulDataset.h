@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_DATASETS_BATCHMATMULDATASET
-#define TESTS_DATASETS_BATCHMATMULDATASET
+#ifndef ACL_TESTS_DATASETS_MATMULDATASET
+#define ACL_TESTS_DATASETS_MATMULDATASET
 
 #include "arm_compute/core/TensorShape.h"
 #include "utils/TypePrinter.h"
@@ -33,7 +33,7 @@ namespace test
 {
 namespace datasets
 {
-class BatchMatMulDataset
+class MatMulDataset
 {
 public:
     using type = std::tuple<TensorShape, TensorShape, TensorShape>;
@@ -58,7 +58,7 @@ public:
             return description.str();
         }
 
-        BatchMatMulDataset::type operator*() const
+        MatMulDataset::type operator*() const
         {
             return std::make_tuple(*_a_it, *_b_it, *_dst_it);
         }
@@ -96,8 +96,8 @@ public:
     }
 
 protected:
-    BatchMatMulDataset()                      = default;
-    BatchMatMulDataset(BatchMatMulDataset &&) = default;
+    MatMulDataset()                 = default;
+    MatMulDataset(MatMulDataset &&) = default;
 
 private:
     std::vector<TensorShape> _a_shapes{};
@@ -107,4 +107,4 @@ private:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_DATASETS_BATCHMATMULDATASET */
+#endif /* ACL_TESTS_DATASETS_MATMULDATASET */

@@ -1297,6 +1297,42 @@
         })                                                                                                               \
     }
 
+#define T_MMUL_T_NT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                     \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
+        {                                                                                 \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
+            {                                                                             \
+                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
+                {                                                                         \
+                    dst[_m].s[_n] = fma((DST_DATA_TYPE)(lhs[_k].s[_m]), (DST_DATA_TYPE)(rhs[_k].s[_n]), dst[_m].s[_n]); \
+                })                                                                        \
+            })                                                                            \
+        })                                                                                \
+    }
+
+#define T_MMUL_T_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                     \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
+        {                                                                                 \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
+            {                                                                             \
+                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
+                {                                                                         \
+                    dst[_m].s[_n] = fma((DST_DATA_TYPE)(lhs[_k].s[_m]), (DST_DATA_TYPE)(rhs[_n].s[_k]), dst[_m].s[_n]); \
+                })                                                                        \
+            })                                                                            \
+        })                                                                                \
+    }
+
 #define T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
     ({ \
         LOOP_UNROLLING(int, _m, 0, 1, M0, \
