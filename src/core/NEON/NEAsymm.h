@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -715,6 +715,12 @@ inline uint16x8x2_t vquantize_qasymm16(const float32x4x4_t &qv, const UniformQua
     const uint16x8_t pb = vcombine_u16(vqmovun_s32(rf.val[2]), vqmovun_s32(rf.val[3]));
     return { pa, pb };
 }
+
+template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
+qasymm8x16_signed_t vmlaq_qasymm8(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
+
+template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
+qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
 } // namespace arm_compute
 #include "src/core/NEON/NEAsymm.inl"
 #endif // ARM_COMPUTE_NEASYMM_H
