@@ -57,6 +57,18 @@ public:
     }
 };
 
+class SmallMatMulDatasetRhsExportToCLImageRhsT final : public MatMulDataset
+{
+public:
+    // Some considerations:
+    //  1) K dimension should be a multiple of 4
+    //  See (2), (3), and (4) in SmallMatMulDatasetRhsExportToCLImageRhsNT
+    SmallMatMulDatasetRhsExportToCLImageRhsT()
+    {
+        add_config(TensorShape(8U /*K*/, 3U /*M*/, 2U, 1U, 2U), TensorShape(20U /*N*/, 8U /*K*/, 2U, 1U, 2U), TensorShape(20U /*N*/, 3U /*M*/, 2U, 1U, 2U));
+    }
+};
+
 class SmallMatMulDatasetRhsExportToCLImageRhsNT final : public MatMulDataset
 {
 public:

@@ -65,7 +65,17 @@ public:
         add_config(TensorShape(45U, 38U, 3U, 2U, 3U), TensorShape(20U, 45U, 3U, 2U, 3U), TensorShape(20U, 38U, 3U, 2U, 3U));
     }
 };
-
+class LargeMatMulDatasetRhsExportToCLImageRhsT final : public MatMulDataset
+{
+public:
+    // For shape choices, please refer to the explanations given in SmallMatMulDatasetRhsExportToCLImageRhsT
+    LargeMatMulDatasetRhsExportToCLImageRhsT()
+    {
+        add_config(TensorShape(28U, 13U, 3U, 2U), TensorShape(32U, 28U, 3U, 2U), TensorShape(32U, 13U, 3U, 2U));
+        add_config(TensorShape(40U, 12U, 1U, 5U, 2U), TensorShape(20U, 40U, 1U, 5U, 2U), TensorShape(20U, 12U, 1U, 5U, 2U));
+        add_config(TensorShape(44U, 38U, 3U, 2U, 3U), TensorShape(20U, 44U, 3U, 2U, 3U), TensorShape(20U, 38U, 3U, 2U, 3U));
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
