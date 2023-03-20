@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -443,7 +443,7 @@ void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
 
 bool export_to_cl_image(const ITensorInfo *tensor)
 {
-    if(tensor->tensor_shape()[0] % 4)
+    if(tensor->tensor_shape()[0] % 4 != 0)
     {
         return false;
     }
@@ -467,7 +467,7 @@ bool export_to_cl_image(const ITensorInfo *tensor)
     }
 
     const size_t image_w     = tensor->tensor_shape()[0] / 4;
-    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
+    const size_t image_h     = tensor->tensor_shape().total_size() / tensor->tensor_shape()[0];
     const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
     const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
 

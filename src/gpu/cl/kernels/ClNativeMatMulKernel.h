@@ -63,6 +63,9 @@ public:
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
+
+private:
+    bool _export_rhs_to_cl_image { false };
 };
 } // namespace kernels
 } // namespace opencl

@@ -48,7 +48,7 @@ class MatMulKernelValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, const int M0, const int N0, const int K0, DataType data_type)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, const int M0, const int N0, const int K0, bool export_rhs_to_cl_image, DataType data_type)
     {
         // For brevity, the input shapes are assumed to be not-transposed for both Lhs and Rhs matrices.
         if(pretranspose_a)
@@ -61,8 +61,13 @@ public:
             permute(shape_b, PermutationVector(1U, 0U));
         }
 
-        _target    = compute_target(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, data_type);
-        _reference = compute_reference(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, data_type);
+        _device_supports_export_to_cl_image = image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
+
+        if(!export_rhs_to_cl_image || _device_supports_export_to_cl_image)
+        {
+            _target    = compute_target(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type);
+            _reference = compute_reference(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, data_type);
+        }
     }
 
 protected:
@@ -89,7 +94,7 @@ protected:
     }
 
     CLTensor compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &output_shape, bool pretranspose_a, bool pretranspose_b, const int M0, const int N0, const int K0,
-                            DataType data_type)
+                            bool export_rhs_to_cl_image, DataType data_type)
     {
         // Create tensors
         CLTensor a   = create_tensor<CLTensor>(shape_a, data_type, 1);
@@ -103,6 +108,7 @@ protected:
         matmul_info.m0      = M0;
         matmul_info.n0      = N0;
         matmul_info.k0      = K0;
+        matmul_info.export_rhs_to_cl_image = export_rhs_to_cl_image;
 
         matMul.configure(a.info(), b.info(), dst.info(), matmul_info);
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
@@ -195,6 +201,7 @@ protected:
 
     CLTensor        _target{};
     SimpleTensor<T> _reference{};
+    bool _device_supports_export_to_cl_image { true };
 };
 
 } // namespace validation

@@ -57,6 +57,22 @@ public:
     }
 };
 
+class SmallMatMulDatasetRhsExportToCLImageRhsNT final : public MatMulDataset
+{
+public:
+    // Some considerations:
+    //  (1) N (Dimension 0 of Rhs matrix) dimension should be a multiple of 4
+    //  (2) Having N=20 enables us to test all possible N0 values, i.e. 4, 8, 16
+    //  (3) It's important to have more than one loop iterations in the K dimension
+    //      K has been chosen in accordance with K0
+    //  (4) The 5-th dimension has been chosen as non-unit because export_to_cl_iamge checks
+    //      were using dim1 * dim2 * dim3 to calculate the CLImage height; however, in our case
+    //      the tensor can be > 4D. To stress that case, the fifth dimension is chosen to be non-unit as well
+    SmallMatMulDatasetRhsExportToCLImageRhsNT()
+    {
+        add_config(TensorShape(7U, 3U, 2U, 1U, 2U), TensorShape(20U, 7U, 2U, 1U, 2U), TensorShape(20U, 3U, 2U, 1U, 2U));
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

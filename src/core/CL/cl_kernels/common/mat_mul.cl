@@ -33,10 +33,11 @@
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
+ * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_NT_NT)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 > 0
- *  - N0 = 1, 2, 3, 4, 8, 16
+ *  - N0 = 1, 2, 3, 4, 8, 16 (only 4, 8, 16 if RHS_TENSOR_TYPE=IMAGE)
  *  - K0 = 1, 2, 3, 4, 8, 16
  * @note Values > 8 for M0 are not expected to be efficient
  *
@@ -47,6 +48,7 @@
  * @param[in]  lhs_h                             The height of the lhs tensor
  * @param[in]  lhs_n                             Number of the matrices (buffers) in the batch
  * @param[in]  lhs_offset_first_element_in_bytes The offset of the first element in the lhs matrix
+ * @param[in]  rhs_img                           (Optional) Read only cl_image object for the rhs tensor. Included when RHS_TENSOR_TYPE=IMAGE
  * @param[in]  rhs_ptr                           Pointer to the rhs matrix. Supported data types: same as @p lhs_ptr
  * @param[in]  rhs_stride_y                      Stride of the rhs matrix in Y (2nd) dimension (in bytes)
  * @param[in]  rhs_stride_z                      Stride of the rhs tensor in Z (3rd) dimension (in bytes)
@@ -64,7 +66,7 @@
  */
 __kernel void mat_mul_native_nt_nt(
     TENSOR3D_T(lhs, BUFFER),
-    TENSOR3D_T(rhs, BUFFER),
+    TENSOR3D_T(rhs, RHS_TENSOR_TYPE),
     TENSOR3D_T(dst, BUFFER))
 {
     const uint x = GET_SPATIAL_IDX(0, N0, PARTIAL_STORE_N0);
@@ -73,7 +75,6 @@ __kernel void mat_mul_native_nt_nt(
 
     // Compute LHS/RHS/DST matrix address
     lhs_offset_first_element_in_bytes += y * lhs_stride_y + z * lhs_stride_z;
-    rhs_offset_first_element_in_bytes += x * sizeof(DATA_TYPE) + z * rhs_stride_z;
     dst_offset_first_element_in_bytes += x * sizeof(DATA_TYPE) + y * dst_stride_y + z * dst_stride_z;
 
     // Initialize the accumulators
@@ -84,6 +85,7 @@ __kernel void mat_mul_native_nt_nt(
         acc[i].v = 0.f;
     })
 
+    const int rhs_z = z * rhs_h;
     int k;
     for(k = 0; k <= K - K0; k += K0)
     {
@@ -102,12 +104,11 @@ __kernel void mat_mul_native_nt_nt(
 
         // Load tile from the lhs/rhs tensors
         T_LOAD(DATA_TYPE, M0, K0, BUFFER, lhs, 0, 0, 1, lhs_stride_y, a);
-        T_LOAD(DATA_TYPE, K0, N0, BUFFER, rhs, 0, 0, 1, rhs_stride_y, b);
+        T_LOAD(DATA_TYPE, K0, N0, RHS_TENSOR_TYPE, rhs, x, k + rhs_z, 1, rhs_stride_y, b);
 
         T_MMUL(DATA_TYPE, DATA_TYPE, DATA_TYPE, M0, N0, K0, NT, NT, a, b, acc);
 
         lhs_offset_first_element_in_bytes += K0 * sizeof(DATA_TYPE);
-        rhs_offset_first_element_in_bytes += K0 * rhs_stride_y;
     }
 
 #ifdef K % K0 != 0
@@ -129,12 +130,11 @@ __kernel void mat_mul_native_nt_nt(
 
         // Load tile from the lhs/rhs tensors
         T_LOAD(DATA_TYPE, M0, 1, BUFFER, lhs, 0, 0, 1, lhs_stride_y, a);
-        T_LOAD(DATA_TYPE, 1, N0, BUFFER, rhs, 0, 0, 1, rhs_stride_y, b);
+        T_LOAD(DATA_TYPE, 1, N0, BUFFER, rhs, x, k + rhs_z, 1, rhs_stride_y, b);
 
         T_MMUL(DATA_TYPE, DATA_TYPE, DATA_TYPE, M0, N0, 1, NT, NT, a, b, acc);
 
         lhs_offset_first_element_in_bytes += 1 * sizeof(DATA_TYPE);
-        rhs_offset_first_element_in_bytes += 1 * rhs_stride_y;
     }
 #endif // K % K0 != 0
 
@@ -314,10 +314,11 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
+ * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_T_NT)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 8, 16
- *  - N0 = 1, 2, 3, 4, 8, 16
+ *  - N0 = 1, 2, 3, 4, 8, 16 (only 4, 8, 16 if RHS_TENSOR_TYPE=IMAGE)
  *  - K0 > 0
  * * @note Values > 8 for M0, and K0 are not expected to be efficient
  *
@@ -328,6 +329,7 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
  * @param[in]  lhs_h                             The height of the lhs tensor
  * @param[in]  lhs_n                             Number of the matrices (buffers) in the batch
  * @param[in]  lhs_offset_first_element_in_bytes The offset of the first element in the lhs matrix
+ * @param[in]  rhs_img                           (Optional) Read only cl_image object for the rhs tensor. Included when RHS_TENSOR_TYPE=IMAGE
  * @param[in]  rhs_ptr                           Pointer to the rhs matrix. Supported data types: same as @p lhs_ptr
  * @param[in]  rhs_stride_y                      Stride of the rhs matrix in Y (2nd) dimension (in bytes)
  * @param[in]  rhs_stride_z                      Stride of the rhs tensor in Z (3rd) dimension (in bytes)
@@ -345,7 +347,7 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
  */
 __kernel void mat_mul_native_t_nt(
     TENSOR3D_T(lhs, BUFFER),
-    TENSOR3D_T(rhs, BUFFER),
+    TENSOR3D_T(rhs, RHS_TENSOR_TYPE),
     TENSOR3D_T(dst, BUFFER))
 {
     const uint x = GET_SPATIAL_IDX(0, N0, PARTIAL_STORE_N0);
@@ -354,7 +356,6 @@ __kernel void mat_mul_native_t_nt(
 
     // Compute LHS/RHS/DST matrix address
     lhs_offset_first_element_in_bytes += y * sizeof(DATA_TYPE) + z * lhs_stride_z;
-    rhs_offset_first_element_in_bytes += x * sizeof(DATA_TYPE) + z * rhs_stride_z;
     dst_offset_first_element_in_bytes += x * sizeof(DATA_TYPE) + y * dst_stride_y + z * dst_stride_z;
 
     // Initialize the accumulators
@@ -365,6 +366,7 @@ __kernel void mat_mul_native_t_nt(
         acc[i].v = 0.f;
     })
 
+    const int rhs_z = z * rhs_h;
     int k;
     for(k = 0; k <= K - K0; k += K0)
     {
@@ -383,7 +385,7 @@ __kernel void mat_mul_native_t_nt(
 
         // Load tile from the lhs/rhs tensors
         T_LOAD(DATA_TYPE, K0, M0, BUFFER, lhs, 0, 0, 1, lhs_stride_y, a);
-        T_LOAD(DATA_TYPE, K0, N0, BUFFER, rhs, 0, 0, 1, rhs_stride_y, b);
+        T_LOAD(DATA_TYPE, K0, N0, RHS_TENSOR_TYPE, rhs, x, k + rhs_z, 1, rhs_stride_y, b);
 
 #if GPU_ARCH == GPU_ARCH_MIDGARD
         // For explanation, see mat_mul_native_nt_t
@@ -401,7 +403,6 @@ __kernel void mat_mul_native_t_nt(
 #endif // GPU_ARCH == GPU_ARCH_MIDGARD
 
         lhs_offset_first_element_in_bytes += K0 * lhs_stride_y;
-        rhs_offset_first_element_in_bytes += K0 * rhs_stride_y;
     }
 
 #ifdef K % K0 != 0
@@ -423,7 +424,7 @@ __kernel void mat_mul_native_t_nt(
 
         // Load tile from the lhs/rhs tensors
         T_LOAD(DATA_TYPE, 1, M0, BUFFER, lhs, 0, 0, 1, lhs_stride_y, a);
-        T_LOAD(DATA_TYPE, 1, N0, BUFFER, rhs, 0, 0, 1, rhs_stride_y, b);
+        T_LOAD(DATA_TYPE, 1, N0, BUFFER, rhs, x, k + rhs_z, 1, rhs_stride_y, b);
 
 #if GPU_ARCH == GPU_ARCH_MIDGARD
         // For explanation, see mat_mul_native_nt_t
@@ -438,7 +439,6 @@ __kernel void mat_mul_native_t_nt(
 #endif // GPU_ARCH == GPU_ARCH_MIDGARD
 
         lhs_offset_first_element_in_bytes += 1 * lhs_stride_y;
-        rhs_offset_first_element_in_bytes += 1 * rhs_stride_y;
     }
 #endif // K % K0 != 0
 

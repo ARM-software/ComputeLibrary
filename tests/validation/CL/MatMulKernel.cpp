@@ -95,6 +95,12 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
         { MatMulKernelInfo(false, false, 9, 1, 2), true },
         { MatMulKernelInfo(false, false, 3, 16, 3), true },
         { MatMulKernelInfo(false, false, 7, 3, 4), true },
+        { MatMulKernelInfo(false, false, 7, 3, 4, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(false, false, 7, 1, 4, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(false, false, 7, 12, 4, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(false, false, 7, 4, 4, true), true },
+        { MatMulKernelInfo(false, false, 7, 8, 4, true), true },
+        { MatMulKernelInfo(false, false, 7, 16, 4, true), true },
 
         // Lhs not-transposed, Rhs transposed
         { MatMulKernelInfo(false, true, 0, 1, 1), false },  // M0 should be > 0
@@ -115,6 +121,12 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
         { MatMulKernelInfo(true, false, 4, 1, 22), true },
         { MatMulKernelInfo(true, false, 3, 3, 3), true },
         { MatMulKernelInfo(true, false, 2, 4, 8), true },
+        { MatMulKernelInfo(true, false, 2, 3, 8, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(true, false, 2, 7, 8, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(true, false, 2, 5, 8, true), false }, // N0 not in {4, 8, 16}
+        { MatMulKernelInfo(true, false, 2, 4, 8, true), true },
+        { MatMulKernelInfo(true, false, 2, 8, 8, true), true },
+        { MatMulKernelInfo(true, false, 2, 16, 8, true), true },
 
         // // Lhs transposed, Rhs-transposed
         { MatMulKernelInfo(true, true, 2, 1, 5), false },  // K0 should in {1, 2, 3, 4, 8, 16}
@@ -134,12 +146,65 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
     const TensorInfo lhs_info = TensorInfo(TensorShape(100U, 100U), 1, DataType::F32);
     const TensorInfo rhs_info = TensorInfo(TensorShape(100U, 100U), 1, DataType::F32);
 
+    const bool export_to_cl_image_supported = image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
     for(auto &pair : supported_block_sizes)
     {
         TensorInfo output_info;
         Status     status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, pair.first);
 
-        ARM_COMPUTE_EXPECT(bool(status) == pair.second, framework::LogLevel::ERRORS);
+        if(!pair.first.export_rhs_to_cl_image || export_to_cl_image_supported)
+        {
+           ARM_COMPUTE_EXPECT(bool(status) == pair.second, framework::LogLevel::ERRORS);
+        }
+    }
+}
+
+TEST_CASE(ExportToCLImage, framework::DatasetMode::ALL)
+{
+    // We skip this test if the hardware does not support exporting to CL Image
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        constexpr size_t pixel_size = 4;
+        const size_t max_image_w = pixel_size * CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
+        const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
+
+        using ShapeConfigurationTuple = std::tuple<TensorShape, TensorShape, bool, bool, bool>;
+        const std::vector<ShapeConfigurationTuple> shape_configurations =
+        {
+            // lhs_shape, rhs_shape, adj_lhs, adj_rhs, expected
+            // Lhs t/Nt, Rhs Nt
+            // Transposition of Lhs doesn't add any value to the tests, therefore always assumed false below
+            { TensorShape(5U, 1U), TensorShape(3U, 5U), false, false, false }, // N should be multiple of 4
+            { TensorShape(5U, 1U), TensorShape(14U, 5U), false, false, false }, // N should be multiple of 4
+            { TensorShape(5U, 1U), TensorShape(12U, 5U), false, false, true },
+            { TensorShape(5U, 1U), TensorShape(8U, 5U), false, false, true },
+            { TensorShape(5U, 1U), TensorShape(4U, 5U), false, false, true },
+            { TensorShape(max_image_h + 1, 1U), TensorShape(4U, max_image_h + 1), false, false, false }, // Cannot fit into CL Image memory's height
+            { TensorShape(5U, 1U), TensorShape(max_image_w + 1, 5U), false, false, false }, // Cannot fit into CL Image memory's width
+            { TensorShape(max_image_h, 1U), TensorShape(4U, max_image_h), false, false, true }, // Barely fits into CL Image memory's height
+            { TensorShape(5U, 1U), TensorShape(max_image_w, 5U), false, false, true }, // Barely fits into CL Image memory's width
+        };
+
+        for(auto &tuple : shape_configurations)
+        {
+            TensorShape lhs_shape = std::get<0>(tuple);
+            TensorShape rhs_shape = std::get<1>(tuple);
+
+            const TensorInfo lhs_info = TensorInfo(lhs_shape, 1, DataType::F32);
+            const TensorInfo rhs_info = TensorInfo(rhs_shape, 1, DataType::F32);
+
+            const bool adj_lhs = std::get<2>(tuple);
+            const bool adj_rhs = std::get<3>(tuple);
+
+            // We choose M0, N0, K0 equal to 4 so that they're always valid for CLImage in any combination
+            const MatMulKernelInfo matmul_kernel_info {adj_lhs, adj_rhs, 4, 4, 4, true /* export_rhs_to_cl_image */};
+
+            TensorInfo output_info;
+            Status     status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+
+            const bool expected = std::get<4>(tuple);
+            ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+        }
     }
 }
 
@@ -244,68 +309,75 @@ TEST_SUITE_END() // Validate
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::TinyMatMulDataset(),
-                                                                                                                   framework::dataset::make("pretransose_A", { false, true })),
-                                                                                                                   framework::dataset::make("pretransose_B", { false, true })),
-                                                                                                                   m0_values_precommit),
-                                                                                                                   n0_values_precommit),
-                                                                                                           k0_values_precommit),
-                                                                                                   framework::dataset::make("DataType", DataType::F32)))
+TEST_SUITE(Buffer)
+FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::TinyMatMulDataset(),
+                                                                                                                       framework::dataset::make("pretransose_A", { false, true })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false, true })),
+                                                                                                                       m0_values_precommit),
+                                                                                                                       n0_values_precommit),
+                                                                                                                       k0_values_precommit),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { false })),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                    framework::dataset::make("pretransose_A", { false, true })),
-                                                                                                                    framework::dataset::make("pretransose_B", { false, true })),
-                                                                                                                    m0_values_precommit),
-                                                                                                                    n0_values_precommit),
-                                                                                                            k0_values_precommit),
-                                                                                                    framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
+                                                                                                                       framework::dataset::make("pretransose_A", { false, true })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false, true })),
+                                                                                                                       m0_values_precommit),
+                                                                                                                       n0_values_precommit),
+                                                                                                                       k0_values_precommit),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { false })),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                    framework::dataset::make("pretransose_A", { false })),
                                                                                                                    framework::dataset::make("pretransose_B", { false })),
                                                                                                                    m0_values_nightly_lhs_nt),
                                                                                                                    n0_values_nightly_rhs_nt),
                                                                                                                    k0_values_nightly_lhs_nt_rhs_nt),
+                                                                                                                   framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                      framework::dataset::make("pretransose_A", { false })),
                                                                                                                      framework::dataset::make("pretransose_B", { true })),
                                                                                                                      m0_values_nightly_lhs_nt),
                                                                                                                      n0_values_nightly_rhs_t),
                                                                                                                      k0_values_nightly_rhs_t),
+                                                                                                                     framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                      framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                      framework::dataset::make("pretransose_A", { true })),
                                                                                                                      framework::dataset::make("pretransose_B", { false })),
                                                                                                                      m0_values_nightly_lhs_t),
                                                                                                                      n0_values_nightly_rhs_nt),
                                                                                                                      k0_values_nightly_lhs_t_rhs_nt),
+                                                                                                                     framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                      framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                        framework::dataset::make("pretransose_A", { true })),
                                                                framework::dataset::make("pretransose_B", { true })),
                                                        m0_values_nightly_lhs_t),
                                                n0_values_nightly_rhs_t),
                                        k0_values_nightly_rhs_t),
+                                       framework::dataset::make("export_rhs_to_cl_image", { false })),
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -313,75 +385,150 @@ FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulKernelFixture
 }
 // Running High Dimensional test is enough for FP32, because we're stressing the number of dimensions, not data type or M0/N0/K0
 // It's a good idea to test for each Lhs/Rhs T/NT combinations because they're different CL kernels
-FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::HighDimensionalMatMulDataset(),
-                                                                                                                      framework::dataset::make("pretransose_A", { false, true })),
-                                                                                                                      framework::dataset::make("pretransose_B", { false, true })),
-                                                                                                                      framework::dataset::make("M0", { 2 })),
-                                                                                                                      framework::dataset::make("N0", { 2 })),
-                                                                                                                      framework::dataset::make("K0", { 2 })),
-                                                                                                              framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::HighDimensionalMatMulDataset(),
+                                                                                                                 framework::dataset::make("pretransose_A", { false, true })),
+                                                                                                                 framework::dataset::make("pretransose_B", { false, true })),
+                                                                                                                 framework::dataset::make("M0", { 2 })),
+                                                                                                                 framework::dataset::make("N0", { 2 })),
+                                                                                                                 framework::dataset::make("K0", { 2 })),
+                                                                                                                 framework::dataset::make("export_rhs_to_cl_image", { false })),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
+TEST_SUITE_END() // Buffer
+
+TEST_SUITE(ExportRhsToCLImage)
+FIXTURE_DATA_TEST_CASE(RunSmallRhsNotTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDatasetRhsExportToCLImageRhsNT(),
+                                                                                                                       framework::dataset::make("pretransose_A", { true, false })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false })),
+                                                                                                                       framework::dataset::make("M0", { 2 })),
+                                                                                                                       framework::dataset::make("N0", { 4, 8, 16 })),
+                                                                                                                       framework::dataset::make("K0", { 2, 4 })),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { true })),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    if(_device_supports_export_to_cl_image)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLargeRhsNotTransposed, CLMatMulKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDatasetRhsExportToCLImageRhsNT(),
+                                                                                                                       framework::dataset::make("pretransose_A", { true, false })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false })),
+                                                                                                                       framework::dataset::make("M0", { 2 })),              // Choices of M0 does not matter much because it's related to Lhs tensor
+                                                                                                                       framework::dataset::make("N0", { 4, 8, 16 })),
+                                                                                                                       framework::dataset::make("K0", { 1, 2, 3, 4 })),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { true })),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    if(_device_supports_export_to_cl_image)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+}
+TEST_SUITE_END() // ExportRhsToCLImage
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulKernelFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                   framework::dataset::make("pretransose_A", { false, true })),
-                                                                                                                   framework::dataset::make("pretransose_B", { false, true })),
-                                                                                                                   m0_values_precommit),
-                                                                                                                   n0_values_precommit),
-                                                                                                           k0_values_precommit),
-                                                                                                   framework::dataset::make("DataType", DataType::F16)))
+TEST_SUITE(Buffer)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulKernelFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
+                                                                                                                      framework::dataset::make("pretransose_A", { false, true })),
+                                                                                                                      framework::dataset::make("pretransose_B", { false, true })),
+                                                                                                                      m0_values_precommit),
+                                                                                                                      n0_values_precommit),
+                                                                                                                      k0_values_precommit),
+                                                                                                                      framework::dataset::make("export_rhs_to_cl_image", { false })),
+                                                                                                              framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                   framework::dataset::make("pretransose_A", { false })),
                                                                                                                   framework::dataset::make("pretransose_B", { false })),
                                                                                                                   m0_values_nightly_lhs_nt),
                                                                                                                   n0_values_nightly_rhs_nt),
                                                                                                                   k0_values_nightly_lhs_nt_rhs_nt),
+                                                                                                                  framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeRhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                     framework::dataset::make("pretransose_A", { false })),
                                                                                                                     framework::dataset::make("pretransose_B", { true })),
                                                                                                                     m0_values_nightly_lhs_nt),
                                                                                                                     n0_values_nightly_rhs_t),
                                                                                                                     k0_values_nightly_rhs_t),
+                                                                                                                    framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                     framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                     framework::dataset::make("pretransose_A", { true })),
                                                                                                                     framework::dataset::make("pretransose_B", { false })),
                                                                                                                     m0_values_nightly_lhs_t),
                                                                                                                     n0_values_nightly_rhs_nt),
                                                                                                                     k0_values_nightly_lhs_t_rhs_nt),
+                                                                                                                    framework::dataset::make("export_rhs_to_cl_image", { false })),
                                                                                                                     framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposedRhsTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDataset(),
                        framework::dataset::make("pretransose_A", { true })),
                        framework::dataset::make("pretransose_B", { true })),
                        m0_values_nightly_lhs_t),
                        n0_values_nightly_rhs_t),
                        k0_values_nightly_rhs_t),
+                       framework::dataset::make("export_rhs_to_cl_image", { false })),
                        framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
+TEST_SUITE_END() // Buffer
+
+TEST_SUITE(ExportRhsToCLImage)
+FIXTURE_DATA_TEST_CASE(RunSmallRhsCLImageRhsNotTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDatasetRhsExportToCLImageRhsNT(),
+                                                                                                                       framework::dataset::make("pretransose_A", { true, false })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false })),
+                                                                                                                       framework::dataset::make("M0", { 2 })),
+                                                                                                                       framework::dataset::make("N0", { 4, 8, 16 })),
+                                                                                                                       framework::dataset::make("K0", { 2, 4 })),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { true })),
+                                                                                                               framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    if(_device_supports_export_to_cl_image)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLargeRhsCLImageRhsNotTransposed, CLMatMulKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulDatasetRhsExportToCLImageRhsNT(),
+                                                                                                                       framework::dataset::make("pretransose_A", { true, false })),
+                                                                                                                       framework::dataset::make("pretransose_B", { false })),
+                                                                                                                       framework::dataset::make("M0", { 2 })),              // Choices of M0 does not matter much because it's related to Lhs tensor
+                                                                                                                       framework::dataset::make("N0", { 4, 8, 16 })),
+                                                                                                                       framework::dataset::make("K0", { 1, 2, 3, 4 })),
+                                                                                                                       framework::dataset::make("export_rhs_to_cl_image", { true })),
+                                                                                                               framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    if(_device_supports_export_to_cl_image)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+}
+TEST_SUITE_END() // ExportRhsToCLImage
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // MatMulKernel
