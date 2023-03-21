@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,7 +103,7 @@ void NEBatchToSpaceLayerKernel::configure(const ITensor *input, const ITensor *b
 void NEBatchToSpaceLayerKernel::configure(const ITensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    TensorShape output_shape = compute_batch_to_space_shape(input->info(), block_shape_x, block_shape_y);
+    const TensorShape output_shape = compute_batch_to_space_shape(input->info()->data_layout(), input->info()->tensor_shape(), block_shape_x, block_shape_y);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 

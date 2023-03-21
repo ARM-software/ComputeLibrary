@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,8 +128,8 @@ void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape = compute_batch_to_space_shape(input->info(), block_shape_x, block_shape_y);
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    const TensorShape output_shape = compute_batch_to_space_shape(input->info()->data_layout(), input->info()->tensor_shape(), block_shape_x, block_shape_y);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_static(input->info(), block_shape_x, block_shape_y, output->info()));
 

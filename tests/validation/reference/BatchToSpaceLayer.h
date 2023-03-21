@@ -37,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &block_shape, const TensorShape &dst_shape, const CropInfo &crop_info = CropInfo{});
+SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test
