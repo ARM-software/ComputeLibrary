@@ -42,14 +42,16 @@ CLMatMul::CLMatMul()
 
 CLMatMul::~CLMatMul() = default;
 
-void CLMatMul::configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info)
+void CLMatMul::configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings)
 {
+    ARM_COMPUTE_UNUSED(settings);
     configure(CLKernelLibrary::get().get_compile_context(), lhs, rhs, output, matmul_info);
 }
 
-void CLMatMul::configure(const CLCompileContext &compile_context, ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info)
+void CLMatMul::configure(const CLCompileContext &compile_context, ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, output);
+    ARM_COMPUTE_UNUSED(settings);
 
     _impl->op = std::make_unique<OperatorType>();
     _impl->op->configure(compile_context, lhs->info(), rhs->info(), output->info(), matmul_info);

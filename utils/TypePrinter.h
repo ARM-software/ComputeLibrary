@@ -49,6 +49,7 @@
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/NEON/functions/NEMatMul.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -3738,6 +3739,35 @@ inline std::string to_string(const arm_compute::MatMulKernelInfo &matmul_info)
 {
     std::stringstream str;
     str << matmul_info;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::CpuMatMulSettings type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  settings arm_compute::CpuMatMulSettings type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::CpuMatMulSettings &settings)
+{
+    os << "CpuMatMulSettings="
+       << "["
+       << "fast_math=" << settings.fast_math()
+       << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::CpuMatMulSettings type.
+ *
+ * @param[in] settings arm_compute::CpuMatMulSettings type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::CpuMatMulSettings &settings)
+{
+    std::stringstream str;
+    str << settings;
     return str.str();
 }
 

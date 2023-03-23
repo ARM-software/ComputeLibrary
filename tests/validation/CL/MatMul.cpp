@@ -46,8 +46,9 @@ constexpr float abs_tolerance_f16(
     0.001f);                                                   /**< Absolute tolerance value for comparing reference's output against implementation's output for fp16  data type in case using relative tolerance fails because of small values */
 RelativeTolerance<half_float::half> tolerance_f16(half(0.01)); /**< Tolerance value for comparing reference's output against implementation's output for fp16 data type */
 } // namespace
+
 template <typename T>
-using MatMulFixture = MatMulValidationFixture<CLTensor, CLAccessor, CLMatMul, T>;
+using MatMulFixture = MatMulValidationFixture<CLTensor, CLAccessor, CLMatMul, GpuMatMulSettings, T>;
 
 TEST_SUITE(CL)
 TEST_SUITE(MatMul)

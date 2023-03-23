@@ -757,10 +757,10 @@ target_sources(
 	cpu/kernels/instancenorm/generic/neon/impl.cpp
 	cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.cpp
 	cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp
-	cpu/kernels/lut/generic/neon/u8.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp16.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp32.cpp
 	cpu/kernels/l2normlayer/generic/neon/impl.cpp
+	cpu/kernels/lut/generic/neon/u8.cpp
 	cpu/kernels/maxunpool/generic/neon/fp16.cpp
 	cpu/kernels/maxunpool/generic/neon/fp32.cpp
 	cpu/kernels/maxunpool/generic/neon/impl.cpp
@@ -829,6 +829,7 @@ target_sources(
 	cpu/operators/CpuGemmDirectConv2d.cpp
 	cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp
 	cpu/operators/CpuGemmLowpOutputStage.cpp
+	cpu/operators/CpuMatMul.cpp
 	cpu/operators/CpuMaxUnpooling.cpp
 	cpu/operators/CpuMul.cpp
 	cpu/operators/CpuPermute.cpp
@@ -913,6 +914,7 @@ target_sources(
 	runtime/NEON/functions/NELSTMLayer.cpp
 	runtime/NEON/functions/NELSTMLayerQuantized.cpp
 	runtime/NEON/functions/NELogical.cpp
+	runtime/NEON/functions/NEMatMul.cpp
 	runtime/NEON/functions/NEMaxUnpoolingLayer.cpp
 	runtime/NEON/functions/NEMeanStdDevNormalizationLayer.cpp
 	runtime/NEON/functions/NENormalizationLayer.cpp

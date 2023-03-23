@@ -35,6 +35,13 @@ class ITensorInfo;
 class MatMulInfo;
 class Status;
 
+/** Settings for MatMul OpenCL implementation */
+class GpuMatMulSettings
+{
+public:
+    /* Placeholder for operator parity between CPU/GPU */
+};
+
 /** Basic function to execute MatMul (Matrix Multiplication) on OpenCL */
 class CLMatMul : public IFunction
 {
@@ -73,13 +80,14 @@ public:
      * @param[in]  rhs             RHS input tensor (Matrix B). Data type supported: same as @p lhs.
      * @param[out] output          Output tensor. Data type supported: same as @p lhs.
      * @param[in]  matmul_info     Attributes for MatMul
+     * @param[in]  settings        Class containing flags for function level settings
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *rhs, ICLTensor *lhs, ICLTensor *output, const MatMulInfo &matmul_info);
+    void configure(const CLCompileContext &compile_context, ICLTensor *rhs, ICLTensor *lhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings = GpuMatMulSettings{});
     /** Initialise the kernel's inputs and output
      *
      * Similar to @ref CLMatMul::configure()
      */
-    void configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info);
+    void configure(ICLTensor *lhs, ICLTensor *rhs, ICLTensor *output, const MatMulInfo &matmul_info, const GpuMatMulSettings &settings = GpuMatMulSettings{});
     /** Static function to check if given info will lead to a valid configuration of @ref CLMatMul.
      *
      * Similar to @ref CLMatMul::configure()
