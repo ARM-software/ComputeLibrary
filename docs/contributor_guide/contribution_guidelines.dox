@@ -264,6 +264,47 @@ auto c = img.ptr(); // NO: Can't tell what the type is without knowing the API.
 auto d = vdup_n_u8(0); // NO: It's not obvious what type this function returns.
 @endcode
 
+- When to use const
+
+    - Local variables: Use const as much as possible. E.g. all read-ony variables should be declared as const.
+
+    - Function parameters
+
+        - Top-level const must not be used in the function declaration or definition. (Note that this applies to all types, including non-primitive types)
+          This is because for function parameters, top-level const in function declaration is always ignored by the compiler (it is meaningless).
+          Therefore we should omit top-level const to reduce visual clutter. In addition, its omission can improve API/ABI
+          stability to some extent as there is one fewer varying factor in function signatures.
+
+          Note that we could in theory allow top-level const in only definition (which is not ignored by the compiler) but not declaration.
+          But certain toolchains are known to require the declaration and definition to match exactly.
+
+        - Use low-level const (of references and pointers) as much as possible.
+@code{.cpp}
+// Primitive types
+void foo(const int a);              // NO: Top-level const must not be used in function declaration or definition
+void foo(int a);                    // OK
+// Pointer to primitive types
+void foo(int *const a);             // NO: Top-level const
+void foo(const int *const a);       // NO: Top-level const
+void foo(int *a);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const int *a);             // OK but not recommended: See section above about passing primitives by value
+// Reference to primitive types
+// There's no "top-level const" for references
+void foo(int &a);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const int &a);             // OK but not recommended: See section above about passing primitives by value
+
+// Custom types
+void foo(const Goo g);              // NO: Top-level const
+void foo(Goo g);                    // OK
+// Pointer to custom types
+void foo(Goo *const g);             // NO: Top-level const
+void foo(Goo *g);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const Goo *g);             // OK
+// Reference to custom types
+void foo(Goo &g);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const Goo &g);             // OK
+@endcode
+
 - OpenCL:
     - Use __ in front of the memory types qualifiers and kernel: __kernel, __constant, __private, __global, __local.
     - Indicate how the global workgroup size / offset / local workgroup size are being calculated.
