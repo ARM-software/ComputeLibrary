@@ -40,6 +40,9 @@ If there is more than one release in a month then an extra sequential number is 
 @note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+v23.05 Public major release
+ - Deprecate dynamic block shape in @ref NEBatchToSpaceLayer
+
 v23.02.1 Public patch release
  - Allow mismatching data layouts between the source tensor and weights for \link cpu::CpuGemmDirectConv2d CpuGemmDirectConv2d \endlink with fixed format kernels.
  - Fixes for experimental CPU only Bazel and CMake builds.

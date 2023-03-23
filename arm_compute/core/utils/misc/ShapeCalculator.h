@@ -1201,7 +1201,7 @@ inline TensorShape compute_split_shape(const ITensorInfo *input, unsigned int ax
  *
  * @return the calculated shape
  */
-inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const int block_x, const int block_y, const Size2D &padding_left, const Size2D &padding_right)
+inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, int block_x, int block_y, const Size2D &padding_left, const Size2D &padding_right)
 {
     TensorShape output_shape{ input->tensor_shape() };
 
