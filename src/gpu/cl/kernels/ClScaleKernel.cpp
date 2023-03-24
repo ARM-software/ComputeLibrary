@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace kernels
 {
 namespace
 {
-inline std::pair<float, float> calculate_scale_factors(const ITensorInfo *src, const ITensorInfo *dst, DataLayout data_layout, bool align_corners)
+inline std::tuple<float, float> calculate_scale_factors(const ITensorInfo *src, const ITensorInfo *dst, DataLayout data_layout, bool align_corners)
 {
     const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -53,7 +53,7 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo *src, c
     float scale_x = arm_compute::scale_utils::calculate_resize_ratio(src_width, dst_width, align_corners);
     float scale_y = arm_compute::scale_utils::calculate_resize_ratio(src_height, dst_height, align_corners);
 
-    return std::make_pair(scale_x, scale_y);
+    return std::make_tuple(scale_x, scale_y);
 }
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info)
