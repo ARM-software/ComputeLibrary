@@ -3678,6 +3678,35 @@ inline std::string to_string(const experimental::dynamic_fusion::SoftmaxAttribut
     str << softmax_attr;
     return str.str();
 }
+/** Formatted output of the arm_compute::MatMulInfo type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  matmul_info arm_compute::MatMulInfo  type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulInfo &matmul_info)
+{
+    os << "MatMulKernelInfo="
+       << "["
+       << "adj_lhs=" << matmul_info.adj_lhs() << ", "
+       << "adj_rhs=" << matmul_info.adj_rhs() << ", "
+       << "fused_activation=" << matmul_info.fused_activation().activation() << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::MatMulInfo type.
+ *
+ * @param[in] matmul_info arm_compute::MatMulInfo type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::MatMulInfo &matmul_info)
+{
+    std::stringstream str;
+    str << matmul_info;
+    return str.str();
+}
 
 /** Formatted output of the arm_compute::MatMulKernelInfo type.
  *

@@ -24,8 +24,6 @@
 #ifndef ACL_SRC_GPU_CL_KERNELS_CLNATIVEMATMULKERNEL
 #define ACL_SRC_GPU_CL_KERNELS_CLNATIVEMATMULKERNEL
 
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
@@ -65,7 +63,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool _export_rhs_to_cl_image { false };
+    bool _export_rhs_to_cl_image{ false };
 };
 } // namespace kernels
 } // namespace opencl
