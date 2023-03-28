@@ -67,18 +67,22 @@ public:
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
-     * @param[in]  crop_info   Information about how the output shape is cropped after batch to space is performed
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
-    void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
+    ARM_COMPUTE_DEPRECATED_REL(23.05)
+    void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
-     * @param[in]  crop_info       Information about how the output shape is cropped after batch to space is performed
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output, const CropInfo &crop_info = CropInfo{});
+    ARM_COMPUTE_DEPRECATED_REL(23.05)
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Set the input and output tensors. (Static block shape).
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -103,11 +107,13 @@ public:
      * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape block shape tensor info with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output info. Data types supported: same as @p input
-     * @param[in]  crop_info   Information about how the output shape is cropped after batch to space is performed
      *
      * @return a status
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output, const CropInfo &crop_info = CropInfo{});
+    ARM_COMPUTE_DEPRECATED_REL(23.05)
+    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer (Static block shape).
      *
      * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: All.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,8 @@ public:
      * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
     void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Initialise the kernel's inputs and output.
@@ -60,6 +62,8 @@ public:
      * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Initialise the kernel's inputs and output (Static block shape).
@@ -68,8 +72,9 @@ public:
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info     Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output);
+    void configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info);
     /** Initialise the kernel's inputs and output (Static block shape).
      *
      * @param[in]  compile_context The compile context to be used.
@@ -77,8 +82,9 @@ public:
      * @param[in]  block_shape_x   Block shape x value.
      * @param[in]  block_shape_y   Block shape y value.
      * @param[out] output          Tensor output. Data types supported: same as @p input
+     * @param[in]  crop_info       Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -86,6 +92,8 @@ public:
      * @param[in] output      Tensor output. Data types supported: same as @p input
      *
      * @return a status
+     *
+     * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel (Static block shape).
@@ -94,10 +102,11 @@ public:
      * @param[in] block_shape_x Block shape x value.
      * @param[in] block_shape_y Block shape y value.
      * @param[in] output        Tensor output. Data types supported: same as @p input
+     * @param[in] crop_info     Specifies how the output shape is cropped after batch to space is performed
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const int32_t block_shape_x, const int32_t block_shape_y, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const int32_t block_shape_x, const int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

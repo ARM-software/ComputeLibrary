@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,8 @@
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The input tensor batch size must be passed at compile time using -DBATCH_SIZE. e.g. -DBATCH_SIZE=2
  *
+ * @deprecated This method for dynamic block shape is not fully mature and will be removed in 23.08 release
+ *
  * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
@@ -55,28 +57,27 @@
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void batch_to_space_nhwc(
-    TENSOR3D_DECLARATION(input),
+    TENSOR4D_DECLARATION(input),
     const int batch_id,
     VECTOR_DECLARATION(block_shape),
-    TENSOR4D_DECLARATION(output))
+    TENSOR3D_DECLARATION(output))
 {
-    Tensor3D in    = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor4D out   = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+    Tensor3D out   = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor4D in    = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
     Vector   block = CONVERT_TO_VECTOR_STRUCT_NO_STEP(block_shape);
 
     const int block_x = *((__global int *)vector_offset(&block, 0));
     const int block_y = *((__global int *)vector_offset(&block, 1));
 
-    const int r = (BATCH_SIZE / (block_x * block_y));
     const int x = get_global_id(1);
     const int y = get_global_id(2);
     const int z = get_global_id(0);
-    const int w = batch_id % r;
 
-    const int out_x = x * block_x + (batch_id / r) % block_x;
-    const int out_y = y * block_y + (batch_id / r) / block_x;
+    const int in_batch = batch_id + ((x % block_x) + (y % block_y) * (block_x)) * BATCH_SIZE;
+    const int in_x     = x / block_x;
+    const int in_y     = y / block_y;
 
-    *((__global DATA_TYPE *)tensor4D_offset(&out, z, out_x, out_y, w)) = *((__global DATA_TYPE *)in.ptr);
+    *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, z, in_x, in_y, in_batch));
 }
 #endif // defined(DATA_TYPE) && defined(BATCH_SIZE)
 
@@ -107,25 +108,24 @@ __kernel void batch_to_space_nhwc(
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void batch_to_space_static_nhwc(
-    TENSOR3D_DECLARATION(input),
+    TENSOR4D_DECLARATION(input),
     const int batch_id,
-    TENSOR4D_DECLARATION(output))
+    TENSOR3D_DECLARATION(output))
 {
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
 
     const int block_x = BLOCK_SHAPE_X;
     const int block_y = BLOCK_SHAPE_Y;
 
-    const int r = (BATCH_SIZE / (block_x * block_y));
-    const int x = get_global_id(1);
-    const int y = get_global_id(2);
+    const int x = get_global_id(1) + CROP_LEFT;
+    const int y = get_global_id(2) + CROP_TOP;
     const int z = get_global_id(0);
-    const int w = batch_id % r;
 
-    const int out_x = x * block_x + (batch_id / r) % block_x;
-    const int out_y = y * block_y + (batch_id / r) / block_x;
+    const int in_batch = batch_id + ((x % block_x) + (y % block_y) * (block_x)) * BATCH_SIZE;
+    const int in_x     = x / block_x;
+    const int in_y     = y / block_y;
 
-    *((__global DATA_TYPE *)tensor4D_offset(&out, z, out_x, out_y, w)) = *((__global DATA_TYPE *)in.ptr);
+    *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, z, in_x, in_y, in_batch));
 }
 #endif // defined(DATA_TYPE) && defined(BATCH_SIZE) && defined(BLOCK_SHAPE_X) && defined(BLOCK_SHAPE_Y)
