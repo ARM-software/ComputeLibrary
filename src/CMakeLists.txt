@@ -408,6 +408,7 @@ target_sources(
 	core/NEON/kernels/NEROIPoolingLayerKernel.cpp
 	core/NEON/kernels/NERangeKernel.cpp
 	core/NEON/kernels/NEReductionOperationKernel.cpp
+	core/NEON/kernels/NEReorderKernel.cpp
 	core/NEON/kernels/NEReorgLayerKernel.cpp
 	core/NEON/kernels/NEReverseKernel.cpp
 	core/NEON/kernels/NESelectKernel.cpp
@@ -945,6 +946,7 @@ target_sources(
 	runtime/NEON/functions/NERange.cpp
 	runtime/NEON/functions/NEReduceMean.cpp
 	runtime/NEON/functions/NEReductionOperation.cpp
+	runtime/NEON/functions/NEReorder.cpp
 	runtime/NEON/functions/NEReorgLayer.cpp
 	runtime/NEON/functions/NEReshapeLayer.cpp
 	runtime/NEON/functions/NEReverse.cpp

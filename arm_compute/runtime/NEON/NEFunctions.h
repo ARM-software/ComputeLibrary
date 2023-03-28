@@ -93,6 +93,7 @@
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
+#include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"

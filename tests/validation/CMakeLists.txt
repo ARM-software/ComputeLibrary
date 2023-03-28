@@ -138,6 +138,7 @@ if(ENABLE_NEON)
             NEON/FullyConnectedLayer.cpp
             NEON/ConvolutionLayer.cpp
             NEON/StridedSlice.cpp
+            NEON/ReorderLayer.cpp
             NEON/UNIT/DynamicTensor.cpp
             NEON/UNIT/TensorAllocator.cpp
             NEON/UNIT/MemoryManager.cpp

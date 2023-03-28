@@ -106,6 +106,13 @@ cc_binary(
                 "ARM_COMPUTE_ENABLE_BF16",
                 ],
                 "//conditions:default": [],
+              }) +
+        select({
+                "//:sve_validation_flag": [
+                "ENABLE_SVE",
+                "ARM_COMPUTE_ENABLE_SVE",
+                ],
+                "//conditions:default": [],
               })
 )
 

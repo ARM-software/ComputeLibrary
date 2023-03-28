@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,7 @@
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
+#include "src/core/NEON/kernels/NEReorderKernel.h"
 #include "src/core/NEON/kernels/NEReorgLayerKernel.h"
 #include "src/core/NEON/kernels/NEReverseKernel.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"

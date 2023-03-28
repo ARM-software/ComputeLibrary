@@ -2077,6 +2077,14 @@
           ]
         }
       },
+      "Reorder": {
+        "files": {
+          "common": [
+            "src/runtime/NEON/functions/NEReorder.cpp",
+            "src/core/NEON/kernels/NEReorderKernel.cpp"
+          ]
+        }
+      },
       "Reverse": {
         "files": {
           "common": [

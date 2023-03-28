@@ -107,6 +107,7 @@ target_sources(
           validation/reference/DepthwiseConvolutionLayer.cpp
           validation/reference/FullyConnectedLayer.cpp
           validation/reference/ConvolutionLayer.cpp
+          validation/reference/Reorder.cpp
           framework/Framework.cpp
           framework/Utils.cpp
           framework/Exceptions.cpp

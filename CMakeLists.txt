@@ -149,6 +149,8 @@ add_library(arm_compute_sve "")
 target_compile_options(arm_compute_sve
                        PRIVATE "-march=armv8.2-a+sve+fp16+dotprod")
 target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_BF16)
+target_compile_definitions(arm_compute_sve PRIVATE ENABLE_SVE)
+target_compile_definitions(arm_compute_sve PRIVATE ARM_COMPUTE_ENABLE_SVE)
 target_include_directories(
   arm_compute_sve
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -170,6 +172,8 @@ target_compile_options(arm_compute_sve2
                        PRIVATE "-march=armv8.6-a+sve2+fp16+dotprod")
 target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE2)
 target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_BF16)
+target_compile_definitions(arm_compute_sve2 PRIVATE ENABLE_SVE)
+target_compile_definitions(arm_compute_sve2 PRIVATE ARM_COMPUTE_ENABLE_SVE)
 target_include_directories(
   arm_compute_sve2
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -189,6 +193,8 @@ target_include_directories(
 add_library(arm_compute_core "")
 target_compile_options(arm_compute_core PRIVATE "-march=armv8.2-a+fp16")
 target_compile_definitions(arm_compute_core PRIVATE ARM_COMPUTE_ENABLE_BF16)
+target_compile_definitions(arm_compute_core PRIVATE ENABLE_SVE)
+target_compile_definitions(arm_compute_core PRIVATE ARM_COMPUTE_ENABLE_SVE)
 target_include_directories(
   arm_compute_core
   PUBLIC $<INSTALL_INTERFACE:include>
@@ -211,6 +217,8 @@ target_link_libraries(
 
 add_library(arm_compute_graph "")
 target_compile_options(arm_compute_graph PRIVATE "-march=armv8.2-a+fp16")
+target_compile_definitions(arm_compute_graph PRIVATE ENABLE_SVE)
+target_compile_definitions(arm_compute_graph PRIVATE ARM_COMPUTE_ENABLE_SVE)
 # add_subdirectory(src/graph)
 
 target_include_directories(
@@ -261,6 +269,10 @@ if(BUILD_TESTING)
   target_compile_options(arm_compute_validation PRIVATE "-march=armv8.2-a+fp16")
   if(ENABLE_BF16_VALIDATION)
     target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_BF16)
+  endif()
+  if(ENABLE_SVE_VALIDATION)
+    target_compile_definitions(arm_compute_validation PRIVATE ENABLE_SVE)
+    target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_SVE)
   endif()
   add_subdirectory(tests/validation)
   target_compile_options(arm_compute_validation PUBLIC ${COMMON_CXX_FLAGS})
