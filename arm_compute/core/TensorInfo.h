@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 
 namespace arm_compute

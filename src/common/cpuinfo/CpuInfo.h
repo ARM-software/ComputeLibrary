@@ -27,6 +27,7 @@
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/common/cpuinfo/CpuModel.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

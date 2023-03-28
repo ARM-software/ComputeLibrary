@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 #include <vector>

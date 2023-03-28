@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 
 namespace arm_compute
 {
