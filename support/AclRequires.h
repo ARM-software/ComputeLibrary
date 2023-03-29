@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_REQUIRES_H
-#define ARM_COMPUTE_UTILS_REQUIRES_H
+#ifndef ARM_COMPUTE_UTILS_ACLREQUIRES_H
+#define ARM_COMPUTE_UTILS_ACLREQUIRES_H
 
 namespace arm_compute
 {
 namespace utils
-{
-namespace requires
 {
 // *INDENT-OFF*
 // clang-format off
@@ -42,10 +40,9 @@ enum class enabler
 /** Requirements as template */
 #define ARM_COMPUTE_REQUIRES_T(...) template <bool Cond = (__VA_ARGS__), typename std::enable_if<Cond, int>::type = 0>
 /** Requirements as template argument */
-#define ARM_COMPUTE_REQUIRES_TA(...) typename = typename std::enable_if<(__VA_ARGS__), arm_compute::utils::requires::detail::enabler>::type
+#define ARM_COMPUTE_REQUIRES_TA(...) typename = typename std::enable_if<(__VA_ARGS__), arm_compute::utils::detail::enabler>::type
 // clang-format on
 // *INDENT-ON*
-} // namespace requires
 } // namespace utils
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_UTILS_REQUIRES_H */

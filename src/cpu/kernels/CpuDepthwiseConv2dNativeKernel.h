@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_neon.h>

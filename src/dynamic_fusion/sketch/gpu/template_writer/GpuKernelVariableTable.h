@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 #include "support/StringSupport.h"
 
 #include <set>

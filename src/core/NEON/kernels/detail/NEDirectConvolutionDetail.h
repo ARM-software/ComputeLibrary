@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 
 #include "src/core/NEON/NEFixedPoint.h"
 #include "src/core/NEON/wrapper/wrapper.h"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 
 #include <arm_neon.h>
 
