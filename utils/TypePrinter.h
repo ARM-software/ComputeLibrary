@@ -2772,7 +2772,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FullyConnectedLayerI
        << "transpose_weights=" << layer_info.transpose_weights << ", "
        << "are_weights_reshaped=" << layer_info.are_weights_reshaped << ", "
        << "retain_internal_weights=" << layer_info.retain_internal_weights << ", "
-       << "constant_weights=" << layer_info.transpose_weights << ", "
        << "fp_mixed_precision=" << layer_info.fp_mixed_precision << "}";
     return os;
 }

@@ -333,7 +333,6 @@ private:
         validate(AccessorType(target), ref, rel_tolerance_f32, 0, abs_tolerance_f32);
     }
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     void validate_with_tolerance(TensorType &target, SimpleTensor<half_float::half> &ref)
     {
         constexpr AbsoluteTolerance<float> abs_tolerance_f16(0.3f);
@@ -342,7 +341,6 @@ private:
 
         validate(AccessorType(target), ref, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
     }
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
     void validate_with_tolerance(TensorType &target, SimpleTensor<uint8_t> &ref)
     {

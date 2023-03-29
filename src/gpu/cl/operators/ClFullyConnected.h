@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,6 +132,12 @@ private:
     bool _is_fc_after_conv{ true };
     bool _is_quantized{ false };
     bool _is_prepared{ false };
+    bool _dynamic_weights{ false };
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    int  _asrt_run_count{};
+    int  _asrt_prepare_count{};
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
 };
 } // namespace opencl
 } // namespace arm_compute
