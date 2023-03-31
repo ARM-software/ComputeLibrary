@@ -114,8 +114,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NERoundLayerQuantizedFixture<int8_t>, framework
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
-
 TEST_SUITE_END() // Quantized
+
 TEST_SUITE_END() // RoundLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

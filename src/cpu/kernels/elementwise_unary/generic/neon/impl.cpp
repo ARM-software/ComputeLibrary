@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "src/cpu/kernels/elementwise_unary/generic/neon/impl.h"
+#include "arm_compute/core/Helpers.h"
+#include "src/core/NEON/NEAsymm.h"
 
 namespace arm_compute
 {
@@ -111,5 +113,166 @@ template void elementwise_op<__fp16>(const ITensor *in, ITensor *out, const Wind
 template void elementwise_op<float>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
 template void elementwise_op<int32_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op);
 
+template <>
+void elementwise_op<int8_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
+{
+    const int                     window_step_x     = 16;
+    const auto                    window_start_x    = static_cast<int>(window.x().start());
+    const auto                    window_end_x      = static_cast<int>(window.x().end());
+    const UniformQuantizationInfo qi_in             = in->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out            = out->info()->quantization_info().uniform();
+    const auto                    min_clamped_value = vdupq_n_f32((-128 - qi_out.offset) * qi_out.scale);
+    const auto                    max_clamped_value = vdupq_n_f32((127 - qi_out.offset) * qi_out.scale);
+    Window                        win               = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(in, win);
+    Iterator output(out, win);
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        int8x16_t  vout;
+        auto       output_ptr    = reinterpret_cast<int8_t *>(output.ptr());
+        const auto input_ptr     = reinterpret_cast<const int8_t *>(input.ptr());
+        const auto vconst_0_f32  = vdupq_n_f32(0);
+        auto       clamped_value = (op == ElementWiseUnary::LOG) ? min_clamped_value : max_clamped_value;
+
+        int x = window_start_x;
+        for(; x <= window_end_x - window_step_x; x += window_step_x)
+        {
+            const auto vin = wrapper::vloadq(input_ptr + x);
+
+            // De-quantize
+            const auto vin_deq = vdequantize(vin, qi_in);
+
+            // Perform activation
+            float32x4x4_t vtmp_deq =
+            {
+                {
+                    elementwise_op_imp<float>(op, vin_deq.val[0]),
+                    elementwise_op_imp<float>(op, vin_deq.val[1]),
+                    elementwise_op_imp<float>(op, vin_deq.val[2]),
+                    elementwise_op_imp<float>(op, vin_deq.val[3]),
+                }
+            };
+
+            if((op == ElementWiseUnary::LOG) || (op == ElementWiseUnary::RSQRT))
+            {
+                vtmp_deq.val[0] = vbslq_f32(vcleq_f32(vin_deq.val[0], vconst_0_f32), clamped_value, vtmp_deq.val[0]);
+                vtmp_deq.val[1] = vbslq_f32(vcleq_f32(vin_deq.val[1], vconst_0_f32), clamped_value, vtmp_deq.val[1]);
+                vtmp_deq.val[2] = vbslq_f32(vcleq_f32(vin_deq.val[2], vconst_0_f32), clamped_value, vtmp_deq.val[2]);
+                vtmp_deq.val[3] = vbslq_f32(vcleq_f32(vin_deq.val[3], vconst_0_f32), clamped_value, vtmp_deq.val[3]);
+            }
+
+            // Re-quantize to new output space
+            vout = vquantize_signed(vtmp_deq, qi_out);
+            wrapper::vstore(output_ptr + x, vout);
+        }
+        for(; x < window_end_x; ++x)
+        {
+            qasymm8_signed_t in    = *(reinterpret_cast<const qasymm8_signed_t *>(input_ptr + x));
+            qasymm8_signed_t tmp   = 0;
+            float            tmp_f = dequantize_qasymm8_signed(in, qi_in);
+            if(tmp_f <= 0.0)
+            {
+                if(op == ElementWiseUnary::LOG)
+                {
+                    tmp_f = (-128 - qi_out.offset) * qi_out.scale;
+                }
+                else if(op == ElementWiseUnary::RSQRT)
+                {
+                    tmp_f = (127 - qi_out.offset) * qi_out.scale;
+                }
+            }
+            else
+            {
+                tmp_f = elementwise_op_scalar_imp<float>(op, tmp_f);
+            }
+            tmp = quantize_qasymm8_signed(tmp_f, qi_out, RoundingPolicy::TO_ZERO); // Set rounding policy TO_ZERO to be compatible with vquantize_signed() used above that follow same policy for armv7a.
+            // For aarch64 LUT is used and rounding to nearest is used
+            *(output_ptr + x) = tmp;
+        }
+    },
+    input, output);
+}
+template <>
+void elementwise_op<uint8_t>(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
+{
+    const int                     window_step_x     = 16;
+    const auto                    window_start_x    = static_cast<int>(window.x().start());
+    const auto                    window_end_x      = static_cast<int>(window.x().end());
+    const UniformQuantizationInfo qi_in             = in->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out            = out->info()->quantization_info().uniform();
+    const auto                    vconst_0_f32      = vdupq_n_f32(0);
+    const auto                    min_clamped_value = vdupq_n_f32((0 - qi_out.offset) * qi_out.scale);
+    const auto                    max_clamped_value = vdupq_n_f32((255 - qi_out.offset) * qi_out.scale);
+    Window                        win               = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(in, win);
+    Iterator output(out, win);
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        uint8x16_t vout;
+        auto       clamped_value = (op == ElementWiseUnary::LOG) ? min_clamped_value : max_clamped_value;
+        auto       output_ptr    = reinterpret_cast<uint8_t *>(output.ptr());
+        const auto input_ptr     = reinterpret_cast<const uint8_t *>(input.ptr());
+        int        x             = window_start_x;
+        for(; x <= window_end_x - window_step_x; x += window_step_x)
+        {
+            const auto vin = wrapper::vloadq(input_ptr + x);
+
+            // De-quantize
+            const auto vin_deq = vdequantize(vin, qi_in);
+
+            // Perform activation
+            float32x4x4_t vtmp_deq =
+            {
+                {
+                    elementwise_op_imp<float>(op, vin_deq.val[0]),
+                    elementwise_op_imp<float>(op, vin_deq.val[1]),
+                    elementwise_op_imp<float>(op, vin_deq.val[2]),
+                    elementwise_op_imp<float>(op, vin_deq.val[3]),
+                }
+            };
+            if((op == ElementWiseUnary::LOG) || (op == ElementWiseUnary::RSQRT))
+            {
+                vtmp_deq.val[0] = vbslq_f32(vcleq_f32(vin_deq.val[0], vconst_0_f32), clamped_value, vtmp_deq.val[0]);
+                vtmp_deq.val[1] = vbslq_f32(vcleq_f32(vin_deq.val[1], vconst_0_f32), clamped_value, vtmp_deq.val[1]);
+                vtmp_deq.val[2] = vbslq_f32(vcleq_f32(vin_deq.val[2], vconst_0_f32), clamped_value, vtmp_deq.val[2]);
+                vtmp_deq.val[3] = vbslq_f32(vcleq_f32(vin_deq.val[3], vconst_0_f32), clamped_value, vtmp_deq.val[3]);
+            }
+
+            // Re-quantize to new output space
+            vout = vquantize(vtmp_deq, qi_out);
+            wrapper::vstore(output_ptr + x, vout);
+        }
+        for(; x < window_end_x; ++x)
+        {
+            qasymm8_t in    = *(reinterpret_cast<const qasymm8_t *>(input_ptr + x));
+            qasymm8_t tmp   = 0;
+            float     tmp_f = dequantize_qasymm8(in, qi_in);
+            if(tmp_f <= 0.0)
+            {
+                if(op == ElementWiseUnary::LOG)
+                {
+                    tmp_f = (0 - qi_out.offset) * qi_out.scale;
+                }
+                else if(op == ElementWiseUnary::RSQRT)
+                {
+                    tmp_f = (255 - qi_out.offset) * qi_out.scale;
+                }
+            }
+            else
+            {
+                tmp_f = elementwise_op_scalar_imp<float>(op, tmp_f);
+            }
+            tmp               = quantize_qasymm8(tmp_f, qi_out, RoundingPolicy::TO_ZERO);
+            *(output_ptr + x) = tmp;
+        }
+    },
+    input, output);
+}
 } // namespace cpu
 } // namespace arm_compute

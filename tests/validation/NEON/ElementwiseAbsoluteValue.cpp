@@ -46,8 +46,13 @@ RelativeTolerance<float> tolerance_fp32(0.000001f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<float> tolerance_fp16(0.01f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(__aarch64__)
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
 constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(0);
+#else  // #if !defined(__aarch64__)
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); // There is difference of 1, because quantizing in reference uses round policy "TO_NEAREST_UP", where the armv7a neon kernel uses "TO_ZERO"
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+#endif // #if !defined(__aarch64__)
 } // namespace
 
 TEST_SUITE(NEON)
@@ -136,8 +141,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerQuantizedFixture<int8_t>, framework::
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
-
 TEST_SUITE_END() // Quantized
+
 TEST_SUITE_END() // AbsLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

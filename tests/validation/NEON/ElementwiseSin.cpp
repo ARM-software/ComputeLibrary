@@ -120,7 +120,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NESinLayerQuantizedFixture<int8_t>, framework::
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE_END() // Quantized
-
 TEST_SUITE_END() // SinLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

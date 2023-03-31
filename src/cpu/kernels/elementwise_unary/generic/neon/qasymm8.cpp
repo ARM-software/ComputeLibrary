@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,32 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_KERNELS_ELEMETWISE_UNARY_LIST_H
-#define SRC_CORE_KERNELS_ELEMETWISE_UNARY_LIST_H
 
+#include "arm_compute/core/Window.h"
 #include "src/cpu/kernels/elementwise_unary/generic/neon/impl.h"
-#include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ELEMETWISE_UNARY_KERNEL(func_name) \
-    void func_name(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
-
-DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp32_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp16_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(sve_s32_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(sve_q8_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp32_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp16_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_s32_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_q8_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_qasymm8_signed_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(neon_qasymm8_elementwise_unary);
-
-#undef DECLARE_ELEMETWISE_UNARY_KERNEL
+#ifndef __aarch64__
+// Fallback function to be used for armv7a, for aarch64 LUT is used
+void neon_qasymm8_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+{
+    ARM_COMPUTE_UNUSED(lut);
+    return elementwise_op<uint8_t>(in, out, window, op);
+}
+#endif // #ifndef __aarch64__
 
 } // namespace cpu
 } // namespace arm_compute
-#endif // SRC_CORE_KERNELS_ELEMETWISE_UNARY_LIST_H

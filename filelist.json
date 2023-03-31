@@ -1427,8 +1427,14 @@
             "integer": ["src/cpu/kernels/elementwise_unary/generic/neon/integer.cpp"],
             "fp32": ["src/cpu/kernels/elementwise_unary/generic/neon/fp32.cpp"],
             "fp16": ["src/cpu/kernels/elementwise_unary/generic/neon/fp16.cpp"],
-            "qasymm8": ["src/cpu/kernels/elementwise_unary/generic/neon/q8.cpp"],
-            "qasymm8_signed": ["src/cpu/kernels/elementwise_unary/generic/neon/q8.cpp"]
+            "qasymm8": [
+              "src/cpu/kernels/elementwise_unary/generic/neon/q8.cpp",
+              "src/cpu/kernels/elementwise_unary/generic/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/cpu/kernels/elementwise_unary/generic/neon/q8.cpp",
+              "src/cpu/kernels/elementwise_unary/generic/neon/qasymm8_signed.cpp"
+            ]
           },
           "sve": {
             "common": ["src/cpu/kernels/elementwise_unary/generic/sve/impl.cpp" ],

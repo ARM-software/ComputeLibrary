@@ -51,18 +51,18 @@ std::unique_ptr<uint8_t[]> q8_prepare_lut(ElementWiseUnary op, const ITensorInfo
     ARM_COMPUTE_ERROR_ON(!is_data_type_quantized(src->data_type()));
     ARM_COMPUTE_ERROR_ON(src->element_size() != 1);
 
-    auto lut = std::unique_ptr<uint8_t[]>(new uint8_t[256]);
+    auto       lut       = std::unique_ptr<uint8_t[]>(new uint8_t[256]);
     const auto is_signed = src->data_type() == DataType::QASYMM8_SIGNED;
-    const auto src_qi = src->quantization_info().uniform();
-    const auto dst_qi = dst->quantization_info().uniform();
+    const auto src_qi    = src->quantization_info().uniform();
+    const auto dst_qi    = dst->quantization_info().uniform();
 
     const auto dst_min_fp = (((is_signed) ? -128 : 0) - dst_qi.offset) * dst_qi.scale;
     const auto dst_max_fp = (((is_signed) ? 127 : 255) - dst_qi.offset) * dst_qi.scale;
 
     for(int i = 0; i < 256; ++i)
     {
-        const auto in = (is_signed) ? dequantize_qasymm8_signed(static_cast<int8_t>(i), src_qi) : dequantize_qasymm8(i, src_qi);
-        float result = 0;
+        const auto in     = (is_signed) ? dequantize_qasymm8_signed(static_cast<int8_t>(i), src_qi) : dequantize_qasymm8(i, src_qi);
+        float      result = 0;
 
         switch(op)
         {
@@ -101,7 +101,7 @@ std::unique_ptr<uint8_t[]> q8_prepare_lut(ElementWiseUnary op, const ITensorInfo
         result = utility::clamp(result, dst_min_fp, dst_max_fp);
 
         const auto out = (is_signed) ? static_cast<uint8_t>(quantize_qasymm8_signed(result, dst_qi)) : quantize_qasymm8(result, dst_qi);
-        lut[i] = out;
+        lut[i]         = out;
     }
 
     return lut;
@@ -174,7 +174,7 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         },
         REGISTER_QASYMM8_SVE(sve_q8_elementwise_unary),
         &q8_prepare_lut,
-        },
+    },
     {
         "neon_q8_elementwise_unary",
         [](const DataTypeISASelectorData & data)
@@ -183,6 +183,25 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         },
         REGISTER_QASYMM8_NEON(neon_q8_elementwise_unary),
         &q8_prepare_lut,
+    },
+#else  // __aarch64__
+    {
+        "neon_qasymm8_signed_elementwise_unary",
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8_SIGNED;
+        },
+        REGISTER_QASYMM8_NEON(neon_qasymm8_signed_elementwise_unary),
+        nullptr,
+    },
+    {
+        "neon_qasymm8_elementwise_unary",
+        [](const DataTypeISASelectorData & data)
+        {
+            return data.dt == DataType::QASYMM8;
+        },
+        REGISTER_QASYMM8_NEON(neon_qasymm8_elementwise_unary),
+        nullptr,
     },
 #endif // __aarch64__
 };
