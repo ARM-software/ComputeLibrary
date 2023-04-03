@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,7 +71,14 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     _impl->original_b  = b;
     _impl->op          = std::make_unique<cpu::CpuGemm>();
 
-    _impl->op->configure(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info);
+    // Make the B matrix dynamic values.
+    auto b_info_to_use = b->info()->clone();
+    if(!gemm_info.reshape_b_only_on_first_run())
+    {
+        b_info_to_use->set_are_values_constant(false);
+    }
+
+    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info);
 
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = { { ACL_SRC_0, a }, { ACL_SRC_1, b }, { ACL_SRC_2, c }, { ACL_DST, d } };
@@ -81,7 +88,14 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
 Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    return cpu::CpuGemm::validate(a, b, c, output, alpha, beta, gemm_info);
+    // Make the B matrix dynamic values.
+    auto b_to_use = b->clone();
+    if(!gemm_info.reshape_b_only_on_first_run())
+    {
+        b_to_use->set_are_values_constant(false);
+    }
+
+    return cpu::CpuGemm::validate(a, b_to_use.get(), c, output, alpha, beta, gemm_info);
 }
 
 Status NEGEMM::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output,

@@ -136,7 +136,7 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
     }
     else
     {
-        GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+        GEMMInfo gemm_info;
         gemm_info.set_weight_format(weight_format);
         gemm_info.set_fixed_format(weight_format != WeightFormat::UNSPECIFIED);
         gemm_info.set_fast_math(enable_fast_math);
@@ -190,7 +190,7 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
         const Status            status = get_gemmlowp_output_stage_info(&src_info, &weights_info, dst, act, gemmlowp_output_stage_info);
         ARM_COMPUTE_ERROR_ON(status.error_code() != ErrorCode::OK);
 
-        GEMMInfo gemm_info(false, false, !_dynamic_weights /* Reshape weights only for the first run */);
+        GEMMInfo gemm_info;
         gemm_info.set_gemmlowp_output_stage(gemmlowp_output_stage_info);
         gemm_info.set_activation_info(act);
         gemm_info.set_fast_math(_enable_fast_math);
@@ -200,7 +200,7 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
     else
     {
         // Configure matrix multiply kernel
-        GEMMInfo gemm_info(false, false, !_dynamic_weights /* Reshape weights only for the first run */);
+        GEMMInfo gemm_info;
         gemm_info.set_activation_info(act);
         gemm_info.set_fast_math(_enable_fast_math);
         gemm_info.set_fixed_format(_fixed_format);
@@ -284,6 +284,8 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
         // Reshape the weights
         _transpose_weights = std::make_unique<kernels::CpuTransposeKernel>();
         _transpose_weights->configure(weights, &_reshaped_weights);
+        _reshaped_weights.set_are_values_constant(weights->are_values_constant());
+
         weights_to_use     = &_reshaped_weights;
         _trans_weights_idx = AuxTensorIdx::TransposedWeights;
     }
@@ -297,6 +299,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                     &_converted_weights,
                                     src->tensor_shape(),
                                     fc_info.weights_trained_layout);
+        _converted_weights.set_are_values_constant(weights_to_use->are_values_constant());
 
         weights_to_use            = &_converted_weights;
         _needs_weights_conversion = true;
@@ -364,7 +367,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
 Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
                                        const ITensorInfo *biases, const ITensorInfo *dst, FullyConnectedLayerInfo fc_info, WeightsInfo weights_info)
 {
-    GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+    GEMMInfo gemm_info;
     gemm_info.set_activation_info(fc_info.activation_info);
     gemm_info.set_fast_math(fc_info.enable_fast_math);
     gemm_info.set_fixed_format(weights_info.weight_format() != WeightFormat::UNSPECIFIED);

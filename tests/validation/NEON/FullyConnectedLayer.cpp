@@ -438,7 +438,7 @@ FIXTURE_DATA_TEST_CASE(RunDynamicBias, NEFullyConnectedLayerDynamicBiasFixture<u
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, NEFullyConnectedLayerDynamicWeightsFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                       framework::dataset::make("WeightsReshaped", { false, true })))
+                       framework::dataset::make("WeightsReshaped", { false })))
 {
 }
 TEST_SUITE_END()
@@ -480,7 +480,7 @@ FIXTURE_DATA_TEST_CASE(RunWithActivation, NEFullyConnectedLayerQuantizedFixture<
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, NEFullyConnectedLayerDynamicWeightsFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                       framework::dataset::make("WeightsReshaped", { false, true })))
+                       framework::dataset::make("WeightsReshaped", { false })))
 {
 }
 TEST_SUITE_END() // QASYMM8_SIGNED

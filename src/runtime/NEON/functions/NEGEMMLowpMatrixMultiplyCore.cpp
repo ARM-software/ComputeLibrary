@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,9 +61,17 @@ NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
+
+    // Make the B matrix dynamic values.
+    auto b_info_to_use = b->info()->clone();
+    if(!gemm_info.reshape_b_only_on_first_run())
+    {
+        b_info_to_use->set_are_values_constant(false);
+    }
+
     _impl->b  = b;
     _impl->op = std::make_unique<cpu::CpuGemmLowpMatrixMultiplyCore>();
-    _impl->op->configure(a->info(), b->info(), (c != nullptr ? c->info() : nullptr), output->info(), gemm_info);
+    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr ? c->info() : nullptr), output->info(), gemm_info);
     _impl->run_pack =
     {
         { TensorType::ACL_SRC_0, a },
@@ -82,7 +90,14 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
 Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info)
 {
-    return cpu::CpuGemmLowpMatrixMultiplyCore::validate(a, b, c, output, gemm_info);
+    // Make the B matrix dynamic values.
+    auto b_info_to_use = b->clone();
+    if(!gemm_info.reshape_b_only_on_first_run())
+    {
+        b_info_to_use->set_are_values_constant(false);
+    }
+
+    return cpu::CpuGemmLowpMatrixMultiplyCore::validate(a, b_info_to_use.get(), c, output, gemm_info);
 }
 
 void NEGEMMLowpMatrixMultiplyCore::run()

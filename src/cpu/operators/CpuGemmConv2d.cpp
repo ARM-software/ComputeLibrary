@@ -169,7 +169,7 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
     {
         // Configure matrix multiply function
         _mm_gemm = std::make_unique<CpuGemm>();
-        _mm_gemm->configure(src, weights, biases, dst, 1.0f, 0.0f, gemm_info);
+        _mm_gemm->configure(src, weights, biases, dst, 1.0f, 1.0f, gemm_info);
         auto mm_mem_req = _mm_gemm->workspace();
         for(unsigned int cont = 0; cont < mm_mem_req.size(); ++cont)
         {
@@ -235,7 +235,7 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
     else
     {
         // Perform validation step on Matrix multiply function
-        return CpuGemm::validate(src, weights, nullptr, dst, 1.0f, 0.0f, gemm_info);
+        return CpuGemm::validate(src, weights, biases, dst, 1.0f, 1.0f, gemm_info);
     }
 }
 
