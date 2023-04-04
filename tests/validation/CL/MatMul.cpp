@@ -58,7 +58,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, MatMulFixture<float>, framework::DatasetMode::P
                                                                                                   framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, MatMulFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                 framework::dataset::make("pretransose_A", { false, true })),
@@ -66,7 +66,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, MatMulFixture<float>, framework::DatasetMode::N
                                                                                                 framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
@@ -76,7 +76,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, MatMulFixture<half>, framework::DatasetMode::PR
                                                                                                  framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, MatMulFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeMatMulDataset(),
                                                                                                                framework::dataset::make("pretransose_A", { false, true })),
@@ -84,7 +84,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, MatMulFixture<half>, framework::DatasetMode::NI
                                                                                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // MatMul
