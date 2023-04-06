@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,7 +139,7 @@ void IScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const W
                 default:
                     ARM_COMPUTE_ERROR("Unknown strategy");
             }
-            // Make sure the smallest window is larger than minimim workload size
+            // Make sure the smallest window is larger than minimum workload size
             num_windows = adjust_num_of_windows(max_window, hints.split_dimension(), num_windows, *kernel, cpu_info());
 
             std::vector<IScheduler::Workload> workloads(num_windows);
@@ -178,7 +178,7 @@ void IScheduler::run_tagged_workloads(std::vector<Workload> &workloads, const ch
 std::size_t IScheduler::adjust_num_of_windows(const Window &window, std::size_t split_dimension, std::size_t init_num_windows, const ICPPKernel &kernel, const CPUInfo &cpu_info)
 {
     // Mitigation of the narrow split issue, which occurs when the split dimension is too small to split (hence "narrow").
-    if(window.num_iterations(split_dimension) < init_num_windows )
+    if(window.num_iterations(split_dimension) < init_num_windows)
     {
         auto recommended_split_dim = Window::DimX;
         for(std::size_t dims = Window::DimY; dims <= Window::DimW; ++dims)

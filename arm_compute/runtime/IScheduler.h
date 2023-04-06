@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,9 +176,9 @@ public:
 
     /** Execute all the passed workloads
      *
-     * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
+     * @note There is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
      *
-     * @param[in] workloads Array of workloads to run
+     * @param[in] workloads List of workloads to run
      * @param[in] tag       String that can be used by profiling tools to identify the workloads run by the scheduler (Can be null).
      */
     virtual void run_tagged_workloads(std::vector<Workload> &workloads, const char *tag);
