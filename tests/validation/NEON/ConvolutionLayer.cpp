@@ -81,7 +81,14 @@ const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
 #endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
+#ifdef ARM_COMPUTE_ENABLE_SME
+// TODO(COMPMID-6011): SME kernels and the reference model use different rounding mode.
+// Temporarily increase the tolerance for quantized data.
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1.0);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#else // ARM_COMPUTE_ENABLE_SME
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#endif // ARM_COMPUTE_ENABLE_SME
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
