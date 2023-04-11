@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,6 +176,38 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
     }
     return std::make_pair(min_quant_val, max_quant_val);
 }
+
+std::tuple<PixelValue, PixelValue> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type)
+{
+    PixelValue type_min{};
+    PixelValue type_max{};
+    std::tie(type_min, type_max)         = get_min_max(data_type);
+    const UniformQuantizationInfo q_unif = q_info.uniform();
+
+    if(act_info.enabled())
+    {
+        switch(act_info.activation())
+        {
+            case ActivationLayerInfo::ActivationFunction::RELU:
+                type_min = PixelValue(q_unif.offset);
+                break;
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+                type_min = PixelValue(q_unif.offset);
+                type_max = PixelValue(act_info.a(), data_type, q_info);
+                break;
+            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+                type_min = PixelValue(act_info.b(), data_type, q_info);
+                type_max = PixelValue(act_info.a(), data_type, q_info);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Activation function not supported.");
+                break;
+        }
+    }
+
+    return std::make_pair(type_min, type_max);
+}
+
 void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               const ITensorInfo *weights,
                                               const ITensorInfo *output,

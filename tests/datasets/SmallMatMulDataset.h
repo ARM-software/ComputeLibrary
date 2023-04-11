@@ -47,6 +47,17 @@ public:
     }
 };
 
+class SmallerMatMulDataset final : public MatMulDataset
+{
+public:
+    SmallerMatMulDataset()
+    {
+        add_config(TensorShape(9U, 6U), TensorShape(5U, 9U), TensorShape(5U, 6U));
+        add_config(TensorShape(8U, 4U, 2U), TensorShape(16U, 8U, 2U), TensorShape(16U, 4U, 2U));
+        add_config(TensorShape(32U, 2U), TensorShape(17U, 32U), TensorShape(17U, 2U));
+    }
+};
+
 class TinyMatMulDataset final : public MatMulDataset
 {
 public:

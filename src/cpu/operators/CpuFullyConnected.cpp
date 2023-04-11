@@ -48,38 +48,6 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-// Get min, max bound of a quantized asymmetric dst tensor, with the effect of fused activation
-std::pair<PixelValue, PixelValue> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type)
-{
-    PixelValue type_min{};
-    PixelValue type_max{};
-    std::tie(type_min, type_max)         = get_min_max(data_type);
-    const UniformQuantizationInfo q_unif = q_info.uniform();
-
-    if(act_info.enabled())
-    {
-        switch(act_info.activation())
-        {
-            case ActivationLayerInfo::ActivationFunction::RELU:
-                type_min = PixelValue(q_unif.offset);
-                break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                type_min = PixelValue(q_unif.offset);
-                type_max = PixelValue(act_info.a(), data_type, q_info);
-                break;
-            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                type_min = PixelValue(act_info.b(), data_type, q_info);
-                type_max = PixelValue(act_info.a(), data_type, q_info);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Activation function not supported.");
-                break;
-        }
-    }
-
-    return std::make_pair(type_min, type_max);
-}
-
 Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const ActivationLayerInfo &act,
                                       GEMMLowpOutputStageInfo &gemmlowp_output_stage_info)
 {
@@ -97,7 +65,7 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
 
     PixelValue type_min{};
     PixelValue type_max{};
-    std::tie(type_min, type_max) = get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
+    std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
 
     gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
     gemmlowp_output_stage_info.gemmlowp_shift      = output_shift;

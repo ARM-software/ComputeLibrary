@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,19 @@ Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
  * @return min and max values for the quantized data type
  */
 std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type);
+
+/** Get minimum and maximum output of the activation function after quantization.
+ *
+ * Only ReLU, upper bounded ReLU and lower+upper bounded ReLU are supported.
+ *
+ * @param[in] q_info    Output quantization info.
+ * @param[in] act_info  Activation function information.
+ * @param[in] data_type Output data type (either QASYMM8 or QASYMM8_SIGNED).
+ *
+ * @return The minimum and maximum output of the activation function after quantization.
+ */
+std::tuple<PixelValue, PixelValue> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type);
+
 /** Compute quantized per-channel multipliers and shifts. As many multipliers
  * and shifts as output channels are computed. If weights are not quantized
  * per-channel, multipliers and shifts will end up being the same for each

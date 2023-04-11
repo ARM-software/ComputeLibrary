@@ -25,12 +25,17 @@
 #define TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
+#include "tests/validation/reference/GEMMLowp.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/ReshapeLayer.h"
+#include <limits>
 #include <random>
+#include <type_traits>
 
 namespace arm_compute
 {
@@ -44,7 +49,7 @@ class MatMulGenericValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs,
-               Settings settings)
+               Settings settings, QuantizationInfo a_qinfo = QuantizationInfo(), QuantizationInfo b_qinfo = QuantizationInfo(), QuantizationInfo o_qinfo = QuantizationInfo())
     {
         // For brevity, the input shapes are assumed to be not-transposed for both a and b matrices.
         if(transpose_a)
@@ -56,8 +61,8 @@ public:
             permute(shape_b, PermutationVector(1U, 0U));
         }
 
-        _target    = compute_target(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, num_extra_runs, settings);
-        _reference = compute_reference(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info);
+        _target    = compute_target(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, num_extra_runs, settings, a_qinfo, b_qinfo, o_qinfo);
+        _reference = compute_reference(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, a_qinfo, b_qinfo, o_qinfo);
     }
 
 protected:
@@ -78,23 +83,29 @@ protected:
                 library->fill(tensor, distribution, i);
                 break;
             }
-            default:
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
             {
                 library->fill_tensor_uniform(tensor, i);
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Unsupported data type.");
             }
         }
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &output_shape, bool transpose_a, bool transpose_b, DataType data_type,
-                              ActivationLayerInfo act_info, int num_extra_runs, const Settings &settings)
+                              ActivationLayerInfo act_info, int num_extra_runs, const Settings &settings, QuantizationInfo a_qinfo, QuantizationInfo b_qinfo, QuantizationInfo o_qinfo)
     {
         // 1. Create Classes and configure function
         // ----------------------------------------------------
         // Create tensors
         // Configure relevant classes and matmul function
-        TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1);
-        TensorType b   = create_tensor<TensorType>(shape_b, data_type, 1);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1);
+        TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1, a_qinfo);
+        TensorType b   = create_tensor<TensorType>(shape_b, data_type, 1, b_qinfo);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, o_qinfo);
 
         FunctionType matmul;
 
@@ -149,18 +160,61 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &a_shape, const TensorShape &b_shape, const TensorShape &output_shape, bool transpose_a, bool transpose_b, DataType data_type,
-                                      ActivationLayerInfo act_info)
+    template <typename TT>
+    typename std::enable_if<!std::is_integral<TT>::value, SimpleTensor<TT>>::type
+    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const ActivationLayerInfo &act_info, const QuantizationInfo &o_qinfo)
     {
-        // We collapse dimensions > 3 onto dimension 3, i.e. 5D+ tensors will look like 4D
-        // This is necessary unless we choose to extend gemm reference for 5D+ tensors
-        TensorShape output_shape_collapsed = output_shape.collapsed_from(Window::DimW);
-        TensorShape a_shape_collapsed      = a_shape.collapsed_from(Window::DimW);
-        TensorShape b_shape_collapsed      = b_shape.collapsed_from(Window::DimW);
+        ARM_COMPUTE_UNUSED(act_info, o_qinfo);
+
+        return reference::gemm(a, b, c, alpha, beta);
+    }
+
+    template <typename TT>
+    typename std::enable_if<std::is_integral<TT>::value, SimpleTensor<TT>>::type
+    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const ActivationLayerInfo &act_info, const QuantizationInfo &o_qinfo)
+    {
+        ARM_COMPUTE_UNUSED(alpha, beta);
+
+        const auto aq = a.quantization_info().uniform();
+        const auto bq = b.quantization_info().uniform();
+        const auto oq = o_qinfo.uniform();
+
+        const auto multiplier = aq.scale * bq.scale / oq.scale;
+
+        int32_t output_multiplier = 0;
+        int32_t output_shift = 0;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        std::vector<int32_t> output_multipliers{ output_multiplier };
+        std::vector<int32_t> output_shifts{ output_shift };
+
+        PixelValue output_min{};
+        PixelValue output_max{};
+        std::tie(output_min, output_max) = quantization::get_quantized_asymmetric_output_min_max(
+            o_qinfo, act_info, a.data_type());
+
+        const auto tmp = reference::gemmlowp_matrix_multiply_core<int32_t>(
+            a, b, c.shape(), aq.offset, bq.offset);
+
+        auto output = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, TT>(
+            tmp, output_multipliers, output_shifts, oq.offset,
+            output_min.get<int32_t>(), output_max.get<int32_t>());
+        output.quantization_info(o_qinfo);
+
+        return output;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &a_shape, const TensorShape &b_shape, const TensorShape &output_shape, bool transpose_a, bool transpose_b, DataType data_type,
+                                      ActivationLayerInfo act_info, QuantizationInfo a_qinfo, QuantizationInfo b_qinfo, QuantizationInfo o_qinfo)
+    {
+        // We collapse dimensions > 2 onto dimension 2, i.e. 4D+ tensors will look like 3D
+        // This is necessary unless we choose to extend gemm reference for 4D+ tensors
+        TensorShape output_shape_collapsed = output_shape.collapsed_from(Window::DimZ);
+        TensorShape a_shape_collapsed      = a_shape.collapsed_from(Window::DimZ);
+        TensorShape b_shape_collapsed      = b_shape.collapsed_from(Window::DimZ);
 
         // Create reference
-        SimpleTensor<T> a{ a_shape_collapsed, data_type, 1 };
-        SimpleTensor<T> b{ b_shape_collapsed, data_type, 1 };
+        SimpleTensor<T> a{ a_shape_collapsed, data_type, 1, a_qinfo };
+        SimpleTensor<T> b{ b_shape_collapsed, data_type, 1, b_qinfo };
         SimpleTensor<T> c{ output_shape_collapsed, data_type, 1 };
 
         // Fill reference
@@ -199,8 +253,9 @@ protected:
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
         // Use transposed tensors if boolean enabled else use original tensors
-        SimpleTensor<T> result = reference::gemm<T>((transpose_a) ? a_transposed : a, (transpose_b) ? b_transposed : b, c, 1.0f, 0.f);
-        result                 = reference::activation_layer<T>(result, act_info, QuantizationInfo());
+        auto result = compute_reference_gemm<T>((transpose_a) ? a_transposed : a, (transpose_b) ? b_transposed : b, c, 1.0f, 0.f, act_info, o_qinfo);
+
+        result = reference::activation_layer<T>(result, act_info, o_qinfo);
 
         // We reshape the gemm output back if the tensor is high dimensional
         if(output_shape_collapsed != output_shape)
@@ -246,6 +301,17 @@ public:
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs)
     {
         MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>::setup(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, num_extra_runs, Settings());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename Settings, typename T>
+class QuantizedMatMulValidationFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs, QuantizationInfo a_qinfo, QuantizationInfo b_qinfo, QuantizationInfo o_qinfo)
+    {
+        MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>::setup(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, num_extra_runs, Settings(), a_qinfo, b_qinfo, o_qinfo);
     }
 };
 

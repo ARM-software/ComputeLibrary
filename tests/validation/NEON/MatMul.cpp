@@ -43,8 +43,10 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(MatMul)
 
-constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
-const AbsoluteTolerance<half>      tolerance_fp16(half(0.1f));
+constexpr AbsoluteTolerance<float>   tolerance_fp32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
+const AbsoluteTolerance<half>        tolerance_fp16(half(0.1f));
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8_signed(0);
 
 // clang-format off
 // *INDENT-OFF*
@@ -57,6 +59,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                              TensorInfo(TensorShape(9U, 6U), 1, DataType::F32),
                                              TensorInfo(TensorShape(9U, 6U , 12U) , 1 , DataType::F32),
                                              TensorInfo(TensorShape(9U, 6U , 12U) , 1 , DataType::F32), // Tensors are not dynamic
+                                             TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8),
+                                             TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8_SIGNED),
+                                             TensorInfo(TensorShape(9U, 6U), 1, DataType::QASYMM8_SIGNED), // Mismatching data type
                                           }),
     framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8),
                                             TensorInfo(TensorShape(5U, 9U), 1, DataType::S32),
@@ -65,6 +70,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             TensorInfo(TensorShape(5U, 9U), 1, DataType::F32),
                                             TensorInfo(TensorShape(5U, 9U, 12U), 1, DataType::F32),
                                             TensorInfo(TensorShape(5U, 9U, 12U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8_SIGNED),
+                                            TensorInfo(TensorShape(5U, 9U), 1, DataType::QASYMM8_SIGNED),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(5U, 6U), 1, DataType::F32),
                                             TensorInfo(TensorShape(5U, 6U), 1, DataType::S32),
@@ -73,9 +81,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             TensorInfo(TensorShape(5U, 6U), 1, DataType::F32),
                                             TensorInfo(TensorShape(5U, 6U, 12U) , 1, DataType::F32),
                                             TensorInfo(TensorShape(5U, 6U, 12U) , 1, DataType::F32),
+                                            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8_SIGNED),
+                                            TensorInfo(TensorShape(5U, 6U), 1, DataType::QASYMM8),
                                            })),
-    framework::dataset::make( "TensorIsConst", {false, false, false, false, false , false, true} )),
-    framework::dataset::make("Expected", { false, false, false, false, true, true, false })),
+    framework::dataset::make( "TensorIsConst", {false, false, false, false, false , false, true, false, false, false} )),
+    framework::dataset::make("Expected", { false, false, false, false, true, true, false, true, true, false })),
     a_info, b_info, output_info, are_tensors_const, expected)
 {
     TensorInfo a{a_info};
@@ -102,6 +113,9 @@ using NEMatMulFastMathFixture = MatMulGenericValidationFixture<Tensor, Accessor,
 
 template <typename T>
 using NEMatMulDynamicTensorsFixture = MatMulValidationWithDynamicTensorsFixture<Tensor, Accessor, NEMatMul, CpuMatMulSettings, T>;
+
+template <typename T>
+using NEQuantizedMatMulFixture = QuantizedMatMulValidationFixture<Tensor, Accessor, NEMatMul, CpuMatMulSettings, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -149,13 +163,18 @@ TEST_SUITE_END() // FP32
 /* Note : MatMul BF16 is enabled by specifying FP32 datatype and enabling the fast math setting */
 constexpr AbsoluteTolerance<float> tolerance_bf16(0.001f);
 TEST_SUITE(BF16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMatMulFastMathFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(datasets::SmallMatMulDataset(),
-                                                                                                                    framework::dataset::make("TransposeA", { false, true })),
-                                                                                                                    framework::dataset::make("TransposeB", { false, true })),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                    framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
-                                                                                                                    framework::dataset::make("RunTimes", { 0 })),
-                                                                                                            framework::dataset::make("Settings", { CpuMatMulSettings().fast_math(true) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMatMulFastMathFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::SmallMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::F32)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo() })),
+    framework::dataset::make("RunTimes", { 0 })),
+    framework::dataset::make("Settings", { CpuMatMulSettings().fast_math(true) })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo() })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo() })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo() }))
+)
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_bf16);
@@ -197,6 +216,114 @@ TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+
+TEST_SUITE(QASYMM8)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizedMatMulFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::SmallMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 2) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallExtraActivation, NEQuantizedMatMulFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::SmallerMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 50, 1) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 30, -1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 2) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizedMatMulFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::LargeMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 2) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizedMatMulFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::SmallMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 40, -2) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 50, 1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 1) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallExtraActivation, NEQuantizedMatMulFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::SmallerMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 40, -2) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 50, 1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 1) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizedMatMulFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(
+    datasets::LargeMatMulDataset(),
+    framework::dataset::make("TransposeA", { false, true })),
+    framework::dataset::make("TransposeB", { false, true })),
+    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
+    framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
+    framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 150, -2) })),
+    framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 250, 1) })),
+    framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 1) }))
+)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // MatMul
 TEST_SUITE_END() // NEON
