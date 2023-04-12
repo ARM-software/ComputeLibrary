@@ -22,16 +22,14 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 template <>
 void interleave_block<4, 4, VLType::SME, false>(
   int8_t * &out, const int8_t * const *in,
-  size_t width, size_t height, size_t row_offset, bool first
+  size_t width, size_t height, size_t row_offset, bool
 )
 {
-  ARM_COMPUTE_UNUSED(first);
-
   __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
       "cntw x16\n"
@@ -123,4 +121,4 @@ void interleave_block<4, 4, VLType::SME, false>(
     );
 }
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#ifdef __aarch64__
+#ifdef ARM_COMPUTE_ENABLE_SME2
 
 
 #include "../std_transforms_sme.hpp"
@@ -83,12 +83,11 @@ public:
 
   StdTransformsSME<operand_type, result_type, 2, 2, 1> transforms = {};
 
-  cls_sme2_interleaved_nomerge_fp32_mopa_2VLx2VL(const CPUInfo *ci)
+  cls_sme2_interleaved_nomerge_fp32_mopa_2VLx2VL(const CPUInfo *)
   {
-    ARM_COMPUTE_UNUSED(ci);
   }
 };
 
 } // namespace arm_gemm
 
-#endif // __aarch64__
+#endif // ARM_COMPUTE_ENABLE_SME2

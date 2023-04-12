@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-#if defined(__aarch64__)
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+
+#if defined(__aarch64__)
 
 namespace arm_conv {
 namespace pooling {
@@ -196,38 +196,38 @@ void a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
     "add x5, x5, #0x10\n"
     "cbz x3, 4f\n"
     "3:"  // Oddments
-    "ldr s6, [x11, x4]\n"
-    "ldr s5, [x10, x4]\n"
-    "fadd v17.4s, v6.4s, v5.4s\n"
+    "ldr s17, [x11, x4]\n"
+    "ldr s16, [x10, x4]\n"
+    "fadd v18.4s, v17.4s, v16.4s\n"
     "subs x3, x3, #0x1\n"
-    "ldr s4, [x27, x4]\n"
-    "ldr s3, [x26, x4]\n"
-    "fadd v16.4s, v4.4s, v3.4s\n"
-    "fadd v19.4s, v17.4s, v16.4s\n"
-    "ldr s2, [x15, x4]\n"
-    "ldr s1, [x14, x4]\n"
-    "fadd v18.4s, v2.4s, v1.4s\n"
-    "fadd v21.4s, v18.4s, v19.4s\n"
-    "ldr s0, [x12, x4]\n"
-    "ldr s31, [x28, x4]\n"
-    "fadd v17.4s, v0.4s, v31.4s\n"
-    "ldr s30, [x9, x4]\n"
-    "ldr s29, [x25, x4]\n"
-    "fadd v22.4s, v30.4s, v29.4s\n"
-    "ldr s28, [x23, x4]\n"
-    "ldr s27, [x22, x4]\n"
-    "fadd v16.4s, v28.4s, v27.4s\n"
-    "fadd v20.4s, v16.4s, v19.4s\n"
-    "ldr s26, [x16, x4]\n"
-    "ldr s25, [x13, x4]\n"
-    "fadd v19.4s, v26.4s, v17.4s\n"
-    "fadd v18.4s, v25.4s, v22.4s\n"
-    "ldr s24, [x24, x4]\n"
-    "ldr s23, [x21, x4]\n"
-    "fadd v17.4s, v24.4s, v17.4s\n"
-    "fadd v16.4s, v23.4s, v22.4s\n"
-    "fadd v19.4s, v21.4s, v19.4s\n"
-    "fadd v18.4s, v21.4s, v18.4s\n"
+    "ldr s17, [x27, x4]\n"
+    "ldr s16, [x26, x4]\n"
+    "fadd v16.4s, v17.4s, v16.4s\n"
+    "fadd v18.4s, v18.4s, v16.4s\n"
+    "ldr s17, [x15, x4]\n"
+    "ldr s16, [x14, x4]\n"
+    "fadd v16.4s, v17.4s, v16.4s\n"
+    "fadd v23.4s, v16.4s, v18.4s\n"
+    "ldr s17, [x12, x4]\n"
+    "ldr s16, [x28, x4]\n"
+    "fadd v22.4s, v17.4s, v16.4s\n"
+    "ldr s17, [x9, x4]\n"
+    "ldr s16, [x25, x4]\n"
+    "fadd v21.4s, v17.4s, v16.4s\n"
+    "ldr s17, [x23, x4]\n"
+    "ldr s16, [x22, x4]\n"
+    "fadd v16.4s, v17.4s, v16.4s\n"
+    "fadd v20.4s, v16.4s, v18.4s\n"
+    "ldr s17, [x16, x4]\n"
+    "ldr s16, [x13, x4]\n"
+    "fadd v19.4s, v17.4s, v22.4s\n"
+    "fadd v18.4s, v16.4s, v21.4s\n"
+    "ldr s17, [x24, x4]\n"
+    "ldr s16, [x21, x4]\n"
+    "fadd v17.4s, v17.4s, v22.4s\n"
+    "fadd v16.4s, v16.4s, v21.4s\n"
+    "fadd v19.4s, v23.4s, v19.4s\n"
+    "fadd v18.4s, v23.4s, v18.4s\n"
     "add x4, x4, #0x4\n"
     "fadd v17.4s, v17.4s, v20.4s\n"
     "fadd v16.4s, v16.4s, v20.4s\n"
@@ -250,4 +250,5 @@ void a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
 
 }  // namespace pooling
 }  // namespace arm_conv
+
 #endif  // defined(__aarch64__)

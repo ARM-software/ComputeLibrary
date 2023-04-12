@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,7 @@ class PoolingDepthfirst : public DepthfirstDriver<TInput, TOutput>
   {
     auto ws = reinterpret_cast<WorkingSpace *>(raw_ws);
     ws->input_buffer = ws + 1;
-    ws->output_buffer = reinterpret_cast<TInput *>(ws + 1) + n_channels;
+    ws->output_buffer = reinterpret_cast<char *>(ws + 1) + sizeof(TInput) * n_channels;
 
     // Fill the input buffer with an appropriate value
     TInput fill_val = 0;

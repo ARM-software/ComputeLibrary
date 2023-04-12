@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 
 #pragma once
 
+#if defined(ARM_COMPUTE_ENABLE_SME)
+
 namespace arm_conv {
 namespace pooling {
 
@@ -45,3 +47,5 @@ struct sme_s8_nhwc_max_2x2_s1_output2x2_depthfirst : public DepthfirstStrategy<i
 
 }  // namespace pooling
 }  // namespace arm_conv
+
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

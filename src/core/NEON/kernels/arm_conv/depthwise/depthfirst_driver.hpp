@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "depthwise.hpp"
+#include "utils.hpp"
 
 namespace arm_conv {
 namespace depthwise {

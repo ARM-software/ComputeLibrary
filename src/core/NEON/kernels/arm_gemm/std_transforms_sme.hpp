@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,9 +67,8 @@ public:
     }
 
     template<typename TOut>
-    void Merge(TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut *bias, const Activation act, bool accumulate) {
+    void Merge(TOut *, const TResult *, int, int, int, int, int, const TOut *, const Activation, bool) {
         // Separate merge not supported for SME.
-        ARM_COMPUTE_UNUSED(out, in, stride, y0, ymax, x0, xmax, bias, act, accumulate);
     }
 };
 

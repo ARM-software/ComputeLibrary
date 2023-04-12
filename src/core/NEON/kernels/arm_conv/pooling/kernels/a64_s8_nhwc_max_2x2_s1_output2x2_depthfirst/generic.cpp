@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-#if defined(__aarch64__)
 
 #include <cstddef>
 #include <cstdint>
+
+#if defined(__aarch64__)
 
 namespace arm_conv {
 namespace pooling {
@@ -111,7 +112,7 @@ void a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
     "smax v18.16b, v18.16b, v21.16b\n"
     "smax v17.16b, v17.16b, v20.16b\n"
     "add x15, x15, #0x10\n"
-    "smax v16.16b, v16.16b, v20.16b\n"
+    "smax v16.16b, v20.16b, v16.16b\n"
     "str q19, [x14, x12]\n"
     "str q18, [x13, x12]\n"
     "str q17, [x11, x12]\n"
@@ -121,43 +122,43 @@ void a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
     "2:"  // Vector: Tail
     "smax v21.16b, v30.16b, v29.16b\n"
     "smax v20.16b, v29.16b, v28.16b\n"
-    "smax v19.16b, v27.16b, v26.16b\n"
+    "smax v16.16b, v27.16b, v26.16b\n"
     "smax v18.16b, v25.16b, v24.16b\n"
     "smax v17.16b, v27.16b, v23.16b\n"
-    "smax v16.16b, v24.16b, v22.16b\n"
-    "smax v19.16b, v21.16b, v19.16b\n"
+    "smax v19.16b, v24.16b, v22.16b\n"
+    "smax v16.16b, v21.16b, v16.16b\n"
     "smax v18.16b, v18.16b, v21.16b\n"
-    "str q19, [x14, x12]\n"
+    "str q16, [x14, x12]\n"
     "smax v17.16b, v17.16b, v20.16b\n"
-    "smax v16.16b, v16.16b, v20.16b\n"
+    "smax v16.16b, v20.16b, v19.16b\n"
     "str q18, [x13, x12]\n"
     "str q17, [x11, x12]\n"
     "str q16, [x10, x12]\n"
     "add x12, x12, #0x10\n"
     "cbz x16, 4f\n"
     "3:"  // Oddments
-    "ldr b30, [x28, x15]\n"
-    "ldr b29, [x25, x15]\n"
-    "smax v21.16b, v30.16b, v29.16b\n"
+    "ldr b16, [x28, x15]\n"
+    "ldr b17, [x25, x15]\n"
+    "smax v23.16b, v16.16b, v17.16b\n"
     "subs x16, x16, #0x1\n"
-    "ldr b28, [x22, x15]\n"
-    "ldr b27, [x26, x15]\n"
-    "smax v20.16b, v29.16b, v28.16b\n"
-    "ldr b26, [x9, x15]\n"
-    "ldr b25, [x27, x15]\n"
-    "smax v19.16b, v27.16b, v26.16b\n"
-    "smax v19.16b, v21.16b, v19.16b\n"
-    "ldr b24, [x24, x15]\n"
-    "ldr b23, [x23, x15]\n"
-    "smax v18.16b, v25.16b, v24.16b\n"
-    "smax v17.16b, v27.16b, v23.16b\n"
-    "ldr b22, [x21, x15]\n"
-    "smax v16.16b, v24.16b, v22.16b\n"
+    "ldr b16, [x22, x15]\n"
+    "ldr b22, [x26, x15]\n"
+    "smax v21.16b, v17.16b, v16.16b\n"
+    "ldr b16, [x9, x15]\n"
+    "ldr b17, [x27, x15]\n"
+    "smax v16.16b, v22.16b, v16.16b\n"
+    "smax v20.16b, v23.16b, v16.16b\n"
+    "ldr b19, [x24, x15]\n"
+    "ldr b16, [x23, x15]\n"
+    "smax v18.16b, v17.16b, v19.16b\n"
+    "smax v17.16b, v22.16b, v16.16b\n"
+    "ldr b16, [x21, x15]\n"
+    "smax v16.16b, v19.16b, v16.16b\n"
     "add x15, x15, #0x1\n"
-    "smax v18.16b, v18.16b, v21.16b\n"
-    "smax v17.16b, v17.16b, v20.16b\n"
-    "smax v16.16b, v16.16b, v20.16b\n"
-    "str b19, [x14, x12]\n"
+    "smax v18.16b, v18.16b, v23.16b\n"
+    "smax v17.16b, v17.16b, v21.16b\n"
+    "smax v16.16b, v21.16b, v16.16b\n"
+    "str b20, [x14, x12]\n"
     "str b18, [x13, x12]\n"
     "str b17, [x11, x12]\n"
     "str b16, [x10, x12]\n"
@@ -172,4 +173,5 @@ void a64_s8_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
 
 }  // namespace pooling
 }  // namespace arm_conv
+
 #endif  // defined(__aarch64__)

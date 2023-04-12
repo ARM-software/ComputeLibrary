@@ -24,8 +24,7 @@
 
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 namespace {
 
@@ -150,4 +149,5 @@ void Transform<16, 2, true, VLType::SME>(
     );
 }
 
-#endif // __ARM_FEATURE_SVE
+
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-#if defined(__aarch64__)
 
 #include <cstddef>
 #include <cstdint>
+
+#if defined(__aarch64__)
 
 namespace arm_conv {
 namespace pooling {
@@ -111,7 +112,7 @@ void a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
     "fmax v18.4s, v18.4s, v21.4s\n"
     "fmax v17.4s, v17.4s, v20.4s\n"
     "add x15, x15, #0x10\n"
-    "fmax v16.4s, v16.4s, v20.4s\n"
+    "fmax v16.4s, v20.4s, v16.4s\n"
     "str q19, [x14, x12]\n"
     "str q18, [x13, x12]\n"
     "str q17, [x11, x12]\n"
@@ -121,43 +122,43 @@ void a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
     "2:"  // Vector: Tail
     "fmax v21.4s, v30.4s, v29.4s\n"
     "fmax v20.4s, v29.4s, v28.4s\n"
-    "fmax v19.4s, v27.4s, v26.4s\n"
+    "fmax v16.4s, v27.4s, v26.4s\n"
     "fmax v18.4s, v25.4s, v24.4s\n"
     "fmax v17.4s, v27.4s, v23.4s\n"
-    "fmax v16.4s, v24.4s, v22.4s\n"
-    "fmax v19.4s, v21.4s, v19.4s\n"
+    "fmax v19.4s, v24.4s, v22.4s\n"
+    "fmax v16.4s, v21.4s, v16.4s\n"
     "fmax v18.4s, v18.4s, v21.4s\n"
-    "str q19, [x14, x12]\n"
+    "str q16, [x14, x12]\n"
     "fmax v17.4s, v17.4s, v20.4s\n"
-    "fmax v16.4s, v16.4s, v20.4s\n"
+    "fmax v16.4s, v20.4s, v19.4s\n"
     "str q18, [x13, x12]\n"
     "str q17, [x11, x12]\n"
     "str q16, [x10, x12]\n"
     "add x12, x12, #0x10\n"
     "cbz x16, 4f\n"
     "3:"  // Oddments
-    "ldr s30, [x28, x15]\n"
-    "ldr s29, [x25, x15]\n"
-    "fmax v21.4s, v30.4s, v29.4s\n"
+    "ldr s16, [x28, x15]\n"
+    "ldr s17, [x25, x15]\n"
+    "fmax v23.4s, v16.4s, v17.4s\n"
     "subs x16, x16, #0x1\n"
-    "ldr s28, [x22, x15]\n"
-    "ldr s27, [x26, x15]\n"
-    "fmax v20.4s, v29.4s, v28.4s\n"
-    "ldr s26, [x9, x15]\n"
-    "ldr s25, [x27, x15]\n"
-    "fmax v19.4s, v27.4s, v26.4s\n"
-    "fmax v19.4s, v21.4s, v19.4s\n"
-    "ldr s24, [x24, x15]\n"
-    "ldr s23, [x23, x15]\n"
-    "fmax v18.4s, v25.4s, v24.4s\n"
-    "fmax v17.4s, v27.4s, v23.4s\n"
-    "ldr s22, [x21, x15]\n"
-    "fmax v16.4s, v24.4s, v22.4s\n"
+    "ldr s16, [x22, x15]\n"
+    "ldr s22, [x26, x15]\n"
+    "fmax v21.4s, v17.4s, v16.4s\n"
+    "ldr s16, [x9, x15]\n"
+    "ldr s17, [x27, x15]\n"
+    "fmax v16.4s, v22.4s, v16.4s\n"
+    "fmax v20.4s, v23.4s, v16.4s\n"
+    "ldr s19, [x24, x15]\n"
+    "ldr s16, [x23, x15]\n"
+    "fmax v18.4s, v17.4s, v19.4s\n"
+    "fmax v17.4s, v22.4s, v16.4s\n"
+    "ldr s16, [x21, x15]\n"
+    "fmax v16.4s, v19.4s, v16.4s\n"
     "add x15, x15, #0x4\n"
-    "fmax v18.4s, v18.4s, v21.4s\n"
-    "fmax v17.4s, v17.4s, v20.4s\n"
-    "fmax v16.4s, v16.4s, v20.4s\n"
-    "str s19, [x14, x12]\n"
+    "fmax v18.4s, v18.4s, v23.4s\n"
+    "fmax v17.4s, v17.4s, v21.4s\n"
+    "fmax v16.4s, v21.4s, v16.4s\n"
+    "str s20, [x14, x12]\n"
     "str s18, [x13, x12]\n"
     "str s17, [x11, x12]\n"
     "str s16, [x10, x12]\n"
@@ -172,4 +173,5 @@ void a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst_impl(
 
 }  // namespace pooling
 }  // namespace arm_conv
+
 #endif  // defined(__aarch64__)

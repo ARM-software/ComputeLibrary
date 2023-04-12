@@ -24,7 +24,7 @@
 
 #pragma once
 
-#ifdef __aarch64__
+#if defined(__aarch64__)
 
 namespace {
 
@@ -333,4 +333,5 @@ void Transform<4, 4, true, VLType::None>(
     );
 }
 
-#endif
+
+#endif  // defined(__aarch64__)

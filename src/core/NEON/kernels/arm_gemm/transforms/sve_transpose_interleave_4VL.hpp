@@ -24,8 +24,7 @@
 
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace {
 
@@ -103,7 +102,6 @@ void sve_transpose_interleave_4VL(uint16_t *out, const uint16_t *in, size_t widt
       "bge 1b\n"
       "cbz %x[height], 8f\n"
       "4:"  // Main loop skip
-
       "5:"  // Tail row loop: Head
       "mov x26, %x[in]\n"
       "add %x[in], x26, %x[in_stride]\n"
@@ -137,7 +135,6 @@ void sve_transpose_interleave_4VL(uint16_t *out, const uint16_t *in, size_t widt
       "addvl %x[out], %x[out], #4\n"
       "bge 5b\n"
       "8:"  // Done
-
       : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
       : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
       : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
@@ -185,4 +182,5 @@ void Transform<4, 1, true, VLType::SVE>(
     );
 }
 
-#endif
+
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

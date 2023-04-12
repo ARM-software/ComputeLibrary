@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,8 @@ inline T roundup(const T a, const T b) {
 enum class VLType {
     None,
     SVE,
-    SME
+    SME,
+    SME2
 };
 
 template<typename T>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 
 #pragma once
 
+#if defined(__aarch64__)
+
 namespace arm_conv {
 namespace pooling {
 
@@ -45,3 +47,5 @@ struct a64_fp32_nhwc_avg_3x3_s1_output2x2_depthfirst : public DepthfirstStrategy
 
 }  // namespace pooling
 }  // namespace arm_conv
+
+#endif  // defined(__aarch64__)

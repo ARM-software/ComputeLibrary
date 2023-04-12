@@ -66,6 +66,10 @@
 #include "kernels/sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_SME2
 
+#include "kernels/sve_ffhybrid_fp32_mla_6x4VL.hpp"
+#include "kernels/sve_ffhybrid_fp32bf16fp32_mmla_4x6VL.hpp"
+#include "kernels/sve_ffinterleaved_fp32_mla_8x3VL.hpp"
+#include "kernels/sve_ffinterleaved_bf16fp32_mmla_8x3VL.hpp"
 #include "kernels/sve_hybrid_fp32bf16fp32_mmla_4x6VL.hpp"
 #include "kernels/sve_hybrid_fp32bf16fp32_mmla_6x4VL.hpp"
 #include "kernels/sve_hybrid_fp32_mla_6x4VL.hpp"

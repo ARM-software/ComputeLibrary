@@ -197,6 +197,7 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE src
           src/cpu/kernels/assembly
+          src/core/NEON/kernels/arm_gemm
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
@@ -223,6 +224,7 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE src
           src/cpu/kernels/assembly
+          src/core/NEON/kernels/arm_gemm
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise

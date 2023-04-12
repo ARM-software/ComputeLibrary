@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,7 +91,7 @@
 
 #include "depthwise.hpp"
 #include "depthfirst_driver.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 namespace arm_conv {
 namespace depthwise {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,6 +101,18 @@ namespace
             (long unsigned) args.input_channels * args.channel_multiplier,
             arm_gemm::utils::get_vector_length<typename Strategy::return_type>(Strategy::vl_type)
           );
+  }
+
+  template <class Strategy>
+  unsigned int fast_mode_cycle_estimate(const DepthwiseArgs &args, const Nothing &)
+  {
+    // First-pass: compute the number of output pixels which will be computed.
+    return arm_gemm::roundup(args.output_rows, Strategy::output_rows) *
+           arm_gemm::roundup(args.output_cols, Strategy::output_cols) *
+           arm_gemm::iceildiv(
+            (long unsigned) args.input_channels * args.channel_multiplier,
+            arm_gemm::utils::get_vector_length<typename Strategy::return_type>(Strategy::vl_type)
+          ) * 2 / 3;
   }
 
 #if defined(__aarch64__)

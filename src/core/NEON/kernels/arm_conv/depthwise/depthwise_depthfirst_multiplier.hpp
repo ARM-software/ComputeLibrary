@@ -27,10 +27,6 @@
 #include "depthwise_depthfirst.hpp"
 #include "interleaves/generic_quantized_dot_product.hpp"
 
-#ifdef CYCLE_PROFILING
-#include "profiler.hpp"
-#endif
-
 #include <limits>
 
 namespace arm_conv {

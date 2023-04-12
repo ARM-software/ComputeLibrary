@@ -24,7 +24,7 @@
 
 #pragma once
 
-#ifdef __aarch64__
+#if defined(__aarch64__)
 
 namespace {
 
@@ -39,7 +39,6 @@ void a64_transpose_interleave_4_1x16(uint8_t *out, const uint8_t *in, size_t wid
     size_t out_stride = 4 * roundup<size_t>(height, 16) * sizeof(uint8_t);
 
     __asm__ __volatile__(
-
       "1:"  // Main row loop: Head
       "mov x17, %x[in]\n"
       "add x16, x17, %x[in_stride]\n"
@@ -316,4 +315,5 @@ void Transform<4, 16, true, VLType::None>(
     );
 }
 
-#endif
+
+#endif  // defined(__aarch64__)

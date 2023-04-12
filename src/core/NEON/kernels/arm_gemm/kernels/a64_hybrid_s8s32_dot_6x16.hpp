@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,20 +10,20 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 #pragma once
-
 #ifdef __aarch64__
+
 #include "../std_transforms_fixed.hpp"
 #include "../performance_parameters.hpp"
 
@@ -79,12 +79,12 @@ public:
             switch (ci->get_cpu_model()) {
                 default:
                     return { 31.65 };
-                case CPUModel::A55r1:
-                    return { 9.217 };
                 case CPUModel::A510:
                     return { 15.87 };
                 case CPUModel::V1:
                     return { 54.50 };
+                case CPUModel::A55r1:
+                    return { 9.217 };
             }
         }
 
@@ -97,7 +97,7 @@ public:
                 case CPUModel::A510:
                     return { 16.66, 3.92, 0.48 };
                 case CPUModel::V1:
-                    return { 55.40, 19.21, 0.93 };
+                    return { 42.62, 16.32, 0.83 };
             }
         }
 
@@ -121,5 +121,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-
 #endif // __aarch64__

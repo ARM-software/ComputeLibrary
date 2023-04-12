@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include "depthfirst_driver.hpp"
 #include "interleaves/generic.hpp"
 
@@ -52,7 +54,7 @@ struct PlanarKernelType;
 template <typename TInput, typename TWeight, typename TOutput, typename TAccum>
 struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
 {
-  using Type = std::function<void(
+  typedef void (*Type)(
     const TInput *, size_t ld_in_row, size_t ld_in_col, size_t ld_in_vl,
     unsigned int pad_top, unsigned int valid_input_rows,
     unsigned int pad_left, unsigned int valid_input_cols,
@@ -60,7 +62,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
     TOutput **, const size_t *, const size_t *, unsigned int output_cols,
     unsigned int start_channels, unsigned int valid_channels,
     TAccum act_min, TAccum act_max
-  )>;
+  );
 
   template <typename WorkspaceType>
   static inline void execute(
@@ -89,7 +91,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
 template <typename TInput, typename TWeight, typename TOutput>
 struct PlanarKernelType<TInput, TWeight, TOutput, int32_t, arm_gemm::Requantize32>
 {
-  using Type = std::function<void(
+  typedef void (*Type)(
     const TInput *, size_t ld_in_row, size_t ld_in_col, size_t ld_in_vl,
     unsigned int pad_top, unsigned int valid_input_rows,
     unsigned int pad_left, unsigned int valid_input_cols,
@@ -97,7 +99,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, int32_t, arm_gemm::Requantize3
     TOutput **, const size_t *, const size_t *, unsigned int output_cols,
     unsigned int start_channel, unsigned int valid_channels,
     const arm_gemm::Requantize32 &
-  )>;
+  );
 
   template <typename WorkspaceType>
   static inline void execute(

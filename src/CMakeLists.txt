@@ -105,7 +105,6 @@ target_sources(
 target_sources(
     arm_compute_sve
     PRIVATE
-    core/NEON/kernels/arm_conv/depthwise/interleaves/sve_8b_mla.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_u8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp
@@ -425,7 +424,6 @@ target_sources(
 	core/NEON/kernels/arm_conv/depthwise/depthwise_strategies_common.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp
-	core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/a64_s8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp

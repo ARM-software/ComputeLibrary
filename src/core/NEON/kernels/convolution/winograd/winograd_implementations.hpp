@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "src/core/NEON/kernels/assembly/winograd.hpp"
+#include "winograd.hpp"
 #include <memory>
 #include <string>
 
@@ -314,6 +314,7 @@ bool get_implementation(
     false,  // Indirect input
     {},  // No activation
     max_threads,
+    false, // Not fixed format
     fast_mode,
     gemm_cfg
   ));

@@ -24,7 +24,7 @@
 
 #pragma once
 
-#ifdef __aarch64__
+#if defined(__aarch64__)
 
 namespace {
 
@@ -276,7 +276,6 @@ void a64_transpose_interleave_12_2x4(uint16_t *out, const uint16_t *in, size_t w
       "bge 1b\n"
       "cbz %x[height], 20f\n"
       "10:"  // Main loop skip
-
       "11:"  // Tail row loop: Head
       "mov x9, %x[in]\n"
       "add x28, x9, %x[in_stride]\n"
@@ -420,7 +419,6 @@ void a64_transpose_interleave_12_2x4(uint16_t *out, const uint16_t *in, size_t w
       "add %x[out], %x[out], #0x60\n"
       "bge 11b\n"
       "20:"  // Done
-
       : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
       : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
       : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
@@ -442,4 +440,5 @@ void Transform<12, 4, true, VLType::None>(
     );
 }
 
-#endif
+
+#endif  // defined(__aarch64__)

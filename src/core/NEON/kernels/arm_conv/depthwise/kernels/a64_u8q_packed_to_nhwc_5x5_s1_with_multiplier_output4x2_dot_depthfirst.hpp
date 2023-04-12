@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
@@ -57,4 +57,5 @@ struct a64_u8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst : 
 
 }  // namespace depthwise
 }  // namespace arm_conv
-#endif // defined(__aarch64__)
+
+#endif  // defined(__aarch64__)

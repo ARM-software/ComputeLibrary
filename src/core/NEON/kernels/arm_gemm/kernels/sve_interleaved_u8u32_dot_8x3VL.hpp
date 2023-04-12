@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,20 +10,20 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 #pragma once
-
 #ifdef ARM_COMPUTE_ENABLE_SVE
+
 #include "../std_transforms_sve.hpp"
 #include "../performance_parameters.hpp"
 
@@ -35,6 +35,7 @@ namespace arm_gemm
 {
 // Actual kernel implementations
 void sve_interleaved_u8u32_dot_8x3VL( ARGLIST );
+void sve_interleaved_u8u32_dot_8x3VL_a64fx( ARGLIST );
 
 class cls_sve_interleaved_u8u32_dot_8x3VL
 {
@@ -53,11 +54,6 @@ public:
     static unsigned int out_width()
     {
         return get_vector_length<uint32_t>() * 3;
-    }
-
-    static unsigned int stripe_width()
-    {
-        return get_vector_length<uint32_t>();
     }
 
     static constexpr unsigned int k_unroll()
@@ -80,6 +76,8 @@ public:
                     return { 27.44, 3.41, 2.90 };
                 case CPUModel::V1:
                     return { 63.30, 4.97, 11.52 };
+                case CPUModel::A64FX:
+                    return { 109.76, 3.88, 6.76 };
             }
         }
 
@@ -92,6 +90,8 @@ public:
                     return { 27.45, 1.65, 0.28 };
                 case CPUModel::V1:
                     return { 52.24, 7.49, 0.80 };
+                case CPUModel::A64FX:
+                    return { 110.18, 2.34, 0.40 };
             }
         }
 
@@ -100,13 +100,19 @@ public:
 
     // Default to the generic kernel
     kern_type kernel=sve_interleaved_u8u32_dot_8x3VL;
-    cls_sve_interleaved_u8u32_dot_8x3VL(const CPUInfo *)
+    cls_sve_interleaved_u8u32_dot_8x3VL(const CPUInfo *ci)
     {
+        switch(ci->get_cpu_model()) {
+            default:
+                break;
+            case CPUModel::A64FX:
+                kernel=sve_interleaved_u8u32_dot_8x3VL_a64fx;
+                break;
+        }
     }
 };
 
 } // namespace arm_gemm
 
 #undef ARGLIST
-
 #endif // ARM_COMPUTE_ENABLE_SVE

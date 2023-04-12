@@ -313,7 +313,6 @@ cc_library_static {
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_strategies_common.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp",
-        "src/core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic_quantized_dot_product.cpp",
         "src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_nhwc_1x1_stride_any_depthfirst/generic.cpp",
@@ -363,7 +362,6 @@ cc_library_static {
         "src/core/NEON/kernels/convolution/winograd/output_transforms/arm_fp32_4x4_3x3.cpp",
         "src/core/NEON/kernels/convolution/winograd/output_transforms_fp16.cpp",
         "src/core/NEON/kernels/convolution/winograd/output_transforms_fp32.cpp",
-        "src/core/NEON/kernels/convolution/winograd/padding.cpp",
         "src/core/NEON/kernels/convolution/winograd/weight_transforms/arm_fp32_2x2_3x3.cpp",
         "src/core/NEON/kernels/convolution/winograd/weight_transforms/arm_fp32_2x2_5x5.cpp",
         "src/core/NEON/kernels/convolution/winograd/weight_transforms/arm_fp32_4x4_3x3.cpp",
@@ -1020,7 +1018,6 @@ cc_library_static {
             srcs: [
                 "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_s8q_3x3_dot.cpp",
                 "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp",
-                "src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_8b_mla.cpp",
                 "src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp",
                 "src/core/NEON/kernels/arm_conv/depthwise/interleaves/sve_u8q_3x3_dot.cpp",
                 "src/core/NEON/kernels/arm_conv/depthwise/kernels/a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp",

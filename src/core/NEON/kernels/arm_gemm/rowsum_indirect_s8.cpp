@@ -34,7 +34,7 @@ namespace arm_gemm {
 
 template<>
 void row_sums_indirect(
-    unsigned int num_strings, const unsigned int *string_lengths, IndirectInputArg<int8_t> A_arg,
+    size_t num_strings, const unsigned int *string_lengths, IndirectInputArg<int8_t> A_arg,
     size_t M, int32_t *out_ptr, const Requantize32 *qp
 )
 {

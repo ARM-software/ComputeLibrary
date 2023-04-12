@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
@@ -42,7 +42,7 @@ class a64_fp16_nhwc_generic_output9_mla_depthfirst : public GenericDepthfirstKer
   public:
   a64_fp16_nhwc_generic_output9_mla_depthfirst(const CPUInfo *) : GenericDepthfirstKernelStrategy<__fp16, __fp16, __fp16, __fp16>(9, arm_gemm::VLType::None) {}
 
-  virtual  KernelType get_kernel() const override { return kernel; }
+  KernelType get_kernel() const override { return kernel; }
 };
 
 }  // namespace depthwise

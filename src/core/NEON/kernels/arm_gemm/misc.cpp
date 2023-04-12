@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2022 Arm Limited.
+ * Copyright (c) 2017-2018, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,10 +56,14 @@ WeightFormat get_weight_format(const KernelWeightFormat kwf, size_t element_size
         wf_i |= 0x10;
     }
 
+#ifdef ARM_COMPUTE_ENABLE_SVE
     // Get total bytes in vector output
     if (kwf_i & 0x1) {
         vector_bytes = vector_count * get_vector_length<uint8_t>();
     } else {
+#else
+    if (1) {
+#endif
         vector_bytes = vector_count * 16;
     }
 

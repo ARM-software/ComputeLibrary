@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,20 +10,20 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 #pragma once
-
 #ifdef ARM_COMPUTE_ENABLE_SVE
+
 #include "../std_transforms_sve.hpp"
 #include "../performance_parameters.hpp"
 
@@ -55,11 +55,6 @@ public:
         return get_vector_length<int32_t>() * 3;
     }
 
-    static unsigned int stripe_width()
-    {
-        return get_vector_length<int32_t>();
-    }
-
     static constexpr unsigned int k_unroll()
     {
         return 8;
@@ -89,7 +84,7 @@ public:
                 default:
                     return { 61.97, 3.64, 0.50 };
                 case CPUModel::V1:
-                    return {  95.28, 7.99, 0.79 };
+                    return { 95.28, 7.99, 0.79 };
                 case CPUModel::A510:
                     return { 43.36, 1.86, 0.28 };
             }
@@ -108,5 +103,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-
 #endif // ARM_COMPUTE_ENABLE_SVE
