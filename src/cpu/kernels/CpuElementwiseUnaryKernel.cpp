@@ -191,7 +191,7 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
         {
             return data.dt == DataType::QASYMM8_SIGNED;
         },
-        REGISTER_QASYMM8_NEON(neon_qasymm8_signed_elementwise_unary),
+        REGISTER_QASYMM8_SIGNED_NEON(neon_qasymm8_signed_elementwise_unary),
         nullptr,
     },
     {

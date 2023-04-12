@@ -106,7 +106,7 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NELogLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(
                        datasets::SmallShapes(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0) })),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(10.5, 0), QuantizationInfo(0.5, -10)  })),
                        framework::dataset::make("OutputQInfo", { QuantizationInfo(5, 10) })))
 {
     // Validate output

@@ -183,6 +183,10 @@ void elementwise_op<int8_t>(const ITensor *in, ITensor *out, const Window &windo
                 {
                     tmp_f = (127 - qi_out.offset) * qi_out.scale;
                 }
+                else
+                {
+                    tmp_f = elementwise_op_scalar_imp<float>(op, tmp_f);
+                }
             }
             else
             {
@@ -262,6 +266,10 @@ void elementwise_op<uint8_t>(const ITensor *in, ITensor *out, const Window &wind
                 else if(op == ElementWiseUnary::RSQRT)
                 {
                     tmp_f = (255 - qi_out.offset) * qi_out.scale;
+                }
+                else
+                {
+                    tmp_f = elementwise_op_scalar_imp<float>(op, tmp_f);
                 }
             }
             else

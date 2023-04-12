@@ -42,9 +42,10 @@ DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp16_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_s32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_q8_elementwise_unary);
+#ifndef __aarch64__
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_qasymm8_signed_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_qasymm8_elementwise_unary);
-
+#endif // __aarch64__
 #undef DECLARE_ELEMETWISE_UNARY_KERNEL
 
 } // namespace cpu
