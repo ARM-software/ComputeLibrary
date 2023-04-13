@@ -25,7 +25,7 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_MATMULKERNELFIXTURE
 
 #include "arm_compute/core/KernelDescriptors.h"
-#include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Fixture.h"
@@ -101,7 +101,7 @@ protected:
         CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1);
         CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1);
 
-        CLSynthetizeOperator<ClNativeMatMulKernel> matMul{};
+        CLSynthetizeOperator<ClMatMulNativeKernel> matMul{};
         MatMulKernelInfo                           matmul_info;
         matmul_info.adj_lhs = pretranspose_a;
         matmul_info.adj_rhs = pretranspose_b;

@@ -512,7 +512,7 @@
     "MatMul": {
       "files": {
         "common": [
-          "src/gpu/cl/kernels/ClNativeMatMulKernel.cpp",
+          "src/gpu/cl/kernels/ClMatMulNativeKernel.cpp",
           "src/gpu/cl/operators/ClMatMul.cpp",
           "src/runtime/CL/functions/CLMatMul.cpp"
         ]

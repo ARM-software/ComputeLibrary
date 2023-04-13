@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_GPU_CL_KERNELS_CLNATIVEMATMULKERNEL
-#define ACL_SRC_GPU_CL_KERNELS_CLNATIVEMATMULKERNEL
+#ifndef ACL_SRC_GPU_CL_KERNELS_CLMATMULNATIVEKERNEL
+#define ACL_SRC_GPU_CL_KERNELS_CLMATMULNATIVEKERNEL
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "src/core/common/Macros.h"
@@ -35,11 +35,11 @@ namespace opencl
 {
 namespace kernels
 {
-class ClNativeMatMulKernel : public IClKernel
+class ClMatMulNativeKernel : public IClKernel
 {
 public:
-    ClNativeMatMulKernel();
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClNativeMatMulKernel);
+    ClMatMulNativeKernel();
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClMatMulNativeKernel);
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -53,7 +53,7 @@ public:
     void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulKernelInfo &matmul_info);
     /** Static function to check if given info will lead to a valid configuration
      *
-     * Similar to @ref ClNativeMatMulKernel::configure()
+     * Similar to @ref ClMatMulNativeKernel::configure()
      *
      * @return a status
      */
@@ -68,4 +68,4 @@ private:
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ACL_SRC_GPU_CL_KERNELS_CLNATIVEMATMULKERNEL */
+#endif /* ACL_SRC_GPU_CL_KERNELS_CLMATMULNATIVEKERNEL */

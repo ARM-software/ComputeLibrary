@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_SRC_GPU_CL_OPERATORS_ClMatMul
 
 #include "src/gpu/cl/IClOperator.h"
-#include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 #include <memory>
 
 namespace arm_compute
@@ -34,7 +34,7 @@ namespace opencl
 {
 /** Basic operator to execute BatchMatMul on OpenCL. This operator calls the following OpenCL kernels:
  *
- *  -# @ref kernels::ClNativeMatMulKernel
+ *  -# @ref kernels::ClMatMulNativeKernel
  */
 class ClMatMul : public IClOperator
 {
@@ -77,7 +77,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<kernels::ClNativeMatMulKernel> _native_matmul_kernel;
+    std::unique_ptr<kernels::ClMatMulNativeKernel> _native_matmul_kernel;
 };
 } // namespace opencl
 } // namespace arm_compute

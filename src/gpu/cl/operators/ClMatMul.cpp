@@ -25,7 +25,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/common/utils/Log.h"
-#include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 
 namespace arm_compute
 {
@@ -33,7 +33,7 @@ namespace opencl
 {
 using namespace arm_compute::opencl::kernels;
 ClMatMul::ClMatMul()
-    : _native_matmul_kernel(std::make_unique<ClNativeMatMulKernel>())
+    : _native_matmul_kernel(std::make_unique<ClMatMulNativeKernel>())
 {
 }
 ClMatMul::~ClMatMul()
@@ -44,7 +44,7 @@ Status ClMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const 
     MatMulKernelInfo kernel_info;
     kernel_info.adj_lhs = matmul_info.adj_lhs();
     kernel_info.adj_rhs = matmul_info.adj_rhs();
-    return ClNativeMatMulKernel::validate(lhs, rhs, output, kernel_info);
+    return ClMatMulNativeKernel::validate(lhs, rhs, output, kernel_info);
 }
 void ClMatMul::configure(const CLCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulInfo &matmul_info)
 {

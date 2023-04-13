@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -115,11 +115,11 @@ Status validate_export_to_cl_image(const ITensorInfo *rhs, const MatMulKernelInf
     return Status {};
 }
 }
-ClNativeMatMulKernel::ClNativeMatMulKernel()
+ClMatMulNativeKernel::ClMatMulNativeKernel()
 {
     _type = CLKernelType::GEMM;
 }
-Status ClNativeMatMulKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
+Status ClMatMulNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16);
@@ -137,7 +137,7 @@ Status ClNativeMatMulKernel::validate(const ITensorInfo *lhs, const ITensorInfo 
 
     return Status{};
 }
-void ClNativeMatMulKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
+void ClMatMulNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, output, &compile_context, &matmul_kernel_info);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, output, matmul_kernel_info);
@@ -212,7 +212,7 @@ void ClNativeMatMulKernel::configure(const ClCompileContext &compile_context, IT
     _config_id += support::cpp11::to_string(matmul_kernel_info.k0);
 }
 
-void ClNativeMatMulKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClMatMulNativeKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);

@@ -23,7 +23,7 @@
  */
 
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "src/gpu/cl/kernels/ClNativeMatMulKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 #include "tests/datasets/LargeMatMulDataset.h"
 #include "tests/datasets/SmallMatMulDataset.h"
 #include "tests/framework/Macros.h"
@@ -162,7 +162,7 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
     for(auto &pair : supported_block_sizes)
     {
         TensorInfo output_info;
-        Status     status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, pair.first);
+        Status     status = ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, &output_info, pair.first);
 
         if(!pair.first.export_rhs_to_cl_image || export_to_cl_image_supported)
         {
@@ -219,7 +219,7 @@ TEST_CASE(ExportToCLImage, framework::DatasetMode::ALL)
             const MatMulKernelInfo matmul_kernel_info {adj_lhs, adj_rhs, 4, 4, 4, true /* export_rhs_to_cl_image */};
 
             TensorInfo output_info;
-            Status     status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+            Status     status = ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
 
             const bool expected = std::get<4>(tuple);
             ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
@@ -276,7 +276,7 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
 
                 MatMulKernelInfo matmul_kernel_info{ adj_lhs, adj_rhs, 1, 1, 1, false /* export_rhs_to_cl_image */ };
 
-                Status status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+                Status status = ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
                 ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
             }
         }
@@ -319,7 +319,7 @@ TEST_CASE(ValidateDataTypes, framework::DatasetMode::ALL)
         const TensorInfo rhs_info(shape, 1, std::get<1>(tuple));
         TensorInfo       output_info(shape, 1, std::get<2>(tuple));
 
-        Status status = ClNativeMatMulKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+        Status status = ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
         ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
     }
 }
