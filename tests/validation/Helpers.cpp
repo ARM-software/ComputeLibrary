@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "tests/validation/Helpers.h"
+#include "tests/framework/Asserts.h"
 
 #include <algorithm>
 #include <cmath>
@@ -371,6 +372,105 @@ void add_padding_y(std::initializer_list<ITensor *> tensors, const DataLayout &d
             tensor->info()->extend_padding(PaddingSize(top, 0U, bottom, 0U));
         }
     }
+}
+
+QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int m, int n, int k, DataType data_type)
+{
+    ARM_COMPUTE_UNUSED(m, n);
+    QuantizationInfo c_q_info;
+
+    ARM_COMPUTE_ASSERT(data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED);
+
+    const int32_t t_max = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::max() : std::numeric_limits<int8_t>::max());
+    const int32_t t_min = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::min() : std::numeric_limits<int8_t>::min());
+
+    /**  Quantization Setup of matrix multiplication
+     *
+     *  We have a matrix multiplication of the form C = A * B
+     *  where A is (M X K), B is (K x N) and C is therefore (M x N).
+     *
+     *  If we have some distributions statistics of A and B, i.e. mean and variance,
+     *  we can estimate the mean and variance of a single value in C matrix and
+     *  pick good scale and offset values for the output and have non-saturated tests.
+     *
+     *  Each element in the output matrix can be calculated as follows:
+     *      C_ij = sum_k(A_ik * B_kj)
+     *
+     *      All values are float above.
+     *
+     * Note: All possible A_ik, B_kj random variables are assumed mutually independent.
+     *
+     * Terminology:
+     *  E[X]: Mean of the random variable X (sometimes referred as mu_x)
+     *  var(X): Variance of the random variable X (someimes referred as sigma^2_x)
+     *  std(X): sqrt(var(X)), standard deviation of X
+     *
+     * 1) Calculate the mean:
+     *      E[C_ij] = sum_k( E[A_ik] * E[B_kj] ) = K * mean_a * mean_b
+     *
+     *      Since elements of A and B are uniformly distributed random variables, we have
+     *          mean_a = (max_a + min_a) / 2, mean_b = (max_b + min_b ) / 2
+     *          max_a and min_a can be calculated with the scale_a/b and offset_a/b
+     *              by replacing data type minimum and maximums in the equations
+     *
+     * 2) Calculate the variance:
+     *      var(C_ij) = sum_k( var(A_ik * B_kj) )
+     *                = sum_k ( E[A_ik^2 * B_kj^2] - E[A_ik]^2E[B_kj^2] )
+     *                = ...
+     *                = K * (var_a * var_b + var_a * mean^2_b + var_b * mean^2_a)
+     *
+     *      Similarly, due to uniform random variable properties, we have
+     *          var_a = (max_a - min_a)^2 / 12
+     *          var_b = (max_b - min_b)^2 / 12
+     *
+     *
+     * 3) Now, we have an idea of what would an average C_ij will like and how much deviation
+     *    is present around it. The exact distribution of C is not easy to come up with dependent on K.
+     *    But, as K increases, due to Central Limit Theorem, it'll look more like a bell shaped figure,
+     *    approaching normal distribution.
+     *
+     *    This is useful because, in normal distribution, we know that values +- 2 std_deviation around
+     *    the mean constitute 95% of the values. Therefore, setting a plausible range for us:
+     *      C_range = [C_min, C_max] = [mean_c - 2 * std_c, mean_c + 2 * std_c]
+     *
+     * 4)
+     *    If we map this [C_min, C_max] to [0, 255] or [-128, 127] depending on the signedness of the
+     *    data type, we can find a suitable scale and offset for the output. On average, it's expected
+     *    that 5% of the output values will saturate and 95% will remain in the range.
+     *
+     *    The equations to be solved for offset_c and scale_c are:
+     *          C_min = scale_c * (type_min - offset_c)
+     *          C_max = scale_c * (type_max - offset_c)
+     */
+
+    const int32_t a_offset = a_q_info.uniform().offset;
+    const float   a_scale  = a_q_info.uniform().scale;
+    const int32_t b_offset = b_q_info.uniform().offset;
+    const float   b_scale  = b_q_info.uniform().scale;
+
+    // Lhs/A stats
+    const float max_a  = (t_max - a_offset) * a_scale;
+    const float min_a  = (t_min - a_offset) * a_scale;
+    const float mean_a = (max_a + min_a) / 2;
+    const float var_a  = (max_a - min_a) * (max_a - min_a) / 12;
+
+    // Rhs/B stats
+    const float max_b  = (t_max - b_offset) * b_scale;
+    const float min_b  = (t_min - b_offset) * b_scale;
+    const float mean_b = (max_b + min_b) / 2;
+    const float var_b  = (max_b - min_b) * (max_b - min_b) / 12;
+
+    // Output stats
+    const float mean_out = k * mean_a * mean_b;
+    const float var_out  = k * (var_a * var_b + var_a * mean_b * mean_b + var_b * mean_a * mean_a);
+    const float std_out  = sqrt(var_out);
+
+    // Output quantization setup
+    const float   scale_out  = 4 * std_out / 255;
+    const int32_t offset_out = static_cast<int32_t>(t_min - (mean_out - 2.f * std_out) / scale_out);
+
+    c_q_info = QuantizationInfo(scale_out, offset_out);
+    return c_q_info;
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

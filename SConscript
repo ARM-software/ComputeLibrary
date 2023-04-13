@@ -390,6 +390,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/instance_normalization.cl',
                        'src/core/CL/cl_kernels/common/l2_normalize.cl',
                        'src/core/CL/cl_kernels/common/mat_mul.cl',
+                       'src/core/CL/cl_kernels/common/mat_mul_quantized.cl',
                        'src/core/CL/cl_kernels/common/mean_stddev_normalization.cl',
                        'src/core/CL/cl_kernels/common/memset.cl',
                        'src/core/CL/cl_kernels/common/minmax_layer.cl',

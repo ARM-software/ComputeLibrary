@@ -323,6 +323,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "mat_mul_native_nt_t", "common/mat_mul.cl" },
     { "mat_mul_native_t_nt", "common/mat_mul.cl" },
     { "mat_mul_native_t_t", "common/mat_mul.cl" },
+    { "mat_mul_native_quantized_nt_nt", "common/mat_mul_quantized.cl" },
+    { "mat_mul_native_quantized_t_nt", "common/mat_mul_quantized.cl" },
     { "max_unpooling_layer_2", "common/unpooling_layer.cl" },
     { "mean_stddev_normalization", "common/mean_stddev_normalization.cl" },
     { "memset", "common/memset.cl" },
@@ -793,6 +795,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/mat_mul.cl",
 #include "./cl_kernels/common/mat_mul.clembed"
+    },
+    {
+        "common/mat_mul_quantized.cl",
+#include "./cl_kernels/common/mat_mul_quantized.clembed"
     },
 #ifdef ENABLE_NCHW_KERNELS
     {

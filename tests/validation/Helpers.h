@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VALIDATION_HELPERS_H
-#define ARM_COMPUTE_TEST_VALIDATION_HELPERS_H
+#ifndef ACL_TESTS_VALIDATION_HELPERS
+#define ACL_TESTS_VALIDATION_HELPERS
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -250,7 +250,12 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
  * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
  */
 void add_padding_y(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC);
+
+/** For MatMulLowp, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
+ *  calculate a suitable output quantization for obtaining non-saturated outputs with high probability.
+ */
+QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &lhs_q_info, const QuantizationInfo &rhs_q_info, int m, int n, int k, DataType data_type);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_VALIDATION_HELPERS_H */
+#endif /* ACL_TESTS_VALIDATION_HELPERS */
