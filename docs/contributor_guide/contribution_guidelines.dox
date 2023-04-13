@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2022 Arm Limited.
+/// Copyright (c) 2019-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -238,6 +238,18 @@ class ClassName
     private:
         int _my_attribute; // '_' in front of name
 };
+@endcode
+
+- In header files, use header guards that use the full file path from the project root and prepend it with "ACL_"
+
+@code{cpp}
+// For File arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER
+.
+.
+.
+#endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER */
 @endcode
 
 - Use quotes instead of angular brackets to include local headers. Use angular brackets for system headers.
