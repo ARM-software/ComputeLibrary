@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
-#define ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
 
 #include "arm_compute/runtime/IFunction.h"
 #include <memory>
@@ -80,25 +80,27 @@ public:
      * - Any
      *
      * Valid data type configurations:
-     * |src0           |src1               |dst            |
+     * |lhs            |rhs                |dst            |
      * |:--------------|:------------------|:--------------|
      * |F32            |F32                |F32            |
      * |F16            |F16                |F16            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED     |QASYMM8_SIGNED |
+     * |QASYMM8        |QASYMM8            |QASYMM8        |
      *
-     * @param[in]  lhs      Input source tensor.
-     * @param[in]  rhs      Input source tensor.
-     * @param[out] output   Output tensor. Data type supported: same as @p lhs/rhs
-     * @param[in]  info     Class containing flags to transpose lhs/rhs
+     * @param[in]  lhs      Left-hand side tensor info. Data types supported: F16/F32/QASYMM8_SIGNED/QASYMM8.
+     * @param[in]  rhs      Right-hand side tensor info. Data types supported: same as @p lhs.
+     * @param[out] dst      Output tensor to store the result of the batched matrix multiplication. Data types supported: same as @p lhs / @p rhs.
+     * @param[in]  info     Contains MatMul operation information described in @ref MatMulInfo.
      * @param[in]  settings Class containing flags for function level settings i.e fast math
      */
-    void configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatMulInfo &info, const CpuMatMulSettings &settings);
+    void configure(ITensor *lhs, ITensor *rhs, ITensor *dst, const MatMulInfo &info, const CpuMatMulSettings &settings);
     /** Static function to check if given info will lead to a valid configuration of @ref NEMatMul
      *
      * Parameters are similar to @ref NEMatMul::configure()
      *
      * @return Status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &info, const CpuMatMulSettings &settings);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings);
 
     // Inherited methods overridden
     void run() override;
@@ -108,4 +110,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 }
-#endif /* ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL */
+#endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL */

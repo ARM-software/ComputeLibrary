@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CPU_OPERATORS_CPUMATMUL
-#define SRC_CPU_OPERATORS_CPUMATMUL
+#ifndef ACL_SRC_CPU_OPERATORS_CPUMATMUL
+#define ACL_SRC_CPU_OPERATORS_CPUMATMUL
 
 #include "arm_compute/core/TensorInfo.h"
 #include "src/core/common/Macros.h"
@@ -59,9 +59,9 @@ public:
      * Note: Check documentation of @ref NEMatMul for a list of supported datatypes and layouts
      *
      *
-     * @param[in]  lhs      Source tensor info.
-     * @param[in]  rhs      Source tensor info.
-     * @param[out] dst      Destination tensor info. Data types supported: same as @p lhs / @p rhs.
+     * @param[in]  lhs      Left-hand side tensor info.
+     * @param[in]  rhs      Right-hand side tensor info.
+     * @param[out] dst      Output tensor to store the result of the batched matrix multiplication. Data types supported: same as @p lhs / @p rhs.
      * @param[in]  info     Contains MatMul operation information described in @ref MatMulInfo.
      * @param[in]  settings The settings for matmul operation (i.e fast math)
      */
@@ -112,4 +112,4 @@ private:
 }
 }
 
-#endif /* SRC_CPU_OPERATORS_CPUMATMUL */
+#endif /* ACL_SRC_CPU_OPERATORS_CPUMATMUL */

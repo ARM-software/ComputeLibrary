@@ -47,17 +47,17 @@ public:
      *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
      * @param[in]  rhs             Input tensor for the RHS matrix. Data type supported: same as @p lhs.
      *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
-     * @param[out] output          Output tensor info. Data type supported: same as @p lhs
+     * @param[out] dst             Output tensor info. Data type supported: same as @p lhs
      * @param[in]  matmul_info     Attributes for Batch MatMul Kernel
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulKernelInfo &matmul_info);
+    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMatMulNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulKernelInfo &matmul_info);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

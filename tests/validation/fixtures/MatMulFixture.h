@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
-#define TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
+#define ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -188,8 +188,9 @@ protected:
         std::vector<int32_t> output_multipliers{ output_multiplier };
         std::vector<int32_t> output_shifts{ output_shift };
 
+        //The lhs and rhs offsets are negated here to keep the reference aligned with the function implementation where the lhs and rhs offsets are also negated.
         const auto tmp = reference::gemmlowp_matrix_multiply_core<int32_t>(
-            a, b, c.shape(), aq.offset, bq.offset);
+            a, b, c.shape(), -aq.offset, -bq.offset);
 
         auto output = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, TT>(
             tmp, output_multipliers, output_shifts, oq.offset,
@@ -314,4 +315,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MATMUL_FIXTURE */
+#endif /* ACL_TESTS_VALIDATION_FIXTURES_MATMULFIXTURE */

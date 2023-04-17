@@ -191,6 +191,7 @@ void CpuMatMul::configure(ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, 
     // Fill AsmGemmInfo class object before configuration
     _gemm_info.activation_info = info.fused_activation();
     _gemm_info.fast_mode       = settings.fast_math();
+    _gemm_info.negated_offsets = false;
 
     lhs_to_use = (_adj_lhs) ? _lhs_transposed : lhs_to_use;
     rhs_to_use = (_adj_rhs) ? _rhs_transposed : rhs_to_use;
