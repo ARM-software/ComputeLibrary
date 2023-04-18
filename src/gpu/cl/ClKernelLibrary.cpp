@@ -324,6 +324,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "mat_mul_native_t_nt", "common/mat_mul.cl" },
     { "mat_mul_native_t_t", "common/mat_mul.cl" },
     { "mat_mul_native_quantized_nt_nt", "common/mat_mul_quantized.cl" },
+    { "mat_mul_native_quantized_nt_t", "common/mat_mul_quantized.cl" },
     { "mat_mul_native_quantized_t_nt", "common/mat_mul_quantized.cl" },
     { "mat_mul_native_quantized_t_t", "common/mat_mul_quantized.cl" },
     { "max_unpooling_layer_2", "common/unpooling_layer.cl" },
