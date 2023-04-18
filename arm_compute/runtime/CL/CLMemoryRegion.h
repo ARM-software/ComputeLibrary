@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,10 +85,9 @@ public:
     std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) override;
 
 protected:
-    cl::CommandQueue _queue;
-    cl::Context      _ctx;
-    void            *_mapping;
-    cl::Buffer       _mem;
+    cl::Context _ctx;
+    void       *_mapping;
+    cl::Buffer  _mem;
 };
 
 /** OpenCL buffer memory region implementation */

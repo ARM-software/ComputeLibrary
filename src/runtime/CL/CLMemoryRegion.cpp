@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@ namespace arm_compute
 {
 ICLMemoryRegion::ICLMemoryRegion(size_t size)
     : IMemoryRegion(size),
-      _queue(CLScheduler::get().queue()),
       _ctx(CLScheduler::get().context()),
       _mapping(nullptr),
       _mem()
@@ -111,7 +110,7 @@ ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
     {
         try
         {
-            clFinish(_queue.get());
+            clFinish(CLScheduler::get().queue().get());
             _mem = cl::Buffer();
             clSVMFree(_ctx.get(), _ptr);
         }
