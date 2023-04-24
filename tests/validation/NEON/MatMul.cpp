@@ -217,6 +217,7 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE_END() // Float
 
+#ifdef __aarch64__ // All the GeMM CPU assembly kernels for integer datatypes require aarch64
 TEST_SUITE(Quantized)
 
 TEST_SUITE(QASYMM8)
@@ -324,6 +325,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizedMatMulFixture<int8_t>, framework::Da
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE_END() // Quantized
+#endif // __aarch64__
 
 TEST_SUITE_END() // MatMul
 TEST_SUITE_END() // NEON
