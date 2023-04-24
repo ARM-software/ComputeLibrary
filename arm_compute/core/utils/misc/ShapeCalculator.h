@@ -432,8 +432,8 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     const int        weights_width_idx   = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::WIDTH);
     const int        weights_height_idx  = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::HEIGHT);
 
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
+    unsigned int output_width             = 0;
+    unsigned int output_height            = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
                                                               weights_shape[weights_width_idx], weights_shape[weights_height_idx],
                                                               info.pad_stride_info, info.dilation);
@@ -517,11 +517,12 @@ inline TensorShape compute_deconvolution_output_shape(const std::pair<unsigned i
  * @param[in] dilation        Dilation, in elements, across x and y
  * @param[in] batch_size_on_z True if batch size is on z axis
  * @param[in] num_groups      (Optional)  Number of groups when performing a grouped convolution
+ * @param[in] input_pad_right (Optional) When fast-math is selected, per element padding for the im2col matrix may be necessary
  *
  * @return the calculated shape
  */
 inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,
-                                             unsigned int num_groups = 1)
+                                             unsigned int num_groups = 1, unsigned int input_pad_right = 0)
 {
     // The output shape will be the 3D shape [ out_channels * kernel_area, num_elems_per_out_channel, batches ]                           if batch_size_on_z == true
     //                       or the 4D shape [ out_channels * kernel_area / num_groups, num_elems_per_out_channel, num_groups, batches ]  if batch_size_on_z == false
@@ -538,7 +539,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
-    output_shape.set(0, (output_shape[channel_idx] / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
+    output_shape.set(0, ((output_shape[channel_idx] + input_pad_right) / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
     output_shape.set(1, (out_dims.first * out_dims.second));
     if(batch_size_on_z && output_shape.num_dimensions() >= 3)
     {
@@ -682,8 +683,8 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
     const DataLayout    data_layout      = winograd_info.output_data_layout;
 
     // Compute output shape
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
+    unsigned int output_width             = 0;
+    unsigned int output_height            = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_dimensions.width, input_dimensions.height,
                                                               kernel_size.width, kernel_size.height, conv_info);
 
@@ -723,7 +724,7 @@ inline TensorShape compute_deep_convolution_shape(const TensorShape &input_shape
     const unsigned int weights_out_channel = weights_shape[3];
     unsigned int       output_width        = 0;
     unsigned int       output_height       = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
+    std::tie(output_width, output_height)  = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(idx_width, output_width);
