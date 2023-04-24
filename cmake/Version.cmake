@@ -36,5 +36,3 @@ if(NOT GIT_FOUND OR RESULT)
 endif()
 
 file(WRITE "arm_compute_version.embed" "\"${ACL_VERSION_SHA}\"")
-
-# TODO: List build options

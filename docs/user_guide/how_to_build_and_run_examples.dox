@@ -399,7 +399,7 @@ SVM allocations are supported for all the underlying allocations in Compute Libr
 @section S1_8_experimental_builds Experimental Bazel and CMake builds
 
 In addition to the scons build the repository includes experimental Bazel and CMake builds.
-Both are similar to the scons multi_isa build. It compiles all libraries with Neon (TM) support, as well as SVE and SVE2 libraries. The build is CPU only, not including OpenCL support.  Both were successfully built with gcc / g++ version 10.2.
+These builds currently support a limited range of options. Both are similar to the scons multi_isa build. It compiles all libraries with Neon (TM) support, as well as SVE and SVE2 libraries. The build is CPU only, not including OpenCL support. Only Linux environment is targeted for now. Both were successfully built with gcc / g++ version 10.2.
 
 @subsection S1_8_1_bazel_build Bazel build
 
@@ -495,14 +495,14 @@ File structure for all files included in the CMake build:
 
 Available build options:
 
-	- DEBUG: Enable ['-O0','-g','-gdwarf-2'] compilation flags
-	- WERROR: Enable -Werror compilation flag
-	- EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
-	- LOGGING: Enable logging
-	- BUILD_EXAMPLES: Build examples
-	- BUILD_TESTING: Build tests
-	- CPPTHREADS: Enable C++11 threads backend
-	- OPENMP: Enable OpenMP backend
+	- CMAKE_BUILD_TYPE: "Release" (default) enables ['-O3', '-DNDEBUG'] compilation flags, "Debug" enables ['-O0','-g','-gdwarf-2', '-DARM_COMPUTE_ASSERTS_ENABLED']
+	- ARM_COMPUTE_WERROR: Enable -Werror compilation flag
+	- ARM_COMPUTE_EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
+	- ARM_COMPUTE_LOGGING: Enable logging
+	- ARM_COMPUTE_BUILD_EXAMPLES: Build examples
+	- ARM_COMPUTE_BUILD_TESTING: Build tests
+	- ARM_COMPUTE_CPPTHREADS: Enable C++11 threads backend
+	- ARM_COMPUTE_OPENMP: Enable OpenMP backend
 
 @subsubsection S1_8_2_3_example_builds Example builds
 
@@ -510,7 +510,7 @@ To build libraries, examples and tests:
 
 	mkdir build
 	cd build
-	cmake .. -DOPENMP=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	cmake .. -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_OPENMP=1 -DARM_COMPUTE_WERROR=0 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
 	cmake --build . -j32
 
 @section S1_8_fixed_format Building with support for fixed format kernels

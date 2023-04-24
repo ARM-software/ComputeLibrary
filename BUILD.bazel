@@ -192,7 +192,7 @@ cc_library(
     name = "arm_compute_graph",
     srcs = ["//src:arm_compute_graph_srcs"],
     copts = [
-                "-march=armv8.2-a+fp16",  # What arch is it we should go for here?
+                "-march=armv8.2-a+fp16",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -211,7 +211,7 @@ cc_library(
             }),
     visibility = ["//visibility:public"],
     deps = [
-        "arm_compute",
+        "arm_compute_core",
         "//:common_defines",
         "//arm_compute:graph_headers",
     ],
@@ -225,7 +225,7 @@ cc_library(
     name = "arm_compute_sve2",
     srcs = ["//src:arm_compute_sve2_srcs"],
     copts = [
-                "-march=armv8.6-a+sve2+fp16+dotprod",  # What arch is it we should go for here?
+                "-march=armv8.6-a+sve2+fp16+dotprod",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -276,7 +276,7 @@ cc_library(
     name = "arm_compute_sve",
     srcs = ["//src:arm_compute_sve_srcs"],
     copts = [
-                "-march=armv8.2-a+sve+fp16+dotprod",  # What arch is it we should go for here?
+                "-march=armv8.2-a+sve+fp16+dotprod",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -323,8 +323,8 @@ cc_library(
 # Core and Runtime library
 
 cc_library(
-    name = "arm_compute",
-    srcs = ["//src:arm_compute_srcs"],
+    name = "arm_compute_core",
+    srcs = ["//src:arm_compute_core_srcs"],
     hdrs = glob([
         "core/NEON/kernels/**/*.h",
         "core/NEON/kernels/**/*.hpp",
@@ -333,7 +333,7 @@ cc_library(
         "//:create_version_file",
     ],
     copts = [
-                "-march=armv8.2-a+fp16",  # What arch is it we should go for here?
+                "-march=armv8.2-a+fp16",
             ] + select({
                 "//:debug_flag": [
                     "-O0",

@@ -57,6 +57,7 @@ endif()
 # ---------------------------------------------------------------------
 # Configuration
 
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -gdwarf-2 -DARM_COMPUTE_ASSERTS_ENABLED")
 # Default to Release Build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE
@@ -113,26 +114,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options("-Wno-psabi")
 endif()
 
-# Compile with -Werror if WERROR set
-if(WERROR)
+# Compile with -Werror if ARM_COMPUTE_WERROR set
+if(ARM_COMPUTE_WERROR)
   add_compile_options("-Werror")
 endif()
 
-# Compile with debug flags and define ARM_COMPUTE_ASSERTS_ENABLED if DEBUG set
-if(DEBUG)
-  add_compile_options("-O0" "-g" "-gdwarf-2")
-  add_definitions(-DARM_COMPUTE_ASSERTS_ENABLED) # ARM_COMPUTE_DEBUG_ENABLED ??
-endif()
-
 # Compile with -fno-exceptions flag and define ARM_COMPUTE_EXCEPTIONS_DISABLED
-# if DEBUG set
-if(NOT EXCEPTIONS)
+# if ARM_COMPUTE_EXCEPTIONS not set
+if(NOT ARM_COMPUTE_EXCEPTIONS)
   add_compile_options("-fno-exceptions")
   add_definitions(-DARM_COMPUTE_EXCEPTIONS_DISABLED)
 endif()
 
-# Link OpenMP libraries if OPENMP flag on
-if(OPENMP)
+# Link OpenMP libraries if ARM_COMPUTE_OPENMP set
+if(ARM_COMPUTE_OPENMP)
   find_package(OpenMP)
   if(OpenMP_CXX_FOUND)
     link_libraries(OpenMP::OpenMP_CXX)
@@ -240,37 +235,36 @@ add_library(ArmCompute::Graph ALIAS arm_compute_graph)
 # Library Target Sources
 add_subdirectory(src)
 
-# ---------------------------------------------------------------------
-# Validation Framework Library
-add_library(arm_compute_validation_framework "")
-# target_compile_options(arm_compute_validation_framework PRIVATE
-# "-march=armv8.2-a")
-target_compile_options(arm_compute_validation_framework
-                       PRIVATE "-march=armv8.2-a+fp16")
+if(ARM_COMPUTE_BUILD_TESTING)
+  # ---------------------------------------------------------------------
+  # Validation Framework Library
+  add_library(arm_compute_validation_framework "")
+  # target_compile_options(arm_compute_validation_framework PRIVATE
+  # "-march=armv8.2-a")
+  target_compile_options(arm_compute_validation_framework
+                        PRIVATE "-march=armv8.2-a+fp16")
 
-add_subdirectory(tests)
-target_include_directories(
-  arm_compute_validation_framework
-  PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(arm_compute_validation_framework
-                       PUBLIC ${COMMON_CXX_FLAGS})
-                       target_link_libraries(
-                        arm_compute_validation_framework
-    PUBLIC arm_compute_core arm_compute_graph)
+  add_subdirectory(tests)
+  target_include_directories(
+    arm_compute_validation_framework
+    PUBLIC $<INSTALL_INTERFACE:include>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          ${CMAKE_CURRENT_SOURCE_DIR})
+  target_compile_options(arm_compute_validation_framework
+                        PUBLIC ${COMMON_CXX_FLAGS})
+                        target_link_libraries(
+                          arm_compute_validation_framework
+      PUBLIC arm_compute_core arm_compute_graph)
 
-# ---------------------------------------------------------------------
-# Validation Binary
-
-if(BUILD_TESTING)
+  # ---------------------------------------------------------------------
+  # Validation Binary
 
   add_executable(arm_compute_validation "")
   target_compile_options(arm_compute_validation PRIVATE "-march=armv8.2-a+fp16")
-  if(ENABLE_BF16_VALIDATION)
+  if(ARM_COMPUTE_ENABLE_BF16_VALIDATION)
     target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_BF16)
   endif()
-  if(ENABLE_SVE_VALIDATION)
+  if(ARM_COMPUTE_ENABLE_SVE_VALIDATION)
     target_compile_definitions(arm_compute_validation PRIVATE ENABLE_SVE)
     target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_SVE)
   endif()
@@ -300,11 +294,11 @@ if(BUILD_TESTING)
     arm_compute_benchmark PUBLIC arm_compute_core arm_compute_graph
                                  arm_compute_validation_framework)
 
-endif() # BUILD_TESTING
+endif() # ARM_COMPUTE_BUILD_TESTING
 # ---------------------------------------------------------------------
 # Examples Binaries
 
-if(BUILD_EXAMPLES)
+if(ARM_COMPUTE_BUILD_EXAMPLES)
 
   add_subdirectory(examples)
 
@@ -331,4 +325,4 @@ if(BUILD_EXAMPLES)
     target_link_libraries(${test_name} PUBLIC arm_compute_core)
   endforeach()
 
-endif() # BUILD_EXAMPLES
+endif() # ARM_COMPUTE_BUILD_EXAMPLES

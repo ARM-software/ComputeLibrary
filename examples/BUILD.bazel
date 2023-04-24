@@ -29,7 +29,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -42,7 +42,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -55,7 +55,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -68,7 +68,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -81,7 +81,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -94,7 +94,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -110,7 +110,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -123,7 +123,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -139,7 +139,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -152,7 +152,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -165,7 +165,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -178,7 +178,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -191,7 +191,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -204,7 +204,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -217,7 +217,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -230,7 +230,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -243,7 +243,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -256,7 +256,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -269,7 +269,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -282,7 +282,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -295,7 +295,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -308,7 +308,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -321,7 +321,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -334,7 +334,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -347,7 +347,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -360,7 +360,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -373,7 +373,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -386,7 +386,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -399,7 +399,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -412,7 +412,7 @@ cc_binary(
     copts = ["-march=armv8.2-a+fp16"],
     linkstatic = False,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//include",
         "//utils",
