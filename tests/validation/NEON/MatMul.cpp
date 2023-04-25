@@ -45,8 +45,10 @@ TEST_SUITE(MatMul)
 
 constexpr AbsoluteTolerance<float>   tolerance_fp32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
 const AbsoluteTolerance<half>        tolerance_fp16(half(0.1f));
+#ifdef __aarch64__
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8_signed(0);
+#endif // __aarch64__
 
 // clang-format off
 // *INDENT-OFF*
