@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
@@ -162,16 +163,16 @@ protected:
 
     template <typename TT>
     typename std::enable_if<!std::is_integral<TT>::value, SimpleTensor<TT>>::type
-    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const ActivationLayerInfo &act_info, const QuantizationInfo &o_qinfo)
+    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const QuantizationInfo &o_qinfo)
     {
-        ARM_COMPUTE_UNUSED(act_info, o_qinfo);
+        ARM_COMPUTE_UNUSED(o_qinfo);
 
         return reference::gemm(a, b, c, alpha, beta);
     }
 
     template <typename TT>
     typename std::enable_if<std::is_integral<TT>::value, SimpleTensor<TT>>::type
-    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const ActivationLayerInfo &act_info, const QuantizationInfo &o_qinfo)
+    compute_reference_gemm(const SimpleTensor<TT> &a, const SimpleTensor<TT> &b, const SimpleTensor<TT> &c, float alpha, float beta, const QuantizationInfo &o_qinfo)
     {
         ARM_COMPUTE_UNUSED(alpha, beta);
 
@@ -187,17 +188,12 @@ protected:
         std::vector<int32_t> output_multipliers{ output_multiplier };
         std::vector<int32_t> output_shifts{ output_shift };
 
-        PixelValue output_min{};
-        PixelValue output_max{};
-        std::tie(output_min, output_max) = quantization::get_quantized_asymmetric_output_min_max(
-            o_qinfo, act_info, a.data_type());
-
         const auto tmp = reference::gemmlowp_matrix_multiply_core<int32_t>(
             a, b, c.shape(), aq.offset, bq.offset);
 
         auto output = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, TT>(
             tmp, output_multipliers, output_shifts, oq.offset,
-            output_min.get<int32_t>(), output_max.get<int32_t>());
+            std::numeric_limits<int32_t>::lowest(), std::numeric_limits<int32_t>::max());
         output.quantization_info(o_qinfo);
 
         return output;
@@ -253,7 +249,7 @@ protected:
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
         // Use transposed tensors if boolean enabled else use original tensors
-        auto result = compute_reference_gemm<T>((transpose_a) ? a_transposed : a, (transpose_b) ? b_transposed : b, c, 1.0f, 0.f, act_info, o_qinfo);
+        auto result = compute_reference_gemm<T>((transpose_a) ? a_transposed : a, (transpose_b) ? b_transposed : b, c, 1.0f, 0.f, o_qinfo);
 
         result = reference::activation_layer<T>(result, act_info, o_qinfo);
 

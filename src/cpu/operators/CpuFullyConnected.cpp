@@ -32,6 +32,7 @@
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 #include "src/cpu/operators/CpuFlatten.h"
@@ -63,16 +64,16 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
 
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
-    PixelValue type_min{};
-    PixelValue type_max{};
+    int32_t type_min = 0;
+    int32_t type_max = 0;
     std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
 
     gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
     gemmlowp_output_stage_info.gemmlowp_shift      = output_shift;
     gemmlowp_output_stage_info.gemmlowp_offset     = oq_unif.offset;
     gemmlowp_output_stage_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    gemmlowp_output_stage_info.gemmlowp_min_bound  = type_min.get<int32_t>();
-    gemmlowp_output_stage_info.gemmlowp_max_bound  = type_max.get<int32_t>();
+    gemmlowp_output_stage_info.gemmlowp_min_bound  = type_min;
+    gemmlowp_output_stage_info.gemmlowp_max_bound  = type_max;
 
     return Status{};
 }
