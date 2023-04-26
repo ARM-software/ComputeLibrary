@@ -69,10 +69,9 @@ protected:
 
         // 10% of the time the index is out-of-range.
         uint32_t max_index = input_shape[actual_axis] + input_shape[actual_axis] / 9 + 1;
-
         std::uniform_int_distribution<uint32_t> dist_index(0, max_index - 1);
-        //Let's consider 1D indices
-        for(unsigned int ind = 0; ind < indices_shape[0]; ind++)
+
+        for(unsigned int ind = 0; ind < indices_shape.total_size(); ind++)
         {
             indices_ptr[ind] = dist_index(gen);
         }
