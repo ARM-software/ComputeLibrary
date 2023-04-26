@@ -1649,7 +1649,7 @@
             "estate64": [
               "src/core/NEON/kernels/arm_gemm/kernels/a64_sgemv_pretransposed/generic.cpp"
             ],
-            "experimental_fixed_format_kernels": [
+            "fixed_format_kernels": [
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_bf16fp32_mmla_6x16/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp16_mla_6x32/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/a64_ffhybrid_fp32_mla_6x16/generic.cpp",
@@ -1725,7 +1725,7 @@
               "src/core/NEON/kernels/arm_gemm/transform-sve.cpp",
               "src/core/NEON/kernels/arm_gemm/misc-sve.cpp"
             ],
-            "experimental_fixed_format_kernels": [
+            "fixed_format_kernels": [
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_bf16fp32_mmla_6x4VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16_mla_6x4VL/a64fx.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffhybrid_fp16_mla_6x4VL/generic.cpp",

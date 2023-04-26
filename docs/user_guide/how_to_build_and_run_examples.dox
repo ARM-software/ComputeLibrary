@@ -513,5 +513,19 @@ To build libraries, examples and tests:
 	cmake .. -DOPENMP=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
 	cmake --build . -j32
 
+@section S1_8_fixed_format Building with support for fixed format kernels
+
+@subsection S1_8_1_intro_to_fixed_format_kernels What are fixed format kernels?
+
+The GEMM kernels used for convolutions and fully-connected layers in Compute Library employ memory layouts optimized for each kernel implementation. This then requires the supplied weights to be re-ordered into a buffer ready for consumption by the GEMM kernel. Where Compute Library is being called from a framework or library which implements operator caching, the re-ordering of the inputted weights into an intermediate buffer may no longer be desirable. When using a cached operator, the caller may wish to re-write the weights tensor, and re-run the operator using the updated weights. With the default GEMM kernels in Compute Library, the GEMM will be executed with the old weights, leading to incorrect results.
+
+To address this, Compute Library provides a set of GEMM kernels which use a common blocked memory format. These kernels consume the input weights directly from the weights buffer and do not execute an intermediate pre-transpose step. With this approach, it is the responsibility of the user (in this case the calling framework) to ensure that the weights are re-ordered into the required memory format. @ref NEGEMM::has_opt_impl is a static function that queries whether there exists fixed-format kernel, and if so will return in the expected weights format. The supported weight formats are enumerated in @ref arm_compute::WeightFormat.
+
+@subsection S1_8_2_building_fixed_format Building with fixed format kernels
+
+Fixed format kernels are only available for the CPU backend. To build Compute Library with fixed format kernels set fixed_format_kernels=1:
+
+        scons Werror=1 debug=0 neon=1 opencl=0 embed_kernels=0 os=linux multi_isa=1 build=native cppthreads=1 openmp=0 fixed_format_kernels=1
+
 */
 } // namespace arm_compute

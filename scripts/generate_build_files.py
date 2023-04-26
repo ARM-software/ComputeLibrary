@@ -234,9 +234,9 @@ def gather_sources():
     data_types = ["qasymm8", "qasymm8_signed", "qsymm16",
                   "fp16", "fp32", "integer"]  # Are all needed?
     data_layouts = ["nhwc", "nchw"]  # Are both needed?
-    experimental_fixed_format_kernels = ["experimental_fixed_format_kernels"]
+    fixed_format_kernels = ["fixed_format_kernels"]
     attrs = data_types + data_layouts + \
-        experimental_fixed_format_kernels + ["estate64"]
+        fixed_format_kernels + ["estate64"]
 
     # Setup data-type and data-layout files to include
     cpu_operators = filelist['cpu']['operators'].keys()

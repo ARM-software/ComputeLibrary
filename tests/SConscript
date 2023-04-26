@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022 Arm Limited.
+# Copyright (c) 2017-2023 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -185,7 +185,7 @@ if test_env['reference_openmp'] and env['os'] not in ['bare_metal', 'macos','win
         test_env['LINKFLAGS'].append('-static-openmp')
 
 # Testing for fixed format GEMM kernels.
-if env['experimental_fixed_format_kernels'] and test_env['validation_tests']:
+if env['fixed_format_kernels'] and test_env['validation_tests']:
     test_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
 
 if test_env['validation_tests']:

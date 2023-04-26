@@ -511,15 +511,14 @@ with (open(Dir('#').path + '/filelist.json')) as fp:
 # Common backend files
 lib_files = filelist['common']
 
+# Fixed format GEMM kernels.
+if env['fixed_format_kernels']:
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
+
 # Experimental files
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
-
-# Fixed format GEMM kernels.
-if env['experimental_fixed_format_kernels']:
-    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
-
 
 # Logging files
 if env["logging"]:
@@ -596,8 +595,9 @@ if env['neon']:
     else:
         attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
 
-    if env['experimental_fixed_format_kernels']:
-        attrs.append("experimental_fixed_format_kernels")
+
+    if env['fixed_format_kernels']:
+        attrs.append("fixed_format_kernels")
 
     # Setup data-type and data-layout files to include
     cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()

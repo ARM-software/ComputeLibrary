@@ -126,7 +126,7 @@ vars.AddVariables(
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
     BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
-    BoolVariable("experimental_fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
+    BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
