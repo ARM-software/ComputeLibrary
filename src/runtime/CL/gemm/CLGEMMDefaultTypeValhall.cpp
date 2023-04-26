@@ -79,6 +79,17 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelec
         { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
     };
 
+    // Mali-G710 and Mali-G610 configurations
+    static std::map<DataType, FunctionExecutorPtr> gemm_g710_configs =
+    {
+        { DataType::F32, &CLGEMMDefaultTypeValhall::default_f32 },
+        { DataType::F16, &CLGEMMDefaultTypeValhall::g710_f16 },
+        { DataType::QASYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8, &CLGEMMDefaultTypeValhall::default_q8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeValhall::default_q8 }
+    };
+
     // Mali-G715 and Mali-G615 configurations
     static std::map<DataType, FunctionExecutorPtr> gemm_g715_configs =
     {
@@ -94,6 +105,13 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::select_kernel(const CLGEMMKernelSelec
 
     switch(_target)
     {
+        case GPUTarget::G710:
+        case GPUTarget::G610:
+            if(gemm_g710_configs.find(data_type) != gemm_g710_configs.end())
+            {
+                return (this->*gemm_g710_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
+            }
+            ARM_COMPUTE_ERROR("Not supported data type");
         case GPUTarget::G715:
         case GPUTarget::G615:
             if(gemm_g715_configs.find(data_type) != gemm_g715_configs.end())
@@ -140,14 +158,14 @@ CLGEMMKernelType CLGEMMDefaultTypeValhall::g77_f16(unsigned int m, unsigned int 
 {
     ARM_COMPUTE_UNUSED(m, n, k, b);
 
-    if(!is_rhs_constant)
-    {
-        return CLGEMMKernelType::NATIVE;
-    }
-    else
-    {
-        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-    }
+    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
+}
+
+CLGEMMKernelType CLGEMMDefaultTypeValhall::g710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+{
+    ARM_COMPUTE_UNUSED(m, n, k, b);
+
+    return is_rhs_constant ? CLGEMMKernelType::RESHAPED_ONLY_RHS : CLGEMMKernelType::NATIVE;
 }
 
 CLGEMMKernelType CLGEMMDefaultTypeValhall::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
