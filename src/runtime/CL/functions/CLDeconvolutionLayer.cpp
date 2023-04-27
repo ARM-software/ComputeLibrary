@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h"
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -155,7 +156,9 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
 
     if(weights->dimension(idx_w) != deconv_info.stride().first || weights->dimension(idx_h) != deconv_info.stride().second)
     {
-        if(input->data_layout() == DataLayout::NHWC && ofm <= 16)
+        // We observe better performance for FP32 types only when ofm <= 16.
+        // A better heuristic is required for selecting the method for FP16 data types.
+        if(input->data_layout() == DataLayout::NHWC && !((input->data_type() == DataType::F32) && (ofm > 16)))
         {
             return DeconvolutionMethod::DIRECT;
         }
