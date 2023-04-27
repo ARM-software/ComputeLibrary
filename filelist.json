@@ -1545,11 +1545,9 @@
             "src/cpu/kernels/CpuGemmLowpOffsetContributionOutputStageKernel.cpp",
             "src/cpu/kernels/CpuGemmLowpOffsetContributionKernel.cpp",
             "src/cpu/operators/CpuGemm.cpp",
-            "src/cpu/operators/CpuMatMul.cpp",
             "src/cpu/operators/CpuGemmLowpOutputStage.cpp",
             "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.cpp",
             "src/runtime/NEON/functions/NEGEMM.cpp",
-            "src/runtime/NEON/functions/NEMatMul.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.cpp",
             "src/runtime/NEON/functions/NEGEMMLowpOutputStage.cpp"
           ],
@@ -1870,6 +1868,7 @@
         }
       },
       "MatMul" : {
+        "deps": [ "Transpose" ],
         "files": {
           "common": [
             "src/cpu/operators/CpuMatMul.cpp",

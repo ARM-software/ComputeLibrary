@@ -178,6 +178,7 @@ cc_library_static {
                          "build/android-arm64v8a/src/core/CL",
                          "src/core/common",
                          "src/core/helpers",
+                         "src/core/NEON/kernels/arm_gemm",
                          "src/core/NEON/kernels/assembly",
                          "src/core/NEON/kernels/convolution/common",
                          "src/core/NEON/kernels/convolution/winograd",
