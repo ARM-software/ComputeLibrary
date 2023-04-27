@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(ITensorInfo *input, ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden
     void run() override;
