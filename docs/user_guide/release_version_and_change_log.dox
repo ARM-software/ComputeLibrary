@@ -43,6 +43,8 @@ If there is more than one release in a month then an extra sequential number is 
 v23.05 Public major release
  - Deprecate dynamic block shape in @ref NEBatchToSpaceLayer
  - Deprecate dynamic block shape in @ref CLBatchToSpaceLayer
+ - New Arm® Neon™ kernels / functions :
+   - @ref NEReorderLayer
 
 v23.02.1 Public patch release
  - Allow mismatching data layouts between the source tensor and weights for \link cpu::CpuGemmDirectConv2d CpuGemmDirectConv2d \endlink with fixed format kernels.

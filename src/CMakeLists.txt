@@ -946,7 +946,7 @@ target_sources(
 	runtime/NEON/functions/NERange.cpp
 	runtime/NEON/functions/NEReduceMean.cpp
 	runtime/NEON/functions/NEReductionOperation.cpp
-	runtime/NEON/functions/NEReorder.cpp
+	runtime/NEON/functions/NEReorderLayer.cpp
 	runtime/NEON/functions/NEReorgLayer.cpp
 	runtime/NEON/functions/NEReshapeLayer.cpp
 	runtime/NEON/functions/NEReverse.cpp

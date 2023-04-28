@@ -964,7 +964,7 @@ cc_library_static {
         "src/runtime/NEON/functions/NERange.cpp",
         "src/runtime/NEON/functions/NEReduceMean.cpp",
         "src/runtime/NEON/functions/NEReductionOperation.cpp",
-        "src/runtime/NEON/functions/NEReorder.cpp",
+        "src/runtime/NEON/functions/NEReorderLayer.cpp",
         "src/runtime/NEON/functions/NEReorgLayer.cpp",
         "src/runtime/NEON/functions/NEReshapeLayer.cpp",
         "src/runtime/NEON/functions/NEReverse.cpp",

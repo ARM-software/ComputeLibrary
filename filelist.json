@@ -2080,7 +2080,7 @@
       "Reorder": {
         "files": {
           "common": [
-            "src/runtime/NEON/functions/NEReorder.cpp",
+            "src/runtime/NEON/functions/NEReorderLayer.cpp",
             "src/core/NEON/kernels/NEReorderKernel.cpp"
           ]
         }
