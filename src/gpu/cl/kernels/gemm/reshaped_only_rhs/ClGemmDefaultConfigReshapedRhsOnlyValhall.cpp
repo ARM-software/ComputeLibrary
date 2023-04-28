@@ -562,21 +562,19 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
 
     if(m == 1)
     {
-        if(r_mn <= 0.0045f)
+        const GeMMConfigsMatrix configs_mnkb_best =
         {
-            if(workload <= 278.7000f)
-            {
-                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 8, 0, 0, 0, 1, 1);
-            }
-            else
-            {
-                return configure_lhs_rhs_info(m, n, 1, 4, 8, 1, 32, 0, 0, 1, 0, 0);
-            }
-        }
-        else
-        {
-            return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 8, 0, 0, 1, 0, 0);
-        }
+            { 1, 8984, 640, 1, 1, 4, 2, 1, 0, 1, 0, 1, 1, 0 },
+            { 1, 420, 392, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 644, 5288, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 6512, 6404, 1, 1, 2, 2, 1, 0, 1, 0, 1, 1, 0 },
+            { 1, 5304, 640, 1, 1, 2, 2, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 1352, 1520, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 4096, 25088, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 732, 8988, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 }
+        };
+
+        return find_lhs_rhs_info(configs_mnkb_best, m, n, k, b);
     }
     else
     {
