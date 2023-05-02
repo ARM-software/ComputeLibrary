@@ -122,13 +122,8 @@ Status CpuMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->dimension(0) != rhs_to_use->dimension(1),
                                     "The product AB is defined only if the number of columns in A is equal to the number of rows in B (after transpose)");
 
-    if(lhs_to_use->num_dimensions() > 2)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->num_dimensions() != rhs_to_use->num_dimensions(), "Broadcasting in Batch dimension is unsupported by this operator.");
-    }
-
-    // Iterate over dimensions to be collapsed in operator - check dimensions are equivelent between tensors
-    for(unsigned int i = 2; i < lhs_to_use->num_dimensions(); i++)
+    // Iterate over dimensions to be collapsed in operator - check dimensions are equivalent between tensors
+    for(unsigned int i = 2; i < Coordinates::num_max_dimensions; i++)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_to_use->dimension(i) != rhs_to_use->dimension(i), "Broadcasting in Batch dimension is unsupported by this operator.");
     }
