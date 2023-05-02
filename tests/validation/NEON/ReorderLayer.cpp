@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__aarch64__)
+
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/NEON/Accessor.h"
@@ -64,3 +66,5 @@ TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif  // defined(__aarch64__)

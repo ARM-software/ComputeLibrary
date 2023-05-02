@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__aarch64__)
+
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 
@@ -51,3 +53,5 @@ Status NEReorderLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 }
 
 } // namespace arm_compute
+
+#endif  // defined(__aarch64__)

@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__aarch64__)
 
 #include "src/core/NEON/kernels/NEReorderKernel.h"
 #include "src/common/utils/Log.h"
@@ -221,3 +222,5 @@ Status NEReorderKernel::validate(const ITensorInfo *input, const ITensorInfo *ou
 }
 
 } // namespace arm_compute
+
+#endif  // defined(__aarch64__)

@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(__aarch64__)
+
 #ifndef ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
 #define ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
 
@@ -91,3 +93,5 @@ private:
 
 } // namespace arm_compute
 #endif /* ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL */
+
+#endif  // defined(__aarch64__)
