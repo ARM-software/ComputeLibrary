@@ -570,7 +570,9 @@ The responsibilities of the operators can be summarized as follows:
 
 Selecting multi_isa when building Compute Library, will create a library that contains all the supported ISA features.
 Based on the CPU support, the appropriate kernel will be selected at runtime for execution. Currently this option is
-only supported with armv8.2-a as the base architecture.
+supported in two configurations: (i) with armv8.2-a as the base architecture where all the supported ISA features are enabled and
+(ii) with armv8-a as the base architecture where only a subset of ISA features (everything except FP16 vector arithmetic)
+are enabled in the build.
 
 @subsection architecture_experimental_per_operator_build Per-operator build
 

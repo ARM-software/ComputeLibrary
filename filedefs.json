@@ -2,7 +2,7 @@
     "cpu": {
         "arch" : {
             "armv8-a": {
-                "cxxflags": ["-march=armv8.2-a"]
+                "cxxflags": ["-march=armv8-a"]
             },
             "armv8.2-a": {
                 "cxxflags": ["-march=armv8.2-a+fp16"],

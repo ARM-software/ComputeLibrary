@@ -98,7 +98,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
-    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Note works only for armv8.2-a", False),
+    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Works for armv8a without the support for FP16 vector arithmetic. Use armv8.2-a or beyond to enable FP16 vector arithmetic support", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -306,11 +306,15 @@ if env['multi_isa']:
         print("Currently Multi ISA binary is only supported for arm v8 family")
         Exit(1)
 
-    if 'v8.6-a' in env['arch']:
-        if "disable_mmla_fp" not in env['custom_options']:
-            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+    if 'v8a' in env['arch']:
+        print("INFO: multi_isa armv8-a architecture build doesn't enable __ARM_FEATURE_FP16_VECTOR_ARITHMETIC. Use armv8.2-a or beyond to enable FP16 vector arithmetic support")
+        env.Append(CXXFLAGS = ['-march=armv8-a']) # note: this will disable fp16 extension __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    else:
+        if 'v8.6-a' in env['arch']:
+            if "disable_mmla_fp" not in env['custom_options']:
+                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
-    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
 
 else: # NONE "multi_isa" builds
 

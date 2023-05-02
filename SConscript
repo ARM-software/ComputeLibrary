@@ -94,8 +94,12 @@ def build_lib_objects():
                            'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
 
     # Build all the common files for the base architecture
-    lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
+    if env['arch'] == 'armv8a':
+        lib_static_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=False)
+    else:
+        lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
 
     # Build the SVE specific files
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
