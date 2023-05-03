@@ -505,7 +505,9 @@
           "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigBifrost.cpp",
           "src/runtime/heuristics/dwc_native/ClDWCNativeDefaultConfigValhall.cpp",
           "src/runtime/heuristics/dwc_native/ClDWCNativeHeuristicsHelpers.cpp",
-          "src/runtime/heuristics/indirect_conv/ClIndirectConvDefaultConfigValhall.cpp"
+          "src/runtime/heuristics/indirect_conv/ClIndirectConvDefaultConfigValhall.cpp",
+          "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.cpp",
+          "src/runtime/heuristics/matmul_native/ClMatMulNativeHelpers.cpp"
         ]
       }
     },

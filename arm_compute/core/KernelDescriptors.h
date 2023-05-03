@@ -226,7 +226,8 @@ struct ScaleKernelInfo
 
 struct MatMulKernelInfo
 {
-    MatMulKernelInfo(bool adj_lhs = false, bool adj_rhs = false, int m0 = 1, int n0 = 1, int k0 = 1, bool export_rhs_to_cl_image = false)
+    MatMulKernelInfo() = default;
+    MatMulKernelInfo(bool adj_lhs, bool adj_rhs, int m0 = 1, int n0 = 1, int k0 = 1, bool export_rhs_to_cl_image = false)
         : adj_lhs{ adj_lhs }, adj_rhs{ adj_rhs }, m0{ m0 }, n0{ n0 }, k0{ k0 }, export_rhs_to_cl_image{ export_rhs_to_cl_image }
     {
     }

@@ -26,6 +26,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/common/utils/Log.h"
 #include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
+#include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.h"
+#include "src/runtime/heuristics/matmul_native/ClMatMulNativeKernelConfig.h"
+#include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
+
+using namespace arm_compute::cl_matmul;
 
 namespace arm_compute
 {
@@ -41,9 +46,12 @@ ClMatMul::~ClMatMul()
 }
 Status ClMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &matmul_info)
 {
-    MatMulKernelInfo kernel_info;
-    kernel_info.adj_lhs = matmul_info.adj_lhs();
-    kernel_info.adj_rhs = matmul_info.adj_rhs();
+    const GPUTarget gpu_target = CLScheduler::get().target();
+
+    std::unique_ptr<IClMatMulNativeKernelConfig> t = ClMatMulNativeKernelConfigurationFactory::create(gpu_target);
+
+    MatMulKernelInfo kernel_info = t->configure(lhs, rhs, matmul_info);
+
     return ClMatMulNativeKernel::validate(lhs, rhs, output, kernel_info);
 }
 void ClMatMul::configure(const CLCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulInfo &matmul_info)
@@ -55,16 +63,9 @@ void ClMatMul::configure(const CLCompileContext &compile_context, ITensorInfo *l
     ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, output, matmul_info));
     const GPUTarget gpu_target = CLScheduler::get().target();
 
-    // Placeholder: Getting the heuristics calculated values for M0, N0, K0, and whether to export RHS to texture pipe
+    std::unique_ptr<IClMatMulNativeKernelConfig> t = ClMatMulNativeKernelConfigurationFactory::create(gpu_target);
 
-    // Filling the MatMul Kernel info
-    MatMulKernelInfo kernel_info;
-    kernel_info.adj_lhs                = matmul_info.adj_lhs();
-    kernel_info.adj_rhs                = matmul_info.adj_rhs();
-    kernel_info.m0                     = 1;     // to be properly calculated from heuristics
-    kernel_info.n0                     = 4;     // to be properly calculated from heuristics
-    kernel_info.k0                     = 4;     // to be properly calculated from heuristics
-    kernel_info.export_rhs_to_cl_image = false; // to be properly determined from heuristics
+    MatMulKernelInfo kernel_info = t->configure(lhs, rhs, matmul_info);
 
     // Set the target for the kernels
     _native_matmul_kernel->set_target(gpu_target);
