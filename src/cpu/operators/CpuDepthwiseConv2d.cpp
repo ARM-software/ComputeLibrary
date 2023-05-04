@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -461,6 +461,8 @@ void CpuDepthwiseConv2d::configure(ITensorInfo *src, const ITensorInfo *weights,
 
 Status CpuDepthwiseConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
+
     DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(src, weights, biases, dst, info);
     switch(depth_conv_func)
     {
