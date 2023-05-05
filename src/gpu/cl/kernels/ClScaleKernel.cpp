@@ -64,6 +64,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst == src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->num_channels()!=1);
     ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(src->data_type()) && !is_data_type_quantized_asymmetric(src->data_type()));
 

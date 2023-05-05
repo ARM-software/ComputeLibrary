@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,10 +136,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dx, const I
     const auto *uk = CpuScaleKernel::get_implementation(ScaleKernelDataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa(), info.interpolation_policy });
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
-
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst == src);
+    ARM_COMPUTE_RETURN_ERROR_ON(src->num_channels()!=1);
     ARM_COMPUTE_RETURN_ERROR_ON(info.sampling_policy != SamplingPolicy::CENTER && info.sampling_policy != SamplingPolicy::TOP_LEFT);
     ARM_COMPUTE_UNUSED(info.constant_border_value);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.use_padding, "Padding is not supported");
