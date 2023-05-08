@@ -234,11 +234,9 @@ void poolingMxN_fp32_neon_nhwc_kernel_indices(const ITensor *src, ITensor *dst0,
             float    res      = min_value;
             uint32_t idx      = 0U;
             const uint8_t *in_ptr_y = in_ptr_n + in_ptr_y_offset + in_ptr_x_offset;
-            uint32_t    curr_kernel_index = pool_size_x * pool_start_y;
             for(int y = pool_start_y; y < pool_end_y; ++y)
             {
                 const uint8_t *in_ptr_x = in_ptr_y + (x_off * sizeof(float));
-                curr_kernel_index += pool_start_x;
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
                     const float data = *(reinterpret_cast<const float *>(in_ptr_x));
@@ -248,9 +246,7 @@ void poolingMxN_fp32_neon_nhwc_kernel_indices(const ITensor *src, ITensor *dst0,
                         res = data;
                     }
                     in_ptr_x += y_stride;
-                    curr_kernel_index++;
                 }
-                curr_kernel_index += (pool_size_x - pool_end_x);
                 in_ptr_y += z_stride;
             }
 

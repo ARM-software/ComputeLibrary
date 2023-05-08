@@ -83,11 +83,11 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorI
     ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConv2dOptimizedInternal::validate(src, weights, (biases == nullptr) ? nullptr : biases,
                                                                              dst, info));
 
-    _is_quantized = is_data_type_quantized_asymmetric(src->data_type());
-    _has_bias     = biases != nullptr;
-    _is_nchw      = src->data_layout() == DataLayout::NCHW;
-    _permute      = _is_nchw;
-    _is_prepared  = false;
+    _is_quantized      = is_data_type_quantized_asymmetric(src->data_type());
+    _has_bias          = biases != nullptr;
+    _is_nchw           = src->data_layout() == DataLayout::NCHW;
+    _permute           = _is_nchw;
+    _is_prepared       = false;
     _are_weights_const = weights->are_values_constant();
 
     // Configure pipeline
@@ -461,8 +461,6 @@ void CpuDepthwiseConv2d::configure(ITensorInfo *src, const ITensorInfo *weights,
 
 Status CpuDepthwiseConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
-
     DepthwiseConvolutionFunction depth_conv_func = get_depthwiseconvolution_function(src, weights, biases, dst, info);
     switch(depth_conv_func)
     {

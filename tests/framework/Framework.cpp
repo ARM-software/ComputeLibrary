@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -557,6 +557,7 @@ bool Framework::run()
 
     int id          = 0;
     int id_run_test = 0;
+    ARM_COMPUTE_UNUSED(id_run_test); // Not used if ARM_COMPUTE_CL is not defined
 
     for(auto &test_factory : _test_factories)
     {
