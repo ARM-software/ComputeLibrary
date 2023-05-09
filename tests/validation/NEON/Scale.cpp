@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -155,8 +155,6 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
         { DataType::BFLOAT16, false },
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         { DataType::F16, true },
-#else  // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { DataType::F16, false },
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         { DataType::F32, true },
         { DataType::F64, false },
