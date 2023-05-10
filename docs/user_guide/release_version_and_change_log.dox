@@ -41,10 +41,22 @@ If there is more than one release in a month then an extra sequential number is 
 
 @section S2_2_changelog Changelog
 v23.05 Public major release
- - Deprecate dynamic block shape in @ref NEBatchToSpaceLayer
- - Deprecate dynamic block shape in @ref CLBatchToSpaceLayer
- - New Arm® Neon™ kernels / functions :
-   - NEReorderLayer (aarch64 only)
+ - New features:
+   - Add new Arm® Neon™ kernels / functions:
+      - @ref NEMatMul for QASYMM8, QASYMM8_SIGNED, FP32 and FP16, with batch support.
+      - NEReorderLayer (aarch64 only)
+   - Add new OpenCL™ kernels / functions:
+      - @ref CLMatMul support for QASYMM8, QASYMM8_SIGNED, FP32 and FP16, with batch support.
+   - Add support for the multiple dimensions in the indices parameter for both the Arm® Neon™ and OpenCL™ implementations of the Gather Layer.
+   - Add support for dynamic weights in @ref CLFullyConnectedLayer and @ref NEFullyConnectedLayer for all data types.
+   - Add support for cropping in the Arm® Neon™ and OpenCL™: implementations of the BatchToSpace Layer for all data types.
+   - Add support for quantized data types for the ElementwiseUnary Operators for Arm® Neon™.
+   - Implement RSQRT for quantized data types on OpenCL™.
+   - Add FP16 depthwise convolution kernels for SME2.
+ - Performance optimizations:
+   - Improve CLTuner exhaustive mode tuning time.
+ - Deprecate dynamic block shape in @ref NEBatchToSpaceLayer and @ref CLBatchToSpaceLayer.
+ - Various optimizations and bug fixes.
 
 v23.02.1 Public patch release
  - Allow mismatching data layouts between the source tensor and weights for \link cpu::CpuGemmDirectConv2d CpuGemmDirectConv2d \endlink with fixed format kernels.
