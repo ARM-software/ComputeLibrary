@@ -28,12 +28,12 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "src/core/NEON/kernels/NEReorderKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
+class NEReorderKernel;
 /** Function to compute blocked reorder. */
 class NEReorderLayer : public IFunction
 {

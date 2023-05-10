@@ -32,6 +32,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ReorderFixture.h"
+#include "src/core/NEON/kernels/NEReorderKernel.h"
 
 namespace arm_compute
 {

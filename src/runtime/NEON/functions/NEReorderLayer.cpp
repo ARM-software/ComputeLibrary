@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
+#include "src/core/NEON/kernels/NEReorderKernel.h"
 
 namespace arm_compute
 {
