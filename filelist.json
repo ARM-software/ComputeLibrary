@@ -106,7 +106,8 @@
     "Conv2d",
     "Permute",
     "Pool2d",
-    "Reshape"
+    "Reshape",
+    "MatMul"
   ],
   "gpu": {
     "common": [
