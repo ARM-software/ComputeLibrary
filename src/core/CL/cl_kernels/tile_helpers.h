@@ -443,17 +443,20 @@
 #define DOT_PRODUCT13_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT5_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABC), ((b).s89ABC), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT1_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sC), ((b).sC), c);     \
     })
 #define DOT_PRODUCT14_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT6_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABCD), ((b).s89ABCD), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sCD), ((b).sCD), c);     \
     })
 #define DOT_PRODUCT15_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT7_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABCDE), ((b).s89ABCDE), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sCDE), ((b).sCDE), c);     \
     })
 #define DOT_PRODUCT16_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                 \
