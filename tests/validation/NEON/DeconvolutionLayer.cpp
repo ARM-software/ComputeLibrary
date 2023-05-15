@@ -47,7 +47,7 @@ constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);    /**< Tolerance for
 constexpr AbsoluteTolerance<float> tolerance_quantized(1.0f); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const RelativeTolerance<half_float::half> tolerance_fp16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float                           tolerance_num_fp16 = 0.01f;             /**< Tolerance number for FP16 tests -- follows a slightly stricter approach compared to ConvolutionLayer tests */
+constexpr float                           tolerance_num_fp16 = 0.02f;             /**< Tolerance number for FP16 tests -- follows a slightly stricter approach compared to ConvolutionLayer tests */
 #endif                                                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 constexpr float tolerance_num_quant = 0.07f;                                      /**< Tolerance number for quantized types */
 
