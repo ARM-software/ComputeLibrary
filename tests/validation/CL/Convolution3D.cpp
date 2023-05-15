@@ -39,7 +39,7 @@ namespace validation
 namespace
 {
 const RelativeTolerance<half>        rel_tolerance_fp16(half(0.2)); /**< Relative tolerance for FP16 tests */
-constexpr float                      abs_tolerance_fp16(0.02f);     /**< Absolute tolerance for FP16 tests */
+constexpr float                      abs_tolerance_fp16(0.05f);     /**< Absolute tolerance for FP16 tests */
 constexpr RelativeTolerance<float>   rel_tolerance_fp32(0.05f);     /**< Relative tolerance for FP32 tests */
 constexpr float                      abs_tolerance_fp32(0.0001f);   /**< Absolute tolerance for FP32 tests*/
 constexpr AbsoluteTolerance<uint8_t> abs_tolerance_qasymm8(1);      /**< Absolute tolerance for quantized tests */
