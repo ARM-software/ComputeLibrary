@@ -107,7 +107,7 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
             break;
         }
     }
-    if(index == libraries_filenames.size())
+    if(handle == nullptr)
     {
         // Set status of loading to failed
         _loaded.second = false;
