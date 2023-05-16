@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,6 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
 Status ClComponentActivation::validate(const Properties                &properties,
                                        const ArgumentPack<ITensorInfo> &tensors,
                                        const Attributes                &attributes)
@@ -67,6 +66,10 @@ ClComponentActivation::ClComponentActivation(ComponentId                        
                                              const Attributes                      &attributes)
     : IGpuKernelComponent{ id, properties, tensors },
       _component_writer{ std::make_unique<ClTemplateActivation>(id, tensors, attributes) }
+{
+}
+
+ClComponentActivation::~ClComponentActivation()
 {
 }
 

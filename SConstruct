@@ -102,7 +102,6 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
-    BoolVariable("ckw", "Build and link the Compute Kernel Writer subproject", False),
     BoolVariable("embed_kernels", "Enable if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate '.cl' / '.cs' files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to './cl_kernels'.", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary using zlib. Useful for reducing the binary size. embed_kernels should be enabled", False),
     BoolVariable("set_soname", "If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects. (requires SCons 2.4 or above)", False),
@@ -126,7 +125,7 @@ vars.AddVariables(
             ├── datasets
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
-    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files. This option also enables opencl=1 and ckw=1 on which it has a direct dependency.", False),
+    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files. This option also enables opencl=1 on which it has a direct dependency.", False),
     BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
@@ -218,7 +217,6 @@ if env['os'] == 'bare_metal':
 if env['experimental_dynamic_fusion']:
     # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
     env['opencl'] = 1
-    env['ckw'] = 1
 
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")
@@ -422,7 +420,7 @@ print("CC", env['CC'])
 print("CXX", env['CXX'])
 
 """Build the Compute Kernel Writer subproject"""
-if env['ckw']:
+if env['experimental_dynamic_fusion']:
     # Strip ccache prefix from CC and CXX to obtain only the target triple
     CKW_CC = env['CC'].replace(env['compiler_cache'] + " ", "")
     CKW_CXX = env['CXX'].replace(env['compiler_cache'] + " ", "")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ClComponentStore.h"
+#include "GpuCkwStore.h"
 
-#include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.h"
-
-#include <memory>
+#include "arm_compute/core/Error.h"
+#include "compute_kernel_writer/include/acl/AclKernelWriter.h"
+#include "compute_kernel_writer/include/acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
+#include <string>
 
 namespace arm_compute
 {
@@ -35,27 +35,22 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentStore::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors)
+GpuCkwStore::GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
+    : IGpuCkwComponentDriver{ id, tensors }, _src{}, _dst{}
 {
-    ARM_COMPUTE_UNUSED(properties, tensors);
-    return Status{};
+    _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
+    _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
 }
-ClComponentStore::ClComponentStore(ComponentId id, const Properties &properties, const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{ id, properties, tensors }, _component_writer{ std::make_unique<ClTemplateStore>(id, tensors) }, _ckw_driver{ std::make_unique<GpuCkwStore>(id, tensors) }
+void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const
 {
-}
-ClComponentStore::~ClComponentStore()
-{
-}
-const IGpuTemplateComponentWriter *ClComponentStore::template_writer() const
-{
-    return _component_writer.get();
-}
-const IGpuCkwComponentDriver *ClComponentStore::ckw_component_driver() const
-{
-    return _ckw_driver.get();
+    auto src = vtable.declare_variable(comp_group, writer, _src, "src");
+    auto dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+
+    auto       &src_tile   = src->tile();
+    const auto &sampler    = src->tile_sampler();
+    auto       &dst_tensor = dst->tensor();
+
+    writer->op_store(dst_tensor, src_tile, sampler);
 }
 } // namespace dynamic_fusion
 } // namespace experimental

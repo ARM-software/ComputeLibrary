@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 
-#include "KernelArgumentsHelpers.h"
+#include "GpuCkwKernelArgumentsHelpers.h"
 
 namespace arm_compute
 {
-
 void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, ICLTensor *tensor, ckw::TensorComponent component)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);

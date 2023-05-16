@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.h"
 
 namespace arm_compute
@@ -111,7 +112,8 @@ ClComponentElementwiseBinary::ClComponentElementwiseBinary(
     const ArgumentPack<ITensorInfo> &tensors,
     const Attributes                &attributes)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateElementwiseBinary>(id, tensors, attributes) }
+      _component_writer{ std::make_unique<ClTemplateElementwiseBinary>(id, tensors, attributes) },
+      _ckw_driver{ std::make_unique<GpuCkwElementwiseBinary>(id, tensors, attributes) }
 {
 }
 ClComponentElementwiseBinary::~ClComponentElementwiseBinary()
@@ -120,6 +122,11 @@ ClComponentElementwiseBinary::~ClComponentElementwiseBinary()
 const IGpuTemplateComponentWriter *ClComponentElementwiseBinary::template_writer() const
 {
     return _component_writer.get();
+}
+
+const IGpuCkwComponentDriver *ClComponentElementwiseBinary::ckw_component_driver() const
+{
+    return _ckw_driver.get();
 }
 } // namespace dynamic_fusion
 } // namespace experimental

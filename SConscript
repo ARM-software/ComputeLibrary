@@ -127,7 +127,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
 
-    if env['ckw']:
+    if env['experimental_dynamic_fusion']:
         libs.append('libckw.a')
 
     if static:
@@ -535,11 +535,6 @@ if env['fixed_format_kernels']:
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
-
-# Compute Kernel Writer integration files
-if env['ckw']:
-    if env['opencl']:
-        lib_files += filelist['experimental']['ckw']['cl']
 
 # Logging files
 if env["logging"]:

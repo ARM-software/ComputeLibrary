@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTELEMENTWISEBINARY
 
-#include "arm_compute/core/Error.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
 
@@ -42,6 +41,7 @@ class ArgumentPack;
 
 /** Forward declaration */
 class ClTemplateElementwiseBinary;
+class GpuCkwElementwiseBinary;
 
 class ClComponentElementwiseBinary final : public IGpuKernelComponent
 {
@@ -103,6 +103,8 @@ public:
     ClComponentElementwiseBinary &operator=(ClComponentElementwiseBinary &&component) = default;
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
+
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -111,6 +113,7 @@ public:
 
 private:
     std::unique_ptr<ClTemplateElementwiseBinary> _component_writer;
+    std::unique_ptr<GpuCkwElementwiseBinary>     _ckw_driver;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

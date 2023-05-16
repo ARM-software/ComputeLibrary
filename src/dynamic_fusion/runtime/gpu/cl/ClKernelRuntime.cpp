@@ -59,6 +59,8 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
 
 inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKernelArgumentInfo &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+
     switch(arg.type)
     {
         case GpuKernelArgumentInfo::Type::Scalar:
@@ -140,6 +142,18 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
 
             _kernel.setArg(idx++, tensor_image2d);
             add_4d_tensor_nhwc_argument(idx, tensor);
+            break;
+        }
+        case GpuKernelArgumentInfo::Type::Tensor_Special_0:
+        {
+            const ITensorInfo *info    = tensor->info();
+            const Strides     &strides = info->strides_in_bytes();
+
+            _kernel.setArg(idx++, tensor->cl_buffer());
+            const size_t dim1xdim2 = info->tensor_shape()[1] * info->tensor_shape()[2];
+            _kernel.setArg<cl_int>(idx++, static_cast<int32_t>(dim1xdim2));
+            const size_t stride1 = strides[1];
+            _kernel.setArg<cl_int>(idx++, static_cast<int32_t>(stride1));
             break;
         }
         default:

@@ -25,12 +25,11 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSigmoid.h"
 #include "arm_compute/core/experimental/Types.h"
 
+#include "src/common/utils/Log.h"
+#include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
-#include "src/core/helpers/AutoConfiguration.h"
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -81,7 +80,7 @@ constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
 Status GpuSigmoid::is_supported_op(const GpuWorkloadContext &context,
-                                 const ITensorInfo        *src)
+                                   const ITensorInfo        *src)
 {
     return is_supported_op_helper(context, src, nullptr);
 }
@@ -112,8 +111,8 @@ Status GpuSigmoid::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate);
 }
 
-ITensorInfo *GpuSigmoid::create_op(GpuWorkloadSketch     &sketch,
-                                   ITensorInfo           *src)
+ITensorInfo *GpuSigmoid::create_op(GpuWorkloadSketch &sketch,
+                                   ITensorInfo       *src)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src);

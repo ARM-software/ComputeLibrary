@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
 
 #include "Types.h"
 
@@ -60,6 +60,7 @@ inline bool operator==(const KernelProperties &config0, const KernelProperties &
 
 /** Forward declaration */
 class IGpuTemplateComponentWriter;
+class IGpuCkwComponentDriver;
 
 /** An abstract interface of a component. It enables manipulation by the component graph for purposes like fusion
  */
@@ -105,6 +106,11 @@ public:
     }
     /** Get template writer for the component */
     virtual const IGpuTemplateComponentWriter *template_writer() const = 0;
+    /** Get compute kernel writer driver for the component */
+    virtual const IGpuCkwComponentDriver *ckw_component_driver() const
+    {
+        return nullptr;
+    }
     /** Get component type */
     virtual GpuComponentType type() const = 0;
 
@@ -116,4 +122,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT */
+#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,9 @@ struct GpuKernelArgumentInfo
         Tensor_3D,
         Tensor_4D,
         Tensor_4D_t_Buffer,
-        Tensor_4D_t_Image
+        Tensor_4D_t_Image,
+
+        Tensor_Special_0,
     };
     /** Default constructor */
     GpuKernelArgumentInfo() = default;

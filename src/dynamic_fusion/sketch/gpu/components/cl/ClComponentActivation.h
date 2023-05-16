@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ public:
         const Attributes                &attributes);
 
     /** Destructor */
-    ~ClComponentActivation() override = default;
+    ~ClComponentActivation() override;
 
     /** Prevent instances of this class from being copy constructed */
     ClComponentActivation(const ClComponentActivation &component) = delete;

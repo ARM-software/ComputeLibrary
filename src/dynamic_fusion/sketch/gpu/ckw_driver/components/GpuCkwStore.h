@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ClComponentStore.h"
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
 
-#include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.h"
-
-#include <memory>
+#include "src/core/common/Macros.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
 
 namespace arm_compute
 {
@@ -35,28 +33,29 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentStore::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors)
+/** An interface used by @ref ClTemplateWriter to write source code for a kernel component
+ */
+class GpuCkwStore : public IGpuCkwComponentDriver
 {
-    ARM_COMPUTE_UNUSED(properties, tensors);
-    return Status{};
-}
-ClComponentStore::ClComponentStore(ComponentId id, const Properties &properties, const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuKernelComponent{ id, properties, tensors }, _component_writer{ std::make_unique<ClTemplateStore>(id, tensors) }, _ckw_driver{ std::make_unique<GpuCkwStore>(id, tensors) }
-{
-}
-ClComponentStore::~ClComponentStore()
-{
-}
-const IGpuTemplateComponentWriter *ClComponentStore::template_writer() const
-{
-    return _component_writer.get();
-}
-const IGpuCkwComponentDriver *ClComponentStore::ckw_component_driver() const
-{
-    return _ckw_driver.get();
-}
+public:
+    /** Constructor
+     *
+     * @param[in] id      Component id
+     * @param[in] tensors Tensor arguments to the component
+     */
+    GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors);
+    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwStore);
+    /** Destructor */
+    ~GpuCkwStore() override = default;
+    // Inherited methods overriden:
+    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const override;
+
+private:
+    const ITensorInfo *_src;
+    const ITensorInfo *_dst;
+};
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
+
+#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE */

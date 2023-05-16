@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_SRC_CKW_KERNELARGUMENTSHELPERS_H
-#define ARM_COMPUTE_SRC_CKW_KERNELARGUMENTSHELPERS_H
+#ifndef ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CKW_DRIVER_GPUCKWKERNELARGUMENTSHELPERS
+#define ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CKW_DRIVER_GPUCKWKERNELARGUMENTSHELPERS
 
 #include "arm_compute/core/CL/ICLTensor.h"
 
@@ -31,7 +31,6 @@
 
 namespace arm_compute
 {
-
 /** Select a Compute Kernel Writer tensor component from a tensor and add to the kernel's arguments at the specified index idx.
  *
  * @param[in,out] kernel    OpenCL kernel to configure with the provided argument.
@@ -59,4 +58,4 @@ void cl_add_texture_argument(cl::Kernel &kernel, unsigned int &idx, const cl::Im
 
 } // namespace arm_compute
 
-#endif //ARM_COMPUTE_SRC_CKW_KERNELARGUMENTSHELPERS_H
+#endif /* ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CKW_DRIVER_GPUCKWKERNELARGUMENTSHELPERS */

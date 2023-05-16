@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
 
-#include "arm_compute/core/Error.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.h"
 #include <memory>
@@ -40,6 +39,7 @@ namespace dynamic_fusion
 /** Forward declaration */
 template <typename T>
 class ArgumentPack;
+class GpuCkwStore;
 
 class ClComponentStore final : public IGpuKernelComponent
 {
@@ -87,6 +87,8 @@ public:
     ClComponentStore &operator=(ClComponentStore &&component) = default;
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
+
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -95,6 +97,7 @@ public:
 
 private:
     std::unique_ptr<ClTemplateStore> _component_writer;
+    std::unique_ptr<GpuCkwStore>     _ckw_driver;
 };
 } // namespace dynamic_fusion
 } // namespace experimental
