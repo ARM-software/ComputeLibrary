@@ -43,7 +43,7 @@ namespace cpu
         uint8_t *const       *output)
 
 DECLARE_LUT_KERNEL(lut_u8_neon);
-DECLARE_LUT_KERNEL(lut_u8_sve);
+DECLARE_LUT_KERNEL(lut_u8_sve2);
 
 #undef DECLARE_LUT_KERNEL
 #endif // __aarch64__

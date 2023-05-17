@@ -891,11 +891,13 @@
           },
           "sve": {
             "fp16": [ "src/cpu/kernels/activation/generic/sve/fp16.cpp" ],
-            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ],
-            "qasymm8": ["src/cpu/kernels/activation/generic/sve/lut.cpp"]
+            "fp32": [ "src/cpu/kernels/activation/generic/sve/fp32.cpp" ]
           },
           "sve2":{
-            "qasymm8": [ "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp" ],
+            "qasymm8": [
+              "src/cpu/kernels/activation/generic/sve2/qasymm8.cpp",
+              "src/cpu/kernels/activation/generic/sve2/lut.cpp"
+            ],
             "qasymm8_signed": [ "src/cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp" ],
             "qsymm16": [ "src/cpu/kernels/activation/generic/sve2/qsymm16.cpp" ]
           }
@@ -1454,9 +1456,11 @@
             "common": ["src/cpu/kernels/elementwise_unary/generic/sve/impl.cpp" ],
             "integer": ["src/cpu/kernels/elementwise_unary/generic/sve/integer.cpp"],
             "fp32": ["src/cpu/kernels/elementwise_unary/generic/sve/fp32.cpp"],
-            "fp16": ["src/cpu/kernels/elementwise_unary/generic/sve/fp16.cpp"],
-            "qasymm8": ["src/cpu/kernels/elementwise_unary/generic/sve/q8.cpp"],
-            "qasymm8_signed": ["src/cpu/kernels/elementwise_unary/generic/sve/q8.cpp"]
+            "fp16": ["src/cpu/kernels/elementwise_unary/generic/sve/fp16.cpp"]
+          },
+          "sve2": {
+            "qasymm8": ["src/cpu/kernels/elementwise_unary/generic/sve2/q8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/elementwise_unary/generic/sve2/q8.cpp"]
           }
         }
       },
@@ -1802,9 +1806,9 @@
             "qasymm8": ["src/cpu/kernels/lut/generic/neon/u8.cpp"],
             "qasymm8_signed": ["src/cpu/kernels/lut/generic/neon/u8.cpp"]
           },
-          "sve": {
-            "qasymm8": ["src/cpu/kernels/lut/generic/sve/u8.cpp"],
-            "qasymm8_signed": ["src/cpu/kernels/lut/generic/sve/u8.cpp"]
+          "sve2": {
+            "qasymm8": ["src/cpu/kernels/lut/generic/sve2/u8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/lut/generic/sve2/u8.cpp"]
           }
         }
       },

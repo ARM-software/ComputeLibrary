@@ -29,23 +29,23 @@ namespace arm_compute
 {
 namespace cpu
 {
-
-void sve_q8_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+void sve2_q8_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
     ARM_COMPUTE_UNUSED(op);
 
-    auto win = window;
+    auto       win          = window;
     const auto window_end_x = window.x().end();
     win.set(0, Window::Dimension(0, 1, 1));
 
     Iterator src_it(in, win);
     Iterator dst_it(out, win);
 
-    execute_window_loop(win, [&](const Coordinates &) {
+    execute_window_loop(win, [&](const Coordinates &)
+    {
         const auto src_ptr = src_it.ptr();
-        auto dst_ptr = dst_it.ptr();
+        auto       dst_ptr = dst_it.ptr();
 
-        lut_u8_sve(lut, 1, window_end_x, &src_ptr, &dst_ptr);
+        lut_u8_sve2(lut, 1, window_end_x, &src_ptr, &dst_ptr);
     },
     src_it, dst_it);
 }

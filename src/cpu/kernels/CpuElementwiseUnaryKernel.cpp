@@ -167,12 +167,12 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
     },
 #ifdef __aarch64__
     {
-        "sve_q8_elementwise_unary",
+        "sve2_q8_elementwise_unary",
         [](const DataTypeISASelectorData & data)
         {
-            return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve;
+            return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve2;
         },
-        REGISTER_QASYMM8_SVE(sve_q8_elementwise_unary),
+        REGISTER_QASYMM8_SVE2(sve2_q8_elementwise_unary),
         &q8_prepare_lut,
     },
     {

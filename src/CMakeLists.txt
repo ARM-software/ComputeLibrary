@@ -302,7 +302,6 @@ target_sources(
 	core/NEON/kernels/convolution/winograd/output_transforms/sme_fp32_mopa_4x4_3x3.cpp
 	cpu/kernels/activation/generic/sve/fp16.cpp
 	cpu/kernels/activation/generic/sve/fp32.cpp
-	cpu/kernels/activation/generic/sve/lut.cpp
 	cpu/kernels/add/generic/sve/fp16.cpp
 	cpu/kernels/add/generic/sve/fp32.cpp
 	cpu/kernels/add/generic/sve/impl.cpp
@@ -315,8 +314,6 @@ target_sources(
 	cpu/kernels/elementwise_unary/generic/sve/fp32.cpp
 	cpu/kernels/elementwise_unary/generic/sve/impl.cpp
 	cpu/kernels/elementwise_unary/generic/sve/integer.cpp
-	cpu/kernels/elementwise_unary/generic/sve/q8.cpp
-	cpu/kernels/lut/generic/sve/u8.cpp
 	cpu/kernels/scale/sve/fp16.cpp
 	cpu/kernels/scale/sve/fp32.cpp
 	cpu/kernels/scale/sve/integer.cpp
@@ -332,7 +329,8 @@ target_sources(
 target_sources(
     arm_compute_sve2
     PRIVATE
-    cpu/kernels/activation/generic/sve2/qasymm8.cpp
+    cpu/kernels/activation/generic/sve2/lut.cpp
+	cpu/kernels/activation/generic/sve2/qasymm8.cpp
 	cpu/kernels/activation/generic/sve2/qasymm8_signed.cpp
 	cpu/kernels/activation/generic/sve2/qsymm16.cpp
 	cpu/kernels/add/generic/sve2/qasymm8.cpp
@@ -340,6 +338,8 @@ target_sources(
 	cpu/kernels/add/generic/sve2/qsymm16.cpp
 	cpu/kernels/elementwise_binary/generic/sve2/qasymm8.cpp
 	cpu/kernels/elementwise_binary/generic/sve2/qasymm8_signed.cpp
+	cpu/kernels/elementwise_unary/generic/sve2/q8.cpp
+	cpu/kernels/lut/generic/sve2/u8.cpp
 	cpu/kernels/softmax/generic/sve2/impl.cpp
 	cpu/kernels/softmax/generic/sve2/qasymm8.cpp
 	cpu/kernels/softmax/generic/sve2/qasymm8_signed.cpp
@@ -977,4 +977,3 @@ target_sources(
 	runtime/TensorAllocator.cpp
 	runtime/Utils.cpp
 )
-    

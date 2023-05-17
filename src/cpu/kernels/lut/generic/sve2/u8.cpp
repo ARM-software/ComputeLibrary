@@ -31,8 +31,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-
-void lut_u8_sve(
+void lut_u8_sve2(
     const uint8_t        *table,
     size_t                num_strings,
     size_t                string_length,

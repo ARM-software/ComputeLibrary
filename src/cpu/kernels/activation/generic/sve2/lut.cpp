@@ -30,7 +30,7 @@ namespace arm_compute
 namespace cpu
 {
 #ifdef __aarch64__
-void sve_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+void sve2_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(!ActivationLayerInfo::is_lut_supported(act_info.activation(), src->info()->data_type()));
     const auto window_end_x  = window.x().end();
@@ -42,7 +42,7 @@ void sve_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLay
     {
         const auto input_ptr  = input.ptr();
         auto       output_ptr = output.ptr();
-        lut_u8_sve(act_info.lut().data(), 1u, window_end_x, &input_ptr, &output_ptr);
+        lut_u8_sve2(act_info.lut().data(), 1u, window_end_x, &input_ptr, &output_ptr);
     },
     input, output);
 }

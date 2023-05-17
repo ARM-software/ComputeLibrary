@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,9 +47,9 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
 {
 #ifdef ARM_COMPUTE_ENABLE_SVE
     {
-        "sve_q8_activation_lut",
-        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt) && data.cpumodel == CPUModel::A510 && data.isa.sve; },
-        REGISTER_QASYMM8_SVE(arm_compute::cpu::sve_q8_activation_lut)
+        "sve2_q8_activation_lut",
+        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt) && data.cpumodel == CPUModel::A510 && data.isa.sve2; },
+        REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_q8_activation_lut)
     },
 #endif // ARM_COMPUTE_ENABLE_SVE
 #ifdef __aarch64__

@@ -37,7 +37,7 @@ namespace cpu
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_fp16_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(sve_s32_elementwise_unary);
-DECLARE_ELEMETWISE_UNARY_KERNEL(sve_q8_elementwise_unary);
+DECLARE_ELEMETWISE_UNARY_KERNEL(sve2_q8_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp32_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_fp16_elementwise_unary);
 DECLARE_ELEMETWISE_UNARY_KERNEL(neon_s32_elementwise_unary);
