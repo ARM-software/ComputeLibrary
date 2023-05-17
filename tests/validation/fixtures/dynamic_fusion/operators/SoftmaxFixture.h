@@ -82,13 +82,13 @@ protected:
     {
         // Create a new workload sketch
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch  sketch{ &gpu_ctx };
+        GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch  sketch{ &context };
 
         SoftmaxAttributes softmax_attr{};
         softmax_attr.axis(axis).beta(beta).is_log_softmax(is_log);
-        TensorInfo src_info = sketch.create_tensor_info(shape, 1, data_type);
-        TensorInfo dst_info = sketch.create_tensor_info(shape, 1, data_type);
+        TensorInfo src_info = context.create_tensor_info(shape, 1, data_type);
+        TensorInfo dst_info = context.create_tensor_info(shape, 1, data_type);
         FunctionType::create_op(sketch, &src_info, &dst_info, softmax_attr);
 
         // Configure runtime

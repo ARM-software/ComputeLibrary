@@ -242,12 +242,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                 input_info, weights_info, biases_info, padding, stride, depth_multiplier, dilation, expected)
 {
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    GpuWorkloadContext context = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
-    const TensorInfo sketch_input_info   = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_weights_info = sketch.create_tensor_info(weights_info);
-    const TensorInfo sketch_biases_info  = sketch.create_tensor_info(biases_info);
+    const TensorInfo sketch_input_info   = context.create_tensor_info(input_info);
+    const TensorInfo sketch_weights_info = context.create_tensor_info(weights_info);
+    const TensorInfo sketch_biases_info  = context.create_tensor_info(biases_info);
 
     DepthwiseConv2dAttributes attributes {};
     attributes.pad(padding)

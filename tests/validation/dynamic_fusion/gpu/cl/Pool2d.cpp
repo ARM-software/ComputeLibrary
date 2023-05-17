@@ -101,15 +101,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 {
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
     // Declare GpuPool2d settings
     const GpuPool2dSettings &settings = GpuPool2dSettings().mixed_precision(false);
 
     // Validate Pool2d Configuration
-    auto                   src_info    = sketch.create_tensor_info(input_info);
-    auto                   dst_info    = sketch.create_tensor_info(output_info);
+    auto                   src_info    = context.create_tensor_info(input_info);
+    auto                   dst_info    = context.create_tensor_info(output_info);
     bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, &dst_info, pool2d_attr, settings));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }

@@ -26,6 +26,7 @@
 
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadContextImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorGroup.h"
@@ -53,8 +54,7 @@ public:
           _comp_services{},
           _component_graph{ &_comp_services },
           _operator_group{},
-          _managed_tensor_info_list{ std::vector<std::unique_ptr<TensorInfo>>() },
-          _mem_map{}
+          _managed_tensor_info_list{ std::vector<std::unique_ptr<TensorInfo>>() }
     {
     }
     /** Prevent instances of this class from being copy constructed */
@@ -101,7 +101,8 @@ public:
      */
     GpuWorkloadSourceCode generate_source_code() const
     {
-        return component_graph().fuse(_mem_map).write_workload_code();
+        const auto mem_map = _context->implementation().mem_map();
+        return component_graph().fuse(mem_map).write_workload_code();
     }
     /** Create a virtual (see @ref MemoryType) tensor info and save it
      *
@@ -110,8 +111,7 @@ public:
     ITensorInfo *create_virtual_tensor()
     {
         auto uptr = std::make_unique<TensorInfo>();
-        uptr->set_id(-allocate_new_tensor_id()); // virtual tensors must have negative id
-        register_memory_descriptor(*uptr, MemoryDescriptor{ MemoryType::Virtual });
+        _context->implementation().register_virtual_tensor(*uptr);
         _managed_tensor_info_list.emplace_back(std::move(uptr));
         return _managed_tensor_info_list.back().get();
     }
@@ -129,19 +129,9 @@ public:
     ITensorInfo *create_auxiliary_tensor(const ITensorInfo &tensor_info)
     {
         auto uptr = std::make_unique<TensorInfo>(tensor_info);
-        uptr->set_id(allocate_new_tensor_id());
-        register_memory_descriptor(*uptr, MemoryDescriptor{ MemoryType::Auxiliary, AuxMemoryInfo{ uptr->total_size() } });
+        _context->implementation().register_aux_tensor(*uptr, AuxMemoryInfo{ uptr->total_size() });
         _managed_tensor_info_list.emplace_back(std::move(uptr));
         return _managed_tensor_info_list.back().get();
-    }
-    /** Register memory descriptor of a tensor info
-     *
-     * @param[in] info     @ref ITensorInfo to be registered
-     * @param[in] mem_desc @ref MemoryDescriptor to be registered with @p info
-     */
-    void register_memory_descriptor(const ITensorInfo &info, const MemoryDescriptor &mem_desc)
-    {
-        _mem_map[info.id()] = mem_desc;
     }
 
 private:
@@ -151,7 +141,6 @@ private:
     GpuOperatorGroup                         _operator_group;
     ITensorInfo::Id                          _next_id{ ITensorInfo::invalid_tensor_id };
     std::vector<std::unique_ptr<TensorInfo>> _managed_tensor_info_list;
-    MemoryDescriptorMap                      _mem_map;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

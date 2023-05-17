@@ -95,10 +95,10 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
     const TensorInfo output_info = TensorInfo{ default_output_shape, 1, default_data_type, default_data_layout };
 
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
-    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+    const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
     // nullptr is given as input
     Status status = GpuResize::validate_op(sketch, nullptr, ResizeAttributes());
@@ -135,10 +135,10 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
         const TensorInfo input_info = TensorInfo{ default_input_shape, 1, kv.first, default_data_layout };
 
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch  sketch{ &gpu_ctx };
+        GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch  sketch{ &context };
 
-        const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+        const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
         ResizeAttributes attributes;
         attributes.output_width(default_output_shape[0]); // shape is not important unless it's empty
@@ -157,10 +157,10 @@ TEST_CASE(MismatchingDataType, framework::DatasetMode::ALL)
     const TensorInfo output_info = TensorInfo{ default_output_shape, 1, non_default_data_type, default_data_layout };
 
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
-    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+    const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
     Status status = GpuResize::validate_op(sketch, &sketch_input_info, ResizeAttributes());
     ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
@@ -177,10 +177,10 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
     const TensorInfo output_info = TensorInfo{ default_output_shape, 1, default_data_type, default_data_layout };
 
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
-    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+    const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy)
@@ -198,10 +198,10 @@ TEST_CASE(UnsupportedInterpolationPolicy, framework::DatasetMode::ALL)
     constexpr auto   interpolation_policy = InterpolationPolicy::AREA;
 
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
-    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+    const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy);
@@ -217,10 +217,10 @@ TEST_CASE(UnsupportedLayout, framework::DatasetMode::ALL)
     constexpr auto   interpolation_policy = InterpolationPolicy::BILINEAR;
 
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
-    const TensorInfo sketch_input_info = sketch.create_tensor_info(input_info);
+    const TensorInfo sketch_input_info = context.create_tensor_info(input_info);
 
     ResizeAttributes attributes{};
     attributes.interpolation_policy(interpolation_policy);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADSKETCH
 
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadContext.h"
 
 #include <memory>
@@ -62,30 +61,8 @@ public:
     const Implementation &implementation() const;
     /** Get the gpu workload context of this sketch */
     const GpuWorkloadContext *gpu_context() const;
-    /** Create a @ref TensorInfo associated with the workload sketch.
-     *
-     * @return TensorInfo   Newly created tensor info
-     */
-    template <typename... Args>
-    TensorInfo create_tensor_info(Args &&... args)
-    {
-        auto tensor_info = TensorInfo(std::forward<Args>(args)...);
-        register_new_tensor(tensor_info);
-        return tensor_info;
-    }
-    /** Create a default @ref TensorInfo associated with the workload sketch
-     * It is usually used by user input or output tensors
-     *
-     * @return TensorInfo   Newly created tensor info
-     */
-    TensorInfo create_tensor_info();
 
 private:
-    /** Register a new tensor by setting a new id to it and register its memory descriptor in the sketch
-     *
-     * @param[in,out] tensor_info @ref ITensorInfo that will be registered
-     */
-    void register_new_tensor(ITensorInfo &tensor_info);
     std::unique_ptr<Implementation> _impl; /**< Internal opaque implementation*/
 };
 

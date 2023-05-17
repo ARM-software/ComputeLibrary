@@ -137,13 +137,13 @@ protected:
 
         // Create a new workload sketch
         CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch  sketch{ &gpu_ctx };
+        GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch  sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo src_info = sketch.create_tensor_info(TensorInfo(shape, 1, _data_type, _data_layout));
+        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, _data_type, _data_layout));
         src_info.set_quantization_info(_input_quantization_info);
-        TensorInfo dst_info = sketch.create_tensor_info();
+        TensorInfo dst_info = context.create_tensor_info();
 
         ResizeAttributes attributes;
         attributes.align_corners(_align_corners).sampling_policy(_sampling_policy).interpolation_policy(_interpolation_policy).output_width(_output_width).output_height(_output_height);

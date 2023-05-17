@@ -61,11 +61,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 {
     // Create a new workload sketch
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    GpuWorkloadContext context{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
     // Fuse tanh
-    const TensorInfo src_info = sketch.create_tensor_info(input_info);
+    const TensorInfo src_info = context.create_tensor_info(input_info);
 
     const bool res = static_cast<bool>(GpuTanh::validate_op(sketch, &src_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);

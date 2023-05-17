@@ -99,13 +99,13 @@ protected:
     {
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Fuse first element wise binary Op
-        TensorInfo lhs_info = sketch.create_tensor_info(TensorInfo(shape0, 1, _data_type));
-        TensorInfo rhs_info = sketch.create_tensor_info(TensorInfo(shape1, 1, _data_type));
-        TensorInfo dst_info = sketch.create_tensor_info();
+        TensorInfo lhs_info = context.create_tensor_info(TensorInfo(shape0, 1, _data_type));
+        TensorInfo rhs_info = context.create_tensor_info(TensorInfo(shape1, 1, _data_type));
+        TensorInfo dst_info = context.create_tensor_info();
 
         TensorInfo rhs_info_fuse;
 
@@ -113,7 +113,7 @@ protected:
 
         if(_fuse)
         {
-            rhs_info_fuse          = sketch.create_tensor_info(TensorInfo(shape2, 1, _data_type));
+            rhs_info_fuse          = context.create_tensor_info(TensorInfo(shape2, 1, _data_type));
             ITensorInfo *ans2_info = FunctionType::create_op(sketch, ans_info, &rhs_info_fuse);
             GpuOutput::create_op(sketch, ans2_info, &dst_info);
         }

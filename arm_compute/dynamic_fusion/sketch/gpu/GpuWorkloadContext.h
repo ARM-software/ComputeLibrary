@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_GPUWORKLOADCONTEXT
 
 #include "arm_compute/core/GPUTarget.h"
+#include "arm_compute/core/TensorInfo.h"
 
 #include <memory>
 
@@ -56,16 +57,20 @@ enum class GpuLanguage
 class GpuWorkloadContext
 {
 public:
+    class Impl;
+
     /** Constructor */
     GpuWorkloadContext(CLCompileContext *cl_compile_context);
-    /** Allow instances of this class to be copy constructed */
-    GpuWorkloadContext(const GpuWorkloadContext &config) = default;
-    /** Allow instances of this class to be copied */
-    GpuWorkloadContext &operator=(const GpuWorkloadContext &config) = default;
+    /** Destructor */
+    ~GpuWorkloadContext();
+    /** Prohibit instances of this class to be copy constructed */
+    GpuWorkloadContext(const GpuWorkloadContext &config) = delete;
+    /** Prohibit instances of this class to be copied */
+    GpuWorkloadContext &operator=(const GpuWorkloadContext &config) = delete;
     /** Allow instances of this class to be move constructed */
-    GpuWorkloadContext(GpuWorkloadContext &&config) = default;
+    GpuWorkloadContext(GpuWorkloadContext &&config);
     /** Allow instances of this class to be moved */
-    GpuWorkloadContext &operator=(GpuWorkloadContext &&config) = default;
+    GpuWorkloadContext &operator=(GpuWorkloadContext &&config);
     /** Get @ref GpuLanguage of the context */
     GpuLanguage gpu_language() const;
     /** Get @ref GpuTarget of the context */
@@ -75,9 +80,33 @@ public:
      */
     const CLCompileContext *cl_compile_context() const;
 
+    /** Create a @ref TensorInfo associated with the workload context.
+     *
+     * @return TensorInfo Newly created tensor info
+     */
+    template <typename... TArgs>
+    TensorInfo create_tensor_info(TArgs &&... args)
+    {
+        auto tensor_info = TensorInfo(std::forward<TArgs>(args)...);
+        register_user_tensor(tensor_info);
+        return tensor_info;
+    }
+
+    /** Get the internal implementation */
+    Impl &implementation();
+
+    /** Get the internal implementation */
+    const Impl &implementation() const;
+
 private:
-    GpuLanguage       _gpu_language{ GpuLanguage::Unknown };
-    CLCompileContext *_cl_compile_ctx{ nullptr };
+    /** Set a new ID to the tensor info and register its memory descriptor to the context.
+     *
+     * @param[in,out] tensor_info @ref ITensorInfo to be registered.
+     */
+    void register_user_tensor(ITensorInfo &tensor_info);
+
+    /** Internal implementation */
+    std::unique_ptr<Impl> _impl;
 };
 
 } // namespace dynamic_fusion

@@ -136,9 +136,9 @@ void GpuSoftmax::create_op(GpuWorkloadSketch &sketch,
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_LOG_PARAMS(src, dst, attributes);
     TensorShape  logits_sum_shape = src->tensor_shape();
-    ITensorInfo *logits           = sketch.implementation().create_auxiliary_tensor(src->clone()->set_tensor_shape(logits_sum_shape));
+    ITensorInfo *logits           = sketch.implementation().create_auxiliary_tensor(src->clone()->set_id(ITensorInfo::invalid_tensor_id).set_tensor_shape(logits_sum_shape));
     logits_sum_shape.set(0, 1);
-    ITensorInfo *sum = sketch.implementation().create_auxiliary_tensor(src->clone()->set_tensor_shape(logits_sum_shape));
+    ITensorInfo *sum = sketch.implementation().create_auxiliary_tensor(src->clone()->set_id(ITensorInfo::invalid_tensor_id).set_tensor_shape(logits_sum_shape));
 
     // Auto initialize dst tensor info and the auxiliary tensor infos as well
     auto_init_if_empty(*dst, *src->clone());

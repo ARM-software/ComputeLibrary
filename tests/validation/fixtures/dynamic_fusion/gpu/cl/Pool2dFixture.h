@@ -91,12 +91,12 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        auto input_info = sketch.create_tensor_info(TensorInfo(input_shape, 1, data_type, DataLayout::NHWC));
-        auto dst_info   = sketch.create_tensor_info();
+        auto input_info = context.create_tensor_info(TensorInfo(input_shape, 1, data_type, DataLayout::NHWC));
+        auto dst_info   = context.create_tensor_info();
 
         // Create Pool2dSettings
         GpuPool2dSettings pool_settings = GpuPool2dSettings().mixed_precision(mixed_precision);

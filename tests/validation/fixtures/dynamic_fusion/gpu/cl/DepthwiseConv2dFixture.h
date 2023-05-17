@@ -126,14 +126,14 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
-        TensorInfo weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
-        TensorInfo bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
-        TensorInfo dst_info    = sketch.create_tensor_info();
+        TensorInfo input_info  = context.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
+        TensorInfo weight_info = context.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
+        TensorInfo bias_info   = context.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
+        TensorInfo dst_info    = context.create_tensor_info();
 
         ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, dwc_conv2d_attr);
         GpuOutput::create_op(sketch, ans_info, &dst_info);

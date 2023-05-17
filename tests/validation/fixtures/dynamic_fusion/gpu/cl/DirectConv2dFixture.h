@@ -115,14 +115,14 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
-        TensorInfo weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
-        TensorInfo bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
-        TensorInfo dst_info    = sketch.create_tensor_info();
+        TensorInfo input_info  = context.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
+        TensorInfo weight_info = context.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
+        TensorInfo bias_info   = context.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
+        TensorInfo dst_info    = context.create_tensor_info();
 
         ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, conv2d_attr);
         GpuOutput::create_op(sketch, ans_info, &dst_info);
@@ -256,14 +256,14 @@ protected:
         permute(output_shape, PermutationVector(2U, 0U, 1U));
 
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        auto input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, data_type, data_layout));
-        auto weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, data_type, data_layout));
-        auto bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, bias_data_type, data_layout));
-        auto dst_info    = sketch.create_tensor_info();
+        auto input_info  = context.create_tensor_info(TensorInfo(input_shape, 1, data_type, data_layout));
+        auto weight_info = context.create_tensor_info(TensorInfo(weights_shape, 1, data_type, data_layout));
+        auto bias_info   = context.create_tensor_info(TensorInfo(bias_shape, 1, bias_data_type, data_layout));
+        auto dst_info    = context.create_tensor_info();
 
         ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, conv2d_attr);
         GpuOutput::create_op(sketch, ans_info, &dst_info);
