@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
 
 #include <cmath>
 #include <limits>
@@ -176,6 +177,42 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
     }
     return std::make_pair(min_quant_val, max_quant_val);
 }
+
+std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type)
+{
+    ARM_COMPUTE_ERROR_ON(data_type != DataType::QASYMM8 && data_type != DataType::QASYMM8_SIGNED);
+
+    const auto min_max = get_min_max(data_type);
+
+    int32_t type_min = std::get<0>(min_max).get<int32_t>();
+    int32_t type_max = std::get<1>(min_max).get<int32_t>();
+
+    const UniformQuantizationInfo q_unif = q_info.uniform();
+
+    if(act_info.enabled())
+    {
+        switch(act_info.activation())
+        {
+            case ActivationLayerInfo::ActivationFunction::RELU:
+                type_min = q_unif.offset;
+                break;
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+                type_min = q_unif.offset;
+                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info) : quantize_qasymm8_signed(act_info.a(), q_info);
+                break;
+            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+                type_min = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.b(), q_info) : quantize_qasymm8_signed(act_info.b(), q_info);
+                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info) : quantize_qasymm8_signed(act_info.a(), q_info);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Activation function not supported.");
+                break;
+        }
+    }
+
+    return std::make_tuple(type_min, type_max);
+}
+
 void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               const ITensorInfo *weights,
                                               const ITensorInfo *output,

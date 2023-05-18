@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -151,9 +151,9 @@ enum class DepthwiseConvolutionFunction
 /** Available DeconvolutionMethod*/
 enum class DeconvolutionMethod
 {
-    GEMM,            /**< Deconvolution using GEMM */
-    DIRECT,          /**< Direct deconvolution */
-    UPSCALE_CONV2D   /**< Deconvolution with Upscaling */
+    GEMM,          /**< Deconvolution using GEMM */
+    DIRECT,        /**< Direct deconvolution */
+    UPSCALE_CONV2D /**< Deconvolution with Upscaling */
 };
 
 /** Available FuseBatchNormalizationType*/
@@ -1209,7 +1209,9 @@ struct PoolingLayerInfo
           pad_stride_info(PadStrideInfo()),
           exclude_padding(false),
           is_global_pooling(false),
-          fp_mixed_precision(false)
+          fp_mixed_precision(false),
+          use_inf_as_limit(true),
+          use_kernel_indices(false)
     {
     }
     /** Constructor
@@ -1222,20 +1224,26 @@ struct PoolingLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
+     * @param[in] use_kernel_indices (Optional) Use kernel indices instead of using source indices while computing indices tensor.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
                               DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
-                              bool          fp_mixed_precision = false)
+                              bool          fp_mixed_precision = false,
+                              bool          use_inf_as_limit   = true,
+                              bool          use_kernel_indices = false)
         : pool_type(pool_type),
           pool_size(Size2D(pool_size, pool_size)),
           data_layout(data_layout),
           pad_stride_info(pad_stride_info),
           exclude_padding(exclude_padding),
           is_global_pooling(false),
-          fp_mixed_precision(fp_mixed_precision)
+          fp_mixed_precision(fp_mixed_precision),
+          use_inf_as_limit(use_inf_as_limit),
+          use_kernel_indices(use_kernel_indices)
     {
     }
 
@@ -1249,20 +1257,26 @@ struct PoolingLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     * @param[in] use_inf_as_limit   (Optional) Use inf to represent the limits of datatypes range, instead of  using "lowest" property of the data type.
+     * @param[in] use_kernel_indices (Optional) Use kernel indices instead of using source indices while computing indices tensor.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
                               DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
-                              bool          fp_mixed_precision = false)
+                              bool          fp_mixed_precision = false,
+                              bool          use_inf_as_limit   = true,
+                              bool          use_kernel_indices = false)
         : pool_type(pool_type),
           pool_size(pool_size),
           data_layout(data_layout),
           pad_stride_info(pad_stride_info),
           exclude_padding(exclude_padding),
           is_global_pooling(false),
-          fp_mixed_precision(fp_mixed_precision)
+          fp_mixed_precision(fp_mixed_precision),
+          use_inf_as_limit(use_inf_as_limit),
+          use_kernel_indices(use_kernel_indices)
     {
     }
 
@@ -1280,7 +1294,9 @@ struct PoolingLayerInfo
           pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
           exclude_padding(false),
           is_global_pooling(true),
-          fp_mixed_precision(false)
+          fp_mixed_precision(false),
+          use_inf_as_limit(true),
+          use_kernel_indices(false)
     {
     }
 
@@ -1291,6 +1307,8 @@ struct PoolingLayerInfo
     bool          exclude_padding;
     bool          is_global_pooling;
     bool          fp_mixed_precision;
+    bool          use_inf_as_limit;
+    bool          use_kernel_indices;
 };
 
 /** Pooling Layer Information struct*/
@@ -1815,7 +1833,7 @@ struct FullyConnectedLayerInfo
     /* Information about weights */
     DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
-    bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
+    bool       are_weights_reshaped{ false };              /**<  @deprecated Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
     bool       enable_fast_math{ false };                  /**<  Enable fast math computation. */
     /* Other parameters */
@@ -2694,5 +2712,53 @@ struct IOFormatInfo
     /** Align columns */
     bool align_columns;
 };
+
+/** Class for holding information related to matrix multiplication function
+ */
+class MatMulInfo
+{
+public:
+    /* Get Adjoint LHS flag value */
+    bool adj_lhs() const
+    {
+        return _adj_lhs;
+    }
+    /* Get Adjoint RHS flag value */
+    bool adj_rhs() const
+    {
+        return _adj_rhs;
+    }
+    /* Get Fused Activation Layer Info */
+    ActivationLayerInfo fused_activation() const
+    {
+        return _fused_act;
+    }
+    /* Set Adjoint LHS flag */
+    MatMulInfo &adj_lhs(bool adj_lhs)
+    {
+        _adj_lhs = adj_lhs;
+        return *this;
+    }
+    /* Set Adjoint RHS flag */
+    MatMulInfo &adj_rhs(bool adj_rhs)
+    {
+        _adj_rhs = adj_rhs;
+        return *this;
+    }
+    /* Set Fused Activation Layer Info */
+    MatMulInfo &fused_activation(const ActivationLayerInfo &act_info)
+    {
+        _fused_act = act_info;
+        return *this;
+    }
+
+private:
+    bool                _adj_lhs{ false };
+    bool                _adj_rhs{ false };
+    ActivationLayerInfo _fused_act{}; // disabled by default
+};
+
+/** Class for holding information related to cropping */
+using CropInfo = Padding2D;
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TYPES_H */

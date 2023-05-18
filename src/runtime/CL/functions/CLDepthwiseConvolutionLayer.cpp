@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,6 +162,9 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
                                              const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
+
     const bool in_place = input == output || output == nullptr;
     if(in_place)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,7 @@ Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
  * @return min and max values for the quantized data type
  */
 std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type);
+
 /** Compute quantized per-channel multipliers and shifts. As many multipliers
  * and shifts as output channels are computed. If weights are not quantized
  * per-channel, multipliers and shifts will end up being the same for each

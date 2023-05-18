@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,9 +86,16 @@ private:
         return 2 + 2 * dimension_size;
     }
 
-    cl::NDRange default_lws_tune(const Window &window)
+    /** Get default lws for the kernel
+     *
+     * @param[in] window               Execution window used by the kernel
+     * @param[in] use_dummy_work_items If the kernel uses dummy workloads
+     *
+     * @return    cl::NDRange
+     */
+    cl::NDRange default_lws_tune(const Window &window, bool use_dummy_work_items)
     {
-        return get_default_lws_for_type(_type, gws_from_window(window));
+        return get_default_lws_for_type(_type, gws_from_window(window, use_dummy_work_items));
     }
 
     using IKernel::configure; //Prevent children from calling IKernel::configure() directly
@@ -115,7 +122,9 @@ protected:
 
         if(is_same_lws(_tuning_params_hint.get_lws(), CLKernelLibrary::get().default_ndrange()))
         {
-            _tuning_params_hint.set_lws(default_lws_tune(window));
+            // Disable use_dummy_work_items at configure time. Because dummy work items only affect gws size, which
+            // will be recalculated with use_dummy_work_items flag at run time again anyway.
+            _tuning_params_hint.set_lws(default_lws_tune(window, false /* use_dummy_work_items */));
         }
 
         IKernel::configure(window);
@@ -124,7 +133,7 @@ protected:
 public:
     /** Constructor */
     ICLKernel()
-        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _type(CLKernelType::UNKNOWN), _tuning_params_hint()
+        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _type(CLKernelType::UNKNOWN), _tuning_params_hint(), _cached_gws(cl::NullRange)
     {
     }
     /** Returns a reference to the OpenCL kernel of this object.
@@ -431,11 +440,24 @@ public:
     size_t get_max_workgroup_size();
     /** Get the global work size given an execution window
      *
-     * @param[in] window Execution window
+     * @param[in] window               Execution window
+     * @param[in] use_dummy_work_items If the kernel uses dummy work items
      *
      * @return Global work size of the given execution window
      */
-    static cl::NDRange gws_from_window(const Window &window);
+    static cl::NDRange gws_from_window(const Window &window, bool use_dummy_work_items);
+
+    /** Get the cached gws used to enqueue this kernel
+     *
+     * @return Latest global work size of the kernel
+     */
+    cl::NDRange get_cached_gws() const;
+
+    /** Cache the latest gws used to enqueue this kernel
+     *
+     * @param[in] gws Latest global work size of the kernel
+     */
+    void cache_gws(const cl::NDRange &gws);
 
 private:
     /** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
@@ -465,6 +487,7 @@ protected:
     CLKernelType _type;               /**< The CL kernel type */
 private:
     CLTuningParams _tuning_params_hint; /**< Tuning parameters hint for the OpenCL kernel */
+    cl::NDRange    _cached_gws;         /**< Latest GWS used to enqueue this kernel */
 };
 
 /** Add the kernel to the command queue with the given window.

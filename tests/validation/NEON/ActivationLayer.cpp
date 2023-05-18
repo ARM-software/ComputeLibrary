@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
 
 #include "arm_compute/Acl.hpp"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 
 namespace arm_compute
 {

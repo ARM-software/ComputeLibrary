@@ -320,24 +320,24 @@ To cross-compile the library with Arm® Neon™ support for baremetal armv8a:
 
 Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
 
-@section S1_6_windows_host Building on a Windows host system (cross-compile)
+@section S1_6_windows_host Building on a Windows® host system (cross-compile)
 
-Using `scons` directly from the Windows command line is known to cause
+Using `scons` directly from the Windows® command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
-it gets confused about Windows style paths (using backslashes). Thus it is
+it gets confused about Windows® style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows (cross-compile)
+@subsection S1_6_1_ubuntu_on_windows Bash on Ubuntu on Windows® (cross-compile)
 
 The best and easiest option is to use
-<a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>.
+<a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows®</a>.
 This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
-Ubuntu on Windows* shell and following the general guidelines given above.
+Ubuntu on Windows®* shell and following the general guidelines given above.
 
 @subsection S1_6_2_cygwin Cygwin (cross-compile)
 
-If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
+If the Windows® subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
 can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
 to the default packages installed by Cygwin `scons` has to be selected in the installer. (`git` might
 also be useful but is not strictly required if you already have got the source
@@ -348,15 +348,15 @@ compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
 
-@subsection S1_6_3_WoA Windows on ARM (native build)
+@subsection S1_6_3_WoA Windows® on Arm™ (native build)
 
-    Native builds on Windows are experimental and some features from the library interacting with the OS are missing.
+    Native builds on Windows® are experimental and some features from the library interacting with the OS are missing.
 
-It's possible to build Compute Library natively on a windows system running on ARM.
+It's possible to build Compute Library natively on a Windows® system running on Arm™.
 
-Windows on ARM(WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
+Windows® on Arm™ (WoA) systems provide compatibility emulating x86 binaries on aarch64. Unfortunately Visual Studio 2022 does not work on aarch64 systems because it's an x86_64bit application and these binaries cannot be exectuted on WoA yet.
 
-Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows.
+Because we cannot use Visual Studio to build Compute Library we have to set up a native standalone toolchain to compile C++ code for arm64 on Windows®.
 
 Native arm64 toolchain installation for WoA:
 - LLVM+Clang-12 which can be downloaded from: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/LLVM-12.0.0-woa64.exe
@@ -372,7 +372,7 @@ There are some additional tools we need to install to build Compute Library:
 - python 3 https://www.python.org/downloads/windows/
 - scons can be installed with pip install scons
 
-In order to use clang to build windows binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
+In order to use clang to build Windows® binaries natively we have to initialize the environment variables from VS22 correctly so that the compiler could find the arm64 C++ libraries. This can be done by pressing the key windows + r  and running the command:
 
     cmd /k "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsx86_arm64.bat"
 
@@ -399,7 +399,7 @@ SVM allocations are supported for all the underlying allocations in Compute Libr
 @section S1_8_experimental_builds Experimental Bazel and CMake builds
 
 In addition to the scons build the repository includes experimental Bazel and CMake builds.
-Both are similar to the scons multi_isa build. It compiles all libraries with Neon (TM) support, as well as SVE and SVE2 libraries. The build is CPU only, not including OpenCL support.  Both were successfully built with gcc / g++ version 10.2.
+These builds currently support a limited range of options. Both are similar to the scons multi_isa build. It compiles all libraries with Neon (TM) support, as well as SVE and SVE2 libraries. The build is CPU only, not including OpenCL support. Only Linux environment is targeted for now. Both were successfully built with gcc / g++ version 10.2.
 
 @subsection S1_8_1_bazel_build Bazel build
 
@@ -495,14 +495,14 @@ File structure for all files included in the CMake build:
 
 Available build options:
 
-	- DEBUG: Enable ['-O0','-g','-gdwarf-2'] compilation flags
-	- WERROR: Enable -Werror compilation flag
-	- EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
-	- LOGGING: Enable logging
-	- BUILD_EXAMPLES: Build examples
-	- BUILD_TESTING: Build tests
-	- CPPTHREADS: Enable C++11 threads backend
-	- OPENMP: Enable OpenMP backend
+	- CMAKE_BUILD_TYPE: "Release" (default) enables ['-O3', '-DNDEBUG'] compilation flags, "Debug" enables ['-O0','-g','-gdwarf-2', '-DARM_COMPUTE_ASSERTS_ENABLED']
+	- ARM_COMPUTE_WERROR: Enable -Werror compilation flag
+	- ARM_COMPUTE_EXCEPTIONS: If disabled ARM_COMPUTE_EXCEPTIONS_DISABLED is enabled
+	- ARM_COMPUTE_LOGGING: Enable logging
+	- ARM_COMPUTE_BUILD_EXAMPLES: Build examples
+	- ARM_COMPUTE_BUILD_TESTING: Build tests
+	- ARM_COMPUTE_CPPTHREADS: Enable C++11 threads backend
+	- ARM_COMPUTE_OPENMP: Enable OpenMP backend
 
 @subsubsection S1_8_2_3_example_builds Example builds
 
@@ -510,8 +510,22 @@ To build libraries, examples and tests:
 
 	mkdir build
 	cd build
-	cmake .. -DOPENMP=1 -DWERROR=0 -DDEBUG=0 -DBUILD_EXAMPLES=1 -DBUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
+	cmake .. -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_OPENMP=1 -DARM_COMPUTE_WERROR=0 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1 -DCMAKE_INSTALL_LIBDIR=.
 	cmake --build . -j32
+
+@section S1_8_fixed_format Building with support for fixed format kernels
+
+@subsection S1_8_1_intro_to_fixed_format_kernels What are fixed format kernels?
+
+The GEMM kernels used for convolutions and fully-connected layers in Compute Library employ memory layouts optimized for each kernel implementation. This then requires the supplied weights to be re-ordered into a buffer ready for consumption by the GEMM kernel. Where Compute Library is being called from a framework or library which implements operator caching, the re-ordering of the inputted weights into an intermediate buffer may no longer be desirable. When using a cached operator, the caller may wish to re-write the weights tensor, and re-run the operator using the updated weights. With the default GEMM kernels in Compute Library, the GEMM will be executed with the old weights, leading to incorrect results.
+
+To address this, Compute Library provides a set of GEMM kernels which use a common blocked memory format. These kernels consume the input weights directly from the weights buffer and do not execute an intermediate pre-transpose step. With this approach, it is the responsibility of the user (in this case the calling framework) to ensure that the weights are re-ordered into the required memory format. @ref NEGEMM::has_opt_impl is a static function that queries whether there exists fixed-format kernel, and if so will return in the expected weights format. The supported weight formats are enumerated in @ref arm_compute::WeightFormat.
+
+@subsection S1_8_2_building_fixed_format Building with fixed format kernels
+
+Fixed format kernels are only available for the CPU backend. To build Compute Library with fixed format kernels set fixed_format_kernels=1:
+
+        scons Werror=1 debug=0 neon=1 opencl=0 embed_kernels=0 os=linux multi_isa=1 build=native cppthreads=1 openmp=0 fixed_format_kernels=1
 
 */
 } // namespace arm_compute

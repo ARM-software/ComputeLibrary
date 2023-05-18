@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,15 +73,16 @@ public:
      * @return The static instance of CLSymbols.
      */
     static CLSymbols &get();
-    /** Load symbols from the given OpenCL library path.
+    /** This method attempts to load the OpenCL symbols from the first available library from the provided OpenCL libraries.
      *
-     * @param[in] library    Path to the OpenCL library.
-     * @param[in] use_loader Use symbol loader function loadOpenCLPointer.
+     * @param[in] libraries_filenames Vector containing the filenames of the libraries to be loaded.
+     * @param[in] use_loader          Use symbol loader function loadOpenCLPointer.
      *
-     * @return True if loading the library is successful.
+     * @return True if loading the library is successful. False if all the provided libraries could not be loaded.
      */
-    bool load(const std::string &library, bool use_loader = false);
+    bool load(const std::vector<std::string> &libraries_filenames, bool use_loader = false);
     /** Load symbols from any of the default OpenCL library names.
+     *  If all the default libraries could not be loaded, this method will print a warning message and return false.
      *
      * @return True if loading any library is successful.
      */

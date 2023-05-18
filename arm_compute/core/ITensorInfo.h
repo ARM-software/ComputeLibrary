@@ -36,6 +36,9 @@
 
 namespace arm_compute
 {
+// Note: Any changes to the fields of the class below that have setters should be mirrored
+// (if possible) in the auto_init_if_empty function in AutoConfiguration.h
+
 /** Store the tensor's metadata */
 class ITensorInfo : public misc::ICloneable<ITensorInfo>
 {

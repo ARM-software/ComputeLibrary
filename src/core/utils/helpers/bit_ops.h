@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_UTILS_HELPERS_BIT_OPS_H
 #define ARM_COMPUTE_UTILS_HELPERS_BIT_OPS_H
 
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 
 #include <type_traits>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,10 +41,10 @@ void NEBatchToSpaceLayer::configure(const ITensor *input, const ITensor *block_s
     _kernel = std::move(k);
 }
 
-void NEBatchToSpaceLayer::configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output)
+void NEBatchToSpaceLayer::configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
 {
     auto k = std::make_unique<NEBatchToSpaceLayerKernel>();
-    k->configure(input, block_shape_x, block_shape_y, output);
+    k->configure(input, block_shape_x, block_shape_y, output, crop_info);
     _kernel = std::move(k);
 }
 
@@ -53,8 +53,8 @@ Status NEBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo
     return NEBatchToSpaceLayerKernel::validate(input, block_shape, output);
 }
 
-Status NEBatchToSpaceLayer::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output)
+Status NEBatchToSpaceLayer::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info)
 {
-    return NEBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output);
+    return NEBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output, crop_info);
 }
 } // namespace arm_compute

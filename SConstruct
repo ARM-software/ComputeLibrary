@@ -98,7 +98,7 @@ vars.AddVariables(
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
-    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Note works only for armv8.2-a", False),
+    BoolVariable("multi_isa", "Build Multi ISA binary version of library. Works for armv8a without the support for FP16 vector arithmetic. Use armv8.2-a or beyond to enable FP16 vector arithmetic support", False),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
@@ -126,7 +126,7 @@ vars.AddVariables(
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
     BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
-    BoolVariable("experimental_fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
+    BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
     ListVariable("data_type_support", "Enable a list of data types to support", "all", ["qasymm8", "qasymm8_signed", "qsymm16", "fp16", "fp32", "integer"]),
@@ -139,6 +139,9 @@ vars.AddVariables(
     ("specs_file", "Specs file to use (e.g. rdimon.specs)", ""),
     ("build_config", "Operator/Data-type/Data-layout configuration to use for tailored ComputeLibrary builds. Can be a JSON file or a JSON formatted string", "")
 )
+
+if version_at_least(SCons.__version__, "4.0"):
+    vars.Add(BoolVariable("export_compile_commands", "Export compile_commands.json file.", False))
 
 
 env = Environment(variables=vars, ENV = os.environ)
@@ -180,6 +183,11 @@ Export('install_lib')
 Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
+
+# Export compile_commands.json file
+if env.get("export_compile_commands", False):
+    env.Tool("compilation_db")
+    env.CompilationDatabase("%s/compile_commands.json" % build_path)
 
 if 'armv7a' in env['arch'] and env['os'] == 'android':
     print("WARNING: armv7a on Android is no longer maintained")
@@ -298,11 +306,15 @@ if env['multi_isa']:
         print("Currently Multi ISA binary is only supported for arm v8 family")
         Exit(1)
 
-    if 'v8.6-a' in env['arch']:
-        if "disable_mmla_fp" not in env['custom_options']:
-            env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
+    if 'v8a' in env['arch']:
+        print("INFO: multi_isa armv8-a architecture build doesn't enable __ARM_FEATURE_FP16_VECTOR_ARITHMETIC. Use armv8.2-a or beyond to enable FP16 vector arithmetic support")
+        env.Append(CXXFLAGS = ['-march=armv8-a']) # note: this will disable fp16 extension __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    else:
+        if 'v8.6-a' in env['arch']:
+            if "disable_mmla_fp" not in env['custom_options']:
+                env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVEF32MM'])
 
-    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
 
 else: # NONE "multi_isa" builds
 

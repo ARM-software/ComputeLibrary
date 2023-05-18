@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,7 +93,7 @@ void pooling3_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
     const int                  src_h          = src->info()->dimension(1);
     const int                  upper_bound_w  = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int                  upper_bound_h  = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-    const float16_t            fp16_min       = -std::numeric_limits<half_float::half>::infinity();
+    const float16_t            fp16_min       = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
     const float16_t            fill_value     = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.f;
     const unsigned char *const src_top_ptr    = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const unsigned char *const src_middle_ptr = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
@@ -125,7 +125,7 @@ void pooling3_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         {
             // Calculate scale
             const float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                    pool_stride_y);
+                                                           pool_stride_y);
             const float16x4_t scale_v = vdup_n_f16(scale);
             // Perform pooling
             const float16x4_t sum_data = vadd_f16(vadd_f16(top_data, bottom_data), middle_data);
@@ -203,7 +203,7 @@ void pooling2_nchw_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *d
     const int            pad_left       = src->info()->padding().left;
     const int            pad_right      = src->info()->padding().right;
     const int            in_stride_y    = static_cast<int>(src->info()->strides_in_bytes().y());
-    constexpr T          float_min      = -std::numeric_limits<float>::infinity();
+    const T              float_min      = get_initial_min<T>(pool_info.use_inf_as_limit);
     const T              fill_value     = (pool_info.pool_type == PoolingType::MAX) ? float_min : 0.f;
 
     execute_window_loop(window, [&](const Coordinates & id)
@@ -259,7 +259,7 @@ void pooling2_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         const int       src_h         = src->info()->dimension(1);
         const int       upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
         const int       upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-        const float16_t fp16_min      = -std::numeric_limits<half_float::half>::infinity();
+        const float16_t fp16_min      = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
         const float16_t fill_value    = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.0f;
 
         const unsigned char *const src_top_ptr    = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
@@ -289,7 +289,7 @@ void pooling2_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
             if(pool_info.pool_type != PoolingType::MAX)
             {
                 const float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                        pool_stride_y);
+                                                               pool_stride_y);
                 const float16x4_t scale_v = vdup_n_f16(scale);
 
                 const float16x4_t sum_data = vadd_f16(top_data, bottom_data);
@@ -333,7 +333,7 @@ void poolingMxN_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1,
     const int       src_h         = src->info()->dimension(1);
     const int       upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int       upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-    const float16_t fp16_min      = -std::numeric_limits<half_float::half>::infinity();
+    const float16_t fp16_min      = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
     const float16_t fill_value    = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.0f;
 
     execute_window_loop(window, [&](const Coordinates & id)
@@ -344,7 +344,7 @@ void poolingMxN_fp16_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1,
         {
             // Calculate scale
             const float16_t scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                        pool_stride_y);
+                                                               pool_stride_y);
 
             // Perform pooling
             for(int y = 0; y < pool_size_y; ++y)
@@ -421,7 +421,8 @@ void poolingMxN_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1,
     const int   src_h         = src->info()->dimension(1);
     const int   upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int   upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? -std::numeric_limits<float>::infinity() : 0.0f;
+    const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
+    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? min_value : 0.0f;
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -431,7 +432,7 @@ void poolingMxN_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1,
         {
             // Calculate scale
             const float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h,
-                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                                                           pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             for(int y = 0; y < pool_size_y; ++y)
@@ -459,7 +460,7 @@ void poolingMxN_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1,
         }
         else // if max pooling
         {
-            res = -std::numeric_limits<float>::infinity();
+            res = min_value;
 
             for(int y = 0; y < pool_size_y; ++y)
             {
@@ -510,7 +511,8 @@ void pooling2_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         const int   src_h         = src->info()->dimension(1);
         const int   upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
         const int   upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-        const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? -std::numeric_limits<float>::infinity() : 0.0f;
+        const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
+        const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? min_value : 0.0f;
 
         const uint8_t *const src_top_ptr    = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
         const uint8_t *const src_bottom_ptr = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
@@ -539,7 +541,7 @@ void pooling2_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
             {
                 // Calculate scale
                 float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                  pool_stride_y);
+                                                         pool_stride_y);
                 const float32x2_t scale_v = vdup_n_f32(scale);
 
                 // Perform pooling
@@ -584,7 +586,8 @@ void pooling3_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
     const int   src_h         = src->info()->dimension(1);
     const int   upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int   upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? -std::numeric_limits<float>::infinity() : 0.0f;
+    const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
+    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? min_value : 0.0f;
 
     const uint8_t *const src_top_ptr    = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const uint8_t *const src_middle_ptr = src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
@@ -619,7 +622,7 @@ void pooling3_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         {
             // Calculate scale
             float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                              pool_stride_y);
+                                                     pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -630,7 +633,7 @@ void pooling3_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         else
         {
             const float32x4_t max_data = vmaxq_f32(vmaxq_f32(top_data, bottom_data), middle_data);
-            res                        = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::infinity(), max_data, 3)), vget_low_f32(max_data));
+            res                        = vpmax_f32(vget_high_f32(vsetq_lane_f32(min_value, max_data, 3)), vget_low_f32(max_data));
             res                        = vpmax_f32(res, res);
         }
         final_res = vget_lane_f32(res, 0);
@@ -665,7 +668,8 @@ void pooling7_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
     const int   src_h         = src->info()->dimension(1);
     const int   upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
     const int   upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? -std::numeric_limits<float>::infinity() : 0.0f;
+    const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
+    const float fill_value    = (pool_info.pool_type == PoolingType::MAX) ? min_value : 0.0f;
 
     std::array<const uint8_t *, pool_size> src_ptrs{ {} };
     for(int i = 0; i < pool_size; ++i)
@@ -688,7 +692,7 @@ void pooling7_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
         {
             // Calculate scale
             float scale = calculate_avg_scale_pool2d(pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                              pool_stride_y);
+                                                     pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Get power of 2 in case of l2 pooling
@@ -728,7 +732,7 @@ void pooling7_fp32_neon_nchw(const ITensor *src, ITensor *dst0, ITensor *dst1, P
                 float32x4x2_t temp = read_8_boundary_aware(src_h, src_w, pool_pad_left, pool_pad_top, x_val, y_val, in_ptr, fill_value);
                 data               = vmax2q_f32(data, temp);
             }
-            res = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::infinity(), data.val[1], 3)), vget_low_f32(data.val[1]));
+            res = vpmax_f32(vget_high_f32(vsetq_lane_f32(min_value, data.val[1], 3)), vget_low_f32(data.val[1]));
             res = vpmax_f32(res, vpmax_f32(vget_high_f32(data.val[0]), vget_low_f32(data.val[0])));
             res = vpmax_f32(res, res);
         }

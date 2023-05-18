@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,6 @@ template <typename FromTensorT, typename ToTensorT>
 PostOpList<ToTensorT> transform_post_op_list_arguments(const PostOpList<FromTensorT> &post_ops, std::function<ToTensorT(FromTensorT)> transform_arg)
 {
     PostOpList<ToTensorT> transformed_post_ops;
-    int                   op_idx = 0;
     for(const auto &post_op : post_ops.get_list())
     {
         switch(post_op->type())
@@ -70,7 +69,6 @@ PostOpList<ToTensorT> transform_post_op_list_arguments(const PostOpList<FromTens
                 ARM_COMPUTE_ERROR("Unsupported PostOpType");
             }
         }
-        ++op_idx;
     }
     return transformed_post_ops;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -235,6 +235,7 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "elementwise_operation_SQUARED_DIFF_quantized", "common/elementwise_operation_quantized.cl" },
     { "elementwise_operation_PRELU_quantized", "common/elementwise_operation_quantized.cl" },
     { "elementwise_unary", "common/elementwise_unary.cl" },
+    { "elementwise_unary_quantized", "common/elementwise_unary_quantized.cl" },
     { "fft_digit_reverse_axis_0", "common/fft_digit_reverse.cl" },
     { "fft_digit_reverse_axis_1", "common/fft_digit_reverse.cl" },
     { "fft_radix_2_first_stage_axis_0", "common/fft.cl" },
@@ -318,6 +319,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "l2_normalize_x", "common/l2_normalize.cl" },
     { "l2_normalize_y", "common/l2_normalize.cl" },
     { "l2_normalize_z", "common/l2_normalize.cl" },
+    { "mat_mul_native_nt_nt", "common/mat_mul.cl" },
+    { "mat_mul_native_nt_t", "common/mat_mul.cl" },
+    { "mat_mul_native_t_nt", "common/mat_mul.cl" },
+    { "mat_mul_native_t_t", "common/mat_mul.cl" },
+    { "mat_mul_native_quantized_nt_nt", "common/mat_mul_quantized.cl" },
+    { "mat_mul_native_quantized_nt_t", "common/mat_mul_quantized.cl" },
+    { "mat_mul_native_quantized_t_nt", "common/mat_mul_quantized.cl" },
+    { "mat_mul_native_quantized_t_t", "common/mat_mul_quantized.cl" },
     { "max_unpooling_layer_2", "common/unpooling_layer.cl" },
     { "mean_stddev_normalization", "common/mean_stddev_normalization.cl" },
     { "memset", "common/memset.cl" },
@@ -570,6 +579,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
 #include "./cl_kernels/common/elementwise_unary.clembed"
     },
     {
+        "common/elementwise_unary_quantized.cl",
+#include "./cl_kernels/common/elementwise_unary_quantized.clembed"
+    },
+    {
         "common/fft.cl",
 #include "./cl_kernels/common/fft.clembed"
     },
@@ -780,6 +793,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/unpooling_layer.cl",
 #include "./cl_kernels/common/unpooling_layer.clembed"
+    },
+    {
+        "common/mat_mul.cl",
+#include "./cl_kernels/common/mat_mul.clembed"
+    },
+    {
+        "common/mat_mul_quantized.cl",
+#include "./cl_kernels/common/mat_mul_quantized.clembed"
     },
 #ifdef ENABLE_NCHW_KERNELS
     {

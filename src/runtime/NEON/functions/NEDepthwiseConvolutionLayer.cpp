@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -221,8 +221,6 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerGeneric::configure(
                                                                                 unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayer::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
-                                                                     output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     const ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
     _impl->op = std::make_unique<cpu::CpuDepthwiseConv2d>();
@@ -310,7 +308,11 @@ struct NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer::Impl
 void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                                             const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+
     ARM_COMPUTE_LOG_PARAMS(input, weights, output, conv_info, depth_multiplier, biases, act_info, dilation);
+    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayer::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
+                                                                     output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     const ConvolutionInfo info{ conv_info, depth_multiplier, act_info, dilation };
     _impl->op              = std::make_shared<cpu::CpuDepthwiseConv2d>();

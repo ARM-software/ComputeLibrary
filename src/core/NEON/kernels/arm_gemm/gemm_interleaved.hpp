@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "convolver.hpp"
 #include "kernel_weight_format.hpp"
 #include "kernel_traits.hpp"
+#include "kernel_weight_format.hpp"
 #include "mergeresults.hpp"
 #include "performance_parameters.hpp"
 #include "quantized.hpp"
@@ -267,16 +268,22 @@ public:
 };
 
 // We need a similar trick here to figure out what type the accumulator buffer should be.
-template<typename strategy, typename OutputStage>
+template<typename strategy, typename OutputStage, bool ForceFloat>
 class accumulate_buffer_type {
 public:
     typedef typename strategy::result_type type;
 };
 
 template<typename strategy>
-class accumulate_buffer_type<strategy, Requantize32> {
+class accumulate_buffer_type<strategy, Requantize32, false> {
 public:
     typedef int32_t type;
+};
+
+template<typename strategy, typename OutputStage>
+class accumulate_buffer_type<strategy, OutputStage, true> {
+public:
+    typedef float type;
 };
 
 // Stripe width is a concept only needed for FixedFormat kernels.  Use an accessor to avoid issues in other scenarios.
@@ -321,11 +328,11 @@ struct get_kernel_weight_format<strategy, true, To> {
 
 } // anonymous namespace
 
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing, bool MergeStep=true, bool FixedFormat=false, bool ForceThreadColumns=false>
+template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing, bool MergeStep=true, bool FixedFormat=false, bool ForceThreadColumns=false, bool ForceFloatAccumulate=false>
 class GemmInterleaved : public GemmCommon<To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
-    typedef typename accumulate_buffer_type<strategy, OutputStage>::type Tab;
+    typedef typename accumulate_buffer_type<strategy, OutputStage, ForceFloatAccumulate>::type Tab;
 
     /* const properties set by constructor */
     const CPUInfo * const _ci;
@@ -383,7 +390,7 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
     class blockwalker {
     private:
         /* Size loops, etc. based on our parent's configuration */
-        const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns> &_parent;
+        const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns, ForceFloatAccumulate> &_parent;
 
         /* K, X and multi parameters for current iteration. */
         unsigned int _k0=0, _x0=0, _multi=0;
@@ -398,9 +405,9 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
         bool _newmulti=true;
 
     public:
-        blockwalker(const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns> &parent) : _parent(parent) { }
+        blockwalker(const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns, ForceFloatAccumulate> &parent) : _parent(parent) { }
 
-        blockwalker(const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns> &parent,
+        blockwalker(const GemmInterleaved<strategy, To, Tr, OutputStage, MergeStep, FixedFormat, ForceThreadColumns, ForceFloatAccumulate> &parent,
                     unsigned int x_start, unsigned int x_end) : _parent(parent), _x0 (_x_start), _x_start(x_start), _x_end(x_end) { }
 
         unsigned int xmax() {
@@ -812,8 +819,8 @@ public:
                             (last_pass ? _act : Activation()), !first_pass,
                             // Pass in quantization parameters for requantizing kernels (others will ignore)
                             _os, col_bias + (multi * _Nsize),
-                            // Accumulation buffer (not yet implemented on this path)
-                            static_cast<Tab *>(nullptr));
+                            // Accumulation buffer
+                            get_accumulation_buffer(start_row, start_x, batch, multi));
 
                         /* Increment to the next block */
                         start_row += strategy::out_height();
@@ -1033,6 +1040,13 @@ public:
         return (x_size * _Ktotal * _nmulti * sizeof(Toi)) + get_col_sum_size();
     }
 
+    size_t get_B_pretranspose_window_size() const override {
+        size_t n_blocks = iceildiv(_Nsize, _x_block);
+        size_t k_blocks = iceildiv(_Ktotal, _k_block);
+
+        return n_blocks * k_blocks * _nmulti;
+    }
+
     void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         if (std::is_same<OutputStage, Requantize32>::value) {
             col_bias = reinterpret_cast<int32_t *>(in_buffer);
@@ -1047,7 +1061,14 @@ public:
     }
 
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        requantize_bias(in_buffer, B, ldb, B_multi_stride);
+        pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, 0, get_B_pretranspose_window_size());
+    }
+
+    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, size_t start, size_t end) override {
+        // Perform column sums etc as part of the last block.
+        if (end >= get_B_pretranspose_window_size()) {
+            requantize_bias(in_buffer, B, ldb, B_multi_stride);
+        }
 
         // Put the transposed data after the column sums - in non-quantized cases get_col_sum_size() == 0
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
@@ -1057,7 +1078,20 @@ public:
         blockwalker current(*this);
         strategy strat(_ci);
 
-        do {
+        // Skip over blocks we aren't doing
+        for(size_t i = 0; i < start; i++) {
+            buffer += roundup(current.xmax() - current.x0(), strategy::out_width()) * roundup(current.kmax() - current.k0(), strategy::k_unroll());
+            current.advance();
+        }
+
+        size_t blocks_left = (end - start);
+
+        // Double check that we haven't run out of work
+        if (current.done()) {
+            blocks_left = 0;
+        }
+
+        for (/* blocks_left initialized above */; blocks_left > 0; blocks_left--) {
             /* Figure out the size of each block. */
             unsigned int k_size = (current.kmax() - current.k0());
 
@@ -1111,7 +1145,12 @@ public:
                                           current.x0(), current.xmax(), current.k0(), std::min(current.kmax(), _Ksize));
                 buffer += roundup(current.xmax() - current.x0(), strategy::out_width()) * roundup(current.kmax() - current.k0(), strategy::k_unroll());
             }
-        } while (current.advance());
+
+            // Advance to the next block, break if we run off the end.
+            if (!current.advance()) {
+                break;
+            }
+        }
     }
 
     void set_pretransposed_B_data(void *in_buffer) override {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,7 +102,23 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_UNUSED(bias);
 
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    unsigned int num_elems_processed_per_iteration = 1;
+
+    if(input->data_layout() == DataLayout::NHWC)
+    {
+        // In the case of FP16 computation, we can perform more
+        // output feature maps in a single work-item.
+        // From experiments, num_elems_processed_per_iteration = 2 looks good for fp16 to
+        // improve the performance. However, in order to make the implementation simpler,
+        // we set num_elems_processed_per_iteration = 2 only when the OFMs are multiple of 2.
+        const DataType dt   = input->data_type();
+        const size_t   dim0 = input->dimension(0);
+        const bool     cond = dt == DataType::F16 && ((dim0 % 2) == 0);
+        if(cond)
+        {
+            num_elems_processed_per_iteration = 2;
+        }
+    }
 
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool   window_changed = false;
@@ -203,7 +219,7 @@ void ClWinogradOutputTransformKernel::configure(const ClCompileContext &compile_
         build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
         build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
         build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src_data_type));
-        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(2)));
+        build_opts.add_option_if(total_batches > 1, "-DIS_BATCHED");
         build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
         build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
         build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));

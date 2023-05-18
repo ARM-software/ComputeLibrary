@@ -154,6 +154,7 @@ void GpuSoftmax::create_op(GpuWorkloadSketch &sketch,
     if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
+        ARM_COMPUTE_UNUSED(cl_compile_ctx);
         ARM_COMPUTE_ERROR_ON(cl_compile_ctx == nullptr);
 
         // Add Direct Conv2d Component

@@ -154,6 +154,8 @@ Status GpuDepthwiseConv2d::validate_op(const GpuWorkloadSketch         &sketch,
                                        const DepthwiseConv2dAttributes &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!wei->are_values_constant(), "Dynamic weights are not supported");
+
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
 
     if(bia != nullptr)

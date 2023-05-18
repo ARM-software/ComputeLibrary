@@ -35,15 +35,9 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::export_to_cl_image(bool cl_image)
-{
-    _export_to_cl_image = cl_image;
-    return *this;
-}
-
 bool ClComponentDirectConv2dSettings::export_to_cl_image() const
 {
-    return _export_to_cl_image;
+    return _desc.export_weights_to_cl_image;
 }
 
 ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::fast_relaxed_math(bool fast_relaxed_math)

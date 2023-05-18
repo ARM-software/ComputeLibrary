@@ -62,13 +62,13 @@ CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo *src, 
     const unsigned int kernel_height = weights->dimension(idx_height);
     unsigned int       conv_w        = 0;
     unsigned int       conv_h        = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width),
-                                                 src->dimension(idx_height),
-                                                 kernel_width,
-                                                 kernel_height,
-                                                 conv_info,
-                                                 dilation);
-    const bool skip_im2col = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    std::tie(conv_w, conv_h)         = scaled_dimensions(src->dimension(idx_width),
+                                                         src->dimension(idx_height),
+                                                         kernel_width,
+                                                         kernel_height,
+                                                         conv_info,
+                                                         dilation);
+    const bool skip_im2col           = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
 
     if(skip_im2col)
     {
@@ -139,8 +139,8 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
         PixelValue type_min{};
         PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int32_t min_activation = type_min.get<int32_t>();
-        int32_t max_activation = type_max.get<int32_t>();
+        int32_t min_activation       = type_min.get<int32_t>();
+        int32_t max_activation       = type_max.get<int32_t>();
 
         if(supported_acts.count(act_info.activation()) != 0)
         {
@@ -169,7 +169,7 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
     {
         // Configure matrix multiply function
         _mm_gemm = std::make_unique<CpuGemm>();
-        _mm_gemm->configure(src, weights, biases, dst, 1.0f, 0.0f, gemm_info);
+        _mm_gemm->configure(src, weights, biases, dst, 1.0f, 1.0f, gemm_info);
         auto mm_mem_req = _mm_gemm->workspace();
         for(unsigned int cont = 0; cont < mm_mem_req.size(); ++cont)
         {
@@ -203,8 +203,8 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
         PixelValue type_min{};
         PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int32_t min_activation = type_min.get<int32_t>();
-        int32_t max_activation = type_max.get<int32_t>();
+        int32_t min_activation       = type_min.get<int32_t>();
+        int32_t max_activation       = type_max.get<int32_t>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -235,7 +235,7 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
     else
     {
         // Perform validation step on Matrix multiply function
-        return CpuGemm::validate(src, weights, nullptr, dst, 1.0f, 0.0f, gemm_info);
+        return CpuGemm::validate(src, weights, biases, dst, 1.0f, 1.0f, gemm_info);
     }
 }
 
@@ -274,6 +274,7 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     const DataLayout data_layout = src->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     const int        idx_kernels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
     const unsigned int kernel_width  = weights->dimension(idx_width);
@@ -288,8 +289,8 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     ITensorInfo       *gemm_output_to_use = dst;
 
     // Get convolved dimensions
-    unsigned int conv_w = 0;
-    unsigned int conv_h = 0;
+    unsigned int conv_w      = 0;
+    unsigned int conv_h      = 0;
     std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width),
                                                  src->dimension(idx_height),
                                                  kernel_width,
@@ -306,8 +307,8 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     _skip_col2im                            = skip_info.skip_col2im;
 
     // Get parameters from conv_info
-    unsigned int stride_x = 0;
-    unsigned int stride_y = 0;
+    unsigned int stride_x        = 0;
+    unsigned int stride_y        = 0;
     std::tie(stride_x, stride_y) = conv_info.stride();
 
     unsigned int mat_weights_cols = weights->dimension(idx_kernels);
@@ -321,9 +322,15 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     // Create tensor to store im2col reshaped inputs
     if(!_skip_im2col)
     {
+        const int    block_by        = arm_compute::block_by(weights_info.weight_format());
+        unsigned int input_pad_right = 0;
+        if(block_by > 1)
+        {
+            input_pad_right = (src->dimension(idx_channel) % block_by) == 0 ? 0 : block_by - (src->dimension(idx_channel) % block_by);
+        }
         // Configure
         _im2col_kernel = std::make_unique<kernels::CpuIm2ColKernel>();
-        _im2col_kernel->configure(src, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation);
+        _im2col_kernel->configure(src, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, false, dilation, num_groups, input_pad_right);
 
         // Update GEMM input
         gemm_input_to_use = &_im2col_output;
@@ -399,12 +406,12 @@ Status CpuGemmConv2d::has_opt_impl(arm_compute::WeightFormat &expected_weight_fo
     const unsigned int kernel_height = weights->dimension(idx_height);
     unsigned int       conv_w        = 0;
     unsigned int       conv_h        = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width),
-                                                 src->dimension(idx_height),
-                                                 kernel_width,
-                                                 kernel_height,
-                                                 conv_info,
-                                                 dilation);
+    std::tie(conv_w, conv_h)         = scaled_dimensions(src->dimension(idx_width),
+                                                         src->dimension(idx_height),
+                                                         kernel_width,
+                                                         kernel_height,
+                                                         conv_info,
+                                                         dilation);
 
     const CpuGemmConv2d::SkipInfo skip_info = CpuGemmConv2d::skip_im_col_info(src, weights, conv_info,
                                                                               dilation, act_info);
@@ -428,7 +435,7 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
 
-    if (!is_fixed_format(weights_info.weight_format()))
+    if(!is_fixed_format(weights_info.weight_format()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, weights);
     }
@@ -469,9 +476,9 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
                                                  dilation);
 
     // Check if GEMM3D is supported
-    const CpuGemmConv2d::SkipInfo skip_info = CpuGemmConv2d::skip_im_col_info(src, weights, conv_info,
-                                                                              dilation, act_info);
-    const bool skip_im2col = skip_info.skip_im2col, skip_col2im = skip_info.skip_col2im;
+    const CpuGemmConv2d::SkipInfo skip_info   = CpuGemmConv2d::skip_im_col_info(src, weights, conv_info,
+                                                                                dilation, act_info);
+    const bool                    skip_im2col = skip_info.skip_im2col, skip_col2im = skip_info.skip_col2im;
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_channel) != src->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -504,6 +511,14 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
 
     if(!skip_im2col)
     {
+        const int block_by        = arm_compute::block_by(weights_info.weight_format());
+        int       input_pad_right = 0;
+        if(block_by > 1)
+        {
+            input_pad_right  = (src->dimension(idx_channel) % block_by) == 0 ? 0 : block_by - (src->dimension(idx_channel) % block_by);
+            mat_weights_rows = weights->dimension(idx_width) * weights->dimension(idx_height) * (weights->dimension(idx_channel) + input_pad_right);
+        }
+
         // Create tensor info for im2col reshaped inputs
         // For CPU, the batch size is on the fourth dimension
         TensorShape shape_im2col = src->tensor_shape();
@@ -513,7 +528,7 @@ Status CpuGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weight
 
         im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(src->quantization_info());
-        ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuIm2ColKernel::validate(src, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, 1));
+        ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuIm2ColKernel::validate(src, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups, input_pad_right));
         gemm_input_to_use = &im2col_reshaped_info;
     }
 
@@ -563,7 +578,7 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
     {
         // Run input reshaping
         unsigned int y_dim = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-        ITensorPack  pack =
+        ITensorPack  pack  =
         {
             { TensorType::ACL_SRC, src },
             { TensorType::ACL_DST, im2col_output.get() }
@@ -657,7 +672,7 @@ void CpuGemmConv2d::prepare(ITensorPack &tensors)
         // Run weights reshaping and mark original weights tensor as unused
         CpuAuxTensorHandler weights_reshaped(offset_int_vec(WeightsReshaped), _weights_reshaped, tensors);
         auto                weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
-        ITensorPack         pack =
+        ITensorPack         pack    =
         {
             { TensorType::ACL_SRC, weights },
             { TensorType::ACL_DST, weights_reshaped.get() }

@@ -64,16 +64,18 @@ void CpuGemm::configure(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     ARM_COMPUTE_LOG_PARAMS(a, b, c, d, alpha, beta, gemm_info);
 
     const cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
-    const bool             is_c_bias     = gemm_info.reshape_b_only_on_first_run();
-    bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, (is_c_bias) ? c : nullptr, d, asm_info)) && gemm_info.reshape_b_only_on_first_run();
+    const bool             is_c_bias     = beta == 1 && c != nullptr;
+    bool                   run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, (is_c_bias) ? c : nullptr, d, asm_info)) &&
+                                           (c == nullptr || beta == 0.f || beta == 1.f) && // Optimized GeMM doesn't support beta coefficient.
+                                           !(!b->are_values_constant() && b->tensor_shape().z() > 1); // Disable batch matmul as optimized GeMM handles batching differently.
 
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;
-    _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
+    _reshape_b_only_on_first_run      = b->are_values_constant();
     _run_vector_matrix_multiplication = a->dimension(1) < 2;
     _run_alpha_scale                  = alpha != 1.f;
-    _run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
-    _run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
+    _run_bias_addition                = is_c_bias;
+    _run_addition                     = beta != 0 && beta != 1 && c != nullptr;
     _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !cpu::CpuGemmAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
     if(run_optimised)
@@ -153,13 +155,14 @@ void CpuGemm::configure(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
-    const bool is_c_bias = gemm_info.reshape_b_only_on_first_run();
+    const bool is_c_bias    = beta == 1 && c != nullptr;
+    const bool run_addition = c != nullptr && beta != 0 && beta != 1;
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::BFLOAT16, DataType::F16, DataType::F32);
-    
-    if (is_fixed_format_fast_math(gemm_info.weight_format()))
+
+    if(is_fixed_format_fast_math(gemm_info.weight_format()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(a, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(b, DataType::BFLOAT16);
@@ -169,7 +172,24 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+    const int block_by = arm_compute::block_by(gemm_info.weight_format());
+    if(block_by > 1)
+    {
+        // have to verify bias
+        const size_t dim0_sz = a->dimension(0);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((dim0_sz % block_by) != 0, ("The matrix A number of columns must be a multiple of block_by=" + std::to_string(block_by)).c_str());
+        // a->dimension(0) = kernel_area * input_channel + kernel_area * input_pad_right
+        // b->dimension(1) = kernel_area * input_channel
+        // a->dimension(0) = b->dimension(1) + kernel_area * input_pad_right
+        const size_t input_pad_right = (dim0_sz - b->dimension(1)) % block_by;
+        const size_t kernel_area     = (dim0_sz - b->dimension(1)) / input_pad_right;
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((dim0_sz - kernel_area * input_pad_right) != b->dimension(1), "The product AB is defined only if A number of columns and B number of rows are related");
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+    }
+
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
     if(a->data_type() != DataType::BFLOAT16)
@@ -177,7 +197,7 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, d);
     }
 
-    if(c != nullptr && !is_c_bias)
+    if(run_addition)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.depth_output_gemm3d() != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.reinterpret_input_as_3d());
@@ -210,7 +230,9 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
 
     // Check if we need to run the optimized assembly kernel
     cpu::AsmGemmInfo asm_info      = init_assembly_metadata(gemm_info);
-    const bool       run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, d, asm_info));
+    const bool       run_optimised = bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, d, asm_info)) &&
+                                     (c == nullptr || beta == 0.f || beta == 1.f) && // Optimized GeMM doesn't support beta coefficient.
+                                     !(!b->are_values_constant() && b->tensor_shape().z() > 1); // Disable batch matmul as optimized GeMM handles batching differently.
 
     if(!run_optimised)
     {
@@ -220,7 +242,7 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
         // Check if the first input tensor is a vector.
         const bool run_vector_matrix_multiplication = a->dimension(1) < 2;
         // Check if we need to reshape the matrix A and matrix B
-        const bool run_interleave_transpose = !run_vector_matrix_multiplication && !(gemm_info.reshape_b_only_on_first_run());
+        const bool run_interleave_transpose = !run_vector_matrix_multiplication && !b->are_values_constant();
 
         // Arguments used by GEMMReshapeInfo
         // If we pass the matrix A and matrix B reshaped to CpuGemmMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to GEMMReshapeInfo
@@ -258,14 +280,14 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
         auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
         ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
 
-        if(c != nullptr && gemm_info.reshape_b_only_on_first_run())
+        if(is_c_bias)
         {
             ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuAdd::validate(&tmp_output_info, c, d, ConvertPolicy::SATURATE));
         }
     }
 
     // Validate matrix addition kernel
-    if(beta != 0 && c != nullptr && !is_c_bias)
+    if(run_addition)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmMatrixAdditionKernel::validate(c, d, beta));
     }
@@ -293,7 +315,7 @@ void CpuGemm::run(ITensorPack &tensors)
     {
         // Pass c to asm dispatch only if it's the bias tensor
         ITensorPack asm_pack = tensors;
-        asm_pack.add_const_tensor(ACL_SRC_2, (_reshape_b_only_on_first_run) ? c : nullptr);
+        asm_pack.add_const_tensor(ACL_SRC_2, _run_bias_addition ? c : nullptr);
         _asm_glue->run(asm_pack);
         if(_run_alpha_scale)
         {

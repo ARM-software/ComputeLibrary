@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,7 +162,7 @@ void ClFullyConnected::configure_mm(const CLCompileContext &compile_context, ITe
 
     const GEMMInfo &gemm_info = GEMMInfo(false,                           // is_a_reshaped
                                          false,                           // is_b_reshaped
-                                         true,                            // reshape_b_only_on_first_run
+                                         !_dynamic_weights,               // reshape_b_only_on_first_run
                                          0,                               // depth_output_gemm3d
                                          false,                           // reinterpret_input_as_3d
                                          fc_info.retain_internal_weights, // retain_internal_weights
@@ -240,6 +240,7 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
     _is_prepared           = fc_info.retain_internal_weights;
     _weights_to_use        = TensorInfo(*weights);
     _weights_to_use_idx    = ACL_SRC_1;
+    _dynamic_weights       = !weights->are_values_constant() && !_are_weights_reshaped;
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -310,8 +311,15 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
     if(_aux_mem[1].size > 0 || _aux_mem[2].size > 0) // Persistent weights memory on GEMMs
     {
         // Release permuted weights at the of prepare as they are further transposed by the assembly dispatch
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), MemoryLifetime::Prepare, _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
+        // Keep all the auxiliary tensors in case of dynamic weights as they are recalculated every time
+        _aux_mem[TransposedWeights] = MemoryInfo(
+            offset_int_vec(TransposedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Prepare,
+            _reshaped_weights.total_size());
+        _aux_mem[ConvertedWeights]  = MemoryInfo(
+            offset_int_vec(ConvertedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Prepare,
+            _converted_weights.total_size());
     }
     else
     {
@@ -319,8 +327,14 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
         const auto transposed_wei_lft = (_weights_to_use_idx == offset_int_vec(TransposedWeights)) ? MemoryLifetime::Persistent : MemoryLifetime::Prepare;
         const auto converted_wei_lft  = (_weights_to_use_idx == offset_int_vec(ConvertedWeights)) ? MemoryLifetime::Persistent : MemoryLifetime::Prepare;
 
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), transposed_wei_lft, _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), converted_wei_lft, _converted_weights.total_size());
+        _aux_mem[TransposedWeights] = MemoryInfo(
+            offset_int_vec(TransposedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : transposed_wei_lft,
+            _reshaped_weights.total_size());
+        _aux_mem[ConvertedWeights] = MemoryInfo(
+            offset_int_vec(ConvertedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : converted_wei_lft,
+            _converted_weights.total_size());
     }
     _aux_mem[FlattenedSrc] = MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
 }
@@ -334,7 +348,6 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
-    ARM_COMPUTE_RETURN_ERROR_ON(!weights->are_values_constant() && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
@@ -420,6 +433,11 @@ void ClFullyConnected::run(ITensorPack &tensors)
 {
     prepare(tensors);
 
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    ++_asrt_run_count;
+    ARM_COMPUTE_ERROR_ON(_dynamic_weights && _asrt_prepare_count != _asrt_run_count);
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
     auto src = tensors.get_const_tensor(ACL_SRC_0);
 
     CLAuxTensorHandler flattened_src(offset_int_vec(FlattenedSrc), _flattened_src, tensors, false);
@@ -452,8 +470,13 @@ void ClFullyConnected::run(ITensorPack &tensors)
 
 void ClFullyConnected::prepare(ITensorPack &tensors)
 {
-    if(!_is_prepared)
+    if(!_is_prepared || _dynamic_weights)
     {
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+        ++_asrt_prepare_count;
+        ARM_COMPUTE_ERROR_ON(!_dynamic_weights && _asrt_prepare_count > 1);
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
         auto weights = tensors.get_const_tensor(ACL_SRC_1);
 
         CLAuxTensorHandler reshaped_weights(offset_int_vec(TransposedWeights), _reshaped_weights, tensors, false);
@@ -462,7 +485,7 @@ void ClFullyConnected::prepare(ITensorPack &tensors)
         // Pointer to current weights
         const ITensor *cur_weights = weights;
 
-        // Reshape of the weights if needed (happens only once)
+        // Reshape of the weights if needed
         if(!_are_weights_reshaped)
         {
             // Run reshape weights kernel and mark weights as unused
@@ -471,11 +494,9 @@ void ClFullyConnected::prepare(ITensorPack &tensors)
 
             cur_weights->mark_as_unused();
             cur_weights = reshaped_weights.get();
-
-            _are_weights_reshaped = true;
         }
 
-        // Convert weights if needed (happens only once)
+        // Convert weights if needed
         if(!_are_weights_converted)
         {
             ITensorPack convert_pack{ { ACL_SRC, cur_weights }, { ACL_DST, converted_weights.get() } };
@@ -483,20 +504,19 @@ void ClFullyConnected::prepare(ITensorPack &tensors)
 
             cur_weights->mark_as_unused();
             cur_weights = converted_weights.get();
-
-            _are_weights_converted = true;
         }
 
-        tensors.add_const_tensor(ACL_SRC_1, cur_weights);
+        ITensorPack gemm_pack = tensors;
+        gemm_pack.add_const_tensor(ACL_SRC_1, cur_weights);
 
         // Prepare GEMM prepare and release unused weights
         if(!_is_quantized)
         {
-            _mm_gemm->prepare(tensors);
+            _mm_gemm->prepare(gemm_pack);
         }
         else
         {
-            _mm_gemmlowp->prepare(tensors);
+            _mm_gemmlowp->prepare(gemm_pack);
         }
         _is_prepared = true;
     }

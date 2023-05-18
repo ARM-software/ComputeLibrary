@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Traits.h"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 #include "support/ToolchainSupport.h"
 
 #include <cmath>

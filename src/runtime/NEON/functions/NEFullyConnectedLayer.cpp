@@ -49,6 +49,7 @@ struct NEFullyConnectedLayer::Impl
     experimental::MemoryRequirements aux_mem_req{};
 
     bool is_prepared{ false };
+    bool dynamic_weights{ false };
 };
 
 NEFullyConnectedLayer::~NEFullyConnectedLayer() = default;
@@ -87,6 +88,12 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     _impl->aux_mem_req = _impl->op->workspace();
     _impl->run_pack    = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
     _impl->workspace   = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->run_pack);
+
+    _impl->dynamic_weights =
+        !weights->info()->are_values_constant() &&
+        fc_info.transpose_weights &&
+        !fc_info.are_weights_reshaped &&
+        !fc_info.retain_internal_weights;
 }
 
 Status NEFullyConnectedLayer::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *input, const ITensorInfo *weights,
@@ -104,7 +111,10 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
 void NEFullyConnectedLayer::run()
 {
-    prepare();
+    if(!_impl->dynamic_weights)
+    {
+        prepare();
+    }
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);

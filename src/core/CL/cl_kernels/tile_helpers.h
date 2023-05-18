@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
-#define SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#ifndef ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
+#define ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS
 
 // *INDENT-OFF*
 // clang-format off
@@ -443,17 +443,20 @@
 #define DOT_PRODUCT13_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT5_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABC), ((b).s89ABC), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT1_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sC), ((b).sC), c);     \
     })
 #define DOT_PRODUCT14_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT6_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABCD), ((b).s89ABCD), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT2_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sCD), ((b).sCD), c);     \
     })
 #define DOT_PRODUCT15_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                \
         DOT_PRODUCT8_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s01234567), ((b).s01234567), c);     \
-        DOT_PRODUCT7_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89ABCDE), ((b).s89ABCDE), c);     \
+        DOT_PRODUCT4_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).s89AB), ((b).s89AB), c);     \
+        DOT_PRODUCT3_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, ((a).sCDE), ((b).sCDE), c);     \
     })
 #define DOT_PRODUCT16_INTEGER8(A_DATA_TYPE, B_DATA_TYPE, C_DATA_TYPE, a, b, c) \
     ({                                                 \
@@ -534,6 +537,100 @@
         {                                                                                                              \
             dst[_i].v = V_LOAD(DATA_TYPE, WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
         })                                                                                                             \
+    })
+
+/** Store a VECTOR variable (e.g. int4, int8, char2 etc.) to a specified column in the TILE object
+ *
+ * @param[in]      VECTOR Vector variable to store
+ * @param[in, out] TILE   Tile variable to store to
+ * @param[in]      WIDTH  Width of the vector variable, also height of the tile (e.g. 2 if char2)
+ * @param[in]      COLUMN Column index of the tile
+ */
+#define COPY_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, WIDTH, COLUMN) COPY_VECTOR_TO_TILE_COLUMN_STR(VECTOR, TILE, WIDTH, COLUMN)
+#define COPY_VECTOR_TO_TILE_COLUMN_STR(VECTOR, TILE, WIDTH, COLUMN) COPY_##WIDTH##_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN)
+#define COPY_1_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR;                         \
+    })
+
+#define COPY_2_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR.s0;                      \
+        TILE[1].s[COLUMN] = VECTOR.s1;                      \
+    })
+
+#define COPY_3_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR.s0;                      \
+        TILE[1].s[COLUMN] = VECTOR.s1;                      \
+        TILE[2].s[COLUMN] = VECTOR.s2;                      \
+    })
+
+#define COPY_4_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR.s0;                      \
+        TILE[1].s[COLUMN] = VECTOR.s1;                      \
+        TILE[2].s[COLUMN] = VECTOR.s2;                      \
+        TILE[3].s[COLUMN] = VECTOR.s3;                      \
+    })
+
+#define COPY_8_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR.s0;                      \
+        TILE[1].s[COLUMN] = VECTOR.s1;                      \
+        TILE[2].s[COLUMN] = VECTOR.s2;                      \
+        TILE[3].s[COLUMN] = VECTOR.s3;                      \
+        TILE[4].s[COLUMN] = VECTOR.s4;                      \
+        TILE[5].s[COLUMN] = VECTOR.s5;                      \
+        TILE[6].s[COLUMN] = VECTOR.s6;                      \
+        TILE[7].s[COLUMN] = VECTOR.s7;                      \
+    })
+
+#define COPY_16_VECTOR_TO_TILE_COLUMN(VECTOR, TILE, COLUMN) \
+    ({                                                      \
+        TILE[0].s[COLUMN] = VECTOR.s0;                      \
+        TILE[1].s[COLUMN] = VECTOR.s1;                      \
+        TILE[2].s[COLUMN] = VECTOR.s2;                      \
+        TILE[3].s[COLUMN] = VECTOR.s3;                      \
+        TILE[4].s[COLUMN] = VECTOR.s4;                      \
+        TILE[5].s[COLUMN] = VECTOR.s5;                      \
+        TILE[6].s[COLUMN] = VECTOR.s6;                      \
+        TILE[7].s[COLUMN] = VECTOR.s7;                      \
+        TILE[8].s[COLUMN] = VECTOR.s8;                      \
+        TILE[9].s[COLUMN] = VECTOR.s9;                      \
+        TILE[10].s[COLUMN] = VECTOR.sA;                     \
+        TILE[11].s[COLUMN] = VECTOR.sB;                     \
+        TILE[12].s[COLUMN] = VECTOR.sC;                     \
+        TILE[13].s[COLUMN] = VECTOR.sD;                     \
+        TILE[14].s[COLUMN] = VECTOR.sE;                     \
+        TILE[15].s[COLUMN] = VECTOR.sF;                     \
+    })
+
+/** Load SRC_HEIGHT x SRC_WIDTH elements from global memory (tensor), and store them in a SRC_WIDTH x SRC_HEIGHT tile
+ *
+ * @param[in]  DATA_TYPE     Data type
+ * @param[in]  SRC_HEIGHT    Number of source rows, or number of columns of the output tile
+ * @param[in]  SRC_WIDTH     Number of source columns, or number of tile rows
+ * @param[in]  TENSOR_TYPE   Type of cl_type used to store the tensor in global memory (BUFFER=cl_buffer, IMAGE=cl_image).
+ *                           In case of cl_image, only WIDTH multiples of 4 are supported (4, 8, 16)
+ * @param[in]  TENSOR        Tensor basename
+ * @param[in]  X             Starting X position
+ * @param[in]  Y             Starting Y position
+ * @param[in]  YI_MULTIPLIER Parameter used to multiply the internal row increment (_i).
+ *                           In common cases should be 1 but it becomes useful when we want to load rows which are multiple of STRIDE_Y.
+ *                           (e.g. loading the weights of convolution layer).
+ *                           In this case the address calculation is performed as: (Y + _i * Y_MULTIPLIER) * STRIDE_Y
+ * @param[in]  STRIDE_Y      Stride Y (in bytes) used to load each row.
+ * @param[out] dst           Output tile
+ */
+#define T_LOAD_TRANSPOSED(DATA_TYPE, SRC_HEIGHT, SRC_WIDTH, TENSOR_TYPE, TENSOR, X, Y, YI_MULTIPLIER, STRIDE_Y, dst)     \
+    ({                                                                                                                   \
+        LOOP_UNROLLING(int, _i, 0, 1, SRC_HEIGHT,                                                                        \
+        {                                                                                                                \
+            VEC_DATA_TYPE(DATA_TYPE, SRC_WIDTH)                                                                          \
+                tmp = V_LOAD(DATA_TYPE, SRC_WIDTH, TENSOR_TYPE, TENSOR, X, ((Y) + _i * (int)(YI_MULTIPLIER)), STRIDE_Y); \
+            COPY_VECTOR_TO_TILE_COLUMN(tmp, dst, SRC_WIDTH, _i);                                                         \
+        })                                                                                                               \
     })
 
 /** Load a tile from global memory (tensor) using an indirect Y index tile
@@ -1259,6 +1356,11 @@
  * @param[in]      lhs           LHS tile
  * @param[in]      rhs           RHS tile
  * @param[in, out] dst           DST tile
+ *
+ * @note For Int8/UInt8 multiplications, we only have T_MMUL_NT_T because we need
+ *       the multiply the rows of Lhs and Rhs tensors to utilize dot product extension.
+ *       Addition of other versions requires dealing with on the fly transposition of
+ *       these tile elements and therefore is not favored.
  */
 #define T_MMUL(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, LHS_LAYOUT, RHS_LAYOUT, lhs, rhs, dst) T_MMUL_##LHS_LAYOUT##_##RHS_LAYOUT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
 #define T_MMUL_NT_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
@@ -1282,6 +1384,57 @@
         })                                                                                \
     }
 
+#define T_MMUL_NT_NT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_NT_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                                                    \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                                                \
+        {                                                                                                                \
+            LOOP_UNROLLING(int, _k, 0, 1, K0,                                                                            \
+            {                                                                                                            \
+                dst[_m].v = fma((DST_DATA_TYPE)(lhs[_m].s[_k]), (rhs[_k].v), dst[_m].v);                                 \
+            })                                                                                                           \
+        })                                                                                                               \
+    }
+
+#define T_MMUL_T_NT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_NT_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                     \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
+        {                                                                                 \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
+            {                                                                             \
+                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
+                {                                                                         \
+                    dst[_m].s[_n] = fma((DST_DATA_TYPE)(lhs[_k].s[_m]), (DST_DATA_TYPE)(rhs[_k].s[_n]), dst[_m].s[_n]); \
+                })                                                                        \
+            })                                                                            \
+        })                                                                                \
+    }
+
+#define T_MMUL_T_T(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_##LHS_DATA_TYPE##_##RHS_DATA_TYPE##_##DST_DATA_TYPE(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_float_float_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_half_half_float(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_half_half_half(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst) T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)
+#define T_MMUL_T_T_FLOAT(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                       \
+    {                                                                                     \
+        LOOP_UNROLLING(int, _m, 0, 1, M0,                                                 \
+        {                                                                                 \
+            LOOP_UNROLLING(int, _n, 0, 1, N0,                                             \
+            {                                                                             \
+                LOOP_UNROLLING(int, _k, 0, 1, K0,                                         \
+                {                                                                         \
+                    dst[_m].s[_n] = fma((DST_DATA_TYPE)(lhs[_k].s[_m]), (DST_DATA_TYPE)(rhs[_n].s[_k]), dst[_m].s[_n]); \
+                })                                                                        \
+            })                                                                            \
+        })                                                                                \
+    }
+
 #define T_MMUL_NT_T_INTEGER8(LHS_DATA_TYPE, RHS_DATA_TYPE, DST_DATA_TYPE, M0, N0, K0, lhs, rhs, dst)                            \
     ({ \
         LOOP_UNROLLING(int, _m, 0, 1, M0, \
@@ -1293,4 +1446,4 @@
         })                                                                                             \
     })
 
-#endif /* SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */
+#endif /* ACL_SRC_CORE_CL_CL_KERNELS_TILE_HELPERS */

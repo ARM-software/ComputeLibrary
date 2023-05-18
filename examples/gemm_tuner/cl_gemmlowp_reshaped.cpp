@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -239,6 +239,11 @@ public:
         rhs_info.interleave         = configs.interleave_rhs;
         rhs_info.transpose          = configs.transpose_rhs;
         rhs_info.export_to_cl_image = false; // CL image not supported for quantized cases yet
+
+        if(rhs_info.h0 == 0)
+        {
+            rhs_info.h0 = std::max(static_cast<unsigned int>(params.N) / rhs_info.n0, 1U);
+        }
 
         lhs_reshaped.allocator()->init(TensorInfo(compute_lhs_reshaped_shape(*lhs.info(), lhs_info), 1, params.data_type));
         rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));

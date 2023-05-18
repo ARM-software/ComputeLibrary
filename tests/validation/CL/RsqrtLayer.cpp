@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,8 +42,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_fp32(0.000001f);
-RelativeTolerance<float> tolerance_fp16(0.001f);
+RelativeTolerance<float>             tolerance_fp32(0.000001f);
+RelativeTolerance<float>             tolerance_fp16(0.001f);
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric type */
+
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(RsqrtLayer)
@@ -68,6 +71,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 // *INDENT-ON*
 template <typename T>
 using CLRsqrtLayerFixture = RsqrtValidationFixture<CLTensor, CLAccessor, CLRsqrtLayer, T>;
+template <typename T>
+using CLRsqrtLayerQuantizedFixture = RsqrtQuantizedValidationFixture<CLTensor, CLAccessor, CLRsqrtLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -101,6 +106,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLRsqrtLayerFixture<float>, framework::DatasetM
 
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                  DataType::QASYMM8_SIGNED)),
+                                                                                                                  framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, -128) })),
+                                                                                                                  framework::dataset::make("OutQInfo", { QuantizationInfo(0.0027, -128) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE(QASYMM8)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::QASYMM8)),
+                                                                                                                   framework::dataset::make("SrcQInfo", { QuantizationInfo(0.4044, 0) })),
+                                                                                                                   framework::dataset::make("OutQInfo", { QuantizationInfo(0.0027, 0) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // RsqrtLayer
 TEST_SUITE_END() // CL

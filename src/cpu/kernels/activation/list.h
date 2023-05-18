@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace cpu
 #ifdef __aarch64__
 DECLARE_ACTIVATION_KERNEL(neon_q8_activation_lut);
 #endif // __aarch64__
-DECLARE_ACTIVATION_KERNEL(sve_q8_activation_lut);
+DECLARE_ACTIVATION_KERNEL(sve2_q8_activation_lut);
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_activation);
 DECLARE_ACTIVATION_KERNEL(sve2_qasymm8_activation);
 DECLARE_ACTIVATION_KERNEL(neon_qasymm8_signed_activation);

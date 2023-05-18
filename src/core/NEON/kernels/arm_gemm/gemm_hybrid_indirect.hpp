@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -614,6 +614,10 @@ public:
         return size;
     }
 
+    size_t get_B_pretranspose_window_size() const override {
+        return _args._nmulti * iceildiv(_args._Nsize, strategy::out_width());
+    }
+
     void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         if (std::is_same<OutputStage, Requantize32>::value) {
             _col_bias = reinterpret_cast<int32_t *>(in_buffer);
@@ -628,25 +632,62 @@ public:
     }
 
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        requantize_bias(in_buffer, B, ldb, B_multi_stride);
+        pretranspose_B_array_part(in_buffer, B, ldb, B_multi_stride, 0, get_B_pretranspose_window_size());
+    }
+
+    void pretranspose_B_array_part(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, size_t start, size_t end) override {
+        if (end >= get_B_pretranspose_window_size()) {
+            requantize_bias(in_buffer, B, ldb, B_multi_stride);
+        }
 
         // Put the transposed data after the column sums - in non-transposing cases get_col_sum_size() == 0
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
-        Troi *buffer = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
-        _B_transposed = buffer;
+        Troi *buffer_base = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
+        _B_transposed = buffer_base;
 
         strategy strat(_args._ci);
+        size_t work_per_multi = iceildiv(_args._Nsize, strategy::out_width());
 
-        for (unsigned int multi=0; multi<_args._nmulti; multi++) {
+        for (unsigned int multi=(start / work_per_multi); multi<_args._nmulti; multi++) {
+            // Work out which part of the window space this multi occupies,
+            // skip to the next multi or exit as needed.
+            size_t wk_start = multi * work_per_multi;
+            size_t wk_end = (multi + 1) * work_per_multi;
+
+            assert(wk_end > start);
+
+            if (wk_start >= end) {
+                break;
+            }
+
             for (unsigned int k0=0; k0<_Ktotal; k0+=_k_block) {
                 const unsigned int kmax=std::min(k0 + _k_block, _Ktotal);
 
                 /* Figure out the size of each block. */
                 unsigned int k_size = kmax - k0;
 
+                // Correct the N range and buffer base if we are not processing the whole block.
+                size_t n_start = 0;
+                size_t n_end = _args._Nsize;
+
+                // If we are not doing the first columns, update the buffer write position and starting N value.
+                if (start > wk_start) {
+                    n_start = (start - wk_start) * strategy::out_width();
+                }
+
+                // If we are not doing the last items, update the final N value.
+                if (end < wk_end) {
+                    n_end = (end - wk_start) * strategy::out_width();
+                }
+
+                // Set the buffer pointer
+                Troi *buffer = buffer_base +
+                               (roundup(_args._Nsize, strategy::out_width()) * (multi * _Ktotal + k0)) +
+                               (n_start * roundup(k_size, strategy::k_unroll()));
+
                 if (_args._Ksections > 1) {
                     // We need to insert padding at the end of each K section.
-                    // The computation needed is a little delicate - the coordinates from the block walker are expressed in
+                    // The computation needed is a little delicate - the k0/kmax coordinates are expressed in
                     // terms of the full, padded, _Ktotal.
                     // But we need to transform each section with reference to the original, unpadded, input, letting the
                     // transform pad each section as needed.
@@ -657,7 +698,7 @@ public:
                     // The expected output format is also an entire <out_width> columns interleaved, then the next set of
                     // columns, and so on.  This means, as we are breaking it up vertically, we have to do it one column at
                     // a time.
-                    for (unsigned int x0=0; x0 < _args._Nsize; x0 += strategy::out_width() ){
+                    for (unsigned int x0 = n_start; x0 < n_end; x0 += strategy::out_width()) {
                         unsigned int xmax = std::min(x0 + strategy::out_width(), _args._Nsize);
 
                         // Track where we are and how much work is left.
@@ -690,8 +731,7 @@ public:
                 } else {
                     // In the single K section case, can process the whole lot in one go.
                     strat.transforms.PrepareB(buffer, B + (multi * B_multi_stride), ldb,
-                                              0, _args._Nsize, k0, std::min(kmax, _args._Ksize));
-                    buffer += roundup(_args._Nsize, strategy::out_width()) * roundup(kmax-k0, strategy::k_unroll());
+                                              n_start, n_end, k0, std::min(kmax, _args._Ksize));
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,6 +79,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
 
   /* Compute a portion of the output tensor with padding. */
   virtual void compute_tile_padded(
+    const DepthwiseArgs &args,
     unsigned int output_i, unsigned int output_j,
     unsigned int output_channel_start, unsigned int output_channel_end,
     const TensorSpec<const TInput *> &input,
@@ -93,6 +94,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
    * variant.
    */
   virtual void compute_row_padded_tile_row(
+    const DepthwiseArgs &args,
     const unsigned int output_i, unsigned int output_j, unsigned int n_tile_cols,
     const unsigned int output_channel_start, const unsigned int output_channel_end,
     const TensorSpec<const TInput *> &input,
@@ -104,6 +106,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
     for (; n_tile_cols; n_tile_cols--, output_j += m_strat->get_output_cols())
     {
       this->compute_tile_padded(
+        args,
         output_i, output_j, output_channel_start, output_channel_end,
         input, output, parameters, working_space
       );
@@ -116,6 +119,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
    * variant.
    */
   virtual void compute_tiles_unpadded(
+    const DepthwiseArgs &args,
     unsigned int start_output_i, unsigned int start_output_j,
     unsigned int n_tile_rows, unsigned int n_tile_cols,
     unsigned int output_channel_start, unsigned int output_channel_end,
@@ -131,6 +135,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
       for (unsigned int tile_j = 0; tile_j < n_tile_cols; tile_j++)
       {
         this->compute_tile_padded(
+            args,
             start_output_i, row_start_output_j,
             output_channel_start, output_channel_end,
             input, output, parameters, working_space
@@ -142,18 +147,12 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
   }
 
   void execute_internal(
-    unsigned int n_batches,
-    unsigned int input_height,
-    unsigned int input_width,
-    unsigned int n_input_channels,
-    const PaddingValues &padding,
+    const DepthwiseArgs &args,
     const void *input,
     size_t ld_input_col,
     size_t ld_input_row,
     size_t ld_input_batch,
     const void *parameters,
-    unsigned int output_height,
-    unsigned int output_width,
     void *output,
     size_t ld_output_col,
     size_t ld_output_row,
@@ -165,40 +164,40 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
   {
     // Get and initialise the working space for this thread.
     void *thread_working_space =
-      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread(n_input_channels);
-    this->initialise_working_space(thread_working_space, n_input_channels);
+      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread(args.input_channels);
+    this->initialise_working_space(thread_working_space, args.input_channels);
 
     // Construct convenient representations of the input/output tensors.
     TensorSpec<const TInput *> input_tensor(reinterpret_cast<const TInput *>(input), ld_input_row, ld_input_col);
     TensorSpec<TOutput *> output_tensor(reinterpret_cast<TOutput *>(output), ld_output_row, ld_output_col);
 
-    const auto n_output_channels = n_input_channels * this->m_args.channel_multiplier;
+    const auto n_output_channels = args.input_channels * args.channel_multiplier;
 
-    for (unsigned int batch = 0; batch < n_batches; batch++)
+    for (unsigned int batch = 0; batch < args.n_batches; batch++)
     {
       // Iterate over rows of the output tensor; we stripe over the tiles.
       for (unsigned int start_output_i = thread_id * m_strat->get_output_rows();
-           start_output_i < output_height;
+           start_output_i < args.output_rows;
            start_output_i += n_threads * m_strat->get_output_rows())
       {
         // Determine what (if any padding) is required on the top/bottom of
         // this row of the convolution.
         const auto end_output_i = start_output_i + m_strat->get_output_rows();
-        const bool pad_output_bottom = output_height < end_output_i;
+        const bool pad_output_bottom = args.output_rows < end_output_i;
 
-        const int start_input_i = start_output_i * this->m_args.stride_rows - padding.top;
+        const int start_input_i = start_output_i * args.stride_rows - args.padding.top;
         const bool pad_input_top = start_input_i < 0;
         const int end_input_i = start_input_i + m_strat->get_input_rows();
-        const bool pad_input_bottom = static_cast<int>(input_height) < end_input_i;
+        const bool pad_input_bottom = static_cast<int>(args.input_rows) < end_input_i;
         const bool pad_row = pad_input_top || pad_input_bottom || pad_output_bottom;
 
         // Iterate over the columns of the output tensor; we attempt to grab as
         // much as possible of the unpadded regions, so the loop structure is a
         // bit odd.
         unsigned int start_output_j = 0;
-        while (start_output_j < output_width)
+        while (start_output_j < args.output_cols)
         {
-          const int start_in_j = start_output_j * this->m_args.stride_cols - padding.left;
+          const int start_in_j = start_output_j * args.stride_cols - args.padding.left;
           const bool pad_input_left = start_in_j < 0;
 
           // Determine if we can process a number of unpadded tiles in one go.
@@ -206,16 +205,16 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
           if (!pad_input_left)
           {
             // Determine the maximum number of tiles we could handle.
-            n_unpadded_tiles = (output_width - start_output_j) / m_strat->get_output_cols();
+            n_unpadded_tiles = (args.output_cols - start_output_j) / m_strat->get_output_cols();
 
             // Handle padding on the right hand edge
-            const int tile_stride = m_strat->get_output_cols() * this->m_args.stride_cols;
+            const int tile_stride = m_strat->get_output_cols() * args.stride_cols;
             int end_output_j = start_output_j + n_unpadded_tiles * m_strat->get_output_cols();
             int end_input_j = start_in_j + m_strat->get_input_cols() + (n_unpadded_tiles - 1)*tile_stride;
 
             while (n_unpadded_tiles > 0 &&
-                   (static_cast<int>(output_width) < end_output_j ||
-                    static_cast<int>(input_width) < end_input_j))
+                   (static_cast<int>(args.output_cols) < end_output_j ||
+                    static_cast<int>(args.input_cols) < end_input_j))
             {
               n_unpadded_tiles--;
               end_output_j -= m_strat->get_output_cols();
@@ -230,6 +229,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
             {
               // Completely unpadded execution
               this->compute_tiles_unpadded(
+                args,
                 start_output_i, start_output_j,
                 1, n_unpadded_tiles,  // Compute a row of unpadded tiles
                 0, n_output_channels,  // Compute all channels
@@ -240,6 +240,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
             {
               // Top/bottom padding only
               this->compute_row_padded_tile_row(
+                args,
                 start_output_i, start_output_j, n_unpadded_tiles,
                 0, n_output_channels,  // Compute all channels
                 input_tensor, output_tensor, parameters, thread_working_space
@@ -250,6 +251,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
           else
           {
             this->compute_tile_padded(
+              args,
               start_output_i, start_output_j,
               0, n_output_channels,  // Compute all channels
               input_tensor, output_tensor, parameters, thread_working_space

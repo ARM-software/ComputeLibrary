@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,11 @@
 #include "kernels/a64_hgemm_8x24.hpp"
 #include "kernels/a64_hybrid_fp16_mla_6x32.hpp"
 #include "kernels/a64_sgemm_8x12.hpp"
+#ifdef ARM_COMPUTE_ENABLE_SME2
+#include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL.hpp"
+#include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_2VLx2VL.hpp"
+#include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL.hpp"
+#endif // ARM_COMPUTE_ENABLE_SME2
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/sve_ffhybrid_fp16_mla_6x4VL.hpp"
 #include "kernels/sve_ffinterleaved_fp16_mla_8x3VL.hpp"
@@ -52,6 +57,31 @@ namespace arm_gemm {
 
 static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #ifdef ARM_COMPUTE_ENABLE_SVE
+#ifdef ARM_COMPUTE_ENABLE_SME2
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL",
+    [](const GemmArgs &args) { return args._ci->has_sme2(); },
+    [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
+                               return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL",
+    [](const GemmArgs &args) { return args._ci->has_sme2(); },
+    [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
+                               return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "sme2_interleaved_nomerge_fp16fp32fp16_mopa_2VLx2VL",
+    [](const GemmArgs &args) { return args._ci->has_sme2(); },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleaved<cls_sme2_interleaved_nomerge_fp16fp32fp16_mopa_2VLx2VL, __fp16, __fp16, Nothing, false, false, false, true>(args); }
+},
+#endif // ARM_COMPUTE_ENABLE_SME2
 GemmImplementation<__fp16, __fp16>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_fp16_mla_6x4VL",

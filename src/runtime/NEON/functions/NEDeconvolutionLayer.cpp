@@ -82,7 +82,8 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 {
 }
 
-Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info, bool enable_fast_math)
+Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info,
+                                      bool enable_fast_math, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
@@ -142,24 +143,36 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
     const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
-    const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
+    const PadStrideInfo upsample_info = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
+
+    // Do not perform upsampling when the operation uses unit stride in all dimensions
+    const bool do_upsampling = stride_x != 1 || stride_y != 1;
 
     const unsigned int batches_idx = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::BATCHES);
     const unsigned int channel_idx = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(batches_idx) != scale_out_info.dimension(batches_idx));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(channel_idx) != scale_out_info.dimension(channel_idx));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math));
+    if(do_upsampling)
+    {
+        const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
+        ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, weights_info, Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math));
+    }
+    else
+    {
+        const PadStrideInfo conv_info(1, 1, upsample_info.pad_left(), upsample_info.pad_right(), upsample_info.pad_top(), upsample_info.pad_bottom(), DimensionRoundingType::CEIL);
+        ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayer::validate(input, weights, bias, output, conv_info, weights_info, Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math));
+    }
 
     return Status{};
 }
 
-void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info, bool enable_fast_math)
+void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info, bool enable_fast_math, const WeightsInfo &weights_info)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), (bias == nullptr) ? nullptr : bias->info(), output->info(), info, enable_fast_math));
-    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, info, enable_fast_math);
+    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), (bias == nullptr) ? nullptr : bias->info(), output->info(), info, enable_fast_math, weights_info));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, info, enable_fast_math, weights_info);
 
     const DataLayout   data_layout = input->info()->data_layout();
     const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -177,9 +190,6 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
 
-    // Do not perform upsampling when input is unit stride and weight shape is 1x1
-    _do_upsampling = stride_x != 1 || stride_y != 1 || weights->info()->dimension(width_idx) != 1 || weights->info()->dimension(height_idx) != 1;
-
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
@@ -189,9 +199,15 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _flip_weights.configure(weights, &_weights_flipped, &_flip_axis);
 
     // setup the function to convolve the upscaled output
-    const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    uint32_t            deconv_pad_x = 0;
-    uint32_t            deconv_pad_y = 0;
+    uint32_t            deconv_pad_x    = 0;
+    uint32_t            deconv_pad_y    = 0;
+    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(),
+                                                                                stride_x, stride_y,
+                                                                                out_dims, deconv_pad_x, deconv_pad_y);
+    const PadStrideInfo upsample_info   = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
+
+    // Do not perform upsampling when the operation uses unit stride in all dimensions
+    _do_upsampling = stride_x != 1 || stride_y != 1;
 
     // Setup flip axis data
     _flip_axis.allocator()->allocate();
@@ -200,28 +216,27 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     axis_data[1]   = static_cast<uint32_t>(height_idx);
 
     // Setup convolution and upsampling, if needed
-    if (_do_upsampling)
+    if(_do_upsampling)
     {
         _memory_group.manage(&_scaled_output);
-        const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(),
-                                                                                  stride_x, stride_y,
-                                                                                  out_dims, deconv_pad_x, deconv_pad_y);
 
-        const PadStrideInfo upsample_info = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
-
-        TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
+        const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
+        TensorInfo          scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
         scale_out_info.set_data_layout(data_layout);
         _scaled_output.allocator()->init(scale_out_info);
 
+        // Minor optimization: In the upsampling step, we do not need to allocate space for the padding in the upsampled image.
+        // The padding amount can be given as input to the convolution layer.
         _upsample_f.configure(input, &_scaled_output, upsample_info);
 
-        _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math);
+        _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info, weights_info, Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math);
 
         _scaled_output.allocator()->allocate();
     }
     else
     {
-        _conv_f.configure(input, &_weights_flipped, bias, output, conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math);
+        const PadStrideInfo conv_info(1, 1, upsample_info.pad_left(), upsample_info.pad_right(), upsample_info.pad_top(), upsample_info.pad_bottom(), DimensionRoundingType::CEIL);
+        _conv_f.configure(input, &_weights_flipped, bias, output, conv_info, weights_info, Size2D(1U, 1U), ActivationLayerInfo(), enable_fast_math);
     }
 }
 

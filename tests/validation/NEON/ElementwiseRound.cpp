@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,11 +40,19 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(0);
+} // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(RoundLayer)
 
 template <typename T>
 using NERoundLayerFixture = RoundValidationFixture<Tensor, Accessor, NERoundLayer, T>;
+
+template <typename T>
+using NERoundLayerQuantizedFixture = RoundQuantizedValidationFixture<Tensor, Accessor, NERoundLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -81,6 +89,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NERoundLayerFixture<float>, framework::DatasetM
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NERoundLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.2, -3) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NERoundLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.075, 6) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+
 TEST_SUITE_END() // RoundLayer
 TEST_SUITE_END() // Neon
 } // namespace validation

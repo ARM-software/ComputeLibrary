@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,8 +38,8 @@ inline Status validate_arguments(const ITensorInfo *input, const ITensorInfo *in
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
     const uint32_t actual_axis = wrap_around(axis, static_cast<int>(input->num_dimensions()));
-    ARM_COMPUTE_RETURN_ERROR_ON(indices->num_dimensions() > 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() + indices->num_dimensions() - 1) > 4);
+
     ARM_COMPUTE_RETURN_ERROR_ON(actual_axis >= input->num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
@@ -102,8 +102,11 @@ void CLGatherKernel::configure(const CLCompileContext &compile_context, const IC
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DOUTPUT_DIM_Z=" + support::cpp11::to_string(output->info()->dimension(2)));
+    build_opts.add_option("-DINDICES_DIM_Z=" + support::cpp11::to_string(indices->info()->dimension(2)));
     build_opts.add_option("-DINPUT_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option("-DINDICES_DIMS=" + support::cpp11::to_string(indices->info()->num_dimensions()));
     build_opts.add_option("-DAXIS=" + support::cpp11::to_string(_axis));
+    build_opts.add_option("-DINDEX_LIMIT=" + support::cpp11::to_string(input->info()->tensor_shape()[_axis]));
 
     // Create kernel
     _kernel = create_kernel(compile_context, "gather", build_opts.options());
@@ -126,7 +129,7 @@ void CLGatherKernel::run(const Window &window, cl::CommandQueue &queue)
     Window       window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     unsigned int idx              = 0;
     add_4D_tensor_argument(idx, _input, window_collapsed);
-    add_1D_tensor_argument(idx, _indices, window_collapsed);
+    add_4D_tensor_argument(idx, _indices, window_collapsed);
     add_4D_tensor_argument(idx, _output, window_collapsed);
     enqueue(queue, *this, window_collapsed, lws_hint());
 }

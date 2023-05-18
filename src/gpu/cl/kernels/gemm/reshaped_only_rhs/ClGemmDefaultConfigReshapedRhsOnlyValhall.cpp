@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,10 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
                                                                     &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G78_f16,
                                                                     &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8);
 
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G710(&ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_f32,
+                                                                     &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G710_f16,
+                                                                     &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8);
+
     CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G715(&ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G715_f32,
                                                                      &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G715_f16,
                                                                      &ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8);
@@ -73,6 +77,10 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
     {
         case GPUTarget::G78:
             func = configs_G78.get_function(data_type);
+            break;
+        case GPUTarget::G710:
+        case GPUTarget::G610:
+            func = configs_G710.get_function(data_type);
             break;
         case GPUTarget::G715:
         case GPUTarget::G615:
@@ -196,52 +204,186 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
-    ARM_COMPUTE_UNUSED(k);
-    ARM_COMPUTE_UNUSED(b);
+    const GeMMConfigsMatrix configs_1nkb_best =
+    {
+        { 1, 8984, 640, 1, 1, 8, 8, 1, 0, 1, 1, 1, 1, 0 },
+        { 1, 420, 392, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 644, 5288, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 6512, 6404, 1, 1, 4, 8, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 5304, 640, 1, 1, 4, 4, 1, 0, 1, 0, 1, 1, 0 },
+        { 1, 1352, 1520, 1, 1, 2, 8, 1, 0, 1, 1, 1, 1, 0 },
+        { 1, 4096, 25088, 1, 1, 2, 16, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 732, 8988, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 }
+    };
 
-    if(m == 1)
+    const GeMMConfigsMatrix configs_mnkb_n_small_best =
     {
-        const unsigned int h0 = std::max(n / 2, 1U);
-        if(n <= 836.0)
+        { 102400, 4, 96, 1, 2, 2, 16, 1, 4, 1, 1, 1, 1, 0 },
+        { 102400, 2, 96, 1, 1, 2, 16, 1, 0, 1, 0, 1, 1, 1 },
+        { 16384, 4, 128, 1, 1, 2, 16, 1, 0, 1, 0, 1, 1, 1 },
+        { 16384, 2, 128, 1, 1, 2, 16, 1, 0, 1, 1, 1, 1, 1 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_small_fallback =
+    {
+        { 102400, 4, 96, 1, 2, 2, 16, 1, 4, 1, 1, 1, 1, 0 },
+        { 102400, 2, 96, 1, 1, 2, 16, 1, 0, 1, 1, 1, 1, 0 },
+        { 16384, 4, 128, 1, 2, 2, 16, 1, 2, 1, 1, 1, 1, 0 },
+        { 16384, 2, 128, 1, 1, 2, 16, 1, 0, 1, 1, 1, 1, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_m_gt_n_best =
+    {
+        { 25584, 88, 16, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 25584, 16, 68, 1, 4, 4, 8, 1, 16, 1, 1, 1, 0, 1 },
+        { 369664, 32, 28, 1, 5, 4, 4, 1, 64, 1, 1, 1, 0, 1 },
+        { 65792, 44, 24, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 23036, 56, 736, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 90968, 40, 600, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 8944, 32, 776, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 50176, 64, 300, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 16544, 104, 160, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 12604, 60, 160, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 29584, 32, 28, 1, 4, 4, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 12544, 32, 27, 1, 2, 8, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 2688, 136, 1492, 1, 8, 4, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 3728, 96, 196, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_m_gt_n_fallback =
+    {
+        { 25584, 88, 16, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 25584, 16, 68, 1, 2, 4, 8, 1, 4, 1, 1, 1, 0, 0 },
+        { 369664, 32, 28, 1, 5, 4, 4, 1, 256, 1, 1, 1, 0, 0 },
+        { 65792, 44, 24, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 23036, 56, 736, 1, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 90968, 40, 600, 1, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 8944, 32, 776, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 0 },
+        { 50176, 64, 300, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 16544, 104, 160, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 0 },
+        { 12604, 60, 160, 1, 4, 4, 8, 1, 256, 1, 1, 1, 0, 0 },
+        { 29584, 32, 28, 1, 4, 4, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 12544, 32, 27, 1, 2, 8, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 2688, 136, 1492, 1, 8, 4, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 3728, 96, 196, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_gt_m_best =
+    {
+        { 24, 488, 88, 1, 2, 4, 16, 1, 4, 1, 1, 1, 0, 0 },
+        { 49, 1024, 512, 1, 4, 4, 8, 1, 128, 1, 1, 1, 0, 1 },
+        { 49, 1024, 1024, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_gt_m_fallback =
+    {
+        { 24, 488, 88, 1, 2, 4, 16, 1, 4, 1, 1, 1, 0, 0 },
+        { 49, 1024, 512, 1, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 49, 1024, 1024, 1, 4, 4, 8, 1, 256, 1, 1, 1, 0, 0 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_squared_best =
+    {
+        { 72, 92, 136, 1, 2, 2, 8, 1, 128, 1, 1, 1, 1, 0 },
+        { 268, 824, 5076, 1, 4, 8, 4, 1, 256, 1, 1, 1, 0, 0 },
+        { 180, 420, 952, 1, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 1000, 152, 304, 1, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 272, 400, 2116, 1, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 196, 512, 512, 1, 5, 4, 4, 1, 64, 1, 1, 1, 0, 1 },
+        { 24, 88, 236, 1, 2, 2, 8, 1, 64, 1, 1, 1, 1, 0 },
+        { 24, 88, 488, 1, 2, 2, 8, 1, 64, 1, 1, 1, 1, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_squared_fallback =
+    {
+        { 72, 92, 136, 1, 2, 2, 8, 1, 128, 1, 1, 1, 1, 0 },
+        { 268, 824, 5076, 1, 4, 8, 4, 1, 256, 1, 1, 1, 0, 0 },
+        { 180, 420, 952, 1, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 1000, 152, 304, 1, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 272, 400, 2116, 1, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 196, 512, 512, 1, 5, 4, 4, 1, 256, 1, 1, 1, 0, 0 },
+        { 24, 88, 236, 1, 2, 2, 8, 1, 64, 1, 1, 1, 1, 0 },
+        { 24, 88, 488, 1, 2, 2, 8, 1, 64, 1, 1, 1, 1, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_best_batched =
+    {
+        { 3136, 64, 64, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 4096, 48, 32, 36, 4, 4, 8, 1, 64, 1, 1, 1, 0, 1 },
+        { 688, 92, 68, 32, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 24, 464, 412, 24, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 112, 184, 144, 28, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 5776, 64, 32, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 1568, 64, 40, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 2920, 64, 64, 24, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_fallback_batched =
+    {
+        { 3136, 64, 64, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 4096, 48, 32, 36, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 688, 92, 68, 32, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 24, 464, 412, 24, 4, 4, 8, 1, 128, 1, 1, 1, 0, 0 },
+        { 112, 184, 144, 28, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 5776, 64, 32, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 1568, 64, 40, 36, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 },
+        { 2920, 64, 64, 24, 4, 8, 4, 1, 64, 1, 1, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix *configs_best_to_use     = nullptr;
+    const GeMMConfigsMatrix *configs_fallback_to_use = nullptr;
+
+    if(b == 1)
+    {
+        constexpr float        ratio_m_gt_n = 10.f;
+        constexpr float        ratio_n_gt_m = 0.1f;
+        constexpr unsigned int n_small_thr  = 4;
+        const float            ratio        = static_cast<float>(m) / static_cast<float>(n);
+
+        if(m == 1)
         {
-            return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, h0, 0, 1, 0, 1, 0);
+            // We do not need fallback in this case, as we never use cl_image for the rhs tensor
+            configs_best_to_use     = &configs_1nkb_best;
+            configs_fallback_to_use = &configs_1nkb_best;
+        }
+        else if(n <= n_small_thr && ratio > ratio_m_gt_n)
+        {
+            configs_best_to_use     = &configs_mnkb_n_small_best;
+            configs_fallback_to_use = &configs_mnkb_n_small_fallback;
+        }
+        else if(ratio > ratio_m_gt_n)
+        {
+            configs_best_to_use     = &configs_mnkb_m_gt_n_best;
+            configs_fallback_to_use = &configs_mnkb_m_gt_n_fallback;
+        }
+        else if(ratio < ratio_n_gt_m)
+        {
+            configs_best_to_use     = &configs_mnkb_n_gt_m_best;
+            configs_fallback_to_use = &configs_mnkb_n_gt_m_fallback;
         }
         else
         {
-            return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, 0, 1, 0, 1, 0);
-        }
-    }
-    else if(m < 128)
-    {
-        const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(256)), static_cast<int>(1));
-        if(k >= 512)
-        {
-            return configure_lhs_rhs_info(m, n, 2, 4, 16, 1, h0, 0, 1, 0, 0);
-        }
-        else
-        {
-            return configure_lhs_rhs_info(m, n, 2, 4, 8, 1, h0, 0, 1, 0, 0);
+            configs_best_to_use     = &configs_mnkb_squared_best;
+            configs_fallback_to_use = &configs_mnkb_squared_fallback;
         }
     }
     else
     {
-        const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(256)), static_cast<int>(1));
-        if(n >= 64)
-        {
-            return configure_lhs_rhs_info(m, n, 4, 8, 4, 1, h0, 0, 1, 0, 0);
-        }
-        else
-        {
-            if(k >= 512)
-            {
-                return configure_lhs_rhs_info(m, n, 2, 4, 16, 1, h0, 0, 1, 0, 0);
-            }
-            else
-            {
-                return configure_lhs_rhs_info(m, n, 2, 4, 8, 1, h0, 0, 1, 0, 0);
-            }
-        }
+        configs_best_to_use     = &configs_mnkb_best_batched;
+        configs_fallback_to_use = &configs_mnkb_fallback_batched;
     }
+
+    GEMMLHSMatrixInfo lhs_info0;
+    GEMMRHSMatrixInfo rhs_info0;
+    GEMMLHSMatrixInfo lhs_info1;
+    GEMMRHSMatrixInfo rhs_info1;
+
+    std::tie(lhs_info0, rhs_info0) = find_lhs_rhs_info(*configs_best_to_use, m, n, k, b);
+    std::tie(lhs_info1, rhs_info1) = find_lhs_rhs_info(*configs_fallback_to_use, m, n, k, b);
+
+    return select_lhs_rhs_info(std::make_pair(lhs_info0, rhs_info0),
+                               std::make_pair(lhs_info1, rhs_info1),
+                               n, k, b, DataType::F16);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
@@ -414,27 +556,25 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G78_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     const float workload = (static_cast<float>(m) * static_cast<float>(n) * static_cast<float>(b)) / 20.0f;
-    const float r_mn = static_cast<float>(m) / static_cast<float>(n);
-    const float r_mk = static_cast<float>(m) / static_cast<float>(k);
-    const float r_nk = static_cast<float>(n) / static_cast<float>(k);
+    const float r_mn     = static_cast<float>(m) / static_cast<float>(n);
+    const float r_mk     = static_cast<float>(m) / static_cast<float>(k);
+    const float r_nk     = static_cast<float>(n) / static_cast<float>(k);
 
     if(m == 1)
     {
-        if(r_mn <= 0.0045f)
+        const GeMMConfigsMatrix configs_mnkb_best =
         {
-            if(workload <= 278.7000f)
-            {
-                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 8, 0, 0, 0, 1, 1);
-            }
-            else
-            {
-                return configure_lhs_rhs_info(m, n, 1, 4, 8, 1, 32, 0, 0, 1, 0, 0);
-            }
-        }
-        else
-        {
-            return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 8, 0, 0, 1, 0, 0);
-        }
+            { 1, 8984, 640, 1, 1, 4, 2, 1, 0, 1, 0, 1, 1, 0 },
+            { 1, 420, 392, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 644, 5288, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 6512, 6404, 1, 1, 2, 2, 1, 0, 1, 0, 1, 1, 0 },
+            { 1, 5304, 640, 1, 1, 2, 2, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 1352, 1520, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 4096, 25088, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+            { 1, 732, 8988, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 }
+        };
+
+        return find_lhs_rhs_info(configs_mnkb_best, m, n, k, b);
     }
     else
     {
@@ -525,6 +665,182 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOn
     {
         return configure_G77_f32(m, n, k, b);
     }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G710_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    const GeMMConfigsMatrix configs_1nkb_best =
+    {
+        { 1, 8984, 640, 1, 1, 2, 2, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 420, 392, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 644, 5288, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 6512, 6404, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 5304, 640, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 1352, 1520, 1, 1, 2, 4, 1, 0, 1, 0, 1, 0, 0 },
+        { 1, 4096, 25088, 1, 1, 2, 8, 1, 0, 1, 0, 1, 1, 0 },
+        { 1, 732, 8988, 1, 1, 2, 8, 1, 0, 1, 0, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_small_best =
+    {
+        { 102400, 4, 96, 1, 1, 2, 16, 1, 0, 1, 0, 1, 0, 0 },
+        { 102400, 2, 96, 1, 1, 2, 16, 1, 0, 1, 0, 1, 0, 0 },
+        { 16384, 4, 128, 1, 1, 2, 16, 1, 0, 1, 0, 1, 0, 0 },
+        { 16384, 2, 128, 1, 1, 2, 16, 1, 0, 1, 0, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_m_gt_n_best =
+    {
+        { 25584, 88, 16, 1, 4, 8, 4, 1, 4, 1, 1, 1, 0, 0 },
+        { 25584, 16, 68, 1, 2, 4, 16, 1, 8, 1, 1, 1, 0, 1 },
+        { 369664, 32, 28, 1, 2, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 65792, 44, 24, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 23036, 56, 736, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 90968, 40, 600, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 8944, 32, 776, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 2688, 136, 1492, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 50176, 64, 300, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 1 },
+        { 16544, 104, 160, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 12604, 60, 160, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 3728, 96, 196, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 29584, 32, 28, 1, 2, 8, 4, 1, 16, 1, 1, 1, 0, 0 },
+        { 12544, 32, 27, 1, 2, 8, 8, 1, 16, 1, 1, 1, 0, 0 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_m_gt_n_fallback =
+    {
+        { 25584, 88, 16, 1, 4, 8, 4, 1, 4, 1, 1, 1, 0, 0 },
+        { 25584, 16, 68, 1, 2, 4, 8, 1, 4, 1, 1, 1, 1, 0 },
+        { 369664, 32, 28, 1, 2, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 65792, 44, 24, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 23036, 56, 736, 1, 4, 8, 4, 1, 16, 1, 1, 1, 0, 0 },
+        { 90968, 40, 600, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 0 },
+        { 8944, 32, 776, 1, 2, 8, 8, 1, 16, 1, 1, 1, 0, 0 },
+        { 2688, 136, 1492, 1, 4, 4, 8, 1, 8, 1, 1, 1, 0, 0 },
+        { 50176, 64, 300, 1, 4, 8, 4, 1, 128, 1, 1, 1, 0, 0 },
+        { 16544, 104, 160, 1, 4, 8, 4, 1, 16, 1, 1, 1, 0, 0 },
+        { 12604, 60, 160, 1, 2, 8, 8, 1, 8, 1, 1, 1, 0, 0 },
+        { 3728, 96, 196, 1, 2, 8, 8, 1, 64, 1, 1, 1, 0, 0 },
+        { 29584, 32, 28, 1, 2, 8, 4, 1, 16, 1, 1, 1, 0, 0 },
+        { 12544, 32, 27, 1, 2, 8, 8, 1, 16, 1, 1, 1, 0, 0 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_gt_m_best =
+    {
+        { 24, 488, 88, 1, 2, 2, 8, 1, 8, 1, 1, 1, 1, 0 },
+        { 49, 1024, 512, 1, 2, 4, 8, 1, 8, 1, 1, 1, 1, 0 },
+        { 49, 1024, 1024, 1, 2, 4, 8, 1, 4, 1, 1, 1, 1, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_n_gt_m_fallback =
+    {
+        { 24, 488, 88, 1, 2, 2, 8, 1, 8, 1, 1, 1, 1, 0 },
+        { 49, 1024, 512, 1, 2, 4, 8, 1, 8, 1, 1, 1, 1, 0 },
+        { 49, 1024, 1024, 1, 2, 4, 8, 1, 4, 1, 1, 1, 1, 0 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_squared_best =
+    {
+        { 24, 88, 236, 1, 2, 2, 8, 1, 4, 1, 1, 1, 1, 0 },
+        { 24, 88, 488, 1, 2, 2, 8, 1, 4, 1, 1, 1, 1, 0 },
+        { 72, 92, 136, 1, 2, 2, 8, 1, 32, 1, 1, 1, 1, 0 },
+        { 268, 824, 5076, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 180, 420, 952, 1, 4, 4, 8, 1, 16, 1, 1, 1, 0, 1 },
+        { 1000, 152, 304, 1, 4, 8, 4, 1, 32, 1, 1, 1, 0, 0 },
+        { 272, 400, 2116, 1, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 196, 512, 512, 1, 5, 2, 8, 1, 4, 1, 1, 1, 1, 1 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_squared_fallback =
+    {
+        { 24, 88, 236, 1, 2, 2, 8, 1, 4, 1, 1, 1, 1, 0 },
+        { 24, 88, 488, 1, 2, 2, 8, 1, 4, 1, 1, 1, 1, 0 },
+        { 72, 92, 136, 1, 2, 2, 8, 1, 32, 1, 1, 1, 1, 0 },
+        { 268, 824, 5076, 1, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 180, 420, 952, 1, 5, 2, 8, 1, 8, 1, 1, 1, 1, 0 },
+        { 1000, 152, 304, 1, 4, 8, 4, 1, 32, 1, 1, 1, 0, 0 },
+        { 272, 400, 2116, 1, 2, 8, 4, 1, 4, 1, 1, 1, 0, 0 },
+        { 196, 512, 512, 1, 5, 2, 8, 1, 8, 1, 1, 1, 1, 0 },
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_best_batched =
+    {
+        { 3136, 64, 64, 36, 4, 8, 4, 1, 16, 1, 1, 1, 0, 1 },
+        { 4096, 48, 32, 36, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 688, 92, 68, 32, 4, 8, 4, 1, 32, 1, 1, 1, 0, 1 },
+        { 24, 464, 412, 24, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 112, 184, 144, 28, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 5776, 64, 32, 36, 4, 4, 8, 1, 4, 1, 1, 1, 0, 1 },
+        { 1568, 64, 40, 36, 4, 8, 4, 1, 8, 1, 1, 1, 0, 1 },
+        { 2920, 64, 64, 24, 4, 8, 4, 1, 8, 1, 1, 1, 0, 1 }
+    };
+
+    const GeMMConfigsMatrix configs_mnkb_fallback_batched =
+    {
+        { 3136, 64, 64, 36, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 },
+        { 4096, 48, 32, 36, 4, 4, 8, 1, 64, 1, 1, 1, 0, 0 },
+        { 688, 92, 68, 32, 4, 8, 4, 1, 32, 1, 1, 1, 0, 0 },
+        { 24, 464, 412, 24, 2, 8, 4, 1, 32, 1, 1, 1, 0, 0 },
+        { 112, 184, 144, 28, 4, 4, 8, 1, 8, 1, 1, 1, 0, 0 },
+        { 5776, 64, 32, 36, 2, 8, 8, 1, 32, 1, 1, 1, 0, 0 },
+        { 1568, 64, 40, 36, 4, 8, 4, 1, 16, 1, 1, 1, 0, 0 },
+        { 2920, 64, 64, 24, 4, 8, 4, 1, 8, 1, 1, 1, 0, 0 }
+    };
+
+    const GeMMConfigsMatrix *configs_best_to_use     = nullptr;
+    const GeMMConfigsMatrix *configs_fallback_to_use = nullptr;
+
+    if(b == 1)
+    {
+        constexpr float        ratio_m_gt_n = 10.f;
+        constexpr float        ratio_n_gt_m = 0.1f;
+        constexpr unsigned int n_small_thr  = 4;
+        const float            ratio        = static_cast<float>(m) / static_cast<float>(n);
+
+        if(m == 1)
+        {
+            // We do not need fallback in this case, as we never use cl_image for the rhs tensor
+            configs_best_to_use     = &configs_1nkb_best;
+            configs_fallback_to_use = &configs_1nkb_best;
+        }
+        else if(n <= n_small_thr && ratio > ratio_m_gt_n)
+        {
+            configs_best_to_use     = &configs_mnkb_n_small_best;
+            configs_fallback_to_use = &configs_mnkb_n_small_best;
+        }
+        else if(ratio > ratio_m_gt_n)
+        {
+            configs_best_to_use     = &configs_mnkb_m_gt_n_best;
+            configs_fallback_to_use = &configs_mnkb_m_gt_n_fallback;
+        }
+        else if(ratio < ratio_n_gt_m)
+        {
+            configs_best_to_use     = &configs_mnkb_n_gt_m_best;
+            configs_fallback_to_use = &configs_mnkb_n_gt_m_fallback;
+        }
+        else
+        {
+            configs_best_to_use     = &configs_mnkb_squared_best;
+            configs_fallback_to_use = &configs_mnkb_squared_fallback;
+        }
+    }
+    else
+    {
+        configs_best_to_use     = &configs_mnkb_best_batched;
+        configs_fallback_to_use = &configs_mnkb_fallback_batched;
+    }
+
+    GEMMLHSMatrixInfo lhs_info0;
+    GEMMRHSMatrixInfo rhs_info0;
+    GEMMLHSMatrixInfo lhs_info1;
+    GEMMRHSMatrixInfo rhs_info1;
+
+    std::tie(lhs_info0, rhs_info0) = find_lhs_rhs_info(*configs_best_to_use, m, n, k, b);
+    std::tie(lhs_info1, rhs_info1) = find_lhs_rhs_info(*configs_fallback_to_use, m, n, k, b);
+
+    return select_lhs_rhs_info(std::make_pair(lhs_info0, rhs_info0),
+                               std::make_pair(lhs_info1, rhs_info1),
+                               n, k, b, DataType::F16);
 }
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigReshapedRhsOnlyValhall::configure_G715_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)

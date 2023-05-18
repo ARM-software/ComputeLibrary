@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -224,6 +224,11 @@ public:
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
         kernel_info.activation_info         = act_info;
+
+        if(rhs_info.h0 == 0)
+        {
+            rhs_info.h0 = std::max(kernel_info.n / rhs_info.n0, 1U);
+        }
 
         // Initialise rhs_reshaped tensor info
         rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));

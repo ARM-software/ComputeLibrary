@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -10,16 +10,16 @@
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 #ifdef __aarch64__
 
@@ -51,34 +51,34 @@ void a64_ffinterleaved_fp32_mla_8x12(
 
     __asm__ __volatile__(
       "1:"  // Height loop
-      "ldr x24, [%x[args_ptr], %[offsetof_Bpanel]]\n"
-      "ldr x23, [%x[args_ptr], %[offsetof_N]]\n"
-      "str x24, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "mov x22, %x[Apanel]\n"
+      "ldr x25, [%x[args_ptr], %[offsetof_Bpanel]]\n"
+      "ldr x24, [%x[args_ptr], %[offsetof_N]]\n"
+      "str x25, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "mov x23, %x[Apanel]\n"
       "2:"  // Width loop
-      "ldr x24, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "ldr x19, [%x[args_ptr], %[offsetof_B_stride]]\n"
-      "add x21, x24, x19, LSL #2\n"
-      "add x20, x21, x19, LSL #2\n"
-      "add x19, x20, x19, LSL #2\n"
-      "str x19, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
-      "cmp x23, #0x8\n"
-      "mov %x[Apanel], x22\n"
+      "ldr x25, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "ldr x20, [%x[args_ptr], %[offsetof_B_stride]]\n"
+      "add x22, x25, x20, LSL #2\n"
+      "add x21, x22, x20, LSL #2\n"
+      "add x20, x21, x20, LSL #2\n"
+      "str x20, [%x[args_ptr], %[offsetof_cur_B_ptr]]\n"
+      "cmp x24, #0x8\n"
+      "mov %x[Apanel], x23\n"
       "bgt 3f\n"
-      "cmp x23, #0x4\n"
-      "mov x20, x24\n"
+      "cmp x24, #0x4\n"
+      "mov x21, x25\n"
       "bgt 3f\n"
-      "mov x21, x24\n"
+      "mov x22, x25\n"
       "3:"  // B setup done
       "ldr q0, [%x[Apanel], #0x0]\n"
       "ldr q1, [%x[Apanel], #0x10]\n"
       "movi v8.16b, #0x0\n"
-      "ldr q4, [x24, #0x0]\n"
-      "ldr q5, [x21, #0x0]\n"
+      "ldr q4, [x25, #0x0]\n"
+      "ldr q5, [x22, #0x0]\n"
       "movi v9.16b, #0x0\n"
-      "ldr q6, [x20, #0x0]\n"
-      "ldr x19, [%x[args_ptr], %[offsetof_K]]\n"
-      "cmp x19, #0x4\n"
+      "ldr q6, [x21, #0x0]\n"
+      "ldr x20, [%x[args_ptr], %[offsetof_K]]\n"
+      "cmp x20, #0x4\n"
       "movi v10.16b, #0x0\n"
       "movi v11.16b, #0x0\n"
       "movi v12.16b, #0x0\n"
@@ -106,17 +106,17 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "ldr q2, [%x[Apanel], #0x20]\n"
       "ldr q3, [%x[Apanel], #0x30]\n"
       "fmla v8.4s, v4.4s, v0.s[0]\n"
-      "ldr q7, [x24, #0x10]\n"
+      "ldr q7, [x25, #0x10]\n"
       "fmla v11.4s, v4.4s, v0.s[1]\n"
       "fmla v14.4s, v4.4s, v0.s[2]\n"
       "fmla v17.4s, v4.4s, v0.s[3]\n"
       "fmla v20.4s, v4.4s, v1.s[0]\n"
-      "sub x19, x19, #0x4\n"
+      "sub x20, x20, #0x4\n"
       "fmla v23.4s, v4.4s, v1.s[1]\n"
       "fmla v26.4s, v4.4s, v1.s[2]\n"
-      "cmp x19, #0x4\n"
+      "cmp x20, #0x4\n"
       "fmla v29.4s, v4.4s, v1.s[3]\n"
-      "ldr q4, [x21, #0x10]\n"
+      "ldr q4, [x22, #0x10]\n"
       "fmla v9.4s, v5.4s, v0.s[0]\n"
       "fmla v12.4s, v5.4s, v0.s[1]\n"
       "fmla v15.4s, v5.4s, v0.s[2]\n"
@@ -125,7 +125,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v24.4s, v5.4s, v1.s[1]\n"
       "fmla v27.4s, v5.4s, v1.s[2]\n"
       "fmla v30.4s, v5.4s, v1.s[3]\n"
-      "ldr q5, [x20, #0x10]\n"
+      "ldr q5, [x21, #0x10]\n"
       "fmla v10.4s, v6.4s, v0.s[0]\n"
       "fmla v13.4s, v6.4s, v0.s[1]\n"
       "fmla v16.4s, v6.4s, v0.s[2]\n"
@@ -136,7 +136,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v28.4s, v6.4s, v1.s[2]\n"
       "fmla v31.4s, v6.4s, v1.s[3]\n"
       "ldr q1, [%x[Apanel], #0x50]\n"
-      "ldr q6, [x24, #0x20]\n"
+      "ldr q6, [x25, #0x20]\n"
       "fmla v8.4s, v7.4s, v2.s[0]\n"
       "fmla v11.4s, v7.4s, v2.s[1]\n"
       "fmla v14.4s, v7.4s, v2.s[2]\n"
@@ -145,7 +145,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v23.4s, v7.4s, v3.s[1]\n"
       "fmla v26.4s, v7.4s, v3.s[2]\n"
       "fmla v29.4s, v7.4s, v3.s[3]\n"
-      "ldr q7, [x21, #0x20]\n"
+      "ldr q7, [x22, #0x20]\n"
       "fmla v9.4s, v4.4s, v2.s[0]\n"
       "fmla v12.4s, v4.4s, v2.s[1]\n"
       "fmla v15.4s, v4.4s, v2.s[2]\n"
@@ -154,7 +154,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v24.4s, v4.4s, v3.s[1]\n"
       "fmla v27.4s, v4.4s, v3.s[2]\n"
       "fmla v30.4s, v4.4s, v3.s[3]\n"
-      "ldr q4, [x20, #0x20]\n"
+      "ldr q4, [x21, #0x20]\n"
       "fmla v10.4s, v5.4s, v2.s[0]\n"
       "fmla v13.4s, v5.4s, v2.s[1]\n"
       "fmla v16.4s, v5.4s, v2.s[2]\n"
@@ -165,7 +165,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v28.4s, v5.4s, v3.s[2]\n"
       "fmla v31.4s, v5.4s, v3.s[3]\n"
       "ldr q3, [%x[Apanel], #0x70]\n"
-      "ldr q5, [x24, #0x30]\n"
+      "ldr q5, [x25, #0x30]\n"
       "fmla v8.4s, v6.4s, v0.s[0]\n"
       "fmla v11.4s, v6.4s, v0.s[1]\n"
       "fmla v14.4s, v6.4s, v0.s[2]\n"
@@ -173,23 +173,23 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "add %x[Apanel], %x[Apanel], #0x80\n"
       "fmla v20.4s, v6.4s, v1.s[0]\n"
       "fmla v23.4s, v6.4s, v1.s[1]\n"
-      "add x24, x24, #0x40\n"
+      "add x25, x25, #0x40\n"
       "fmla v26.4s, v6.4s, v1.s[2]\n"
       "fmla v29.4s, v6.4s, v1.s[3]\n"
-      "ldr q6, [x21, #0x30]\n"
+      "ldr q6, [x22, #0x30]\n"
       "fmla v9.4s, v7.4s, v0.s[0]\n"
       "fmla v12.4s, v7.4s, v0.s[1]\n"
-      "add x21, x21, #0x40\n"
+      "add x22, x22, #0x40\n"
       "fmla v15.4s, v7.4s, v0.s[2]\n"
       "fmla v18.4s, v7.4s, v0.s[3]\n"
       "fmla v21.4s, v7.4s, v1.s[0]\n"
       "fmla v24.4s, v7.4s, v1.s[1]\n"
       "fmla v27.4s, v7.4s, v1.s[2]\n"
       "fmla v30.4s, v7.4s, v1.s[3]\n"
-      "ldr q7, [x20, #0x30]\n"
+      "ldr q7, [x21, #0x30]\n"
       "fmla v10.4s, v4.4s, v0.s[0]\n"
       "fmla v13.4s, v4.4s, v0.s[1]\n"
-      "add x20, x20, #0x40\n"
+      "add x21, x21, #0x40\n"
       "fmla v16.4s, v4.4s, v0.s[2]\n"
       "fmla v19.4s, v4.4s, v0.s[3]\n"
       "ldr q0, [%x[Apanel], #0x0]\n"
@@ -198,7 +198,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v28.4s, v4.4s, v1.s[2]\n"
       "fmla v31.4s, v4.4s, v1.s[3]\n"
       "ldr q1, [%x[Apanel], #0x10]\n"
-      "ldr q4, [x24, #0x0]\n"
+      "ldr q4, [x25, #0x0]\n"
       "fmla v8.4s, v5.4s, v2.s[0]\n"
       "fmla v11.4s, v5.4s, v2.s[1]\n"
       "fmla v14.4s, v5.4s, v2.s[2]\n"
@@ -207,7 +207,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v23.4s, v5.4s, v3.s[1]\n"
       "fmla v26.4s, v5.4s, v3.s[2]\n"
       "fmla v29.4s, v5.4s, v3.s[3]\n"
-      "ldr q5, [x21, #0x0]\n"
+      "ldr q5, [x22, #0x0]\n"
       "fmla v9.4s, v6.4s, v2.s[0]\n"
       "fmla v12.4s, v6.4s, v2.s[1]\n"
       "fmla v15.4s, v6.4s, v2.s[2]\n"
@@ -216,7 +216,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v24.4s, v6.4s, v3.s[1]\n"
       "fmla v27.4s, v6.4s, v3.s[2]\n"
       "fmla v30.4s, v6.4s, v3.s[3]\n"
-      "ldr q6, [x20, #0x0]\n"
+      "ldr q6, [x21, #0x0]\n"
       "fmla v10.4s, v7.4s, v2.s[0]\n"
       "fmla v13.4s, v7.4s, v2.s[1]\n"
       "fmla v16.4s, v7.4s, v2.s[2]\n"
@@ -232,13 +232,13 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "add %x[Apanel], %x[Apanel], #0x20\n"
       "fmla v14.4s, v4.4s, v0.s[2]\n"
       "fmla v17.4s, v4.4s, v0.s[3]\n"
-      "add x24, x24, #0x10\n"
+      "add x25, x25, #0x10\n"
       "fmla v20.4s, v4.4s, v1.s[0]\n"
       "fmla v23.4s, v4.4s, v1.s[1]\n"
-      "add x21, x21, #0x10\n"
+      "add x22, x22, #0x10\n"
       "fmla v26.4s, v4.4s, v1.s[2]\n"
       "fmla v29.4s, v4.4s, v1.s[3]\n"
-      "add x20, x20, #0x10\n"
+      "add x21, x21, #0x10\n"
       "fmla v9.4s, v5.4s, v0.s[0]\n"
       "fmla v12.4s, v5.4s, v0.s[1]\n"
       "fmla v15.4s, v5.4s, v0.s[2]\n"
@@ -255,15 +255,15 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v25.4s, v6.4s, v1.s[1]\n"
       "fmla v28.4s, v6.4s, v1.s[2]\n"
       "fmla v31.4s, v6.4s, v1.s[3]\n"
-      "cbz x19, 7f\n"
+      "cbz x20, 7f\n"
       "6:"  // odd loop
       "ldr q0, [%x[Apanel], #0x0]\n"
       "ldr q1, [%x[Apanel], #0x10]\n"
-      "subs x19, x19, #0x1\n"
-      "ldr q7, [x24, #0x0]\n"
-      "ldr q4, [x21, #0x0]\n"
+      "subs x20, x20, #0x1\n"
+      "ldr q7, [x25, #0x0]\n"
+      "ldr q4, [x22, #0x0]\n"
       "fmla v8.4s, v7.4s, v0.s[0]\n"
-      "ldr q5, [x20, #0x0]\n"
+      "ldr q5, [x21, #0x0]\n"
       "fmla v11.4s, v7.4s, v0.s[1]\n"
       "fmla v14.4s, v7.4s, v0.s[2]\n"
       "fmla v17.4s, v7.4s, v0.s[3]\n"
@@ -271,13 +271,13 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "add %x[Apanel], %x[Apanel], #0x20\n"
       "fmla v23.4s, v7.4s, v1.s[1]\n"
       "fmla v26.4s, v7.4s, v1.s[2]\n"
-      "add x24, x24, #0x10\n"
+      "add x25, x25, #0x10\n"
       "fmla v29.4s, v7.4s, v1.s[3]\n"
       "fmla v9.4s, v4.4s, v0.s[0]\n"
-      "add x21, x21, #0x10\n"
+      "add x22, x22, #0x10\n"
       "fmla v12.4s, v4.4s, v0.s[1]\n"
       "fmla v15.4s, v4.4s, v0.s[2]\n"
-      "add x20, x20, #0x10\n"
+      "add x21, x21, #0x10\n"
       "fmla v18.4s, v4.4s, v0.s[3]\n"
       "fmla v21.4s, v4.4s, v1.s[0]\n"
       "fmla v24.4s, v4.4s, v1.s[1]\n"
@@ -293,7 +293,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "fmla v31.4s, v5.4s, v1.s[3]\n"
       "bne 6b\n"
       "7:"  // multiply loop done
-      "subs x23, x23, #0xc\n"
+      "subs x24, x24, #0xc\n"
       "str q8, [%x[Cpanel], #0x0]\n"
       "str q9, [%x[Cpanel], #0x10]\n"
       "str q10, [%x[Cpanel], #0x20]\n"
@@ -324,7 +324,7 @@ void a64_ffinterleaved_fp32_mla_8x12(
       "bne 1b\n"
       : [Apanel] "+&r" (Apanel), [Cpanel] "+&r" (Cpanel), [ablocks] "+&r" (ablocks)
       : [args_ptr] "r" (&ka), [offsetof_B_stride] "I" (offsetof(KernelArgs, B_stride)), [offsetof_Bpanel] "I" (offsetof(KernelArgs, Bpanel)), [offsetof_K] "I" (offsetof(KernelArgs, K)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_cur_B_ptr] "I" (offsetof(KernelArgs, cur_B_ptr))
-      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x19", "x20", "x21", "x22", "x23", "x24"
+      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x20", "x21", "x22", "x23", "x24", "x25"
     );
 }
 

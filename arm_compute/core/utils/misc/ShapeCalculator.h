@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H
-#define ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
@@ -432,8 +432,8 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     const int        weights_width_idx   = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::WIDTH);
     const int        weights_height_idx  = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::HEIGHT);
 
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
+    unsigned int output_width             = 0;
+    unsigned int output_height            = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
                                                               weights_shape[weights_width_idx], weights_shape[weights_height_idx],
                                                               info.pad_stride_info, info.dilation);
@@ -517,11 +517,12 @@ inline TensorShape compute_deconvolution_output_shape(const std::pair<unsigned i
  * @param[in] dilation        Dilation, in elements, across x and y
  * @param[in] batch_size_on_z True if batch size is on z axis
  * @param[in] num_groups      (Optional)  Number of groups when performing a grouped convolution
+ * @param[in] input_pad_right (Optional) When fast-math is selected, per element padding for the im2col matrix may be necessary
  *
  * @return the calculated shape
  */
 inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,
-                                             unsigned int num_groups = 1)
+                                             unsigned int num_groups = 1, unsigned int input_pad_right = 0)
 {
     // The output shape will be the 3D shape [ out_channels * kernel_area, num_elems_per_out_channel, batches ]                           if batch_size_on_z == true
     //                       or the 4D shape [ out_channels * kernel_area / num_groups, num_elems_per_out_channel, num_groups, batches ]  if batch_size_on_z == false
@@ -538,7 +539,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
-    output_shape.set(0, (output_shape[channel_idx] / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
+    output_shape.set(0, ((output_shape[channel_idx] + input_pad_right) / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
     output_shape.set(1, (out_dims.first * out_dims.second));
     if(batch_size_on_z && output_shape.num_dimensions() >= 3)
     {
@@ -682,8 +683,8 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
     const DataLayout    data_layout      = winograd_info.output_data_layout;
 
     // Compute output shape
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
+    unsigned int output_width             = 0;
+    unsigned int output_height            = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_dimensions.width, input_dimensions.height,
                                                               kernel_size.width, kernel_size.height, conv_info);
 
@@ -723,7 +724,7 @@ inline TensorShape compute_deep_convolution_shape(const TensorShape &input_shape
     const unsigned int weights_out_channel = weights_shape[3];
     unsigned int       output_width        = 0;
     unsigned int       output_height       = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
+    std::tie(output_width, output_height)  = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(idx_width, output_width);
@@ -1008,6 +1009,34 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 
 /** Calculate the matrix multiplication output shape of two tensors
  *
+ * @param[in] input0      First input tensor info
+ * @param[in] input1      Second input tensor info
+ * @param[in] matmul_info Batch MatMul Kernel info to know which matrix is transposed
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_matmul_shape(const TensorShape &input0, const TensorShape &input1, const MatMulKernelInfo &matmul_info)
+{
+    TensorShape output_shape{ input0 };
+
+    if(matmul_info.adj_lhs)
+    {
+        output_shape.set(1, input0[0]); // The vertical (M) dimension
+    }
+
+    if(matmul_info.adj_rhs)
+    {
+        output_shape.set(0, input1[1]); // The horizontal (N) dimension
+    }
+    else
+    {
+        output_shape.set(0, input1[0]); // The horizontal (N) dimension
+    }
+
+    return output_shape;
+}
+/** Calculate the matrix multiplication output shape of two tensors
+ *
  * @param[in] input           Input tensor info
  * @param[in] gemm_3d_depth   (Optional)  GEMM 3d depth
  * @param[in] batch_size_on_z (Optional) True if batch size is on z axis
@@ -1072,25 +1101,36 @@ inline TensorShape compute_slice_shape(const TensorShape &input_shape, const Coo
 
 /** Calculate the batch to space output shape of a tensor
  *
- * @param[in] input   Input tensor info
- * @param[in] block_x Block shape x value
- * @param[in] block_y Block shape y value
+ * @param[in] data_layout Data layout
+ * @param[in] input       Input tensor shape
+ * @param[in] block_x     Block shape x value
+ * @param[in] block_y     Block shape y value
+ * @param[in] crop_info   Information about how the output shape is cropped after batch to space is performed
  *
  * @return the calculated shape
  */
-inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)
+inline TensorShape compute_batch_to_space_shape(DataLayout data_layout, const TensorShape &input, int block_x, int block_y, const CropInfo &crop_info = CropInfo{})
 {
-    ARM_COMPUTE_ERROR_ON(block_x <= 0 || block_y <= 0);
+    ARM_COMPUTE_ERROR_ON(block_x < 1 || block_y < 1);
 
-    const DataLayout data_layout = input->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+    const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int idx_batch  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
-    TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x);
-    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y);
-    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
+    TensorShape output_shape{ input };
+
+    unsigned int       new_width   = input[idx_width] * static_cast<unsigned int>(block_x);
+    unsigned int       new_height  = input[idx_height] * static_cast<unsigned int>(block_y);
+    const unsigned int width_crop  = crop_info.left + crop_info.right;
+    const unsigned int height_crop = crop_info.top + crop_info.bottom;
+    ARM_COMPUTE_ERROR_ON(new_width <= width_crop);
+    ARM_COMPUTE_ERROR_ON(new_height <= height_crop);
+    new_width -= width_crop;
+    new_height -= height_crop;
+
+    output_shape.set(idx_width, new_width);
+    output_shape.set(idx_height, new_height);
+    output_shape.set(idx_batch, input[idx_batch] / (block_x * block_y));
 
     return output_shape;
 }
@@ -1162,7 +1202,7 @@ inline TensorShape compute_split_shape(const ITensorInfo *input, unsigned int ax
  *
  * @return the calculated shape
  */
-inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const int block_x, const int block_y, const Size2D &padding_left, const Size2D &padding_right)
+inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, int block_x, int block_y, const Size2D &padding_left, const Size2D &padding_right)
 {
     TensorShape output_shape{ input->tensor_shape() };
 
@@ -1537,42 +1577,35 @@ inline TensorShape compute_pool3d_shape(const TensorShape &src, Pooling3dLayerIn
  */
 inline TensorShape compute_gather_shape(const TensorShape &input_shape, const TensorShape &indices_shape, uint32_t actual_axis)
 {
-    ARM_COMPUTE_ERROR_ON(input_shape.num_dimensions() > 4);
-    ARM_COMPUTE_ERROR_ON(actual_axis >= input_shape.num_dimensions());
-    ARM_COMPUTE_ERROR_ON(indices_shape.num_dimensions() > 3);
-    TensorShape output_shape = input_shape;
-    if(indices_shape.num_dimensions() == 1u)
+    const auto input_num_dims   = input_shape.num_dimensions();
+    const auto indices_num_dims = indices_shape.num_dimensions();
+
+    ARM_COMPUTE_ERROR_ON(actual_axis >= input_num_dims);
+    ARM_COMPUTE_ERROR_ON(input_num_dims + indices_num_dims - 1 > Coordinates::num_max_dimensions);
+
+    TensorShape output_shape;
+    size_t      dim_no = 0;
+
+    for(; dim_no < actual_axis; ++dim_no)
     {
-        output_shape[actual_axis] = indices_shape[0];
+        output_shape.set(dim_no, input_shape[dim_no]);
     }
-    else
+
+    for(; dim_no < actual_axis + indices_num_dims; ++dim_no)
     {
-        const auto ind_num_dims
-        {
-            indices_shape.num_dimensions()
-        };
-        output_shape.shift_right(ind_num_dims - 1);
-        switch(actual_axis)
-        {
-            case 1:
-            {
-                output_shape[0] = input_shape[0];
-                for(size_t idx = 0; idx < ind_num_dims; ++idx)
-                {
-                    output_shape.set(actual_axis + idx, indices_shape[idx], false);
-                }
-                break;
-            }
-            default:
-            {
-                // 2d and 3d indices are only supported for axis == 1
-                ARM_COMPUTE_ERROR_ON(actual_axis != 1 && indices_shape.num_dimensions() > 1);
-            }
-        }
+        output_shape.set(dim_no, indices_shape[dim_no - actual_axis]);
     }
+
+    for(; dim_no < input_num_dims + indices_num_dims - 1; ++dim_no)
+    {
+        output_shape.set(dim_no, input_shape[dim_no + 1 - indices_num_dims]);
+    }
+
+    ARM_COMPUTE_ERROR_ON(input_shape.total_size() * indices_shape.total_size() != output_shape.total_size() * input_shape[actual_axis]);
+
     return output_shape;
 }
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H */
+#endif /* ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR */

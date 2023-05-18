@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
      * |All            |All            |
      *
      * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: All.
-     * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
+     * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis]), otherwise the result will become unpredictable.
      * @param[out] output  Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Defaults to 0
      */
@@ -58,7 +58,7 @@ public:
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Supported tensor rank: up to 4. Data type supported: All.
-     * @param[in]  indices         Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
+     * @param[in]  indices         Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis]), otherwise the result will become unpredictable.
      * @param[out] output          Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis            (Optional) The axis in @p input to gather @p indices from. Defaults to 0
      */
@@ -67,7 +67,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLGatherKernel
      *
      * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: All.
-     * @param[in] indices Indices tensor info. Supported tensor rank: up to 4. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
+     * @param[in] indices Indices tensor info. Supported tensor rank: up to 4. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis]), otherwise the result will become unpredictable.
      * @param[in] output  Destination tensor info. Data type supported: Same as @p input
      * @param[in] axis    (Optional) The axis in @p input to gather @p indices from. Defaults to 0
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,21 +101,21 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
                 // Perform activation
                 tmp = vmaxq_u8(vconst_0, vin);
                 // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
+                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
             }
             else if(act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
             {
                 // Perform activation
                 tmp = vminq_u8(va, vmaxq_u8(vconst_0, vin));
                 // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
+                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
             }
             else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
             {
                 // Perform activation
                 tmp = vminq_u8(va, vmaxq_u8(vb, vin));
                 // Re-quantize to new output space
-                tmp = vmlaq_qasymm8(tmp, vs, vo);
+                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
             }
 #ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
             else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
@@ -230,17 +230,17 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
             if(act == ActivationLayerInfo::ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
             }
             else if(act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
             }
             else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
             }
 #ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
             else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)

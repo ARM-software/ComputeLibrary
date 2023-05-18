@@ -32,6 +32,7 @@
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/utils/quantization/AsymmHelpers.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 #include "src/cpu/operators/CpuFlatten.h"
@@ -48,38 +49,6 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-// Get min, max bound of a quantized asymmetric dst tensor, with the effect of fused activation
-std::pair<PixelValue, PixelValue> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type)
-{
-    PixelValue type_min{};
-    PixelValue type_max{};
-    std::tie(type_min, type_max)         = get_min_max(data_type);
-    const UniformQuantizationInfo q_unif = q_info.uniform();
-
-    if(act_info.enabled())
-    {
-        switch(act_info.activation())
-        {
-            case ActivationLayerInfo::ActivationFunction::RELU:
-                type_min = PixelValue(q_unif.offset);
-                break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                type_min = PixelValue(q_unif.offset);
-                type_max = PixelValue(act_info.a(), data_type, q_info);
-                break;
-            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                type_min = PixelValue(act_info.b(), data_type, q_info);
-                type_max = PixelValue(act_info.a(), data_type, q_info);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Activation function not supported.");
-                break;
-        }
-    }
-
-    return std::make_pair(type_min, type_max);
-}
-
 Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const ActivationLayerInfo &act,
                                       GEMMLowpOutputStageInfo &gemmlowp_output_stage_info)
 {
@@ -95,16 +64,16 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
 
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
-    PixelValue type_min{};
-    PixelValue type_max{};
-    std::tie(type_min, type_max) = get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
+    int32_t type_min = 0;
+    int32_t type_max = 0;
+    std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
 
     gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
     gemmlowp_output_stage_info.gemmlowp_shift      = output_shift;
     gemmlowp_output_stage_info.gemmlowp_offset     = oq_unif.offset;
     gemmlowp_output_stage_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    gemmlowp_output_stage_info.gemmlowp_min_bound  = type_min.get<int32_t>();
-    gemmlowp_output_stage_info.gemmlowp_max_bound  = type_max.get<int32_t>();
+    gemmlowp_output_stage_info.gemmlowp_min_bound  = type_min;
+    gemmlowp_output_stage_info.gemmlowp_max_bound  = type_max;
 
     return Status{};
 }
@@ -136,7 +105,7 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
     }
     else
     {
-        GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+        GEMMInfo gemm_info;
         gemm_info.set_weight_format(weight_format);
         gemm_info.set_fixed_format(weight_format != WeightFormat::UNSPECIFIED);
         gemm_info.set_fast_math(enable_fast_math);
@@ -166,7 +135,8 @@ CpuFullyConnected::CpuFullyConnected()
       _is_prepared(false),
       _enable_fast_math(false),
       _fixed_format(false),
-      _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
+      _weight_format(arm_compute::WeightFormat::UNSPECIFIED),
+      _dynamic_weights(false)
 {
 }
 
@@ -199,7 +169,7 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
     else
     {
         // Configure matrix multiply kernel
-        GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+        GEMMInfo gemm_info;
         gemm_info.set_activation_info(act);
         gemm_info.set_fast_math(_enable_fast_math);
         gemm_info.set_fixed_format(_fixed_format);
@@ -256,6 +226,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     _enable_fast_math         = fc_info.enable_fast_math;
     _fixed_format             = weights_info.weight_format() != WeightFormat::UNSPECIFIED;
     _weight_format            = weights_info.weight_format();
+    _dynamic_weights          = !weights->are_values_constant() && _needs_weights_reshape;
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -282,6 +253,8 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
         // Reshape the weights
         _transpose_weights = std::make_unique<kernels::CpuTransposeKernel>();
         _transpose_weights->configure(weights, &_reshaped_weights);
+        _reshaped_weights.set_are_values_constant(weights->are_values_constant());
+
         weights_to_use     = &_reshaped_weights;
         _trans_weights_idx = AuxTensorIdx::TransposedWeights;
     }
@@ -295,6 +268,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
                                     &_converted_weights,
                                     src->tensor_shape(),
                                     fc_info.weights_trained_layout);
+        _converted_weights.set_are_values_constant(weights_to_use->are_values_constant());
 
         weights_to_use            = &_converted_weights;
         _needs_weights_conversion = true;
@@ -329,15 +303,32 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     {
         // Release permuted weights at the end of prepare as they are further transposed by the assembly dispatch
         // Do not release them if biases are dynamic and data type is quantized, since the weights tensor will be used for biases offset calculation
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), (_is_quantized_asymmetric && biases
-                                                                                     && !(biases->are_values_constant())) ? MemoryLifetime::Persistent : MemoryLifetime::Prepare,
-                                                 _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Prepare, _converted_weights.total_size());
+        // Keep all the auxiliary tensors in case of dynamic weights as they are recalculated every time.
+        _aux_mem[TransposedWeights] = MemoryInfo(
+            offset_int_vec(TransposedWeights),
+            _dynamic_weights                                                         ? MemoryLifetime::Temporary  :
+            (_is_quantized_asymmetric && biases && !(biases->are_values_constant())) ? MemoryLifetime::Persistent :
+                                                                                       MemoryLifetime::Prepare,
+            _reshaped_weights.total_size());
+
+        _aux_mem[ConvertedWeights] = MemoryInfo(
+            offset_int_vec(ConvertedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Prepare,
+            _converted_weights.total_size());
     }
     else
     {
-        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights), _needs_weights_conversion ? MemoryLifetime::Prepare : MemoryLifetime::Persistent, _reshaped_weights.total_size());
-        _aux_mem[ConvertedWeights]  = MemoryInfo(offset_int_vec(ConvertedWeights), MemoryLifetime::Persistent, _converted_weights.total_size());
+        _aux_mem[TransposedWeights] = MemoryInfo(
+            offset_int_vec(TransposedWeights),
+            _dynamic_weights          ? MemoryLifetime::Temporary :
+            _needs_weights_conversion ? MemoryLifetime::Prepare   :
+                                        MemoryLifetime::Persistent,
+            _reshaped_weights.total_size());
+
+        _aux_mem[ConvertedWeights] = MemoryInfo(
+            offset_int_vec(ConvertedWeights),
+            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Persistent,
+            _converted_weights.total_size());
     }
     _aux_mem[FlattenedSrc] = MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
 }
@@ -345,7 +336,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
 Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
                                        const ITensorInfo *biases, const ITensorInfo *dst, FullyConnectedLayerInfo fc_info, WeightsInfo weights_info)
 {
-    GEMMInfo gemm_info(false, false, true /* Reshape weights only for the first run */);
+    GEMMInfo gemm_info;
     gemm_info.set_activation_info(fc_info.activation_info);
     gemm_info.set_fast_math(fc_info.enable_fast_math);
     gemm_info.set_fixed_format(weights_info.weight_format() != WeightFormat::UNSPECIFIED);
@@ -375,7 +366,6 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
-    ARM_COMPUTE_RETURN_ERROR_ON(!weights->are_values_constant() && (!fc_info.are_weights_reshaped || fc_info.transpose_weights));
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
@@ -459,6 +449,11 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 {
     prepare(tensors);
 
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    ++_asrt_run_count;
+    ARM_COMPUTE_ERROR_ON(_dynamic_weights && _asrt_prepare_count != _asrt_run_count);
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
     auto src = tensors.get_const_tensor(ACL_SRC_0);
 
     CpuAuxTensorHandler flattened_src(offset_int_vec(FlattenedSrc), _flattened_src, tensors, false);
@@ -491,8 +486,13 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 
 void CpuFullyConnected::prepare(ITensorPack &tensors)
 {
-    if(!_is_prepared)
+    if(!_is_prepared || _dynamic_weights)
     {
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+        ++_asrt_prepare_count;
+        ARM_COMPUTE_ERROR_ON(!_dynamic_weights && _asrt_prepare_count > 1);
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
         auto weights = tensors.get_const_tensor(ACL_SRC_1);
 
         CpuAuxTensorHandler reshaped_weights(offset_int_vec(TransposedWeights), _reshaped_weights, tensors, false);

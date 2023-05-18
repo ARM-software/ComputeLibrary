@@ -54,7 +54,7 @@ cc_library(
             }),
     linkstatic = True,
     deps = [
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:common_defines",
         "//tests/framework",
     ],
@@ -95,7 +95,7 @@ cc_binary(
     linkstatic = True,
     deps = [
         ":validation_framework",
-        "//:arm_compute",
+        "//:arm_compute_core",
         "//:arm_compute_graph",
         "//:common_defines",
         "//tests/framework",
@@ -104,6 +104,13 @@ cc_binary(
         select({
                 "//:bf16_validation_flag": [
                 "ARM_COMPUTE_ENABLE_BF16",
+                ],
+                "//conditions:default": [],
+              }) +
+        select({
+                "//:sve_validation_flag": [
+                "ENABLE_SVE",
+                "ARM_COMPUTE_ENABLE_SVE",
                 ],
                 "//conditions:default": [],
               })
@@ -140,6 +147,6 @@ cc_binary(
     deps = [
         ":arm_compute_validation",
         ":validation_framework",
-        "//:arm_compute",
+        "//:arm_compute_core",
     ],
 )

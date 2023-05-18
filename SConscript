@@ -31,10 +31,10 @@ import zlib
 import json
 import codecs
 
-VERSION = "v23.02.1"
-LIBRARY_VERSION_MAJOR = 30
+VERSION = "v23.05"
+LIBRARY_VERSION_MAJOR = 31
 LIBRARY_VERSION_MINOR =  0
-LIBRARY_VERSION_PATCH =  1
+LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
@@ -94,8 +94,12 @@ def build_lib_objects():
                            'ARM_COMPUTE_ENABLE_I8MM', 'ARM_COMPUTE_ENABLE_SVEF32MM'])
 
     # Build all the common files for the base architecture
-    lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
+    if env['arch'] == 'armv8a':
+        lib_static_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=False)
+    else:
+        lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
 
     # Build the SVE specific files
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
@@ -359,6 +363,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/cast.cl',
                        'src/core/CL/cl_kernels/common/comparisons.cl',
                        'src/core/CL/cl_kernels/common/concatenate.cl',
+                       'src/core/CL/cl_kernels/common/convolution_layer.cl',
                        'src/core/CL/cl_kernels/common/col2im.cl',
                        'src/core/CL/cl_kernels/common/convert_fc_weights.cl',
                        'src/core/CL/cl_kernels/common/copy_tensor.cl',
@@ -368,6 +373,10 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/elementwise_operation.cl',
                        'src/core/CL/cl_kernels/common/elementwise_operation_quantized.cl',
                        'src/core/CL/cl_kernels/common/elementwise_unary.cl',
+                       'src/core/CL/cl_kernels/common/elementwise_unary_quantized.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
+                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
                        'src/core/CL/cl_kernels/common/fft_digit_reverse.cl',
                        'src/core/CL/cl_kernels/common/fft.cl',
                        'src/core/CL/cl_kernels/common/fft_scale.cl',
@@ -377,21 +386,19 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/gemm.cl',
                        'src/core/CL/cl_kernels/common/gemm_reshaped_only_rhs_mmul.cl',
                        'src/core/CL/cl_kernels/common/gemm_utils.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
-                       'src/core/CL/cl_kernels/common/gemv.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp.cl',
                        'src/core/CL/cl_kernels/common/gemmlowp_reshaped_only_rhs_mmul.cl',
+                       'src/core/CL/cl_kernels/common/gemv.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals.cl',
                        'src/core/CL/cl_kernels/common/generate_proposals_quantized.cl',
                        'src/core/CL/cl_kernels/common/instance_normalization.cl',
                        'src/core/CL/cl_kernels/common/l2_normalize.cl',
+                       'src/core/CL/cl_kernels/common/mat_mul.cl',
+                       'src/core/CL/cl_kernels/common/mat_mul_quantized.cl',
                        'src/core/CL/cl_kernels/common/mean_stddev_normalization.cl',
-                       'src/core/CL/cl_kernels/common/unpooling_layer.cl',
                        'src/core/CL/cl_kernels/common/memset.cl',
-                       'src/core/CL/cl_kernels/common/nonmax.cl',
                        'src/core/CL/cl_kernels/common/minmax_layer.cl',
+                       'src/core/CL/cl_kernels/common/nonmax.cl',
                        'src/core/CL/cl_kernels/common/pad_layer.cl',
                        'src/core/CL/cl_kernels/common/permute.cl',
                        'src/core/CL/cl_kernels/common/pixelwise_mul_float.cl',
@@ -401,18 +408,18 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/range.cl',
                        'src/core/CL/cl_kernels/common/reduction_operation.cl',
                        'src/core/CL/cl_kernels/common/reshape_layer.cl',
-                       'src/core/CL/cl_kernels/common/convolution_layer.cl',
                        'src/core/CL/cl_kernels/common/reverse.cl',
                        'src/core/CL/cl_kernels/common/roi_align_layer.cl',
                        'src/core/CL/cl_kernels/common/roi_align_layer_quantized.cl',
                        'src/core/CL/cl_kernels/common/roi_pooling_layer.cl',
                        'src/core/CL/cl_kernels/common/select.cl',
+                       'src/core/CL/cl_kernels/common/slice_ops.cl',
                        'src/core/CL/cl_kernels/common/softmax_layer.cl',
                        'src/core/CL/cl_kernels/common/softmax_layer_quantized.cl',
                        'src/core/CL/cl_kernels/common/stack_layer.cl',
-                       'src/core/CL/cl_kernels/common/slice_ops.cl',
                        'src/core/CL/cl_kernels/common/tile.cl',
-                       'src/core/CL/cl_kernels/common/transpose.cl'
+                       'src/core/CL/cl_kernels/common/transpose.cl',
+                       'src/core/CL/cl_kernels/common/unpooling_layer.cl'
                     ]
 
     # NCHW kernels
@@ -508,15 +515,14 @@ with (open(Dir('#').path + '/filelist.json')) as fp:
 # Common backend files
 lib_files = filelist['common']
 
+# Fixed format GEMM kernels.
+if env['fixed_format_kernels']:
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
+
 # Experimental files
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
-
-# Fixed format GEMM kernels.
-if env['experimental_fixed_format_kernels']:
-    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS'])
-
 
 # Logging files
 if env["logging"]:
@@ -593,8 +599,9 @@ if env['neon']:
     else:
         attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
 
-    if env['experimental_fixed_format_kernels']:
-        attrs.append("experimental_fixed_format_kernels")
+
+    if env['fixed_format_kernels']:
+        attrs.append("fixed_format_kernels")
 
     # Setup data-type and data-layout files to include
     cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()

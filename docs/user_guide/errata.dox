@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2022 Arm Limited.
+/// Copyright (c) 2019-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -29,6 +29,15 @@ namespace arm_compute
 @tableofcontents
 
 @section S7_1_errata Errata
+
+- (COMPMID-6271) Under certain conditions, CLArgMinMaxLayer validation tests may fail
+    - Versions Affected: >= v20.02
+    - OSs Affected: Linux
+    - Conditions:
+        - Backend: OpenCL
+        - Axis == 0
+    - Result:
+        - Sporadic mismatches only on certain devices
 
 - (COMPMID-5324) Issue identified with direct and depthwise convolutions for certain Arm® Mali™ DDK versions.
     - Versions Affected: < v22.08

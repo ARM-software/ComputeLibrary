@@ -36,6 +36,13 @@
 
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+#include "kernels/sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
+#include "kernels/sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
+#include "kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
+#include "kernels/sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst.hpp"
+#include "kernels/sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst.hpp"
+#endif // defined(ARM_COMPUTE_ENABLE_SME2)
 #include "kernels/sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
@@ -82,6 +89,68 @@ namespace
 static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = {
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst",
+    constraint(is_supported<sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
+               has_no_channel_multiplier,
+               cpu_has_sme2),
+    cycle_estimate<sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
+      auto strat = new sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<__fp16>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst",
+    constraint(is_supported<sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
+               has_no_channel_multiplier,
+               cpu_has_sme2),
+    cycle_estimate<sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
+      auto strat = new sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<__fp16>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst",
+    constraint(is_supported<sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
+              has_no_channel_multiplier,
+              cpu_has_sme2),
+    cycle_estimate<sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
+      auto strat = new sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<__fp16>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst",
+    constraint(is_supported<sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
+               has_no_channel_multiplier,
+               cpu_has_sme2),
+    cycle_estimate<sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
+      auto strat = new sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<__fp16>(strat, args);
+    },
+  },
+  {
+    DepthwiseMethod::DEPTHFIRST,
+    "sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst",
+    constraint(is_supported<sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
+               has_no_channel_multiplier,
+               cpu_has_sme2),
+    cycle_estimate<sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
+    [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
+      auto strat = new sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst(args.cpu_info);
+      return new DepthwiseDepthfirst<__fp16>(strat, args);
+    },
+  },
+#endif // defined(ARM_COMPUTE_ENABLE_SME2)
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst",

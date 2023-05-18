@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,6 +173,15 @@ public:
      */
     QuantizationInfo quantization_info() const override;
 
+    /** Set the quantization information of the tensor.
+     *
+     * This function does not have any effect on the raw quantized data of the tensor.
+     * It simply changes the quantization information, hence changes the dequantized values.
+     *
+     * @return A reference to the current object.
+     */
+    SimpleTensor<T> &quantization_info(const QuantizationInfo &qinfo);
+
     /** Constant pointer to the underlying buffer.
      *
      * @return a constant pointer to the data.
@@ -332,6 +341,13 @@ template <typename T>
 QuantizationInfo SimpleTensor<T>::quantization_info() const
 {
     return _quantization_info;
+}
+
+template <typename T>
+SimpleTensor<T> &SimpleTensor<T>::quantization_info(const QuantizationInfo &qinfo)
+{
+    _quantization_info = qinfo;
+    return *this;
 }
 
 template <typename T>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,7 @@ struct CLFullyConnectedLayer::Impl
     experimental::MemoryRequirements aux_mem_req{};
 
     bool is_prepared{ false };
+    bool dynamic_weights{ false };
 };
 
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
@@ -96,6 +97,12 @@ void CLFullyConnectedLayer::configure(const CLCompileContext &compile_context, c
         _impl->run_pack.add_tensor(ACL_SRC_0, input);
         _impl->run_pack.add_tensor(ACL_DST, output);
     }
+
+    _impl->dynamic_weights =
+        !weights->info()->are_values_constant() &&
+        fc_info.transpose_weights &&
+        !fc_info.are_weights_reshaped &&
+        !fc_info.retain_internal_weights;
 }
 
 Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
@@ -106,7 +113,10 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
 void CLFullyConnectedLayer::run()
 {
-    prepare();
+    if(!_impl->dynamic_weights)
+    {
+        prepare();
+    }
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->op->run(_impl->run_pack);

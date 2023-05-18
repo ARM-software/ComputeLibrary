@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,17 +28,11 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/AccessWindowStatic.h"
 #include "src/core/CPP/Validate.h"
-#include "src/core/NEON/NEAsymm.h"
-#include "src/core/NEON/NEFixedPoint.h"
-#include "src/core/NEON/NEMath.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/pool2d/neon/list.h"
-#include "support/ToolchainSupport.h"
-
 #include "src/core/NEON/wrapper/wrapper.h"
 #include <arm_neon.h>
 
@@ -191,7 +185,8 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
         if(indices)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(((pool_size != Size2D(2, 2)) && !pool_info.use_kernel_indices), "Pooling indices returning source tensor coordinates is only supported for pool size 2x2");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.use_kernel_indices && (src->data_layout() != DataLayout::NHWC), "Pooling kernel indices only supported for NHWC");
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(indices, &out_info);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_H
 #define ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_H
 
+#include "arm_compute/core/Types.h"
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
 
@@ -36,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &block_shape, const TensorShape &dst_shape);
+SimpleTensor<T> batch_to_space(const SimpleTensor<T> &src, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

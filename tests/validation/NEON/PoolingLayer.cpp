@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/PoolingLayerDataset.h"
@@ -150,13 +149,26 @@ using NESpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<Tensor
 const auto PoolingLayerIndicesDatasetFPSmall = combine(combine(combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2) })),
                                                                framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0) })),
                                                        framework::dataset::make("ExcludePadding", { true, false }));
-
+const auto PoolingLayerKernelIndicesDatasetFPSmall = combine(combine(combine(framework::dataset::make("PoolType", { PoolingType::MAX }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7) })),
+                                                                     framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 1, 1, 1) })),
+                                                             framework::dataset::make("ExcludePadding", { false }));
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::F32))),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                   combine(PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                           framework::dataset::make("DataType", DataType::F32))),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("UseKernelIndices", { false })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target_indices), _ref_indices);
+}
+FIXTURE_DATA_TEST_CASE(RunKernelIndices, NEPoolingLayerIndicesFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                   combine(PoolingLayerKernelIndicesDatasetFPSmall,
+                                                                                                                           framework::dataset::make("DataType", DataType::F32))),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("UseKernelIndices", { true })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -208,10 +220,12 @@ TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallNoneUnitShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                          DataType::F16))),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallNoneUnitShapes(),
+                                                                                                                  combine(PoolingLayerIndicesDatasetFPSmall,
+                                                                                                                          framework::dataset::make("DataType",
+                                                                                                                                  DataType::F16))),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                  framework::dataset::make("UseKernelIndices", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);

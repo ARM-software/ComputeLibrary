@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -332,18 +332,12 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
   }
 
   void execute_internal(
-    unsigned int batches,
-    unsigned int input_height,
-    unsigned int input_width,
-    unsigned int n_input_channels,
-    const PaddingValues &padding,
+    const DepthwiseArgs &args,
     const void *input,
     size_t ld_input_col,
     size_t ld_input_row,
     size_t ld_input_batch,
     const void *parameters,
-    unsigned int output_height,
-    unsigned int output_width,
     void *output,
     size_t ld_output_col,
     size_t ld_output_row,
@@ -359,7 +353,7 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
     this->initialise_working_space(thread_working_space);
     auto ws = reinterpret_cast<WorkspaceType *>(thread_working_space);
 
-    const auto n_output_channels = n_input_channels * this->m_args.channel_multiplier;
+    const auto n_output_channels = args.input_channels * args.channel_multiplier;
     const auto vl = get_vector_length<TAccum>(m_strat->get_vl_type());
 
     // Get typed pointers
@@ -368,23 +362,23 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
     auto weights = reinterpret_cast<const TWeight *>(parameters);
 
     // Iterate over batches
-    for (; batches; batches--)
+    for (auto batches = args.n_batches; batches; batches--)
     {
       // NOTE: Other loop orderings are possible and it would be worth
       // investigating them.
 
       // Within a batch, stripe threads across rows.
       for (auto start_output_i = thread_id * m_strat->get_output_rows();
-           start_output_i < output_height;
+           start_output_i < args.output_rows;
            start_output_i += n_threads * m_strat->get_output_rows())
       {
         // Determine what (if any padding) is required on the top/bottom of
         // this row of the convolution.
-        const int start_input_i = start_output_i * this->m_args.stride_rows - padding.top;
+        const int start_input_i = start_output_i * args.stride_rows - args.padding.top;
         const unsigned int input_pad_top = start_input_i < 0 ? -start_input_i : 0;
         const unsigned int input_i = start_input_i < 0 ? 0 : start_input_i;
-        const unsigned int valid_input_rows = input_i > input_height ? 0 : input_height - input_i;
-        const unsigned int valid_output_rows = output_height - start_output_i;
+        const unsigned int valid_input_rows = input_i > args.input_rows ? 0 : args.input_rows - input_i;
+        const unsigned int valid_output_rows = args.output_rows - start_output_i;
 
         auto inptr_row = input_batch + input_i*ld_input_row;
         auto outptr_row = output_batch + start_output_i * ld_output_row;
@@ -392,10 +386,10 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
         // Execute the kernel
         this->execute_kernel(
           inptr_row, ld_input_row, ld_input_col, vl,
-          input_pad_top, valid_input_rows, padding.left, input_width,
+          input_pad_top, valid_input_rows, args.padding.left, args.input_cols,
           weights, this->m_bias,
           outptr_row, ld_output_row, ld_output_col, vl,
-          valid_output_rows, output_width,
+          valid_output_rows, args.output_cols,
           0 /* first channel */, n_output_channels,
           ws
         );

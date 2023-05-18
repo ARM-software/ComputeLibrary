@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Arm Limited.
+* Copyright (c) 2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,12 +57,16 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
 }
 
 /** Auto initialize the tensor info using another tensor info.
-*
-* @param info_sink   Tensor info used to check and assign
-* @param info_source Tensor info used to assign
-*
-* @return True if the tensor info has been initialized
-*/
+ *
+ * (COMPMID-6012) This method should remain in sync with the fields of ITensorInfo that have setters.
+ *
+ *
+ * @param info_sink   Tensor info used to check and assign
+ * @param info_source Tensor info used to assign
+ *
+ *
+ * @return True if the tensor info has been initialized
+ */
 inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source)
 {
     if(info_sink.tensor_shape().total_size() == 0)
@@ -72,6 +76,7 @@ inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_s
         info_sink.set_tensor_shape(info_source.tensor_shape());
         info_sink.set_quantization_info(info_source.quantization_info());
         info_sink.set_data_layout(info_source.data_layout());
+        info_sink.set_are_values_constant(info_source.are_values_constant());
         return true;
     }
 

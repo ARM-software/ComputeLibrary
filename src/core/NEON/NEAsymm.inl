@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#include "arm_compute/core/Rounding.h"
+
 namespace arm_compute
 {
+template <RoundingPolicy round_policy>
 inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo)
 {
     // Convert uint8 vectors to uint16 vectors
@@ -46,16 +50,43 @@ inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t v
     C_f32x4 = vmlaq_f32(vo, C_f32x4, vs);
     D_f32x4 = vmlaq_f32(vo, D_f32x4, vs);
     // Convert float32 vectors to uint32 vectors
+#if __aarch64__
+    if(round_policy == RoundingPolicy::TO_NEAREST_EVEN)
+    {
+        A_u32x4 = vcvtnq_u32_f32(A_f32x4);
+        B_u32x4 = vcvtnq_u32_f32(B_f32x4);
+        C_u32x4 = vcvtnq_u32_f32(C_f32x4);
+        D_u32x4 = vcvtnq_u32_f32(D_f32x4);
+    }
+    else if(round_policy == RoundingPolicy::TO_NEAREST_UP)
+    {
+        A_u32x4 = vcvtaq_u32_f32(A_f32x4);
+        B_u32x4 = vcvtaq_u32_f32(B_f32x4);
+        C_u32x4 = vcvtaq_u32_f32(C_f32x4);
+        D_u32x4 = vcvtaq_u32_f32(D_f32x4);
+    }
+    else
+    {
+        A_u32x4 = vcvtq_u32_f32(A_f32x4);
+        B_u32x4 = vcvtq_u32_f32(B_f32x4);
+        C_u32x4 = vcvtq_u32_f32(C_f32x4);
+        D_u32x4 = vcvtq_u32_f32(D_f32x4);
+    }
+#else  // #if __aarch64__
+    // rounding mode only supported in aarch64
     A_u32x4 = vcvtq_u32_f32(A_f32x4);
     B_u32x4 = vcvtq_u32_f32(B_f32x4);
     C_u32x4 = vcvtq_u32_f32(C_f32x4);
     D_u32x4 = vcvtq_u32_f32(D_f32x4);
+#endif // #if __aarch64__
     // Convert uint32 vectors to uint16 vectors (with saturation)
     vd_low_u16x8  = vcombine_u16(vqmovn_u32(A_u32x4), vqmovn_u32(B_u32x4));
     vd_high_u16x8 = vcombine_u16(vqmovn_u32(C_u32x4), vqmovn_u32(D_u32x4));
     // convert uint16 vectors to uint8 vectors (with saturation)
     return vcombine_u8(vqmovn_u16(vd_low_u16x8), vqmovn_u16(vd_high_u16x8));
 }
+
+template <RoundingPolicy   round_policy>
 inline qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo)
 {
     // Convert uint8 vectors to int16 vectors
@@ -78,11 +109,36 @@ inline qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x
     B_f32x4 = vmlaq_f32(vo, B_f32x4, vs);
     C_f32x4 = vmlaq_f32(vo, C_f32x4, vs);
     D_f32x4 = vmlaq_f32(vo, D_f32x4, vs);
-    // Convert float32 vectors to int32 vectors
+#if __aarch64__
+    if(round_policy == RoundingPolicy::TO_NEAREST_EVEN)
+    {
+        A_s32x4 = vcvtnq_s32_f32(A_f32x4);
+        B_s32x4 = vcvtnq_s32_f32(B_f32x4);
+        C_s32x4 = vcvtnq_s32_f32(C_f32x4);
+        D_s32x4 = vcvtnq_s32_f32(D_f32x4);
+    }
+    else if(round_policy == RoundingPolicy::TO_NEAREST_UP)
+    {
+        A_s32x4 = vcvtaq_s32_f32(A_f32x4);
+        B_s32x4 = vcvtaq_s32_f32(B_f32x4);
+        C_s32x4 = vcvtaq_s32_f32(C_f32x4);
+        D_s32x4 = vcvtaq_s32_f32(D_f32x4);
+    }
+    else
+    {
+        A_s32x4 = vcvtq_s32_f32(A_f32x4);
+        B_s32x4 = vcvtq_s32_f32(B_f32x4);
+        C_s32x4 = vcvtq_s32_f32(C_f32x4);
+        D_s32x4 = vcvtq_s32_f32(D_f32x4);
+    }
+#else  // #if __aarch64__
+    // rounding mode only supported in aarch64
     A_s32x4 = vcvtq_s32_f32(A_f32x4);
     B_s32x4 = vcvtq_s32_f32(B_f32x4);
     C_s32x4 = vcvtq_s32_f32(C_f32x4);
     D_s32x4 = vcvtq_s32_f32(D_f32x4);
+#endif // #if __aarch64__
+
     // Convert int32 vectors to int16 vectors (with saturation)
     vd_low_s16x8  = vcombine_s16(vqmovn_s32(A_s32x4), vqmovn_s32(B_s32x4));
     vd_high_s16x8 = vcombine_s16(vqmovn_s32(C_s32x4), vqmovn_s32(D_s32x4));

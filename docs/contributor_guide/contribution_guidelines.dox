@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2022 Arm Limited.
+/// Copyright (c) 2019-2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -240,6 +240,18 @@ class ClassName
 };
 @endcode
 
+- In header files, use header guards that use the full file path from the project root and prepend it with "ACL_"
+
+@code{cpp}
+// For File arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER
+.
+.
+.
+#endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEBATCHNORMALIZATIONLAYER */
+@endcode
+
 - Use quotes instead of angular brackets to include local headers. Use angular brackets for system headers.
 - Also include the module header first, then local headers, and lastly system headers. All groups should be separated by a blank line and sorted lexicographically within each group.
 - Where applicable the C++ version of system headers has to be included, e.g. cstddef instead of stddef.h.
@@ -262,6 +274,47 @@ auto a = static_cast<float*>(bar); // OK: there is an explicit cast
 auto b = std::make_unique<Image>(foo); // OK: we can see it's going to be an std::unique_ptr<Image>
 auto c = img.ptr(); // NO: Can't tell what the type is without knowing the API.
 auto d = vdup_n_u8(0); // NO: It's not obvious what type this function returns.
+@endcode
+
+- When to use const
+
+    - Local variables: Use const as much as possible. E.g. all read-ony variables should be declared as const.
+
+    - Function parameters
+
+        - Top-level const must not be used in the function declaration or definition. (Note that this applies to all types, including non-primitive types)
+          This is because for function parameters, top-level const in function declaration is always ignored by the compiler (it is meaningless).
+          Therefore we should omit top-level const to reduce visual clutter. In addition, its omission can improve API/ABI
+          stability to some extent as there is one fewer varying factor in function signatures.
+
+          Note that we could in theory allow top-level const in only definition (which is not ignored by the compiler) but not declaration.
+          But certain toolchains are known to require the declaration and definition to match exactly.
+
+        - Use low-level const (of references and pointers) as much as possible.
+@code{.cpp}
+// Primitive types
+void foo(const int a);              // NO: Top-level const must not be used in function declaration or definition
+void foo(int a);                    // OK
+// Pointer to primitive types
+void foo(int *const a);             // NO: Top-level const
+void foo(const int *const a);       // NO: Top-level const
+void foo(int *a);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const int *a);             // OK but not recommended: See section above about passing primitives by value
+// Reference to primitive types
+// There's no "top-level const" for references
+void foo(int &a);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const int &a);             // OK but not recommended: See section above about passing primitives by value
+
+// Custom types
+void foo(const Goo g);              // NO: Top-level const
+void foo(Goo g);                    // OK
+// Pointer to custom types
+void foo(Goo *const g);             // NO: Top-level const
+void foo(Goo *g);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const Goo *g);             // OK
+// Reference to custom types
+void foo(Goo &g);                   // OK. But only if foo needs to mutate the underlying object
+void foo(const Goo &g);             // OK
 @endcode
 
 - OpenCL:

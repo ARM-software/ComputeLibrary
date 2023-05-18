@@ -83,20 +83,28 @@ SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const Pooling
                     {
                         int wstart   = w * pool_stride_x - pad_left;
                         int hstart   = h * pool_stride_y - pad_top;
+
+                        // Used to calculate kernel indices
+                        int  kh_start = std::max(0, -hstart);
+                        int  kw_start = std::max(0, -wstart);
+                        int  max_ker_index{ 0 };
+
                         int wend     = std::min(wstart + pool_size_x, w_src);
                         int hend     = std::min(hstart + pool_size_y, h_src);
                         wstart       = std::max(wstart, 0);
                         hstart       = std::max(hstart, 0);
-                        auto max_val = -std::numeric_limits<ACC_T>::infinity();
+                        auto max_val = info.use_inf_as_limit ? -std::numeric_limits<ACC_T>::infinity() : std::numeric_limits<ACC_T>::lowest();
                         int  max_index{ 0 };
-                        for(int y = hstart; y < hend; ++y)
+
+                        for(int y = hstart, kh = kh_start; y < hend; ++y, ++kh)
                         {
-                            for(int x = wstart; x < wend; ++x)
+                            for(int x = wstart, kw = kw_start; x < wend; ++x, ++kw)
                             {
                                 const auto val = static_cast<ACC_T>(src[b * z_src * h_src * w_src + r * h_src * w_src + y * w_src + x]);
                                 if(val > max_val)
                                 {
-                                    max_val = val;
+                                    max_val   = val;
+                                    max_ker_index = pool_size_x * (kh) + (kw);
                                     if(data_layout == DataLayout::NCHW)
                                     {
                                         max_index = coord2index(src.shape(), Coordinates(x, y, r, 0));
@@ -112,7 +120,7 @@ SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const Pooling
                         dst[b * z_dst * h_dst * w_dst + r * h_dst * w_dst + h * w_dst + w] = static_cast<T>(max_val);
                         if(indices)
                         {
-                            (*indices)[b * z_dst * h_dst * w_dst + r * h_dst * w_dst + h * w_dst + w] = max_index;
+                            (*indices)[b * z_dst * h_dst * w_dst + r * h_dst * w_dst + h * w_dst + w] = (info.use_kernel_indices) ? max_ker_index : max_index;
                         }
                     }
                 }

@@ -55,7 +55,9 @@ struct DepthwiseImplementation
 
   DepthwiseCommon<TInput, TWeight, TOutput> *get_instance(const DepthwiseArgs &args, const OutputStage &os) const
   {
-    return initialise(args, os);
+    auto impl = initialise(args, os);
+    impl->set_name(std::string(name));
+    return impl;
   }
 };
 
@@ -136,14 +138,7 @@ UniqueDepthwiseCommon<TInput, TWeight, TOutput> depthwise(const DepthwiseArgs &a
 {
   const DepthwiseImplementation<TInput, TWeight, TOutput, OutputStage> *impl = nullptr;
   const bool success = find_implementation<TInput, TWeight, TOutput, OutputStage>(args, os, impl);
-
-  if(success)
-  {
-        auto i =  impl->get_instance(args, os);
-        i->set_name(impl->name);
-        return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(i);
-  }
-  return nullptr;
+  return UniqueDepthwiseCommon<TInput, TWeight, TOutput>(success ? impl->get_instance(args, os) : nullptr);
 }
 
 }  // namespace depthwise

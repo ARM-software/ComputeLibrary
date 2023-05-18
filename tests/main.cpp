@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -236,13 +236,18 @@ int main(int argc, char **argv)
 #endif /* ARM_COMPUTE_CL */
                 const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
                 const unsigned int          num_cpus = cpu_info.get_cpu_num();
+
                 p->print_entry("cpu_has_sve", support::cpp11::to_string(cpu_info.has_sve()));
+                p->print_entry("cpu_has_sve2", support::cpp11::to_string(cpu_info.has_sve2()));
+                p->print_entry("cpu_has_svef32mm", support::cpp11::to_string(cpu_info.has_svef32mm()));
+                p->print_entry("cpu_has_svei8mm", support::cpp11::to_string(cpu_info.has_svei8mm()));
+                p->print_entry("cpu_has_svebf16", support::cpp11::to_string(cpu_info.has_svebf16()));
                 p->print_entry("cpu_has_sme", support::cpp11::to_string(cpu_info.has_sme()));
                 p->print_entry("cpu_has_sme2", support::cpp11::to_string(cpu_info.has_sme2()));
                 p->print_entry("cpu_has_fp16", support::cpp11::to_string(cpu_info.has_fp16()));
                 p->print_entry("cpu_has_bf16", support::cpp11::to_string(cpu_info.has_bf16()));
                 p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));
-                p->print_entry("cpu_has_svebf16", support::cpp11::to_string(cpu_info.has_svebf16()));
+                p->print_entry("cpu_has_i8mm", support::cpp11::to_string(cpu_info.has_i8mm()));
 
                 for(unsigned int j = 0; j < num_cpus; ++j)
                 {

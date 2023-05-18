@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 #include "ElementwiseUnary.h"
-
+#include "tests/validation/Helpers.h"
+#include "utils/TypePrinter.h"
 namespace arm_compute
 {
 namespace test
@@ -32,10 +33,8 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary op)
+SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, SimpleTensor<T> &dst, ElementWiseUnary op)
 {
-    SimpleTensor<T> dst(src.shape(), src.data_type());
-
     for(int i = 0; i < src.num_elements(); ++i)
     {
         switch(op)
@@ -65,13 +64,107 @@ SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary o
                 ARM_COMPUTE_ERROR("Not implemented");
         }
     }
+    return dst;
+}
+template <>
+SimpleTensor<int8_t> elementwise_unary(const SimpleTensor<int8_t> &src, SimpleTensor<int8_t> &dst, ElementWiseUnary op)
+{
+    if(dst.data_type() == DataType::QASYMM8_SIGNED)
+    {
+        SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
+        SimpleTensor<float> dst_tmp(src.shape(), DataType::F32);
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            switch(op)
+            {
+                case ElementWiseUnary::RSQRT:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = 1.f / std::sqrt(src_tmp[i]);
+                    }
+                    else
+                    {
+                       // rsqrt(0) give 'inf' so set to the maximum in int8: 127
+                       dst_tmp[i] = (127.0f - dst.quantization_info().uniform().offset)  * dst.quantization_info().uniform().scale ;
+                    }
+                    break;
 
+                case ElementWiseUnary::LOG:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = std::log(src_tmp[i]);
+                    }
+                    else
+                    {
+                       dst_tmp[i] = (-128.0f - dst.quantization_info().uniform().offset)  * dst.quantization_info().uniform().scale ;
+                    }
+                    break;
+
+                default:
+                    elementwise_unary(src_tmp, dst_tmp, op);
+                    break;
+            }
+        }
+        dst = convert_to_asymmetric<int8_t>(dst_tmp, dst.quantization_info());
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not implemented");
+    }
+    return dst;
+}
+template <>
+SimpleTensor<uint8_t> elementwise_unary(const SimpleTensor<uint8_t> &src, SimpleTensor<uint8_t> &dst, ElementWiseUnary op)
+{
+    if(dst.data_type() == DataType::QASYMM8)
+    {
+        SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
+        SimpleTensor<float> dst_tmp(src.shape(), DataType::F32);
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            switch(op)
+            {
+                case ElementWiseUnary::RSQRT:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = 1.f / std::sqrt(src_tmp[i]);
+                    }
+                    else
+                    {
+                        // rsqrt(0) give 'inf' so set to the maximum in uint8: 255
+                        dst_tmp[i] = (255.0f - dst.quantization_info().uniform().offset)* dst.quantization_info().uniform().scale;
+                    }
+                    break;
+
+                case ElementWiseUnary::LOG:
+                    if(src_tmp[i] != 0)
+                    {
+                        dst_tmp[i] = std::log(src_tmp[i]);
+                    }
+                    else
+                    {
+                        dst_tmp[i] = -dst.quantization_info().uniform().offset * dst.quantization_info().uniform().scale;
+                    }
+                    break;
+
+                default:
+                    elementwise_unary(src_tmp, dst_tmp, op);
+                    break;
+            }
+        }
+        dst = convert_to_asymmetric<uint8_t>(dst_tmp, dst.quantization_info());
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not implemented");
+    }
     return dst;
 }
 
-template SimpleTensor<float> elementwise_unary(const SimpleTensor<float> &src, ElementWiseUnary op);
-template SimpleTensor<half> elementwise_unary(const SimpleTensor<half> &src, ElementWiseUnary op);
-template SimpleTensor<int32_t> elementwise_unary(const SimpleTensor<int32_t> &src, ElementWiseUnary op);
+template SimpleTensor<float> elementwise_unary(const SimpleTensor<float> &src, SimpleTensor<float> &dst, ElementWiseUnary op);
+template SimpleTensor<half> elementwise_unary(const SimpleTensor<half> &src, SimpleTensor<half> &dst, ElementWiseUnary op);
+template SimpleTensor<int32_t> elementwise_unary(const SimpleTensor<int32_t> &src, SimpleTensor<int32_t> &dst, ElementWiseUnary op);
+
 } // namespace reference
 } // namespace validation
 } // namespace test

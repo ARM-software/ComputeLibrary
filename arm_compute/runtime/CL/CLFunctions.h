@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,7 @@
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
+#include "arm_compute/runtime/CL/functions/CLMatMul.h"
 #include "arm_compute/runtime/CL/functions/CLMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"

@@ -26,29 +26,28 @@ include(CMakeDependentOption)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
-option(DEBUG "Enable ['-O0','-g','-gdwarf-2'] compilation flags" OFF)
-option(WERROR "Enable the -Werror compilation flag" OFF)
-option(EXCEPTIONS "Enable C++ exception support" ON)
-option(LOGGING "Enable logging" OFF)
-
-option(GEMM_TUNER "Build gemm_tuner programs" OFF) # Not used atm
-option(BUILD_EXAMPLES "Build example programs" OFF)
-
-option(BUILD_TESTING "Build tests" OFF)
-option(CPPTHREADS "Enable C++11 threads backend" OFF)
-option(OPENMP "Enable OpenMP backend" ON)
+option(ARM_COMPUTE_WERROR "Enable the -Werror compilation flag" OFF)
+option(ARM_COMPUTE_EXCEPTIONS "Enable C++ exception support" ON)
+option(ARM_COMPUTE_LOGGING "Enable logging" OFF)
+option(ARM_COMPUTE_BUILD_EXAMPLES "Build example programs" OFF)
+option(ARM_COMPUTE_BUILD_TESTING "Build tests" OFF)
+option(ARM_COMPUTE_CPPTHREADS "Enable C++11 threads backend" OFF)
+option(ARM_COMPUTE_OPENMP "Enable OpenMP backend" ON)
 
 #
-if(CPPTHREADS)
+if(ARM_COMPUTE_CPPTHREADS)
   add_definitions(-DARM_COMPUTE_CPP_SCHEDULER)
 endif()
 #
-if(LOGGING)
+if(ARM_COMPUTE_LOGGING)
   add_definitions(-DARM_COMPUTE_LOGGING_ENABLED)
 endif()
 
 # ---------------------------------------------------------------------
 # Backends
+
+option(ARM_COMPUTE_ENABLE_BF16_VALIDATION "" OFF)
+option(ARM_COMPUTE_ENABLE_SVE_VALIDATION "" OFF)
 
 option(ENABLE_NEON "Enable Arm® Neon™ support" ON)
 option(ARM_COMPUTE_CPU_ENABLED "" ON)
@@ -66,9 +65,6 @@ option(ENABLE_NCHW_KERNELS "" ON)
 option(ARM_COMPUTE_GRAPH_ENABLED "" ON)
 option(ARM_COMPUTE_ENABLE_SVEF32MM "" ON)
 option(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS "" ON)
-option(ENABLE_SVE "" ON)
-option(ARM_COMPUTE_ENABLE_SVE "" ON)
-option(ENABLE_BF16_VALIDATION "" OFF)
 
 if(ENABLE_NEON)
   add_definitions(-DENABLE_NEON)
@@ -112,19 +108,10 @@ endif()
 if(ARM_COMPUTE_GRAPH_ENABLED)
   add_definitions(-DARM_COMPUTE_GRAPH_ENABLED)
 endif()
-if(ARM_COMPUTE_ENABLE_BF16)
-  add_definitions(-DARM_COMPUTE_ENABLE_BF16)
-endif()
 if(ARM_COMPUTE_ENABLE_SVEF32MM)
   add_definitions(-DARM_COMPUTE_ENABLE_SVEF32MM)
 endif()
 if(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS)
   add_definitions(-DARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS)
-endif()
-if(ENABLE_SVE)
-  add_definitions(-DENABLE_SVE)
-endif()
-if(ARM_COMPUTE_ENABLE_SVE)
-  add_definitions(-DARM_COMPUTE_ENABLE_SVE)
 endif()
 add_definitions(-D_GLIBCXX_USE_NANOSLEEP)

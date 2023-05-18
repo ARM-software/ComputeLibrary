@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,11 +83,11 @@ void CpuDepthwiseConv2d::CpuDepthwiseConv2dOptimizedInternal::configure(ITensorI
     ARM_COMPUTE_ERROR_THROW_ON(CpuDepthwiseConv2dOptimizedInternal::validate(src, weights, (biases == nullptr) ? nullptr : biases,
                                                                              dst, info));
 
-    _is_quantized = is_data_type_quantized_asymmetric(src->data_type());
-    _has_bias     = biases != nullptr;
-    _is_nchw      = src->data_layout() == DataLayout::NCHW;
-    _permute      = _is_nchw;
-    _is_prepared  = false;
+    _is_quantized      = is_data_type_quantized_asymmetric(src->data_type());
+    _has_bias          = biases != nullptr;
+    _is_nchw           = src->data_layout() == DataLayout::NCHW;
+    _permute           = _is_nchw;
+    _is_prepared       = false;
     _are_weights_const = weights->are_values_constant();
 
     // Configure pipeline

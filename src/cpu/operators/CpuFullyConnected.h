@@ -155,6 +155,12 @@ private:
     bool                      _enable_fast_math;
     bool                      _fixed_format;
     arm_compute::WeightFormat _weight_format;
+    bool                      _dynamic_weights;
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    int                       _asrt_run_count{};
+    int                       _asrt_prepare_count{};
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
 };
 } // namespace cpu
 } // namespace arm_compute

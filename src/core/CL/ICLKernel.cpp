@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         ARM_COMPUTE_ERROR_ON((i >= 3) && ((window[i].end() - window[i].start()) != 1));
     }
 
-    cl::NDRange gws = ICLKernel::gws_from_window(window);
+    cl::NDRange gws = ICLKernel::gws_from_window(window, use_dummy_work_items);
 
     // Check for empty NDRange
     if(gws.dimensions() == 0)
@@ -51,12 +51,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         return;
     }
 
-    // Use dummy work-items
-    if(use_dummy_work_items)
-    {
-        gws.get()[0] = get_next_power_two(gws[0]);
-        gws.get()[1] = get_next_power_two(gws[1]);
-    }
+    kernel.cache_gws(gws);
 
     cl::NDRange valid_lws;
     if(lws_hint[0] * lws_hint[1] * lws_hint[2] > kernel.get_max_workgroup_size())
@@ -190,7 +185,7 @@ size_t ICLKernel::get_max_workgroup_size()
     return _max_workgroup_size;
 }
 
-cl::NDRange ICLKernel::gws_from_window(const Window &window)
+cl::NDRange ICLKernel::gws_from_window(const Window &window, bool use_dummy_work_items)
 {
     if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
     {
@@ -201,6 +196,22 @@ cl::NDRange ICLKernel::gws_from_window(const Window &window)
                     (window.y().end() - window.y().start()) / window.y().step(),
                     (window.z().end() - window.z().start()) / window.z().step());
 
+    if(use_dummy_work_items)
+    {
+        gws.get()[0] = get_next_power_two(gws[0]);
+        gws.get()[1] = get_next_power_two(gws[1]);
+    }
+
     return gws;
+}
+
+cl::NDRange ICLKernel::get_cached_gws() const
+{
+    return _cached_gws;
+}
+
+void ICLKernel::cache_gws(const cl::NDRange &gws)
+{
+    _cached_gws = gws;
 }
 } // namespace arm_compute

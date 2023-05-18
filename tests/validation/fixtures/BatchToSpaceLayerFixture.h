@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_FIXTURE
 #define ARM_COMPUTE_TEST_BATCH_TO_SPACE_LAYER_FIXTURE
 
+#include "arm_compute/core/Helpers.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
@@ -40,10 +41,10 @@ class BatchToSpaceLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape output_shape, DataType data_type, DataLayout data_layout)
+    void setup(const TensorShape &input_shape, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &output_shape, DataType data_type, DataLayout data_layout)
     {
-        _target    = compute_target(input_shape, block_shape_shape, output_shape, data_type, data_layout);
-        _reference = compute_reference(input_shape, block_shape_shape, output_shape, data_type);
+        _target    = compute_target(input_shape, block_shape, crop_info, output_shape, data_type, data_layout);
+        _reference = compute_reference(input_shape, block_shape, crop_info, output_shape, data_type);
     }
 
 protected:
@@ -56,9 +57,10 @@ protected:
         DistributionType distribution{ T(-1.0f), T(1.0f) };
         library->fill(tensor, distribution, i);
     }
-    TensorType compute_target(TensorShape input_shape, TensorShape block_shape_shape, TensorShape output_shape,
+    TensorType compute_target(TensorShape input_shape, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, TensorShape output_shape,
                               DataType data_type, DataLayout data_layout)
     {
+        ARM_COMPUTE_ERROR_ON(block_shape.size() != 2U); // Only support batch to 2D space (x, y) for now
         if(data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
@@ -66,64 +68,49 @@ protected:
         }
 
         // Create tensors
-        TensorType input       = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType block_shape = create_tensor<TensorType>(block_shape_shape, DataType::S32);
-        TensorType output      = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType input  = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType output = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType batch_to_space;
-        batch_to_space.configure(&input, &block_shape, &output);
+        batch_to_space.configure(&input, block_shape.at(0), block_shape.at(1), &output, crop_info);
 
         ARM_COMPUTE_ASSERT(input.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(block_shape.info()->is_resizable());
         ARM_COMPUTE_ASSERT(output.info()->is_resizable());
 
         // Allocate tensors
         input.allocator()->allocate();
-        block_shape.allocator()->allocate();
         output.allocator()->allocate();
 
         ARM_COMPUTE_ASSERT(!input.info()->is_resizable());
-        ARM_COMPUTE_ASSERT(!block_shape.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!output.info()->is_resizable());
 
         // Fill tensors
         fill(AccessorType(input), 0);
-        {
-            auto      block_shape_data = AccessorType(block_shape);
-            const int idx_width        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-            for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
-            {
-                static_cast<int32_t *>(block_shape_data.data())[i] = output_shape[i + idx_width] / input_shape[i + idx_width];
-            }
-        }
         // Compute function
         batch_to_space.run();
 
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &block_shape_shape,
-                                      const TensorShape &output_shape, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const std::vector<int32_t> &block_shape,
+                                      const CropInfo &crop_info, const TensorShape &output_shape, DataType data_type)
     {
+        ARM_COMPUTE_ERROR_ON(block_shape.size() != 2U); // Only support batch to 2D space (x, y) for now
         // Create reference
-        SimpleTensor<T>       input{ input_shape, data_type };
-        SimpleTensor<int32_t> block_shape{ block_shape_shape, DataType::S32 };
+        SimpleTensor<T> input{ input_shape, data_type };
 
         // Fill reference
         fill(input, 0);
-        for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
-        {
-            block_shape[i] = output_shape[i] / input_shape[i];
-        }
 
         // Compute reference
-        return reference::batch_to_space(input, block_shape, output_shape);
+        return reference::batch_to_space(input, block_shape, crop_info, output_shape);
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/pool2d/neon/list.h"
@@ -98,10 +97,10 @@ void pooling2_f32_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
             vst1q_f32(reinterpret_cast<float *>(out.ptr()) + x_off, vres);
 
             const uint32_t   offset_base  = offset_no_padding<float>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
-            const uint32_t   offset_x0    = (uint32_t)offset_base / sizeof(float) + x_off;
-            const uint32_t   offset_x1    = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_horizontal;
-            const uint32_t   offset_x2    = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_horizontal * src->info()->tensor_shape()[1];
-            const uint32_t   offset_x3    = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_horizontal;
+            const uint32_t   offset_x0    = offset_base / sizeof(float) + x_off;
+            const uint32_t   offset_x1    = offset_x0 + in_stride_y / sizeof(float) - pad_horizontal;
+            const uint32_t   offset_x2    = offset_x0 + in_stride_z / sizeof(float) - pad_horizontal * src->info()->tensor_shape()[1];
+            const uint32_t   offset_x3    = offset_x2 + in_stride_y / sizeof(float) - pad_horizontal;
             const uint32x4_t voffset_x0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
             const uint32x4_t voffset_x1   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
             const uint32x4_t voffset_x2   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };
@@ -127,10 +126,10 @@ void pooling2_f32_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
             *(reinterpret_cast<float *>(out.ptr()) + x_off) = res;
 
             const uint32_t offset_base = offset_no_padding<float>(in.offset(), id, *src->info(), pool_stride_x, pool_stride_y, DataLayout::NHWC);
-            const uint32_t offset_x0   = (uint32_t)offset_base / sizeof(float) + x_off;
-            const uint32_t offset_x1   = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_horizontal;
-            const uint32_t offset_x2   = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_horizontal * src->info()->tensor_shape()[1];
-            const uint32_t offset_x3   = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_horizontal;
+            const uint32_t offset_x0   = offset_base / sizeof(float) + x_off;
+            const uint32_t offset_x1   = offset_x0 + in_stride_y / sizeof(float) - pad_horizontal;
+            const uint32_t offset_x2   = offset_x0 + in_stride_z / sizeof(float) - pad_horizontal * src->info()->tensor_shape()[1];
+            const uint32_t offset_x3   = offset_x2 + in_stride_y / sizeof(float) - pad_horizontal;
             const uint32_t tmp_idx0    = (x0 >= x1) ? offset_x0 : offset_x1;
             const uint32_t tmp_idx1    = (x2 >= x3) ? offset_x2 : offset_x3;
             const uint32_t tmp_idx2    = (std::max(x0, x1) >= std::max(x2, x3)) ? tmp_idx0 : tmp_idx1;
@@ -141,11 +140,131 @@ void pooling2_f32_maxpool_indices(const ITensor *src, ITensor *dst0, ITensor *ds
     },
     in, out, indices);
 }
+} // namespace
+
+void poolingMxN_fp32_neon_nhwc_kernel_indices(const ITensor *src, ITensor *dst0, ITensor *dst1, const PoolingLayerInfo &pool_info, const Window &window)
+{
+    const int window_start_x     = window.x().start();
+    const int window_end_x       = window.x().end();
+    constexpr int window_step_x  = 4;
+
+    Window window_out = window;
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator out(dst0, window_out);
+    Iterator indices(dst1, window_out);
+
+    const int pool_size_x = pool_info.is_global_pooling ? src->info()->tensor_shape().y() : pool_info.pool_size.width;
+    const int pool_size_y = pool_info.is_global_pooling ? src->info()->tensor_shape().z() : pool_info.pool_size.height;
+
+    const int pool_pad_top  = pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left = pool_info.pad_stride_info.pad_left();
+
+    int pool_stride_x = 0;
+    int pool_stride_y = 0;
+    std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
+
+    const float min_value = get_initial_min<float>(pool_info.use_inf_as_limit);
+
+    float32x4_t vres;
+    uint32x4_t  vidx;
+
+    constexpr int idx_width   = 1;
+    constexpr int idx_height  = 2;
+    constexpr int idx_batch   = 3;
+
+    const int y_stride = static_cast<int>(src->info()->strides_in_bytes().y());
+    const int z_stride = static_cast<int>(src->info()->strides_in_bytes().z());
+    const int n_stride = static_cast<int>(src->info()->strides_in_bytes()[idx_batch]);
+
+    const int input_dim_w = src->info()->dimension(idx_width);
+    const int input_dim_h = src->info()->dimension(idx_height);
+
+    const uint8_t *in_ptr_start = src->buffer() + src->info()->offset_first_element_in_bytes();
+
+    execute_window_loop(window_out, [&](const Coordinates & id)
+    {
+        const int idx_width  = static_cast<int>(id.y()) * pool_stride_x - pool_pad_left;
+        const int idx_height = static_cast<int>(id.z()) * pool_stride_y - pool_pad_top;
+
+        const int pool_start_x = std::max(0, -idx_width);
+        const int pool_start_y = std::max(0, -idx_height);
+
+        const int pool_end_x = std::min(pool_size_x, input_dim_w - idx_width);
+        const int pool_end_y = std::min(pool_size_y, input_dim_h - idx_height);
+
+        const uint8_t *in_ptr_n = in_ptr_start + id[idx_batch] * n_stride;
+
+        const int in_ptr_y_offset = (z_stride * idx_height) + (pool_start_y * z_stride);
+        const int in_ptr_x_offset = (y_stride * idx_width) + (pool_start_x * y_stride);
+
+        int x_off = window_start_x;
+
+        for(; x_off <= (window_end_x - window_step_x); x_off += window_step_x)
+        {
+            vres              = vdupq_n_f32(min_value);
+            vidx              = vdupq_n_u32(0U);
+            const uint8_t *in_ptr_y = in_ptr_n + in_ptr_y_offset + in_ptr_x_offset;
+            uint32_t    curr_kernel_index = pool_size_x * pool_start_y;
+            for(int y = pool_start_y; y < pool_end_y; ++y)
+            {
+                const uint8_t *in_ptr_x = in_ptr_y + (x_off * sizeof(float));
+                curr_kernel_index += pool_start_x;
+                for(int x = pool_start_x; x < pool_end_x; ++x)
+                {
+                    const float32x4_t data              = vld1q_f32(reinterpret_cast<const float *>(in_ptr_x));
+                    const uint32x4_t  vidx_curr         = vdupq_n_u32(curr_kernel_index);
+                    const uint32x4_t idxMask = vcgtq_f32(data, vres);
+                    vidx                     = vbslq_u32(idxMask, vidx_curr, vidx);
+                    vres                     = vmaxq_f32(vres, data);
+                    in_ptr_x += y_stride;
+                    curr_kernel_index++;
+                }
+                curr_kernel_index += (pool_size_x - pool_end_x);
+                in_ptr_y += z_stride;
+            }
+            // Store result
+            vst1q_f32(reinterpret_cast<float *>(out.ptr()) + x_off, vres);
+            vst1q_u32(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off, vidx);
+        }
+
+        // Left-overs loop
+        for(; x_off < window_end_x; ++x_off)
+        {
+            float    res      = min_value;
+            uint32_t idx      = 0U;
+            const uint8_t *in_ptr_y = in_ptr_n + in_ptr_y_offset + in_ptr_x_offset;
+            for(int y = pool_start_y; y < pool_end_y; ++y)
+            {
+                const uint8_t *in_ptr_x = in_ptr_y + (x_off * sizeof(float));
+                for(int x = pool_start_x; x < pool_end_x; ++x)
+                {
+                    const float data = *(reinterpret_cast<const float *>(in_ptr_x));
+                    if(data > res)
+                    {
+                        idx = pool_size_x * y + x;
+                        res = data;
+                    }
+                    in_ptr_x += y_stride;
+                }
+                in_ptr_y += z_stride;
+            }
+
+            // Store result
+            *(reinterpret_cast<float *>(out.ptr()) + x_off)        = res;
+            *(reinterpret_cast<uint32_t *>(indices.ptr()) + x_off) = idx;
+        }
+    },
+    out, indices);
 }
 
 void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1, PoolingLayerInfo &pool_info, const Window &window_src, const Window &window)
 {
-    if(pool_info.pool_size == Size2D(2, 2) && pool_info.pool_type == PoolingType::MAX && dst1)
+    if((pool_info.pool_type == PoolingType::MAX) && pool_info.use_kernel_indices && (dst1 != nullptr))
+    {
+        poolingMxN_fp32_neon_nhwc_kernel_indices(src, dst0, dst1, pool_info, window);
+    }
+    else if(pool_info.pool_size == Size2D(2, 2) && pool_info.pool_type == PoolingType::MAX && !pool_info.pad_stride_info.has_padding() && (dst1 != nullptr))
     {
         pooling2_f32_maxpool_indices(src, dst0, dst1, pool_info, window_src, window);
     }
@@ -170,9 +289,9 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
         int       pool_stride_x   = 0;
         int       pool_stride_y   = 0;
         std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
-        const int upper_bound_w = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_right);
-        const int upper_bound_h = src->info()->dimension(2) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
-
+        const int   upper_bound_w = src->info()->dimension(1) + (pool_info.exclude_padding ? 0 : pool_pad_right);
+        const int   upper_bound_h = src->info()->dimension(2) + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+        const float min_value     = get_initial_min<float>(pool_info.use_inf_as_limit);
         float32x4_t vres;
 
         execute_window_loop(window_out, [&](const Coordinates & id)
@@ -223,7 +342,7 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
                 }
                 else
                 {
-                    vres = vdupq_n_f32(-std::numeric_limits<float>::infinity());
+                    vres = vdupq_n_f32(min_value);
                     for(int y = pool_start_y; y < pool_end_y; ++y)
                     {
                         for(int x = pool_start_x; x < pool_end_x; ++x)
@@ -285,7 +404,7 @@ void poolingMxN_fp32_neon_nhwc(const ITensor *src, ITensor *dst0, ITensor *dst1,
                 }
                 else
                 {
-                    res = -std::numeric_limits<float>::infinity();
+                    res = min_value;
                     for(int y = pool_start_y; y < pool_end_y; ++y)
                     {
                         for(int x = pool_start_x; x < pool_end_x; ++x)

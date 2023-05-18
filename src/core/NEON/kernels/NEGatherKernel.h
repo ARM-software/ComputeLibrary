@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,27 +81,8 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Implementation of the gather operation for 0 axis.
-     *
-     * For gather on the 0 axis an element by element copy is performed.
-     *
-     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about running thread and CPU.
-     */
-    template <typename U>
-    void gather_0_axis(const Window &window, const ThreadInfo &info);
-
-    template <typename U>
-    void gather_multiindices_1_axis(const Window &window, const ThreadInfo &info);
-    /** Implementation of the gather operation.
-     *
-     * For 1<=axis a row-wise copy is taking place.
-     *
-     * @param[in] window Region on which to run the kernel. (Must be a region of the window returned by window())
-     * @param[in] info   Info about running thread and CPU.
-     */
-    template <typename U>
-    void gather_n_axis(const Window &window, const ThreadInfo &info);
+    template <typename TIndex>
+    void gather_common(const Window &window, const ThreadInfo &info);
 
     using kernel_ptr = void (NEGatherKernel::*)(const Window &window, const ThreadInfo &info);
 
@@ -110,6 +91,9 @@ private:
     int            _axis;
     ITensor       *_output;
     kernel_ptr     _func;
+
+    Strides        _src_it_strides;
+    Strides        _idx_it_strides;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEGATHERKERNEL_H */

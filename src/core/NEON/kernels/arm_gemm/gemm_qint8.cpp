@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2022 Arm Limited.
+ * Copyright (c) 2019-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,6 @@
 #include "kernels/sve_hybrid_s8s32_mmla_6x4VL.hpp"
 #include "kernels/sve_interleaved_s8s32_dot_8x3VL.hpp"
 #include "kernels/sve_interleaved_s8s32_mmla_8x3VL.hpp"
-#include "kernels/sve_smallK_hybrid_s8s32_dot_8x1VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_SVE
 
 #include "gemm_hybrid_indirect.hpp"
@@ -81,7 +80,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme2_interleaved_nomerge_s8q_mopa_1VLx4VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && args._maxthreads == 1 && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
+    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
     [](const GemmArgs &args, const Requantize32 &) { const auto VL = sme::get_vector_length<int32_t>();
                                return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedPretransposedNoMergeQuantizedInline<cls_sme2_interleaved_nomerge_s8q_mopa_1VLx4VL, int8_t, int8_t>(args, qp); }
@@ -89,7 +88,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme2_interleaved_nomerge_s8q_mopa_4VLx1VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && args._maxthreads == 1 && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
+    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
     [](const GemmArgs &args, const Requantize32 &) { const auto VL = sme::get_vector_length<int32_t>();
                                return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedPretransposedNoMergeQuantizedInline<cls_sme2_interleaved_nomerge_s8q_mopa_4VLx1VL, int8_t, int8_t>(args, qp); }
@@ -97,7 +96,7 @@ static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme2_interleaved_nomerge_s8q_mopa_2VLx2VL",
-    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && args._maxthreads == 1 && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
+    [](const GemmArgs &args, const Requantize32 &qp) { return args._ci->has_sme2() && ((qp.per_channel_requant && (qp.per_channel_left_shifts == nullptr)) || (!qp.per_channel_requant && (qp.per_layer_left_shift == 0)));},
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmInterleavedPretransposedNoMergeQuantizedInline<cls_sme2_interleaved_nomerge_s8q_mopa_2VLx2VL, int8_t, int8_t>(args, qp); }
 },
@@ -130,13 +129,6 @@ GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
     [](const GemmArgs &args, const Requantize32 &) { return GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, Requantize32, true>::estimate_cycles<int8_t>(args); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridIndirect<cls_sve_hybrid_s8s32_mmla_6x4VL, int8_t, int8_t, Requantize32, true>(args, qp); }
 ),
-{
-    GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "sve_smallK_hybrid_s8s32_dot_8x1VL",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_sve() && args._Ksize<=64 && !args._indirect_input; },
-    [](const GemmArgs &args, const Requantize32 &) { return !(args._ci->has_svei8mm() || args._ci->has_i8mm()); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<cls_sve_smallK_hybrid_s8s32_dot_8x1VL, int8_t, int8_t>(args, qp); }
-},
 GemmImplementation<int8_t, int8_t, Requantize32>::with_estimate(
     GemmMethod::GEMM_HYBRID,
     "sve_hybrid_s8qs_dot_6x4VL",

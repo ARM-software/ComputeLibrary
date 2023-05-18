@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,8 @@ CLBatchToSpaceLayer::~CLBatchToSpaceLayer() = default;
 
 void CLBatchToSpaceLayer::configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, output);
+    ARM_COMPUTE_LOG_PARAMS(input, block_shape, output);
+    _batch_to_space_kernel->configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, output);
 }
 
 void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
@@ -54,15 +55,15 @@ void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, con
     _batch_to_space_kernel->configure(compile_context, input, block_shape, output);
 }
 
-void CLBatchToSpaceLayer::configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output)
+void CLBatchToSpaceLayer::configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, output, crop_info);
 }
 
-void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output)
+void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output, const CropInfo &crop_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, block_shape_x, block_shape_y, output);
-    _batch_to_space_kernel->configure(compile_context, input, block_shape_x, block_shape_y, output);
+    _batch_to_space_kernel->configure(compile_context, input, block_shape_x, block_shape_y, output, crop_info);
 }
 
 Status CLBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
@@ -70,9 +71,9 @@ Status CLBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo
     return CLBatchToSpaceLayerKernel::validate(input, block_shape, output);
 }
 
-Status CLBatchToSpaceLayer::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output)
+Status CLBatchToSpaceLayer::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info)
 {
-    return CLBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output);
+    return CLBatchToSpaceLayerKernel::validate(input, block_shape_x, block_shape_y, output, crop_info);
 }
 
 void CLBatchToSpaceLayer::run()

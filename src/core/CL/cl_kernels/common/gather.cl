@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,33 +59,73 @@
  */
 __kernel void gather(
     TENSOR4D_DECLARATION(input),
-    VECTOR_DECLARATION(indices),
+    TENSOR4D_DECLARATION(indices),
     TENSOR4D_DECLARATION(output))
 {
     const int px = get_global_id(0);
     const int py = get_global_id(1);
     const int pz = get_global_id(2) % OUTPUT_DIM_Z;
-    const int pw = get_global_id(2) / OUTPUT_DIM_Z;
+    const int pw = (get_global_id(2) / OUTPUT_DIM_Z );
 
     const Tensor4D input   = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, INPUT_DIM_Z);
-    const Vector   indices = CONVERT_TO_VECTOR_STRUCT_NO_STEP(indices);
+    const Tensor4D indices = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(indices, INDICES_DIM_Z);
     Tensor4D       output  = CONVERT_TO_TENSOR4D_STRUCT(output, OUTPUT_DIM_Z);
 
 #if AXIS == 0
-    const uint index                 = *(__global const uint *)vector_offset(&indices, px);
-    __global const uchar *input_addr = tensor4D_offset(&input, index, py, pz, pw);
+#if INDICES_DIMS == 1
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, px, 0, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, safe_index, py, pz, pw);
+#elif INDICES_DIMS == 2
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, px, py, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, safe_index, pz, pw, 0);
+#elif INDICES_DIMS == 3
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, px, py, pz, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, safe_index, pw, 0, 0);
+#elif INDICES_DIMS == 4
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, px, py, pz, pw);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, safe_index, 0, 0, 0);
+#endif //INDICES_DIMS
+
 #elif AXIS == 1
-    const uint index                 = *(__global const uint *)vector_offset(&indices, py);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, index, pz, pw);
+#if INDICES_DIMS == 1
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, py, 0, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+     __global const uchar *input_addr = tensor4D_offset(&input, px, safe_index, pz, pw);
+#elif INDICES_DIMS == 2
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, py, pz, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, safe_index, pw, 0);
+#elif INDICES_DIMS == 3
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, py, pz, pw, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, safe_index, 0, 0);
+#endif //INDICES_DIMS
+
 #elif AXIS == 2
-    const uint index                 = *(__global const uint *)vector_offset(&indices, pz);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, py, index, pw);
+#if INDICES_DIMS == 1
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, pz, 0, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+     __global const uchar *input_addr = tensor4D_offset(&input, px, py, safe_index, pw);
+#elif INDICES_DIMS == 2
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, pz, pw, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+    __global const uchar *input_addr = tensor4D_offset(&input, px, py, safe_index, 0);
+#endif //INDICES_DIMS
+
 #elif AXIS == 3
-    const uint index                 = *(__global const uint *)vector_offset(&indices, pw);
-    __global const uchar *input_addr = tensor4D_offset(&input, px, py, pz, index);
+#if INDICES_DIMS == 1
+    const uint index                 = *(__global const uint *)tensor4D_offset(&indices, pw, 0, 0, 0);
+    const uint safe_index            = select((uint)0, index, index < INDEX_LIMIT);
+     __global const uchar *input_addr = tensor4D_offset(&input, px, py, pz, safe_index);
+#endif //INDICES_DIMS
+
 #endif //AXIS
 
-    *(__global DATA_TYPE *)output.ptr = *((__global const DATA_TYPE *)input_addr);
+    *(__global DATA_TYPE *)output.ptr = select((DATA_TYPE)0, *((__global const DATA_TYPE *)input_addr), (DATA_TYPE)(index < INDEX_LIMIT));
 }
 
 #endif //defined(DATA_TYPE) && defined(AXIS)

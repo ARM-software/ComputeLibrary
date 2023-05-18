@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@ constexpr unsigned int max_lws_supported_x{ 64u };
 constexpr unsigned int max_lws_supported_y{ 32u };
 constexpr unsigned int max_lws_supported_z{ 32u };
 
-/** Non instantiable base class for Tuning parameters combinations that use Index2Cooard mapping */
+/** Non instantiable base class for Tuning parameters combinations that use Index2Coord mapping */
 class CLTuningParametersList : public ICLTuningParametersList
 {
 protected:
@@ -162,10 +162,13 @@ CLTuningParams CLTuningParametersListExhaustive::operator[](size_t index)
 
 CLTuningParametersListExhaustive::CLTuningParametersListExhaustive(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
-    ARM_COMPUTE_UNUSED(gws);
-    search_space_shape[0] = max_lws_supported_x;
-    search_space_shape[1] = max_lws_supported_y;
-    search_space_shape[2] = max_lws_supported_z;
+    const auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), max_lws_supported_x);
+    const auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), max_lws_supported_y);
+    const auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), max_lws_supported_z);
+
+    search_space_shape[0] = lws_x_max;
+    search_space_shape[1] = lws_y_max;
+    search_space_shape[2] = lws_z_max;
     search_space_shape[3] = 1;
     if(tuning_info.tune_wbsm)
     {
@@ -183,9 +186,9 @@ CLTuningParams CLTuningParametersListNormal::operator[](size_t index)
 
 CLTuningParametersListNormal::CLTuningParametersListNormal(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
-    auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), max_lws_supported_x);
-    auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), max_lws_supported_y);
-    auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), max_lws_supported_z);
+    const auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), max_lws_supported_x);
+    const auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), max_lws_supported_y);
+    const auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), max_lws_supported_z);
 
     // Initialize the tuning parameters values to test
     _lws_x = {};
@@ -227,9 +230,9 @@ void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned in
 
 CLTuningParametersListRapid::CLTuningParametersListRapid(const cl::NDRange &gws, CLTuningInfo tuning_info)
 {
-    auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), 8u); // Limit exploration to 1 - 8
-    auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), 4u); // Limit exploration to 1 - 4
-    auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), 4u); // Limit exploration to 1 - 4
+    const auto lws_x_max = std::min(static_cast<unsigned int>(gws[0]), 8u); // Limit exploration to 1 - 8
+    const auto lws_y_max = std::min(static_cast<unsigned int>(gws[1]), 4u); // Limit exploration to 1 - 4
+    const auto lws_z_max = std::min(static_cast<unsigned int>(gws[2]), 4u); // Limit exploration to 1 - 4
 
     // Initialize the LWS values to test
     _lws_x = {};

@@ -49,6 +49,7 @@
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/NEON/functions/NEMatMul.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -421,7 +422,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" << gemm_info.export_to_cl_image << "})";
+    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" <<
+       gemm_info.export_to_cl_image << "})";
     return os;
 }
 
@@ -474,7 +476,8 @@ inline std::string to_string(const GEMMKernelInfo &gemm_info)
 inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
 {
     auto weights = bbox_info.weights();
-    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] << "})";
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
+       "})";
     return os;
 }
 
@@ -1436,6 +1439,36 @@ inline std::string to_string(const ICLTensor *cl_tensor)
 inline std::string to_string(ICLTensor *cl_tensor)
 {
     return to_string(static_cast<const ICLTensor *>(cl_tensor));
+}
+
+/** Formatted output of the cl::NDRange type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  nd_range cl::NDRange to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const cl::NDRange &nd_range)
+{
+    os << "{"
+       << nd_range[0] << ","
+       << nd_range[1] << ","
+       << nd_range[2]
+       << "}";
+    return os;
+}
+
+/** Formatted output of the cl::NDRange type
+ *
+ * @param[in] nd_Range Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const cl::NDRange &nd_range)
+{
+    std::stringstream str;
+    str << nd_range;
+    return str.str();
 }
 #endif /* ARM_COMPUTE_OPENCL_ENABLED */
 
@@ -2740,7 +2773,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FullyConnectedLayerI
        << "transpose_weights=" << layer_info.transpose_weights << ", "
        << "are_weights_reshaped=" << layer_info.are_weights_reshaped << ", "
        << "retain_internal_weights=" << layer_info.retain_internal_weights << ", "
-       << "constant_weights=" << layer_info.transpose_weights << ", "
        << "fp_mixed_precision=" << layer_info.fp_mixed_precision << "}";
     return os;
 }
@@ -3303,46 +3335,46 @@ inline std::string to_string(const Conv3dInfo &conv3d_info)
 inline std::string to_string(const WeightFormat wf)
 {
 #define __CASE_WEIGHT_FORMAT(wf) \
-    case WeightFormat::wf:       \
-        return #wf;
+case WeightFormat::wf:       \
+    return #wf;
     switch(wf)
     {
-        __CASE_WEIGHT_FORMAT(UNSPECIFIED)
-        __CASE_WEIGHT_FORMAT(ANY)
-        __CASE_WEIGHT_FORMAT(OHWI)
-        __CASE_WEIGHT_FORMAT(OHWIo2)
-        __CASE_WEIGHT_FORMAT(OHWIo4)
-        __CASE_WEIGHT_FORMAT(OHWIo8)
-        __CASE_WEIGHT_FORMAT(OHWIo16)
-        __CASE_WEIGHT_FORMAT(OHWIo32)
-        __CASE_WEIGHT_FORMAT(OHWIo64)
-        __CASE_WEIGHT_FORMAT(OHWIo128)
-        __CASE_WEIGHT_FORMAT(OHWIo4i2)
-        __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo8i2)
-        __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo16i2)
-        __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo32i2)
-        __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo64i2)
-        __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo4i4)
-        __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo8i4)
-        __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo16i4)
-        __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo32i4)
-        __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo64i4)
-        __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
-        __CASE_WEIGHT_FORMAT(OHWIo2i8)
-        __CASE_WEIGHT_FORMAT(OHWIo4i8)
-        __CASE_WEIGHT_FORMAT(OHWIo8i8)
-        __CASE_WEIGHT_FORMAT(OHWIo16i8)
-        __CASE_WEIGHT_FORMAT(OHWIo32i8)
-        __CASE_WEIGHT_FORMAT(OHWIo64i8)
+            __CASE_WEIGHT_FORMAT(UNSPECIFIED)
+            __CASE_WEIGHT_FORMAT(ANY)
+            __CASE_WEIGHT_FORMAT(OHWI)
+            __CASE_WEIGHT_FORMAT(OHWIo2)
+            __CASE_WEIGHT_FORMAT(OHWIo4)
+            __CASE_WEIGHT_FORMAT(OHWIo8)
+            __CASE_WEIGHT_FORMAT(OHWIo16)
+            __CASE_WEIGHT_FORMAT(OHWIo32)
+            __CASE_WEIGHT_FORMAT(OHWIo64)
+            __CASE_WEIGHT_FORMAT(OHWIo128)
+            __CASE_WEIGHT_FORMAT(OHWIo4i2)
+            __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo8i2)
+            __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo16i2)
+            __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo32i2)
+            __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo64i2)
+            __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo4i4)
+            __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo8i4)
+            __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo16i4)
+            __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo32i4)
+            __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo64i4)
+            __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
+            __CASE_WEIGHT_FORMAT(OHWIo2i8)
+            __CASE_WEIGHT_FORMAT(OHWIo4i8)
+            __CASE_WEIGHT_FORMAT(OHWIo8i8)
+            __CASE_WEIGHT_FORMAT(OHWIo16i8)
+            __CASE_WEIGHT_FORMAT(OHWIo32i8)
+            __CASE_WEIGHT_FORMAT(OHWIo64i8)
         default:
             return "invalid value";
     }
@@ -3644,6 +3676,98 @@ inline std::string to_string(const experimental::dynamic_fusion::SoftmaxAttribut
 {
     std::stringstream str;
     str << softmax_attr;
+    return str.str();
+}
+/** Formatted output of the arm_compute::MatMulInfo type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  matmul_info arm_compute::MatMulInfo  type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulInfo &matmul_info)
+{
+    os << "MatMulKernelInfo="
+       << "["
+       << "adj_lhs=" << matmul_info.adj_lhs() << ", "
+       << "adj_rhs=" << matmul_info.adj_rhs() << ", "
+       << "fused_activation=" << matmul_info.fused_activation().activation() << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::MatMulInfo type.
+ *
+ * @param[in] matmul_info arm_compute::MatMulInfo type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::MatMulInfo &matmul_info)
+{
+    std::stringstream str;
+    str << matmul_info;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::MatMulKernelInfo type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  matmul_info arm_compute::MatMulKernelInfo  type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulKernelInfo &matmul_info)
+{
+    os << "MatMulKernelInfo="
+       << "["
+       << "adj_lhs=" << matmul_info.adj_lhs << ", "
+       << "adj_rhs=" << matmul_info.adj_rhs << ", "
+       << "M0=" << matmul_info.m0 << ", "
+       << "N0=" << matmul_info.n0 << ", "
+       << "K0=" << matmul_info.k0 << ", "
+       << "export_rhs_to_cl_image=" << matmul_info.export_rhs_to_cl_image
+       << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::MatMulKernelInfo type.
+ *
+ * @param[in] matmul_info arm_compute::MatMulKernelInfo type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::MatMulKernelInfo &matmul_info)
+{
+    std::stringstream str;
+    str << matmul_info;
+    return str.str();
+}
+
+/** Formatted output of the arm_compute::CpuMatMulSettings type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  settings arm_compute::CpuMatMulSettings type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::CpuMatMulSettings &settings)
+{
+    os << "CpuMatMulSettings="
+       << "["
+       << "fast_math=" << settings.fast_math()
+       << "]";
+
+    return os;
+}
+/** Formatted output of the arm_compute::CpuMatMulSettings type.
+ *
+ * @param[in] settings arm_compute::CpuMatMulSettings type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::CpuMatMulSettings &settings)
+{
+    std::stringstream str;
+    str << settings;
     return str.str();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary op);
+SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, SimpleTensor<T> &dst, ElementWiseUnary op);
 } // namespace reference
 } // namespace validation
 } // namespace test

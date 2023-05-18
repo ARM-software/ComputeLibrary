@@ -149,7 +149,7 @@ filegroup(
 )
 
 filegroup(
-        name = "arm_compute_srcs",
+        name = "arm_compute_core_srcs",
         srcs = ["{line_separator.join(srcs_core)}"]  +
     glob(["**/*.h",
     "**/*.hpp",
@@ -189,8 +189,7 @@ target_sources(
     arm_compute_core
     PRIVATE
     {line_separator.join(srcs_core)}
-)
-    """
+)"""
     return template
 
 
@@ -232,11 +231,11 @@ def gather_sources():
 
     # Get attributes
     data_types = ["qasymm8", "qasymm8_signed", "qsymm16",
-                  "fp16", "fp32", "integer"]  # Are all needed?
-    data_layouts = ["nhwc", "nchw"]  # Are both needed?
-    experimental_fixed_format_kernels = ["experimental_fixed_format_kernels"]
+                  "fp16", "fp32", "integer"]
+    data_layouts = ["nhwc", "nchw"]
+    fixed_format_kernels = ["fixed_format_kernels"]
     attrs = data_types + data_layouts + \
-        experimental_fixed_format_kernels + ["estate64"]
+        fixed_format_kernels + ["estate64"]
 
     # Setup data-type and data-layout files to include
     cpu_operators = filelist['cpu']['operators'].keys()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_TEST_VALIDATION_CONVOLUTION_H
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "support/Requires.h"
+#include "support/AclRequires.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 

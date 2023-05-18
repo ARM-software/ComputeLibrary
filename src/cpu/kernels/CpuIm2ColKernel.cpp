@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ namespace kernels
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                          bool has_bias, const Size2D &dilation, unsigned int num_groups)
+                          bool has_bias, const Size2D &dilation, unsigned int num_groups, unsigned int input_pad_right)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -70,7 +70,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     if(output->total_size() > 0)
     {
-        TensorInfo expected_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false));
+        TensorInfo expected_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false, num_groups, input_pad_right));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
@@ -246,6 +246,86 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
         *out_ptr = static_cast<T>(1);
     }
 }
+
+template <typename T, bool has_pads>
+inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
+                                  T                   *out_ptr,
+                                  bool                 has_bias,
+                                  int                  start_x,
+                                  int                  start_y,
+                                  int                  kernel_width,
+                                  int                  kernel_height,
+                                  int                  input_w,
+                                  int                  input_h,
+                                  int                  input_c,
+                                  int                  input_stride_y,
+                                  int                  input_stride_z,
+                                  int                  pad_value,
+                                  int                  dilation_x,
+                                  int                  dilation_y,
+                                  int                  pad_right)
+{
+    const int end_x              = start_x + kernel_width * dilation_x;
+    const int end_y              = start_y + kernel_height * dilation_y;
+    const int pad_quant          = kernel_width * (input_c + pad_right);
+    const int element_size       = static_cast<int>(sizeof(T));
+    const int channel_chunk_size = input_c * element_size;
+
+    if((start_y >= 0) && (end_y < input_h) && (start_x >= 0) && (end_x < input_w) && (dilation_x == 1) && (input_stride_y == channel_chunk_size))
+    {
+        for(int y = start_y; y < end_y; y += dilation_y)
+        {
+            const uint8_t *offset_ptr = in_ptr + (y * input_stride_z + start_x * input_stride_y);
+            for(int e = 0; e < kernel_width; e++)
+            {
+                memcpy(out_ptr, reinterpret_cast<const T *>(offset_ptr + e * channel_chunk_size), channel_chunk_size);
+                out_ptr += input_c + pad_right;
+            }
+        }
+    }
+    else
+    {
+        for(int y = start_y; y < end_y; y += dilation_y)
+        {
+            if(y < 0 || y >= input_h)
+            {
+                memset(static_cast<void *>(out_ptr), pad_value, pad_quant * element_size);
+                out_ptr += pad_quant;
+            }
+            else if(dilation_x > 1 || start_x < 0 || end_x >= input_w || input_stride_y != channel_chunk_size)
+            {
+                for(int x = start_x; x < end_x; x += dilation_x)
+                {
+                    if(x < 0 || x >= input_w)
+                    {
+                        memset(static_cast<void *>(out_ptr), pad_value, (input_c + pad_right) * element_size);
+                        out_ptr += input_c + pad_right;
+                    }
+                    else
+                    {
+                        memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), channel_chunk_size);
+                        out_ptr += input_c + pad_right;
+                    }
+                }
+            }
+            else
+            {
+                const uint8_t *offset_ptr = in_ptr + (y * input_stride_z + start_x * input_stride_y);
+                for(int e = 0; e < kernel_width; e++)
+                {
+                    memcpy(out_ptr, reinterpret_cast<const T *>(offset_ptr + e * channel_chunk_size), channel_chunk_size);
+                    out_ptr += input_c + pad_right;
+                }
+            }
+        }
+    }
+    // Append 1 if the convolution layer has biases
+    if(has_bias)
+    {
+        *out_ptr = static_cast<T>(1);
+    }
+}
+
 } // namespace
 
 template <typename T, bool has_pads, bool is_nchw>
@@ -280,7 +360,8 @@ void CpuIm2ColKernel::run_im2col(const ITensor *src, ITensor *dst, const Window 
     Iterator in(src, window_in_out);
     Iterator out(dst, window_in_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(
+        window, [&](const Coordinates & id)
     {
         const int start_w = id[width_idx] * stride_x - pad_left;
         const int start_h = id[height_idx] * stride_y - pad_top;
@@ -311,31 +392,53 @@ void CpuIm2ColKernel::run_im2col(const ITensor *src, ITensor *dst, const Window 
         }
         else
         {
-            linearize_volume_nhwc<T, has_pads>(input_ptr,
-                                               output_ptr,
-                                               _has_bias,
-                                               start_w,
-                                               start_h,
-                                               _kernel_width,
-                                               _kernel_height,
-                                               input_w,
-                                               input_h,
-                                               input_c,
-                                               input_stride_y,
-                                               input_stride_z,
-                                               pad_value,
-                                               _dilation.x(),
-                                               _dilation.y());
+            if(_input_pad_right > 0)
+            {
+                linearize_volume_nhwc<T, has_pads>(input_ptr,
+                                                   output_ptr,
+                                                   _has_bias,
+                                                   start_w,
+                                                   start_h,
+                                                   _kernel_width,
+                                                   _kernel_height,
+                                                   input_w,
+                                                   input_h,
+                                                   input_c,
+                                                   input_stride_y,
+                                                   input_stride_z,
+                                                   pad_value,
+                                                   _dilation.x(),
+                                                   _dilation.y(),
+                                                   _input_pad_right);
+            }
+            else
+            {
+                linearize_volume_nhwc<T, has_pads>(input_ptr,
+                                                   output_ptr,
+                                                   _has_bias,
+                                                   start_w,
+                                                   start_h,
+                                                   _kernel_width,
+                                                   _kernel_height,
+                                                   input_w,
+                                                   input_h,
+                                                   input_c,
+                                                   input_stride_y,
+                                                   input_stride_z,
+                                                   pad_value,
+                                                   _dilation.x(),
+                                                   _dilation.y());
+            }
         }
     },
     in, out);
 }
 
 void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                bool has_bias, const Size2D &dilation, unsigned int num_groups)
+                                bool has_bias, const Size2D &dilation, unsigned int num_groups, unsigned int input_pad_right)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, input_pad_right));
     ARM_COMPUTE_UNUSED(num_groups);
 
     _data_layout                   = src->data_layout();
@@ -343,14 +446,15 @@ void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
     const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
-    _conv_info      = conv_info;
-    _kernel_width   = kernel_dims.width;
-    _kernel_height  = kernel_dims.height;
-    _dilation       = dilation;
-    _convolved_dims = scaled_dimensions(src->dimension(width_idx), dst->dimension(height_idx),
-                                        _kernel_width, _kernel_height,
-                                        _conv_info, _dilation);
-    _has_bias = has_bias;
+    _conv_info       = conv_info;
+    _kernel_width    = kernel_dims.width;
+    _kernel_height   = kernel_dims.height;
+    _input_pad_right = input_pad_right;
+    _dilation        = dilation;
+    _convolved_dims  = scaled_dimensions(src->dimension(width_idx), dst->dimension(height_idx),
+                                         _kernel_width, _kernel_height,
+                                         _conv_info, _dilation);
+    _has_bias        = has_bias;
 
     if(_data_layout == DataLayout::NCHW)
     {
@@ -408,7 +512,7 @@ void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
     }
 
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_im2col_conv_shape(src, kernel_dims, conv_info, has_bias, dilation, false)));
+    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_im2col_conv_shape(src, kernel_dims, conv_info, has_bias, dilation, false, num_groups, _input_pad_right)));
 
     std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(src->dimension(width_idx), src->dimension(height_idx),
                                                                              kernel_dims.width, kernel_dims.height,
@@ -423,9 +527,9 @@ void CpuIm2ColKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
 }
 
 Status CpuIm2ColKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                 bool has_bias, const Size2D &dilation, unsigned int num_groups)
+                                 bool has_bias, const Size2D &dilation, unsigned int num_groups, unsigned int input_pad_right)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, input_pad_right));
     return Status{};
 }
 
@@ -437,8 +541,10 @@ void CpuIm2ColKernel::run_op(ITensorPack &tensors, const Window &window, const T
 
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
     (this->*_func)(src, dst, window);
 }
+
 const char *CpuIm2ColKernel::name() const
 {
     return "CpuIm2ColKernel";

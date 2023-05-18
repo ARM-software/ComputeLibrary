@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,22 @@ RelativeTolerance<float> tolerance_fp32(0.000001f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 RelativeTolerance<float> tolerance_fp16(0.01f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#if defined(__aarch64__)
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(0);
+#else  // #if !defined(__aarch64__)
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); // There is difference of 1, because quantizing in reference uses round policy "TO_NEAREST_UP", where the armv7a neon kernel uses "TO_ZERO"
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+#endif // #if !defined(__aarch64__)
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(AbsLayer)
 template <typename T>
 using NEAbsLayerFixture = AbsValidationFixture<Tensor, Accessor, NEAbsLayer, T>;
+
+template <typename T>
+using NEAbsLayerQuantizedFixture = AbsQuantizedValidationFixture<Tensor, Accessor, NEAbsLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -106,6 +116,32 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAbsLayerFixture<int32_t>, framework::DatasetM
 }
 TEST_SUITE_END() // S32
 TEST_SUITE_END() // Integer
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.2, -3) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.5, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEAbsLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(
+                       datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("InputQInfo", { QuantizationInfo(0.075, 6) })),
+                       framework::dataset::make("OutputQInfo", { QuantizationInfo(0.1, -7) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // AbsLayer
 TEST_SUITE_END() // Neon

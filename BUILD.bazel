@@ -72,6 +72,12 @@ bool_flag(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "enable_sve_validation",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
 #---------------------------------------------------------------------
 # Flag variables
 config_setting(
@@ -116,6 +122,13 @@ config_setting(
     },
 )
 
+config_setting(
+    name = "sve_validation_flag",
+    flag_values = {
+        ":enable_sve_validation": "true",
+    },
+)
+
 
 #---------------------------------------------------------------------
 # Common defines used for all targets
@@ -138,8 +151,6 @@ cc_library(
                   "DARM_COMPUTE_GRAPH_ENABLED",
                   "ARM_COMPUTE_ENABLE_SVEF32MM",
                   "ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS",
-                  "ENABLE_SVE",
-                  "ARM_COMPUTE_ENABLE_SVE",
                   "_GLIBCXX_USE_NANOSLEEP"
               ] + select({
                   "//:debug_flag": [
@@ -181,7 +192,7 @@ cc_library(
     name = "arm_compute_graph",
     srcs = ["//src:arm_compute_graph_srcs"],
     copts = [
-                "-march=armv8.2-a+fp16",  # What arch is it we should go for here?
+                "-march=armv8.2-a+fp16",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -200,7 +211,7 @@ cc_library(
             }),
     visibility = ["//visibility:public"],
     deps = [
-        "arm_compute",
+        "arm_compute_core",
         "//:common_defines",
         "//arm_compute:graph_headers",
     ],
@@ -214,7 +225,7 @@ cc_library(
     name = "arm_compute_sve2",
     srcs = ["//src:arm_compute_sve2_srcs"],
     copts = [
-                "-march=armv8.6-a+sve2+fp16+dotprod",  # What arch is it we should go for here?
+                "-march=armv8.6-a+sve2+fp16+dotprod",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -243,8 +254,10 @@ cc_library(
         "//conditions:default": [],
     }),
     local_defines = [
+        "ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_SVE",
         "ARM_COMPUTE_ENABLE_SVE2",
-        "ARM_COMPUTE_ENABLE_BF16"
+        "ARM_COMPUTE_ENABLE_BF16",
     ],
     deps = [
         "//:common_defines",
@@ -263,7 +276,7 @@ cc_library(
     name = "arm_compute_sve",
     srcs = ["//src:arm_compute_sve_srcs"],
     copts = [
-                "-march=armv8.2-a+sve+fp16+dotprod",  # What arch is it we should go for here?
+                "-march=armv8.2-a+sve+fp16+dotprod",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -292,6 +305,8 @@ cc_library(
         "//conditions:default": [],
     }),
     local_defines = [
+        "ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_SVE",
         "ARM_COMPUTE_ENABLE_BF16",
     ],
     deps = [
@@ -308,8 +323,8 @@ cc_library(
 # Core and Runtime library
 
 cc_library(
-    name = "arm_compute",
-    srcs = ["//src:arm_compute_srcs"],
+    name = "arm_compute_core",
+    srcs = ["//src:arm_compute_core_srcs"],
     hdrs = glob([
         "core/NEON/kernels/**/*.h",
         "core/NEON/kernels/**/*.hpp",
@@ -318,7 +333,7 @@ cc_library(
         "//:create_version_file",
     ],
     copts = [
-                "-march=armv8.2-a+fp16",  # What arch is it we should go for here?
+                "-march=armv8.2-a+fp16",
             ] + select({
                 "//:debug_flag": [
                     "-O0",
@@ -348,6 +363,8 @@ cc_library(
         "//conditions:default": [],
     }),
     local_defines = [
+        "ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_SVE",
         "ARM_COMPUTE_ENABLE_BF16",
     ],
     visibility = ["//visibility:public"],

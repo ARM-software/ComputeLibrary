@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ void NECast::configure(ITensor *input, ITensor *output, ConvertPolicy policy)
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), policy);
 }
 
-Status NECast::validate(ITensorInfo *input, ITensorInfo *output, ConvertPolicy policy)
+Status NECast::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy)
 {
     return cpu::CpuCast::validate(input, output, policy);
 }

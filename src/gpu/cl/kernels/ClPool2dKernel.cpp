@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -182,7 +182,8 @@ void ClPool2dKernel::configure(const ClCompileContext &compile_context, ITensorI
         }
         else
         {
-            build_opts.add_option("-DINITIAL_VALUE=" + float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
+            std::string initial_value = pool_info.use_inf_as_limit ? "(-INFINITY)" : float_to_string_with_full_precision(std::numeric_limits<float>::lowest());
+            build_opts.add_option("-DINITIAL_VALUE=" + initial_value);
         }
     }
     else

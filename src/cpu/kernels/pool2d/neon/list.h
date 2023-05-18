@@ -59,6 +59,12 @@ DECLARE_POOLING_KERNEL(poolingMxN_fp32_neon_nchw);
 #undef DECLARE_POOLING_KERNEL
 
 template <typename T>
+T get_initial_min(bool use_inf_as_limit)
+{
+    return use_inf_as_limit ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::lowest();
+}
+
+template <typename T>
 inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id, const ITensorInfo &info, int pool_stride_x, int pool_stride_y, DataLayout data_layout)
 {
     const int pad_left    = info.padding().left;

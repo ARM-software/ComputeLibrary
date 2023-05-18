@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-void sve_fp16_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op)
+void sve_fp16_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
+    ARM_COMPUTE_UNUSED(lut);
     return elementwise_sve_op<float16_t>(in, out, window, op);
 }
 }

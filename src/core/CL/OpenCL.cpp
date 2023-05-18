@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,10 @@
 
 #include "arm_compute/core/Error.h"
 
+#include <algorithm>
 #include <dlfcn.h>
 #include <iostream>
+#include <sstream>
 
 namespace arm_compute
 {
@@ -50,7 +52,7 @@ CLSymbols &CLSymbols::get()
 
 bool CLSymbols::load_default()
 {
-    static const std::vector<std::string> libraries{ "libOpenCL.so", "libGLES_mali.so", "libmali.so" };
+    static const std::vector<std::string> libraries_filenames{ "libOpenCL.so", "libGLES_mali.so", "libmali.so" };
 
     if(_loaded.first)
     {
@@ -60,40 +62,53 @@ bool CLSymbols::load_default()
     // Indicate that default loading has been tried
     _loaded.first = true;
 
-    for(const auto &lib : libraries)
+    if(load(libraries_filenames, /* use_loader */ false))
     {
-        if(load(lib, /* use_loader */false))
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from shared library");
-            return true;
-        }
+        ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from shared library");
+        return true;
     }
 
 #ifdef __ANDROID__
     // When running in NDK environment, the above libraries are not accessible.
-    static const std::vector<std::string> android_libraries{ "libOpenCL-pixel.so", "libOpenCL-car.so" };
+    static const std::vector<std::string> android_libraries_filenames{ "libOpenCL-pixel.so", "libOpenCL-car.so" };
 
-    for(const auto &lib : android_libraries)
+    if(load(android_libraries_filenames, /* use_loader */ true))
     {
-        if(load(lib, /* use_loader */true))
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from android shared library");
-            return true;
-        }
+        ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from android shared library");
+        return true;
     }
-#endif /* __ANDROID__ */
+#endif // __ANDROID__
 
-    std::cerr << "Couldn't find any OpenCL library.\n";
+    // If not returned till here then libraries not found
+    std::stringstream ss;
+    std::for_each(libraries_filenames.begin(), libraries_filenames.end(), [&ss](const std::string & s)
+    {
+        ss << s << " ";
+    });
+#ifdef __ANDROID__
+    std::for_each(android_libraries_filenames.begin(), android_libraries_filenames.end(), [&ss](const std::string & s)
+    {
+        ss << s << " ";
+    });
+#endif // __ANDROID__
+    std::cerr << "Couldn't find any of the following OpenCL library: " << ss.str() << std::endl;
     return false;
 }
 
-bool CLSymbols::load(const std::string &library, bool use_loader)
+bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool use_loader)
 {
-    void *handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
-
-    if(handle == nullptr)
+    void        *handle = nullptr;
+    unsigned int index  = 0;
+    for(index = 0; index < libraries_filenames.size(); ++index)
     {
-        std::cerr << "Can't load " << library << ": " << dlerror() << "\n";
+        handle = dlopen(libraries_filenames[index].c_str(), RTLD_LAZY | RTLD_LOCAL);
+        if(handle != nullptr)
+        {
+            break;
+        }
+    }
+    if(index == libraries_filenames.size())
+    {
         // Set status of loading to failed
         _loaded.second = false;
         return false;

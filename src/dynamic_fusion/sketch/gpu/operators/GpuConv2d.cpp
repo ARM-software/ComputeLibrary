@@ -45,49 +45,6 @@ namespace dynamic_fusion
 {
 namespace
 {
-bool export_to_cl_image_support(const ITensorInfo *tensor, GPUTarget gpu_target, const cl::Device &device, DataLayout data_layout)
-{
-    if(tensor->tensor_shape()[0] % 4 || (data_layout != DataLayout::NHWC))
-    {
-        return false;
-    }
-
-    // If not floating point
-    if(!is_data_type_float(tensor->data_type()))
-    {
-        return false;
-    }
-
-    if(gpu_target == GPUTarget::G71 || get_arch_from_target(gpu_target) == GPUTarget::MIDGARD)
-    {
-        return false;
-    }
-
-    // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
-    if(!image2d_from_buffer_supported(device))
-    {
-        return false;
-    }
-
-    // Check cl image pitch alignment
-    if(get_cl_image_pitch_alignment(device) == 0)
-    {
-        return false;
-    }
-
-    const size_t image_w     = tensor->tensor_shape()[0] / 4;
-    const size_t image_h     = tensor->tensor_shape()[1] * tensor->tensor_shape()[2] * tensor->tensor_shape()[3];
-    const size_t max_image_w = device.getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
-    const size_t max_image_h = device.getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
-
-    if(image_w > max_image_w || image_h > max_image_h)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 DirectConvComputeKernelInfo config_direct_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
 {
     // Get GPU target
@@ -126,7 +83,6 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    const DataLayout data_layout = src->data_layout();
     if(dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
@@ -150,9 +106,6 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
         {
             const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
             auto       settings   = ClComponentDirectConv2d::Settings();
-
-            settings.export_to_cl_image(
-                export_to_cl_image_support(src, gpu_target, cl_compile_ctx->get_device(), data_layout));
 
             settings.fast_relaxed_math(
                 (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
@@ -192,6 +145,7 @@ Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,
                               const Conv2dAttributes &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!wei->are_values_constant(), "Dynamic weights are not supported");
 
     // Check if tensors have valid id. I.e. they are created from a sketch
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
@@ -251,13 +205,13 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
 
     const auto sketch_ctx = sketch.implementation().context();
 
-    const auto data_layout = src->data_layout();
-    const auto gpu_target  = sketch_ctx->gpu_target();
+    const auto gpu_target = sketch_ctx->gpu_target();
 
     if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
         ARM_COMPUTE_ERROR_ON(cl_compile_ctx == nullptr);
+        ARM_COMPUTE_UNUSED(cl_compile_ctx);
 
         // Add Direct Conv2d Component
         {
@@ -266,19 +220,16 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
 
             auto settings = ClComponentDirectConv2d::Settings();
 
-            settings.export_to_cl_image(
-                export_to_cl_image_support(src, gpu_target, cl_compile_ctx->get_device(), data_layout));
-
             settings.fast_relaxed_math(
                 (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
                 && (dst->data_type() == DataType::F32 || dst->data_type() == DataType::F16));
+
+            settings.direct_conv_descriptor(desc);
 
             if(settings.export_to_cl_image())
             {
                 arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(wei);
             }
-
-            settings.direct_conv_descriptor(desc);
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,8 +47,6 @@ class Conv2dAttributes;
 class ClComponentDirectConv2dSettings
 {
 public:
-    /** Set export_to_cl_image flag */
-    ClComponentDirectConv2dSettings &export_to_cl_image(bool cl_image);
     /** Get export_to_cl_image flag */
     bool export_to_cl_image() const;
 
@@ -63,7 +61,6 @@ public:
     DirectConvComputeKernelInfo direct_conv_descriptor() const;
 
 private:
-    bool                        _export_to_cl_image{ false };
     bool                        _fast_relaxed_math{ true };
     DirectConvComputeKernelInfo _desc{}; // Direct convolution descriptor
 };

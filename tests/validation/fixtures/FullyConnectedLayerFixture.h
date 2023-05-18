@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -326,23 +326,32 @@ private:
         }
     }
 
-    void validate_with_tolerance(TensorType &target, SimpleTensor<T> &ref)
+    void validate_with_tolerance(TensorType &target, SimpleTensor<float> &ref)
     {
-        if(_data_type == DataType::F32)
-        {
-            constexpr RelativeTolerance<float> rel_tolerance_f32(0.05f);
-            constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f);
-            validate(AccessorType(target), ref, rel_tolerance_f32, 0, abs_tolerance_f32);
-        }
-        else if(_data_type == DataType::QASYMM8)
-        {
-            constexpr AbsoluteTolerance<uint32_t> tolerance_qasymm8(1);
-            validate(AccessorType(target), ref, tolerance_qasymm8);
-        }
-        else
-        {
-            validate(AccessorType(target), ref);
-        }
+        constexpr RelativeTolerance<float> rel_tolerance_f32(0.01f);
+        constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.001f);
+        validate(AccessorType(target), ref, rel_tolerance_f32, 0, abs_tolerance_f32);
+    }
+
+    void validate_with_tolerance(TensorType &target, SimpleTensor<half_float::half> &ref)
+    {
+        constexpr AbsoluteTolerance<float> abs_tolerance_f16(0.3f);
+        const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f));
+        constexpr float tolerance_num_f16 = 0.07f;
+
+        validate(AccessorType(target), ref, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
+    }
+
+    void validate_with_tolerance(TensorType &target, SimpleTensor<uint8_t> &ref)
+    {
+        constexpr AbsoluteTolerance<uint32_t> tolerance_qasymm8(1);
+        validate(AccessorType(target), ref, tolerance_qasymm8);
+    }
+
+    void validate_with_tolerance(TensorType &target, SimpleTensor<int8_t> &ref)
+    {
+        constexpr AbsoluteTolerance<uint32_t> tolerance_qasymm8_signed(1);
+        validate(AccessorType(target), ref, tolerance_qasymm8_signed);
     }
 
 public:
@@ -351,7 +360,7 @@ public:
 
     template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
-               DataType data_type, ActivationLayerInfo activation_info, bool constant_weights, bool constant_bias)
+               DataType data_type, ActivationLayerInfo activation_info, bool constant_weights, bool constant_bias, bool weights_reshaped)
     {
         _data_type = data_type;
 
@@ -368,7 +377,7 @@ public:
         _src.allocator()->init(src_info);
 
         TensorInfo wei_info(weights_shape, 1, data_type, weights_qinfo);
-        if(!constant_weights)
+        if(!constant_weights && weights_reshaped)
         {
             const TensorShape tr_weights_shape{ weights_shape[1], weights_shape[0] };
             wei_info.set_tensor_shape(tr_weights_shape);
@@ -388,8 +397,8 @@ public:
         fc_info.activation_info = activation_info;
         if(!constant_weights)
         {
-            fc_info.are_weights_reshaped = true;
-            fc_info.transpose_weights    = false;
+            fc_info.are_weights_reshaped = weights_reshaped;
+            fc_info.transpose_weights    = !weights_reshaped;
         }
         FunctionType fc;
         fc.configure(&_src, &_weights, &_bias, &_dst, fc_info);
@@ -428,7 +437,14 @@ public:
                 fill(AccessorType(_src), randomizer_offset);
                 if(!constant_weights)
                 {
-                    fill_transposed_weights(_weights, weights_shape, randomizer_offset + 1);
+                    if(weights_reshaped)
+                    {
+                        fill_transposed_weights(_weights, weights_shape, randomizer_offset + 1);
+                    }
+                    else
+                    {
+                        fill(AccessorType(_weights), randomizer_offset + 1);
+                    }
                 }
                 if(!constant_bias)
                 {
@@ -472,10 +488,10 @@ class FullyConnectedWithDynamicWeightsFixture : public FullyConnectedWithDynamic
 public:
     template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
-               DataType data_type, ActivationLayerInfo activation_info)
+               DataType data_type, ActivationLayerInfo activation_info, bool weights_reshaped)
     {
         FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, weights_shape, bias_shape,
-                                                                                                  dst_shape, data_type, activation_info, false, true);
+                                                                                                  dst_shape, data_type, activation_info, false, true, weights_reshaped);
     }
 };
 
@@ -488,7 +504,7 @@ public:
                DataType data_type, ActivationLayerInfo activation_info)
     {
         FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, weights_shape, bias_shape,
-                                                                                                  dst_shape, data_type, activation_info, true, false);
+                                                                                                  dst_shape, data_type, activation_info, true, false, false /* weights_reshaped (not used) */);
     }
 };
 } // namespace validation
