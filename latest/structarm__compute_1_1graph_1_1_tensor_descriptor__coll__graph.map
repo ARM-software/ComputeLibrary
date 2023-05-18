@@ -1,0 +1,8 @@
+<map id="TensorDescriptor" name="TensorDescriptor">
+<area shape="rect" id="node2" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="ICloneable\&lt; TensorDescriptor \&gt;" alt="" coords="5,184,236,211"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface. " alt="" coords="56,95,185,121"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor. " alt="" coords="489,184,593,211"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; size_t \&gt;" alt="" coords="457,95,624,121"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. " alt="" coords="472,5,609,32"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information. " alt="" coords="617,184,747,211"/>
+</map>

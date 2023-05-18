@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1cl__matmul_1_1_i_cl_mat_mul_native_kernel_config.xhtml" title="Basic interface for the matmul native kernel configuration. " alt="" coords="5,13,216,39"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__matmul_1_1_cl_mat_mul_native_default_config_valhall.xhtml" title="Valhall based OpenCL matmul configuration. " alt="" coords="264,5,479,47"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="ClQueue" name="ClQueue">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_queue.xhtml" title="Base class specifying the queue interface. " alt="" coords="17,171,85,197"/>
+<area shape="rect" id="node3" href="$struct_acl_queue__.xhtml" title="AclQueue_" alt="" coords="5,95,96,121"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1detail_1_1_header.xhtml" title="Header" alt="" coords="136,5,205,32"/>
+<area shape="rect" id="node6" href="$struct_acl_context__.xhtml" title="AclContext_" alt="" coords="121,95,221,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_context.xhtml" title="Context interface. " alt="" coords="197,171,275,197"/>
+</map>

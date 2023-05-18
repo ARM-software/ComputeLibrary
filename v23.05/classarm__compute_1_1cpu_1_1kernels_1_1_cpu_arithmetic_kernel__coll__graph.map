@@ -1,0 +1,9 @@
+<map id="CpuArithmeticKernel" name="CpuArithmeticKernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel.xhtml" title="CpuElementwiseKernel\l\&lt; CpuArithmeticKernel \&gt;" alt="" coords="116,351,303,392"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title="ICpuKernel\&lt; CpuArithmetic\lKernel \&gt;" alt="" coords="5,247,205,288"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="73,81,165,108"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title="ICpuKernel\&lt; Derived \&gt;" alt="" coords="32,157,205,184"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title="ICpuKernel\&lt; Derived \&gt;" alt="" coords="229,157,403,184"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="85,5,152,32"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1cpu_1_1kernels_1_1_cpu_elementwise_kernel.xhtml" title="Interface for an element&#45;wise operation kernel. " alt="" coords="230,247,402,288"/>
+</map>
