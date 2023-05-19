@@ -47,7 +47,7 @@ namespace validation
 {
 using namespace arm_compute::opencl::kernels;
 
-template <typename T, typename KernelType>
+template <typename T, typename KernelType, bool use_mmul = false>
 class MatMulKernelValidationFixture : public framework::Fixture
 {
 public:
@@ -94,13 +94,25 @@ public:
             permute(shape_b, PermutationVector(1U, 0U));
         }
 
+        // Skip configurations unsupported by the device.
         _device_supports_export_to_cl_image = image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
-
-        if(!export_rhs_to_cl_image || _device_supports_export_to_cl_image)
+        if(!_device_supports_export_to_cl_image && export_rhs_to_cl_image)
         {
-            _target    = compute_target(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type, lhs_q_info, rhs_q_info, dst_q_info);
-            _reference = compute_reference(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, data_type, lhs_q_info, rhs_q_info, dst_q_info);
+            ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+            framework::ARM_COMPUTE_PRINT_INFO();
+            return; // Note: Also need to skip the validate in corresponding FIXTURE_DATA_TEST_CASEs.
         }
+
+        _device_supports_mmul = arm_matrix_multiply_supported(CLKernelLibrary::get().get_device());
+        if(!_device_supports_mmul && use_mmul)
+        {
+            ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
+            framework::ARM_COMPUTE_PRINT_INFO();
+            return; // Note: Also need to skip the validate in corresponding FIXTURE_DATA_TEST_CASEs.
+        }
+
+        _target    = compute_target(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type, lhs_q_info, rhs_q_info, dst_q_info);
+        _reference = compute_reference(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, data_type, lhs_q_info, rhs_q_info, dst_q_info);
     }
 
 protected:
@@ -274,6 +286,7 @@ protected:
     CLTensor        _target{};
     SimpleTensor<T> _reference{};
     bool            _device_supports_export_to_cl_image{ true };
+    bool            _device_supports_mmul{ true };
 };
 
 } // namespace validation
