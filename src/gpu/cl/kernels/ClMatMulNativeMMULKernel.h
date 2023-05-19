@@ -86,6 +86,7 @@ public:
 private:
     int _m{ 1 };
     int _n{ 1 };
+    int _k{ 1 };
 };
 } // namespace kernels
 } // namespace opencl

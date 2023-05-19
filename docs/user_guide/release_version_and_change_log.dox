@@ -44,6 +44,9 @@ v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
  Users must no longer link their applications to this library and instead link only to the main `libarm_compute` library for core functionality.
  - Various optimizations and bug fixes.
+ - New features
+   - Add new OpenCL™ kernels:
+     - @ref opencl::kernels::ClMatMulNativeMMULKernel support for FP32 and FP16, with batch support
 
 v23.05 Public major release
  - New features:

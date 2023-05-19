@@ -61,6 +61,7 @@ const auto m0_values_nightly_lhs_nt = framework::dataset::make("M0", { 1, 2, 3, 
 
 /** N0 values to test --nightly*/
 const auto n0_values_nightly_rhs_nt = framework::dataset::make("N0", { 1, 2, 3, 4, 8, 16 });
+const auto n0_values_nightly_rhs_t  = framework::dataset::make("N0", { 1, 2, 3, 4, 8 });
 
 /** K0 value -- Fixed to 1 */
 const auto k0_value = framework::dataset::make("K0", { 1 });
@@ -86,15 +87,22 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
             { MatMulKernelInfo(false, false, 3, 5, 1), false }, // N0 not in {1, 2, 3, 4, 8, 16}
             { MatMulKernelInfo(false, false, 3, 6, 1), false }, // N0 not in {1, 2, 3, 4, 8, 16}
             { MatMulKernelInfo(false, false, 3, 3, 4), false }, // K0 not 1
-            { MatMulKernelInfo(false, false, 9, 1, 2), true },
-            { MatMulKernelInfo(false, false, 3, 16, 3), true },
-            { MatMulKernelInfo(false, false, 7, 3, 4), true },
+            { MatMulKernelInfo(false, false, 9, 1, 1), true },
+            { MatMulKernelInfo(false, false, 3, 16, 1), true },
+            { MatMulKernelInfo(false, false, 7, 3, 1), true },
 
             // Lhs not-transposed, Rhs transposed
             // TODO: COMPMID-6195
 
             // Lhs transposed, Rhs-not-transposed
-            // TODO: COMPMID-6196
+            { MatMulKernelInfo(false, true, 3, 11, 1), false }, // N0 not in {1, 2, 3, 4, 8}
+            { MatMulKernelInfo(false, true, 2, 17, 1), false }, // N0 not in {1, 2, 3, 4, 8}
+            { MatMulKernelInfo(false, true, 4, 5, 1), false },  // N0 not in {1, 2, 3, 4, 8}
+            { MatMulKernelInfo(false, true, 4, 4, 7), false },  // K0 is not 1
+            { MatMulKernelInfo(false, true, 4, 7, 1), false },  // N0 not in {1, 2, 3, 4, 8}
+            { MatMulKernelInfo(false, true, 3, 8, 1), true },
+            { MatMulKernelInfo(false, true, 8, 16, 1), true },
+            { MatMulKernelInfo(false, true, 2, 4, 1), true },
 
             // Lhs transposed, Rhs-transposed
             // TODO: COMPMID-6197
@@ -110,6 +118,7 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
         {
             TensorInfo output_info;
             Status     status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &output_info, pair.first);
+            ARM_COMPUTE_EXPECT(bool(status) == pair.second, framework::LogLevel::ERRORS);
         }
     }
     else
@@ -149,7 +158,7 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
             {
                 for(bool adj_rhs :
                     {
-                        false // TODO: COMPMID-6195, COMPMID-6196, COMPMID-6197
+                        false, true
                     })
                 {
                     TensorShape lhs_shape = std::get<0>(tuple);
@@ -240,7 +249,7 @@ TEST_SUITE(FP32)
 TEST_SUITE(Buffer)
 FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::TinyMatMulMMULDataset(),
                                                                                                                      framework::dataset::make("TransposeA", { false })),
-                                                                                                                     framework::dataset::make("TransposeB", { false })),
+                                                                                                                     framework::dataset::make("TransposeB", { false, true })),
                                                                                                                      m0_values_precommit),
                                                                                                                      n0_values_precommit),
                                                                                                                      k0_value),
@@ -255,7 +264,7 @@ FIXTURE_DATA_TEST_CASE(RunTiny, CLMatMulNativeMMULKernelFixture<float>, framewor
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulMMULDataset(),
                                                                                                                       framework::dataset::make("TransposeA", { false })),
-                                                                                                                      framework::dataset::make("TransposeB", { false })),
+                                                                                                                      framework::dataset::make("TransposeB", { false, true })),
                                                                                                                       m0_values_precommit),
                                                                                                                       n0_values_precommit),
                                                                                                                       k0_value),
@@ -268,14 +277,30 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<float>, framewo
         validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
-                                                                                                                  framework::dataset::make("TransposeA", { false })),
-                                                                                                                  framework::dataset::make("TransposeB", { false })),
-                                                                                                                  m0_values_nightly_lhs_nt),
-                                                                                                                  n0_values_nightly_rhs_nt),
-                                                                                                                  k0_value),
-                                                                                                                  framework::dataset::make("ExportRhsToCLImage", { false })),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { false })),
+                                                                       framework::dataset::make("TransposeB", { false })),
+                                                               m0_values_nightly_lhs_nt),
+                                                       n0_values_nightly_rhs_nt),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    if(_device_supports_mmul)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeRHSTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { false })),
+                                                                       framework::dataset::make("TransposeB", { true })),
+                                                               m0_values_nightly_lhs_nt),
+                                                       n0_values_nightly_rhs_t),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     if(_device_supports_mmul)
@@ -288,7 +313,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulNativeMMULKernelFixture<float>, framewo
 FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(combine(combine(datasets::HighDimensionalMatMulMMULDataset(),
                                                                                framework::dataset::make("TransposeA", { false })),
-                                                                       framework::dataset::make("TransposeB", { false })),
+                                                                       framework::dataset::make("TransposeB", { false, true })),
                                                                framework::dataset::make("M0", { 2 })),
                                                        framework::dataset::make("N0", { 2 })),
                                                framework::dataset::make("K0", { 1 })),
@@ -309,7 +334,7 @@ TEST_SUITE(FP16)
 TEST_SUITE(Buffer)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulMMULDataset(),
                                                                                                                      framework::dataset::make("TransposeA", { false })),
-                                                                                                                     framework::dataset::make("TransposeB", { false })),
+                                                                                                                     framework::dataset::make("TransposeB", { false, true })),
                                                                                                                      m0_values_precommit),
                                                                                                                      n0_values_precommit),
                                                                                                                      k0_value),
@@ -322,14 +347,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<half>, framewor
         validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
-                                                                                                                 framework::dataset::make("TransposeA", { false })),
-                                                                                                                 framework::dataset::make("TransposeB", { false })),
-                                                                                                                 m0_values_nightly_lhs_nt),
-                                                                                                                 n0_values_nightly_rhs_nt),
-                                                                                                                 k0_value),
-                                                                                                                 framework::dataset::make("ExportRhsToCLImage", { false })),
-                                                                                                                 framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { false })),
+                                                                       framework::dataset::make("TransposeB", { false })),
+                                                               m0_values_nightly_lhs_nt),
+                                                       n0_values_nightly_rhs_nt),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    if(_device_supports_mmul)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLargeRHSTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { false })),
+                                                                       framework::dataset::make("TransposeB", { true })),
+                                                               m0_values_nightly_lhs_nt),
+                                                       n0_values_nightly_rhs_t),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     if(_device_supports_mmul)
