@@ -1,6 +1,8 @@
 # Library builds
 build/
 bazel-*
+compute_kernel_writer/build/
+compute_kernel_writer/cmake-build*
 
 # Cscope/Ctags files
 *cscope*

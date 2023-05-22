@@ -41,19 +41,22 @@ int32_t main()
     const auto test0 = std::make_unique<UtilsTest>();
     const auto test1 = std::make_unique<TensorBitMaskTrueTest>();
     const auto test2 = std::make_unique<TensorBitMaskFalseTest>();
+    tests.push_back(test0.get());
+    tests.push_back(test1.get());
+    tests.push_back(test2.get());
+
+#ifdef COMPUTE_KERNEL_WRITER_OPENCL_ENABLED
     const auto test3 = std::make_unique<CLTileInternalVariableNamesTest>();
     const auto test4 = std::make_unique<CLTileInternalNumVariablesTest>();
     const auto test5 = std::make_unique<CLTileAccessScalarVariableTest>();
     const auto test6 = std::make_unique<CLTileAccessScalarVariableBroadcastXTest>();
     const auto test7 = std::make_unique<CLTileAccessScalarVariableBroadcastYTest>();
-    tests.push_back(test0.get());
-    tests.push_back(test1.get());
-    tests.push_back(test2.get());
     tests.push_back(test3.get());
     tests.push_back(test4.get());
     tests.push_back(test5.get());
     tests.push_back(test6.get());
     tests.push_back(test7.get());
+#endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;
 
