@@ -404,8 +404,8 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 {
     TensorShape shape_transposed{ input.tensor_shape() };
 
-    shape_transposed.set(0, input.dimension(1));
-    shape_transposed.set(1, input.dimension(0));
+    shape_transposed.set(0, input.dimension(1), false);
+    shape_transposed.set(1, input.dimension(0), false);
 
     return shape_transposed;
 }
