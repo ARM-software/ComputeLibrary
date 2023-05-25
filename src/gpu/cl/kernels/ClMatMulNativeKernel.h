@@ -42,22 +42,24 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClMatMulNativeKernel);
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  compile_context The compile context to be used.
-     * @param[in]  lhs             Input tensor for the LHS matrix. Data type supported: F32/F16.
-     *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
-     * @param[in]  rhs             Input tensor for the RHS matrix. Data type supported: same as @p lhs.
-     *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
-     * @param[out] dst             Output tensor info. Data type supported: same as @p lhs
-     * @param[in]  matmul_info     Attributes for Batch MatMul Kernel
+     * @param[in]  compile_context    The compile context to be used.
+     * @param[in]  lhs                Input tensor for the LHS matrix. Data type supported: F32/F16.
+     *                                Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
+     * @param[in]  rhs                Input tensor for the RHS matrix. Data type supported: same as @p lhs.
+     *                                Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
+     * @param[out] dst                Output tensor info. Data type supported: same as @p lhs
+     * @param[in]  matmul_kernel_info Attributes for Batch MatMul Kernel
+     * @param[in]  act_info           Specifies activation function to use after Matrix multiplication. Default is Identity function.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMatMulNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

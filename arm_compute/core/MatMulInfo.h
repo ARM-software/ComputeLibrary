@@ -58,11 +58,6 @@ public:
     {
         return _adj_rhs;
     }
-    /* Get Fused Activation Layer Info */
-    ActivationLayerInfo fused_activation() const
-    {
-        return _fused_act;
-    }
     /* Set Adjoint LHS flag */
     MatMulInfo &adj_lhs(bool adj_lhs)
     {
@@ -75,17 +70,10 @@ public:
         _adj_rhs = adj_rhs;
         return *this;
     }
-    /* Set Fused Activation Layer Info */
-    MatMulInfo &fused_activation(const ActivationLayerInfo &act_info)
-    {
-        _fused_act = act_info;
-        return *this;
-    }
 
 private:
     bool                _adj_lhs{ false };
     bool                _adj_rhs{ false };
-    ActivationLayerInfo _fused_act{}; // disabled by default
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_MATMULINFO_H */

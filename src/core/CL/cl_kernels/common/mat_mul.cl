@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "activation_float_helpers.h"
 #include "helpers.h"
 #include "tile_helpers.h"
 
@@ -31,6 +32,7 @@
  *       should NOT be confused with the batch size of the model. For NHWC the "batch" is the "H" dimension
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
+ * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output bounded activation functions.
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
@@ -86,7 +88,7 @@ __kernel void mat_mul_native_nt_nt(
     })
 
     const int rhs_z = z * rhs_h;
-    int k;
+    int       k;
     for(k = 0; k <= K - K0; k += K0)
     {
         TILE(DATA_TYPE, M0, K0, a);
@@ -111,7 +113,7 @@ __kernel void mat_mul_native_nt_nt(
         lhs_offset_first_element_in_bytes += K0 * sizeof(DATA_TYPE);
     }
 
-#ifdef K % K0 != 0
+#if K % K0 != 0
     /* Leftover Loop */
     for(; k < K; ++k)
     {
@@ -147,6 +149,8 @@ __kernel void mat_mul_native_nt_nt(
         indirect_buffer[_i].v = min(_i, select(M0 - 1, PARTIAL_STORE_M0 - 1, y_cond));
     });
 
+    T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
+
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, 0, dst_stride_y, x_cond, acc, indirect_buffer);
 }
 #endif // defined(MAT_MUL_NATIVE_NT_NT)
@@ -158,6 +162,7 @@ __kernel void mat_mul_native_nt_nt(
  *       should NOT be confused with the batch size of the model. For NHWC the "batch" is the "H" dimension
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
+ * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output bounded activation functions.
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
@@ -213,7 +218,7 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
     })
 
     const int rhs_z = z * rhs_h;
-    int k;
+    int       k;
     for(k = 0; k <= K - K0; k += K0)
     {
         TILE(DATA_TYPE, M0, K0, a);
@@ -301,6 +306,8 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
         indirect_buffer[_i].v = min(_i, select(M0 - 1, PARTIAL_STORE_M0 - 1, y_cond));
     });
 
+    T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
+
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, 0, dst_stride_y, x_cond, acc, indirect_buffer);
 }
 #endif // defined(MAT_MUL_NATIVE_NT_T)
@@ -312,6 +319,7 @@ __kernel void mat_mul_native_nt_t(TENSOR3D_T(lhs, BUFFER),
  *       should NOT be confused with the batch size of the model. For NHWC the "batch" is the "H" dimension
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
+ * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output bounded activation functions.
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
@@ -367,7 +375,7 @@ __kernel void mat_mul_native_t_nt(
     })
 
     const int rhs_z = z * rhs_h;
-    int k;
+    int       k;
     for(k = 0; k <= K - K0; k += K0)
     {
         TILE(DATA_TYPE, K0, M0, a);
@@ -405,7 +413,7 @@ __kernel void mat_mul_native_t_nt(
         lhs_offset_first_element_in_bytes += K0 * lhs_stride_y;
     }
 
-#ifdef K % K0 != 0
+#if K % K0 != 0
     /* Leftover Loop */
     for(; k < K; ++k)
     {
@@ -451,6 +459,8 @@ __kernel void mat_mul_native_t_nt(
         indirect_buffer[_i].v = min(_i, select(M0 - 1, PARTIAL_STORE_M0 - 1, y_cond));
     });
 
+    T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
+
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, 0, dst_stride_y, x_cond, acc, indirect_buffer);
 }
 #endif // defined(MAT_MUL_NATIVE_T_NT)
@@ -462,6 +472,7 @@ __kernel void mat_mul_native_t_nt(
  *       should NOT be confused with the batch size of the model. For NHWC the "batch" is the "H" dimension
  * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
+ * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output bounded activation functions.
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The tensor type ("BUFFER" or "IMAGE") of the rhs tensor must be passed at compile time using -DRHS_TENSOR_TYPE (e.g. -DRHS_TENSOR_TYPE=BUFFER)
@@ -517,7 +528,7 @@ __kernel void mat_mul_native_t_t(
     })
 
     const int rhs_z = z * rhs_h;
-    int k;
+    int       k;
     for(k = 0; k <= K - K0; k += K0)
     {
         TILE(DATA_TYPE, K0, M0, a);
@@ -565,7 +576,7 @@ __kernel void mat_mul_native_t_t(
         lhs_offset_first_element_in_bytes += K0 * lhs_stride_y;
     }
 
-#ifdef K % K0 != 0
+#if K % K0 != 0
     /* Leftover Loop */
     for(; k < K; ++k)
     {
@@ -618,6 +629,8 @@ __kernel void mat_mul_native_t_t(
     {
         indirect_buffer[_i].v = min(_i, select(M0 - 1, PARTIAL_STORE_M0 - 1, y_cond));
     });
+
+    T_ACTIVATION(DATA_TYPE, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
 
     T_STORE_INDIRECT_WIDTH_SELECT(DATA_TYPE, M0, N0, PARTIAL_STORE_N0, BUFFER, dst, 0, dst_stride_y, x_cond, acc, indirect_buffer);
 }

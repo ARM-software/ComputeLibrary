@@ -112,7 +112,7 @@ Status validate_export_to_cl_image(const ITensorInfo *rhs, const MatMulKernelInf
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_to_cl_image(rhs), "Export to CLImage is not supported for this device/configuration");
     }
 
-    return Status {};
+    return Status{};
 }
 }
 ClMatMulNativeKernel::ClMatMulNativeKernel()
@@ -120,8 +120,9 @@ ClMatMulNativeKernel::ClMatMulNativeKernel()
     _type = CLKernelType::GEMM;
 }
 
-Status ClMatMulNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info)
+Status ClMatMulNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs);
@@ -138,7 +139,8 @@ Status ClMatMulNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo 
 
     return Status{};
 }
-void ClMatMulNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info)
+void ClMatMulNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                                     const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst, &compile_context, &matmul_kernel_info);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, dst, matmul_kernel_info);
@@ -175,6 +177,11 @@ void ClMatMulNativeKernel::configure(const ClCompileContext &compile_context, IT
     build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     build_opts.add_option("-DK=" + support::cpp11::to_string(k));
     build_opts.add_option_if_else(_export_rhs_to_cl_image, "-DRHS_TENSOR_TYPE=IMAGE", "-DRHS_TENSOR_TYPE=BUFFER");
+
+    // Define values for activation function
+    build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(act_info.a())));
+    build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(act_info.b())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
 
     std::string kernel_name("mat_mul_native");
     kernel_name += matmul_kernel_info.adj_lhs ? "_t" : "_nt";
@@ -218,8 +225,8 @@ void ClMatMulNativeKernel::run_op(ITensorPack &tensors, const Window &window, cl
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const ICLTensor *lhs    = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const ICLTensor *rhs    = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const ICLTensor *lhs = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const ICLTensor *rhs = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
     ICLTensor       *dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, dst);

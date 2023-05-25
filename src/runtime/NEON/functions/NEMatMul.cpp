@@ -25,9 +25,9 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/Tensor.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuMatMul.h"
-#include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
@@ -49,7 +49,7 @@ NEMatMul::NEMatMul()
 
 NEMatMul::~NEMatMul() = default;
 
-void NEMatMul::configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatMulInfo &info, const CpuMatMulSettings &settings)
+void NEMatMul::configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
 {
     _impl->lhs    = lhs;
     _impl->rhs    = rhs;
@@ -57,14 +57,14 @@ void NEMatMul::configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatM
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->lhs, _impl->rhs, _impl->output);
     _impl->op = std::make_unique<cpu::CpuMatMul>();
-    _impl->op->configure(lhs->info(), rhs->info(), output->info(), info, settings);
+    _impl->op->configure(lhs->info(), rhs->info(), output->info(), info, settings, act_info);
     _impl->run_pack          = { { ACL_SRC_0, lhs }, { ACL_SRC_1, rhs }, { ACL_DST, output } };
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
-Status NEMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &info, const CpuMatMulSettings &settings)
+Status NEMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
 {
-    return cpu::CpuMatMul::validate(lhs, rhs, output, info, settings);
+    return cpu::CpuMatMul::validate(lhs, rhs, output, info, settings, act_info);
 }
 
 void NEMatMul::run()

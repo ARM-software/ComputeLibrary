@@ -35,11 +35,11 @@
 #include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
@@ -3691,9 +3691,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulI
     os << "MatMulKernelInfo="
        << "["
        << "adj_lhs=" << matmul_info.adj_lhs() << ", "
-       << "adj_rhs=" << matmul_info.adj_rhs() << ", "
-       << "fused_activation=" << matmul_info.fused_activation().activation() << "]";
-
+       << "adj_rhs=" << matmul_info.adj_rhs() << "] ";
     return os;
 }
 /** Formatted output of the arm_compute::MatMulInfo type.
