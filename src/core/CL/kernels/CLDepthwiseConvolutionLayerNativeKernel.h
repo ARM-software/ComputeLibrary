@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "src/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/ConvolutionInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
 
 namespace arm_compute

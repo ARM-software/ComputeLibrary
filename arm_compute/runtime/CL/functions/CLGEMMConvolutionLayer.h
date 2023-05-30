@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"

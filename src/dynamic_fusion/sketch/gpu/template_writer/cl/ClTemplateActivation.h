@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEACTIVATION
 
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"

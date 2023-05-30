@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_TYPES_H
 
 #include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/Strides.h"
@@ -51,6 +50,27 @@ using half = half_float::half;
 using PermutationVector = Strides;
 /** Bidirectional strides */
 using BiStrides = Coordinates;
+
+/** Available activation functions */
+enum class ActivationFunction
+{
+    LOGISTIC,        /**< Logistic ( \f$ f(x) = \frac{1}{1 + e^{-x}} \f$ ) */
+    TANH,            /**< Hyperbolic tangent ( \f$ f(x) = a \cdot tanh(b \cdot x) \f$ ) */
+    RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
+    BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
+    LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
+    LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+    ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
+    SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
+    SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
+    LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+    IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
+    HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
+    SWISH,           /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
+    GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
+};
 
 /** Image colour formats */
 enum class Format
@@ -1655,126 +1675,6 @@ private:
     float _bbox_xform_clip;
 };
 
-/** Activation Layer Information class */
-class ActivationLayerInfo
-{
-public:
-    /** Available activation functions */
-    enum class ActivationFunction
-    {
-        LOGISTIC,        /**< Logistic ( \f$ f(x) = \frac{1}{1 + e^{-x}} \f$ ) */
-        TANH,            /**< Hyperbolic tangent ( \f$ f(x) = a \cdot tanh(b \cdot x) \f$ ) */
-        RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
-        BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
-        LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
-        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
-        SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
-        ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
-        ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
-        SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
-        SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
-        LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
-        IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
-        HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
-        SWISH,           /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
-        GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
-    };
-
-    /** Lookup table  */
-    using LookupTable256 = std::array<qasymm8_t, 256>;
-
-    ActivationLayerInfo() = default;
-    /** Default Constructor
-     *
-     * @param[in] f The activation function to use.
-     * @param[in] a (Optional) The alpha parameter used by some activation functions
-     *              (@ref ActivationFunction::BOUNDED_RELU, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
-     * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::TANH).
-     */
-    ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
-        : _act(f), _a(a), _b(b), _enabled(true)
-    {
-    }
-    /** Get the type of activation function */
-    ActivationFunction activation() const
-    {
-        return _act;
-    }
-    /** Get the alpha value */
-    float a() const
-    {
-        return _a;
-    }
-    /** Get the beta value */
-    float b() const
-    {
-        return _b;
-    }
-    /** Check if initialised */
-    bool enabled() const
-    {
-        return _enabled;
-    }
-
-#ifdef __aarch64__
-    const LookupTable256 &lut() const
-    {
-        return _lut;
-    }
-    void setLookupTable256(LookupTable256 &lut)
-    {
-        _lut = std::move(lut);
-    }
-#endif // __aarch64__
-private:
-    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::IDENTITY };
-    float              _a       = {};
-    float              _b       = {};
-    bool               _enabled = { false };
-
-#ifdef __aarch64__
-    LookupTable256 _lut = {};
-#endif // __aarch64__
-};
-
-/** Fully connected layer info */
-struct FullyConnectedLayerInfo
-{
-    /* Fused-activation parameters */
-    ActivationLayerInfo activation_info{}; /**<  Fused activation to apply after the matrix multiplication. */
-    /* Information about weights */
-    DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
-    bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
-    bool       are_weights_reshaped{ false };              /**<  @deprecated Reshape the weights tensor if false. */
-    bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
-    bool       enable_fast_math{ false };                  /**<  Enable fast math computation. */
-    /* Other parameters */
-    bool fp_mixed_precision{ false }; /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
-
-    /** Sets the weights trained data layout
-     *
-     * @param[in] layout Data layout that the weights were trained with
-     *
-     * @return Updated object
-     */
-    FullyConnectedLayerInfo &set_weights_trained_layout(DataLayout layout)
-    {
-        weights_trained_layout = layout;
-        return *this;
-    }
-    /** Sets the transpose weights flag
-     *
-     * @param[in] should_transpose_weights Boolean flag indicating if weights should be transposed
-     *
-     * @return Updated object
-     */
-    FullyConnectedLayerInfo &set_transpose_weights(bool should_transpose_weights)
-    {
-        transpose_weights = should_transpose_weights;
-        return *this;
-    }
-};
-
 /** Normalization Layer Information class */
 class NormalizationLayerInfo
 {
@@ -2193,19 +2093,6 @@ private:
     bool _broadcast_bias;
 };
 
-struct ConvolutionInfo
-{
-    ConvolutionInfo() = default;
-    ConvolutionInfo(const PadStrideInfo &pad_stride_info, unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
-        : pad_stride_info(pad_stride_info), depth_multiplier(depth_multiplier), act_info(act_info), dilation(dilation)
-    {
-    }
-    PadStrideInfo       pad_stride_info{};        /**< Convolution info (Pads, strides,...) */
-    unsigned int        depth_multiplier{ 1 };    /**< Multiplier to apply to input's depth to retrieve the output depth. Defaults to 1 */
-    ActivationLayerInfo act_info{};               /**< Fused activation to apply after convolution. */
-    Size2D              dilation{ Size2D(1, 1) }; /**< Dilation, in elements, across x and y. Defaults to (1, 1). */
-};
-
 /** GEMMLowp output stage type */
 enum class GEMMLowpOutputStageType
 {
@@ -2263,287 +2150,6 @@ struct GEMMRHSMatrixInfo
 };
 
 class ITensorInfo;
-/** GEMM information class. This class stores the necessary information to compute GEMM functions
- *
- * This object also contains the information about how matrix A and matrix B have been reshaped
- *
- */
-class GEMMInfo
-{
-public:
-    /** Default constructor */
-    GEMMInfo() noexcept
-        : _is_a_reshaped(false),
-          _is_b_reshaped(false),
-          _reshape_b_only_on_first_run(true),
-          _depth_output_gemm3d(0),
-          _reinterpret_input_as_3d(false),
-          _retain_internal_weights(false),
-          _gemmlowp_output_stage(),
-          _fast_math(false),
-          _fp_mixed_precision(false),
-          _broadcast_bias(false),
-          _pretranspose_A(false),
-          _pretranspose_B(false),
-          _activation_info(),
-          _post_ops(),
-          _fixed_format(false),
-          _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
-    {
-    }
-    /** Constructor
-     *
-     * @param[in] is_a_reshaped               True if the matrix A has been reshaped
-     * @param[in] is_b_reshaped               True if the matrix B has been reshaped
-     * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
-     * @param[in] depth_output_gemm3d         (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
-     *                                        If 0 the output will not be reinterpreted as 3D. Default 0
-     * @param[in] reinterpret_input_as_3d     (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
-     *                                        to perform 1x1 convolutions with the NHWC data layout)
-     * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
-     * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
-     * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
-     * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
-     * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
-     * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
-     * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
-     * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_compute::WeightFormat.
-     * @param[in] weight_format               (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_compute::WeightFormat::UNSPECIFIED.
-     */
-    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>(),
-             bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED) noexcept
-        : _is_a_reshaped(is_a_reshaped),
-          _is_b_reshaped(is_b_reshaped),
-          _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
-          _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d),
-          _retain_internal_weights(retain_internal_weights),
-          _gemmlowp_output_stage(gemmlowp_output_stage),
-          _fast_math(fast_math),
-          _fp_mixed_precision(fp_mixed_precision),
-          _broadcast_bias(broadcast_bias),
-          _pretranspose_A(false),
-          _pretranspose_B(false),
-          _activation_info(activation_info),
-          _post_ops(post_ops),
-          _fixed_format(fixed_format),
-          _weight_format(weight_format)
-    {
-    }
-    /** Flag which specifies if the matrix A has been reshaped
-     *
-     * @return True if the matrix A has been reshaped
-     */
-    bool is_a_reshaped() const
-    {
-        return _is_a_reshaped;
-    };
-    /** Flag which specifies if the matrix B has been reshaped
-     *
-     * @return True if the matrix B has been reshaped
-     */
-    bool is_b_reshaped() const
-    {
-        return _is_b_reshaped;
-    };
-    /** Flag which specifies if the reshape of matrix B should executed only for the first
-     *
-     * @note This flag could be set to TRUE when GEMM is used to accelerate convolution layer
-     *
-     * @return True if the reshaped of matrix B happens only for the first run
-     */
-    bool reshape_b_only_on_first_run() const
-    {
-        return _reshape_b_only_on_first_run;
-    };
-    /** Depth of the output when GEMM output is reinterpreted as 3D tensor
-     *
-     * @return the depth of the output tensor
-     */
-    int depth_output_gemm3d() const
-    {
-        return _depth_output_gemm3d;
-    };
-    /** Flag which specifies if the input tensor has to be reinterpreted as 3D
-     *
-     * @return True if the input tensor has to be reinterpreted as 3D tensor
-     */
-    bool reinterpret_input_as_3d() const
-    {
-        return _reinterpret_input_as_3d;
-    };
-    /** Flag which specifies if the weights tensor has to be retained from previous run
-     *
-     * @return True if the weights tensor has to be retained
-     */
-    bool retain_internal_weights() const
-    {
-        return _retain_internal_weights;
-    };
-    /** GEMMLowp output stage
-     *
-     * @return the GEMMLowp output stage info
-     */
-    GEMMLowpOutputStageInfo gemmlowp_output_stage() const
-    {
-        return _gemmlowp_output_stage;
-    };
-    /** Sets GEMMLowp output stage
-     *
-     * @param[in] output_stage Output stage to set
-     */
-    void set_gemmlowp_output_stage(GEMMLowpOutputStageInfo &output_stage)
-    {
-        _gemmlowp_output_stage = output_stage;
-    };
-    /** Flag which specifies if a wider accumulator should be used.
-     *
-     * @return True if a wider accumulator has to be used
-     */
-    bool fp_mixed_precision() const
-    {
-        return _fp_mixed_precision;
-    };
-    /** Flag which specifies if a shorter accumulator to be used.
-     *
-     * @return True if a shorter accumulator has to be used
-     */
-    bool fast_math() const
-    {
-        return _fast_math;
-    };
-    /** Set fast math flag
-     *
-     * @param[in] fast_math Flag to set
-     */
-    void set_fast_math(bool fast_math)
-    {
-        _fast_math = fast_math;
-    }
-    /** Flag which specifies whether to broadcast the shape of the bias tensor.
-     *
-     * @return True if the shape of the bias tensor is to be broadcasted.
-     */
-    bool broadcast_bias() const
-    {
-        return _broadcast_bias;
-    };
-    /** Flag which specifies whether A should be pre-transposed if supported.
-     *
-     * @return True if A should be pre-transposed else false.
-     */
-    bool pretranspose_A() const
-    {
-        return _pretranspose_A;
-    };
-    /** Set pre-transpose A flag
-     *
-     * @param[in] flag Flag to set
-     */
-    void set_pretranspose_A(bool flag)
-    {
-        _pretranspose_A = flag;
-    }
-    /** Flag which specifies whether b should be pre-transposed if supported.
-     *
-     * @return True if b should be pre-transposed else false.
-     */
-    bool pretranspose_B() const
-    {
-        return _pretranspose_B;
-    };
-    /** Set pre-transpose b flag
-     *
-     * @param[in] flag Flag to set
-     */
-    void set_pretranspose_B(bool flag)
-    {
-        _pretranspose_B = flag;
-    }
-    /** Activation layer to apply after the matrix multiplication
-     *
-     * @return ActivationLayerInfo object
-     */
-    ActivationLayerInfo activation_info() const
-    {
-        return _activation_info;
-    }
-    /** Set activation layer info
-     *
-     * @param[in] activation_info ActivationLayerInfo object to set
-     */
-    void set_activation_info(const ActivationLayerInfo &activation_info)
-    {
-        _activation_info = activation_info;
-    }
-    /** Post operations to apply after the matrix multiplication
-     *
-     * @return experimental::PostOpList object
-     */
-    const experimental::PostOpList<ITensorInfo *> &post_ops() const
-    {
-        return _post_ops;
-    }
-    /** Set post ops
-     *
-     * @param[in] post_ops experimental::PostOpList object to set
-     */
-    void set_post_ops(const experimental::PostOpList<ITensorInfo *> &post_ops)
-    {
-        _post_ops = post_ops;
-    }
-    /** Flag which specifies if the GEMM operation is running fixed-format kernels.
-     *
-     * @return True if the GEMM operation is running fixed-format kernel else false.
-     */
-    bool fixed_format() const
-    {
-        return _fixed_format;
-    }
-
-    /** Set fixed-format flag
-     *
-     * @param[in] fixed_format sets whether or not to use fixed-format kernels
-     */
-    void set_fixed_format(bool fixed_format)
-    {
-        _fixed_format = fixed_format;
-    }
-
-    arm_compute::WeightFormat weight_format() const
-    {
-        return _weight_format;
-    }
-
-    /** Set weight format to be used
-     *
-     * @param[in] weight_format arm_compute::WeightFormat enumeration
-     */
-    void set_weight_format(arm_compute::WeightFormat weight_format)
-    {
-        _weight_format = weight_format;
-    }
-
-private:
-    bool                                    _is_a_reshaped;
-    bool                                    _is_b_reshaped;
-    bool                                    _reshape_b_only_on_first_run;
-    int                                     _depth_output_gemm3d;
-    bool                                    _reinterpret_input_as_3d;
-    bool                                    _retain_internal_weights;
-    GEMMLowpOutputStageInfo                 _gemmlowp_output_stage;
-    bool                                    _fast_math;
-    bool                                    _fp_mixed_precision;
-    bool                                    _broadcast_bias;
-    bool                                    _pretranspose_A;
-    bool                                    _pretranspose_B;
-    ActivationLayerInfo                     _activation_info;
-    experimental::PostOpList<ITensorInfo *> _post_ops;
-    bool                                    _fixed_format;
-    arm_compute::WeightFormat               _weight_format;
-};
 
 /** Winograd information */
 struct WinogradInfo
@@ -2623,51 +2229,6 @@ struct IOFormatInfo
     std::string row_delim;
     /** Align columns */
     bool align_columns;
-};
-
-/** Class for holding information related to matrix multiplication function
- */
-class MatMulInfo
-{
-public:
-    /* Get Adjoint LHS flag value */
-    bool adj_lhs() const
-    {
-        return _adj_lhs;
-    }
-    /* Get Adjoint RHS flag value */
-    bool adj_rhs() const
-    {
-        return _adj_rhs;
-    }
-    /* Get Fused Activation Layer Info */
-    ActivationLayerInfo fused_activation() const
-    {
-        return _fused_act;
-    }
-    /* Set Adjoint LHS flag */
-    MatMulInfo &adj_lhs(bool adj_lhs)
-    {
-        _adj_lhs = adj_lhs;
-        return *this;
-    }
-    /* Set Adjoint RHS flag */
-    MatMulInfo &adj_rhs(bool adj_rhs)
-    {
-        _adj_rhs = adj_rhs;
-        return *this;
-    }
-    /* Set Fused Activation Layer Info */
-    MatMulInfo &fused_activation(const ActivationLayerInfo &act_info)
-    {
-        _fused_act = act_info;
-        return *this;
-    }
-
-private:
-    bool                _adj_lhs{ false };
-    bool                _adj_rhs{ false };
-    ActivationLayerInfo _fused_act{}; // disabled by default
 };
 
 /** Class for holding information related to cropping */

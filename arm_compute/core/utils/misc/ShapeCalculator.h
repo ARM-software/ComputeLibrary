@@ -24,6 +24,7 @@
 #ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
 #define ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
 
+#include "arm_compute/core/ConvolutionInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"

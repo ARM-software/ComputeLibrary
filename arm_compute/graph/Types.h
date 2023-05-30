@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,10 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/core/ConvolutionInfo.h"
+#include "arm_compute/core/FullyConnectedLayerInfo.h"
+#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_NATIVE_KERNEL_H
 #define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_NATIVE_KERNEL_H
 
+#include "arm_compute/core/ConvolutionInfo.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"

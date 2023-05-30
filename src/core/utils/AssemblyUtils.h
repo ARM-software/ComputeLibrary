@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,8 @@
 
 namespace arm_compute
 {
+class ActivationLayerInfo;
+
 namespace assembly_utils
 {
 /** Performs a mapping between Compute Library ActivationLayerInfo and the assembly Activation structure.

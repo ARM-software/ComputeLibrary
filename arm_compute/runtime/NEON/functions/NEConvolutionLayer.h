@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"

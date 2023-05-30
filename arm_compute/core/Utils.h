@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,7 @@ namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
+class ActivationLayerInfo;
 
 /** Calculate the rounded up quotient of val / m.
  *
@@ -837,7 +838,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
  *
  * @return The pair with minimum and maximum values
  */
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info);
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo& act_info, DataType data_type, UniformQuantizationInfo oq_info);
 
 /** Convert a tensor format into a string.
  *
@@ -874,7 +875,7 @@ const std::string &string_from_data_type(DataType dt);
  *
  * @return The string describing the activation function.
  */
-const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFunction act);
+const std::string &string_from_activation_func(const ActivationFunction& act);
 /** Translates a given interpolation policy to a string.
  *
  * @param[in] policy @ref InterpolationPolicy to be translated to string.

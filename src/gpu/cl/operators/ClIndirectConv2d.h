@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CL_INDIRECT_CONV2D_H
 #define ARM_COMPUTE_CL_INDIRECT_CONV2D_H
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"

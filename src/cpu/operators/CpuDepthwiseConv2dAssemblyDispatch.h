@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,8 @@
 
 namespace arm_compute
 {
+struct ConvolutionInfo;
+
 namespace cpu
 {
 /** Depthwise convolution assembly kernel glue */

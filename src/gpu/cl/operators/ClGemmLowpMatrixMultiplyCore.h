@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 #define ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 
+#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 

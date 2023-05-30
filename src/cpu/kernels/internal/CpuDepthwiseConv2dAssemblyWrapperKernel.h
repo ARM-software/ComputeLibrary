@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,8 @@ class IDepthwiseCommon;
 
 namespace arm_compute
 {
+struct ConvolutionInfo;
+
 namespace cpu
 {
 namespace kernels

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CL_FULLY_CONNECTED_H
 #define ARM_COMPUTE_CL_FULLY_CONNECTED_H
 
+#include "arm_compute/core/FullyConnectedLayerInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/gpu/cl/ClCompileContext.h"

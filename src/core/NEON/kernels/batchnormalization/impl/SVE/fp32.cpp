@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"

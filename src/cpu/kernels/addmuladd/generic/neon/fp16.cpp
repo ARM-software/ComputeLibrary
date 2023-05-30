@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"

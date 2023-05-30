@@ -26,6 +26,7 @@
 
 #include "src/cpu/ICpuOperator.h"
 
+#include "arm_compute/core/FullyConnectedLayerInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 
 #include <memory>

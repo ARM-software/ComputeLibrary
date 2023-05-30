@@ -26,6 +26,7 @@
 
 #include "src/cpu/ICpuOperator.h"
 
+#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"

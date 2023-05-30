@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NEGEMM_H
 #define ARM_COMPUTE_NEGEMM_H
 
+#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IWeightsManager.h"

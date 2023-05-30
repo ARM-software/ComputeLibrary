@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ struct ActivationDataTypeISASelectorData
     DataType                                dt;
     const CPUModel                         &cpumodel;
     const cpuinfo::CpuIsaInfo              &isa;
-    ActivationLayerInfo::ActivationFunction f;
+    const ActivationFunction f;
 };
 
 struct CpuAddKernelDataTypeISASelectorData

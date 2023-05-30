@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 #define ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
 
 #include <utility>

@@ -28,14 +28,18 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #endif /* ARM_COMPUTE_OPENCL_ENABLED */
 
+#include "arm_compute/core/ConvolutionInfo.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/FullyConnectedLayerInfo.h"
+#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"

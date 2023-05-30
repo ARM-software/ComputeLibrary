@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/Types.h"
 #include "src/core/common/Macros.h"
 

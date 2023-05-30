@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Utils.h"
 
 #include <algorithm>
@@ -160,7 +161,7 @@ const std::string &string_from_data_type(DataType dt)
     return dt_map[dt];
 }
 
-const std::string &string_from_activation_func(ActivationLayerInfo::ActivationFunction act)
+const std::string &string_from_activation_func(const ActivationLayerInfo::ActivationFunction& act)
 {
     static std::map<ActivationLayerInfo::ActivationFunction, const std::string> act_map =
     {
@@ -555,7 +556,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
     return QuantizationInfo(1.f / 256, 0);
 }
 
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo& act_info, DataType data_type, UniformQuantizationInfo oq_info)
 {
     const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
     const auto a                 = act_info.a();
