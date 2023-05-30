@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 
 namespace arm_compute
 {

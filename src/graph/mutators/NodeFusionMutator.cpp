@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/mutators/NodeFusionMutator.h"
 
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/graph/GraphBuilder.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Utils.h"

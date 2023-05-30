@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_FILL_H
 #define ARM_COMPUTE_CPU_FILL_H
 
+#include "arm_compute/core/PixelValue.h"
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute

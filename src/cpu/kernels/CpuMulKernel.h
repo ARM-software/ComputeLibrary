@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_MUL_KERNEL_H
 #define ARM_COMPUTE_CPU_MUL_KERNEL_H
 
+#include "arm_compute/core/Rounding.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 

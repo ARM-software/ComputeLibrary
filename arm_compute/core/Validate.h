@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>
@@ -283,6 +284,38 @@ arm_compute::Status error_on_mismatching_dimensions(const char *function, const 
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
+/** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
+ *
+ * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
+ *       <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java">Android Source</a>
+ *       <a href="https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM">WebM</a>
+ *       <a href="https://bugs.chromium.org/p/libyuv/issues/detail?id=198&amp;can=1&amp;q=odd%20width">libYUV</a>
+ *       <a href="https://sourceforge.net/p/raw-yuvplayer/bugs/1/">YUVPlayer</a> *
+ *
+ * @param[in, out] shape  Tensor shape of 2D size
+ * @param[in]      format Format of the tensor
+ *
+ * @return The adjusted tensor shape.
+ */
+inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
+{
+    TensorShape output{ shape };
+
+    // Force width to be even for formats which require subsampling of the U and V channels
+    if(has_format_horizontal_subsampling(format))
+    {
+        output.set(0, (output.x() + 1) & ~1U);
+    }
+
+    // Force height to be even for formats which require subsampling of the U and V channels
+    if(has_format_vertical_subsampling(format))
+    {
+        output.set(1, (output.y() + 1) & ~1U);
+    }
+
+    return output;
+}
 
 /** Return an error if the passed tensor objects are not even.
  *

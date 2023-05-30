@@ -48,47 +48,6 @@ class ITensor;
 class ITensorInfo;
 class ActivationLayerInfo;
 
-/** Calculate the rounded up quotient of val / m.
- *
- * @param[in] val Value to divide and round up.
- * @param[in] m   Value to divide by.
- *
- * @return the result.
- */
-template <typename S, typename T>
-constexpr auto DIV_CEIL(S val, T m) -> decltype((val + m - 1) / m)
-{
-    return (val + m - 1) / m;
-}
-
-/** Computes the smallest number larger or equal to value that is a multiple of divisor.
- *
- * @param[in] value   Lower bound value
- * @param[in] divisor Value to compute multiple of.
- *
- * @return the result.
- */
-template <typename S, typename T>
-inline auto ceil_to_multiple(S value, T divisor) -> decltype(((value + divisor - 1) / divisor) * divisor)
-{
-    ARM_COMPUTE_ERROR_ON(value < 0 || divisor <= 0);
-    return DIV_CEIL(value, divisor) * divisor;
-}
-
-/** Computes the largest number smaller or equal to value that is a multiple of divisor.
- *
- * @param[in] value   Upper bound value
- * @param[in] divisor Value to compute multiple of.
- *
- * @return the result.
- */
-template <typename S, typename T>
-inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) * divisor)
-{
-    ARM_COMPUTE_ERROR_ON(value < 0 || divisor <= 0);
-    return (value / divisor) * divisor;
-}
-
 /** Load an entire file in memory
  *
  * @param[in] filename Name of the file to read.
@@ -654,38 +613,6 @@ inline bool has_format_horizontal_subsampling(Format format)
 inline bool has_format_vertical_subsampling(Format format)
 {
     return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
-}
-
-/** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
- *
- * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
- *       <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java">Android Source</a>
- *       <a href="https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM">WebM</a>
- *       <a href="https://bugs.chromium.org/p/libyuv/issues/detail?id=198&amp;can=1&amp;q=odd%20width">libYUV</a>
- *       <a href="https://sourceforge.net/p/raw-yuvplayer/bugs/1/">YUVPlayer</a> *
- *
- * @param[in, out] shape  Tensor shape of 2D size
- * @param[in]      format Format of the tensor
- *
- * @return The adjusted tensor shape.
- */
-inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
-{
-    TensorShape output{ shape };
-
-    // Force width to be even for formats which require subsampling of the U and V channels
-    if(has_format_horizontal_subsampling(format))
-    {
-        output.set(0, (output.x() + 1) & ~1U);
-    }
-
-    // Force height to be even for formats which require subsampling of the U and V channels
-    if(has_format_vertical_subsampling(format))
-    {
-        output.set(1, (output.y() + 1) & ~1U);
-    }
-
-    return output;
 }
 
 /** Calculate subsampled shape for a given format and channel
