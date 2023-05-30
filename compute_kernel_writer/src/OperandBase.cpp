@@ -22,55 +22,29 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#include "ckw/OperandBase.h"
 
 namespace ckw
 {
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
+
+OperandBase::OperandBase(const std::string &name)
+    : _name(name)
 {
 }
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+OperandBase::~OperandBase()
 {
 }
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
+const std::string &OperandBase::name() const
 {
+    return _name;
 }
 
-TileInfo &TileInfo::width(int32_t w)
+OperandBase &OperandBase::name(const std::string &name)
 {
-    _shape[kTileWidthIdx] = w;
+    _name = name;
     return *this;
 }
 
-int32_t TileInfo::width() const
-{
-    return _shape[kTileWidthIdx];
-}
-
-TileInfo &TileInfo::height(int32_t h)
-{
-    _shape[kTileHeightIdx] = h;
-    return *this;
-}
-
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
-
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
-
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
 } // namespace ckw

@@ -22,55 +22,41 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#ifndef CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H
+#define CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H
 
-namespace ckw
-{
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
-{
-}
+#include <cstdint>
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
-{
-}
+class AclKernelWriter;
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
+/** Helper to automatically manage kernel writer ID space. */
+class AclScopedKernelWriter
 {
-}
+public:
+    /** Initialize a new instance of @ref AclScopedKernelWriter class. */
+    explicit AclScopedKernelWriter(AclKernelWriter *writer);
 
-TileInfo &TileInfo::width(int32_t w)
-{
-    _shape[kTileWidthIdx] = w;
-    return *this;
-}
+    /** Create a new scope from the specified scoped kernel writer. */
+    AclScopedKernelWriter(const AclScopedKernelWriter &other);
 
-int32_t TileInfo::width() const
-{
-    return _shape[kTileWidthIdx];
-}
+    /** Assignment is disallowed. */
+    AclScopedKernelWriter &operator=(const AclScopedKernelWriter &) = delete;
 
-TileInfo &TileInfo::height(int32_t h)
-{
-    _shape[kTileHeightIdx] = h;
-    return *this;
-}
+    /** Access the underlying kernel writer. */
+    AclKernelWriter *operator->();
 
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
+    /** Access the underlying kernel writer. */
+    const AclKernelWriter *operator->() const;
 
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
+    /** Get the kernel writer. */
+    AclKernelWriter *writer();
 
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
-} // namespace ckw
+    /** Get the kernel writer. */
+    const AclKernelWriter *writer() const;
+
+private:
+    AclKernelWriter *_writer;
+    int32_t          _parent_id_space;
+};
+
+#endif // CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H

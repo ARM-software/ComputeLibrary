@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_ERROR_H
-#define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_ERROR_H
 
-#include <string>
+#ifndef CKW_INCLUDE_CKW_ERROR_H
+#define CKW_INCLUDE_CKW_ERROR_H
+
 #include <stdexcept>
+#include <string>
 
 namespace ckw
 {
@@ -44,16 +45,59 @@ std::string create_error_msg(const std::string &file, const std::string &func, c
  *
  * @param[in] msg Message to display.
  */
-#define COMPUTE_KERNEL_WRITER_ERROR_ON_MSG(msg)     \
-    do                                      \
-    {                                       \
-        const std::string arg0(__FILE__);   \
-        const std::string arg1(__func__);   \
-        const std::string arg2(std::to_string(__LINE__));   \
-        const std::string arg3(msg);         \
+#define COMPUTE_KERNEL_WRITER_ERROR_ON_MSG(msg)                       \
+    do                                                                \
+    {                                                                 \
+        const std::string arg0(__FILE__);                             \
+        const std::string arg1(__func__);                             \
+        const std::string arg2(std::to_string(__LINE__));             \
+        const std::string arg3(msg);                                  \
         std::runtime_error(create_error_msg(arg0, arg1, arg2, arg3)); \
     } while(false)
 
+/** If the condition is not met, throw an std::runtime_error with the specified message.
+ *
+ * @param[in] cond The condition that is expected to be true.
+ * @param[in] msg  The error message when the condition is not met.
+ */
+#define CKW_ASSERT_MSG(cond, msg)            \
+    do                                       \
+    {                                        \
+        if(!(cond))                          \
+        {                                    \
+            throw ::std::runtime_error(msg); \
+        }                                    \
+    } while(false)
+
+/** If the condition is not met, throw an std::runtime_error.
+ *
+ * @param[in] cond The condition that is expected to be true.
+ */
+#define CKW_ASSERT(cond) CKW_ASSERT_MSG(cond, #cond)
+
+/** If the precondition is met but the consequence is not met, throw an std::runtime_error.
+ *
+ * @param[in] precond The condition if is met requires the consequence must also be met.
+ * @param[in] cond    The condition that is expected to be true if the precondition is true.
+ */
+#define CKW_ASSERT_IF(precond, cond) \
+    CKW_ASSERT_MSG(!(precond) || ((precond) && (cond)), #precond " |-> " #cond)
+
+/** Mark the variables as unused.
+ *
+ * @param[in] ... Variables which are unused.
+ */
+#define CKW_UNUSED(...) ::ckw::ignore_unused(__VA_ARGS__) // NOLINT
+
+/** Mark the variables as unused.
+ *
+ * @param[in] ... Variables which are unused.
+ */
+template <typename... T>
+inline void ignore_unused(T &&...)
+{
+}
+
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_INCLUDE_CKW_ERROR_H */
+#endif // CKW_INCLUDE_CKW_ERROR_H

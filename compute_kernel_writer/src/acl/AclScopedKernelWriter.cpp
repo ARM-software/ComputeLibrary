@@ -22,55 +22,37 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#include "acl/AclScopedKernelWriter.h"
+#include "acl/AclKernelWriter.h"
 
-namespace ckw
+AclScopedKernelWriter::AclScopedKernelWriter(AclKernelWriter *writer)
+    : _writer(writer), _parent_id_space(writer->id_space())
 {
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
-{
+    _writer->next_id_space();
 }
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+AclScopedKernelWriter::AclScopedKernelWriter(const AclScopedKernelWriter &other)
+    : _writer(other._writer), _parent_id_space(other._writer->id_space())
 {
+    _writer->next_id_space();
 }
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
+AclKernelWriter *AclScopedKernelWriter::operator->()
 {
+    return _writer;
 }
 
-TileInfo &TileInfo::width(int32_t w)
+const AclKernelWriter *AclScopedKernelWriter::operator->() const
 {
-    _shape[kTileWidthIdx] = w;
-    return *this;
+    return _writer;
 }
 
-int32_t TileInfo::width() const
+AclKernelWriter *AclScopedKernelWriter::writer()
 {
-    return _shape[kTileWidthIdx];
+    return _writer;
 }
 
-TileInfo &TileInfo::height(int32_t h)
+const AclKernelWriter *AclScopedKernelWriter::writer() const
 {
-    _shape[kTileHeightIdx] = h;
-    return *this;
+    return _writer;
 }
-
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
-
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
-
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
-} // namespace ckw

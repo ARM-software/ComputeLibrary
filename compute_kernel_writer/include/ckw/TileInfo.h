@@ -57,10 +57,10 @@ public:
     /** Constructor used to initialize a tile with a given data type and tile sizes.
      *
      * @param[in] dt Tile data type
-     * @param[in] w  Tile width
      * @param[in] h  Tile height
+     * @param[in] w  Tile width
      */
-    TileInfo(DataType dt, int32_t w, int32_t h);
+    TileInfo(DataType dt, int32_t h, int32_t w);
     /** Set width */
     TileInfo &width(int32_t w);
     /** Get width */

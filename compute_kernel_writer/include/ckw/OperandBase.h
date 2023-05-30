@@ -22,55 +22,55 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#ifndef CKW_INCLUDE_CKW_OPERANDBASE_H
+#define CKW_INCLUDE_CKW_OPERANDBASE_H
+
+#include "ckw/Types.h"
+#include <string>
 
 namespace ckw
 {
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
+namespace prototype
 {
-}
+class IGpuKernelWriter;
+class Operand;
+} // namespace prototype
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+/** The base class for all operands. */
+class OperandBase
 {
-}
+public:
+    /** Constructor
+     *
+     * @param[in] name The name of the operand.
+     */
+    explicit OperandBase(const ::std::string &name);
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
-{
-}
+    /** Destructor */
+    virtual ~OperandBase();
 
-TileInfo &TileInfo::width(int32_t w)
-{
-    _shape[kTileWidthIdx] = w;
-    return *this;
-}
+    /** (Internal use only) Create the implementation operand.
+     *
+     * @param[in] writer The implementation kernel writer.
+     */
+    virtual prototype::Operand create_impl_operand(prototype::IGpuKernelWriter *writer) const = 0;
 
-int32_t TileInfo::width() const
-{
-    return _shape[kTileWidthIdx];
-}
+    /** Get the name of the operand. */
+    const ::std::string &name() const;
 
-TileInfo &TileInfo::height(int32_t h)
-{
-    _shape[kTileHeightIdx] = h;
-    return *this;
-}
+    /** Set the name of the operand. */
+    OperandBase &name(const ::std::string &name);
 
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
+    /** Get the data type of the operand. */
+    virtual DataType data_type() const = 0;
 
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
+    /** Get whether the operand is compile-time constant. */
+    virtual bool is_constant() const = 0;
 
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
+private:
+    ::std::string _name;
+};
+
 } // namespace ckw
+
+#endif // CKW_INCLUDE_CKW_OPERANDBASE_H

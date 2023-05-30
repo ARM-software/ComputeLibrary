@@ -22,55 +22,35 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#ifndef CKW_INCLUDE_ACL_ACLKERNELWRITER_H
+#define CKW_INCLUDE_ACL_ACLKERNELWRITER_H
+
+#include "ckw/KernelWriter.h"
+#include "ckw/TensorTileSampler.h"
+
+class AclComponentArgument;
 
 namespace ckw
 {
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
-{
-}
-
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
-{
-}
-
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
-{
-}
-
-TileInfo &TileInfo::width(int32_t w)
-{
-    _shape[kTileWidthIdx] = w;
-    return *this;
-}
-
-int32_t TileInfo::width() const
-{
-    return _shape[kTileWidthIdx];
-}
-
-TileInfo &TileInfo::height(int32_t h)
-{
-    _shape[kTileHeightIdx] = h;
-    return *this;
-}
-
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
-
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
-
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
+class Kernel;
 } // namespace ckw
+
+/** Extended implementation of kernel writer for dynamic fusion. */
+class AclKernelWriter : public ckw::KernelWriter
+{
+public:
+    /** Initialize a new instance of @ref AclKernelWriter class.
+     *
+     * @param[in] kernel The kernel to be generated.
+     */
+    explicit AclKernelWriter(ckw::Kernel &kernel);
+
+    /** Load the user tensor to the tile in the same component argument if it hasn't been loaded.
+     *
+     * @param[in] tensor_or_tile The component argument that is either a user tensor or a virtual tensor.
+     * @param[in] sampler        The tensor sampling information to load the tile.
+     */
+    void op_load_once(AclComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler);
+};
+
+#endif // CKW_INCLUDE_ACL_ACLKERNELWRITER_H

@@ -22,55 +22,40 @@
  * SOFTWARE.
  */
 
-#include "ckw/TileInfo.h"
+#include "ckw/Kernel.h"
+#include "ckw/Types.h"
+#include "src/Prototype.h"
 
 namespace ckw
 {
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
+
+Kernel::Kernel(const char *name, GpuTargetLanguage language)
+    : _name(name), _kernel(std::make_unique<prototype::GpuKernelWriterDataHolder>(language)), _operands{}
 {
 }
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+Kernel::~Kernel()
 {
 }
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
+const std::string &Kernel::name() const
 {
+    return _name;
 }
 
-TileInfo &TileInfo::width(int32_t w)
+const std::map<std::string, std::unique_ptr<OperandBase>> &Kernel::operands() const
 {
-    _shape[kTileWidthIdx] = w;
-    return *this;
+    return _operands;
 }
 
-int32_t TileInfo::width() const
+std::map<std::string, std::unique_ptr<OperandBase>> &Kernel::operands()
 {
-    return _shape[kTileWidthIdx];
+    return _operands;
 }
 
-TileInfo &TileInfo::height(int32_t h)
+prototype::GpuKernelWriterDataHolder *Kernel::impl()
 {
-    _shape[kTileHeightIdx] = h;
-    return *this;
+    return _kernel.get();
 }
 
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
-
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
-
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
 } // namespace ckw

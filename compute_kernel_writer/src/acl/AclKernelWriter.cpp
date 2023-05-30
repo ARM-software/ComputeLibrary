@@ -22,55 +22,29 @@
  * SOFTWARE.
  */
 
+#include "acl/AclKernelWriter.h"
+#include "acl/AclComponentArgument.h"
+#include "ckw/Error.h"
 #include "ckw/TileInfo.h"
 
-namespace ckw
-{
-TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
+AclKernelWriter::AclKernelWriter(ckw::Kernel &kernel)
+    : KernelWriter(kernel)
 {
 }
 
-TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+void AclKernelWriter::op_load_once(AclComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
 {
-}
+    if(!tensor_or_tile->has_tile())
+    {
+        CKW_ASSERT(tensor_or_tile->has_tensor());
 
-TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
-{
-}
+        auto &tensor = tensor_or_tile->tensor();
 
-TileInfo &TileInfo::width(int32_t w)
-{
-    _shape[kTileWidthIdx] = w;
-    return *this;
-}
+        const auto tile_name = tensor.name() + "_tile";
+        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
 
-int32_t TileInfo::width() const
-{
-    return _shape[kTileWidthIdx];
-}
+        op_load(tile, tensor, sampler);
 
-TileInfo &TileInfo::height(int32_t h)
-{
-    _shape[kTileHeightIdx] = h;
-    return *this;
+        tensor_or_tile->init_virtual_tensor(tile, sampler);
+    }
 }
-
-int32_t TileInfo::height() const
-{
-    return _shape[kTileHeightIdx];
-}
-
-TileInfo &TileInfo::data_type(DataType dt)
-{
-    _dt = dt;
-    return *this;
-}
-
-DataType TileInfo::data_type() const
-{
-    return _dt;
-}
-} // namespace ckw
