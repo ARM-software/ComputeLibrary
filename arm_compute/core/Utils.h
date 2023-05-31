@@ -593,59 +593,6 @@ inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
     return std::make_tuple(min, max);
 }
 
-/** Return true if the given format has horizontal subsampling.
- *
- * @param[in] format Format to determine subsampling.
- *
- * @return True if the format can be subsampled horizontaly.
- */
-inline bool has_format_horizontal_subsampling(Format format)
-{
-    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
-}
-
-/** Return true if the given format has vertical subsampling.
- *
- * @param[in] format Format to determine subsampling.
- *
- * @return True if the format can be subsampled verticaly.
- */
-inline bool has_format_vertical_subsampling(Format format)
-{
-    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
-}
-
-/** Calculate subsampled shape for a given format and channel
- *
- * @param[in] shape   Shape of the tensor to calculate the extracted channel.
- * @param[in] format  Format of the tensor.
- * @param[in] channel Channel to create tensor shape to be extracted.
- *
- * @return The subsampled tensor shape.
- */
-inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
-{
-    TensorShape output{ shape };
-
-    // Subsample shape only for U or V channel
-    if(Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
-    {
-        // Subsample width for the tensor shape when channel is U or V
-        if(has_format_horizontal_subsampling(format))
-        {
-            output.set(0, output.x() / 2U);
-        }
-
-        // Subsample height for the tensor shape when channel is U or V
-        if(has_format_vertical_subsampling(format))
-        {
-            output.set(1, output.y() / 2U);
-        }
-    }
-
-    return output;
-}
-
 /** Permutes the given dimensions according the permutation vector
  *
  * @param[in,out] dimensions Dimensions to be permuted.

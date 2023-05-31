@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,8 +43,6 @@
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "arm_compute/runtime/Scheduler.h"
-
-#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {

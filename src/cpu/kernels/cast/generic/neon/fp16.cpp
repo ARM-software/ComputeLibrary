@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "src/cpu/kernels/CpuCastKernel.h"
 #include "src/cpu/kernels/cast/list.h"
 #include "support/SaturateCast.h"
+
+#include "arm_neon.h"
 
 namespace arm_compute
 {

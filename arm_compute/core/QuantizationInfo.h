@@ -24,13 +24,10 @@
 #ifndef ARM_COMPUTE_QUANTIZATION_INFO_H
 #define ARM_COMPUTE_QUANTIZATION_INFO_H
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 #include "support/ToolchainSupport.h"
-#include "utils/misc/Utility.h"
 
-#include <cstddef>
-#include <type_traits>
 #include <vector>
 
 namespace arm_compute

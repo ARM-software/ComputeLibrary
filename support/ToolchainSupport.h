@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,10 +33,6 @@
 #include <string>
 #include <type_traits>
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#include <arm_neon.h>
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 #include "support/Bfloat16.h"
 #include "support/Half.h"
 
@@ -46,6 +42,10 @@
 
 namespace arm_compute
 {
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+typedef __fp16 float16_t;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 namespace support
 {
 namespace cpp11

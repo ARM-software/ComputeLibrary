@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.h"
+
 namespace arm_compute
 {
 namespace cpu

@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
@@ -285,6 +286,28 @@ arm_compute::Status error_on_mismatching_dimensions(const char *function, const 
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
+/** Return true if the given format has horizontal subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled horizontaly.
+ */
+inline bool has_format_horizontal_subsampling(Format format)
+{
+    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
+/** Return true if the given format has vertical subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled verticaly.
+ */
+inline bool has_format_vertical_subsampling(Format format)
+{
+    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
 /** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
  *
  * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
@@ -348,6 +371,37 @@ arm_compute::Status error_on_tensors_not_even(const char *function, const char *
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_EVEN(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
+/** Calculate subsampled shape for a given format and channel
+ *
+ * @param[in] shape   Shape of the tensor to calculate the extracted channel.
+ * @param[in] format  Format of the tensor.
+ * @param[in] channel Channel to create tensor shape to be extracted.
+ *
+ * @return The subsampled tensor shape.
+ */
+inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
+{
+    TensorShape output{ shape };
+
+    // Subsample shape only for U or V channel
+    if(Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
+    {
+        // Subsample width for the tensor shape when channel is U or V
+        if(has_format_horizontal_subsampling(format))
+        {
+            output.set(0, output.x() / 2U);
+        }
+
+        // Subsample height for the tensor shape when channel is U or V
+        if(has_format_vertical_subsampling(format))
+        {
+            output.set(1, output.y() / 2U);
+        }
+    }
+
+    return output;
+}
 
 /** Return an error if the passed tensor objects are not sub-sampled.
  *

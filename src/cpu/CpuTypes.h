@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-#include "src/cpu/CpuTypes.h"
-#include "src/cpu/kernels/pool3d/neon/impl.h"
+#ifndef ARM_COMPUTE_CPUTYPES
+#define ARM_COMPUTE_CPUTYPES
 
 namespace arm_compute
 {
-namespace cpu
-{
-void neon_fp16_pool3d(const ITensor *src, ITensor *dst0, Pooling3dLayerInfo &pool_info, const Window &window)
-{
-    return poolingMxNxD_fp_neon_ndhwc<float16_t>(src, dst0, pool_info, window);
+/* Type definitions compatible with arm_neon.h and arm_sve.h */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+typedef __fp16 float16_t;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+typedef float float32_t;
 }
-} // namespace cpu
-} // namespace arm_compute
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+
+#endif /* ARM_COMPUTE_CPUTYPES */

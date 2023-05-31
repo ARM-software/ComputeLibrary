@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@
 #include "arm_compute/graph/Types.h"
 
 #include "support/Mutex.h"
-#include "support/ToolchainSupport.h"
 
 #include <map>
 #include <memory>
