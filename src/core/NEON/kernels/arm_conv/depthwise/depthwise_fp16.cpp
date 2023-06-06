@@ -100,6 +100,7 @@ namespace
 
 static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = {
 #if defined(__aarch64__)
+#if defined(ENABLE_FP16_KERNELS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(ARM_COMPUTE_ENABLE_SME2)
   {
@@ -224,7 +225,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     },
   },
 #endif  // defined(ARM_COMPUTE_ENABLE_SVE)
-#if defined(ENABLE_FP16_KERNELS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
   {
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst",
