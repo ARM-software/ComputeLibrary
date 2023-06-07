@@ -239,17 +239,7 @@ GemmImplementation<bfloat16, float>::with_estimate(
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_sgemm_8x12, bfloat16, float>(args); }
 ),
 #endif // ARM_COMPUTE_ENABLE_BF16
-#elif defined(__arm__)
-{
-    GemmMethod::GEMM_INTERLEAVED,
-    "sgemm_8x6",
-    nullptr,
-    nullptr,
-    [](const GemmArgs &args) { return new GemmInterleaved<sgemm_8x6, bfloat16, float>(args); }
-},
-#else
-# error "Unknown Architecture"
-#endif
+#endif // __aarch64__
 {
     GemmMethod::DEFAULT,
     "",
