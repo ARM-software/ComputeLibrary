@@ -185,13 +185,13 @@ target_include_directories(
 # ---------------------------------------------------------------------
 # Core Library
 
-add_library(arm_compute_core "")
-target_compile_options(arm_compute_core PRIVATE "-march=armv8.2-a+fp16")
-target_compile_definitions(arm_compute_core PRIVATE ARM_COMPUTE_ENABLE_BF16)
-target_compile_definitions(arm_compute_core PRIVATE ENABLE_SVE)
-target_compile_definitions(arm_compute_core PRIVATE ARM_COMPUTE_ENABLE_SVE)
+add_library(arm_compute "")
+target_compile_options(arm_compute PRIVATE "-march=${ARM_COMPUTE_ARCH}")
+target_compile_definitions(arm_compute PRIVATE ARM_COMPUTE_ENABLE_BF16)
+target_compile_definitions(arm_compute PRIVATE ENABLE_SVE)
+target_compile_definitions(arm_compute PRIVATE ARM_COMPUTE_ENABLE_SVE)
 target_include_directories(
-  arm_compute_core
+  arm_compute
   PUBLIC $<INSTALL_INTERFACE:include>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          ${CMAKE_CURRENT_SOURCE_DIR}
@@ -202,17 +202,17 @@ target_include_directories(
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
           src/core/NEON/kernels/convolution/winograd)
-target_compile_options(arm_compute_core PUBLIC ${COMMON_CXX_FLAGS})
+target_compile_options(arm_compute PUBLIC ${COMMON_CXX_FLAGS})
 
-add_library(ArmCompute::Core ALIAS arm_compute_core)
+add_library(ArmCompute::Core ALIAS arm_compute)
 target_link_libraries(
-  arm_compute_core PUBLIC arm_compute_sve arm_compute_sve2)
+  arm_compute PUBLIC arm_compute_sve arm_compute_sve2)
 
 # ---------------------------------------------------------------------
 # Graph Library
 
 add_library(arm_compute_graph "")
-target_compile_options(arm_compute_graph PRIVATE "-march=armv8.2-a+fp16")
+target_compile_options(arm_compute_graph PRIVATE "-march=${ARM_COMPUTE_ARCH}")
 target_compile_definitions(arm_compute_graph PRIVATE ENABLE_SVE)
 target_compile_definitions(arm_compute_graph PRIVATE ARM_COMPUTE_ENABLE_SVE)
 # add_subdirectory(src/graph)
@@ -244,7 +244,7 @@ if(ARM_COMPUTE_BUILD_TESTING)
   # target_compile_options(arm_compute_validation_framework PRIVATE
   # "-march=armv8.2-a")
   target_compile_options(arm_compute_validation_framework
-                        PRIVATE "-march=armv8.2-a+fp16")
+                        PRIVATE "-march=${ARM_COMPUTE_ARCH}")
 
   add_subdirectory(tests)
   target_include_directories(
@@ -256,13 +256,13 @@ if(ARM_COMPUTE_BUILD_TESTING)
                         PUBLIC ${COMMON_CXX_FLAGS})
                         target_link_libraries(
                           arm_compute_validation_framework
-      PUBLIC arm_compute_core arm_compute_graph)
+      PUBLIC arm_compute arm_compute_graph)
 
   # ---------------------------------------------------------------------
   # Validation Binary
 
   add_executable(arm_compute_validation "")
-  target_compile_options(arm_compute_validation PRIVATE "-march=armv8.2-a+fp16")
+  target_compile_options(arm_compute_validation PRIVATE "-march=${ARM_COMPUTE_ARCH}")
   if(ARM_COMPUTE_ENABLE_BF16_VALIDATION)
     target_compile_definitions(arm_compute_validation PRIVATE ARM_COMPUTE_ENABLE_BF16)
   endif()
@@ -277,7 +277,7 @@ if(ARM_COMPUTE_BUILD_TESTING)
                                       "${CMAKE_BINARY_DIR}/validation")
   target_link_libraries(
     arm_compute_validation
-    PUBLIC arm_compute_core arm_compute_graph arm_compute_validation_framework
+    PUBLIC arm_compute arm_compute_graph arm_compute_validation_framework
            arm_compute_sve)
   target_link_directories(arm_compute_validation PUBLIC tests)
 
@@ -285,7 +285,7 @@ if(ARM_COMPUTE_BUILD_TESTING)
   # Benchmark Binary
 
   add_executable(arm_compute_benchmark)
-  target_compile_options(arm_compute_benchmark PRIVATE "-march=armv8.2-a+fp16")
+  target_compile_options(arm_compute_benchmark PRIVATE "-march=${ARM_COMPUTE_ARCH}")
 
   add_subdirectory(tests/benchmark)
   target_compile_options(arm_compute_benchmark PUBLIC ${COMMON_CXX_FLAGS})
@@ -293,7 +293,7 @@ if(ARM_COMPUTE_BUILD_TESTING)
     arm_compute_benchmark PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                      "${CMAKE_BINARY_DIR}/validation")
   target_link_libraries(
-    arm_compute_benchmark PUBLIC arm_compute_core arm_compute_graph
+    arm_compute_benchmark PUBLIC arm_compute arm_compute_graph
                                  arm_compute_validation_framework)
 
 endif() # ARM_COMPUTE_BUILD_TESTING
@@ -309,22 +309,22 @@ if(ARM_COMPUTE_BUILD_EXAMPLES)
     add_executable(
       ${test_name} "examples/${test_name}.cpp" utils/Utils.cpp
                    utils/GraphUtils.cpp utils/CommonGraphOptions.cpp)
-    target_compile_options(${test_name} PRIVATE "-march=armv8.2-a+fp16")
+    target_compile_options(${test_name} PRIVATE "-march=${ARM_COMPUTE_ARCH}")
     set_target_properties(
       ${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                               "${CMAKE_BINARY_DIR}/examples")
-    target_link_libraries(${test_name} PUBLIC arm_compute_core
+    target_link_libraries(${test_name} PUBLIC arm_compute
                                               arm_compute_graph arm_compute_sve)
   endforeach()
 
   # NEON Examples
   foreach(test_name ${EXAMPLE_NEON_NAMES})
     add_executable(${test_name} "examples/${test_name}.cpp" utils/Utils.cpp)
-    target_compile_options(${test_name} PRIVATE "-march=armv8.2-a+fp16")
+    target_compile_options(${test_name} PRIVATE "-march=${ARM_COMPUTE_ARCH}")
     set_target_properties(
       ${test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                               "${CMAKE_BINARY_DIR}/examples")
-    target_link_libraries(${test_name} PUBLIC arm_compute_core)
+    target_link_libraries(${test_name} PUBLIC arm_compute)
   endforeach()
 
 endif() # ARM_COMPUTE_BUILD_EXAMPLES

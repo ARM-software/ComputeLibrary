@@ -354,7 +354,7 @@ filegroup(
 )
 
 filegroup(
-        name = "arm_compute_core_srcs",
+        name = "arm_compute_srcs",
         srcs = ["c/AclContext.cpp",
 	"c/AclOperator.cpp",
 	"c/AclQueue.cpp",

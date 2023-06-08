@@ -78,6 +78,15 @@ bool_flag(
     visibility = ["//visibility:public"],
 )
 
+string_flag(
+    name = "arch",
+    build_setting_default = "armv8-a",
+    values = [
+        "armv8-a",
+        "armv8.2-a+fp16"
+    ]
+)
+
 #---------------------------------------------------------------------
 # Flag variables
 config_setting(
@@ -129,6 +138,20 @@ config_setting(
     },
 )
 
+config_setting(
+    name = "arch_armv8-a",
+    flag_values = {
+        "arch": "armv8-a"
+    }
+)
+
+config_setting(
+    name = "arch_armv8.2-a+fp16",
+    flag_values = {
+        "arch": "armv8.2-a+fp16"
+    }
+)
+
 
 #---------------------------------------------------------------------
 # Common defines used for all targets
@@ -138,9 +161,7 @@ cc_library(
                   "ENABLE_NEON",
                   "ARM_COMPUTE_CPU_ENABLED",
                   "ARM_COMPUTE_ENABLE_NEON",
-                  "ARM_COMPUTE_ENABLE_FP16",
                   "ARM_COMPUTE_ENABLE_I8MM",
-                  "ENABLE_FP16_KERNELS",
                   "ENABLE_FP32_KERNELS",
                   "ENABLE_QASYMM8_KERNELS",
                   "ENABLE_QASYMM8_SIGNED_KERNELS",
@@ -148,7 +169,7 @@ cc_library(
                   "ENABLE_INTEGER_KERNELS",
                   "ENABLE_NHWC_KERNELS",
                   "ENABLE_NCHW_KERNELS",
-                  "DARM_COMPUTE_GRAPH_ENABLED",
+                  "ARM_COMPUTE_GRAPH_ENABLED",
                   "ARM_COMPUTE_ENABLE_SVEF32MM",
                   "ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS",
                   "_GLIBCXX_USE_NANOSLEEP"
@@ -170,6 +191,11 @@ cc_library(
               select({
                   "//:openmp_flag": ["ARM_COMPUTE_OPENMP_SCHEDULER"],
                   "//conditions:default": [],
+              }) +
+              select({
+                  "//:arch_armv8-a": [],
+                  "//:arch_armv8.2-a+fp16": ["ENABLE_FP16_KERNELS", "ARM_COMPUTE_ENABLE_FP16"],
+                  "//conditions:default": [],
               }),
     visibility = ["//visibility:public"],
 )
@@ -178,9 +204,9 @@ cc_library(
 # Rule for creating file "arm_compute_version.embed"
 genrule(
     name = "create_version_file",
-    srcs = [".git/HEAD"],
+    srcs = ["SConscript"],
     outs = ["arm_compute_version.embed"],
-    cmd = "$(location //scripts:print_version_file) bazel-build-options `cat $(location :.git/HEAD)` > $@",
+    cmd = "$(location //scripts:print_version_file) 'n/a' 'n/a' 'true' > $@",
     tools = ["//scripts:print_version_file"],
     visibility = ["//visibility:public"],
 )
@@ -191,9 +217,11 @@ genrule(
 cc_library(
     name = "arm_compute_graph",
     srcs = ["//src:arm_compute_graph_srcs"],
-    copts = [
-                "-march=armv8.2-a+fp16",
-            ] + select({
+    copts = [] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }) + select({
                 "//:debug_flag": [
                     "-O0",
                     "-g",
@@ -211,7 +239,7 @@ cc_library(
             }),
     visibility = ["//visibility:public"],
     deps = [
-        "arm_compute_core",
+        "arm_compute",
         "//:common_defines",
         "//arm_compute:graph_headers",
     ],
@@ -323,8 +351,8 @@ cc_library(
 # Core and Runtime library
 
 cc_library(
-    name = "arm_compute_core",
-    srcs = ["//src:arm_compute_core_srcs"],
+    name = "arm_compute",
+    srcs = ["//src:arm_compute_srcs"],
     hdrs = glob([
         "core/NEON/kernels/**/*.h",
         "core/NEON/kernels/**/*.hpp",
@@ -332,9 +360,11 @@ cc_library(
     ]) + [
         "//:create_version_file",
     ],
-    copts = [
-                "-march=armv8.2-a+fp16",
-            ] + select({
+    copts = [] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }) + select({
                 "//:debug_flag": [
                     "-O0",
                     "-g",

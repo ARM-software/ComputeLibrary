@@ -46,8 +46,11 @@ cc_library(
     ]),
     copts = [
         "-Wno-overloaded-virtual",
-        "-march=armv8.2-a+fp16",
-    ],
+    ] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = True,
     visibility = ["//visibility:public"],
     deps = [

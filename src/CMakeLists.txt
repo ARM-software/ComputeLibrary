@@ -105,7 +105,7 @@ target_sources(
 target_sources(
     arm_compute_sve
     PRIVATE
-	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp
+    core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_u8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp
@@ -345,7 +345,7 @@ target_sources(
 )
 
 target_sources(
-    arm_compute_core
+    arm_compute
     PRIVATE
     c/AclContext.cpp
 	c/AclOperator.cpp

@@ -149,7 +149,7 @@ filegroup(
 )
 
 filegroup(
-        name = "arm_compute_core_srcs",
+        name = "arm_compute_srcs",
         srcs = ["{line_separator.join(srcs_core)}"]  +
     glob(["**/*.h",
     "**/*.hpp",
@@ -186,7 +186,7 @@ target_sources(
 )
 
 target_sources(
-    arm_compute_core
+    arm_compute
     PRIVATE
     {line_separator.join(srcs_core)}
 )"""
