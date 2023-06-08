@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+NEReorderLayer::~NEReorderLayer() = default;
 
 NEReorderLayer::NEReorderLayer()
     : _reorder_kernel(std::make_unique<NEReorderKernel>())
