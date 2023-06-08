@@ -1737,7 +1737,14 @@ public:
         }
         else if(_act == ActivationFunction::LEAKY_RELU)
         {
-            qasymm8_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
+            if(data_type == DataType::QASYMM8)
+            {
+                qasymm8_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
+            }
+            else
+            {
+                qasymm8_signed_leaky_relu_populate_table(_lut, qi_in, qi_out, _a);
+            }
         }
         else if(_act == ActivationFunction::LOGISTIC)
         {
@@ -1761,7 +1768,7 @@ public:
             case ActivationFunction::HARD_SWISH:
                 return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
             case ActivationFunction::LEAKY_RELU:
-                return data_type == DataType::QASYMM8;
+                return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
             case ActivationFunction::LOGISTIC:
                 return data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED;
             default:
@@ -1804,6 +1811,14 @@ private:
         for(size_t i = 0; i < lut.size(); ++i)
         {
             lut[i] = qasymm8_leaky_relu(i, qi_in, qi_out, alpha);
+        }
+    }
+
+    static inline void qasymm8_signed_leaky_relu_populate_table(LookupTable256 &lut, const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out, float alpha)
+    {
+        for(size_t i = 0; i < lut.size(); ++i)
+        {
+            lut[i] = qasymm8_signed_leaky_relu(i, qi_in, qi_out, alpha);
         }
     }
 
