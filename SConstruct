@@ -432,7 +432,7 @@ if env['ckw']:
     CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
     CKW_BUILD_DIR = build_path.replace("#", "")
 
-    CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" --clean-first " \
+    CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
                     "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
                     "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
                     "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \

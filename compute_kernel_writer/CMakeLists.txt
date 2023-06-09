@@ -45,6 +45,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wdisabled-optimization -W
                      -Winit-self -Wstrict-overflow=2 -Wswitch-default -Woverloaded-virtual \
                      -Wformat-security -Wctor-dtor-privacy -Wsign-promo -Weffc++ \
                      -Wlogical-op -Wstrict-null-sentinel")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os")
 
 option(CKW_ENABLE_OPENCL "Enable OpenCL code generation" OFF)
 option(CKW_ENABLE_ASSERTS "Enable assertions. Always enabled in Debug builds" OFF)
@@ -56,10 +57,13 @@ option(CKW_CCACHE "Enable compiler cache builds" OFF)
 
 get_property(CKW_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
-if(NOT CKW_IS_MULTI_CONFIG)
+# Allow only Release or Debug builds
+if(NOT CKW_IS_MULTI_CONFIG) # Single-config generators
     if(NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Options: Release, Debug (default), RelWithDebInfo, MinSizeRel" FORCE)
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Options: Release (default) or Debug" FORCE)
     endif()
+else() # Multi-config generators
+    list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES RelWithDebInfo MinSizeRel)
 endif()
 
 # Simplistic CCache setup
