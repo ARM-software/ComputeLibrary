@@ -25,7 +25,7 @@
 import SCons
 import json
 import os
-from subprocess import check_output
+import subprocess
 
 def version_at_least(version, required):
 
@@ -102,6 +102,7 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Arm® Neon™ support", False),
+    BoolVariable("ckw", "Build and link the Compute Kernel Writer subproject", False),
     BoolVariable("embed_kernels", "Enable if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate '.cl' / '.cs' files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to './cl_kernels'.", True),
     BoolVariable("compress_kernels", "Compress embedded OpenCL kernels in library binary using zlib. Useful for reducing the binary size. embed_kernels should be enabled", False),
     BoolVariable("set_soname", "If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects. (requires SCons 2.4 or above)", False),
@@ -415,12 +416,59 @@ print("Using compilers:")
 print("CC", env['CC'])
 print("CXX", env['CXX'])
 
+"""Build the Compute Kernel Writer subproject"""
+if env['ckw']:
+    # Strip ccache from CC and CXX
+    CKW_CC = env['CC'].replace(env['compiler_cache'] + " ", "")
+    CKW_CXX = env['CXX'].replace(env['compiler_cache'] + " ", "")
+    CKW_CCACHE = 1 if env['compiler_cache'] else 0
+
+    CKW_BUILD_TYPE = "Debug" if env['debug'] else "Release"
+
+    CKW_ENABLE_OPENCL = env['opencl']
+    CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
+
+    CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
+    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
+    CKW_BUILD_DIR = build_path.replace("#", "")
+
+    CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" --clean-first " \
+                    "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
+                    "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
+                    "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \
+                    "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
+                    "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
+                                                        CKW_CXX=CKW_CXX,
+                                                        CKW_PROJECT_DIR=CKW_PROJECT_DIR,
+                                                        CKW_BUILD_DIR=CKW_BUILD_DIR,
+                                                        CKW_BUILD_TYPE=CKW_BUILD_TYPE,
+                                                        CKW_ENABLE_OPENCL=CKW_ENABLE_OPENCL,
+                                                        CKW_ENABLE_ASSERTS=CKW_ENABLE_ASSERTS,
+                                                        CKW_CCACHE=CKW_CCACHE
+                                                        )
+
+    CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF"
+    CKW_CMAKE_CONFIGURE_SHARED = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=ON"
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR}".format(CKW_BUILD_DIR=CKW_BUILD_DIR)
+
+    # Build Compute Kernel Writer Static Library
+    subprocess.check_call(CKW_CMAKE_CONFIGURE_STATIC, stderr=subprocess.STDOUT, shell=True)
+    subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
+
+    # Build Compute Kernel Writer Shared Library
+    subprocess.check_call(CKW_CMAKE_CONFIGURE_SHARED, stderr=subprocess.STDOUT, shell=True)
+    subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
+
+    # Linking library
+    env.Append(LIBS = ['ckw'])
+    env.Append(CPPPATH = CKW_INCLUDE_DIR)
+
 if not GetOption("help"):
     try:
         if env['os'] == 'windows':
-            compiler_ver = check_output("clang++ -dumpversion").decode().strip()
+            compiler_ver = subprocess.check_output("clang++ -dumpversion").decode().strip()
         else:
-            compiler_ver = check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
+            compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)

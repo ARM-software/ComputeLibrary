@@ -37,11 +37,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(GNUInstallDirs)
 
 message(STATUS "${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_VERSION}")
-message(STATUS "Options:")
-message(STATUS "  CKW_ENABLE_OPENCL:  ${CKW_ENABLE_OPENCL}")
-message(STATUS "  CKW_ENABLE_ASSERTS: ${CKW_ASSERTS}")
-message(STATUS "  CKW_BUILD_TESTING:  ${CKW_BUILD_TESTING}")
-message(STATUS "  CKW_CCACHE:         ${CKW_CCACHE}")
 
 #---------------------------------------------------------------------
 # Options
