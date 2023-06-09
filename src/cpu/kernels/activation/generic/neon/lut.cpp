@@ -32,7 +32,7 @@ namespace cpu
 #ifdef __aarch64__
 void neon_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON(!ActivationLayerInfo::is_lut_supported(act_info.activation(), src->info()->data_type()));
+    ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::QASYMM8 && src->info()->data_type() != DataType::QASYMM8_SIGNED);
     const auto window_end_x  = window.x().end();
     Window     win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
