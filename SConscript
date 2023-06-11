@@ -31,6 +31,9 @@ import zlib
 import json
 import codecs
 
+print("DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated. Link your application only to "
+      "libarm_compute for core library functionality")
+
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 31
 LIBRARY_VERSION_MINOR =  0

@@ -40,6 +40,10 @@ If there is more than one release in a month then an extra sequential number is 
 @note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+v23.08 Public major release
+ - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
+ Users must no longer link their applications to this library and instead link only to the main `libarm_compute` library for core functionality.
+
 v23.05 Public major release
  - New features:
    - Add new Arm® Neon™ kernels / functions:
