@@ -173,7 +173,8 @@ Status CpuGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITens
     }
 
     const int block_by = arm_compute::block_by(gemm_info.weight_format());
-    if(block_by > 1)
+    // test if im2col has changed the dimensions that are needed for padding
+    if(a->dimension(0) != b->dimension(1) && block_by > 1)
     {
         // have to verify bias
         const size_t dim0_sz = a->dimension(0);
