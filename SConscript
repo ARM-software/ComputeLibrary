@@ -220,7 +220,8 @@ def create_version_file(target, source, env):
     except (OSError, subprocess.CalledProcessError):
         git_hash="unknown"
 
-    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
+    build_options = str(vars.args).replace('"', '\\"')
+    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION,build_options, git_hash.strip())
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
