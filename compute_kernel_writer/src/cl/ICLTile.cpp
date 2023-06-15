@@ -21,40 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
-#define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
+#include "ckw/Error.h"
+#include "ckw/TileInfo.h"
 
-#include "src/ITile.h"
+#include "src/cl/CLHelpers.h"
 #include "src/cl/ICLTile.h"
 
-#include <string>
+#include <vector>
 
 namespace ckw
 {
-// Forward declarations
-class TileInfo;
-
-/** OpenCL specific tile */
-class CLTile : public ICLTile
+std::vector<int32_t> ICLTile::supported_vector_lengths() const
 {
-public:
-    /** Constructor
-     *
-     * @param[in] name Tile name
-     * @param[in] info Tile info
-    */
-    CLTile(const std::string& name, const TileInfo &info);
+    return std::vector<int32_t> {1, 2, 3, 4, 8, 16};
+}
 
-    // Inherited method overridden
-    TileVariable scalar(int32_t row, int32_t col) const override;
-    TileVariable vector(int32_t row) const override;
-    TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
-    std::vector<TileVariable> all() const override;
-    bool is_assignable() const override;
+void ICLTile::validate_tile_info(const TileInfo &info) const
+{
+    if(cl_validate_vector_length(info.width()))
+    {
+        COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported TileInfo width");
+    }
 
-private:
-    std::string create_var_name(int32_t row) const;
-};
+    if(info.data_type() == DataType::Unknown)
+    {
+        COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("DataType::Unknown is not supported");
+    }
+}
 } // namespace ckw
-
-#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H */

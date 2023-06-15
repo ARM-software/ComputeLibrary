@@ -1,5 +1,29 @@
-#ifndef COMPUTE_KERNEL_WRITER_TESTS_CLTENSOR_HPP
-#define COMPUTE_KERNEL_WRITER_TESTS_CLTENSOR_HPP
+/*
+ * Copyright (c) 2023 Arm Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
+#define COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
 
 #include "src/Helpers.h"
 #include "src/cl/CLTile.h"
@@ -31,10 +55,9 @@ public:
 
         const TileInfo info(dt, width, height);
 
-        const size_t num_tests = _tile_name.size();
-        for(size_t i = 0; i < num_tests; ++i)
+        int32_t test_idx = 0;
+        for(const auto &tile_name : _tile_name)
         {
-            const std::string tile_name = _tile_name[i];
             const CLTile tile(tile_name, info);
             const auto vars = tile.all();
 
@@ -42,7 +65,7 @@ public:
             {
                 const std::string expected_var_name = tile_name + "_" + std::to_string(y);
                 const std::string actual_var_name = vars[y].str;
-                VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, i);
+                VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
             }
         }
         return all_tests_passed;
@@ -78,9 +101,10 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        const size_t num_tests = _width.size();
+        const size_t num_dims = _width.size();
 
-        for(size_t i = 0; i < num_tests; ++i)
+        int32_t test_idx = 0;
+        for(size_t i = 0; i < num_dims; ++i)
         {
             const int32_t width  = _width[i];
             const int32_t height = _height[i];
@@ -90,7 +114,7 @@ public:
             const int32_t num_vars = vars.size();
 
             // We expect the number of variables to match the heigth of the tile
-            VALIDATE_TEST(num_vars == height, all_tests_passed, i);
+            VALIDATE_TEST(num_vars == height, all_tests_passed, test_idx++);
         }
         return all_tests_passed;
     }
@@ -136,21 +160,22 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        const size_t num_tests = _x_coord.size();
+        const size_t num_coords = _x_coord.size();
 
-        for(size_t i = 0; i < num_tests; ++i)
+        int32_t test_idx = 0;
+        for(size_t i = 0; i < num_coords; ++i)
         {
             const int32_t x_coord = _x_coord[i];
             const int32_t y_coord = _y_coord[i];
 
-            const TileVariable var = tile.scalar(x_coord, y_coord);
+            const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string expected_var_name = var.str;
-            std::string actual_var_name = tile_name;
-            actual_var_name += "_" + std::to_string(y_coord);
-            actual_var_name += ".s" + dec_to_hex_as_string(x_coord);
+            const std::string actual_var_name = var.str;
+            std::string expected_var_name = tile_name;
+            expected_var_name += "_" + std::to_string(y_coord);
+            expected_var_name += ".s" + dec_to_hex_as_string(x_coord);
 
-            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, i);
+            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
         }
         return all_tests_passed;
     }
@@ -195,9 +220,10 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        const size_t num_tests = _x_coord.size();
+        const size_t num_coords = _x_coord.size();
 
-        for(size_t i = 0; i < num_tests; ++i)
+        int32_t test_idx = 0;
+        for(size_t i = 0; i < num_coords; ++i)
         {
             const int32_t width   = _width[i];
             const int32_t x_coord = _x_coord[i];
@@ -208,17 +234,17 @@ public:
             const TileInfo info(dt, width, height);
             const CLTile tile(tile_name, info);
 
-            const TileVariable var = tile.scalar(x_coord, y_coord);
+            const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string expected_var_name = var.str;
-            std::string actual_var_name = tile_name;
-            actual_var_name += "_" + std::to_string(y_coord);
+            const std::string actual_var_name = var.str;
+            std::string expected_var_name = tile_name;
+            expected_var_name += "_" + std::to_string(y_coord);
             if(width != 1)
             {
-                actual_var_name += ".s" + dec_to_hex_as_string(x_coord_clamped);
+                expected_var_name += ".s" + dec_to_hex_as_string(x_coord_clamped);
             }
 
-            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, i);
+            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
         }
         return all_tests_passed;
     }
@@ -264,9 +290,10 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        const size_t num_tests = _x_coord.size();
+        const size_t num_coords = _x_coord.size();
 
-        for(size_t i = 0; i < num_tests; ++i)
+        int32_t test_idx = 0;
+        for(size_t i = 0; i < num_coords; ++i)
         {
             const int32_t height  = _height[i];
             const int32_t x_coord = _x_coord[i];
@@ -277,21 +304,21 @@ public:
             const TileInfo info(dt, width, height);
             const CLTile tile(tile_name, info);
 
-            const TileVariable var = tile.scalar(x_coord, y_coord);
+            const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string expected_var_name = var.str;
-            std::string actual_var_name = tile_name;
+            const std::string actual_var_name = var.str;
+            std::string expected_var_name = tile_name;
             if(height != 1)
             {
-                actual_var_name += "_" + std::to_string(y_coord_clamped);
+                expected_var_name += "_" + std::to_string(y_coord_clamped);
             }
 
             if(width != 1)
             {
-                actual_var_name += ".s" + dec_to_hex_as_string(x_coord);
+                expected_var_name += ".s" + dec_to_hex_as_string(x_coord);
             }
 
-            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, i);
+            VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
         }
         return all_tests_passed;
     }
@@ -306,6 +333,135 @@ private:
     std::vector<int32_t> _x_coord {};
     std::vector<int32_t> _y_coord {};
 };
-}
 
-#endif /* COMPUTE_KERNEL_WRITER_TESTS_CLTENSOR_HPP */
+class CLTileAccessVectorVariablesTest : public ITest
+{
+public:
+    const std::string tile_name = "src";
+    const int32_t     width     = 8;
+    const DataType    dt        = DataType::Fp32;
+
+    CLTileAccessVectorVariablesTest()
+    {
+        _heights.push_back(1);
+        _heights.push_back(2);
+        _heights.push_back(3);
+    }
+
+    bool run() override
+    {
+        // The status of this variable can change in VALIDATE_TEST()
+        bool all_tests_passed = true;
+
+        int32_t test_idx = 0;
+        for(const auto &height : _heights)
+        {
+            const TileInfo info(dt, width, height);
+            const CLTile tile(tile_name, info);
+
+            for(int32_t row = 0; row < height; ++row)
+            {
+                const TileVariable var = tile.vector(row);
+
+                const std::string actual_var_name = var.str;
+                std::string expected_var_name = tile_name;
+                if(height != 1)
+                {
+                    expected_var_name += "_" + std::to_string(row);
+                }
+
+                VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
+            }
+        }
+        return all_tests_passed;
+    }
+
+    std::string name() override
+    {
+        return "CLTileAccessVectorVariablesTest";
+    }
+
+private:
+    std::vector<int32_t> _heights {};
+};
+
+class CLTileAccessSubVectorVariablesTest : public ITest
+{
+public:
+    const std::string tile_name = "src";
+    const int32_t     width     = 8;
+    const int32_t     height    = 3;
+    const DataType    dt        = DataType::Fp32;
+
+    CLTileAccessSubVectorVariablesTest()
+    {
+        _subwidths.push_back(1);
+        _subwidths.push_back(2);
+        _subwidths.push_back(3);
+        _subwidths.push_back(4);
+        _offsets.push_back(1);
+        _offsets.push_back(3);
+        _offsets.push_back(4);
+    }
+
+    bool run() override
+    {
+        // The status of this variable can change in VALIDATE_TEST()
+        bool all_tests_passed = true;
+
+        size_t test_idx = 0;
+
+        for(auto &col_start : _offsets)
+        {
+            for(const auto &subwidth : _subwidths)
+            {
+                const TileInfo info(dt, width, height);
+                const CLTile tile(tile_name, info);
+
+                for(int32_t row = 0; row < height; ++row)
+                {
+                    std::string expected_var_name = tile_name;
+                    if(height != 1)
+                    {
+                        expected_var_name += "_" + std::to_string(row);
+                    }
+
+                    if(width != 1)
+                    {
+                        expected_var_name += ".s";
+                    }
+
+                    int32_t col = col_start;
+                    for(; col < col_start + subwidth - 1; ++col)
+                    {
+                        if(width != 1)
+                        {
+                            expected_var_name += dec_to_hex_as_string(col);
+                        }
+                    }
+
+                    if(width != 1)
+                    {
+                        expected_var_name += dec_to_hex_as_string(col);
+                    }
+
+                    const std::string actual_var_name = tile.vector(row, col_start, subwidth).str;
+                    VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
+                }
+            }
+        }
+        return all_tests_passed;
+    }
+
+    std::string name() override
+    {
+        return "CLTileAccessSubVectorVariablesTest";
+    }
+
+private:
+    std::vector<int32_t> _subwidths {};
+    std::vector<int32_t> _offsets {};
+};
+} // namespace ckw
+
+#endif /* COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP */

@@ -26,55 +26,51 @@
 
 #include "src/Helpers.h"
 #include "src/cl/CLHelpers.h"
-#include "src/cl/CLTile.h"
-
-#include <algorithm>
-#include <vector>
+#include "src/cl/CLConstantTile.h"
 
 namespace ckw
 {
-CLTile::CLTile(const std::string &name, const TileInfo &info)
+CLConstantTile::CLConstantTile(const TileContainer &vals, DataType dt)
 {
-    validate_tile_info(info);
+    const int32_t w = vals[0].size();
+    const int32_t h = vals.size();
 
-    _basename = name;
-    _info     = info;
+    _info.width(w);
+    _info.height(h);
+    _info.data_type(dt);
+
+    validate_tile_info(_info);
+
+    _vals = TileContainer(h, std::vector<std::string>(w));
+
+    for(int32_t y = 0; y < h; ++y)
+    {
+        for(int32_t x = 0; x < w; ++x)
+        {
+            _vals[y][x] = vals[y][x];
+        }
+    }
 }
 
-TileVariable CLTile::scalar(int32_t row, int32_t col) const
+TileVariable CLConstantTile::scalar(int32_t row, int32_t col) const
 {
     // Clamp to nearest valid edge
     col = clamp(col, static_cast<int32_t>(0), _info.width() - 1);
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
-    TileVariable t;
-    t.str      = create_var_name(row);
-    t.desc.dt  = _info.data_type();
-    t.desc.len = 1;
-
-    // This check is required because if the width has only one element, we cannot use .s0
-    if(_info.width() != 1)
-    {
-        // Automatic broadcasting
-        t.str += ".s" + dec_to_hex_as_string(col);
-    }
-
-    return t;
+    // We can use the vector method to retrieve the scalar variable stored in the constant tile
+    return vector(row, col, 1);
 }
 
-TileVariable CLTile::vector(int32_t row) const
+TileVariable CLConstantTile::vector(int32_t row) const
 {
     // Clamp to nearest valid edge
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
-    TileVariable t;
-    t.str       = create_var_name(row);
-    t.desc.dt  = _info.data_type();
-    t.desc.len = _info.width();
-    return t;
+    return vector(row, 0, _info.width());
 }
 
-TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
+TileVariable CLConstantTile::vector(int32_t row, int32_t col_start, int32_t width) const
 {
     // Validate the new vector length
     cl_validate_vector_length(width);
@@ -83,56 +79,43 @@ TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
     TileVariable t;
-    t.str      = create_var_name(row);
     t.desc.dt  = _info.data_type();
     t.desc.len = width;
 
-    if(_info.width() != 1)
+    // The vector has the following form: ((data_typeN)(val0, val1,..., ValN-1))
+    t.str = "((" + cl_get_variable_datatype_as_string(t.desc.dt, width) + ")";
+    t.str += "(";
+
+    int32_t col = col_start;
+    for(; col < width - 1; ++col)
     {
-        t.str += ".s";
-        for(int i = 0; i < width; ++i)
-        {
-            t.str += dec_to_hex_as_string(col_start + i);
-        }
+        t.str += _vals[row][col];
+        t.str += ", ";
     }
+    t.str += _vals[row][col];
+    t.str += "))";
+
     return t;
 }
 
-std::vector<TileVariable> CLTile::all() const
+std::vector<TileVariable> CLConstantTile::all() const
 {
     std::vector<TileVariable> vars;
+
     for(int32_t y = 0; y < _info.height(); ++y)
     {
-        TileVariable t;
-        t.str       = create_var_name(y);
-        t.desc.dt  = _info.data_type();
-        t.desc.len = _info.width();
-        vars.push_back(t);
+        for(int32_t x = 0; x < _info.width(); ++x)
+        {
+            // We can use the vector method to retrieve all the scalar variables stored in the constant tile
+            TileVariable t = vector(y, x, 1);
+            vars.push_back(t);
+        }
     }
     return vars;
 }
 
-bool CLTile::is_assignable() const
+bool CLConstantTile::is_assignable() const
 {
-    return true;
-}
-
-std::string CLTile::create_var_name(int32_t row) const
-{
-    std::string var_name = _basename;
-
-    // If a scalar variable, we do not append the row index
-    if(_info.height() == 1)
-    {
-        return var_name;
-
-    }
-    else
-    {
-        var_name += "_";
-        var_name += std::to_string(row);
-    }
-
-    return var_name;
+    return false;
 }
 } // namespace ckw

@@ -21,40 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
-#define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
+#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_ICLTILE_H
+#define COMPUTE_KERNEL_WRITER_SRC_CL_ICLTILE_H
 
 #include "src/ITile.h"
-#include "src/cl/ICLTile.h"
-
-#include <string>
 
 namespace ckw
 {
 // Forward declarations
 class TileInfo;
 
-/** OpenCL specific tile */
-class CLTile : public ICLTile
+/** Interface for the OpenCL specific tile */
+class ICLTile : public IVectorTile
 {
 public:
-    /** Constructor
-     *
-     * @param[in] name Tile name
-     * @param[in] info Tile info
-    */
-    CLTile(const std::string& name, const TileInfo &info);
-
     // Inherited method overridden
-    TileVariable scalar(int32_t row, int32_t col) const override;
-    TileVariable vector(int32_t row) const override;
-    TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
-    std::vector<TileVariable> all() const override;
-    bool is_assignable() const override;
+    std::vector<int32_t> supported_vector_lengths() const override;
 
-private:
-    std::string create_var_name(int32_t row) const;
+protected:
+    void validate_tile_info(const TileInfo &info) const;
 };
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H */
+#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_ICLTILE_H */

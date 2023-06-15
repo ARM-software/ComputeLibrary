@@ -31,6 +31,9 @@
 
 namespace ckw
 {
+/** Compute Kernel Writer tile container. It contains the variables stored in the tile as a string */
+using TileContainer = std::vector<std::vector<std::string>>;
+
 /** Tile descriptor which reports the underlying datatype and vector length */
 struct TileVariableDescriptor
 {
@@ -92,12 +95,12 @@ class IScalarTile : public ITile
 public:
     virtual ~IScalarTile() = default;
     /** Method to get the scalar variable from a tile as a string
-     * @param[in] col Tile column. If out-of-bound, the column is clamped to the nearest valid edge
      * @param[in] row Tile row. If out-of-bound, the row is clamped to the nearest valid edge
+     * @param[in] col Tile column. If out-of-bound, the column is clamped to the nearest valid edge
      *
      * @return the @ref TileVariable
      */
-    virtual TileVariable scalar(int32_t col, int32_t row) const = 0;
+    virtual TileVariable scalar(int32_t row, int32_t col) const = 0;
 };
 
 /** Tile base class to store vector variables. It derives from IScalarTile since we can still access the scalar variable
@@ -116,13 +119,13 @@ public:
     virtual TileVariable vector(int32_t row) const = 0;
     /** Method to get a sub-vector variable. The length of the sub-vector must be supported by the derived IVectorTile class
      *
+     * @param[in] row       Tile row. If out-of-bound, the row is clamped to the nearest valid edge
      * @param[in] col_start Tile starting column to get the sub-vector. If out-of-bound, the derived IVectorTile class may throw an assert.
      * @param[in] width     The width of the sub-vector. The width must be supported by the derived IVectorTile class and the last element must be in-bound.
-     * @param[in] row       Tile row. If out-of-bound, the row is clamped to the nearest valid edge
      *
      * @return the vector variable as a @ref TileVariable
      */
-    virtual TileVariable vector(int32_t col_start, int32_t width, int32_t row) const = 0;
+    virtual TileVariable vector(int32_t row, int32_t col_start, int32_t width) const = 0;
     /** Method to get the supported vector length.
      *
      * @return a vector containing the supported vector lengths

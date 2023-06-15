@@ -36,7 +36,7 @@ namespace ckw
 constexpr int32_t kTileWidthIdx  = 0;
 constexpr int32_t kTileHeightIdx = 1;
 
-/** Compute Kernel Writer tile shape */
+/** Compute Kernel Writer tile shape. It is used to define the shape of the tile */
 using TileShape = std::array<int32_t, 2>;
 
 /** Compute Kernel Writer tile info */

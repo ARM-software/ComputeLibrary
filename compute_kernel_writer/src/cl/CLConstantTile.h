@@ -21,29 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
-#define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
+#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLCONSTANTTILE_H
+#define COMPUTE_KERNEL_WRITER_SRC_CL_CLCONSTANTTILE_H
 
 #include "src/ITile.h"
 #include "src/cl/ICLTile.h"
-
-#include <string>
 
 namespace ckw
 {
 // Forward declarations
 class TileInfo;
 
-/** OpenCL specific tile */
-class CLTile : public ICLTile
+/** OpenCL specific constant tile */
+class CLConstantTile : public ICLTile
 {
 public:
     /** Constructor
      *
-     * @param[in] name Tile name
-     * @param[in] info Tile info
+     * @note A constant tile does not need a name since this object does not return variable's name but rather
+     *       values stored as string type
+     *
+     * @param[in] vals The tile container with the constant values as std::string
+     * @param[in] dt   Datatype of the values stored in the tile container
     */
-    CLTile(const std::string& name, const TileInfo &info);
+    CLConstantTile(const TileContainer &vals, DataType dt);
 
     // Inherited method overridden
     TileVariable scalar(int32_t row, int32_t col) const override;
@@ -53,8 +54,8 @@ public:
     bool is_assignable() const override;
 
 private:
-    std::string create_var_name(int32_t row) const;
+    TileContainer _vals {};
 };
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H */
+#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLCONSTANTTILE_H */
