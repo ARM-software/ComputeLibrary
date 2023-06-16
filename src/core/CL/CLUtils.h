@@ -33,6 +33,7 @@ namespace arm_compute
 class TensorShape;
 class CLBuildOptions;
 class ITensorInfo;
+class ICLTensor;
 
 /** OpenCL Image2D types */
 enum class CLImage2DType
@@ -40,6 +41,15 @@ enum class CLImage2DType
     ReadOnly,
     WriteOnly
 };
+
+/** Create a cl::Image2D object from a tensor
+ *
+ * @param[in] tensor     Tensor from which to construct Image 2D object
+ * @param[in] image_type Image 2D type (@ref CLImage2DType)
+ *
+ * @return cl::Image2D object
+ */
+cl::Image2D create_image2d_from_tensor(const ICLTensor *tensor, CLImage2DType image_type);
 
 /** Create a cl::Image2D object from an OpenCL buffer
  *

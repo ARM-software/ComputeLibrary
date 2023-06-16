@@ -86,6 +86,16 @@ enum class TensorComponent : uint32_t
     Dim1xDim2xDim3     = 0x08001110
 };
 
+/** Compute Kernel Writer tensor storage. The tensor storage represents the type of tensor memory object.
+ */
+enum class TensorStorage : uint32_t
+{
+    Unknown            = 0x00000000,
+    BufferUint8Ptr     = 0x01000000,
+    Texture2dReadOnly  = 0x02000001,
+    Texture2dWriteOnly = 0x02000010,
+};
+
 /** Compute Kernel Writer tensor shape
  *  Negative dimensions can be interpreted as dynamic dimensions by the Compute Kernel Writer
  */

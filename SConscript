@@ -529,6 +529,11 @@ if env['fixed_format_kernels']:
 if env['experimental_dynamic_fusion']:
     lib_files += filelist['experimental']['dynamic_fusion']
 
+# Compute Kernel Writer integration files
+if env['ckw']:
+    if env['opencl']:
+        lib_files += filelist['experimental']['ckw']['cl']
+
 # Logging files
 if env["logging"]:
     lib_files += filelist['logging']

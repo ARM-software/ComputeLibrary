@@ -228,6 +228,7 @@ cc_library_static {
         "src/core/CL/ICLSimpleKernel.cpp",
         "src/core/CL/ICLTensor.cpp",
         "src/core/CL/OpenCL.cpp",
+        "src/core/CL/ckw/KernelArgumentsHelpers.cpp",
         "src/core/CL/kernels/CLArgMinMaxLayerKernel.cpp",
         "src/core/CL/kernels/CLBatchNormalizationLayerKernel.cpp",
         "src/core/CL/kernels/CLBatchToSpaceLayerKernel.cpp",

@@ -431,35 +431,20 @@ void ClDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, cl
 
         if(_export_weights_to_cl_image)
         {
-            const size_t      image_w = weights->info()->dimension(0) / 4;
-            const size_t      image_h = weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
-            const TensorShape shape2d(image_w, image_h);
-            const size_t      image_row_pitch = weights->info()->strides_in_bytes()[1];
-
-            // Export cl_buffer to cl_image
-            weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+            // Export tensor to cl_image
+            weights_cl_image = create_image2d_from_tensor(weights, CLImage2DType::ReadOnly);
         }
 
         if(_export_output_to_cl_image)
         {
-            const size_t      image_w = dst->info()->dimension(0) / 4;
-            const size_t      image_h = dst->info()->dimension(1) * dst->info()->dimension(2) * dst->info()->dimension(3);
-            const TensorShape shape2d(image_w, image_h);
-            const size_t      image_row_pitch = dst->info()->strides_in_bytes()[1];
-
-            // Export cl_buffer to cl_image
-            output_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), dst->cl_buffer(), shape2d, dst->info()->data_type(), image_row_pitch, CLImage2DType::WriteOnly);
+            // Export tensor to cl_image
+            output_cl_image = create_image2d_from_tensor(dst, CLImage2DType::WriteOnly);
         }
 
         if(_export_input_to_cl_image)
         {
-            const size_t      image_w = src->info()->dimension(0) / 4;
-            const size_t      image_h = src->info()->dimension(1) * src->info()->dimension(2) * src->info()->dimension(3);
-            const TensorShape shape2d(image_w, image_h);
-            const size_t      image_row_pitch = src->info()->strides_in_bytes()[1];
-
-            // Export cl_buffer to cl_image
-            input_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), src->cl_buffer(), shape2d, src->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+            // Export tensor to cl_image
+            input_cl_image = create_image2d_from_tensor(src, CLImage2DType::ReadOnly);
         }
 
         unsigned int idx = 0;

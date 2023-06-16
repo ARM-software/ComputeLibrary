@@ -126,7 +126,7 @@ vars.AddVariables(
             ├── datasets
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
-    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
+    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files. This option also enables opencl=1 and ckw=1 on which it has a direct dependency.", False),
     BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
@@ -214,6 +214,11 @@ if env['os'] == 'bare_metal':
     if env['cppthreads'] or env['openmp']:
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
+
+if env['experimental_dynamic_fusion']:
+    # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
+    env['opencl'] = 1
+    env['ckw'] = 1
 
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")

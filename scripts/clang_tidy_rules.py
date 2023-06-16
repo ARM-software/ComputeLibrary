@@ -28,7 +28,8 @@ import re
 import sys
 
 def get_list_includes():
-    return "src/cpu/kernels/assembly " \
+    return "compute_kernel_writer/include " \
+           "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \

@@ -120,12 +120,6 @@ target_include_directories(ckw
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}
     )
 
-set_target_properties(ckw
-    PROPERTIES
-    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
-    VERSION ${CMAKE_PROJECT_VERSION}
-    )
-
 #---------------------------------------------------------------------
 # Validation tests
 

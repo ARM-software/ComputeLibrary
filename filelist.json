@@ -2337,6 +2337,11 @@
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateWriter.cpp",
       "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp"
-    ]
+    ],
+    "ckw": {
+      "cl": [
+        "src/core/CL/ckw/KernelArgumentsHelpers.cpp"
+      ]
+    }
   }
 }
