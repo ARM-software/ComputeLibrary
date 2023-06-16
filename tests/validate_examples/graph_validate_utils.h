@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -309,8 +309,6 @@ public:
  *
  * @param[in]  options       Options to consume
  * @param[out] common_params params structure to consume.
- *
- * @return consume_common_graph_parameters structure containing the common graph parameters
  */
 void consume_common_graph_parameters(CommonGraphValidateOptions &options, CommonParams &common_params)
 {
@@ -445,8 +443,6 @@ public:
      * @param[in]  seed   seed for the randomization function
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
-     *
-     * @return None.
      */
     void fill_tensor(arm_compute::test::SimpleTensor<uint8_t> &tensor, std::random_device::result_type seed, uint8_t low, uint8_t high)
     {
@@ -473,8 +469,6 @@ public:
      * @param[in]  seed   seed for the randomization function
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
-     *
-     * @return None.
      */
     void fill_tensor(arm_compute::test::SimpleTensor<int32_t> &tensor, std::random_device::result_type seed, int32_t low, int32_t high)
     {
@@ -494,8 +488,6 @@ public:
      * @param[in]  seed   seed for the randomization function
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
-     *
-     * @return None.
      */
     void fill_tensor(arm_compute::test::SimpleTensor<float> &tensor, std::random_device::result_type seed, float low, float high)
     {
@@ -516,8 +508,6 @@ public:
      * @param[in]  seed   seed for the randomization function
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
-     *
-     * @return None.
      */
     void fill_tensor(arm_compute::test::SimpleTensor<half> &tensor, std::random_device::result_type seed, half low, half high)
     {
@@ -559,8 +549,6 @@ public:
      *
      * @param[in] tensor Tensor result of the actual operation passed into the Accessor.
      * @param[in] output Tensor result of the reference implementation.
-     *
-     * @return None.
      */
     void validate(ITensor &tensor, arm_compute::test::SimpleTensor<D> output)
     {

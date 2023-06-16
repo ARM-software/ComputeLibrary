@@ -143,6 +143,7 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<T> &src);
  * @param[in] src               Float tensor.
  * @param[in] quantization_info Quantification information.
  *
+ * \relates  arm_compute::test::SimpleTensor
  * @return Quantized tensor.
  */
 template <typename T>
@@ -161,7 +162,7 @@ SimpleTensor<float> convert_from_symmetric(const SimpleTensor<T> &src);
  *
  * @param[in] src               Float tensor.
  * @param[in] quantization_info Quantification information.
- *
+ * \relates  arm_compute::test::SimpleTensor
  * @return Quantized tensor.
  */
 template <typename T>

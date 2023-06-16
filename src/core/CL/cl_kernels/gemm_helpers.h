@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
  * @param[in] offset The offset within the vector. Offset can only be of the same size of the OpenCL vector (2,3,4,8,16)
  * @param[in] n0     The number of consecutive columns to access. n0 + offset must be <= 16
  * @param[in] x      Vector to access
- * @{
+ *
  */
 #define SCALAR_ACCESS_STR(offset, n0, x) scalar_access_##offset##_##n0(x)
 #define SCALAR_ACCESS(offset, n0, x) SCALAR_ACCESS_STR(offset, n0, x)
@@ -281,6 +281,7 @@
  */
 #define LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0X##N0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 #define LOAD_TENSOR_M0XN0(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) LOAD_TENSOR_M0XN0_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+/** @}*/ // end of group LOAD_TENSOR_M0XN0
 
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
  * @name LOAD_ROW_n
@@ -492,7 +493,7 @@
     LOAD_ROW_PARTIAL_15(N0, LOAD_N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)     \
     VLOAD_PARTIAL(N0, LOAD_N0)                                                          \
     (BASENAME##F, 0, (__global DATA_TYPE *)(PTR + OFFSET + 15 * STRIDE_Y + Z##F));
-/** @} */ // end of groupd LOAD_ROW_PARTIAL_n
+/** @} */ // end of group LOAD_ROW_PARTIAL_n
 
 /** Partially load a block of the given size LOAD_M0xLOAD_N0
  * @name LOAD_BLOCK_PARTIAL
@@ -697,6 +698,7 @@
     LOAD_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)
 
 #endif // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
+/** @} */ // end of group LOAD_BLOCK_BOUNDARY_AWARE
 
 /** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
  * @name LOAD_TEXTURE2D_ROW_n
@@ -952,6 +954,7 @@
         BASENAME##F = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + Y##F * STRIDE_Y)); \
     else                                                                                    \
         BASENAME##F = 0;
+/** @} */ // end of group LOAD_ROW_INDIRECT_n
 
 /** Load blocks (consecutive rows and columns) with Y offset.
  * @name LOAD_BLOCK_INDIRECT
@@ -975,6 +978,7 @@
  */
 #define LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) LOAD_ROW_INDIRECT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
 #define LOAD_BLOCK_INDIRECT(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK) LOAD_BLOCK_INDIRECT_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Y, Y_MASK)
+/** @} */ // end of group LOAD_BLOCK_INDIRECT
 
 /** Loads the elements from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
  * @name LOAD_ELEMENT_n
@@ -1328,7 +1332,7 @@
 #define COLUMN_VECTOR_SCALAR16(IDX_COL, BASENAME, X, TYPE) \
     VEC_DATA_TYPE(TYPE, 16)                                \
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7), (X##8), (X##9), (X##A), (X##B), (X##C), (X##D), (X##E), (X##F));
-/** @} */ // end of group COLUMN_VECTORn
+/** @} */ // end of group COLUMN_VECTOR_SCALARn
 
 /** Create transposed vectors of the given vectors
  * @name TRANSPOSE_K0Xn
@@ -1561,6 +1565,7 @@
 #define ADD_ROW_BROADCAST_16(BASENAME, BIAS) \
     ADD_ROW_BROADCAST_15(BASENAME, BIAS)     \
     BASENAME##F += BIAS;
+/** @} */ // end of group ADD_ROW_BROADCAST_n
 
 /** Broadcast (add a value) to the each element of the destination block (BASENAME)
  * @name ADD_BLOCK_BROADCAST
@@ -1674,6 +1679,7 @@
  * @param[in] DATA_TYPE    The data type of the vectors
  * @param[in] BASENAME_SRC The basename of the source variables
  * @param[in] BASENAME_DST The basename of the destination variables
+ * @{
  */
 #define CONVERT_ROW_1(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) \
     VEC_DATA_TYPE(DATA_TYPE, N)                                 \
@@ -1765,6 +1771,7 @@
  * @param[in] DATA_TYPE    The data type of the vectors
  * @param[in] BASENAME_SRC The basename of the source variables
  * @param[in] BASENAME_DST The basename of the destination variables
+ * @{
  */
 #define CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_ROW_##M(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
 #define CONVERT_BLOCK(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)

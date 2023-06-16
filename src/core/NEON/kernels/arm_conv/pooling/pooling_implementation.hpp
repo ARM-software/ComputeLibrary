@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,9 @@ struct PoolingImplementation
   }
 };
 
+/**
+ * \relates PoolingImplementation
+ */
 template <typename TInput, typename TOutput, class OutputStage = Nothing>
 const PoolingImplementation<TInput, TOutput, OutputStage> *pooling_implementation_list();
 

@@ -52,7 +52,8 @@ using qasymm8x16_signed_t  = int8x16_t;  /**< 8 bit quantized signed asymmetric 
  *
  * @return A 16-component vector in QASYMM8 format, saturated to fit
  */
-uint8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo);
+template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
+qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo);
 
 /** Perform a multiply-accumulate on all 16 components of a QASYMM8_SIGNED vector
  *
@@ -64,7 +65,8 @@ uint8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo);
  *
  * @return A 16-component vector in QASYMM8_SIGNED format, saturated to fit
  */
-int8x16_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
+template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
+qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
 
 /** Performs final quantization step on 16 elements
  *
@@ -716,11 +718,6 @@ inline uint16x8x2_t vquantize_qasymm16(const float32x4x4_t &qv, const UniformQua
     return { pa, pb };
 }
 
-template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
-qasymm8x16_signed_t vmlaq_qasymm8(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
-
-template <RoundingPolicy round_policy = RoundingPolicy::TO_ZERO>
-qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
 } // namespace arm_compute
 #include "src/core/NEON/NEAsymm.inl"
 #endif // ARM_COMPUTE_NEASYMM_H
