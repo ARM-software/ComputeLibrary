@@ -111,6 +111,6 @@ public:
 protected:
     GPUTarget _target;
 };
-} // namespace opencl
+} // namespace cl_matmul
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG */

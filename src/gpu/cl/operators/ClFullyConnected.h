@@ -42,7 +42,12 @@ class ClFlatten;
 class ClGemm;
 class ClGemmLowpMatrixMultiplyCore;
 class ClTranspose;
-
+// Kernel Forward Declarations
+namespace kernels
+{
+class ClMatMulNativeKernel;
+class ClMatMulLowpNativeKernel;
+}
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
@@ -119,11 +124,18 @@ private:
     std::unique_ptr<ClGemm>                         _mm_gemm;
     std::unique_ptr<ClGemmLowpMatrixMultiplyCore>   _mm_gemmlowp;
 
+    std::unique_ptr<kernels::ClMatMulNativeKernel>     _matmul_native_kernel;
+    std::unique_ptr<kernels::ClMatMulLowpNativeKernel> _matmul_lowp_native_kernel;
+
     experimental::MemoryRequirements _aux_mem{};
 
     TensorInfo _flattened_src{};
     TensorInfo _converted_weights{};
     TensorInfo _reshaped_weights{};
+
+    // Saved tensor shapes for reshaping when using matmul
+    TensorShape _lhs_shape_original{};
+    TensorInfo  _lhs_to_use{};
 
     TensorInfo _weights_to_use{};
     int        _weights_to_use_idx{ ACL_SRC_1 };
@@ -134,10 +146,11 @@ private:
     bool _is_quantized{ false };
     bool _is_prepared{ false };
     bool _dynamic_weights{ false };
+    bool _use_matmul{ false };
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    int  _asrt_run_count{};
-    int  _asrt_prepare_count{};
+    int _asrt_run_count {};
+    int _asrt_prepare_count{};
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 };
 } // namespace opencl

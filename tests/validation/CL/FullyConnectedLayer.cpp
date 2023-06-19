@@ -131,6 +131,8 @@ template <typename T>
 using CLFullyConnectedLayerMixedDataLayoutFixture = FullyConnectedLayerValidationFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, true>;
 template <typename T>
 using CLFullyConnectedLayerDynamicWeightsFixture = FullyConnectedWithDynamicWeightsFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
+template <typename T>
+using CLFullyConnectedNoBiasFixture = FullyConnectedDynamicNoBiasFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -151,9 +153,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                                        framework::dataset::make("WeightsReshaped", { false, true })))
+                       framework::dataset::make("DataType", DataType::F16)),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                       framework::dataset::make("WeightsReshaped", { false, true })))
 {
 }
 TEST_SUITE_END()
@@ -179,9 +181,15 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerMixedDataLayoutF
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                                        framework::dataset::make("WeightsReshaped", { false, true })))
+                       framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                       framework::dataset::make("WeightsReshaped", { false, true })))
+{
+}
+FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                       framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
+                       framework::dataset::make("WeightsReshaped", { false })))
 {
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
@@ -230,9 +238,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>,
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                                        framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
 {
 }
 TEST_SUITE_END() /* QASYMM8 */
@@ -259,9 +267,15 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFullyConnectedLayerQuantizedMixedDa
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunDynamicWeights, CLFullyConnectedLayerDynamicWeightsFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                                        framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
+{
+}
+FIXTURE_DATA_TEST_CASE(RunDynamicNoBias, CLFullyConnectedNoBiasFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                       framework::dataset::make("WeightsReshaped", { false /* COMPMID-6000: Support FullyConnected with quantized dynamic weights already reshaped */ })))
 {
 }
 TEST_SUITE_END() // QASYMM8_SIGNED

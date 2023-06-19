@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "activation_float_helpers.h"
 #include "helpers.h"
 #include "tile_helpers.h"
-#include "activation_float_helpers.h"
 
 #if defined(MAT_MUL_NATIVE_QUANTIZED_NT_NT)
 /** This OpenCL kernel performs the batch matrix multiplication (BatchMatMul): LHS non-transposed, RHS non-transposed - buffer only
@@ -189,7 +189,7 @@ __kernel void mat_mul_native_quantized_nt_nt(
     {
         LOOP_UNROLLING(int, j, 0, 1, N0,
         {
-            acc[i].s[j] += ((int)RHS_OFFSET) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
+            acc[i].s[j] -= ((int)RHS_OFFSET) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
         })
     })
 
@@ -368,7 +368,7 @@ __kernel void mat_mul_native_quantized_nt_t(
     {
         LOOP_UNROLLING(int, j, 0, 1, N0,
         {
-            acc[i].s[j] += ((int)(RHS_OFFSET)) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
+            acc[i].s[j] -= ((int)(RHS_OFFSET)) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
         })
     })
 
@@ -549,7 +549,7 @@ __kernel void mat_mul_native_quantized_t_nt(
     {
         LOOP_UNROLLING(int, j, 0, 1, N0,
         {
-            acc[i].s[j] += ((int)(RHS_OFFSET)) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
+            acc[i].s[j] -= ((int)(RHS_OFFSET)) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
         })
     })
 
@@ -734,7 +734,7 @@ __kernel void mat_mul_native_quantized_t_t(
     {
         LOOP_UNROLLING(int, j, 0, 1, N0,
         {
-            acc[i].s[j] += ((int)RHS_OFFSET) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
+            acc[i].s[j] -= ((int)RHS_OFFSET) * a_sum[0].s[i] + ((int)(LHS_OFFSET)) * b_sum[0].s[j];
         })
     })
 

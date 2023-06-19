@@ -164,9 +164,10 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     build_opts.add_option("-DDST_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
     build_opts.add_option("-DDST_SHIFT=" + support::cpp11::to_string(output_shift));
 
-    build_opts.add_option("-DLHS_OFFSET=" + support::cpp11::to_string(-lqinfo.offset)); // Note this is passed as negative to maintain similarity with CLDirectConv2D
-    build_opts.add_option("-DRHS_OFFSET=" + support::cpp11::to_string(-rqinfo.offset)); // Note this is passed as negative to maintain similarity with CLDirectConv2D
-    build_opts.add_option("-DDST_OFFSET=" + support::cpp11::to_string(dqinfo.offset));  // Passed as positive (unlike the above two)
+    // Note : Offset is not negated, unlike gemmlowp kernels
+    build_opts.add_option("-DLHS_OFFSET=" + support::cpp11::to_string(lqinfo.offset));
+    build_opts.add_option("-DRHS_OFFSET=" + support::cpp11::to_string(rqinfo.offset));
+    build_opts.add_option("-DDST_OFFSET=" + support::cpp11::to_string(dqinfo.offset)); // Passed as positive (unlike the above two)
 
     build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(act_info.a())));
     build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(act_info.b())));
