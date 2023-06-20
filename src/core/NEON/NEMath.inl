@@ -52,11 +52,11 @@ constexpr float te_sin_coeff5 = 0.013888888889f; // 1/(8*9)
 #ifndef DOXYGEN_SKIP_THIS
 inline float32x4_t prefer_vfmaq_f32(float32x4_t a, float32x4_t b, float32x4_t c)
 {
-#ifdef __aarch64__
+#if __ARM_FEATURE_FMA
     return vfmaq_f32(a, b, c);
-#else  // __aarch64__
+#else // __ARM_FEATURE_FMA
     return vmlaq_f32(a, b, c);
-#endif // __aarch64__
+#endif // __ARM_FEATURE_FMA
 }
 
 inline float32x4_t vfloorq_f32(float32x4_t val)
