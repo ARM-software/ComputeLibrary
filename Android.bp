@@ -166,7 +166,8 @@ arm_compute_library_defaults {
             "-DARM_COMPUTE_ENABLE_NEON",
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
-            "-Wno-implicit-fallthrough"
+            "-Wno-implicit-fallthrough",
+            "-fPIC"
     ],
     rtti: true,
 }
@@ -177,6 +178,8 @@ cc_library_static {
     proprietary: true,
     local_include_dirs: ["build/android-arm64v8a/src/core",
                          "build/android-arm64v8a/src/core/CL",
+                         "compute_kernel_writer/include",
+                         "compute_kernel_writer",
                          "src/core/common",
                          "src/core/helpers",
                          "src/core/NEON/kernels/arm_gemm",
@@ -186,6 +189,15 @@ cc_library_static {
                          "src/cpu/kernels/assembly"],
     export_include_dirs: [".", "./include"],
     srcs: [
+        "compute_kernel_writer/src/Error.cpp",
+        "compute_kernel_writer/src/Helpers.cpp",
+        "compute_kernel_writer/src/TensorInfo.cpp",
+        "compute_kernel_writer/src/TensorUtils.cpp",
+        "compute_kernel_writer/src/TileInfo.cpp",
+        "compute_kernel_writer/src/cl/CLConstantTile.cpp",
+        "compute_kernel_writer/src/cl/CLHelpers.cpp",
+        "compute_kernel_writer/src/cl/CLTile.cpp",
+        "compute_kernel_writer/src/cl/ICLTile.cpp",
         "src/c/AclContext.cpp",
         "src/c/AclOperator.cpp",
         "src/c/AclQueue.cpp",
