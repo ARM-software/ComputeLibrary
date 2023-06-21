@@ -303,6 +303,16 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo *src,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
+
+    // Assembly kernels cannot work with padding greater than the kernel.
+    const auto &padding = info.pad_stride_info;
+    const auto &wei_shape = weights->tensor_shape();
+
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        padding.pad_top() >= wei_shape[2] || padding.pad_bottom() >= wei_shape[2] ||
+        padding.pad_left() >= wei_shape[1] || padding.pad_right() >= wei_shape[1]
+    );
+
     return Status{};
 }
 
