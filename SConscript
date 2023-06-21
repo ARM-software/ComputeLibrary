@@ -31,8 +31,12 @@ import zlib
 import json
 import codecs
 
-print("DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated. Link your application only to "
-      "libarm_compute for core library functionality")
+from SCons.Warnings import warn, DeprecatedWarning
+
+warn(DeprecatedWarning,
+     "DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated and is scheduled for removal in 24.02 release."
+     " Link your application only to libarm_compute for core library functionality"
+     )
 
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 31
@@ -122,6 +126,9 @@ def build_library(name, build_env, sources, static=False, libs=[]):
     if env['os'] == 'android' and static == False:
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
+
+    if env['ckw']:
+        libs.append('libckw.a')
 
     if static:
         obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)

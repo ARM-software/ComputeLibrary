@@ -28,11 +28,10 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 project(ComputeKernelWriter
     VERSION 1.0.0
     LANGUAGES CXX
-    )
+)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(GNUInstallDirs)
 
@@ -41,17 +40,11 @@ message(STATUS "${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_VERSION}")
 #---------------------------------------------------------------------
 # Options
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wdisabled-optimization -Wformat=2 \
-                     -Winit-self -Wstrict-overflow=2 -Wswitch-default -Woverloaded-virtual \
-                     -Wformat-security -Wctor-dtor-privacy -Wsign-promo -Weffc++ \
-                     -Wlogical-op -Wstrict-null-sentinel")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os")
-
 option(CKW_ENABLE_OPENCL "Enable OpenCL code generation" OFF)
 option(CKW_ENABLE_ASSERTS "Enable assertions. Always enabled in Debug builds" OFF)
 option(CKW_BUILD_TESTING "Build the Compute Kernel Writer validation test suite" OFF)
 option(CKW_BUILD_EXAMPLES "Build the Compute Kernel Writer examples" OFF)
-option(CKW_CCACHE "Enable compiler cache builds" OFF)
+option(CKW_CCACHE "Use compiler cache for faster recompilation" OFF)
 
 #---------------------------------------------------------------------
 # Build configuration
@@ -79,25 +72,49 @@ endif()
 #---------------------------------------------------------------------
 # Library targets
 
-set(CKW_ASSERTS_OPTS "-fstack-protector-strong")
+set(CKW_CXX_FLAGS
+    -Wall
+    -Werror
+    -Wextra
+    -Wdisabled-optimization
+    -Wformat=2
+    -Winit-self
+    -Wstrict-overflow=2
+    -Wswitch-default
+    -Woverloaded-virtual
+    -Wformat-security
+    -Wctor-dtor-privacy
+    -Wsign-promo
+    -Weffc++
+    -pedantic
+)
+set(GNU_WARNINGS
+    -Wlogical-op
+    -Wstrict-null-sentinel
+)
+set(CKW_ASSERTS_OPTS
+    -fstack-protector-strong
+)
 
-# Define common properties across all targets
-add_library(ckw_common INTERFACE)
+add_library(ckw)
+target_compile_options(ckw
+    PUBLIC
+    ${CKW_CXX_FLAGS}
+    "$<$<CXX_COMPILER_ID:GNU>:${GNU_WARNINGS}>"
+    "$<$<CONFIG:Debug>:${CKW_ASSERTS_OPTS}>"
+    "$<$<BOOL:${CKW_ASSERTS}>:${CKW_ASSERTS_OPTS}>"
+    # Set CMAKE_CXX_FLAGS last so user can overwrite options
+    ${CMAKE_CXX_FLAGS}
+    PRIVATE
+    $<$<CONFIG:Release>:-Os>
+)
 
-target_compile_definitions(ckw_common INTERFACE
+target_compile_definitions(ckw PUBLIC
     $<$<CONFIG:Debug>:COMPUTE_KERNEL_WRITER_DEBUG_ENABLED>
     $<$<CONFIG:Debug>:COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED>
     $<$<BOOL:${CKW_ASSERTS}>:COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED>
     $<$<BOOL:${CKW_ENABLE_OPENCL}>:COMPUTE_KERNEL_WRITER_OPENCL_ENABLED>
-    )
-
-target_compile_options(ckw_common INTERFACE
-    -pedantic
-    "$<$<BOOL:${CKW_ASSERTS}>:${CKW_ASSERTS_OPTS}>"
-    )
-
-# Compute Kernel Writer library
-add_library(ckw)
+)
 
 target_sources(ckw PRIVATE
     src/Error.cpp
@@ -124,10 +141,9 @@ if(CKW_ENABLE_OPENCL)
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
         src/cl/ICLTile.cpp
-        )
+    )
 endif()
 
-target_link_libraries(ckw PUBLIC ckw_common)
 target_include_directories(ckw
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}
@@ -142,30 +158,30 @@ if(CKW_BUILD_TESTING)
         validation/tests/TensorBitMaskTest.hpp
         validation/tests/UtilsTest.hpp
         validation/Validation.cpp
-        )
+    )
     if(CKW_ENABLE_OPENCL)
-    target_sources(ckw_validation PRIVATE
-        validation/tests/CLConstantTileTest.hpp
-        validation/tests/CLTileTest.hpp)
+        target_sources(ckw_validation PRIVATE
+            validation/tests/CLConstantTileTest.hpp
+            validation/tests/CLTileTest.hpp)
     endif()
 
     target_link_libraries(ckw_validation PRIVATE ckw)
     target_include_directories(ckw_validation
         PRIVATE ${CMAKE_CURRENT_LIST_DIR}
-        )
+    )
 endif()
 
 #---------------------------------------------------------------------
-# Example
+# Examples
+
+function(add_ckw_example name)
+    add_executable(${name} ${ARGN})
+    target_link_libraries(${name} PUBLIC ckw)
+endfunction(add_ckw_example)
 
 if(CKW_BUILD_EXAMPLES)
-    add_executable(ckw_example_add_exp_store
-        examples/add_exp_store.cpp
-    )
-
-    target_link_libraries(ckw_example_add_exp_store
-        PUBLIC ckw
-    )
+    add_ckw_example(ckw_example_add_exp_store
+        examples/add_exp_store.cpp)
 endif()
 
 #---------------------------------------------------------------------
@@ -176,8 +192,8 @@ install(TARGETS ckw
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
+)
 
 install(DIRECTORY include/ckw
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
+)

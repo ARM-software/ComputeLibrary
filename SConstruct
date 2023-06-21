@@ -423,7 +423,7 @@ print("CXX", env['CXX'])
 
 """Build the Compute Kernel Writer subproject"""
 if env['ckw']:
-    # Strip ccache from CC and CXX
+    # Strip ccache prefix from CC and CXX to obtain only the target triple
     CKW_CC = env['CC'].replace(env['compiler_cache'] + " ", "")
     CKW_CXX = env['CXX'].replace(env['compiler_cache'] + " ", "")
     CKW_CCACHE = 1 if env['compiler_cache'] else 0
@@ -452,20 +452,17 @@ if env['ckw']:
                                                         CKW_CCACHE=CKW_CCACHE
                                                         )
 
-    CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF"
-    CKW_CMAKE_CONFIGURE_SHARED = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=ON"
-    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR}".format(CKW_BUILD_DIR=CKW_BUILD_DIR)
+    # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
+    CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
+                                                                          NUM_JOBS=GetOption('num_jobs')
+                                                                          )
 
     # Build Compute Kernel Writer Static Library
     subprocess.check_call(CKW_CMAKE_CONFIGURE_STATIC, stderr=subprocess.STDOUT, shell=True)
     subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
 
-    # Build Compute Kernel Writer Shared Library
-    subprocess.check_call(CKW_CMAKE_CONFIGURE_SHARED, stderr=subprocess.STDOUT, shell=True)
-    subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
-
-    # Linking library
-    env.Append(LIBS = ['ckw'])
+    # Let ACL know where to find CKW headers
     env.Append(CPPPATH = CKW_INCLUDE_DIR)
 
 if not GetOption("help"):
