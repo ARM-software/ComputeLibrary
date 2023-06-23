@@ -28,7 +28,9 @@
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"

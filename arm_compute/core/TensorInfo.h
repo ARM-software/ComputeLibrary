@@ -32,7 +32,6 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 
 #include <cstddef>
 #include <memory>

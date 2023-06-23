@@ -24,11 +24,13 @@
 #ifndef ARM_COMPUTE_VALIDATE_H
 #define ARM_COMPUTE_VALIDATE_H
 
+#include "arm_compute/core/utils/DataLayoutUtils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/FormatUtils.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/QuantizationInfo.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>

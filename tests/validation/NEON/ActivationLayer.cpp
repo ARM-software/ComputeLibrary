@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"

@@ -24,10 +24,10 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 #include "src/gpu/cl/ClCompileContext.h"
 
 #include "src/gpu/cl/ClKernelLibrary.h"

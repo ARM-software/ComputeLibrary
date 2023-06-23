@@ -24,6 +24,8 @@
 
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DMaxShiftExpSum.h"
 
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"

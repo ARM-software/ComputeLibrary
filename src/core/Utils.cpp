@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Utils.h"
 
 #include "arm_compute/core/ActivationLayerInfo.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/StringUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -74,32 +75,6 @@ std::string read_file(const std::string &filename, bool binary)
     return out;
 }
 
-const std::string &string_from_format(Format format)
-{
-    static std::map<Format, const std::string> formats_map =
-    {
-        { Format::UNKNOWN, "UNKNOWN" },
-        { Format::U8, "U8" },
-        { Format::S16, "S16" },
-        { Format::U16, "U16" },
-        { Format::S32, "S32" },
-        { Format::U32, "U32" },
-        { Format::F16, "F16" },
-        { Format::F32, "F32" },
-        { Format::UV88, "UV88" },
-        { Format::RGB888, "RGB888" },
-        { Format::RGBA8888, "RGBA8888" },
-        { Format::YUV444, "YUV444" },
-        { Format::YUYV422, "YUYV422" },
-        { Format::NV12, "NV12" },
-        { Format::NV21, "NV21" },
-        { Format::IYUV, "IYUV" },
-        { Format::UYVY422, "UYVY422" }
-    };
-
-    return formats_map[format];
-}
-
 const std::string &string_from_channel(Channel channel)
 {
     static std::map<Channel, const std::string> channels_map =
@@ -119,84 +94,6 @@ const std::string &string_from_channel(Channel channel)
     };
 
     return channels_map[channel];
-}
-
-const std::string &string_from_data_layout(DataLayout dl)
-{
-    static std::map<DataLayout, const std::string> dl_map =
-    {
-        { DataLayout::UNKNOWN, "UNKNOWN" },
-        { DataLayout::NCHW, "NCHW" },
-        { DataLayout::NHWC, "NHWC" },
-    };
-
-    return dl_map[dl];
-}
-
-const std::string &string_from_data_type(DataType dt)
-{
-    static std::map<DataType, const std::string> dt_map =
-    {
-        { DataType::UNKNOWN, "UNKNOWN" },
-        { DataType::S8, "S8" },
-        { DataType::U8, "U8" },
-        { DataType::S16, "S16" },
-        { DataType::U16, "U16" },
-        { DataType::S32, "S32" },
-        { DataType::U32, "U32" },
-        { DataType::S64, "S64" },
-        { DataType::U64, "U64" },
-        { DataType::F16, "F16" },
-        { DataType::F32, "F32" },
-        { DataType::F64, "F64" },
-        { DataType::SIZET, "SIZET" },
-        { DataType::QSYMM8, "QSYMM8" },
-        { DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL" },
-        { DataType::QASYMM8, "QASYMM8" },
-        { DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED" },
-        { DataType::QSYMM16, "QSYMM16" },
-        { DataType::QASYMM16, "QASYMM16" },
-    };
-
-    return dt_map[dt];
-}
-
-const std::string &string_from_activation_func(const ActivationLayerInfo::ActivationFunction& act)
-{
-    static std::map<ActivationLayerInfo::ActivationFunction, const std::string> act_map =
-    {
-        { ActivationLayerInfo::ActivationFunction::ABS, "ABS" },
-        { ActivationLayerInfo::ActivationFunction::LINEAR, "LINEAR" },
-        { ActivationLayerInfo::ActivationFunction::LOGISTIC, "LOGISTIC" },
-        { ActivationLayerInfo::ActivationFunction::RELU, "RELU" },
-        { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, "BRELU" },
-        { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU" },
-        { ActivationLayerInfo::ActivationFunction::LEAKY_RELU, "LRELU" },
-        { ActivationLayerInfo::ActivationFunction::SOFT_RELU, "SRELU" },
-        { ActivationLayerInfo::ActivationFunction::ELU, "ELU" },
-        { ActivationLayerInfo::ActivationFunction::SQRT, "SQRT" },
-        { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
-        { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },
-        { ActivationLayerInfo::ActivationFunction::IDENTITY, "IDENTITY" },
-        { ActivationLayerInfo::ActivationFunction::HARD_SWISH, "HARD_SWISH" },
-        { ActivationLayerInfo::ActivationFunction::SWISH, "SWISH" },
-        { ActivationLayerInfo::ActivationFunction::GELU, "GELU" }
-
-    };
-
-    return act_map[act];
-}
-
-const std::string &string_from_interpolation_policy(InterpolationPolicy policy)
-{
-    static std::map<InterpolationPolicy, const std::string> interpolation_policy_map =
-    {
-        { InterpolationPolicy::AREA, "AREA" },
-        { InterpolationPolicy::BILINEAR, "BILINEAR" },
-        { InterpolationPolicy::NEAREST_NEIGHBOR, "NEAREST_NEIGHBOUR" },
-    };
-
-    return interpolation_policy_map[policy];
 }
 
 const std::string &string_from_border_mode(BorderMode border_mode)
@@ -324,45 +221,6 @@ std::string string_from_pixel_value(const PixelValue &value, const DataType data
     }
 
     return converted_string;
-}
-
-DataType data_type_from_name(const std::string &name)
-{
-    static const std::map<std::string, DataType> data_types =
-    {
-        { "f16", DataType::F16 },
-        { "f32", DataType::F32 },
-        { "qasymm8", DataType::QASYMM8 },
-        { "qasymm8_signed", DataType::QASYMM8_SIGNED },
-    };
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    try
-    {
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-        return data_types.at(utility::tolower(name));
-
-#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
-    }
-    catch(const std::out_of_range &)
-    {
-        ARM_COMPUTE_ERROR_VAR("Invalid data type name: %s", name.c_str());
-    }
-#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-}
-
-std::string lower_string(const std::string &val)
-{
-    std::string res = val;
-    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
-    return res;
-}
-
-std::string upper_string(const std::string &val)
-{
-    std::string res = val;
-    std::transform(res.begin(), res.end(), res.begin(), ::toupper);
-    return res;
 }
 
 PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,

@@ -21,13 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/core/CL/CLUtils.h"
+
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "support/StringSupport.h"
 
-#include "src/core/CL/CLUtils.h"
 #include "src/core/experimental/PostOpUtils.h"
 
 namespace arm_compute

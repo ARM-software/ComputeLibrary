@@ -23,15 +23,16 @@
  */
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
 
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/experimental/PostOpUtils.h"

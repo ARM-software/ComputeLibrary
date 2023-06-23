@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"

@@ -24,6 +24,7 @@
 #include "src/cpu/kernels/CpuScaleKernel.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/InterpolationPolicyUtils.h"
 #include "arm_compute/core/Window.h"
 #include "src/core/common/Registrars.h"
 #include "src/core/helpers/ScaleHelpers.h"

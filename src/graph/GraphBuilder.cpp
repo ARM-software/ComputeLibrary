@@ -23,7 +23,7 @@
  */
 #include "arm_compute/graph/GraphBuilder.h"
 
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/algorithms/TopologicalSort.h"

@@ -637,8 +637,14 @@ target_sources(
 	core/Version.cpp
 	core/helpers/SoftmaxHelpers.cpp
 	core/helpers/WindowHelpers.cpp
+	core/utils/ActivationFunctionUtils.cpp
 	core/utils/AssemblyUtils.cpp
+	core/utils/DataLayoutUtils.cpp
+	core/utils/DataTypeUtils.cpp
+	core/utils/FormatUtils.cpp
+	core/utils/InterpolationPolicyUtils.cpp
 	core/utils/ScaleUtils.cpp
+	core/utils/StringUtils.cpp
 	core/utils/helpers/fft.cpp
 	core/utils/helpers/tensor_transform.cpp
 	core/utils/io/FileHandler.cpp

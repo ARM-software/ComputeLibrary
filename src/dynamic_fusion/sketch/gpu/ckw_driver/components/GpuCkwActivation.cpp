@@ -27,6 +27,7 @@
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "ckw/TensorTileSampler.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"

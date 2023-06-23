@@ -27,6 +27,8 @@
 #include "arm_compute/core/ActivationLayerInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
+#include "arm_compute/core/ActivationLayerInfo.h"
+
 namespace arm_compute
 {
 /** Forward declaration */

@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/cpu/kernels/CpuElementwiseKernel.h"
 #include "src/cpu/kernels/CpuElementwiseUnaryKernel.h"

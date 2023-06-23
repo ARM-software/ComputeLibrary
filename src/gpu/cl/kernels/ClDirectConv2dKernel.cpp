@@ -23,15 +23,17 @@
  */
 #include "src/gpu/cl/kernels/ClDirectConv2dKernel.h"
 
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/PixelValue.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"

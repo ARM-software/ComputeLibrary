@@ -27,6 +27,8 @@
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 #include "support/StringSupport.h"

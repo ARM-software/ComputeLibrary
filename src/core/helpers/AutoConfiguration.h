@@ -24,9 +24,9 @@
 #ifndef SRC_CORE_HELPERS_AUTOCONFIGURATION_H
 #define SRC_CORE_HELPERS_AUTOCONFIGURATION_H
 
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 
 namespace arm_compute
 {

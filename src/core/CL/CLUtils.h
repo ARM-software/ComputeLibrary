@@ -28,12 +28,15 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/experimental/IPostOp.h"
 
+#include <map>
+
 namespace arm_compute
 {
 class TensorShape;
 class CLBuildOptions;
 class ITensorInfo;
 class ICLTensor;
+enum class DataType;
 
 /** OpenCL Image2D types */
 enum class CLImage2DType

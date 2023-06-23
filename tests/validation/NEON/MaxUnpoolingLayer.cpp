@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/runtime/NEON/functions/NEMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
