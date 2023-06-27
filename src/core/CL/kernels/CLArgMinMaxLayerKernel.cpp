@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,14 +33,13 @@
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_output, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -53,31 +52,23 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_outp
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
     }
-    if(prev_output != nullptr && prev_output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(prev_output, 1, DataType::U32, DataType::S32);
-        if(output->total_size() != 0)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(prev_output, output);
-        }
-    }
 
     return Status{};
 }
 } // namespace
 
 CLArgMinMaxLayerKernel::CLArgMinMaxLayerKernel()
-    : _input(nullptr), _prev_output(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::ARG_IDX_MAX)
+    : _input(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::ARG_IDX_MAX)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
+void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, prev_output, output, axis, op);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, op);
 }
 
-void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
+void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -85,42 +76,35 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     output_shape.set(axis, 1);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(DataType::S32).reset_padding().set_is_resizable(true));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
-    auto padding_info = get_padding_info({ input, prev_output, output });
+    auto padding_info = get_padding_info({ input, output });
 
     _input          = input;
-    _prev_output    = prev_output;
     _output         = output;
     _reduction_axis = axis;
     _op             = op;
 
     // Set build options
-    const auto vector_size = (axis == 0) ? 16U : adjust_vec_size(16U, input->info()->dimension(0));
-
+    const auto     vector_size = adjust_vec_size(16U, input->info()->dimension(0));
     CLBuildOptions build_opts;
-    build_opts.add_option_if(_prev_output != nullptr, "-DPREV_OUTPUT");
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % vector_size));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vector_size));
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
     build_opts.add_option_if_else(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX", "-DARG_MIN");
     build_opts.add_option("-DDATA_TYPE_OUTPUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.add_option("-DCOND_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DUNROLL_WITH_PRAGMA=1");
 
     // Create kernel
-    cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
     std::string kernel_axis_name;
     switch(axis)
     {
         case 0:
-        {
-            const ICLTensor *input_for_width = prev_output != nullptr ? _prev_output : _input;
-            build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input_for_width->info()->dimension(0)));
-
+            build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
             kernel_axis_name = "x";
-            lws_hint         = create_lws_hint_parallel_implementations(input_for_width->info()->dimension(0), vector_size);
-        }
-        break;
+            break;
         case 1:
             build_opts.add_option("-DHEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
             kernel_axis_name = "y";
@@ -140,15 +124,15 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     _kernel = create_kernel(compile_context, "arg_min_max_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window((prev_output != nullptr) ? (*prev_output->info()) : (*input->info()), Steps(vector_size));
-    ICLKernel::configure_internal(win, lws_hint);
+    Window win = calculate_max_window(*input->info(), Steps(vector_size));
+    ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLArgMinMaxLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *prev_output, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+Status CLArgMinMaxLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, prev_output, output, axis, op));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, op));
     return Status{};
 }
 
@@ -163,30 +147,22 @@ void CLArgMinMaxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         {
             // Set out window
             Window out_window(window);
+            Window in_window(window);
             out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+            in_window.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
+            in_window.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), 1u));
 
             // Get first input and output slices
-            Window in_slice  = window.first_slice_window_2D();
+            Window in_slice  = in_window.first_slice_window_2D();
             Window out_slice = out_window.first_slice_window_2D();
-
-            // Reshape window
-            const unsigned int num_tensors = _prev_output != nullptr ? 3 : 2;
-
-            // Set local sums buffer
-            unsigned int local_res_size = lws_hint()[0] * _output->info()->element_size();
-            _kernel.setArg(num_arguments_per_2D_tensor() * num_tensors, local_res_size, nullptr);
             do
             {
                 unsigned int idx = 0;
                 add_2D_tensor_argument(idx, _input, in_slice);
-                if(_prev_output != nullptr)
-                {
-                    add_2D_tensor_argument(idx, _prev_output, in_slice);
-                }
                 add_2D_tensor_argument(idx, _output, out_slice);
                 enqueue(queue, *this, in_slice, lws_hint());
             }
-            while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
+            while(in_window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
         }
         break;
         case 1:

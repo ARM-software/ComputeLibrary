@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+#include "tile_helpers.h"
 
 #if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE_OUTPUT)
 
@@ -52,246 +53,183 @@
 #endif // defined(ARG_MAX)
 
 #if defined(WIDTH)
-#if defined(ARG_MIN)
-#if defined(PREV_OUTPUT)
-/** Find index minimum value of a vector
- *
- * @param[in] input Pointer to the first value.
- *
- * @return index of the vector.
- */
-inline DATA_TYPE_OUTPUT arg_idx_min_prev_out(__global const DATA_TYPE *input, __global const DATA_TYPE_OUTPUT *prev_res, const int x_idx)
-{
-    int end_elem = (x_idx + 1) * 16;
-    if(end_elem > WIDTH)
-    {
-        end_elem = WIDTH - x_idx * 16;
-    }
-    DATA_TYPE_OUTPUT res = prev_res[0];
-    for(int x_v = 1; x_v < end_elem; ++x_v)
-    {
-        res = select(res, prev_res[x_v], *(input + prev_res[x_v]) < * (input + res));
-    }
-    return res;
-}
-#else // !defined(PREV_OUTPUT)
-/** Find index minimum value of a vector
- *
- * @param[in] input Pointer to the first value.
- *
- * @return index of the vector.
- */
-inline DATA_TYPE_OUTPUT arg_idx_min(__global const DATA_TYPE *input, const int x_idx)
-{
-#if WIDTH < 16
-    DATA_TYPE_OUTPUT res = 0;
-    for(DATA_TYPE_OUTPUT x_v = res + 1; x_v < WIDTH; ++x_v)
-    {
-        res = select(res, x_v, *(input + x_v) < * (input + res));
-    }
-    return res;
-#else  // WIDTH >= 16
-    int       x_elem   = x_idx * 16;
-    const int x_goback = select(0, 16 - WIDTH % 16, x_elem + 16 > WIDTH);
-    x_elem -= x_goback;
 
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    in = vload16(0, input - x_goback);
-    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-    res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-
-    SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 8)
-    idx_sel       = (in.s01234567 <= in.s89abcdef);
-    in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
-    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
-
-    idx_sel.s0123 = (in.s0123 < in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 4)));
-    in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
-    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
-
-    idx_sel.s01 = (in.s01 < in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 2)));
-    in.s01      = select(in.s23, in.s01, idx_sel.s01);
-    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
-
-    idx_sel.s0 = (in.s0 < in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), SIGNED_INT_DATA_TYPE(DATA_TYPE)));
-    res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
-
-    return res.s0 + x_elem;
-#endif // WIDTH < 16
-}
-#endif // defined(PREV_OUTPUT)
-#endif // defined(ARG_MIN)
 #if defined(ARG_MAX)
-#if defined(PREV_OUTPUT)
-/** Find index maximum value of a vector
- *
- * @param[in] input Pointer to the first value.
- *
- * @return index of the vector.
- */
-inline DATA_TYPE_OUTPUT arg_idx_max_prev_out(__global const DATA_TYPE *input, __global const DATA_TYPE_OUTPUT *prev_res, const int x_idx)
-{
-    int end_elem = (x_idx + 1) * 16;
-    if(end_elem > WIDTH)
-    {
-        end_elem = WIDTH - x_idx * 16;
-    }
-    DATA_TYPE_OUTPUT res = prev_res[0];
-    for(int x_v = 1; x_v < end_elem; ++x_v)
-    {
-        res = select(res, prev_res[x_v], *(input + prev_res[x_v]) > *(input + res));
-    }
-    return res;
-}
-#else // !defined(PREV_OUTPUT)
-/** Find index maximum value of a vector
- *
- * @param[in] input Pointer to the first value.
- *
- * @return index of the vector.
- */
-inline DATA_TYPE_OUTPUT arg_idx_max(__global const DATA_TYPE *input, const int x_idx)
-{
-#if WIDTH < 16
-    DATA_TYPE_OUTPUT res = 0;
-    for(DATA_TYPE_OUTPUT x_v = res + 1; x_v < WIDTH; ++x_v)
-    {
-        res = select(res, x_v, *(input + x_v) > *(input + res));
-    }
-    return res;
-#else  // WIDTH >= 16
-    int       x_elem   = x_idx * 16;
-    const int x_goback = select(0, 16 - WIDTH % 16, x_elem + 16 > WIDTH);
-    x_elem -= x_goback;
-
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    in = vload16(0, input - x_goback);
-    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
-    res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-
-    SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 8)
-    idx_sel       = (in.s01234567 >= in.s89abcdef);
-    in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
-    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
-
-    idx_sel.s0123 = (in.s0123 > in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 4)));
-    in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
-    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
-
-    idx_sel.s01 = (in.s01 > in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), SIGNED_INT_VEC_DATA_TYPE(DATA_TYPE, 2)));
-    in.s01      = select(in.s23, in.s01, idx_sel.s01);
-    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
-
-    idx_sel.s0 = (in.s0 > in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), SIGNED_INT_DATA_TYPE(DATA_TYPE)));
-    res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
-
-    return res.s0 + x_elem;
-#endif // WIDTH < 16
-}
-#endif // defined(PREV_OUTPUT)
+#define VECTOR_PREDICATE_EQ(x, y) ((x) >= (y))
+#define VECTOR_PREDICATE(x, y) ((x) > (y))
+#define SCALAR_SELECT_OP(x, y) ((x) > (y)) ? (x) : (y);
+#elif defined(ARG_MIN)
+#define VECTOR_PREDICATE_EQ(x, y) ((x) <= (y))
+#define VECTOR_PREDICATE(x, y) ((x) < (y))
+#define SCALAR_SELECT_OP(x, y) ((x) < (y)) ? (x) : (y);
+#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+#error "Unsupported reduction operation!"
 #endif // defined(ARG_MAX)
 
-/** This kernel performs parallel reduction given an operation on x-axis.
+inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_2(DATA_TYPE *min_max_val, DATA_TYPE_OUTPUT *min_max_idx, VEC_DATA_TYPE(DATA_TYPE, 2) in, VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 2) res)
+{
+    if( VECTOR_PREDICATE_EQ(in.s0,in.s1) )
+    {
+        *min_max_val  = in.s0;
+        *min_max_idx  = res.s0;
+    }
+    else
+    {
+        *min_max_val  = in.s1;
+        *min_max_idx  = res.s1;
+    }
+}
+
+inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_4(DATA_TYPE *min_max_val, DATA_TYPE_OUTPUT *min_max_idx, VEC_DATA_TYPE(DATA_TYPE, 4) in, VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 4) res)
+{
+    VEC_DATA_TYPE(COND_DATA_TYPE, 2)
+    idx_sel       = VECTOR_PREDICATE_EQ(in.s01, in.s23);
+    in.s01      = select(in.s23, in.s01, idx_sel);
+    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel, int2));
+    idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
+    *min_max_idx  = res.s0;
+}
+
+inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_8(DATA_TYPE *min_max_val, DATA_TYPE_OUTPUT *min_max_idx, VEC_DATA_TYPE(DATA_TYPE, 8) in, VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 8) res)
+{
+    VEC_DATA_TYPE(COND_DATA_TYPE, 4)
+    idx_sel       = VECTOR_PREDICATE_EQ(in.s0123, in.s4567);
+    in.s0123      = select(in.s4567, in.s0123, idx_sel);
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel, int4));
+    idx_sel.s01   = (VECTOR_PREDICATE(in.s01, in.s23)) || (in.s01 == in.s23 && CONVERT(((res.s01 < res.s23)), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
+    in.s01        = select(in.s23, in.s01, idx_sel.s01);
+    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+    idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
+    *min_max_idx  = res.s0;
+}
+
+inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_16(DATA_TYPE *min_max_val, DATA_TYPE_OUTPUT *min_max_idx, VEC_DATA_TYPE(DATA_TYPE, 16) in, VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16) res)
+{
+    VEC_DATA_TYPE(COND_DATA_TYPE, 8)
+    idx_sel       = VECTOR_PREDICATE_EQ(in.s01234567, in.s89abcdef);
+    in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
+    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
+    idx_sel.s0123 = VECTOR_PREDICATE(in.s0123, in.s4567) || (in.s0123 == in.s4567 && CONVERT(((res.s0123 < res.s4567)), VEC_DATA_TYPE(COND_DATA_TYPE, 4)));
+    in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
+    idx_sel.s01   = (VECTOR_PREDICATE(in.s01, in.s23)) || (in.s01 == in.s23 && CONVERT(((res.s01 < res.s23)), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
+    in.s01        = select(in.s23, in.s01, idx_sel.s01);
+    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+    idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
+    *min_max_idx  = res.s0;
+}
+
+
+
+inline void scalar_compute_global_min_max(DATA_TYPE in_val, int idx, DATA_TYPE *out_min_max_val, DATA_TYPE_OUTPUT *out_idx)
+{
+#if defined(ARG_MAX)
+    if(in_val > *out_min_max_val)
+#else  // defined(ARG_MAX)
+    if(in_val < *out_min_max_val)
+#endif // defined(ARG_MAX)
+    {
+        *out_min_max_val = in_val;
+        *out_idx         = idx;
+    }
+}
+
+#if VEC_SIZE > 1
+#if VEC_SIZE == 16
+    #define VECTORIZED_OP(min_max_val,min_max_idx,in,res) vectorized_compute_arg_min_max_16(min_max_val,min_max_idx,in,res)
+#elif VEC_SIZE == 8 // #if VEC_SIZE == 16
+    #define VECTORIZED_OP(min_max_val,min_max_idx,in,res) vectorized_compute_arg_min_max_8(min_max_val,min_max_idx,in,res)
+#elif VEC_SIZE == 4 // # elif VEC_SIZE == 8
+    #define VECTORIZED_OP(min_max_val,min_max_idx,in,res) vectorized_compute_arg_min_max_4(min_max_val,min_max_idx,in,res)
+#elif VEC_SIZE == 2 // elif VEC_SIZE == 4
+    #define VECTORIZED_OP(min_max_val,min_max_idx,in,res) vectorized_compute_arg_min_max_2(min_max_val,min_max_idx,in,res)
+#else // elif VEC_SIZE == 2
+    #error "Not supported"
+#endif // #if VEC_SIZE == 16
+
+inline VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE) init_idx_vector()
+{
+#if VEC_SIZE == 16
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+    vidx = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+#elif VEC_SIZE == 8 // #if VEC_SIZE == 16
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+    vidx = { 0, 1, 2, 3, 4, 5, 6, 7 };
+#elif VEC_SIZE == 4 // elif VEC_SIZE == 8
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+    vidx = { 0, 1, 2, 3 };
+#elif VEC_SIZE == 2 // elif VEC_SIZE == 4
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+    vidx = { 0, 1 };
+#else  // elif VEC_SIZE == 2
+#error "Not supported"
+#endif // #if VEC_SIZE == 16
+    return vidx;
+}
+#endif // VEC_SIZE > 1
+
+/** This kernel performs reduction on x-axis.
  *
- * @note In case the results of previous stages are passed the flag PREV_OUTPUT has to be passed using -DPREV_OUTPUT
- * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The data type of the output must be passed at compile time using -DDATA_TYPE_OUTPUT: e.g. -DDATA_TYPE_OUTPUT=uint
- * @note The arg_max flag must be passed at compile time using -DARG_MAX if we want to compute the ArgMax
- * @note The arg_min flag must be passed at compile time using -DARG_MIN if we want to compute the ArgMin
+ * @note The data type used for the comparing indexe must be passed at compile type using -DCOND_DATA_TYPE: e.g -DCOND_DATA_TYPE=uint
+ * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
- * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
- * @param[in] src_stride_x                              Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_step_x                                src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                              Stride of the source tensor in Y dimension (in bytes)
- * @param[in] src_step_y                                src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes         The offset of the first element in the source tensor
- * @param[in] prev_res_ptr                              (Optional) Pointer to previous results tensor. Supported data types: U32/S32
- * @param[in] prev_res_stride_x                         (Optional) Stride of the output tensor in X dimension (in bytes)
- * @param[in] prev_res_step_x                           (Optional) prev_res_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] prev_res_stride_y                         (Optional) Stride of the output tensor in Y dimension (in bytes)
- * @param[in] prev_res_step_y                           (Optional) prev_res_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] prev_res_offset_first_element_in_bytes    (Optional) The offset of the first element in the previous results tensor
- * @param[in] partial_res_ptr                           The local buffer to hold partial result values. Supported data types: U32/S32
- * @param[in] partial_res_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] partial_res_step_x                        partial_res_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] partial_res_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] partial_res_step_y                        partial_res_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] partial_res_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] local_results                             Local buffer for storing the partial result
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32
+ * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[in] output_ptr                           The local buffer to hold sumed values. Supported data types: U32/S32
+ * @param[in] output_stride_x                      Stride of the output tensor in X dimension (in bytes)
+ * @param[in] output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] output_stride_y                      Stride of the output tensor in Y dimension (in bytes)
+ * @param[in] output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] output_offset_first_element_in_bytes The offset of the first element in the source tensor
  */
 __kernel void arg_min_max_x(
-    IMAGE_DECLARATION(src),
-#if defined(PREV_OUTPUT)
-    IMAGE_DECLARATION(prev_res),
-#endif // defined(PREV_OUTPUT)
-    IMAGE_DECLARATION(partial_res),
-    __local DATA_TYPE_OUTPUT *local_results)
+    IMAGE_DECLARATION(input),
+    IMAGE_DECLARATION(output))
 {
-#if defined(PREV_OUTPUT)
-    Image src      = CONVERT_TO_IMAGE_STRUCT_NO_STEP(src);
-    Image prev_res = CONVERT_TO_IMAGE_STRUCT(prev_res);
-#else  // !defined(PREV_OUTPUT)
-    Image src                      = CONVERT_TO_IMAGE_STRUCT(src);
-#endif // defined(PREV_OUTPUT)
-    Image partial_res = CONVERT_TO_IMAGE_STRUCT(partial_res);
+    __global DATA_TYPE *input_addr         = (__global DATA_TYPE *)(input_ptr + input_offset_first_element_in_bytes + get_global_id(1) * input_stride_y);
+    __global DATA_TYPE_OUTPUT *output_addr = (__global DATA_TYPE_OUTPUT *)(output_ptr + output_offset_first_element_in_bytes + get_global_id(1) * output_stride_y);
 
-    unsigned int lsize = get_local_size(0);
-    unsigned int lid   = get_local_id(0);
+    DATA_TYPE        final_value = input_addr[0];
+    DATA_TYPE_OUTPUT final_idx   = 0;
 
-    const uint     x_idx                 = get_global_id(0);
-    const uint     y_idx                 = get_global_id(1);
-    const __global DATA_TYPE *src_in_row = (const __global DATA_TYPE *)(src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y);
+#if VEC_SIZE > 1
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, VEC_SIZE)
+    vidx = init_idx_vector();
 
-    for(unsigned int y = 0; y < get_local_size(1); ++y)
+    int x = 0;
+    for(; x <= (WIDTH - VEC_SIZE); x += VEC_SIZE)
     {
-#if defined(ARG_MAX)
-#if defined(PREV_OUTPUT)
-        local_results[lid] = arg_idx_max_prev_out(src_in_row, (__global DATA_TYPE_OUTPUT *)offset(&prev_res, 0, y), x_idx);
-#else  // !defined(PREV_OUTPUT)
-        local_results[lid] = arg_idx_max((__global DATA_TYPE *)offset(&src, 0, y), x_idx);
-#endif // defined(PREV_OUTPUT)
-#else  // defined(ARG_MIN)
-#if defined(PREV_OUTPUT)
-        local_results[lid]         = arg_idx_min_prev_out(src_in_row, (__global DATA_TYPE_OUTPUT *)offset(&prev_res, 0, y), x_idx);
-#else  // !defined(PREV_OUTPUT)
-        local_results[lid] = arg_idx_min((__global DATA_TYPE *)offset(&src, 0, y), x_idx);
-#endif // defined(PREV_OUTPUT)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        vals = VLOAD(VEC_SIZE)(0, (input_addr + x));
+        DATA_TYPE        local_min_max_value;
+        DATA_TYPE_OUTPUT local_min_max_idx;
 
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // Looking for the next highest power of 2 (maximum value of lsize is 8)
-        unsigned int middle = lsize - 1;
-        middle |= middle >> 1;
-        middle |= middle >> 2;
-        middle += 1;
-        // Perform parallel reduction
-        for(unsigned int i = middle; i > 0; i >>= 1)
-        {
-            if(lid < i && lid + i < lsize)
-            {
-                DATA_TYPE tmp0 = *(src_in_row + local_results[lid]);
-                DATA_TYPE tmp1 = *(src_in_row + local_results[lid + i]);
-#if defined(ARG_MAX)
-                local_results[lid] = select(
-                                         local_results[lid],
-                                         local_results[lid + i],
-                                         ((tmp0 == tmp1) && (local_results[lid + i] < local_results[lid])) || (tmp0 < tmp1));
-#else  // defined(ARG_MIN)
-                local_results[lid] = select(
-                                         local_results[lid],
-                                         local_results[lid + i],
-                                         ((tmp0 == tmp1) && (local_results[lid + i] < local_results[lid])) || (tmp0 > tmp1));
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
-            }
-            barrier(CLK_LOCAL_MEM_FENCE);
-        }
-
-        if(lid == 0)
-        {
-            ((__global DATA_TYPE_OUTPUT *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
-        }
+        VECTORIZED_OP(&local_min_max_value, &local_min_max_idx, vals, vidx);
+        local_min_max_idx += x;
+        scalar_compute_global_min_max(local_min_max_value, local_min_max_idx, &final_value, &final_idx);
     }
+#endif // VEC_SIZE > 1
+
+#if(WIDTH % VEC_SIZE)
+    LOOP_UNROLLING(int, j, 0, 1, WIDTH % VEC_SIZE,
+    {
+        scalar_compute_global_min_max(*(input_addr + j + x), j + x, &final_value, &final_idx);
+    })
+#endif // (WIDTH % VEC_SIZE)
+
+    output_addr[0] = final_idx;
 }
 #endif // defined(WIDTH)
 
@@ -320,8 +258,7 @@ __kernel void arg_min_max_y(
     IMAGE_DECLARATION(input),
     IMAGE_DECLARATION(output))
 {
-    const int x_offs = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
-
+    const int x_offs            = max((int)(get_global_id(0) * VEC_SIZE - (VEC_SIZE - VEC_SIZE_LEFTOVER) % VEC_SIZE), 0);
     __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE) + get_global_id(1) * input_stride_y;
     __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + x_offs * sizeof(DATA_TYPE_OUTPUT) + get_global_id(1) * output_stride_y;
 
