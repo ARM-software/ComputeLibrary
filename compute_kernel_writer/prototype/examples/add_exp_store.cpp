@@ -23,6 +23,7 @@
  */
 
 #include "ckw/Error.h"
+#include "ckw/KernelArgument.h"
 #include "ckw/KernelWriter.h"
 #include "ckw/TensorOperand.h"
 #include "ckw/TensorTileSampler.h"
@@ -163,9 +164,9 @@ int main()
     const TensorInfo src1_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 1);
     const TensorInfo dst_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 2);
 
-    ExampleComponentArgument src0(writer->declare_tensor_argument("src0", src0_info));
-    ExampleComponentArgument src1(writer->declare_tensor_argument("src1", src1_info));
-    ExampleComponentArgument dst(writer->declare_tensor_argument("dst", dst_info));
+    ExampleComponentArgument src0(writer->declare_tensor_argument("src0", src0_info, TensorStorageType::BufferUint8Ptr));
+    ExampleComponentArgument src1(writer->declare_tensor_argument("src1", src1_info, TensorStorageType::BufferUint8Ptr));
+    ExampleComponentArgument dst(writer->declare_tensor_argument("dst", dst_info, TensorStorageType::BufferUint8Ptr));
 
     ExampleComponentArgument ans;
 
@@ -173,6 +174,28 @@ int main()
     op_exp(writer, { &ans, &ans });
     op_store(writer, { &ans, &dst });
 
+    const auto arguments = kernel.arguments();
+
+    std::cout << "\n====================\nArguments:\n====================\n";
+
+    for(auto &arg : arguments)
+    {
+        switch(arg.type())
+        {
+            case ckw::KernelArgument::Type::TensorStorage:
+                std::cout << "* Tensor storage:   ID = " << arg.id() << ", type = " << std::hex << "0x" << static_cast<uint32_t>(arg.tensor_storage_type()) << std::dec << "\n";
+                break;
+
+            case ckw::KernelArgument::Type::TensorComponent:
+                std::cout << "* Tensor component: ID = " << arg.id() << ", type = " << std::hex << "0x" << static_cast<uint32_t>(arg.tensor_component_type()) << std::dec << "\n";
+                break;
+
+            default:
+                CKW_ASSERT(false);
+        }
+    }
+
+    std::cout << "\n====================\nCode:\n====================\n";
     const auto code = root_writer.generate_code();
     std::cout << code;
 

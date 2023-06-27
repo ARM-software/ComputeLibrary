@@ -67,7 +67,7 @@ enum class TensorComponentBitmask : uint32_t
  *  The data type is represented as an integer. The value of the integer value
  *  is assigned to retrieve the information through the @ref TensorComponentBitmask.
  */
-enum class TensorComponent : uint32_t
+enum class TensorComponentType : uint32_t
 {
     Unknown            = 0x00000000,
     OffsetFirstElement = 0x01000000,
@@ -88,7 +88,7 @@ enum class TensorComponent : uint32_t
 
 /** Compute Kernel Writer tensor storage. The tensor storage represents the type of tensor memory object.
  */
-enum class TensorStorage : uint32_t
+enum class TensorStorageType : uint32_t
 {
     Unknown            = 0x00000000,
     BufferUint8Ptr     = 0x01000000,

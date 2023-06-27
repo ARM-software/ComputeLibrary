@@ -88,12 +88,13 @@ public:
 
     /** Declare a tensor argument.
      *
-     * @param[in] name The name of the tensor.
-     * @param[in] info The tensor info.
+     * @param[in] name         The name of the tensor.
+     * @param[in] info         The tensor info.
+     * @param[in] storage_type The tensor storage type.
      *
      * @return The @ref TensorOperand object.
      */
-    TensorOperand &declare_tensor_argument(const std::string &name, const TensorInfo &info);
+    TensorOperand &declare_tensor_argument(const std::string &name, const TensorInfo &info, TensorStorageType storage_type = TensorStorageType::BufferUint8Ptr);
 
     /** Declare a compile-time constant scalar argument.
      *
@@ -117,10 +118,9 @@ public:
     TileOperand &declare_tile(const std::string &name, TArgs &&...args)
     {
         const auto var_name = generate_variable_name(name);
-        auto       operand  = new TileOperand(var_name, ::std::forward<TArgs>(args)...);
-        register_operand(operand, true);
+        auto       operand  = std::make_unique<TileOperand>(var_name, ::std::forward<TArgs>(args)...);
 
-        return *operand;
+        return declare_tile_operand(std::move(operand));
     }
 
     // =============================================================================================
@@ -272,14 +272,11 @@ private:
      */
     ::std::string generate_variable_name(const std::string &name) const;
 
-    /** Register the operand to the kernel.
+    /** Declare the tile operand.
      *
-     * The operand is uniquely owned by the kernel afterward.
-     *
-     * @param[in] operand   The operand to be registered.
-     * @param[in] declaring Whether the tile declaration is generated.
+     * @param[in] operand   The tile operand to be declared.
      */
-    void register_operand(OperandBase *operand, bool declaring);
+    TileOperand &declare_tile_operand(std::unique_ptr<TileOperand> operand);
 
 private:
     Kernel                                                *_kernel;

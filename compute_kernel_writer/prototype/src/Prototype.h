@@ -561,7 +561,7 @@ enum class TensorComponentIndex : int32_t
     IndexMask = 0x0000000f,
 };
 
-enum class TensorComponentType : int32_t
+enum class TensorComponentGroup : int32_t
 {
     OffsetFirstElement = 0x00000100,
     Stride             = 0x00001000,
@@ -570,62 +570,39 @@ enum class TensorComponentType : int32_t
     Constant           = 0x01000000
 };
 
-enum class TensorComponent : int32_t
-{
-    Unknown            = 0x00000000,
-    OffsetFirstElement = 0x00000100,
-    Stride1            = 0x00001001,
-    Stride2            = 0x00001002,
-    Stride3            = 0x00001003,
-    Stride4            = 0x00001004,
-    Dim0               = 0x00010000,
-    Dim1               = 0x00010001,
-    Dim2               = 0x00010002,
-    Dim3               = 0x00010003,
-    Dim4               = 0x00010004,
-    C                  = 0x00010000, // Dim0
-    W                  = 0x00010001, // Dim1
-    H                  = 0x00010002, // Dim2
-    D                  = 0x00010003,
-    N                  = 0x00010004,
-    Dim1xDim2          = 0x00100021,
-    Dim1xDim2xDim3     = 0x00100321,
-    WxH                = 0x00100021,
-    WxHxD              = 0x00100321
-};
-
-inline std::string to_string(TensorComponent x)
+inline std::string to_string(TensorComponentType x)
 {
     switch(x)
     {
-        case TensorComponent::Unknown:
+        case TensorComponentType::Unknown:
             return "Unknown";
-        case TensorComponent::OffsetFirstElement:
+        case TensorComponentType::OffsetFirstElement:
             return "OffsetFirstElement";
-        case TensorComponent::Stride1:
+        case TensorComponentType::Stride1:
             return "Stride1";
-        case TensorComponent::Stride2:
+        case TensorComponentType::Stride2:
             return "Stride2";
-        case TensorComponent::Stride3:
+        case TensorComponentType::Stride3:
             return "Stride3";
-        case TensorComponent::Stride4:
+        case TensorComponentType::Stride4:
             return "Stride4";
-        case TensorComponent::Dim0:
+        case TensorComponentType::Dim0:
             return "Dim0";
-        case TensorComponent::Dim1:
+        case TensorComponentType::Dim1:
             return "Dim1";
-        case TensorComponent::Dim2:
+        case TensorComponentType::Dim2:
             return "Dim2";
-        case TensorComponent::Dim3:
+        case TensorComponentType::Dim3:
             return "Dim3";
-        case TensorComponent::Dim4:
+        case TensorComponentType::Dim4:
             return "Dim4";
-        case TensorComponent::Dim1xDim2:
+        case TensorComponentType::Dim1xDim2:
             return "Dim1xDim2";
-        case TensorComponent::Dim1xDim2xDim3:
+        case TensorComponentType::Dim1xDim2xDim3:
             return "Dim1xDim2xDim3";
         default:
             assert(false);
+            return "";
     }
 }
 
@@ -640,7 +617,7 @@ public:
      *
      * @return  the tensor component as a string
      */
-    virtual std::string component(TensorComponent x) = 0;
+    virtual std::string component(TensorComponentType x) = 0;
 
     /** Method to get the tensor component type declaration as a string
      *
@@ -658,7 +635,7 @@ public:
      *
      * @return a vector containing the tensor component declarations
      */
-    virtual std::vector<TensorComponent> component_declarations() const = 0;
+    virtual std::vector<TensorComponentType> component_declarations() const = 0;
 
     /** Method to get the name of the tensor argument.
      *
@@ -692,6 +669,50 @@ enum class GpuTensorStorage : int32_t
     Image3dReadOnly  = 0x0030,
     Image3dWriteOnly = 0x0031
 };
+
+inline GpuTensorStorage to_gpu_tensor_storage(TensorStorageType s)
+{
+    switch(s)
+    {
+        case TensorStorageType::Unknown:
+            return GpuTensorStorage::Unknown;
+
+        case TensorStorageType::BufferUint8Ptr:
+            return GpuTensorStorage::BufferUint8Ptr;
+
+        case TensorStorageType::Texture2dReadOnly:
+            return GpuTensorStorage::Image2dReadOnly;
+
+        case TensorStorageType::Texture2dWriteOnly:
+            return GpuTensorStorage::Image2dWriteOnly;
+
+        default:
+            assert(false);
+            return GpuTensorStorage::Unknown;
+    }
+}
+
+inline TensorStorageType to_tensor_storage(GpuTensorStorage s)
+{
+    switch(s)
+    {
+        case GpuTensorStorage::Unknown:
+            return TensorStorageType::Unknown;
+
+        case GpuTensorStorage::BufferUint8Ptr:
+            return TensorStorageType::BufferUint8Ptr;
+
+        case GpuTensorStorage::Image2dReadOnly:
+            return TensorStorageType::Texture2dReadOnly;
+
+        case GpuTensorStorage::Image2dWriteOnly:
+            return TensorStorageType::Texture2dWriteOnly;
+
+        default:
+            assert(false);
+            return TensorStorageType::Unknown;
+    }
+}
 
 class IGpuTensorArgument : public ITensorArgument
 {
@@ -732,9 +753,9 @@ public:
     }
 
     // Methods to override
-    std::string component(TensorComponent x) override
+    std::string component(TensorComponentType x) override
     {
-        if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentType::Constant)))
+        if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Constant)))
         {
             int32_t idx = static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentIndex::IndexMask);
             return std::to_string(idx - 1);
@@ -742,19 +763,19 @@ public:
 
         if(_return_by_value_when_possible)
         {
-            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentType::Dimension)))
+            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Dimension)))
             {
                 int32_t idx = static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentIndex::IndexMask);
                 return std::to_string(_format.shape[idx]);
             }
 
-            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentType::FoldedDimension)))
+            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::FoldedDimension)))
             {
                 switch(x)
                 {
-                    case TensorComponent::Dim1xDim2:
+                    case TensorComponentType::Dim1xDim2:
                         return std::to_string(_format.shape[1] * _format.shape[2]);
-                    case TensorComponent::Dim1xDim2xDim3:
+                    case TensorComponentType::Dim1xDim2xDim3:
                         return std::to_string(_format.shape[1] * _format.shape[2] * _format.shape[2]);
                     default:
                         std::cout << "Unsupported folded dimension" << std::endl;
@@ -817,7 +838,7 @@ public:
         return _storage_required;
     }
 
-    std::vector<TensorComponent> component_declarations() const override
+    std::vector<TensorComponentType> component_declarations() const override
     {
         return _components_required;
     }
@@ -845,31 +866,31 @@ private:
         return var_name;
     }
 
-    std::string build_component_name(TensorComponent x) const
+    std::string build_component_name(TensorComponentType x) const
     {
         std::string var_name = _basename;
 
         switch(x)
         {
-            case TensorComponent::OffsetFirstElement:
+            case TensorComponentType::OffsetFirstElement:
                 return var_name + "_offset_first_element";
-            case TensorComponent::Stride1:
+            case TensorComponentType::Stride1:
                 return var_name + "_stride1";
-            case TensorComponent::Stride2:
+            case TensorComponentType::Stride2:
                 return var_name + "_stride2";
-            case TensorComponent::Stride3:
+            case TensorComponentType::Stride3:
                 return var_name + "_stride3";
-            case TensorComponent::Dim0:
+            case TensorComponentType::Dim0:
                 return var_name + "_dim0";
-            case TensorComponent::Dim1:
+            case TensorComponentType::Dim1:
                 return var_name + "_dim1";
-            case TensorComponent::Dim2:
+            case TensorComponentType::Dim2:
                 return var_name + "_dim2";
-            case TensorComponent::Dim3:
+            case TensorComponentType::Dim3:
                 return var_name + "_dim3";
-            case TensorComponent::Dim1xDim2:
+            case TensorComponentType::Dim1xDim2:
                 return var_name + "_dim1xdim2";
-            case TensorComponent::Dim1xDim2xDim3:
+            case TensorComponentType::Dim1xDim2xDim3:
                 return var_name + "_dim1xdim2xdim3";
             default:
                 std::cout << "Unsupported component" << std::endl;
@@ -881,7 +902,7 @@ private:
 
     bool                          _return_by_value_when_possible{ false };
     std::vector<GpuTensorStorage> _storage_required{};
-    std::vector<TensorComponent>  _components_required{};
+    std::vector<TensorComponentType>  _components_required{};
 };
 
 /**
@@ -1745,15 +1766,7 @@ private:
     ScalarTileCoord _coord{};
 };
 
-enum class GpuSamplerTensorStorage : int32_t
-{
-    Unknown          = static_cast<int32_t>(GpuTensorStorage::Unknown),
-    BufferUint8Ptr   = static_cast<int32_t>(GpuTensorStorage::BufferUint8Ptr),
-    Image2dReadOnly  = static_cast<int32_t>(GpuTensorStorage::Image2dReadOnly),
-    Image2dWriteOnly = static_cast<int32_t>(GpuTensorStorage::Image2dWriteOnly),
-    Image3dReadOnly  = static_cast<int32_t>(GpuTensorStorage::Image3dReadOnly),
-    Image3dWriteOnly = static_cast<int32_t>(GpuTensorStorage::Image2dWriteOnly),
-};
+using GpuSamplerTensorStorage = GpuTensorStorage;
 
 struct GpuSampler
 {
@@ -2098,37 +2111,37 @@ private:
         return static_cast<DataType>(static_cast<int32_t>(x) & 0x00ff);
     }
 
-    TensorComponent to_tensor_component(OperandType x)
+    TensorComponentType to_tensor_component(OperandType x)
     {
         switch(x)
         {
             case OperandType::TensorDim0:
-                return TensorComponent::Dim0;
+                return TensorComponentType::Dim0;
             case OperandType::TensorDim1:
-                return TensorComponent::Dim1;
+                return TensorComponentType::Dim1;
             case OperandType::TensorDim2:
-                return TensorComponent::Dim2;
+                return TensorComponentType::Dim2;
             case OperandType::TensorDim3:
-                return TensorComponent::Dim3;
+                return TensorComponentType::Dim3;
             case OperandType::TensorDim4:
-                return TensorComponent::Dim4;
+                return TensorComponentType::Dim4;
             case OperandType::TensorStride1:
-                return TensorComponent::Stride1;
+                return TensorComponentType::Stride1;
             case OperandType::TensorStride2:
-                return TensorComponent::Stride2;
+                return TensorComponentType::Stride2;
             case OperandType::TensorStride3:
-                return TensorComponent::Stride3;
+                return TensorComponentType::Stride3;
             case OperandType::TensorStride4:
-                return TensorComponent::Stride4;
+                return TensorComponentType::Stride4;
             case OperandType::TensorDim1xDim2:
-                return TensorComponent::Dim1xDim2;
+                return TensorComponentType::Dim1xDim2;
             case OperandType::TensorDim1xDim2xDim3:
-                return TensorComponent::Dim1xDim2xDim3;
+                return TensorComponentType::Dim1xDim2xDim3;
             case OperandType::TensorDataOffset:
-                return TensorComponent::OffsetFirstElement;
+                return TensorComponentType::OffsetFirstElement;
             default:
                 assert(false);
-                return TensorComponent::Unknown;
+                return TensorComponentType::Unknown;
         }
     }
 
@@ -2174,7 +2187,7 @@ struct GpuKernel
     // Dispatch stage
     GpuOutputSampler                                  output_sampler{};       // GpuOutputSampler, required for the dispatch stage
     std::vector<std::pair<int32_t, GpuTensorStorage>> list_tensor_storages;   // List of tensor storages, required for the dispatch stage
-    std::vector<std::pair<int32_t, TensorComponent>>  list_tensor_components; // List of tensor components (width, stride,..), required for the dispatch stage)
+    std::vector<std::pair<int32_t, TensorComponentType>>  list_tensor_components; // List of tensor components (width, stride,..), required for the dispatch stage)
 };
 
 // This function should produce an object with the source
@@ -2251,7 +2264,7 @@ public:
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::C);
+                return _tensor->component(TensorComponentType::Dim0);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -2265,9 +2278,9 @@ public:
         switch(format)
         {
             case TensorSamplerFormat::C_WH_1:
-                return _tensor->component(TensorComponent::WxH);
+                return _tensor->component(TensorComponentType::Dim1xDim2);
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::W);
+                return _tensor->component(TensorComponentType::Dim1);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -2283,7 +2296,7 @@ public:
             case TensorSamplerFormat::C_WH_1:
                 return "1";
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::H);
+                return _tensor->component(TensorComponentType::Dim2);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -2298,7 +2311,7 @@ public:
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::Stride1);
+                return _tensor->component(TensorComponentType::Stride1);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -2314,7 +2327,7 @@ public:
             case TensorSamplerFormat::C_WH_1:
                 return "0";
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::Stride2);
+                return _tensor->component(TensorComponentType::Stride2);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -2329,7 +2342,7 @@ public:
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
-                return _tensor->component(TensorComponent::Stride3);
+                return _tensor->component(TensorComponentType::Stride3);
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
@@ -3941,9 +3954,9 @@ public:
         assert(x_off->format().dt == DataType::Int32);
         assert(y_off->format().dt == DataType::Int32);
 
-        const std::string width  = tensor->component(TensorComponent::W);
-        const std::string height = tensor->component(TensorComponent::H);
-        const std::string wxh    = tensor->component(TensorComponent::WxH);
+        const std::string width  = tensor->component(TensorComponentType::Dim1);
+        const std::string height = tensor->component(TensorComponentType::Dim2);
+        const std::string wxh    = tensor->component(TensorComponentType::Dim1xDim2);
         /*
         int x_s;
         int y_s;

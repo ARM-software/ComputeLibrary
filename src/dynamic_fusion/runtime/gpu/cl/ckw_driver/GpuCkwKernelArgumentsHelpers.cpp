@@ -26,7 +26,7 @@
 
 namespace arm_compute
 {
-void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, ICLTensor *tensor, ckw::TensorComponent component)
+void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, ICLTensor *tensor, ckw::TensorComponentType component)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
 
@@ -35,49 +35,49 @@ void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, ICL
 
     switch(component)
     {
-        case ckw::TensorComponent::OffsetFirstElement:
+        case ckw::TensorComponentType::OffsetFirstElement:
             kernel.setArg<cl_uint>(idx++, info->offset_first_element_in_bytes());
             break;
-        case ckw::TensorComponent::Stride0:
+        case ckw::TensorComponentType::Stride0:
             kernel.setArg<cl_uint>(idx++, strides[0]);
             break;
-        case ckw::TensorComponent::Stride1:
+        case ckw::TensorComponentType::Stride1:
             kernel.setArg<cl_uint>(idx++, strides[1]);
             break;
-        case ckw::TensorComponent::Stride2:
+        case ckw::TensorComponentType::Stride2:
             kernel.setArg<cl_uint>(idx++, strides[2]);
             break;
-        case ckw::TensorComponent::Stride3:
+        case ckw::TensorComponentType::Stride3:
             kernel.setArg<cl_uint>(idx++, strides[3]);
             break;
-        case ckw::TensorComponent::Stride4:
+        case ckw::TensorComponentType::Stride4:
             kernel.setArg<cl_uint>(idx++, strides[4]);
             break;
-        case ckw::TensorComponent::Dim0:
+        case ckw::TensorComponentType::Dim0:
             kernel.setArg<cl_uint>(idx++, info->dimension(0));
             break;
-        case ckw::TensorComponent::Dim1:
+        case ckw::TensorComponentType::Dim1:
             kernel.setArg<cl_uint>(idx++, info->dimension(1));
             break;
-        case ckw::TensorComponent::Dim2:
+        case ckw::TensorComponentType::Dim2:
             kernel.setArg<cl_uint>(idx++, info->dimension(2));
             break;
-        case ckw::TensorComponent::Dim3:
+        case ckw::TensorComponentType::Dim3:
             kernel.setArg<cl_uint>(idx++, info->dimension(3));
             break;
-        case ckw::TensorComponent::Dim4:
+        case ckw::TensorComponentType::Dim4:
             kernel.setArg<cl_uint>(idx++, info->dimension(4));
             break;
-        case ckw::TensorComponent::Dim1xDim2:
+        case ckw::TensorComponentType::Dim1xDim2:
             kernel.setArg<cl_uint>(idx++, info->dimension(1) * info->dimension(2));
             break;
-        case ckw::TensorComponent::Dim2xDim3:
+        case ckw::TensorComponentType::Dim2xDim3:
             kernel.setArg<cl_uint>(idx++, info->dimension(2) * info->dimension(3));
             break;
-        case ckw::TensorComponent::Dim1xDim2xDim3:
+        case ckw::TensorComponentType::Dim1xDim2xDim3:
             kernel.setArg<cl_uint>(idx++, info->dimension(1) * info->dimension(2) * info->dimension(3));
             break;
-        case ckw::TensorComponent::Unknown:
+        case ckw::TensorComponentType::Unknown:
         default:
             ARM_COMPUTE_ERROR("Unknown tensor component");
     }

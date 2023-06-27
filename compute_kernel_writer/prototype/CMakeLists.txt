@@ -34,6 +34,7 @@ add_library(ckw_prototype
     src/TileOperand.cpp
     src/TensorOperand.cpp
     src/TensorTileSampler.cpp
+    src/KernelArgument.cpp
 )
 
 target_compile_options(ckw_prototype
