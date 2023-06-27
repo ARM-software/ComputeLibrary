@@ -270,13 +270,14 @@ void KernelWriter::op_else(const std::function<void()> &body)
     _impl->compound_statement_end();
 }
 
-void KernelWriter::op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body)
+void KernelWriter::op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, const TileOperand &update_var_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body)
 {
     auto impl_var_name          = var_name.create_impl_operand(_impl.get());
     auto impl_cond_value_name   = cond_value_name.create_impl_operand(_impl.get());
+    auto impl_update_var_name   = update_var_name.create_impl_operand(_impl.get());
     auto impl_update_value_name = update_value_name.create_impl_operand(_impl.get());
 
-    _impl->op_for_loop_header(impl_var_name, cond_op, impl_cond_value_name, update_op, impl_update_value_name);
+    _impl->op_for_loop_header(impl_var_name, cond_op, impl_cond_value_name, impl_update_var_name, update_op, impl_update_value_name);
     _impl->compound_statement_begin();
     body();
     _impl->compound_statement_end();

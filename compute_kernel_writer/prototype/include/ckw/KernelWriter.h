@@ -230,16 +230,17 @@ public:
      */
     void op_else(const std::function<void()> &body);
 
-    /** Write for-loops: `for(; <var> <cond_op> <cond_value>; <update_op> <update_value>) { body }`.
+    /** Write for-loops: `for(; <var> <cond_op> <cond_value>; <var> <update_op> <update_value>) { body }`.
      *
      * @param[in]       var_name          The name of the variable used in condition.
      * @param[in]       cond_op           The relational binary operator used in condition.
      * @param[in]       cond_value_name   The value which the variable is compared against.
+     * @param[in]       update_var_name   The name of the variable which is updated.
      * @param[in]       update_op         The assignment operator used for updating the update value.
      * @param[in, out]  update_value      The value which is updated at every iteration.
      * @param[in]       body              The body of the for-loop.
      */
-    void op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body);
+    void op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, const TileOperand &update_var_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body);
 
     /** Write the return statement: `return;`
      */

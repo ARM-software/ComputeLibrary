@@ -68,8 +68,8 @@ enum class BinaryOp : int32_t
 enum class AssignmentOp : int32_t
 {
     // Unary
-    Increment = 0x0000, // +=
-    Decrement = 0x0001, // -=
+    Increment  = 0x0000, // +=
+    Decrement  = 0x0001, // -=
 };
 
 } // namespace ckw

@@ -37,7 +37,6 @@ enum class UnaryFunction : int32_t
     Sqrt           = 0x0002,
     Erf            = 0x0003,
     Fabs           = 0x0004,
-    IsGreaterEqual = 0x0005,
     Log            = 0x0006,
     Round          = 0x0007,
 

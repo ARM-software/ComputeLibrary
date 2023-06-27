@@ -2498,7 +2498,7 @@ public:
 
     virtual void op_else_header()                                                                                                                                                                                                                                        = 0;
 
-    virtual void op_for_loop_header(const Operand &var_name, BinaryOp cond_op, const Operand &cond_value, AssignmentOp update_op, const Operand &update_value)                                                                                                           = 0;
+    virtual void op_for_loop_header(const Operand &var_name, BinaryOp cond_op, const Operand &cond_value, const Operand &update_var, AssignmentOp update_op, const Operand &update_value)                                                                                                           = 0;
 
     virtual void op_load_indirect(const TensorOperand &tensor, const Operand &dst, const Operand &x, const Operand &y_indirect, const Operand &z, const Operand &b = Operand("0", OperandType::ScalarInt32))                                                             = 0;
 
@@ -3654,9 +3654,6 @@ public:
                 case UnaryFunction::Fabs:
                     _data->code += "fabs(";
                     break;
-                case UnaryFunction::IsGreaterEqual:
-                    _data->code += "isgreaterequal(";
-                    break;
                 case UnaryFunction::Log:
                     _data->code += "log(";
                     break;
@@ -3798,11 +3795,12 @@ public:
         _data->code += "else\n";
     }
 
-    void op_for_loop_header(const Operand& var_name, BinaryOp cond_op, const Operand& cond_value_name, AssignmentOp update_op, const Operand& update_value_name) override
+    void op_for_loop_header(const Operand& var_name, BinaryOp cond_op, const Operand& cond_value_name, const Operand &update_var_name, AssignmentOp update_op, const Operand& update_value_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *var          = operands.unpack(var_name);
         const IVectorTile *cond_value   = operands.unpack(cond_value_name);
+        const IVectorTile *update_var   = operands.unpack(update_var_name);
         const IVectorTile *update_value = operands.unpack(update_value_name);
 
         const int32_t dst_w = var->format().w;
@@ -3818,7 +3816,7 @@ public:
         _data->code += " ";
         _data->code += to_string(cond_op);
         _data->code += " " + cond_value->scalar(0, 0).str + "; ";
-        _data->code += var->scalar(0, 0).str;
+        _data->code += update_var->scalar(0, 0).str;
         _data->code += " ";
         _data->code += to_string(update_op);
         _data->code += " " + update_value->scalar(0, 0).str + ")";

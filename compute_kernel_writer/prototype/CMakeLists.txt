@@ -73,3 +73,6 @@ target_link_libraries(ckw_prototype_examples_common PUBLIC ckw_prototype)
 
 add_executable(ckw_prototype_examples_add_exp_store examples/add_exp_store.cpp)
 target_link_libraries(ckw_prototype_examples_add_exp_store PUBLIC ckw_prototype_examples_common)
+
+add_executable(writer_helper examples/writer_helper.cpp)
+target_link_libraries(writer_helper PUBLIC ckw_prototype)
