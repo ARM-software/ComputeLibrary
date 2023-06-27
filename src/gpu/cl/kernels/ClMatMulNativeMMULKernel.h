@@ -66,19 +66,20 @@ public:
      * - No broadcasting in batch dimensions. I.e. batch dims must be the same across lhs, rhs and dst
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  lhs             Input tensor for the LHS matrix.
-     * @param[in]  rhs             Input tensor for the RHS matrix.
+     * @param[in]  lhs             Input tensor info for the LHS matrix.
+     * @param[in]  rhs             Input tensor info for the RHS matrix.
+     * @param[in]  bias            Bias tensor info. Can be nullptr. Data type supported: Same as @p lhs.
      * @param[out] dst             Output tensor info.
      * @param[in]  matmul_info     Attributes for Batch MatMul Kernel
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMatMulNativeMMULKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

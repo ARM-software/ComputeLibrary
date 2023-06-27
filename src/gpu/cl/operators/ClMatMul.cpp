@@ -61,8 +61,8 @@ Status ClMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const 
 
     const bool is_quantized = is_data_type_quantized_asymmetric(lhs->data_type());
 
-    return is_quantized ? ClMatMulLowpNativeKernel::validate(lhs, rhs, dst, kernel_info, act_info) :
-           ClMatMulNativeKernel::validate(lhs, rhs, dst, kernel_info, act_info);
+    return is_quantized ? ClMatMulLowpNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info) :
+           ClMatMulNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
 }
 
 void ClMatMul::configure(const CLCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulInfo &matmul_info, const ActivationLayerInfo &act_info)
@@ -86,14 +86,14 @@ void ClMatMul::configure(const CLCompileContext &compile_context, ITensorInfo *l
         _matmul_lowp_native_kernel->set_target(gpu_target);
 
         // Configure the low-precision native matrix multiply kernel
-        _matmul_lowp_native_kernel->configure(compile_context, lhs, rhs, dst, kernel_info, act_info);
+        _matmul_lowp_native_kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
     }
     else
     {
         _matmul_native_kernel->set_target(gpu_target);
 
         // Configure the native matrix multiply kernel
-        _matmul_native_kernel->configure(compile_context, lhs, rhs, dst, kernel_info, act_info);
+        _matmul_native_kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
     }
 }
 

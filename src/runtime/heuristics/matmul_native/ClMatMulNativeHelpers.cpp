@@ -52,7 +52,7 @@ MatMulKernelInfo select_info(const MatMulKernelInfo &info0,
 
     if(rhs_lock_padding == false)
     {
-        if(bool(opencl::kernels::ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, &dst_info, info0)))
+        if(bool(opencl::kernels::ClMatMulNativeKernel::validate(&lhs_info, &rhs_info, nullptr, &dst_info, info0)))
         {
             return info0;
         }

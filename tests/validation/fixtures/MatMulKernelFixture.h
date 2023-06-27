@@ -36,7 +36,7 @@
 #include "tests/validation/reference/GEMMLowp.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/ReshapeLayer.h"
-
+#include <cmath>
 #include <random>
 
 namespace arm_compute
@@ -48,12 +48,16 @@ namespace validation
 using namespace arm_compute::opencl::kernels;
 
 template <typename T, typename KernelType, bool use_mmul = false>
-class MatMulKernelValidationFixture : public framework::Fixture
+class MatMulKernelGenericValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type,
+               bool enable_bias)
     {
+        // Flag to create a bias
+        _enable_bias = enable_bias;
+
         // For brevity, the input shapes are assumed to be not-transposed for both Lhs and Rhs matrices.
         QuantizationInfo lhs_q_info;
         QuantizationInfo rhs_q_info;
@@ -138,6 +142,16 @@ protected:
         }
     }
 
+    template <typename U>
+    void fill_bias_s32(U &&tensor, int i, const UniformQuantizationInfo &q_info)
+    {
+        // For quantized cases, fill the S32 bias according to the following to avoid saturation of test cases.
+        // The following code limits size of bias values to within expected range of output quantization.
+        const unsigned int                     bound = std::abs(q_info.scale * 256); // 256 is size of 8 bit datatype
+        std::uniform_int_distribution<int32_t> distribution(-(bound / 10), (bound / 10));
+        library->fill(tensor, distribution, i);
+    }
+
     template <typename U, typename D>
     void fill_constant(U &&tensor, D value)
     {
@@ -156,12 +170,15 @@ protected:
         matmul_info.k0                     = K0;
         matmul_info.export_rhs_to_cl_image = export_rhs_to_cl_image;
 
-        // Create tensors
-        CLTensor a   = create_tensor<CLTensor>(shape_a, data_type, 1, lhs_q_info);
-        CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1, rhs_q_info);
-        CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1, dst_q_info);
+        bool is_quantized = is_data_type_quantized(data_type);
 
-        matMul.configure(a.info(), b.info(), dst.info(), matmul_info);
+        // Create tensors
+        CLTensor a    = create_tensor<CLTensor>(shape_a, data_type, 1, lhs_q_info);
+        CLTensor b    = create_tensor<CLTensor>(shape_b, data_type, 1, rhs_q_info);
+        CLTensor bias = create_tensor<CLTensor>(output_shape[0], (is_quantized) ? DataType::S32 : data_type, 1, dst_q_info);
+        CLTensor dst  = create_tensor<CLTensor>(output_shape, data_type, 1, dst_q_info);
+
+        matMul.configure(a.info(), b.info(), (_enable_bias) ? bias.info() : nullptr, dst.info(), matmul_info);
         ARM_COMPUTE_ASSERT(a.info()->is_resizable());
         ARM_COMPUTE_ASSERT(b.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
@@ -184,6 +201,22 @@ protected:
             { ACL_SRC_1, &b },
             { ACL_DST, &dst }
         });
+
+        if(_enable_bias)
+        {
+            // Allocate, fill and add bias to TensorPack obj
+            bias.allocator()->allocate();
+            if(is_quantized)
+            {
+                fill_bias_s32(CLAccessor(bias), 2, dst_q_info.uniform());
+            }
+            else
+            {
+                fill(CLAccessor(bias), 2);
+            }
+            tensors_pack.add_tensor(ACL_SRC_2, &bias);
+        }
+
         matMul.run(tensors_pack);
 
         return dst;
@@ -252,9 +285,21 @@ protected:
     template <typename U = T>
     typename std::enable_if < std::is_same<U, float>::value || std::is_same<U, half>::value, SimpleTensor<U >>::type gemm_reference(SimpleTensor<U> &a, SimpleTensor<U> &b, SimpleTensor<U> &c)
     {
+        // Fill bias, then copy first dimension into subsequent dimensions to mimic broadcast
+        // of bias tensor from shape [dst.dimension(0)] to [dst.tensor_shape()] in target kernel
+        if(_enable_bias)
+        {
+            fill(c, 2);
+            const int n          = c.shape().x();
+            const int other_dims = c.shape().collapsed_from(1)[1];
+            for(int i = 1; i < other_dims; ++i) // For all data, copy first n elements into remaining batches
+            {
+                memcpy(c.data() + i * n, c.data(), n * sizeof(T));
+            }
+        }
         // Setting beta to 0 will effectively disable C for the
         // computation of the reference: alpha * A * B + 0 * C
-        return reference::gemm<U>(a, b, c, 1.0f, 0.f);
+        return reference::gemm<U>(a, b, c, 1.0f, (_enable_bias) ? 1.0f : 0.f);
     }
 
     template <typename U = T>
@@ -276,19 +321,59 @@ protected:
         constexpr int32_t gemmlowp_max_bound = std::numeric_limits<int32_t>::max();
 
         SimpleTensor<int> bias{ c.shape(), DataType::S32 };
-        fill_constant(bias, static_cast<int32_t>(0));
+        if(_enable_bias)
+        {
+            // Identical to float implementation, fill and copy values of bias first dimension
+            fill_bias_s32(bias, 2, cq);
+            const int          n          = bias.shape().x();
+            const int          other_dims = bias.shape().collapsed_from(1)[1];
+            const unsigned int dt_size    = sizeof(int32_t);
+            for(int i = 1; i < other_dims; ++i)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * dt_size);
+            }
+        }
+        else
+        {
+            fill_constant(bias, static_cast<int32_t>(0)); // effectively disable bias
+        }
 
         const SimpleTensor<U> final_result = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, U>(result, bias,
                                                                                                                gemmlowp_multipliers, gemmlowp_shifts, gemmlowp_offset, gemmlowp_min_bound, gemmlowp_max_bound);
+
         return final_result;
     }
 
     CLTensor        _target{};
     SimpleTensor<T> _reference{};
+    bool            _enable_bias{ false };
     bool            _device_supports_export_to_cl_image{ true };
     bool            _device_supports_mmul{ true };
 };
 
+template <typename T, typename KernelType, bool use_mmul = false>
+class MatMulKernelValidationFixture : public MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type)
+    {
+        MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>::setup(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type,
+                                                                             false /* enable bias */);
+    }
+};
+
+template <typename T, typename KernelType, bool use_mmul = false>
+class MatMulKernelWithBiasValidation : public MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type)
+    {
+        MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>::setup(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type,
+                                                                             true /* enable bias */);
+    }
+};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -132,17 +132,18 @@ private:
     TensorInfo _flattened_src{};
     TensorInfo _converted_weights{};
     TensorInfo _reshaped_weights{};
-    TensorInfo  _lhs_to_use{};
+    TensorInfo _lhs_to_use{};
     TensorInfo _weights_to_use{};
     int        _weights_to_use_idx{ ACL_SRC_1 };
 
-    bool _are_weights_converted{ true };
-    bool _are_weights_reshaped{ true };
+    bool _run_convert_weights{ false };
+    bool _transpose_weights{ false };
+    bool _dynamic_gemm{ false };
+    bool _use_matmul{ false };
+
     bool _is_fc_after_conv{ true };
     bool _is_quantized{ false };
     bool _is_prepared{ false };
-    bool _dynamic_weights{ false };
-    bool _use_matmul{ false };
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
     int _asrt_run_count {};

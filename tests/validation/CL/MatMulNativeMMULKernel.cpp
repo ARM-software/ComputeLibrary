@@ -70,6 +70,9 @@ const auto k0_value = framework::dataset::make("K0", { 1 });
 template <typename T>
 using CLMatMulNativeMMULKernelFixture = MatMulKernelValidationFixture<T, ClMatMulNativeMMULKernel, true /*use_mmul*/>;
 
+template <typename T>
+using CLMatMulKernelBiasFixture = MatMulKernelWithBiasValidation<T, ClMatMulNativeMMULKernel, true /*use_mmul*/>;
+
 TEST_SUITE(CL)
 TEST_SUITE(MatMulNativeMMULKernel)
 TEST_SUITE(Validate)
@@ -117,7 +120,7 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
             { MatMulKernelInfo(true, true, 3, 7, 1), false },  // N0 not in {1, 2, 3, 4, 8, 16}
             { MatMulKernelInfo(true, true, 6, 3, 1), false },  // M0 not in {1, 2, 3, 4, 8, 16}
             { MatMulKernelInfo(true, true, 5, 3, 1), false },  // M0 not in {1, 2, 3, 4, 8, 16}
-            { MatMulKernelInfo(true, true, 4, 8, 2), false },   // K0 is not 1
+            { MatMulKernelInfo(true, true, 4, 8, 2), false },  // K0 is not 1
             { MatMulKernelInfo(true, true, 4, 8, 1), true },
             { MatMulKernelInfo(true, true, 3, 3, 1), true },
             { MatMulKernelInfo(true, true, 16, 4, 1), true },
@@ -132,7 +135,7 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
         for(auto &pair : supported_block_sizes)
         {
             TensorInfo output_info;
-            Status     status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &output_info, pair.first);
+            Status     status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, nullptr, &output_info, pair.first);
             ARM_COMPUTE_EXPECT(bool(status) == pair.second, framework::LogLevel::ERRORS);
         }
     }
@@ -148,28 +151,30 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
         // Configurations are assumed to be Nt/Nt, but will be transposed inside the test to test other configurations
-        using ShapeConfigurationTuple = std::tuple<TensorShape, TensorShape, bool>;
+        using ShapeConfigurationTuple = std::tuple<TensorShape, TensorShape, TensorShape, bool>; // lhs, rhs, bias, result
         const std::vector<ShapeConfigurationTuple> shape_configurations =
         {
-            { TensorShape(4U, 1U), TensorShape(3U, 4U), true },
-            { TensorShape(12U, 12U), TensorShape(3U, 12U), true },
-            { TensorShape(8U, 4U), TensorShape(2U, 8U), true },
-            { TensorShape(8U, 4U), TensorShape(2U, 4U), false }, // Mismatch in the K dimension
-            { TensorShape(5U, 0U), TensorShape(2U, 5U), false }, // Invalid dimension
-            { TensorShape(5U, 7U), TensorShape(2U, 5U), false }, // K not a multiple of 4 (MMUL_K0)
-            { TensorShape(8U, 4U, 3U, 4U, 5U, 6U), TensorShape(2U, 8U, 3U, 4U, 5U, 6U), true },
-            { TensorShape(5U, 4U, 3U, 4U, 5U, 1U), TensorShape(2U, 5U, 3U, 4U, 5U, 6U), false }, // No batch broadcasting
-            { TensorShape(5U, 4U, 3U, 4U, 9U, 6U), TensorShape(2U, 5U, 3U, 4U, 5U, 6U), false }, // Mismatch in batch dimension
+            { TensorShape(4U, 1U), TensorShape(3U, 4U), TensorShape(3U), true },
+            { TensorShape(12U, 12U), TensorShape(3U, 12U), TensorShape(3U), true },
+            { TensorShape(8U, 4U), TensorShape(2U, 8U), TensorShape(2U), true },
+            { TensorShape(8U, 4U), TensorShape(2U, 4U), TensorShape(2U), false }, // Mismatch in the K dimension
+            { TensorShape(5U, 0U), TensorShape(2U, 5U), TensorShape(2U), false }, // Invalid dimension
+            { TensorShape(5U, 7U), TensorShape(2U, 5U), TensorShape(2U), false }, // K not a multiple of 4 (MMUL_K0)
+            { TensorShape(8U, 4U, 3U, 4U, 5U, 6U), TensorShape(2U, 8U, 3U, 4U, 5U, 6U), TensorShape(2U), true },
+            { TensorShape(5U, 4U, 3U, 4U, 5U, 1U), TensorShape(2U, 5U, 3U, 4U, 5U, 6U), TensorShape(2U), false }, // No batch broadcasting
+            { TensorShape(5U, 4U, 3U, 4U, 9U, 6U), TensorShape(2U, 5U, 3U, 4U, 5U, 6U), TensorShape(2U), false }, // Mismatch in batch dimension
+            { TensorShape(4U, 1U), TensorShape(3U, 4U), TensorShape(1U), false },                                 // Bias first dimensions != dst first dimension.
+            { TensorShape(4U, 1U), TensorShape(3U, 4U), TensorShape(5U, 6U), false },                             // Bias is 2d which is invalid.
         };
 
         for(auto &tuple : shape_configurations)
         {
-            const bool expected = std::get<2>(tuple);
+            const bool expected = std::get<3>(tuple);
 
-        for(bool adj_lhs :
-            {
-                false, true
-            })
+            for(bool adj_lhs :
+                {
+                    false, true
+                })
             {
                 for(bool adj_rhs :
                     {
@@ -178,6 +183,7 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
                 {
                     TensorShape lhs_shape = std::get<0>(tuple);
                     TensorShape rhs_shape = std::get<1>(tuple);
+                    TensorShape bia_shape = std::get<2>(tuple);
 
                     if(adj_lhs)
                     {
@@ -191,11 +197,12 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
 
                     const TensorInfo lhs_info = TensorInfo(lhs_shape, 1, DataType::F32);
                     const TensorInfo rhs_info = TensorInfo(rhs_shape, 1, DataType::F32);
+                    const TensorInfo bia_info = TensorInfo(bia_shape, 1, DataType::F32);
                     TensorInfo       output_info;
 
                     MatMulKernelInfo matmul_kernel_info{ adj_lhs, adj_rhs, 1, 1, 1, false /* export_rhs_to_cl_image */ };
 
-                    Status status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+                    Status status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &bia_info, &output_info, matmul_kernel_info);
                     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
                 }
             }
@@ -213,40 +220,44 @@ TEST_CASE(ValidateDataTypes, framework::DatasetMode::ALL)
     if(arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()))
     {
         // Configurations are assumed to be Nt/Nt, but will be transposed inside the test to test other configurations
-        using DataTypeConfigurationTuple = std::tuple<DataType, DataType, DataType, bool>;
+        using DataTypeConfigurationTuple = std::tuple<DataType, DataType, DataType, DataType, bool>;
         const std::vector<DataTypeConfigurationTuple> data_type_configurations =
         {
-            { DataType::F32, DataType::F32, DataType::F32, true },
-            { DataType::F16, DataType::F16, DataType::F16, true },
-            { DataType::F16, DataType::F32, DataType::F32, false },                                              // no mixed precision
-            { DataType::F64, DataType::F64, DataType::F64, false },                                              // no double precision
-            { DataType::QASYMM8, DataType::QASYMM8, DataType::QASYMM8, false },                                  // no quantized types
-            { DataType::QASYMM8_SIGNED, DataType::QASYMM8_SIGNED, DataType::QASYMM8_SIGNED, false },             // no quantized types
-            { DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8_PER_CHANNEL, false }, // no quantized types
-            { DataType::QASYMM16, DataType::QASYMM16, DataType::QASYMM16, false },                               // no quantized types
-            { DataType::QSYMM16, DataType::QSYMM16, DataType::QSYMM16, false },                                  // no quantized types
-            { DataType::QSYMM8, DataType::QSYMM8, DataType::QSYMM8, false },                                     // no quantized types
-            { DataType::S64, DataType::S64, DataType::S64, false },                                              // no integral types
-            { DataType::S32, DataType::S32, DataType::S32, false },                                              // no integral types
-            { DataType::S16, DataType::S16, DataType::S16, false },                                              // no integral types
-            { DataType::S8, DataType::S8, DataType::S8, false },                                                 // no integral types
-            { DataType::U64, DataType::U64, DataType::U64, false },                                              // no integral types
-            { DataType::U32, DataType::U32, DataType::U32, false },                                              // no integral types
-            { DataType::U16, DataType::U16, DataType::U16, false },                                              // no integral types
-            { DataType::U8, DataType::U8, DataType::U8, false },                                                 // no integral types
+            { DataType::F32, DataType::F32, DataType::F32, DataType::F32, true },
+            { DataType::F16, DataType::F16, DataType::F16, DataType::F16, true },
+            { DataType::F32, DataType::F32, DataType::F32, DataType::F32, true },
+            { DataType::F32, DataType::F32, DataType::F16, DataType::F32, false },                                              // incorrect bias type
+            { DataType::F16, DataType::F32, DataType::F32, DataType::F32, false },                                              // no mixed precision
+            { DataType::F64, DataType::F64, DataType::F64, DataType::F64, false },                                              // no double precision
+            { DataType::QASYMM8, DataType::QASYMM8, DataType::S32, DataType::QASYMM8, false },                                  // no quantized types
+            { DataType::QASYMM8_SIGNED, DataType::QASYMM8_SIGNED, DataType::S32, DataType::QASYMM8_SIGNED, false },             // no quantized types
+            { DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8_PER_CHANNEL, DataType::S32, DataType::QSYMM8_PER_CHANNEL, false }, // no quantized types
+            { DataType::QASYMM16, DataType::QASYMM16, DataType::S32, DataType::QASYMM16, false },                               // no quantized types
+            { DataType::QSYMM16, DataType::QSYMM16, DataType::S32, DataType::QSYMM16, false },                                  // no quantized types
+            { DataType::QSYMM8, DataType::QSYMM8, DataType::S32, DataType::QSYMM8, false },                                     // no quantized types
+            { DataType::S64, DataType::S64, DataType::S64, DataType::S64, false },                                              // no integral types
+            { DataType::S32, DataType::S32, DataType::S32, DataType::S32, false },                                              // no integral types
+            { DataType::S16, DataType::S16, DataType::S16, DataType::S16, false },                                              // no integral types
+            { DataType::S8, DataType::S8, DataType::S8, DataType::S8, false },                                                  // no integral types
+            { DataType::U64, DataType::U64, DataType::U64, DataType::U64, false },                                              // no integral types
+            { DataType::U32, DataType::U32, DataType::U32, DataType::U32, false },                                              // no integral types
+            { DataType::U16, DataType::U16, DataType::U16, DataType::U16, false },                                              // no integral types
+            { DataType::U8, DataType::U8, DataType::U8, DataType::U8, false },                                                  // no integral types
         };
 
-        const TensorShape      shape = TensorShape(8U, 8U);
+        const TensorShape      shape     = TensorShape(8U, 8U);
+        const TensorShape      bia_shape = TensorShape(8U);
         const MatMulKernelInfo matmul_kernel_info{ false, false, 1, 1, 1, false };
         for(auto &tuple : data_type_configurations)
         {
-            const bool expected = std::get<3>(tuple);
+            const bool expected = std::get<4>(tuple);
 
             const TensorInfo lhs_info(shape, 1, std::get<0>(tuple));
             const TensorInfo rhs_info(shape, 1, std::get<1>(tuple));
-            TensorInfo       output_info(shape, 1, std::get<2>(tuple));
+            const TensorInfo bia_info(bia_shape, 1, std::get<2>(tuple));
+            TensorInfo       output_info(shape, 1, std::get<3>(tuple));
 
-            Status status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &output_info, matmul_kernel_info);
+            Status status = ClMatMulNativeMMULKernel::validate(&lhs_info, &rhs_info, &bia_info, &output_info, matmul_kernel_info);
             ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
         }
     }
@@ -292,7 +303,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<float>, framewo
         validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+FIXTURE_DATA_TEST_CASE(RunWithBias, CLMatMulKernelBiasFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallMatMulMMULDataset(),
+                                                                                                                   framework::dataset::make("TransposeA", { false, true })),
+                                                                                                                   framework::dataset::make("TransposeB", { false, true })),
+                                                                                                                   m0_values_precommit),
+                                                                                                                   n0_values_precommit),
+                                                                                                                   k0_value),
+                                                                                                                   framework::dataset::make("ExportRhsToCLImage", { false })),
+                                                                                                           framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    if(_device_supports_mmul)
+    {
+        validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
                                                                                framework::dataset::make("TransposeA", { false })),
                                                                        framework::dataset::make("TransposeB", { false })),
                                                                m0_values_nightly_lhs_nt),
@@ -308,7 +335,8 @@ FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<floa
     }
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
                                                                                framework::dataset::make("TransposeA", { false })),
                                                                        framework::dataset::make("TransposeB", { true })),
                                                                m0_values_nightly_lhs_nt),
@@ -323,14 +351,15 @@ FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<flo
         validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
-                                                                                                                    framework::dataset::make("TransposeA", { true })),
-                                                                                                                    framework::dataset::make("TransposeB", { false })),
-                                                                                                                    m0_values_nightly_lhs_t),
-                                                                                                                    n0_values_nightly_rhs_nt),
-                                                                                                                    k0_value),
-                                                                                                                    framework::dataset::make("ExportRhsToCLImage", { false })),
-                                                                                                                    framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulNativeMMULKernelFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { true })),
+                                                                       framework::dataset::make("TransposeB", { false })),
+                                                               m0_values_nightly_lhs_t),
+                                                       n0_values_nightly_rhs_nt),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     // Validate output
@@ -395,7 +424,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulNativeMMULKernelFixture<half>, framewor
         validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
                                                                                framework::dataset::make("TransposeA", { false })),
                                                                        framework::dataset::make("TransposeB", { false })),
                                                                m0_values_nightly_lhs_nt),
@@ -410,7 +440,8 @@ FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulNativeMMULKernelFixture<half
         validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
                                                                                framework::dataset::make("TransposeA", { false })),
                                                                        framework::dataset::make("TransposeB", { true })),
                                                                m0_values_nightly_lhs_nt),
@@ -425,14 +456,15 @@ FIXTURE_DATA_TEST_CASE(RunLargeRhsTranspose, CLMatMulNativeMMULKernelFixture<hal
         validate(CLAccessor(_target), _reference, tolerance_f16, 0.f, abs_tolerance_f16);
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
-                                                                                                                    framework::dataset::make("TransposeA", { true })),
-                                                                                                                    framework::dataset::make("TransposeB", { false })),
-                                                                                                                    m0_values_nightly_lhs_t),
-                                                                                                                    n0_values_nightly_rhs_nt),
-                                                                                                                    k0_value),
-                                                                                                                    framework::dataset::make("ExportRhsToCLImage", { false })),
-                                                                                                                    framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLargeLhsTransposed, CLMatMulNativeMMULKernelFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeMatMulMMULDataset(),
+                                                                               framework::dataset::make("TransposeA", { true })),
+                                                                       framework::dataset::make("TransposeB", { false })),
+                                                               m0_values_nightly_lhs_t),
+                                                       n0_values_nightly_rhs_nt),
+                                               k0_value),
+                                       framework::dataset::make("ExportRhsToCLImage", { false })),
+                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     // Validate output
