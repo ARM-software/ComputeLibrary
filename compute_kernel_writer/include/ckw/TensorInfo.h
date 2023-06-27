@@ -25,7 +25,7 @@
 #ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TENSORINFO_H
 #define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TENSORINFO_H
 
-#include "ckw/Types.h"
+#include "ckw/types/DataType.h"
 
 #include <array>
 #include <cstdint>

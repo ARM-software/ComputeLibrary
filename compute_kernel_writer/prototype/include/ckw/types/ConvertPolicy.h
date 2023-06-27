@@ -21,25 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
-#define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
+
+#ifndef CKW_INCLUDE_CKW_CONVERTPOLICY_H
+#define CKW_INCLUDE_CKW_CONVERTPOLICY_H
+
+#include <cstdint>
 
 namespace ckw
 {
-/** Compute Kernel Writer data types. This data type is used by the code variables and tensor arguments. */
-enum class DataType
+
+enum class ConvertPolicy : int32_t
 {
-    Unknown,
-    Fp32,
-    Fp16,
-    Int32,
-    Int16,
-    Int8,
-    Uint32,
-    Uint16,
-    Uint8,
-    Bool
+    None     = 0, // No policy specified.
+    Saturate = 1, // Saturated.
 };
+
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H */
+#endif //CKW_INCLUDE_CKW_CONVERTPOLICY_H

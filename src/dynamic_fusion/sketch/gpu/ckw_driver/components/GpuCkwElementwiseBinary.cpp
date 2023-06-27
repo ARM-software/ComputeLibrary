@@ -28,7 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "ckw/TensorTileSampler.h"
-#include "ckw/Types.h"
+#include "ckw/types/TensorSamplerTypes.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
@@ -120,7 +120,7 @@ void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_gr
     auto &dst_tile = dst->tile();
 
     // Perform the operation.
-    writer->op_binary_expression(dst_tile, lhs_tile, rhs_tile, BinaryOp::Add);
+    writer->op_binary_expression(dst_tile, lhs_tile, BinaryOp::Add, rhs_tile);
 }
 
 Window GpuCkwElementwiseBinary::get_window() const

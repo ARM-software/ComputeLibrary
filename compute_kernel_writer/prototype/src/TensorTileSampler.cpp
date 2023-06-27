@@ -24,7 +24,7 @@
 
 #include "ckw/TensorTileSampler.h"
 #include "ckw/TileOperand.h"
-#include "ckw/Types.h"
+#include "ckw/types/TensorSamplerTypes.h"
 
 namespace ckw
 {

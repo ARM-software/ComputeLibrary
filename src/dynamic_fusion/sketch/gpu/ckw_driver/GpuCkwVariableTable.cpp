@@ -59,7 +59,7 @@ GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelCo
         std::stringstream ss;
         ss << alias << "_t" << abs(tensor->id());
         const auto              uniq_name = ss.str();
-        GpuCkwComponentArgument var{ writer->create_tensor_argument(uniq_name.c_str(), to_ckw(*tensor)) };
+        GpuCkwComponentArgument var{ writer->declare_tensor_argument(uniq_name.c_str(), to_ckw(*tensor)) };
         auto                  &&inserted = _vars.emplace(tensor->id(), var);
         return &(inserted.first->second);
     }

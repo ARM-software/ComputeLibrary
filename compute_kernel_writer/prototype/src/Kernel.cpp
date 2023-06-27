@@ -23,7 +23,7 @@
  */
 
 #include "ckw/Kernel.h"
-#include "ckw/Types.h"
+#include "ckw/types/GpuTargetLanguage.h"
 #include "src/Prototype.h"
 
 namespace ckw

@@ -22,56 +22,20 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
-#define CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
+#ifndef CKW_INCLUDE_CKW_GPUTARGETLANGUAGE_H
+#define CKW_INCLUDE_CKW_GPUTARGETLANGUAGE_H
 
-#include "ckw/types/DataType.h"
-#include <string>
+#include <cstdint>
 
 namespace ckw
 {
-namespace prototype
+
+enum class GpuTargetLanguage : int32_t
 {
-class IGpuKernelWriter;
-
-class Operand;
-} // namespace prototype
-
-/** The base class for all operands. */
-class OperandBase
-{
-public:
-    /** Constructor
-     *
-     * @param[in] name The name of the operand.
-     */
-    explicit OperandBase(const ::std::string &name);
-
-    /** Destructor */
-    virtual ~OperandBase();
-
-    /** (Internal use only) Create the implementation operand.
-     *
-     * @param[in] writer The implementation kernel writer.
-     */
-    virtual prototype::Operand create_impl_operand(prototype::IGpuKernelWriter *writer) const = 0;
-
-    /** Get the name of the operand. */
-    const ::std::string &name() const;
-
-    /** Set the name of the operand. */
-    OperandBase &name(const ::std::string &name);
-
-    /** Get the data type of the operand. */
-    virtual DataType data_type() const = 0;
-
-    /** Get whether the operand is compile-time constant. */
-    virtual bool is_constant() const = 0;
-
-private:
-    ::std::string _name;
+    Unknown,
+    OpenCL
 };
 
 } // namespace ckw
 
-#endif // CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
+#endif //CKW_INCLUDE_CKW_GPUTARGETLANGUAGE_H

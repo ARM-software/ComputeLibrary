@@ -30,6 +30,9 @@
 #include "ckw/TensorOperand.h"
 #include "ckw/TileInfo.h"
 #include "ckw/TileOperand.h"
+#include "ckw/types/ConvertPolicy.h"
+#include "ckw/types/Functions.h"
+#include "ckw/types/Operators.h"
 
 #include <memory>
 
@@ -83,23 +86,23 @@ public:
     // Tensor and tile declaration
     // =============================================================================================
 
-    /** Define a tensor argument.
+    /** Declare a tensor argument.
      *
      * @param[in] name The name of the tensor.
      * @param[in] info The tensor info.
      *
      * @return The @ref TensorOperand object.
      */
-    TensorOperand &create_tensor_argument(const char *name, const TensorInfo &info);
+    TensorOperand &declare_tensor_argument(const std::string &name, const TensorInfo &info);
 
-    /** Define a compile-time constant scalar argument.
+    /** Declare a compile-time constant scalar argument.
      *
      * @param[in] name  The name of the tile.
      * @param[in] value The value of the tile.
      *
      * @return The @ref TileOperand object.
      */
-    TileOperand &create_tile_argument(const char *name, int32_t value);
+    TileOperand &declare_tile_argument(const std::string &name, int32_t value);
 
     /** Declare a new tile.
      *
@@ -111,7 +114,7 @@ public:
      * @return The @ref TileOperand object.
      */
     template <typename... TArgs>
-    TileOperand &declare_tile(const char *name, TArgs &&...args)
+    TileOperand &declare_tile(const std::string &name, TArgs &&...args)
     {
         const auto var_name = generate_variable_name(name);
         auto       operand  = new TileOperand(var_name, ::std::forward<TArgs>(args)...);
@@ -144,29 +147,103 @@ public:
     // Data processing
     // =============================================================================================
 
-    /** Write assignment: `<dst> = <src>`.
+    /** Write assignment: `<dst> = <src>;`.
      *
-     * @param[in] dst The destination tile.
-     * @param[in] src The source tile.
+     * @param[out] dst The destination tile.
+     * @param[in]  src The source tile.
      */
-    void op_assign(TileOperand &dst, const TileOperand &src);
+    void op_assign(const TileOperand &dst, const TileOperand &src);
 
-    /** Write binary expression: `<dst> = <lhs> <op> <rhs>`.
+    /** Write the cast: `<dst> = convert_<dst.type><_sat>(<src>);`.
      *
-     * @param[in] dst The destination tile.
-     * @param[in] lhs The LHS operand.
-     * @param[in] rhs The RHS operand.
-     * @param[in] op  The binary operator.
+     * @param[out] dst      The destination tile.
+     * @param[in]  src      The source tile.
+     * @param[in]  policy   The policy governing the behavior of the cast.
      */
-    void op_binary_expression(TileOperand &dst, const TileOperand &lhs, const TileOperand &rhs, BinaryOp op);
+    void op_cast_expression(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy);
 
-    /** Write function applied to scalar value: `<dst> = <func>(<src>)`.
+    /** Write the unary expression: `<dst> = <op> <src>`.
      *
-     * @param[in] dst  The destination tile.
-     * @param[in] src  The source tile.
-     * @param[in] func The function to be applied to the source tile.
+     * @param[out]  dst The destination tile.
+     * @param[in]   op  The unary operator.
+     * @param[in]   src The source tile.
      */
-    void op_scalar_function(TileOperand &dst, const TileOperand &src, ScalarUnaryFunction func);
+    void op_unary_expression(const TileOperand &dst, UnaryOp op, const TileOperand &src);
+
+    /** Write binary expression: `<dst> = <lhs> <op> <rhs>;`.
+     *
+     * @param[out] dst  The destination tile.
+     * @param[in]  lhs  The LHS tile.
+     * @param[in]  op   The binary operator.
+     * @param[in]  rhs  The RHS tile.
+     */
+    void op_binary_expression(const TileOperand &dst, const TileOperand &lhs, BinaryOp op, const TileOperand &rhs);
+
+    /** Write function applied to scalar value: `<dst> = <func>(<src>);`.
+     *
+     * @param[out] dst  The destination tile.
+     * @param[in]  func The function to be applied to the source tile.
+     * @param[in]  src  The source tile.
+     */
+    void op_unary_elementwise_function(const TileOperand &dst, UnaryFunction func, const TileOperand &src);
+
+    /** Write function applied to scalar value: `<dst> = <func>(<first>, <second>);`.
+     *
+     * @param[out] dst      The destination tile.
+     * @param[in]  func     The function to be applied to the source tiles.
+     * @param[in]  first    The first argument tile.
+     * @param[in]  second   The second argument tile.
+     */
+    void op_binary_elementwise_function(const TileOperand &dst, BinaryFunction func, const TileOperand &first, const TileOperand &second);
+
+    /** Write function applied to scalar value: `<dst> = <func>(<first>, <second>, <third>);`.
+     *
+     * @param[out] dst      The destination tile.
+     * @param[in]  func     The function to be applied to the source tiles.
+     * @param[in]  first    The first argument tile.
+     * @param[in]  second   The second argument tile.
+     * @param[in]  third    The third argument tile.
+     */
+    void op_ternary_elementwise_function(const TileOperand &dst, TernaryFunction func, const TileOperand &first, const TileOperand &second, const TileOperand &third);
+
+    /** Write if-statement: `if(<lhs> <op> <rhs>) { <body> }`.
+     *
+     * @param[in] lhs   The LHS tile of the condition.
+     * @param[in] op    The relational binary operator.
+     * @param[in] rhs   The RHS tile of the condition.
+     * @param[in] body  The body of the if-statement.
+     */
+    void op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body);
+
+    /** Write else-if-statement: `else if(<lhs> <op> <rhs>) { <body> }`.
+     *
+     * @param[in] lhs   The LHS tile of the condition.
+     * @param[in] op    The relational binary operator.
+     * @param[in] rhs   The RHS tile of the condition.
+     * @param[in] body  The body of the else-if-statement.
+     */
+    void op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body);
+
+    /** Write an else-statement: `else { <body> }`.
+     *
+     * @param[in] body The body of the else-statement.
+     */
+    void op_else(const std::function<void()> &body);
+
+    /** Write for-loops: `for(; <var> <cond_op> <cond_value>; <update_op> <update_value>) { body }`.
+     *
+     * @param[in]       var_name          The name of the variable used in condition.
+     * @param[in]       cond_op           The relational binary operator used in condition.
+     * @param[in]       cond_value_name   The value which the variable is compared against.
+     * @param[in]       update_op         The assignment operator used for updating the update value.
+     * @param[in, out]  update_value      The value which is updated at every iteration.
+     * @param[in]       body              The body of the for-loop.
+     */
+    void op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body);
+
+    /** Write the return statement: `return;`
+     */
+    void op_return();
 
     // =============================================================================================
     // Misc
@@ -174,8 +251,8 @@ public:
 
     /** Set `dst` the global ID of dimension `dim`.
      *
-     * @param[in] dst The tile to be written to.
-     * @param[in] dim The global ID dimension.
+     * @param[out] dst The tile to be written to.
+     * @param[in]  dim The global ID dimension.
      */
     void op_get_global_id(TileOperand &dst, int32_t dim);
 
@@ -193,7 +270,7 @@ private:
      *
      * @return The full variable name.
      */
-    ::std::string generate_variable_name(const char *name) const;
+    ::std::string generate_variable_name(const std::string &name) const;
 
     /** Register the operand to the kernel.
      *

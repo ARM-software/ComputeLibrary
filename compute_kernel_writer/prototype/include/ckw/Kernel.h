@@ -26,7 +26,7 @@
 #define CKW_PROTOTYPE_INCLUDE_CKW_KERNEL_H
 
 #include "ckw/OperandBase.h"
-#include "ckw/Types.h"
+#include "ckw/types/GpuTargetLanguage.h"
 
 #include <map>
 #include <memory>

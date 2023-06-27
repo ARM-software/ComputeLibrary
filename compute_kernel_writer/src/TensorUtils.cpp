@@ -24,7 +24,6 @@
 
 #include "ckw/Error.h"
 #include "ckw/TensorInfo.h"
-#include "ckw/Types.h"
 
 #include "src/TensorUtils.h"
 

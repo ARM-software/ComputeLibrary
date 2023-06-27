@@ -25,7 +25,7 @@
 #ifndef CKW_PROTOTYPE_INCLUDE_CKW_TILEINFO_H
 #define CKW_PROTOTYPE_INCLUDE_CKW_TILEINFO_H
 
-#include "ckw/Types.h"
+#include "ckw/types/DataType.h"
 
 #include <array>
 #include <cstdint>

@@ -47,15 +47,15 @@ public:
     CLConstantTile(const TileContainer &vals, DataType dt);
 
     // Inherited method overridden
-    TileVariable scalar(int32_t row, int32_t col) const override;
+    TileVariable              scalar(int32_t row, int32_t col) const override;
 
-    TileVariable vector(int32_t row) const override;
+    TileVariable              vector(int32_t row) const override;
 
-    TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
+    TileVariable              vector(int32_t row, int32_t col_start, int32_t width) const override;
 
     std::vector<TileVariable> all() const override;
 
-    bool is_assignable() const override;
+    bool                      is_assignable() const override;
 
 private:
     TileContainer _vals{};

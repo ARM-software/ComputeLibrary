@@ -27,7 +27,6 @@
 #include "ckw/TensorOperand.h"
 #include "ckw/TensorTileSampler.h"
 #include "ckw/TileOperand.h"
-#include "ckw/Types.h"
 
 #include "common/ExampleComponentArgument.h"
 #include "common/ExampleKernelWriter.h"
@@ -110,7 +109,7 @@ void op_binary_elementwise(ExampleScopedKernelWriter writer, std::vector<Example
     auto &dst_tile = dst->tile();
 
     // Perform the operation.
-    writer->op_binary_expression(dst_tile, lhs_tile, rhs_tile, BinaryOp::Add);
+    writer->op_binary_expression(dst_tile, lhs_tile, BinaryOp::Add, rhs_tile);
 }
 
 void op_exp(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgument *> operands)
@@ -138,7 +137,7 @@ void op_exp(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgume
     auto &dst_tile = dst->tile();
 
     // Perform the operation.
-    writer->op_scalar_function(dst_tile, src_tile, ScalarUnaryFunction::Exp);
+    writer->op_unary_elementwise_function(dst_tile, UnaryFunction::Exp, src_tile);
 }
 
 void op_store(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgument *> operands)
@@ -164,9 +163,9 @@ int main()
     const TensorInfo src1_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 1);
     const TensorInfo dst_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 2);
 
-    ExampleComponentArgument src0(writer->create_tensor_argument("src0", src0_info));
-    ExampleComponentArgument src1(writer->create_tensor_argument("src1", src1_info));
-    ExampleComponentArgument dst(writer->create_tensor_argument("dst", dst_info));
+    ExampleComponentArgument src0(writer->declare_tensor_argument("src0", src0_info));
+    ExampleComponentArgument src1(writer->declare_tensor_argument("src1", src1_info));
+    ExampleComponentArgument dst(writer->declare_tensor_argument("dst", dst_info));
 
     ExampleComponentArgument ans;
 

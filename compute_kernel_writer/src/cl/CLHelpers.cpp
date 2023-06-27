@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "ckw/Error.h"
-#include "ckw/Types.h"
+#include "ckw/types/DataType.h"
 
 #include "src/cl/CLHelpers.h"
 

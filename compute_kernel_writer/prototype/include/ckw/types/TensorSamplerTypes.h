@@ -22,75 +22,13 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_PROTOTYPE_INCLUDE_CKW_TYPES_H
-#define CKW_PROTOTYPE_INCLUDE_CKW_TYPES_H
+#ifndef CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
+#define CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
 
-#include <array>
 #include <cstdint>
 
 namespace ckw
 {
-
-/** Compute Kernel Writer data types. This data type is used by the code variables and tensor arguments. */
-enum class DataType
-{
-    Unknown = 0x00,
-    Fp32    = 0x11,
-    Fp16    = 0x12,
-    Int32   = 0x21,
-    Int16   = 0x22,
-    Int8    = 0x24,
-    Uint32  = 0x31,
-    Uint16  = 0x32,
-    Uint8   = 0x34,
-    Bool    = 0x41
-};
-
-enum class GpuTargetLanguage
-{
-    Unknown,
-    OpenCL
-};
-
-/* Binary operations
-*/
-enum class BinaryOp : int32_t
-{
-    // Elementwise
-    Add = 0x0000, // +
-    Sub = 0x0001, // -
-    Mul = 0x0002, // *
-    Div = 0x0003, // /
-    Mod = 0x0004, // %
-    // Relational
-    Equal        = 0x1000, // ==
-    Less         = 0x1001, // <
-    LessEqual    = 0x1002, // <=
-    Greater      = 0x1003, // >
-    GreaterEqual = 0x1004, // >=
-    // Algebra
-    MatMul_Nt_Nt = 0x2000, // X
-    MatMul_Nt_T  = 0x2001, // X
-    MatMul_T_Nt  = 0x2002, // X
-    MatMul_T_T   = 0x2003, // X
-    Dot          = 0x2004, // .
-    // Logical
-    LogicalAnd = 0x3000, // &&
-    LogicalOr  = 0x3001, // ||
-    LogicalNot = 0x3002  // !
-};
-
-enum class AssignmentOp : int32_t
-{
-    // Unary
-    Increment = 0x0000, // +=
-    Decrement = 0x0001, // -=
-};
-
-enum class ScalarUnaryFunction : int32_t
-{
-    Exp,
-};
 
 enum class TensorSamplerFormat : int32_t
 {
@@ -137,4 +75,4 @@ enum class TensorSamplerAddressModeZ : int32_t
 
 } // namespace ckw
 
-#endif // CKW_PROTOTYPE_INCLUDE_CKW_TYPES_H
+#endif //CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H

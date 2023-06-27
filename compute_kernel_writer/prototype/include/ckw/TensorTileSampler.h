@@ -25,7 +25,7 @@
 #ifndef CKW_PROTOTYPE_INCLUDE_CKW_TENSORTILESAMPLER_H
 #define CKW_PROTOTYPE_INCLUDE_CKW_TENSORTILESAMPLER_H
 
-#include "ckw/Types.h"
+#include "ckw/types/TensorSamplerTypes.h"
 #include <functional>
 
 namespace ckw
