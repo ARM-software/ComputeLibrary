@@ -37,7 +37,7 @@ print("DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated. Link 
 VERSION = "v0.0-unreleased"
 LIBRARY_VERSION_MAJOR = 31
 LIBRARY_VERSION_MINOR =  0
-LIBRARY_VERSION_PATCH =  0
+LIBRARY_VERSION_PATCH =  1
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
