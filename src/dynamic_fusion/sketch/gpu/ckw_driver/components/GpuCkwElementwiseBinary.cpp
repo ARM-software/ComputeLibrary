@@ -23,14 +23,16 @@
  */
 #include "GpuCkwElementwiseBinary.h"
 
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "ckw/TensorTileSampler.h"
 #include "ckw/types/TensorSamplerTypes.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
 #include <string>
@@ -54,14 +56,20 @@ inline TensorTileSampler create_simple_sampler(GpuCkwScopedKernelWriter &writer,
     auto &gid_1 = writer->declare_tile("gid_1", ckw::DataType::Int32);
     auto &gid_2 = writer->declare_tile("gid_2", ckw::DataType::Int32);
 
-    auto &const_0 = writer->declare_tile("0", 0);
-
     writer->op_get_global_id(gid_0, 0);
     writer->op_get_global_id(gid_1, 1);
     writer->op_get_global_id(gid_2, 2);
 
-    sampler.x(gid_0);
-    sampler.y(gid_1);
+    auto &x_coord = writer->declare_tile("x_coord", ckw::DataType::Int32);
+    auto &y_coord = writer->declare_tile("y_coord", ckw::DataType::Int32);
+    auto &m0_t    = writer->declare_tile("m0", m0);
+    auto &n0_t    = writer->declare_tile("n0", n0);
+    writer->op_binary_expression(x_coord, gid_0, ckw::BinaryOp::Mul, n0_t);
+    writer->op_binary_expression(y_coord, gid_1, ckw::BinaryOp::Mul, m0_t);
+
+    sampler.x(x_coord);
+    sampler.y(y_coord);
+    auto &const_0 = writer->declare_tile("0", 0);
     sampler.z(const_0); // 3rd dimension collapsed with 2nd dimension
     sampler.b(gid_2);
 
@@ -99,9 +107,9 @@ void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_gr
     const unsigned int n0          = root_window.x().step();
     const unsigned int m0          = root_window.y().step();
 
-    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, "lhs");
-    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, "rhs");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, TensorStorageType::ClBufferUint8Ptr, "lhs");
+    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, TensorStorageType::ClBufferUint8Ptr, "rhs");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     // Load the LHS and RHS tiles and prepare the tensor sampler.
     load_lhs_rhs_tiles_and_prepare_sampler(writer, lhs, rhs, m0, n0, create_simple_sampler);
@@ -131,10 +139,9 @@ Window GpuCkwElementwiseBinary::get_window() const
     // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) unchanged
     // This is in line with the collapsing convention used by operators like Conv2d
     output_shape.collapse(2U, 1U);
-    // constexpr unsigned int vector_size_byte_opencl = 16;
-    // const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
-    const unsigned int num_elems_processed_per_iteration = 1U; // Hard-coded for now
-    Window             win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
+    constexpr unsigned int vector_size_byte_opencl           = 16;
+    const unsigned int     num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
+    Window                 win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 
     return win;
 }

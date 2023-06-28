@@ -30,10 +30,16 @@
 namespace ckw
 {
 
+Kernel::Kernel(GpuTargetLanguage language)
+    : Kernel{"unnamed", language}
+{
+}
+
 Kernel::Kernel(const char *name, GpuTargetLanguage language)
     : _name(name), _kernel(std::make_unique<prototype::GpuKernelWriterDataHolder>(language)), _operands{}, _tensor_id_operands{}
 {
 }
+
 
 Kernel::~Kernel()
 {
@@ -44,6 +50,10 @@ const std::string &Kernel::name() const
     return _name;
 }
 
+void Kernel::name(const std::string& name)
+{
+    _name = name;
+}
 std::vector<KernelArgument> Kernel::arguments() const
 {
     std::vector<KernelArgument> arguments;

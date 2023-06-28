@@ -28,6 +28,8 @@
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/IGpuKernelWriter.h"
 
+#include "ckw/Kernel.h"
+
 #include <map>
 #include <string>
 
@@ -66,11 +68,12 @@ public:
     std::string get_config_id() override;
     /** Generate execution window */
     Window get_window() const override;
-    /** Get the kernel argument lists of the kernel*/
-    std::map<ITensorInfo::Id, GpuKernelArgument> get_tensors() override;
+    /** Get the flat list of arguments of the kernel*/
+    GpuKernelArgumentList get_kernel_arguments() override;
 
 private:
     GpuKernelComponentGroup _components{};
+    ckw::Kernel             _kernel;
 };
 
 } // namespace dynamic_fusion

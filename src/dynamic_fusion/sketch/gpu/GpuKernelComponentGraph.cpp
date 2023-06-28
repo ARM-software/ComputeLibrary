@@ -44,14 +44,14 @@ std::vector<DependencyGraph::TensorId> GpuKernelComponentGraph::get_tensor_ids(c
     return tensor_ids;
 }
 
-GpuKernelComponentGraph::GpuKernelComponentGraph(GpuComponentServices *services)
-    : _services{ services }, _components{}, _tensors{}, _dependency_graph{}
+GpuKernelComponentGraph::GpuKernelComponentGraph(GpuWorkloadContext *context, GpuComponentServices *services)
+    : _context{ context }, _services{ services }, _components{}, _tensors{}, _dependency_graph{}
 {
 }
 
 GpuKernelComponentStream GpuKernelComponentGraph::fuse(const MemoryDescriptorMap &mem_map) const
 {
-    GpuKernelComponentStream stream{ _services, mem_map };
+    GpuKernelComponentStream stream{ _context, _services, mem_map };
     const auto               op_seq = _dependency_graph.build_operators_sequence();
 
     stream.new_component_group();

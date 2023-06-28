@@ -24,6 +24,7 @@
 #include "GpuCkwStore.h"
 
 #include "arm_compute/core/Error.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
@@ -43,8 +44,8 @@ GpuCkwStore::GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensor
 }
 void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
 {
-    auto src = vtable.declare_variable(comp_group, writer, _src, "src");
-    auto dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+    auto src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
+    auto dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     auto       &src_tile   = src->tile();
     const auto &sampler    = src->tile_sampler();

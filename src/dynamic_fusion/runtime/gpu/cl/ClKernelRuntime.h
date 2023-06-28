@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,8 @@
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
 
+#include <vector>
+
 namespace arm_compute
 {
 namespace experimental
@@ -57,6 +59,7 @@ public:
     virtual void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     /** Set a kernel tensor argument
      *
      * @param[in,out] idx       Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
@@ -66,9 +69,19 @@ private:
      * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
      */
     inline void add_tensor_argument(unsigned int &idx, const GpuKernelArgumentInfo &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images);
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+    /** Set a kernel argument as part of a tensor
+     *
+     * @param[in,out] idx       Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     arg       Kernel argument binding, as part of @p tensor
+     * @param[in]     tensor    Tensor of which the kernel argument @p arg is a part of
+     * @param[out]    cl_images Extra cl images created from the tensor (will need to be retained until the kernel is enqueued)
+     */
+    inline void add_kernel_argument(unsigned int &idx, const GpuKernelArgumentBinding &arg, const ICLTensor *tensor, std::vector<cl::Image2D> &cl_images);
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 private:
-    GpuKernelArgumentList _arguments{}; /** All kernel arguments required by the runtime */
+    GpuKernelArgumentList _arguments{};
 };
 
 } // namespace dynamic_fusion

@@ -43,6 +43,9 @@ def get_list_flags( filename, arch):
     flags.append("-DARM_COMPUTE_OPENCL_ENABLED")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
+    if "ckw_driver" in filename:
+        flags.append("-DACL_INTERNAL_TEST_CKW_IN_DF")
+
     return flags
 
 def filter_files( list_files ):

@@ -50,6 +50,11 @@ class Kernel
 public:
     /** Constructor
      *
+     * @param[in] language The programming language to write the kernel.
+     */
+    Kernel(GpuTargetLanguage language);
+    /** Constructor
+     *
      * @param[in] name     The name of the kernel function.
      * @param[in] language The programming language to write the kernel.
      */
@@ -60,6 +65,12 @@ public:
 
     /** Get the name of the kernel function. */
     const std::string &name() const;
+
+    /** Set the name of the kernel function.
+     *
+     * @param[in] name     The name of the kernel function.
+     */
+    void name(const std::string &name);
 
     /** Get the list of kernel arguments. */
     ::std::vector<KernelArgument> arguments() const;

@@ -24,8 +24,8 @@
 #ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE
 
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 #include "arm_compute/core/ITensorInfo.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 
 #include <map>
 
@@ -37,6 +37,7 @@ namespace dynamic_fusion
 {
 class GpuKernelComponentGroup;
 class GpuCkwScopedKernelWriter;
+enum class TensorStorageType;
 
 /** A table of all the variables used in the kernel.
  *
@@ -52,11 +53,13 @@ public:
      * @param[in] comp_group Component group the tensor belongs to
      * @param[in] writer     Compute Kernel Writer
      * @param[in] tensor     Tensor info with which the new variable is associated
+     * @param[in] storage    Tensor storage type associated with the tensor
      * @param[in] alias      Alias for the variable. Will be used as part of the variable name
      *
      * @return GpuCkwComponentArgument*
      */
-    GpuCkwComponentArgument *declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, const std::string &alias = "unnamed");
+    GpuCkwComponentArgument *declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, TensorStorageType storage,
+                                              const std::string &alias = "unnamed");
 
 private:
     std::map<ITensorInfo::Id, GpuCkwComponentArgument> _vars{};

@@ -26,13 +26,10 @@
 
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadContextImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGraph.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorGroup.h"
-
-#include <memory>
-#include <vector>
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadContextImpl.h"
 
 namespace arm_compute
 {
@@ -52,9 +49,8 @@ public:
         Context *context)
         : _context{ context },
           _comp_services{},
-          _component_graph{ &_comp_services },
-          _operator_group{},
-          _managed_tensor_info_list{ std::vector<std::unique_ptr<TensorInfo>>() }
+          _component_graph{ _context, &_comp_services },
+          _operator_group{}
     {
     }
     /** Prevent instances of this class from being copy constructed */
@@ -90,10 +86,6 @@ public:
     {
         return _operator_group;
     }
-    ITensorInfo::Id allocate_new_tensor_id()
-    {
-        return ++_next_id;
-    }
     /** Generate @ref GpuWorkloadSourceCode from the workload sketch
      * @note The sketch must be valid. Any error encountered during the building of the code will be thrown.
      *
@@ -110,16 +102,8 @@ public:
      */
     ITensorInfo *create_virtual_tensor()
     {
-        auto uptr = std::make_unique<TensorInfo>();
-        _context->implementation().register_virtual_tensor(*uptr);
-        _managed_tensor_info_list.emplace_back(std::move(uptr));
-        return _managed_tensor_info_list.back().get();
+        return _context->implementation().create_virtual_tensor();
     }
-    /** Create an auxiliary (see @ref MemoryType) tensor info and save it
-     *
-     * @return ITensorInfo*  The created auxiliary tensor info object pointer
-     */
-
     /** Create an auxiliary (see @ref MemoryType) tensor info and save it
      *
      * @param[in] tensor_info @ref ITensorInfo to copy from
@@ -128,19 +112,19 @@ public:
      */
     ITensorInfo *create_auxiliary_tensor(const ITensorInfo &tensor_info)
     {
-        auto uptr = std::make_unique<TensorInfo>(tensor_info);
-        _context->implementation().register_aux_tensor(*uptr, AuxMemoryInfo{ uptr->total_size() });
-        _managed_tensor_info_list.emplace_back(std::move(uptr));
-        return _managed_tensor_info_list.back().get();
+        return _context->implementation().create_auxiliary_tensor(tensor_info);
+    }
+
+    ITensorInfo *get_tensor_info(ITensorInfo::Id id)
+    {
+        return _context->implementation().get_tensor_info(id);
     }
 
 private:
-    Context                                 *_context;
-    GpuComponentServices                     _comp_services;
-    GpuKernelComponentGraph                  _component_graph;
-    GpuOperatorGroup                         _operator_group;
-    ITensorInfo::Id                          _next_id{ ITensorInfo::invalid_tensor_id };
-    std::vector<std::unique_ptr<TensorInfo>> _managed_tensor_info_list;
+    Context                *_context;
+    GpuComponentServices    _comp_services;
+    GpuKernelComponentGraph _component_graph;
+    GpuOperatorGroup        _operator_group;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

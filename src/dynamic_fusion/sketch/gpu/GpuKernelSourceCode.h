@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE
 
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Window.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 #include <map>
+#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#include <deque>
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 #include <string>
 
 namespace arm_compute
@@ -38,7 +42,11 @@ namespace experimental
 namespace dynamic_fusion
 {
 /** The argument list of a @ref GpuKernelSourceCode */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 using GpuKernelArgumentList = std::map<ITensorInfo::Id, GpuKernelArgument>;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+using GpuKernelArgumentList = std::deque<GpuKernelArgumentBinding>;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 /** Container of kernel code to be compiled and run in a @ref GpuUnitWorkload
  */
@@ -123,4 +131,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE */
+#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELSOURCECODE */

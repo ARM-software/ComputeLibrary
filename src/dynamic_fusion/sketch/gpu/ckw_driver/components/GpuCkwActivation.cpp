@@ -23,14 +23,15 @@
  */
 #include "GpuCkwActivation.h"
 
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "ckw/TensorTileSampler.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
 #include <string>
@@ -84,8 +85,8 @@ inline TensorTileSampler create_sampler(GpuCkwScopedKernelWriter &writer, int32_
 } // namespace
 
 GpuCkwActivation::GpuCkwActivation(ComponentId                      id,
-                                                 const ArgumentPack<ITensorInfo> &tensors,
-                                                 const Attributes                &attributes)
+                                   const ArgumentPack<ITensorInfo> &tensors,
+                                   const Attributes                &attributes)
     : IGpuCkwComponentDriver{ id, tensors },
       _src{},
       _dst{},
@@ -102,8 +103,8 @@ void GpuCkwActivation::write_component_code(const ComponentGroup &comp_group, Gp
     const unsigned int n0          = root_window.x().step();
     const unsigned int m0          = root_window.y().step();
 
-    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, "src");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     load_src_dst_tiles_and_prepare_sampler(writer, src, dst, m0, n0, create_sampler);
 
@@ -111,14 +112,14 @@ void GpuCkwActivation::write_component_code(const ComponentGroup &comp_group, Gp
     auto &dst_tile = dst->tile();
 
     // Constants
-    const auto &constant_minus_1     = writer->declare_tile("minus_1", -1);
-    const auto &constant_pos_1       = writer->declare_tile("one", 1);
-    const auto &constant_zero        = writer->declare_tile("zero", 0);
-    const auto &constant_A           = writer->declare_tile("A_VAL", _attributes.a());
-    const auto &constant_B           = writer->declare_tile("B_VAL", _attributes.b());
+    const auto &constant_minus_1 = writer->declare_tile("minus_1", -1);
+    const auto &constant_pos_1   = writer->declare_tile("one", 1);
+    const auto &constant_zero    = writer->declare_tile("zero", 0);
+    const auto &constant_A       = writer->declare_tile("A_VAL", _attributes.a());
+    const auto &constant_B       = writer->declare_tile("B_VAL", _attributes.b());
 
     // Perform the operation.
-    switch (_attributes.activation())
+    switch(_attributes.activation())
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
         {
@@ -178,9 +179,9 @@ Window GpuCkwActivation::get_window() const
     // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) unchanged
     // This is in line with the collapsing convention used by operators like Conv2d
     output_shape.collapse(2U, 1U);
-    constexpr unsigned int vector_size_byte_opencl = 16;
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
-    Window             win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
+    constexpr unsigned int vector_size_byte_opencl           = 16;
+    const unsigned int     num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
+    Window                 win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 
     return win;
 }

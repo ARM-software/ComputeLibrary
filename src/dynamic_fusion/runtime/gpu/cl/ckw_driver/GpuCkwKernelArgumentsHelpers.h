@@ -27,9 +27,13 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 
-#include "ckw/TensorInfo.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 
 namespace arm_compute
+{
+namespace experimental
+{
+namespace dynamic_fusion
 {
 /** Select a Compute Kernel Writer tensor component from a tensor and add to the kernel's arguments at the specified index idx.
  *
@@ -38,7 +42,7 @@ namespace arm_compute
  * @param[in]     tensor    Tensor from which to access the tensor component.
  * @param[in]     component Tensor component to select such as tensor dimensions, strides, etc.
  */
-void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, ICLTensor *tensor, ckw::TensorComponentType component);
+void cl_add_tensor_component_argument(cl::Kernel &kernel, unsigned int &idx, const ICLTensor *tensor, TensorComponentType component);
 
 /** Add an OpenCL buffer object to the kernel's arguments at the specified index @p idx.
  *
@@ -56,6 +60,8 @@ void cl_add_buffer_argument(cl::Kernel &kernel, unsigned int &idx, const cl::Buf
  */
 void cl_add_texture_argument(cl::Kernel &kernel, unsigned int &idx, const cl::Image &image);
 
+} // namespace dynamic_fusion
+} // namespace experimental
 } // namespace arm_compute
 
 #endif /* ACL_SRC_DYNAMIC_FUSION_RUNTIME_GPU_CL_CKW_DRIVER_GPUCKWKERNELARGUMENTSHELPERS */

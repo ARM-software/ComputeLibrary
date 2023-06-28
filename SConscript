@@ -564,7 +564,14 @@ if env['fixed_format_kernels']:
 # Experimental files
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
-    lib_files += filelist['experimental']['dynamic_fusion']
+    lib_files += filelist['experimental']['dynamic_fusion']['common']
+    lib_files += filelist['experimental']['dynamic_fusion']['template_writer']
+
+if "ACL_INTERNAL_TEST_CKW_IN_DF" in env["extra_cxx_flags"]:
+    if not env["experimental_dynamic_fusion"]:
+        print("To use ACL_INTERNAL_TEST_CKW_IN_DF experimental_dynamic_fusion must be set to 1")
+        Exit(1)
+    lib_files += filelist['experimental']['dynamic_fusion']['ckw_driver']
 
 # Logging files
 if env["logging"]:

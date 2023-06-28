@@ -104,9 +104,11 @@ public:
     {
         return _properties;
     }
-    /** Get template writer for the component */
-    virtual const IGpuTemplateComponentWriter *template_writer() const = 0;
-    /** Get compute kernel writer driver for the component */
+    /** Get writer for the component */
+    virtual const IGpuTemplateComponentWriter *template_writer() const
+    {
+        return nullptr;
+    }
     virtual const IGpuCkwComponentDriver *ckw_component_driver() const
     {
         return nullptr;

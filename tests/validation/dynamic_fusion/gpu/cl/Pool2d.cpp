@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -132,7 +133,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, DynamicFusionGpuPool2dFixture<float>, framework
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunSpecial, DFSpecialGpuPool2dFixture<float>, framework::DatasetMode::ALL, combine(datasets::PoolingLayerDatasetSpecialDynamicFusion(),
-                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
+                                                                                                          framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -231,3 +232,5 @@ TEST_SUITE_END() // CL
 }
 }
 }
+
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF

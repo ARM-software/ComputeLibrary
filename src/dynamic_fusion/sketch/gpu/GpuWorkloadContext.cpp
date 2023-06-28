@@ -32,9 +32,8 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-
 GpuWorkloadContext::GpuWorkloadContext(CLCompileContext *cl_compile_ctx)
-    : _impl { std::make_unique<Impl>(GpuLanguage::OpenCL, cl_compile_ctx) }
+    : _impl{ std::make_unique<Impl>(GpuLanguage::OpenCL, cl_compile_ctx) }
 {
 }
 
@@ -75,8 +74,7 @@ const GpuWorkloadContext::Impl &GpuWorkloadContext::implementation() const
 }
 
 GpuWorkloadContext::Impl::Impl(GpuLanguage gpu_language, CLCompileContext *cl_compile_ctx)
-    : _gpu_language(gpu_language), _cl_compile_ctx(cl_compile_ctx),
-      _next_tensor_id(1), _mem_map()
+    : _gpu_language(gpu_language), _cl_compile_ctx(cl_compile_ctx), _next_tensor_id(1), _mem_map(), _managed_tensor_info()
 {
 }
 
@@ -103,26 +101,39 @@ void GpuWorkloadContext::Impl::register_user_tensor(ITensorInfo &tensor_info)
 
     tensor_info.set_id(tensor_id);
     _mem_map[tensor_id] = MemoryDescriptor{ MemoryType::User };
+    // Save a *copy* of the user tensor info in workload context for future reference
+    // Note that this means if the user modifies the @p tensor_info, the change will not be reflected in the context
+    _managed_tensor_info.emplace(tensor_info.id(), std::make_unique<TensorInfo>(tensor_info));
 }
 
-void GpuWorkloadContext::Impl::register_aux_tensor(ITensorInfo &tensor_info, const AuxMemoryInfo &mem_info)
+ITensorInfo *GpuWorkloadContext::Impl::create_virtual_tensor()
 {
-    ARM_COMPUTE_ERROR_ON(tensor_info.has_valid_id());
-
-    const auto tensor_id = next_tensor_id();
-
-    tensor_info.set_id(tensor_id);
-    _mem_map[tensor_id] = MemoryDescriptor{ MemoryType::Auxiliary, mem_info };
-}
-
-void GpuWorkloadContext::Impl::register_virtual_tensor(ITensorInfo &tensor_info)
-{
-    ARM_COMPUTE_ERROR_ON(tensor_info.has_valid_id());
-
-    const auto tensor_id = -next_tensor_id();
-
-    tensor_info.set_id(tensor_id);
+    auto       tensor_info = std::make_unique<TensorInfo>();
+    const auto tensor_id   = -next_tensor_id();
+    tensor_info->set_id(tensor_id);
     _mem_map[tensor_id] = MemoryDescriptor{ MemoryType::Virtual };
+    auto inserted       = _managed_tensor_info.emplace(tensor_info->id(), std::move(tensor_info));
+    return inserted.first->second.get();
+}
+
+ITensorInfo *GpuWorkloadContext::Impl::create_auxiliary_tensor(const ITensorInfo &itensor_info)
+{
+    auto       tensor_info = std::make_unique<TensorInfo>(itensor_info);
+    const auto tensor_id   = next_tensor_id();
+    tensor_info->set_id(tensor_id);
+    _mem_map[tensor_id] = MemoryDescriptor{ MemoryType::Auxiliary, AuxMemoryInfo{ tensor_info->total_size() } };
+    auto inserted       = _managed_tensor_info.emplace(tensor_info->id(), std::move(tensor_info));
+    return inserted.first->second.get();
+}
+
+ITensorInfo *GpuWorkloadContext::Impl::get_tensor_info(ITensorInfo::Id id)
+{
+    return _managed_tensor_info.at(id).get();
+}
+
+const ITensorInfo *GpuWorkloadContext::Impl::get_tensor_info(ITensorInfo::Id id) const
+{
+    return _managed_tensor_info.at(id).get();
 }
 
 ITensorInfo::Id GpuWorkloadContext::Impl::next_tensor_id()

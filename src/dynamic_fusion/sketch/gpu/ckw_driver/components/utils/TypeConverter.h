@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "ckw/TensorInfo.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 
 namespace arm_compute
 {
@@ -97,6 +98,103 @@ inline ckw::TensorInfo to_ckw(const ITensorInfo &tensor_info)
         to_ckw(tensor_info.data_layout()),
         tensor_info.id()
     };
+}
+
+inline TensorComponentType from_ckw(const ckw::TensorComponentType &component)
+{
+    switch(component)
+    {
+        case ckw::TensorComponentType::OffsetFirstElement:
+            return TensorComponentType::OffsetFirstElement;
+            break;
+        case ckw::TensorComponentType::Stride0:
+            return TensorComponentType::Stride0;
+            break;
+        case ckw::TensorComponentType::Stride1:
+            return TensorComponentType::Stride1;
+            break;
+        case ckw::TensorComponentType::Stride2:
+            return TensorComponentType::Stride2;
+            break;
+        case ckw::TensorComponentType::Stride3:
+            return TensorComponentType::Stride3;
+            break;
+        case ckw::TensorComponentType::Stride4:
+            return TensorComponentType::Stride4;
+            break;
+        case ckw::TensorComponentType::Dim0:
+            return TensorComponentType::Dim0;
+            break;
+        case ckw::TensorComponentType::Dim1:
+            return TensorComponentType::Dim1;
+            break;
+        case ckw::TensorComponentType::Dim2:
+            return TensorComponentType::Dim2;
+            break;
+        case ckw::TensorComponentType::Dim3:
+            return TensorComponentType::Dim3;
+            break;
+        case ckw::TensorComponentType::Dim4:
+            return TensorComponentType::Dim4;
+            break;
+        case ckw::TensorComponentType::Dim1xDim2:
+            return TensorComponentType::Dim1xDim2;
+            break;
+        case ckw::TensorComponentType::Dim2xDim3:
+            return TensorComponentType::Dim2xDim3;
+            break;
+        case ckw::TensorComponentType::Dim1xDim2xDim3:
+            return TensorComponentType::Dim1xDim2xDim3;
+            break;
+        case ckw::TensorComponentType::Unknown:
+            return TensorComponentType::Unknown;
+        default:
+            ARM_COMPUTE_ERROR("Unknown CKW tensor component");
+            return TensorComponentType::Unknown;
+    }
+}
+
+inline ckw::TensorStorageType to_ckw(const TensorStorageType &storage)
+{
+    switch(storage)
+    {
+        case TensorStorageType::ClBufferUint8Ptr:
+            return ckw::TensorStorageType::BufferUint8Ptr;
+            break;
+        case TensorStorageType::ClImage2dReadOnly:
+            return ckw::TensorStorageType::Texture2dReadOnly;
+            break;
+        case TensorStorageType::ClImage2dWriteOnly:
+            return ckw::TensorStorageType::Texture2dWriteOnly;
+            break;
+        case TensorStorageType::Unknown:
+            return ckw::TensorStorageType::Unknown;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unknown tensor storage type");
+            return ckw::TensorStorageType::Unknown;
+    }
+}
+inline TensorStorageType from_ckw(const ckw::TensorStorageType &storage)
+{
+    switch(storage)
+    {
+        case ckw::TensorStorageType::BufferUint8Ptr:
+            return TensorStorageType::ClBufferUint8Ptr;
+            break;
+        case ckw::TensorStorageType::Texture2dReadOnly:
+            return TensorStorageType::ClImage2dReadOnly;
+            break;
+        case ckw::TensorStorageType::Texture2dWriteOnly:
+            return TensorStorageType::ClImage2dWriteOnly;
+            break;
+        case ckw::TensorStorageType::Unknown:
+            return TensorStorageType::Unknown;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unknown CKW tensor storage type");
+            return TensorStorageType::Unknown;
+    }
 }
 } // namespace dynamic_fusion
 } // namespace experimental
