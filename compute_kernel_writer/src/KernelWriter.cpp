@@ -139,7 +139,7 @@ void KernelWriter::register_operand(OperandBase *operand, bool declaring)
 
 void KernelWriter::op_load(TileOperand &tile, TensorOperand &tensor, const TensorTileSampler &sampler)
 {
-    auto impl_tensor = prototype::TensorOperand(
+    prototype::TensorOperand impl_tensor(
         tensor.name(),
         prototype::GpuSampler{
             sampler.format(),
@@ -160,7 +160,7 @@ void KernelWriter::op_load(TileOperand &tile, TensorOperand &tensor, const Tenso
 
 void KernelWriter::op_store(TensorOperand &tensor, const TileOperand &tile, const TensorTileSampler &sampler)
 {
-    auto impl_tensor = prototype::TensorOperand(
+    prototype::TensorOperand impl_tensor(
         tensor.name(),
         prototype::GpuSampler{
             sampler.format(),

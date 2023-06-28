@@ -112,6 +112,7 @@ inline std::string data_type_to_cl_type(DataType dt)
             return "bool";
         default:
             assert(false);
+            return "";
     }
 }
 
@@ -143,6 +144,7 @@ inline int32_t width_to_cl_vector_size(int32_t width)
             return 16;
         default:
             assert(false);
+            return 0;
     }
 }
 
@@ -410,8 +412,9 @@ private:
             case 15:
                 return "F";
             default:
-            std::cout << "Unsupported hexadecimal value" << std::endl;
-            assert(false);
+                std::cout << "Unsupported hexadecimal value" << std::endl;
+                assert(false);
+                return "";
         }
     }
 };
@@ -766,6 +769,7 @@ public:
             default:
                 std::cout << "Unsupported storage" << std::endl;
                 assert(false);
+                return "";
         }
     };
 
@@ -1474,9 +1478,9 @@ inline std::string to_string(AssignmentOp op)
             return "-=";
         case AssignmentOp::Increment:
             return "+=";
-
         default:
             assert(false);
+            return "";
     }
 }
 
@@ -1512,6 +1516,7 @@ inline std::string to_string(BinaryOp op)
             return "!";
         default:
             assert(false);
+            return "";
     }
 }
 
@@ -1541,6 +1546,7 @@ inline std::string binary_op_string(BinaryOp op)
             return "lte";
         default:
             assert(false);
+            return "";
     }
 }
 
@@ -1673,6 +1679,8 @@ struct GpuSampler
 
 inline GpuSampler create_simple_sampler(const TensorInfo* tensor_info_id, GpuSampler sampler, int32_t step_x, int32_t step_y, int32_t step_z)
 {
+    CKW_UNUSED(step_x, step_y, step_z);
+
     auto tensor = tensor_info_id->shape;
 
     GpuSampler dst_sampler;
@@ -2020,6 +2028,7 @@ private:
             return TensorComponent::OffsetFirstElement;
             default:
             assert(false);
+            return TensorComponent::Unknown;
         }
     }
 
@@ -2123,7 +2132,7 @@ inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::strin
     code += "}\n";
 
     return code;
-};
+}
 
 /**
  * @brief This class is responsible to map a N-Tensor to a 3d tensor. The mapper needs the GpuSampler to know
@@ -2148,6 +2157,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2163,6 +2173,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2178,6 +2189,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2192,6 +2204,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2207,6 +2220,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2221,6 +2235,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2236,6 +2251,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2252,6 +2268,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2268,6 +2285,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2283,6 +2301,7 @@ public:
             default:
                 std::cout << "Unsupported tensor format" << std::endl;
                 assert(false);
+                return "";
         }
     }
 
@@ -2783,6 +2802,7 @@ private:
             default:
             std::cout << "Unsupported GpuLoadStoreType" << std::endl;
             assert(false);
+            return "";
         }
     }
 
@@ -3002,6 +3022,7 @@ private:
             assert(false);
             std::cout << "Unsupported GpuLoadStoreType" << std::endl;
             assert(false);
+            return "";
         }
     }
 
@@ -3027,6 +3048,7 @@ private:
             default:
             std::cout << "Unsupported address_mode_coord" << std::endl;
             assert(false);
+            return "";
         }
     }
 
@@ -3085,6 +3107,7 @@ public:
             default:
                 std::cout << "Unsupported Gpu tensor storage" << std::endl;
                 assert(false);
+                return nullptr;
         }
     }
 };
@@ -3470,6 +3493,7 @@ public:
         const int32_t dst_h = var->format().h;
 
         // It must be a scalar variable
+        CKW_UNUSED(dst_w, dst_h);
         assert(dst_w == 1);
         assert(dst_h == 1);
 
@@ -3705,6 +3729,7 @@ public:
             default:
                 std::cout << "Unsupported Gpu programming language" << std::endl;
                 assert(false);
+                return nullptr;
         }
     }
 };
