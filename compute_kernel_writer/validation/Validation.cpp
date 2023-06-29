@@ -88,7 +88,7 @@ int32_t main()
     }
     else
     {
-        std::runtime_error("One or more tests failed");
+        throw std::runtime_error("One or more tests failed");
     }
 
     return 0;

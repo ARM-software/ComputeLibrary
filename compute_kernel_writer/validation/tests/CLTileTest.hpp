@@ -53,7 +53,7 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        const TileInfo info(dt, width, height);
+        const TileInfo info(dt, height, width);
 
         int32_t test_idx = 0;
         for(const auto &tile_name : _tile_name)
@@ -108,7 +108,7 @@ public:
         {
             const int32_t width  = _width[i];
             const int32_t height = _height[i];
-            const TileInfo info(DataType::Fp32, width, height);
+            const TileInfo info(DataType::Fp32, height, width);
             const CLTile tile("src", info);
             const auto vars = tile.all();
             const int32_t num_vars = vars.size();
@@ -152,7 +152,7 @@ public:
 
     bool run() override
     {
-        const TileInfo info(dt, width, height);
+        const TileInfo info(dt, height, width);
         const CLTile tile(tile_name, info);
 
         VALIDATE_ON_MSG(_x_coord.size() == _y_coord.size(), "The number of x-coords and y-coords does not match");
@@ -231,7 +231,7 @@ public:
 
             const int32_t x_coord_clamped = clamp(x_coord, static_cast<int32_t>(0), width - 1);
 
-            const TileInfo info(dt, width, height);
+            const TileInfo info(dt, height, width);
             const CLTile tile(tile_name, info);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
@@ -301,7 +301,7 @@ public:
 
             const int32_t y_coord_clamped = clamp(y_coord, static_cast<int32_t>(0), height - 1);
 
-            const TileInfo info(dt, width, height);
+            const TileInfo info(dt, height, width);
             const CLTile tile(tile_name, info);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
@@ -356,7 +356,7 @@ public:
         int32_t test_idx = 0;
         for(const auto &height : _heights)
         {
-            const TileInfo info(dt, width, height);
+            const TileInfo info(dt, height, width);
             const CLTile tile(tile_name, info);
 
             for(int32_t row = 0; row < height; ++row)
@@ -415,7 +415,7 @@ public:
         {
             for(const auto &subwidth : _subwidths)
             {
-                const TileInfo info(dt, width, height);
+                const TileInfo info(dt, height, width);
                 const CLTile tile(tile_name, info);
 
                 for(int32_t row = 0; row < height; ++row)
