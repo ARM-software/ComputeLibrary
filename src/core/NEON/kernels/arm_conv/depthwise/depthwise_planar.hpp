@@ -153,7 +153,7 @@ class PlanarStrategy : public IPlanarStrategy<OutputStage>
   {
     return interleaves::PackingArguments(
       m_kernel_rows, m_kernel_cols, sizeof(TWeight),
-      false, sizeof(TAccum),  // Don't pack the bias
+      false, sizeof(TAccum), true,  // Don't pack the bias
       m_vl_type, sizeof(TAccum), 1,  // Accumulator depth of 1 TODO
       [this] (unsigned int idx, unsigned int &x, unsigned int &y) -> bool
       { return this->get_kernel_packing_point(idx, x, y); }
@@ -276,7 +276,7 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
     depthwise_depthfirst::stash_bias(this->m_os, biases);
   }
 
-  size_t get_working_size(unsigned int n_threads, unsigned int) const override
+  size_t get_working_size(unsigned int n_threads) const override
   {
     return this->get_working_size_per_thread() * n_threads;
   }

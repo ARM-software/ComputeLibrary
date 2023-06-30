@@ -217,7 +217,7 @@ class InputBufferElement
   template <typename StratType, typename OutputStage>
   static size_t get_element_size(const WorkspaceArgs<StratType, OutputStage> &args)
   {
-    return sizeof(T) * args.depthwise_args.input_channels;
+    return sizeof(T) * args.depthwise_args.input_channels * args.depthwise_args.channel_multiplier;
   }
 
   template <class WorkspaceType, typename StratType, typename OutputStage>
@@ -275,6 +275,36 @@ class OutputArrayElement
   {
     return sizeof(T) * args.depthwise_args.input_channels * args.depthwise_args.channel_multiplier;
   }
+};
+
+
+/* Intermediate array to store results of premultiplication.
+ * Used as input to the kernel instead of the original input array.
+ */
+template <typename T>
+class IntermediateBufferElement
+{
+public:
+    struct Workspace
+    {
+        T *intermediate_buffer;
+    };
+
+    template <typename StratType, typename OutputStage>
+    static size_t get_element_size(const WorkspaceArgs<StratType, OutputStage> &args)
+    {
+      auto cols = args.depthwise_args.input_cols + args.depthwise_args.kernel_cols;
+      auto rows = args.strategy->get_input_rows() + args.depthwise_args.kernel_rows;
+      auto channels = args.depthwise_args.input_channels * args.depthwise_args.channel_multiplier;
+      return sizeof(T) * cols * rows * channels;
+    }
+
+    template <class WorkspaceType, typename StratType, typename OutputStage>
+    static void *initialise(WorkspaceType *ws, void *buffer, const WorkspaceArgs<StratType, OutputStage> &args)
+    {
+      ws->intermediate_buffer = reinterpret_cast<T*>(buffer);
+      return reinterpret_cast<char *>(buffer) + get_element_size(args);
+    }
 };
 
 

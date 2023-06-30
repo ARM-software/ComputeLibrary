@@ -28,6 +28,7 @@
 #include "depthwise_depthfirst.hpp"
 #include "depthwise_depthfirst_generic.hpp"
 #include "depthwise_depthfirst_multiplier.hpp"
+#include "depthwise_planar.hpp"
 
 #include "depthwise_implementation_constraints.hpp"
 
@@ -35,14 +36,14 @@
 #if defined(__ARM_FP16_ARGS)
 
 #if defined(__aarch64__)
-#if defined(ARM_COMPUTE_ENABLE_SVE)
 #if defined(ARM_COMPUTE_ENABLE_SME2)
 #include "kernels/sme2_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/sme2_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
 #include "kernels/sme2_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst.hpp"
 #include "kernels/sme2_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst.hpp"
-#endif // defined(ARM_COMPUTE_ENABLE_SME2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "kernels/sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst.hpp"
 #include "kernels/sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst.hpp"
@@ -163,12 +164,11 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
       return new DepthwiseDepthfirst<__fp16>(strat, args);
     },
   },
-#endif // defined(ARM_COMPUTE_ENABLE_SME2)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
   {
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst",
     constraint(is_supported<sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_sve),
     cycle_estimate<sve_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -180,7 +180,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst",
     constraint(is_supported<sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_sve),
     cycle_estimate<sve_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -192,7 +191,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
-              has_no_channel_multiplier,
               cpu_has_sve),
     cycle_estimate<sve_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -204,7 +202,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_sve),
     cycle_estimate<sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -216,7 +213,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst",
     constraint(is_supported<sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_sve),
     cycle_estimate<sve_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -229,7 +225,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst",
     constraint(is_supported<a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_fp16),
     cycle_estimate<a64_fp16_nhwc_3x3_s1_output4x4_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -241,7 +236,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst",
     constraint(is_supported<a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_fp16),
     cycle_estimate<a64_fp16_nhwc_3x3_s1_output3x3_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -253,7 +247,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst",
     constraint(is_supported<a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_fp16),
     cycle_estimate<a64_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -265,7 +258,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst",
     constraint(is_supported<a64_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_fp16),
     cycle_estimate<a64_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -277,7 +269,6 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst",
     constraint(is_supported<a64_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
-               has_no_channel_multiplier,
                cpu_has_fp16),
     cycle_estimate<a64_fp16_nhwc_5x5_s1_output2x2_mla_depthfirst>,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
@@ -288,7 +279,7 @@ static const DepthwiseImplementation<__fp16, __fp16> depthwise_fp16_methods[] = 
   {
     DepthwiseMethod::DEPTHFIRST,
     "a64_fp16_nhwc_generic_output3x3_mla_depthfirst",
-    constraint(has_no_channel_multiplier, cpu_has_fp16),
+    constraint(cpu_has_fp16),
     not_preferred,
     [] (const DepthwiseArgs &args, const Nothing &) -> DepthwiseCommon<__fp16, __fp16, __fp16> * {
       auto kern = new a64_fp16_nhwc_generic_output9_mla_depthfirst(args.cpu_info);

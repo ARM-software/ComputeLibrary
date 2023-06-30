@@ -136,8 +136,8 @@ class PoolingDepthfirstGeneric : public DepthfirstDriver<TInput, TOutput>
   const OutputStage m_os;
 
   protected:
-  size_t get_working_size_per_thread(unsigned int) const override { return 0; }
-  void initialise_working_space(void *, unsigned int) const override { /* Nothing */ }
+  size_t get_working_size_per_thread() const override { return 0; }
+  void initialise_working_space(void *) const override { /* Nothing */ }
 
   /* Compute a portion of the output tensor with padding. */
   void compute_tile_padded(

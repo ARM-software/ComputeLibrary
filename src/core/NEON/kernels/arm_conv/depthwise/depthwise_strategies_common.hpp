@@ -49,6 +49,8 @@ class DepthfirstStrategyUntyped : public IDepthfirstStrategy
   virtual unsigned int get_n_output_points() const;
   virtual unsigned int get_n_kernel_points() const;
 
+  virtual bool uses_premultiply() const;
+
   // Get the number of VLs used in the accumulator, this defaults to 1.
   virtual unsigned int get_accumulator_depth_vl() const;
 
@@ -65,7 +67,7 @@ class DepthfirstStrategy : public DepthfirstStrategyUntyped
   {
     interleaves::PackingArguments packing_args(
       this->get_kernel_rows(), this->get_kernel_cols(), sizeof(TWeight),
-      true, sizeof(TAccum),
+      true, sizeof(TAccum), this->uses_premultiply(),
       this->get_vl_type(), sizeof(TAccum), this->get_accumulator_depth_vl(),
       [this] (unsigned int idx, unsigned int &x, unsigned int &y) -> bool
       { return this->get_kernel_packing_point(idx, x, y); }
@@ -81,7 +83,7 @@ class DepthfirstStrategy : public DepthfirstStrategyUntyped
   {
     interleaves::PackingArguments packing_args(
       this->get_kernel_rows(), this->get_kernel_cols(), sizeof(TWeight),
-      true, sizeof(TAccum),
+      true, sizeof(TAccum), this->uses_premultiply(),
       this->get_vl_type(), sizeof(TAccum), this->get_accumulator_depth_vl(),
       [this] (unsigned int idx, unsigned int &x, unsigned int &y) -> bool
       { return this->get_kernel_packing_point(idx, x, y); }

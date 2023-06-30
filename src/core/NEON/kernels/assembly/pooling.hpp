@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,11 +122,7 @@ public:
     PoolingCommon(PoolingCommon &) = delete;
     PoolingCommon &operator=(PoolingCommon &) = delete;
 
-    size_t get_working_size(unsigned int, unsigned int) const override = 0;
-    size_t get_working_size(unsigned int n_threads) const override
-    {
-        return this->get_working_size(n_threads, m_args.n_channels);
-    }
+    size_t get_working_size(unsigned int) const override = 0;
 
     // Execute pooling over the specified area of memory.
     void execute(

@@ -64,10 +64,10 @@ class DepthfirstDriver : public PoolingCommon<TInput, TOutput>
   std::unique_ptr<const IDepthfirstStrategy> m_strat;
 
   /* Compute the amount of working space required for a single thread. */
-  virtual size_t get_working_size_per_thread(unsigned int n_input_channels) const = 0;
+  virtual size_t get_working_size_per_thread() const = 0;
 
   /* Initialise the working space for a thread. */
-  virtual void initialise_working_space(void *, unsigned int n_input_channels) const = 0;
+  virtual void initialise_working_space(void *) const = 0;
 
   /* Compute a portion of the output tensor with padding. */
   virtual void compute_tile_padded(
@@ -148,8 +148,8 @@ class DepthfirstDriver : public PoolingCommon<TInput, TOutput>
   {
     // Get and initialise the working space for this thread.
     void *thread_working_space =
-      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread(n_channels);
-    this->initialise_working_space(thread_working_space, n_channels);
+      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread();
+    this->initialise_working_space(thread_working_space);
 
     // Construct convenient representations of the input/output tensors.
     TensorSpec<const TInput *> input_tensor(reinterpret_cast<const TInput *>(input), ld_input_row, ld_input_col);
@@ -289,14 +289,9 @@ class DepthfirstDriver : public PoolingCommon<TInput, TOutput>
   {
   }
 
-  size_t get_working_size(unsigned int n_threads) const override
+  size_t get_working_size(unsigned int n_threads) const override final
   {
-    return this->get_working_size(n_threads, this->m_args.n_channels);
-  }
-
-  size_t get_working_size(unsigned int n_threads, unsigned int n_channels) const override final
-  {
-    return n_threads * this->get_working_size_per_thread(n_channels);
+    return n_threads * this->get_working_size_per_thread();
   }
 };
 

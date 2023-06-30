@@ -337,6 +337,7 @@ cc_library_static {
         "src/core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp",
         "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic_quantized_dot_product.cpp",
+        "src/core/NEON/kernels/arm_conv/depthwise/premultiply.cpp",
         "src/core/NEON/kernels/arm_conv/pooling/kernels/cpp_nhwc_1x1_stride_any_depthfirst/generic.cpp",
         "src/core/NEON/kernels/arm_conv/pooling/pooling_fp16.cpp",
         "src/core/NEON/kernels/arm_conv/pooling/pooling_fp32.cpp",

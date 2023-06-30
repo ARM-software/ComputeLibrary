@@ -363,9 +363,9 @@ size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_storage_size() const
     return _kernel_asm->get_storage_size();
 }
 
-size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_working_size(unsigned int num_threads, unsigned int num_input_channels) const
+size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_working_size(unsigned int num_threads) const
 {
-    return _kernel_asm->get_working_size(num_threads, num_input_channels);
+    return _kernel_asm->get_working_size(num_threads);
 }
 
 bool CpuDepthwiseConv2dAssemblyWrapperKernel::is_configured() const

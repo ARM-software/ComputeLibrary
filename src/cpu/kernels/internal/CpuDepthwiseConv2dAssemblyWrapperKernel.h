@@ -98,12 +98,11 @@ public:
 
     /** Get size of the workspace needed by the assembly kernel.
      *
-     * @param[in] num_threads        Maximum number of threads that are going to be spawned.
-     * @param[in] num_input_channels Number of channels of the input tensor.
+     * @param[in] num_threads Maximum number of threads that are going to be spawned.
      *
      * @return size of workspace
      */
-    size_t get_working_size(unsigned int num_threads, unsigned int num_input_channels) const;
+    size_t get_working_size(unsigned int num_threads) const;
 
     /** Was the asm kernel successfully configured?
      *

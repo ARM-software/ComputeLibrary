@@ -1282,6 +1282,7 @@
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp",
               "src/core/NEON/kernels/arm_conv/depthwise/interleaves/generic_quantized_dot_product.cpp",
+              "src/core/NEON/kernels/arm_conv/depthwise/premultiply.cpp",
               "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.cpp"
               ],
               "fp16":["src/cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp"],
