@@ -35,6 +35,8 @@
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/ClCompileContext.h"
 
+#include "arm_compute/core/QuantizationInfo.h"
+
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -100,12 +102,15 @@ ClMatMulLowpNativeKernel::ClMatMulLowpNativeKernel()
 }
 Status ClMatMulLowpNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_matmul_kernel_info(matmul_kernel_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_input_shapes(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info));
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.activation() != ActivationFunction::IDENTITY && act_info.activation() != ActivationFunction::RELU
+                                     && act_info.activation() != ActivationFunction::LU_BOUNDED_RELU && act_info.activation() != ActivationFunction::BOUNDED_RELU),
+                                    "Activation Function specified is unsupported.");
 
     if(dst->total_size() != 0)
     {
@@ -169,9 +174,16 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     build_opts.add_option("-DRHS_OFFSET=" + support::cpp11::to_string(rqinfo.offset));
     build_opts.add_option("-DDST_OFFSET=" + support::cpp11::to_string(dqinfo.offset)); // Passed as positive (unlike the above two)
 
-    build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(act_info.a())));
-    build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(act_info.b())));
+    // Floating point boundaries are quantized prior to being passed as arguments.
+    // Note: We expect the input and output tensors to always adopt a per-tensor quantization approach
+    int a_val{};
+    int b_val{};
+    std::tie(b_val, a_val) = get_quantized_activation_min_max(act_info, dst->data_type(), dqinfo);
+
+    build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
+    build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DZERO_POINT=" + support::cpp11::to_string(dqinfo.offset));
 
     std::string kernel_name("mat_mul_native_quantized");
     kernel_name += matmul_kernel_info.adj_lhs ? "_t" : "_nt";

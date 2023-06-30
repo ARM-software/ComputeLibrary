@@ -69,30 +69,27 @@ using CLMatMulActivationAlphaBetaFixture = MatMulValidationWithActivationAlphaBe
 template <typename T>
 using CLQuantizedMatMulActivationFixture = QuantizedMatMulValidationWithActivationFixture<CLTensor, CLAccessor, CLMatMul, GpuMatMulSettings, T>;
 
-/* The main act functions matmul is expected to support */
+/* The main act functions matmul (float) is expected to support */
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH)
 });
 
+/* (Float datatype only) Larger activation functions dataset, used during some nightly tests. */
+const auto AllActivationsDataset = combine(datasets::ActivationFunctions(), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+// Alpha beta values should be integer values
+// This is for testing purposes with quantized datatypes and is not a limitation of the kernel.
+// To properly remove this restriction, dst_qinfo should be auto-initialised with consideration for alpha beta values
+// The main act functions quantized matmul kernels are expected to support
 const auto ActivationFunctionsQuantizedDataset = concat(concat(concat(
                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo()),
                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f))),
-                                                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f)));
-
-/* Larger activation functions dataset, used during some nightly tests. */
-const auto AllActivationsDataset = combine(datasets::ActivationFunctions(), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
-
-const auto AllQuantizedActivationsDataset = combine(concat(datasets::ActivationFunctionsQuantized(),
-                                                           framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::HARD_SWISH,
-                                                                                                            ActivationLayerInfo::ActivationFunction::LEAKY_RELU
-                                                                                                          })),
-                                                    framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+                                                               framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 1.f))),
+                                                        framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 1.f)));
 
 TEST_SUITE(CL)
 TEST_SUITE(MatMul)
@@ -218,22 +215,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLQuantizedMatMulFixture<int8_t>, framework::Da
                                                                                                                     framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
                                                                                                                     framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) })),
                                                                                                                     framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) })),
-                                                                                                            framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 2) })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_quant);
-}
-
-FIXTURE_DATA_TEST_CASE(RunAllActivations, CLQuantizedMatMulActivationFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(
-                           datasets::LargeMatMulDataset(),
-                           framework::dataset::make("TransposeA", { false })),
-                       framework::dataset::make("TransposeB", { true })),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       AllQuantizedActivationsDataset),
-                       framework::dataset::make("NumberOfExtraRuns", { 0, 1 })),
-                       framework::dataset::make("LhsQInfo", { QuantizationInfo(1.f / 100, 1) })),
-                       framework::dataset::make("RhsQInfo", { QuantizationInfo(1.f / 200, -1) })),
-                       framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 2) })))
+                                                                                                            framework::dataset::make("DstQInfo", { QuantizationInfo(1.f, 50) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_quant);

@@ -34,6 +34,7 @@
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output with the relu and bounded relu operations.
+ * @note The value of 0 in quantized format is equivalent to the quantization offset of the output data. This should be passed with -DZERO_POINT
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_QUANTIZED_NT_NT)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
@@ -196,11 +197,11 @@ __kernel void mat_mul_native_quantized_nt_nt(
     const bool x_cond = PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0;
     const bool y_cond = PARTIAL_STORE_M0 != 0 && get_global_id(1) == 0;
 
-    T_ACTIVATION(int, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
-
     // Quantize the tile
     TILE(DATA_TYPE, M0, N0, accq);
     T_QUANTIZE8_ASYMMETRIC(int, DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, acc, accq);
+
+    T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_POINT, A_VAL, B_VAL, accq, accq);
 
     TILE(int, M0, 1, indirect_buffer);
     LOOP_UNROLLING(int, _i, 0, 1, M0,
@@ -221,6 +222,7 @@ __kernel void mat_mul_native_quantized_nt_nt(
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output bounded activation functions.
+ * @note The value of 0 in quantized format is equivalent to the quantization offset of the output data. This should be passed with -DZERO_POINT
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_QUANTIZED_NT_T)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
@@ -375,11 +377,11 @@ __kernel void mat_mul_native_quantized_nt_t(
     const bool x_cond = PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0;
     const bool y_cond = PARTIAL_STORE_M0 != 0 && get_global_id(1) == 0;
 
-    T_ACTIVATION(int, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
-
     // Quantize the tile
     TILE(DATA_TYPE, M0, N0, accq);
     T_QUANTIZE8_ASYMMETRIC(int, DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, acc, accq);
+
+    T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_POINT, A_VAL, B_VAL, accq, accq);
 
     TILE(int, M0, 1, indirect_buffer);
     LOOP_UNROLLING(int, _i, 0, 1, M0,
@@ -400,6 +402,7 @@ __kernel void mat_mul_native_quantized_nt_t(
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output with the relu and bounded relu operations.
+ * @note The value of 0 in quantized format is equivalent to the quantization offset of the output data. This should be passed with -DZERO_POINT
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_QUANTIZED_T_NT)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
@@ -556,11 +559,11 @@ __kernel void mat_mul_native_quantized_t_nt(
     const bool x_cond = PARTIAL_STORE_N0 != 0 && get_global_id(0) == 0;
     const bool y_cond = PARTIAL_STORE_M0 != 0 && get_global_id(1) == 0;
 
-    T_ACTIVATION(int, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
-
     // Quantize the tile
     TILE(DATA_TYPE, M0, N0, accq);
     T_QUANTIZE8_ASYMMETRIC(int, DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, acc, accq);
+
+    T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_POINT, A_VAL, B_VAL, accq, accq);
 
     TILE(int, M0, 1, indirect_buffer);
     LOOP_UNROLLING(int, _i, 0, 1, M0,
@@ -581,6 +584,7 @@ __kernel void mat_mul_native_quantized_t_nt(
  * @note The block's dimensions used for the LHS and RHS matrices (M0, N0 and K0) must be passed at compile time using -DN0, -DM0 and -DK0 (e.g. -DN0=8, -DM0=4, -DK0=4).
  * @note The number of leftover outputs rows/columns must be passed using -DPARTIAL_STORE_N0 and -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_N0=2, -DPARTIAL_STORE_M0=3)
  * @note The fused activation function used should be passed with -DACTIVATION_TYPE, -DA_VAL and -DB_VAL are used for min and max output with the relu and bounded relu operations.
+ * @note The value of 0 in quantized format is equivalent to the quantization offset of the output data. This should be passed with -DZERO_POINT
  * @note The dimension K must be passed at compile time using -DK (e.g. -DK=6)
  * @note The kernel name in uppercase must be passed at compile time (e.g. -DMAT_MUL_NATIVE_QUANTIZED_T_T)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
@@ -742,10 +746,10 @@ __kernel void mat_mul_native_quantized_t_t(
     const bool y_cond = PARTIAL_STORE_M0 != 0 && get_global_id(1) == 0;
 
     // Quantize the tile
-    T_ACTIVATION(int, M0, N0, ACTIVATION_TYPE, A_VAL, B_VAL, acc, acc);
-
     TILE(DATA_TYPE, M0, N0, accq);
     T_QUANTIZE8_ASYMMETRIC(int, DATA_TYPE, M0, N0, DST_OFFSET, DST_SHIFT, DST_MULTIPLIER, acc, accq);
+
+    T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_POINT, A_VAL, B_VAL, accq, accq);
 
     TILE(int, M0, 1, indirect_buffer);
     LOOP_UNROLLING(int, _i, 0, 1, M0,
