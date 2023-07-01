@@ -81,7 +81,7 @@ def process_comment(fd, comment, first_param, last_param):
 if __name__ == "__main__":
     n_file=0
 
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 2 and sys.argv[1] == '--all':
         paths = []
 
         for top_level in ["./arm_compute", "./src", "./examples", "./tests", "./utils", "./framework", "./support"]:

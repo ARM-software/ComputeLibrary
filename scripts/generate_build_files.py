@@ -280,14 +280,12 @@ if "__main__" in __name__:
     if args.bazel:
         bazel_build_string = build_from_template_bazel(
             graph_files, lib_files_sve, lib_files_sve2, lib_files)
-        print(bazel_build_string)
         with open("src/BUILD.bazel", "w") as fp:
             fp.write(bazel_build_string)
 
     if args.cmake:
         cmake_build_string = build_from_template_cmake(
             graph_files, lib_files_sve, lib_files_sve2, lib_files)
-        print(cmake_build_string)
         with open("src/CMakeLists.txt", "w") as fp:
             fp.write(cmake_build_string)
 
