@@ -32,32 +32,34 @@ namespace ckw
 {
 #define VALIDATE_ON_MSG(exp, msg) assert(((void)msg, exp))
 
-#define VALIDATE_TEST(exp, all_tests_passed, id_test) \
-    do                                      \
-    {                                       \
-        if((exp) == true)   \
-        { \
-            all_tests_passed &= true; \
+#define VALIDATE_TEST(exp, all_tests_passed, id_test)                                   \
+    do                                                                                  \
+    {                                                                                   \
+        if((exp) == true)                                                               \
+        {                                                                               \
+            all_tests_passed &= true;                                                   \
             const std::string msg = "TEST " + std::to_string((id_test)) + ": [PASSED]"; \
-            std::cout << msg << std::endl; \
-        } \
-        else \
-        { \
-            all_tests_passed &= false; \
+            std::cout << msg << std::endl;                                              \
+        }                                                                               \
+        else                                                                            \
+        {                                                                               \
+            all_tests_passed &= false;                                                  \
             const std::string msg = "TEST " + std::to_string((id_test)) + ": [FAILED]"; \
-            std::cout << msg << std::endl; \
-        } \
+            std::cout << msg << std::endl;                                              \
+        }                                                                               \
     } while(false)
 
 class ITest
 {
 public:
     virtual ~ITest() = default;
+
     /** Method to run the test
      *
      * @return it returns true if all tests passed
      */
     virtual bool run() = 0;
+
     /** Name of the test
      *
      * @return it returns the name of the test

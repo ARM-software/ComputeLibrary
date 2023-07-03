@@ -48,12 +48,14 @@ public:
      * @param[in] dt Tile data type
      */
     TileInfo(DataType dt);
+
     /** Constructor used to initialize a vector with a given data type and vector length.
      *
      * @param[in] dt Tile data type
      * @param[in] w  Tile width (or vector length)
      */
     TileInfo(DataType dt, int32_t w);
+
     /** Constructor used to initialize a tile with a given data type and tile sizes.
      *
      * @param[in] dt Tile data type
@@ -61,16 +63,22 @@ public:
      * @param[in] w  Tile width
      */
     TileInfo(DataType dt, int32_t h, int32_t w);
+
     /** Set width */
     TileInfo &width(int32_t w);
+
     /** Get width */
     int32_t width() const;
+
     /** Set height */
     TileInfo &height(int32_t h);
+
     /** Get height */
     int32_t height() const;
+
     /** Set data type */
     TileInfo &data_type(DataType dt);
+
     /** Get data type */
     DataType data_type() const;
 

@@ -27,17 +27,17 @@
 namespace ckw
 {
 TileInfo::TileInfo(DataType dt)
-    : _dt(dt), _shape({{1, 1}})
+    : _dt(dt), _shape({ { 1, 1 } })
 {
 }
 
 TileInfo::TileInfo(DataType dt, int32_t w)
-    : _dt(dt), _shape({{w, 1}})
+    : _dt(dt), _shape({ { w, 1 } })
 {
 }
 
 TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
-    : _dt(dt), _shape({{w, h}})
+    : _dt(dt), _shape({ { w, h } })
 {
 }
 

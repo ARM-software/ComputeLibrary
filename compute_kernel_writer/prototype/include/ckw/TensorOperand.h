@@ -134,7 +134,7 @@ public:
 private:
     TensorInfo _info;
 
-    TileOperand  *_tile{ nullptr };
+    TileOperand      *_tile{ nullptr };
     TensorTileSampler _tile_sampler{};
 
     ::std::unique_ptr<TensorComponentOperand> _stride1{ nullptr };

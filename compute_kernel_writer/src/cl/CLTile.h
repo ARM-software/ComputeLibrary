@@ -44,13 +44,17 @@ public:
      * @param[in] name Tile name
      * @param[in] info Tile info
     */
-    CLTile(const std::string& name, const TileInfo &info);
+    CLTile(const std::string &name, const TileInfo &info);
 
     // Inherited method overridden
     TileVariable scalar(int32_t row, int32_t col) const override;
+
     TileVariable vector(int32_t row) const override;
+
     TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
+
     std::vector<TileVariable> all() const override;
+
     bool is_assignable() const override;
 
 private:

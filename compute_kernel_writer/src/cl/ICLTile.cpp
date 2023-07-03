@@ -33,7 +33,7 @@ namespace ckw
 {
 std::vector<int32_t> ICLTile::supported_vector_lengths() const
 {
-    return std::vector<int32_t> {1, 2, 3, 4, 8, 16};
+    return std::vector<int32_t>{ 1, 2, 3, 4, 8, 16 };
 }
 
 void ICLTile::validate_tile_info(const TileInfo &info) const

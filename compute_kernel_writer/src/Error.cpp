@@ -28,7 +28,8 @@
 
 namespace ckw
 {
-std::string create_error_msg(const std::string &file, const std::string &func, const std::string &line, const std::string &msg)
+std::string create_error_msg(const std::string &file, const std::string &func, const std::string &line,
+                             const std::string &msg)
 {
     std::string err;
     err += "[COMPUTE_KERNEL_WRITER][ERROR]:";

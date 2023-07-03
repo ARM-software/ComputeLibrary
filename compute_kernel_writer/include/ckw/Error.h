@@ -24,8 +24,8 @@
 #ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_ERROR_H
 #define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_ERROR_H
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace ckw
 {
@@ -38,19 +38,20 @@ namespace ckw
  *
  * @return status containing the error
  */
-std::string create_error_msg(const std::string &file, const std::string &func, const std::string &line, const std::string &msg);
+std::string
+create_error_msg(const std::string &file, const std::string &func, const std::string &line, const std::string &msg);
 
 /** Print the given message then throw an std::runtime_error.
  *
  * @param[in] msg Message to display.
  */
-#define COMPUTE_KERNEL_WRITER_ERROR_ON_MSG(msg)     \
-    do                                      \
-    {                                       \
-        const std::string arg0(__FILE__);   \
-        const std::string arg1(__func__);   \
-        const std::string arg2(std::to_string(__LINE__));   \
-        const std::string arg3(msg);         \
+#define COMPUTE_KERNEL_WRITER_ERROR_ON_MSG(msg)                       \
+    do                                                                \
+    {                                                                 \
+        const std::string arg0(__FILE__);                             \
+        const std::string arg1(__func__);                             \
+        const std::string arg2(std::to_string(__LINE__));             \
+        const std::string arg3(msg);                                  \
         std::runtime_error(create_error_msg(arg0, arg1, arg2, arg3)); \
     } while(false)
 

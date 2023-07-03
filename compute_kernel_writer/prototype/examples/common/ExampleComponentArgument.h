@@ -30,6 +30,7 @@
 namespace ckw
 {
 class TensorOperand;
+
 class TileOperand;
 } // namespace ckw
 
@@ -103,9 +104,9 @@ public:
     const ckw::TensorTileSampler &tile_sampler() const;
 
 private:
-    ckw::TensorOperand *_tensor{ nullptr };
-    ckw::TileOperand   *_tile{ nullptr };
-    ckw::TensorTileSampler  _tile_sampler{};
+    ckw::TensorOperand    *_tensor{ nullptr };
+    ckw::TileOperand      *_tile{ nullptr };
+    ckw::TensorTileSampler _tile_sampler{};
 };
 
 #endif // CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLECOMPONENTARGUMENT_H

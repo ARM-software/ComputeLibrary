@@ -25,9 +25,9 @@
 #ifndef COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
 #define COMPUTE_KERNEL_WRITER_TESTS_CLTILETEST_HPP
 
+#include "common/Common.h"
 #include "src/Helpers.h"
 #include "src/cl/CLTile.h"
-#include "common/Common.h"
 
 #include <string>
 #include <vector>
@@ -37,9 +37,9 @@ namespace ckw
 class CLTileInternalVariableNamesTest : public ITest
 {
 public:
-    const int32_t width  = 4;
-    const int32_t height = 4;
-    const DataType dt    = DataType::Fp32;
+    const int32_t  width  = 4;
+    const int32_t  height = 4;
+    const DataType dt     = DataType::Fp32;
 
     CLTileInternalVariableNamesTest()
     {
@@ -59,12 +59,12 @@ public:
         for(const auto &tile_name : _tile_name)
         {
             const CLTile tile(tile_name, info);
-            const auto vars = tile.all();
+            const auto   vars = tile.all();
 
             for(int32_t y = 0; y < height; ++y)
             {
                 const std::string expected_var_name = tile_name + "_" + std::to_string(y);
-                const std::string actual_var_name = vars[y].str;
+                const std::string actual_var_name   = vars[y].str;
                 VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
             }
         }
@@ -77,7 +77,7 @@ public:
     }
 
 private:
-    std::vector<std::string> _tile_name {};
+    std::vector<std::string> _tile_name{};
 };
 
 class CLTileInternalNumVariablesTest : public ITest
@@ -106,12 +106,12 @@ public:
         int32_t test_idx = 0;
         for(size_t i = 0; i < num_dims; ++i)
         {
-            const int32_t width  = _width[i];
-            const int32_t height = _height[i];
+            const int32_t  width  = _width[i];
+            const int32_t  height = _height[i];
             const TileInfo info(DataType::Fp32, height, width);
-            const CLTile tile("src", info);
-            const auto vars = tile.all();
-            const int32_t num_vars = vars.size();
+            const CLTile   tile("src", info);
+            const auto     vars     = tile.all();
+            const int32_t  num_vars = vars.size();
 
             // We expect the number of variables to match the heigth of the tile
             VALIDATE_TEST(num_vars == height, all_tests_passed, test_idx++);
@@ -125,8 +125,8 @@ public:
     }
 
 private:
-    std::vector<int32_t> _width {};
-    std::vector<int32_t> _height {};
+    std::vector<int32_t> _width{};
+    std::vector<int32_t> _height{};
 };
 
 class CLTileAccessScalarVariableTest : public ITest
@@ -153,7 +153,7 @@ public:
     bool run() override
     {
         const TileInfo info(dt, height, width);
-        const CLTile tile(tile_name, info);
+        const CLTile   tile(tile_name, info);
 
         VALIDATE_ON_MSG(_x_coord.size() == _y_coord.size(), "The number of x-coords and y-coords does not match");
 
@@ -170,8 +170,8 @@ public:
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string actual_var_name = var.str;
-            std::string expected_var_name = tile_name;
+            const std::string actual_var_name   = var.str;
+            std::string       expected_var_name = tile_name;
             expected_var_name += "_" + std::to_string(y_coord);
             expected_var_name += ".s" + dec_to_hex_as_string(x_coord);
 
@@ -186,8 +186,8 @@ public:
     }
 
 private:
-    std::vector<int32_t> _x_coord {};
-    std::vector<int32_t> _y_coord {};
+    std::vector<int32_t> _x_coord{};
+    std::vector<int32_t> _y_coord{};
 };
 
 class CLTileAccessScalarVariableBroadcastXTest : public ITest
@@ -232,12 +232,12 @@ public:
             const int32_t x_coord_clamped = clamp(x_coord, static_cast<int32_t>(0), width - 1);
 
             const TileInfo info(dt, height, width);
-            const CLTile tile(tile_name, info);
+            const CLTile   tile(tile_name, info);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string actual_var_name = var.str;
-            std::string expected_var_name = tile_name;
+            const std::string actual_var_name   = var.str;
+            std::string       expected_var_name = tile_name;
             expected_var_name += "_" + std::to_string(y_coord);
             if(width != 1)
             {
@@ -255,9 +255,9 @@ public:
     }
 
 private:
-    std::vector<int32_t> _width {};
-    std::vector<int32_t> _x_coord {};
-    std::vector<int32_t> _y_coord {};
+    std::vector<int32_t> _width{};
+    std::vector<int32_t> _x_coord{};
+    std::vector<int32_t> _y_coord{};
 };
 
 class CLTileAccessScalarVariableBroadcastYTest : public ITest
@@ -302,12 +302,12 @@ public:
             const int32_t y_coord_clamped = clamp(y_coord, static_cast<int32_t>(0), height - 1);
 
             const TileInfo info(dt, height, width);
-            const CLTile tile(tile_name, info);
+            const CLTile   tile(tile_name, info);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string actual_var_name = var.str;
-            std::string expected_var_name = tile_name;
+            const std::string actual_var_name   = var.str;
+            std::string       expected_var_name = tile_name;
             if(height != 1)
             {
                 expected_var_name += "_" + std::to_string(y_coord_clamped);
@@ -329,9 +329,9 @@ public:
     }
 
 private:
-    std::vector<int32_t> _height {};
-    std::vector<int32_t> _x_coord {};
-    std::vector<int32_t> _y_coord {};
+    std::vector<int32_t> _height{};
+    std::vector<int32_t> _x_coord{};
+    std::vector<int32_t> _y_coord{};
 };
 
 class CLTileAccessVectorVariablesTest : public ITest
@@ -357,14 +357,14 @@ public:
         for(const auto &height : _heights)
         {
             const TileInfo info(dt, height, width);
-            const CLTile tile(tile_name, info);
+            const CLTile   tile(tile_name, info);
 
             for(int32_t row = 0; row < height; ++row)
             {
                 const TileVariable var = tile.vector(row);
 
-                const std::string actual_var_name = var.str;
-                std::string expected_var_name = tile_name;
+                const std::string actual_var_name   = var.str;
+                std::string       expected_var_name = tile_name;
                 if(height != 1)
                 {
                     expected_var_name += "_" + std::to_string(row);
@@ -382,7 +382,7 @@ public:
     }
 
 private:
-    std::vector<int32_t> _heights {};
+    std::vector<int32_t> _heights{};
 };
 
 class CLTileAccessSubVectorVariablesTest : public ITest
@@ -416,7 +416,7 @@ public:
             for(const auto &subwidth : _subwidths)
             {
                 const TileInfo info(dt, height, width);
-                const CLTile tile(tile_name, info);
+                const CLTile   tile(tile_name, info);
 
                 for(int32_t row = 0; row < height; ++row)
                 {
@@ -459,8 +459,8 @@ public:
     }
 
 private:
-    std::vector<int32_t> _subwidths {};
-    std::vector<int32_t> _offsets {};
+    std::vector<int32_t> _subwidths{};
+    std::vector<int32_t> _offsets{};
 };
 } // namespace ckw
 

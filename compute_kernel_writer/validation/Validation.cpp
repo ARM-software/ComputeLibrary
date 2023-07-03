@@ -36,7 +36,7 @@ using namespace ckw;
  */
 int32_t main()
 {
-    std::vector<ITest*> tests;
+    std::vector<ITest *> tests;
 
     // Add your test here
     const auto test0 = std::make_unique<UtilsTest>();
@@ -47,13 +47,13 @@ int32_t main()
     tests.push_back(test2.get());
 
 #ifdef COMPUTE_KERNEL_WRITER_OPENCL_ENABLED
-    const auto test3 = std::make_unique<CLTileInternalVariableNamesTest>();
-    const auto test4 = std::make_unique<CLTileInternalNumVariablesTest>();
-    const auto test5 = std::make_unique<CLTileAccessScalarVariableTest>();
-    const auto test6 = std::make_unique<CLTileAccessScalarVariableBroadcastXTest>();
-    const auto test7 = std::make_unique<CLTileAccessScalarVariableBroadcastYTest>();
-    const auto test8 = std::make_unique<CLTileAccessVectorVariablesTest>();
-    const auto test9 = std::make_unique<CLTileAccessSubVectorVariablesTest>();
+    const auto test3  = std::make_unique<CLTileInternalVariableNamesTest>();
+    const auto test4  = std::make_unique<CLTileInternalNumVariablesTest>();
+    const auto test5  = std::make_unique<CLTileAccessScalarVariableTest>();
+    const auto test6  = std::make_unique<CLTileAccessScalarVariableBroadcastXTest>();
+    const auto test7  = std::make_unique<CLTileAccessScalarVariableBroadcastYTest>();
+    const auto test8  = std::make_unique<CLTileAccessVectorVariablesTest>();
+    const auto test9  = std::make_unique<CLTileAccessSubVectorVariablesTest>();
     const auto test10 = std::make_unique<CLConstantTileInternalValuesTest>();
     const auto test11 = std::make_unique<CLConstantTileAccessScalarVariableBroadcastXTest>();
     const auto test12 = std::make_unique<CLConstantTileAccessScalarVariableBroadcastYTest>();

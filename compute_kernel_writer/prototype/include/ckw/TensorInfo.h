@@ -117,20 +117,28 @@ public:
      *                  - less than 0: bind a virtual tensor (tile)
      */
     TensorInfo(DataType dt, const TensorShape &shape, TensorDataLayout dl, int32_t id);
+
     /** Set shape */
     TensorInfo &shape(const TensorShape &shape);
+
     /** Get shape */
     TensorShape shape() const;
+
     /** Set data type */
     TensorInfo &data_type(DataType dt);
+
     /** Get data type */
     DataType data_type() const;
+
     /** Set data layout */
     TensorInfo &data_layout(TensorDataLayout dl);
+
     /** Get data layout */
     TensorDataLayout data_layout() const;
+
     /** Set id */
     TensorInfo &id(int32_t id);
+
     /** Get layout */
     int32_t id() const;
 
@@ -140,6 +148,6 @@ private:
     TensorDataLayout _dl{ TensorDataLayout::Unknown };
     int32_t          _id{ -1 };
 };
-} // namespace kw
+} // namespace ckw
 
 #endif /* CKW_PROTOTYPE_INCLUDE_CKW_TENSORINFO_H */

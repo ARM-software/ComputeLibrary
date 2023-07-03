@@ -68,7 +68,7 @@ TileVariable CLTile::vector(int32_t row) const
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
     TileVariable t;
-    t.str       = create_var_name(row);
+    t.str      = create_var_name(row);
     t.desc.dt  = _info.data_type();
     t.desc.len = _info.width();
     return t;
@@ -104,7 +104,7 @@ std::vector<TileVariable> CLTile::all() const
     for(int32_t y = 0; y < _info.height(); ++y)
     {
         TileVariable t;
-        t.str       = create_var_name(y);
+        t.str      = create_var_name(y);
         t.desc.dt  = _info.data_type();
         t.desc.len = _info.width();
         vars.push_back(t);
@@ -125,7 +125,6 @@ std::string CLTile::create_var_name(int32_t row) const
     if(_info.height() == 1)
     {
         return var_name;
-
     }
     else
     {

@@ -155,7 +155,7 @@ void op_store(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgu
 
 int main()
 {
-    Kernel          kernel("example", GpuTargetLanguage::OpenCL);
+    Kernel              kernel("example", GpuTargetLanguage::OpenCL);
     ExampleKernelWriter root_writer(kernel);
 
     ExampleScopedKernelWriter writer(&root_writer);

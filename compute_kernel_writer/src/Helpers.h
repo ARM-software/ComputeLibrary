@@ -48,9 +48,9 @@ std::string dec_to_hex_as_string(int32_t dec);
  * @return the clamped value
  */
 template <typename T>
-T clamp(const T& val, const T& min_val, const T& max_val)
+T clamp(const T &val, const T &min_val, const T &max_val)
 {
     return std::max(min_val, std::min(val, max_val));
 }
-}
+} // namespace ckw
 #endif /* COMPUTE_KERNEL_WRITER_SRC_HELPERS_H */

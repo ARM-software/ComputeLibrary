@@ -58,7 +58,8 @@ prototype::Operand TileOperand::create_impl_operand(prototype::IGpuKernelWriter 
         switch(_info.data_type())
         {
             case DataType::Int32:
-                return prototype::Operand(std::to_string(_value.get<int32_t>()), prototype::OperandType::ScalarInt32);
+                return prototype::Operand(std::to_string(_value.get<int32_t>()),
+                                          prototype::OperandType::ScalarInt32);
 
             case DataType::Fp32:
                 return prototype::Operand(std::to_string(_value.get<float>()), prototype::OperandType::ScalarFp32);

@@ -72,13 +72,14 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        VALIDATE_ON_MSG(_component.size() == _bitmask.size(), "The number of layouts and components does not match");
+        VALIDATE_ON_MSG(_component.size() == _bitmask.size(),
+                        "The number of layouts and components does not match");
         const size_t num_tests = _component.size();
         for(size_t i = 0; i < num_tests; ++i)
         {
             const TensorComponent        component = _component[i];
             const TensorComponentBitmask bitmask   = _bitmask[i];
-            const bool out = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
+            const bool                   out       = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
             VALIDATE_TEST(out == true, all_tests_passed, i);
         }
         return all_tests_passed;
@@ -90,8 +91,8 @@ public:
     }
 
 private:
-    std::vector<TensorComponent>        _component {};
-    std::vector<TensorComponentBitmask> _bitmask {};
+    std::vector<TensorComponent>        _component{};
+    std::vector<TensorComponentBitmask> _bitmask{};
 };
 
 class TensorBitMaskFalseTest : public ITest
@@ -191,13 +192,14 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        VALIDATE_ON_MSG(_component.size() == _bitmask.size(), "The number of layouts and components does not match");
+        VALIDATE_ON_MSG(_component.size() == _bitmask.size(),
+                        "The number of layouts and components does not match");
         const size_t num_tests = _component.size();
         for(size_t i = 0; i < num_tests; ++i)
         {
             const TensorComponent        component = _component[i];
             const TensorComponentBitmask bitmask   = _bitmask[i];
-            const bool out = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
+            const bool                   out       = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
             VALIDATE_TEST(out == false, all_tests_passed, i);
         }
         return all_tests_passed;
@@ -209,9 +211,9 @@ public:
     }
 
 private:
-    std::vector<TensorComponent>        _component {};
-    std::vector<TensorComponentBitmask> _bitmask {};
+    std::vector<TensorComponent>        _component{};
+    std::vector<TensorComponentBitmask> _bitmask{};
 };
-}
+} // namespace ckw
 
 #endif /* COMPUTE_KERNEL_WRITER_TESTS_TENSORBITMASK_HPP */

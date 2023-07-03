@@ -33,6 +33,7 @@ namespace ckw
 namespace prototype
 {
 class IGpuKernelWriter;
+
 class Operand;
 } // namespace prototype
 

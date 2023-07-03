@@ -25,10 +25,10 @@
 #ifndef COMPUTE_KERNEL_WRITER_TESTS_CLCONSTANTTILETEST_HPP
 #define COMPUTE_KERNEL_WRITER_TESTS_CLCONSTANTTILETEST_HPP
 
+#include "common/Common.h"
 #include "src/Helpers.h"
 #include "src/cl/CLConstantTile.h"
 #include "src/cl/CLHelpers.h"
-#include "common/Common.h"
 
 #include <random>
 #include <string>
@@ -41,9 +41,10 @@ class CLConstantTileInternalValuesTest : public ITest
 public:
     CLConstantTileInternalValuesTest()
     {
-        _values.push_back({{"1.2", "3.5"}, {"4.2", "1.3"}});
-        _values.push_back({{"1.2"}});
-        _values.push_back({{"1.2", "6.9"}});
+        _values.push_back({ { "1.2", "3.5" },
+                            { "4.2", "1.3" } });
+        _values.push_back({ { "1.2" } });
+        _values.push_back({ { "1.2", "6.9" } });
     }
 
     bool run() override
@@ -55,19 +56,18 @@ public:
         for(const auto &test : _values)
         {
             const CLConstantTile tile(test, DataType::Fp16);
-            const auto    vars     = tile.all();
-            const int32_t num_vars = vars.size();
-            const int32_t width    = tile.info().width();
+            const auto           vars     = tile.all();
+            const int32_t        num_vars = vars.size();
+            const int32_t        width    = tile.info().width();
 
             for(int32_t y = 0; y < num_vars; ++y)
             {
-                const int32_t col = y % width;
-                const int32_t row = y / width;
+                const int32_t     col               = y % width;
+                const int32_t     row               = y / width;
                 const std::string expected_var_name = "((half)(" + test[row][col] + "))";
-                const std::string actual_var_name = vars[y].str;
+                const std::string actual_var_name   = vars[y].str;
                 VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
             }
-
         }
         return all_tests_passed;
     }
@@ -78,7 +78,7 @@ public:
     }
 
 private:
-    std::vector<TileContainer> _values {};
+    std::vector<TileContainer> _values{};
 };
 
 class CLConstantTileAccessScalarVariableBroadcastXTest : public ITest
@@ -113,8 +113,8 @@ public:
 
         const size_t num_coords = _x_coord.size();
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        std::random_device               rd;
+        std::mt19937                     gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
 
         int32_t test_idx = 0;
@@ -140,7 +140,7 @@ public:
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string actual_var_name = var.str;
+            const std::string actual_var_name   = var.str;
             const std::string expected_var_name = "((half)(" + container[y_coord][x_coord_clamped] + "))";
 
             VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
@@ -154,9 +154,9 @@ public:
     }
 
 private:
-    std::vector<int32_t> _width {};
-    std::vector<int32_t> _x_coord {};
-    std::vector<int32_t> _y_coord {};
+    std::vector<int32_t> _width{};
+    std::vector<int32_t> _x_coord{};
+    std::vector<int32_t> _y_coord{};
 };
 
 class CLConstantTileAccessScalarVariableBroadcastYTest : public ITest
@@ -189,8 +189,8 @@ public:
         // The status of this variable can change in VALIDATE_TEST()
         bool all_tests_passed = true;
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        std::random_device               rd;
+        std::mt19937                     gen(rd());
         std::uniform_real_distribution<> dist(-1, 1);
 
         const size_t num_coords = _x_coord.size();
@@ -218,7 +218,7 @@ public:
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
-            const std::string actual_var_name = var.str;
+            const std::string actual_var_name   = var.str;
             const std::string expected_var_name = "((half)(" + container[y_coord_clamped][x_coord] + "))";
 
             VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
@@ -232,9 +232,9 @@ public:
     }
 
 private:
-    std::vector<int32_t> _height {};
-    std::vector<int32_t> _x_coord {};
-    std::vector<int32_t> _y_coord {};
+    std::vector<int32_t> _height{};
+    std::vector<int32_t> _x_coord{};
+    std::vector<int32_t> _y_coord{};
 };
 
 class CLConstantTileAccessVectorVariablesTest : public ITest
@@ -244,10 +244,11 @@ public:
 
     CLConstantTileAccessVectorVariablesTest()
     {
-        _values.push_back({{"1.2", "3.5"}, {"4.2", "1.3"}});
-        _values.push_back({{"1.2"}});
+        _values.push_back({ { "1.2", "3.5" },
+                            { "4.2", "1.3" } });
+        _values.push_back({ { "1.2" } });
         // Mix variable names and values
-        _values.push_back({{"1.2", "acc", "8.7", "9.3", "ratio", "2.9", "1.7", "0.3"}});
+        _values.push_back({ { "1.2", "acc", "8.7", "9.3", "ratio", "2.9", "1.7", "0.3" } });
     }
 
     bool run() override
@@ -260,8 +261,8 @@ public:
         for(const auto &test : _values)
         {
             const CLConstantTile tile(test, dt);
-            const int32_t width  = tile.info().width();
-            const int32_t height = tile.info().height();
+            const int32_t        width  = tile.info().width();
+            const int32_t        height = tile.info().height();
 
             for(int32_t row = 0; row < height; ++row)
             {
@@ -292,7 +293,7 @@ public:
     }
 
 private:
-    std::vector<TileContainer> _values {};
+    std::vector<TileContainer> _values{};
 };
 
 class CLConstantTileAccessSubVectorVariablesTest : public ITest
@@ -302,7 +303,7 @@ public:
 
     CLConstantTileAccessSubVectorVariablesTest()
     {
-        _values.push_back({{"1.2", "acc", "8.7", "9.3", "ratio", "2.9", "1.7", "0.3"}});
+        _values.push_back({ { "1.2", "acc", "8.7", "9.3", "ratio", "2.9", "1.7", "0.3" } });
         _subwidths.push_back(1);
         _subwidths.push_back(2);
         _subwidths.push_back(3);
@@ -326,7 +327,7 @@ public:
                 for(auto &subwidth : _subwidths)
                 {
                     const CLConstantTile tile(test, dt);
-                    const int32_t height = tile.info().height();
+                    const int32_t        height = tile.info().height();
 
                     for(int32_t row = 0; row < height; ++row)
                     {
@@ -345,7 +346,8 @@ public:
                         expected_var_name += "))";
 
                         const std::string actual_var_name = tile.vector(row, col_start, subwidth).str;
-                        VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed, test_idx++);
+                        VALIDATE_TEST(actual_var_name.compare(expected_var_name) == 0, all_tests_passed,
+                                      test_idx++);
                     }
                 }
             }
@@ -359,9 +361,9 @@ public:
     }
 
 private:
-    std::vector<TileContainer> _values {};
-    std::vector<int32_t>       _subwidths {};
-    std::vector<int32_t>       _offsets {};
+    std::vector<TileContainer> _values{};
+    std::vector<int32_t>       _subwidths{};
+    std::vector<int32_t>       _offsets{};
 };
 
 } // namespace ckw

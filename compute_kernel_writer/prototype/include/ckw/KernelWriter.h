@@ -39,6 +39,7 @@ namespace ckw
 namespace prototype
 {
 struct GpuKernelWriterAttribute;
+
 class IGpuKernelWriter;
 } // namespace prototype
 

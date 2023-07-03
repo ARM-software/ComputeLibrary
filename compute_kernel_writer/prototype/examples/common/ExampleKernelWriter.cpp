@@ -41,7 +41,8 @@ void ExampleKernelWriter::op_load_once(ExampleComponentArgument *tensor_or_tile,
         auto &tensor = tensor_or_tile->tensor();
 
         const auto tile_name = tensor.name() + "_tile";
-        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
+        auto      &tile      = declare_tile(tile_name.c_str(),
+                                            ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
 
         op_load(tile, tensor, sampler);
 

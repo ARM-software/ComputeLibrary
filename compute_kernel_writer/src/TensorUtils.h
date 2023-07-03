@@ -52,5 +52,5 @@ TensorComponent get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutCo
  * @return the @ref TensorComponent
  */
 TensorComponent get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component);
-}
+} // namespace ckw
 #endif /* COMPUTE_KERNEL_WRITER_SRC_TENSORUTILS_H */

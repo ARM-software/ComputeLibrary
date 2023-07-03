@@ -34,7 +34,8 @@ ExampleComponentArgument::ExampleComponentArgument(ckw::TensorOperand &tensor)
 {
 }
 
-ExampleComponentArgument &ExampleComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
+ExampleComponentArgument &
+ExampleComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
 {
     CKW_ASSERT(_tile == nullptr);
 

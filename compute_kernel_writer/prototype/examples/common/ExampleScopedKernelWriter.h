@@ -56,7 +56,7 @@ public:
 
 private:
     ExampleKernelWriter *_writer;
-    int32_t          _parent_id_space;
+    int32_t              _parent_id_space;
 };
 
 #endif // CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLESCOPEDKERNELWRITER_H

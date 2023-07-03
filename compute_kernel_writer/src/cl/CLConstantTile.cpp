@@ -25,8 +25,8 @@
 #include "ckw/TileInfo.h"
 
 #include "src/Helpers.h"
-#include "src/cl/CLHelpers.h"
 #include "src/cl/CLConstantTile.h"
+#include "src/cl/CLHelpers.h"
 
 namespace ckw
 {

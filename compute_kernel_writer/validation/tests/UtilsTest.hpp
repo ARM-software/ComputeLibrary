@@ -25,8 +25,8 @@
 #define COMPUTE_KERNEL_WRITER_TESTS_UTILSTEST_HPP
 
 #include "ckw/TensorInfo.h"
-#include "src/TensorUtils.h"
 #include "common/Common.h"
+#include "src/TensorUtils.h"
 
 #include <vector>
 
@@ -74,14 +74,15 @@ public:
         bool all_tests_passed = true;
 
         VALIDATE_ON_MSG(_layout.size() == _component.size(), "The number of layouts and components does not match");
-        VALIDATE_ON_MSG(_layout.size() == _expected.size(), "The number of layouts and expected outputs does not match");
+        VALIDATE_ON_MSG(_layout.size() == _expected.size(),
+                        "The number of layouts and expected outputs does not match");
         const size_t num_tests = _layout.size();
         for(size_t i = 0; i < num_tests; ++i)
         {
             const TensorDataLayout          layout    = _layout[i];
             const TensorDataLayoutComponent component = _component[i];
             const TensorComponent           expected  = _expected[i];
-            const TensorComponent           out = get_tensor_dimension(layout, component);
+            const TensorComponent           out       = get_tensor_dimension(layout, component);
             VALIDATE_TEST(out == expected, all_tests_passed, i);
         }
         return all_tests_passed;
@@ -93,10 +94,10 @@ public:
     }
 
 private:
-    std::vector<TensorDataLayout>          _layout {};
-    std::vector<TensorDataLayoutComponent> _component {};
-    std::vector<TensorComponent>           _expected {};
+    std::vector<TensorDataLayout>          _layout{};
+    std::vector<TensorDataLayoutComponent> _component{};
+    std::vector<TensorComponent>           _expected{};
 };
-}
+} // namespace ckw
 
 #endif /* COMPUTE_KERNEL_WRITER_TESTS_UTILSTEST_HPP */

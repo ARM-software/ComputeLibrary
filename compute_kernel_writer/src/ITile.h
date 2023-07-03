@@ -37,15 +37,15 @@ using TileContainer = std::vector<std::vector<std::string>>;
 /** Tile descriptor which reports the underlying datatype and vector length */
 struct TileVariableDescriptor
 {
-    DataType dt { DataType::Unknown };  /** Data type  */
-    int32_t  len { 1 };                 /** Number of elements in a single variable. For example, 1 for scalar  */
+    DataType dt{ DataType::Unknown }; /** Data type  */
+    int32_t  len{ 1 };                /** Number of elements in a single variable. For example, 1 for scalar  */
 };
 
 /** Tile variable */
 struct TileVariable
 {
-    std::string            str {""}; /** Tile variable as a string */
-    TileVariableDescriptor desc {};  /** Tile value descriptor which reports the datatype and vector length */
+    std::string            str{ "" }; /** Tile variable as a string */
+    TileVariableDescriptor desc{};    /** Tile value descriptor which reports the datatype and vector length */
 };
 
 /** Tile base class.
@@ -55,11 +55,13 @@ class ITile
 {
 public:
     virtual ~ITile() = default;
+
     /** Method to get all TileVariable objects
      *
      * @return a vector containing all @ref TileVariable objects
      */
     virtual std::vector<TileVariable> all() const = 0;
+
     /** Method to get the name of the tile.
      *
      * @return the name of the tile
@@ -68,6 +70,7 @@ public:
     {
         return _basename;
     }
+
     /** Method to get the tile info
      *
      * @return the @ref TileInfo
@@ -76,6 +79,7 @@ public:
     {
         return _info;
     }
+
     /** Method to know whether the tile is assignable or not.
      *  For example, a constant tile is not assignable.
      *
@@ -84,8 +88,8 @@ public:
     virtual bool is_assignable() const = 0;
 
 protected:
-    TileInfo    _info { DataType::Unknown };    // Tile info
-    std::string _basename { "" };               // Tile name
+    TileInfo    _info{ DataType::Unknown }; // Tile info
+    std::string _basename{ "" };            // Tile name
 };
 
 /** Tile base class to store scalar variables.
@@ -94,6 +98,7 @@ class IScalarTile : public ITile
 {
 public:
     virtual ~IScalarTile() = default;
+
     /** Method to get the scalar variable from a tile as a string
      * @param[in] row Tile row. If out-of-bound, the row is clamped to the nearest valid edge
      * @param[in] col Tile column. If out-of-bound, the column is clamped to the nearest valid edge
@@ -109,6 +114,7 @@ class IVectorTile : public IScalarTile
 {
 public:
     virtual ~IVectorTile() = default;
+
     /** Method to get the vector variable from a tile.
      *  The user can query the list of supported vector lengths through the supported_vector_lengths() method.
      *
@@ -117,6 +123,7 @@ public:
      * @return the vector variable as a @ref TileVariable
      */
     virtual TileVariable vector(int32_t row) const = 0;
+
     /** Method to get a sub-vector variable. The length of the sub-vector must be supported by the derived IVectorTile class
      *
      * @param[in] row       Tile row. If out-of-bound, the row is clamped to the nearest valid edge
@@ -126,6 +133,7 @@ public:
      * @return the vector variable as a @ref TileVariable
      */
     virtual TileVariable vector(int32_t row, int32_t col_start, int32_t width) const = 0;
+
     /** Method to get the supported vector length.
      *
      * @return a vector containing the supported vector lengths
