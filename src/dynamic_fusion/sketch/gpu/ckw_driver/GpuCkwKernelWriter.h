@@ -21,11 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
 
-#include "src/core/common/Macros.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H
+
+#include "ckw/KernelWriter.h"
+#include "ckw/TensorTileSampler.h"
+
+namespace ckw
+{
+class Kernel;
+} // namespace ckw
 
 namespace arm_compute
 {
@@ -33,29 +39,29 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-/** An interface used by @ref ClTemplateWriter to write source code for a kernel component
- */
-class GpuCkwStore : public IGpuCkwComponentDriver
+
+class GpuCkwComponentArgument;
+
+/** Extended implementation of kernel writer for dynamic fusion. */
+class GpuCkwKernelWriter : public ckw::KernelWriter
 {
 public:
-    /** Constructor
+    /** Initialize a new instance of @ref GpuCkwKernelWriter class.
      *
-     * @param[in] id      Component id
-     * @param[in] tensors Tensor arguments to the component
+     * @param[in] kernel The kernel to be generated.
      */
-    GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors);
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwStore);
-    /** Destructor */
-    ~GpuCkwStore() override = default;
-    // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
+    explicit GpuCkwKernelWriter(ckw::Kernel &kernel);
 
-private:
-    const ITensorInfo *_src;
-    const ITensorInfo *_dst;
+    /** Load the user tensor to the tile in the same component argument if it hasn't been loaded.
+     *
+     * @param[in] tensor_or_tile The component argument that is either a user tensor or a virtual tensor.
+     * @param[in] sampler        The tensor sampling information to load the tile.
+     */
+    void op_load_once(GpuCkwComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler);
 };
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWKERNELWRITER_H

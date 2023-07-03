@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
 
-#include "src/core/common/Macros.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWSCOPEDKERNELWRITER_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWSCOPEDKERNELWRITER_H
+
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -33,29 +33,41 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-/** An interface used by @ref ClTemplateWriter to write source code for a kernel component
- */
-class GpuCkwStore : public IGpuCkwComponentDriver
+
+class GpuCkwKernelWriter;
+
+/** Helper to automatically manage kernel writer ID space. */
+class GpuCkwScopedKernelWriter
 {
 public:
-    /** Constructor
-     *
-     * @param[in] id      Component id
-     * @param[in] tensors Tensor arguments to the component
-     */
-    GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors);
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwStore);
-    /** Destructor */
-    ~GpuCkwStore() override = default;
-    // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
+    /** Initialize a new instance of @ref GpuCkwScopedKernelWriter class. */
+    explicit GpuCkwScopedKernelWriter(GpuCkwKernelWriter *writer);
+
+    /** Create a new scope from the specified scoped kernel writer. */
+    GpuCkwScopedKernelWriter(const GpuCkwScopedKernelWriter &other);
+
+    /** Assignment is disallowed. */
+    GpuCkwScopedKernelWriter &operator=(const GpuCkwScopedKernelWriter &) = delete;
+
+    /** Access the underlying kernel writer. */
+    GpuCkwKernelWriter *operator->();
+
+    /** Access the underlying kernel writer. */
+    const GpuCkwKernelWriter *operator->() const;
+
+    /** Get the kernel writer. */
+    GpuCkwKernelWriter *writer();
+
+    /** Get the kernel writer. */
+    const GpuCkwKernelWriter *writer() const;
 
 private:
-    const ITensorInfo *_src;
-    const ITensorInfo *_dst;
+    GpuCkwKernelWriter *_writer;
+    int32_t          _parent_id_space;
 };
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWSCOPEDKERNELWRITER_H

@@ -21,13 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE
 
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
-#include "arm_compute/core/ITensorInfo.h"
-
-#include <map>
+#include "ckw/Error.h"
+#include "ckw/TileInfo.h"
 
 namespace arm_compute
 {
@@ -35,34 +33,29 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-class GpuKernelComponentGroup;
-class GpuCkwScopedKernelWriter;
 
-/** A table of all the variables used in the kernel.
- *
- * It determines whether we create an virtual tensor var or a user tensor var
- * It avoids duplicating variables for the same tensors (Tensors with the same id)
- * Each kernel has exactly one variable table.
- */
-class GpuCkwVariableTable
+GpuCkwKernelWriter::GpuCkwKernelWriter(ckw::Kernel &kernel)
+    : KernelWriter(kernel)
 {
-public:
-    /** Declare a kernel component variable(argument) for the corresponding tensor info.
-     *
-     * @param[in] comp_group Component group the tensor belongs to
-     * @param[in] writer     Compute Kernel Writer
-     * @param[in] tensor     Tensor info with which the new variable is associated
-     * @param[in] alias      Alias for the variable. Will be used as part of the variable name
-     *
-     * @return GpuCkwComponentArgument*
-     */
-    GpuCkwComponentArgument *declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, const std::string &alias = "unnamed");
+}
 
-private:
-    std::map<ITensorInfo::Id, GpuCkwComponentArgument> _vars{};
-};
+void GpuCkwKernelWriter::op_load_once(GpuCkwComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
+{
+    if(!tensor_or_tile->has_tile())
+    {
+        CKW_ASSERT(tensor_or_tile->has_tensor());
+
+        auto &tensor = tensor_or_tile->tensor();
+
+        const auto tile_name = tensor.name() + "_tile";
+        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
+
+        op_load(tile, tensor, sampler);
+
+        tensor_or_tile->init_virtual_tensor(tile, sampler);
+    }
+}
 
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE */

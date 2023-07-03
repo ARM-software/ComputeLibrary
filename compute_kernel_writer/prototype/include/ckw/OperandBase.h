@@ -21,41 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE
 
-#include "src/core/common/Macros.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
+#ifndef CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
+#define CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
 
-namespace arm_compute
+#include "ckw/Types.h"
+#include <string>
+
+namespace ckw
 {
-namespace experimental
+namespace prototype
 {
-namespace dynamic_fusion
-{
-/** An interface used by @ref ClTemplateWriter to write source code for a kernel component
- */
-class GpuCkwStore : public IGpuCkwComponentDriver
+class IGpuKernelWriter;
+class Operand;
+} // namespace prototype
+
+/** The base class for all operands. */
+class OperandBase
 {
 public:
     /** Constructor
      *
-     * @param[in] id      Component id
-     * @param[in] tensors Tensor arguments to the component
+     * @param[in] name The name of the operand.
      */
-    GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors);
-    ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwStore);
+    explicit OperandBase(const ::std::string &name);
+
     /** Destructor */
-    ~GpuCkwStore() override = default;
-    // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
+    virtual ~OperandBase();
+
+    /** (Internal use only) Create the implementation operand.
+     *
+     * @param[in] writer The implementation kernel writer.
+     */
+    virtual prototype::Operand create_impl_operand(prototype::IGpuKernelWriter *writer) const = 0;
+
+    /** Get the name of the operand. */
+    const ::std::string &name() const;
+
+    /** Set the name of the operand. */
+    OperandBase &name(const ::std::string &name);
+
+    /** Get the data type of the operand. */
+    virtual DataType data_type() const = 0;
+
+    /** Get whether the operand is compile-time constant. */
+    virtual bool is_constant() const = 0;
 
 private:
-    const ITensorInfo *_src;
-    const ITensorInfo *_dst;
+    ::std::string _name;
 };
-} // namespace dynamic_fusion
-} // namespace experimental
-} // namespace arm_compute
 
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_GPUCKWSTORE */
+} // namespace ckw
+
+#endif // CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H

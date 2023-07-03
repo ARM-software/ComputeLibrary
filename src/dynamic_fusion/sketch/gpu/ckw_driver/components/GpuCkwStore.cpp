@@ -24,8 +24,8 @@
 #include "GpuCkwStore.h"
 
 #include "arm_compute/core/Error.h"
-#include "compute_kernel_writer/include/acl/AclKernelWriter.h"
-#include "compute_kernel_writer/include/acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include <string>
 
@@ -41,7 +41,7 @@ GpuCkwStore::GpuCkwStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensor
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
 }
-void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const
+void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
 {
     auto src = vtable.declare_variable(comp_group, writer, _src, "src");
     auto dst = vtable.declare_variable(comp_group, writer, _dst, "dst");

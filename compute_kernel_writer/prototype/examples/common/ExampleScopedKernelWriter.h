@@ -22,41 +22,41 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H
-#define CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H
+#ifndef CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLESCOPEDKERNELWRITER_H
+#define CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLESCOPEDKERNELWRITER_H
 
 #include <cstdint>
 
-class AclKernelWriter;
+class ExampleKernelWriter;
 
 /** Helper to automatically manage kernel writer ID space. */
-class AclScopedKernelWriter
+class ExampleScopedKernelWriter
 {
 public:
-    /** Initialize a new instance of @ref AclScopedKernelWriter class. */
-    explicit AclScopedKernelWriter(AclKernelWriter *writer);
+    /** Initialize a new instance of @ref ExampleScopedKernelWriter class. */
+    explicit ExampleScopedKernelWriter(ExampleKernelWriter *writer);
 
     /** Create a new scope from the specified scoped kernel writer. */
-    AclScopedKernelWriter(const AclScopedKernelWriter &other);
+    ExampleScopedKernelWriter(const ExampleScopedKernelWriter &other);
 
     /** Assignment is disallowed. */
-    AclScopedKernelWriter &operator=(const AclScopedKernelWriter &) = delete;
+    ExampleScopedKernelWriter &operator=(const ExampleScopedKernelWriter &) = delete;
 
     /** Access the underlying kernel writer. */
-    AclKernelWriter *operator->();
+    ExampleKernelWriter *operator->();
 
     /** Access the underlying kernel writer. */
-    const AclKernelWriter *operator->() const;
+    const ExampleKernelWriter *operator->() const;
 
     /** Get the kernel writer. */
-    AclKernelWriter *writer();
+    ExampleKernelWriter *writer();
 
     /** Get the kernel writer. */
-    const AclKernelWriter *writer() const;
+    const ExampleKernelWriter *writer() const;
 
 private:
-    AclKernelWriter *_writer;
+    ExampleKernelWriter *_writer;
     int32_t          _parent_id_space;
 };
 
-#endif // CKW_INCLUDE_ACL_ACLSCOPEDKERNELWRITER_H
+#endif // CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLESCOPEDKERNELWRITER_H

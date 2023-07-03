@@ -23,8 +23,8 @@
  */
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 
-#include "acl/AclKernelWriter.h"
-#include "acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/TypeConverter.h"
 #include <sstream>
@@ -35,7 +35,7 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-AclComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group, AclScopedKernelWriter &writer, const ITensorInfo *tensor, const std::string &alias)
+GpuCkwComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, const std::string &alias)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!tensor->has_valid_id(), "Tensor info with valid id expected");
 
@@ -49,8 +49,8 @@ AclComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelCompo
     if(comp_group.is_intermediate_tensor(tensor))
     {
         // Create a virtual tensor variable
-        AclComponentArgument var;
-        auto               &&inserted = _vars.emplace(tensor->id(), var);
+        GpuCkwComponentArgument var;
+        auto                  &&inserted = _vars.emplace(tensor->id(), var);
         return &(inserted.first->second);
     }
     else
@@ -58,9 +58,9 @@ AclComponentArgument *GpuCkwVariableTable::declare_variable(const GpuKernelCompo
         // Create a user tensor variable
         std::stringstream ss;
         ss << alias << "_t" << abs(tensor->id());
-        const auto           uniq_name = ss.str();
-        AclComponentArgument var{ writer->create_tensor_argument(uniq_name.c_str(), to_ckw(*tensor)) };
-        auto               &&inserted = _vars.emplace(tensor->id(), var);
+        const auto              uniq_name = ss.str();
+        GpuCkwComponentArgument var{ writer->create_tensor_argument(uniq_name.c_str(), to_ckw(*tensor)) };
+        auto                  &&inserted = _vars.emplace(tensor->id(), var);
         return &(inserted.first->second);
     }
 }

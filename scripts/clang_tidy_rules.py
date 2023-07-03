@@ -28,7 +28,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "compute_kernel_writer/include " \
+    return "compute_kernel_writer/prototype/include " \
            "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TENSOROPERAND_H
-#define CKW_INCLUDE_CKW_TENSOROPERAND_H
+#ifndef CKW_PROTOTYPE_INCLUDE_CKW_TENSOROPERAND_H
+#define CKW_PROTOTYPE_INCLUDE_CKW_TENSOROPERAND_H
 
 #include "ckw/OperandBase.h"
 #include "ckw/TensorInfo.h"
@@ -178,4 +178,4 @@ private:
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_TENSOROPERAND_H
+#endif // CKW_PROTOTYPE_INCLUDE_CKW_TENSOROPERAND_H

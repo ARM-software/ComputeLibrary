@@ -22,35 +22,48 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_ACL_ACLKERNELWRITER_H
-#define CKW_INCLUDE_ACL_ACLKERNELWRITER_H
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 
-#include "ckw/KernelWriter.h"
-#include "ckw/TensorTileSampler.h"
-
-class AclComponentArgument;
-
-namespace ckw
+namespace arm_compute
 {
-class Kernel;
-} // namespace ckw
-
-/** Extended implementation of kernel writer for dynamic fusion. */
-class AclKernelWriter : public ckw::KernelWriter
+namespace experimental
 {
-public:
-    /** Initialize a new instance of @ref AclKernelWriter class.
-     *
-     * @param[in] kernel The kernel to be generated.
-     */
-    explicit AclKernelWriter(ckw::Kernel &kernel);
+namespace dynamic_fusion
+{
 
-    /** Load the user tensor to the tile in the same component argument if it hasn't been loaded.
-     *
-     * @param[in] tensor_or_tile The component argument that is either a user tensor or a virtual tensor.
-     * @param[in] sampler        The tensor sampling information to load the tile.
-     */
-    void op_load_once(AclComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler);
-};
+GpuCkwScopedKernelWriter::GpuCkwScopedKernelWriter(GpuCkwKernelWriter *writer)
+    : _writer(writer), _parent_id_space(writer->id_space())
+{
+    _writer->next_id_space();
+}
 
-#endif // CKW_INCLUDE_ACL_ACLKERNELWRITER_H
+GpuCkwScopedKernelWriter::GpuCkwScopedKernelWriter(const GpuCkwScopedKernelWriter &other)
+    : _writer(other._writer), _parent_id_space(other._writer->id_space())
+{
+    _writer->next_id_space();
+}
+
+GpuCkwKernelWriter *GpuCkwScopedKernelWriter::operator->()
+{
+    return _writer;
+}
+
+const GpuCkwKernelWriter *GpuCkwScopedKernelWriter::operator->() const
+{
+    return _writer;
+}
+
+GpuCkwKernelWriter *GpuCkwScopedKernelWriter::writer()
+{
+    return _writer;
+}
+
+const GpuCkwKernelWriter *GpuCkwScopedKernelWriter::writer() const
+{
+    return _writer;
+}
+
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute

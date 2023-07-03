@@ -24,8 +24,8 @@
 #ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER
 
-#include "acl/AclComponentArgument.h"
-#include "acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "ckw/TensorTileSampler.h"
 
 #include <functional>
@@ -37,11 +37,11 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-using SamplerCreator = std::function<TensorTileSampler(AclScopedKernelWriter &, int32_t /* m0 */, int32_t /* n0 */)>;
+using SamplerCreator = std::function<TensorTileSampler(GpuCkwScopedKernelWriter &, int32_t /* m0 */, int32_t /* n0 */)>;
 
 /** Load lhs and rhs tiles of dimension [m0, n0] only when not loaded and prepare the sampler
  */
-inline void load_lhs_rhs_tiles_and_prepare_sampler(AclScopedKernelWriter &writer, AclComponentArgument *lhs, AclComponentArgument *rhs, int32_t m0, int32_t n0, SamplerCreator create_sampler)
+inline void load_lhs_rhs_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &writer, GpuCkwComponentArgument *lhs, GpuCkwComponentArgument *rhs, int32_t m0, int32_t n0, SamplerCreator create_sampler)
 {
     if(!lhs->has_tile() && !rhs->has_tile())
     {

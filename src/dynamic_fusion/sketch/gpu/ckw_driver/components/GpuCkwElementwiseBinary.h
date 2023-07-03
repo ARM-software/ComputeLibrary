@@ -53,14 +53,13 @@ public:
     /** Destructor */
     ~GpuCkwElementwiseBinary() override = default;
     // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const override;
+    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
     Window get_window() const override;
 
 private:
     const ITensorInfo *_lhs;
     const ITensorInfo *_rhs;
     const ITensorInfo *_dst;
-    Attributes         _attributes;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

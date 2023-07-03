@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TILEOPERAND_H
-#define CKW_INCLUDE_CKW_TILEOPERAND_H
+#ifndef CKW_PROTOTYPE_INCLUDE_CKW_TILEOPERAND_H
+#define CKW_PROTOTYPE_INCLUDE_CKW_TILEOPERAND_H
 
 #include "ckw/Error.h"
 #include "ckw/OperandBase.h"
@@ -107,4 +107,4 @@ private:
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_TILEOPERAND_H
+#endif // CKW_PROTOTYPE_INCLUDE_CKW_TILEOPERAND_H

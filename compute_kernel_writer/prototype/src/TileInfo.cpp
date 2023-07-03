@@ -21,25 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
-#define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
+
+#include "ckw/TileInfo.h"
 
 namespace ckw
 {
-/** Compute Kernel Writer data types. This data type is used by the code variables and tensor arguments. */
-enum class DataType
+TileInfo::TileInfo(DataType dt)
+    : _dt(dt), _shape({{1, 1}})
 {
-    Unknown,
-    Fp32,
-    Fp16,
-    Int32,
-    Int16,
-    Int8,
-    Uint32,
-    Uint16,
-    Uint8,
-    Bool
-};
-} // namespace ckw
+}
 
-#endif /* COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H */
+TileInfo::TileInfo(DataType dt, int32_t w)
+    : _dt(dt), _shape({{w, 1}})
+{
+}
+
+TileInfo::TileInfo(DataType dt, int32_t h, int32_t w)
+    : _dt(dt), _shape({{w, h}})
+{
+}
+
+TileInfo &TileInfo::width(int32_t w)
+{
+    _shape[kTileWidthIdx] = w;
+    return *this;
+}
+
+int32_t TileInfo::width() const
+{
+    return _shape[kTileWidthIdx];
+}
+
+TileInfo &TileInfo::height(int32_t h)
+{
+    _shape[kTileHeightIdx] = h;
+    return *this;
+}
+
+int32_t TileInfo::height() const
+{
+    return _shape[kTileHeightIdx];
+}
+
+TileInfo &TileInfo::data_type(DataType dt)
+{
+    _dt = dt;
+    return *this;
+}
+
+DataType TileInfo::data_type() const
+{
+    return _dt;
+}
+} // namespace ckw

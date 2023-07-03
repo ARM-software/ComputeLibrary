@@ -160,7 +160,7 @@ install_path = env['install_dir']
 if not env['install_dir'].startswith('/') and install_path != "":
     install_path = "%s/%s" % (build_path, install_path)
 
-env.Append(LIBPATH = [build_path])
+env.Append(LIBPATH = [build_path, os.path.join(build_path, "prototype")])
 Export('env')
 Export('vars')
 
@@ -432,7 +432,7 @@ if env['experimental_dynamic_fusion']:
     CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
 
     CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
-    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/include"
+    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/prototype/include"
     CKW_BUILD_DIR = build_path.replace("#", "")
 
     CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
@@ -440,6 +440,7 @@ if env['experimental_dynamic_fusion']:
                     "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
                     "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \
                     "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
+                    "-DCKW_BUILD_PROTOTYPE=ON " \
                     "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
                                                         CKW_CXX=CKW_CXX,
                                                         CKW_PROJECT_DIR=CKW_PROJECT_DIR,

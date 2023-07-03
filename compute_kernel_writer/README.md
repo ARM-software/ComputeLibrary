@@ -82,6 +82,5 @@ This project can be configured with the following build options. Enable options 
 | CKW_ENABLE_OPENCL    | Enable OpenCL code generation.                                                                                                            |
 | CKW_ENABLE_ASSERTS   | Enable assertions. Always enabled for Debug builds.                                                                                       |
 | CKW_BUILD_TESTING    | Build the validation test suite.                                                                                                          |
-| CKW_BUILD_EXAMPLES   | Build the examples.                                                                                                                       |
 | CKW_CCACHE           | Use compiler cache for faster recompilation.                                                                                              |
 | CMAKE_TOOLCHAIN_FILE | When cross-compiling, set this variable to the path of the CMake toolchain file.                                                          |

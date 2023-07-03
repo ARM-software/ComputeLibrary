@@ -128,7 +128,7 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
 
     if env['experimental_dynamic_fusion']:
-        libs.append('libckw.a')
+        libs.append('libckw_prototype.a')
 
     if static:
         obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)

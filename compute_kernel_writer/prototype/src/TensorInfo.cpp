@@ -22,29 +22,56 @@
  * SOFTWARE.
  */
 
-#include "acl/AclKernelWriter.h"
-#include "acl/AclComponentArgument.h"
-#include "ckw/Error.h"
-#include "ckw/TileInfo.h"
+#include "ckw/TensorInfo.h"
 
-AclKernelWriter::AclKernelWriter(ckw::Kernel &kernel)
-    : KernelWriter(kernel)
+namespace ckw
+{
+TensorInfo::TensorInfo(DataType dt, const TensorShape &shape, TensorDataLayout dl, int32_t id)
+    : _shape(shape), _dt(dt), _dl(dl), _id(id)
 {
 }
 
-void AclKernelWriter::op_load_once(AclComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
+TensorInfo &TensorInfo::shape(const TensorShape &shape)
 {
-    if(!tensor_or_tile->has_tile())
-    {
-        CKW_ASSERT(tensor_or_tile->has_tensor());
-
-        auto &tensor = tensor_or_tile->tensor();
-
-        const auto tile_name = tensor.name() + "_tile";
-        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
-
-        op_load(tile, tensor, sampler);
-
-        tensor_or_tile->init_virtual_tensor(tile, sampler);
-    }
+    _shape = shape;
+    return *this;
 }
+
+TensorShape TensorInfo::shape() const
+{
+    return _shape;
+}
+
+TensorInfo &TensorInfo::data_type(DataType dt)
+{
+    _dt = dt;
+    return *this;
+}
+
+DataType TensorInfo::data_type() const
+{
+    return _dt;
+}
+
+TensorInfo &TensorInfo::data_layout(TensorDataLayout dl)
+{
+    _dl = dl;
+    return *this;
+}
+
+TensorDataLayout TensorInfo::data_layout() const
+{
+    return _dl;
+}
+
+TensorInfo &TensorInfo::id(int32_t id)
+{
+    _id = id;
+    return *this;
+}
+
+int32_t TensorInfo::id() const
+{
+    return _id;
+}
+} // namespace ckw

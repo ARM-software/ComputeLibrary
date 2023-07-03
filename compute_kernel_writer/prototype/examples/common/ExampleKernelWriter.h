@@ -22,55 +22,35 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_OPERANDBASE_H
-#define CKW_INCLUDE_CKW_OPERANDBASE_H
+#ifndef CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLEKERNELWRITER_H
+#define CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLEKERNELWRITER_H
 
-#include "ckw/Types.h"
-#include <string>
+#include "ckw/KernelWriter.h"
+#include "ckw/TensorTileSampler.h"
+
+class ExampleComponentArgument;
 
 namespace ckw
 {
-namespace prototype
-{
-class IGpuKernelWriter;
-class Operand;
-} // namespace prototype
-
-/** The base class for all operands. */
-class OperandBase
-{
-public:
-    /** Constructor
-     *
-     * @param[in] name The name of the operand.
-     */
-    explicit OperandBase(const ::std::string &name);
-
-    /** Destructor */
-    virtual ~OperandBase();
-
-    /** (Internal use only) Create the implementation operand.
-     *
-     * @param[in] writer The implementation kernel writer.
-     */
-    virtual prototype::Operand create_impl_operand(prototype::IGpuKernelWriter *writer) const = 0;
-
-    /** Get the name of the operand. */
-    const ::std::string &name() const;
-
-    /** Set the name of the operand. */
-    OperandBase &name(const ::std::string &name);
-
-    /** Get the data type of the operand. */
-    virtual DataType data_type() const = 0;
-
-    /** Get whether the operand is compile-time constant. */
-    virtual bool is_constant() const = 0;
-
-private:
-    ::std::string _name;
-};
-
+class Kernel;
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_OPERANDBASE_H
+/** Extended implementation of kernel writer for dynamic fusion. */
+class ExampleKernelWriter : public ckw::KernelWriter
+{
+public:
+    /** Initialize a new instance of @ref ExampleKernelWriter class.
+     *
+     * @param[in] kernel The kernel to be generated.
+     */
+    explicit ExampleKernelWriter(ckw::Kernel &kernel);
+
+    /** Load the user tensor to the tile in the same component argument if it hasn't been loaded.
+     *
+     * @param[in] tensor_or_tile The component argument that is either a user tensor or a virtual tensor.
+     * @param[in] sampler        The tensor sampling information to load the tile.
+     */
+    void op_load_once(ExampleComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler);
+};
+
+#endif // CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLEKERNELWRITER_H

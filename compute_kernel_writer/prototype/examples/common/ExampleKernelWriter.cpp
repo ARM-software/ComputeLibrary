@@ -22,37 +22,29 @@
  * SOFTWARE.
  */
 
-#include "acl/AclScopedKernelWriter.h"
-#include "acl/AclKernelWriter.h"
+#include "ExampleKernelWriter.h"
+#include "ExampleComponentArgument.h"
+#include "ckw/Error.h"
+#include "ckw/TileInfo.h"
 
-AclScopedKernelWriter::AclScopedKernelWriter(AclKernelWriter *writer)
-    : _writer(writer), _parent_id_space(writer->id_space())
+ExampleKernelWriter::ExampleKernelWriter(ckw::Kernel &kernel)
+    : KernelWriter(kernel)
 {
-    _writer->next_id_space();
 }
 
-AclScopedKernelWriter::AclScopedKernelWriter(const AclScopedKernelWriter &other)
-    : _writer(other._writer), _parent_id_space(other._writer->id_space())
+void ExampleKernelWriter::op_load_once(ExampleComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
 {
-    _writer->next_id_space();
-}
+    if(!tensor_or_tile->has_tile())
+    {
+        CKW_ASSERT(tensor_or_tile->has_tensor());
 
-AclKernelWriter *AclScopedKernelWriter::operator->()
-{
-    return _writer;
-}
+        auto &tensor = tensor_or_tile->tensor();
 
-const AclKernelWriter *AclScopedKernelWriter::operator->() const
-{
-    return _writer;
-}
+        const auto tile_name = tensor.name() + "_tile";
+        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
 
-AclKernelWriter *AclScopedKernelWriter::writer()
-{
-    return _writer;
-}
+        op_load(tile, tensor, sampler);
 
-const AclKernelWriter *AclScopedKernelWriter::writer() const
-{
-    return _writer;
+        tensor_or_tile->init_virtual_tensor(tile, sampler);
+    }
 }

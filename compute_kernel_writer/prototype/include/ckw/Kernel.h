@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_KERNEL_H
-#define CKW_INCLUDE_CKW_KERNEL_H
+#ifndef CKW_PROTOTYPE_INCLUDE_CKW_KERNEL_H
+#define CKW_PROTOTYPE_INCLUDE_CKW_KERNEL_H
 
 #include "ckw/OperandBase.h"
 #include "ckw/Types.h"
@@ -74,4 +74,4 @@ private:
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_KERNEL_H
+#endif // CKW_PROTOTYPE_INCLUDE_CKW_KERNEL_H

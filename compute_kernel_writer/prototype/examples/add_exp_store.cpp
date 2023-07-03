@@ -29,16 +29,16 @@
 #include "ckw/TileOperand.h"
 #include "ckw/Types.h"
 
-#include "acl/AclComponentArgument.h"
-#include "acl/AclKernelWriter.h"
-#include "acl/AclScopedKernelWriter.h"
+#include "common/ExampleComponentArgument.h"
+#include "common/ExampleKernelWriter.h"
+#include "common/ExampleScopedKernelWriter.h"
 
 #include <iostream>
 #include <vector>
 
 using namespace ckw;
 
-TensorTileSampler create_simple_sampler(AclScopedKernelWriter writer)
+TensorTileSampler create_simple_sampler(ExampleScopedKernelWriter writer)
 {
     TensorTileSampler sampler;
 
@@ -57,8 +57,8 @@ TensorTileSampler create_simple_sampler(AclScopedKernelWriter writer)
 
     sampler.x(gid_0);
     sampler.y(gid_1);
-    sampler.z(gid_2);
-    sampler.b(const_0);
+    sampler.z(const_0);
+    sampler.b(gid_2);
 
     sampler.width(n0);
     sampler.height(m0);
@@ -71,7 +71,7 @@ TensorTileSampler create_simple_sampler(AclScopedKernelWriter writer)
     return sampler;
 }
 
-void op_binary_elementwise(AclScopedKernelWriter writer, std::vector<AclComponentArgument *> operands)
+void op_binary_elementwise(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgument *> operands)
 {
     auto lhs = operands.at(0);
     auto rhs = operands.at(1);
@@ -113,7 +113,7 @@ void op_binary_elementwise(AclScopedKernelWriter writer, std::vector<AclComponen
     writer->op_binary_expression(dst_tile, lhs_tile, rhs_tile, BinaryOp::Add);
 }
 
-void op_exp(AclScopedKernelWriter writer, std::vector<AclComponentArgument *> operands)
+void op_exp(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgument *> operands)
 {
     auto src = operands.at(0);
     auto dst = operands.at(1);
@@ -141,7 +141,7 @@ void op_exp(AclScopedKernelWriter writer, std::vector<AclComponentArgument *> op
     writer->op_scalar_function(dst_tile, src_tile, ScalarUnaryFunction::Exp);
 }
 
-void op_store(AclScopedKernelWriter writer, std::vector<AclComponentArgument *> operands)
+void op_store(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgument *> operands)
 {
     auto src = operands.at(0);
     auto dst = operands.at(1);
@@ -156,19 +156,19 @@ void op_store(AclScopedKernelWriter writer, std::vector<AclComponentArgument *> 
 int main()
 {
     Kernel          kernel("example", GpuTargetLanguage::OpenCL);
-    AclKernelWriter root_writer(kernel);
+    ExampleKernelWriter root_writer(kernel);
 
-    AclScopedKernelWriter writer(&root_writer);
+    ExampleScopedKernelWriter writer(&root_writer);
 
     const TensorInfo src0_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 0);
     const TensorInfo src1_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 1);
     const TensorInfo dst_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 2);
 
-    AclComponentArgument src0(writer->create_tensor_argument("src0", src0_info));
-    AclComponentArgument src1(writer->create_tensor_argument("src1", src1_info));
-    AclComponentArgument dst(writer->create_tensor_argument("dst", dst_info));
+    ExampleComponentArgument src0(writer->create_tensor_argument("src0", src0_info));
+    ExampleComponentArgument src1(writer->create_tensor_argument("src1", src1_info));
+    ExampleComponentArgument dst(writer->create_tensor_argument("dst", dst_info));
 
-    AclComponentArgument ans;
+    ExampleComponentArgument ans;
 
     op_binary_elementwise(writer, { &src0, &src1, &ans });
     op_exp(writer, { &ans, &ans });

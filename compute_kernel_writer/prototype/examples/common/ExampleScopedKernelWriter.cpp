@@ -21,25 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
-#define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H
 
-namespace ckw
-{
-/** Compute Kernel Writer data types. This data type is used by the code variables and tensor arguments. */
-enum class DataType
-{
-    Unknown,
-    Fp32,
-    Fp16,
-    Int32,
-    Int16,
-    Int8,
-    Uint32,
-    Uint16,
-    Uint8,
-    Bool
-};
-} // namespace ckw
+#include "ExampleScopedKernelWriter.h"
+#include "ExampleKernelWriter.h"
 
-#endif /* COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TYPES_H */
+ExampleScopedKernelWriter::ExampleScopedKernelWriter(ExampleKernelWriter *writer)
+    : _writer(writer), _parent_id_space(writer->id_space())
+{
+    _writer->next_id_space();
+}
+
+ExampleScopedKernelWriter::ExampleScopedKernelWriter(const ExampleScopedKernelWriter &other)
+    : _writer(other._writer), _parent_id_space(other._writer->id_space())
+{
+    _writer->next_id_space();
+}
+
+ExampleKernelWriter *ExampleScopedKernelWriter::operator->()
+{
+    return _writer;
+}
+
+const ExampleKernelWriter *ExampleScopedKernelWriter::operator->() const
+{
+    return _writer;
+}
+
+ExampleKernelWriter *ExampleScopedKernelWriter::writer()
+{
+    return _writer;
+}
+
+const ExampleKernelWriter *ExampleScopedKernelWriter::writer() const
+{
+    return _writer;
+}

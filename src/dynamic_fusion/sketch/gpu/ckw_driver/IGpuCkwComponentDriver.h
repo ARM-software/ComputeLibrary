@@ -28,8 +28,6 @@
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/components/Types.h"
 
-class AclScopedKernelWriter;
-
 namespace arm_compute
 {
 class ITensorInfo;
@@ -40,6 +38,7 @@ namespace dynamic_fusion
 /** Forward declaration */
 class GpuKernelComponentGroup;
 class GpuCkwVariableTable;
+class GpuCkwScopedKernelWriter;
 
 /** An interface used by @ref GpuCkwDriver to write source code for a kernel component
  *
@@ -90,7 +89,7 @@ public:
      *
      *                            @note @p writer can only be passed via value since the new scope is created in the copy constructor
      */
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const = 0;
+    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const = 0;
     /** Get tensor arguments */
     ArgumentPack<ITensorInfo> tensors() const
     {

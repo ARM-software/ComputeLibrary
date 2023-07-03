@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_ACL_ACLCOMPONENTARGUMENT_H
-#define CKW_INCLUDE_ACL_ACLCOMPONENTARGUMENT_H
+#ifndef CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLECOMPONENTARGUMENT_H
+#define CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLECOMPONENTARGUMENT_H
 
 #include "ckw/TensorTileSampler.h"
 
@@ -34,27 +34,27 @@ class TileOperand;
 } // namespace ckw
 
 /** The argument of a dynamic fusion component which can be either user tensor or virtual tensor. */
-class AclComponentArgument
+class ExampleComponentArgument
 {
 public:
-    /** Initialize a new instance of @ref AclComponentArgument class for empty virtual tensor. */
-    AclComponentArgument();
+    /** Initialize a new instance of @ref ExampleComponentArgument class for empty virtual tensor. */
+    ExampleComponentArgument();
 
-    /** Initialize a new instance of @ref AclComponentArgument class for user tensor.
+    /** Initialize a new instance of @ref ExampleComponentArgument class for user tensor.
      *
      * @param[in] tensor The user tensor.
      */
-    explicit AclComponentArgument(ckw::TensorOperand &tensor);
+    explicit ExampleComponentArgument(ckw::TensorOperand &tensor);
 
     /** Set virtual tensor information (tile, sampler) for the argument.
      *
      * If the component is a user tensor, it can be treated as virtual tensor as well
-     * and won't be loaded again using @ref AclKernelWriter::op_load_once method.
+     * and won't be loaded again using @ref ExampleKernelWriter::op_load_once method.
      *
      * @param[in] tile    The tile that has been loaded.
      * @param[in] sampler The tensor sampling information that has been used to load the tile.
      */
-    AclComponentArgument &init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &sampler);
+    ExampleComponentArgument &init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &sampler);
 
     /** Get whether the argument is a user tensor. */
     bool has_tensor() const;
@@ -108,4 +108,4 @@ private:
     ckw::TensorTileSampler  _tile_sampler{};
 };
 
-#endif // CKW_INCLUDE_ACL_ACLCOMPONENTARGUMENT_H
+#endif // CKW_PROTOTYPE_EXAMPLES_COMMON_EXAMPLECOMPONENTARGUMENT_H

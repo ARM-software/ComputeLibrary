@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_KERNELWRITER_H
-#define CKW_INCLUDE_CKW_KERNELWRITER_H
+#ifndef CKW_PROTOTYPE_INCLUDE_CKW_KERNELWRITER_H
+#define CKW_PROTOTYPE_INCLUDE_CKW_KERNELWRITER_H
 
 #include "ckw/Kernel.h"
 #include "ckw/TensorInfo.h"
@@ -214,4 +214,4 @@ private:
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_KERNELWRITER_H
+#endif // CKW_PROTOTYPE_INCLUDE_CKW_KERNELWRITER_H

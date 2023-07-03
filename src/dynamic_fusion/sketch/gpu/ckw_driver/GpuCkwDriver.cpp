@@ -31,8 +31,8 @@
 #include "src/common/utils/Log.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 
-#include "acl/AclKernelWriter.h"
-#include "acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 
 using namespace ckw;
 namespace arm_compute
@@ -55,10 +55,10 @@ std::string GpuCkwDriver::get_name()
 std::string GpuCkwDriver::get_code()
 {
     ARM_COMPUTE_LOG_PARAMS(std::string("[V1] TODO"));
-    ckw::Kernel           kernel(get_name().c_str(), GpuTargetLanguage::OpenCL);
-    AclKernelWriter       root_writer(kernel);
-    AclScopedKernelWriter writer(&root_writer);
-    GpuCkwVariableTable   vtable{};
+    ckw::Kernel              kernel(get_name().c_str(), GpuTargetLanguage::OpenCL);
+    GpuCkwKernelWriter       root_writer(kernel);
+    GpuCkwScopedKernelWriter writer(&root_writer);
+    GpuCkwVariableTable      vtable{};
 
     // Global Kernel Writer Driver code
 

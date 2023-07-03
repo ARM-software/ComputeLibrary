@@ -43,7 +43,6 @@ message(STATUS "${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_VERSION}")
 option(CKW_ENABLE_OPENCL "Enable OpenCL code generation" OFF)
 option(CKW_ENABLE_ASSERTS "Enable assertions. Always enabled in Debug builds" OFF)
 option(CKW_BUILD_TESTING "Build the Compute Kernel Writer validation test suite" OFF)
-option(CKW_BUILD_EXAMPLES "Build the Compute Kernel Writer examples" OFF)
 option(CKW_CCACHE "Use compiler cache for faster recompilation" OFF)
 
 #---------------------------------------------------------------------
@@ -122,17 +121,6 @@ target_sources(ckw PRIVATE
     src/TensorInfo.cpp
     src/TensorUtils.cpp
     src/TileInfo.cpp
-
-    src/Kernel.cpp
-    src/KernelWriter.cpp
-    src/OperandBase.cpp
-    src/TileOperand.cpp
-    src/TensorOperand.cpp
-    src/TensorTileSampler.cpp
-
-    src/acl/AclKernelWriter.cpp
-    src/acl/AclScopedKernelWriter.cpp
-    src/acl/AclComponentArgument.cpp
 )
 
 if(CKW_ENABLE_OPENCL)
@@ -147,7 +135,7 @@ endif()
 target_include_directories(ckw
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}
-    )
+)
 
 #---------------------------------------------------------------------
 # Validation tests
@@ -172,16 +160,10 @@ if(CKW_BUILD_TESTING)
 endif()
 
 #---------------------------------------------------------------------
-# Examples
+# Prototype
 
-function(add_ckw_example name)
-    add_executable(${name} ${ARGN})
-    target_link_libraries(${name} PUBLIC ckw)
-endfunction(add_ckw_example)
-
-if(CKW_BUILD_EXAMPLES)
-    add_ckw_example(ckw_example_add_exp_store
-        examples/add_exp_store.cpp)
+if(CKW_BUILD_PROTOTYPE)
+    add_subdirectory(prototype)
 endif()
 
 #---------------------------------------------------------------------

@@ -22,19 +22,26 @@
  * SOFTWARE.
  */
 
-#include "acl/AclComponentArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 #include "ckw/Error.h"
 
-AclComponentArgument::AclComponentArgument()
+namespace arm_compute
+{
+namespace experimental
+{
+namespace dynamic_fusion
+{
+
+GpuCkwComponentArgument::GpuCkwComponentArgument()
 {
 }
 
-AclComponentArgument::AclComponentArgument(ckw::TensorOperand &tensor)
+GpuCkwComponentArgument::GpuCkwComponentArgument(ckw::TensorOperand &tensor)
     : _tensor(&tensor)
 {
 }
 
-AclComponentArgument &AclComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
+GpuCkwComponentArgument &GpuCkwComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
 {
     CKW_ASSERT(_tile == nullptr);
 
@@ -44,54 +51,58 @@ AclComponentArgument &AclComponentArgument::init_virtual_tensor(ckw::TileOperand
     return *this;
 }
 
-bool AclComponentArgument::has_tensor() const
+bool GpuCkwComponentArgument::has_tensor() const
 {
     return _tensor != nullptr;
 }
 
-ckw::TensorOperand &AclComponentArgument::tensor()
+ckw::TensorOperand &GpuCkwComponentArgument::tensor()
 {
     CKW_ASSERT(_tensor != nullptr);
 
     return *_tensor;
 }
 
-const ckw::TensorOperand &AclComponentArgument::tensor() const
+const ckw::TensorOperand &GpuCkwComponentArgument::tensor() const
 {
     CKW_ASSERT(_tensor != nullptr);
 
     return *_tensor;
 }
 
-bool AclComponentArgument::has_tile() const
+bool GpuCkwComponentArgument::has_tile() const
 {
     return _tile != nullptr;
 }
 
-ckw::TileOperand &AclComponentArgument::tile()
+ckw::TileOperand &GpuCkwComponentArgument::tile()
 {
     CKW_ASSERT(_tile != nullptr);
 
     return *_tile;
 }
 
-const ckw::TileOperand &AclComponentArgument::tile() const
+const ckw::TileOperand &GpuCkwComponentArgument::tile() const
 {
     CKW_ASSERT(_tile != nullptr);
 
     return *_tile;
 }
 
-ckw::TensorTileSampler &AclComponentArgument::tile_sampler()
+ckw::TensorTileSampler &GpuCkwComponentArgument::tile_sampler()
 {
     CKW_ASSERT(_tile != nullptr);
 
     return _tile_sampler;
 }
 
-const ckw::TensorTileSampler &AclComponentArgument::tile_sampler() const
+const ckw::TensorTileSampler &GpuCkwComponentArgument::tile_sampler() const
 {
     CKW_ASSERT(_tile != nullptr);
 
     return _tile_sampler;
 }
+
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute

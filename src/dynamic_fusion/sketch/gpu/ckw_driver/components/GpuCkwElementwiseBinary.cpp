@@ -23,8 +23,8 @@
  */
 #include "GpuCkwElementwiseBinary.h"
 
-#include "acl/AclKernelWriter.h"
-#include "acl/AclScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "ckw/TensorTileSampler.h"
@@ -40,11 +40,13 @@ namespace arm_compute
 {
 namespace experimental
 {
+namespace dynamic_fusion
+{
 namespace
 {
 /** Create a simple sampler from tile of dimension [m0, n0]
  */
-inline TensorTileSampler create_simple_sampler(AclScopedKernelWriter &writer, int32_t m0, int32_t n0)
+inline TensorTileSampler create_simple_sampler(GpuCkwScopedKernelWriter &writer, int32_t m0, int32_t n0)
 {
     TensorTileSampler sampler;
 
@@ -75,32 +77,31 @@ inline TensorTileSampler create_simple_sampler(AclScopedKernelWriter &writer, in
 }
 } // namespace
 
-namespace dynamic_fusion
-{
 GpuCkwElementwiseBinary::GpuCkwElementwiseBinary(ComponentId                      id,
                                                  const ArgumentPack<ITensorInfo> &tensors,
                                                  const Attributes                &attributes)
     : IGpuCkwComponentDriver{ id, tensors },
       _lhs{},
       _rhs{},
-      _dst{},
-      _attributes{ attributes }
+      _dst{}
 {
+    ARM_COMPUTE_UNUSED(attributes);
+
     _lhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _rhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_lhs, _rhs, _dst);
 }
 
-void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, AclScopedKernelWriter writer) const
+void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
 {
     const auto         root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
     const unsigned int n0          = root_window.x().step();
     const unsigned int m0          = root_window.y().step();
 
-    AclComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, "lhs");
-    AclComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, "rhs");
-    AclComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
+    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, "lhs");
+    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, "rhs");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, "dst");
 
     // Load the LHS and RHS tiles and prepare the tensor sampler.
     load_lhs_rhs_tiles_and_prepare_sampler(writer, lhs, rhs, m0, n0, create_simple_sampler);

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_SRC_PROTOTYPE_H
-#define CKW_SRC_PROTOTYPE_H
+#ifndef CKW_PROTOTYPE_SRC_PROTOTYPE_H
+#define CKW_PROTOTYPE_SRC_PROTOTYPE_H
 
 #include <vector>
 #include <map>
@@ -3764,4 +3764,4 @@ inline int32_t adjust_step(TensorSamplerFormat tensor_format, int32_t step, cons
 } // namespace prototype
 } // namespace ckw
 
-#endif // CKW_SRC_PROTOTYPE_H
+#endif // CKW_PROTOTYPE_SRC_PROTOTYPE_H
