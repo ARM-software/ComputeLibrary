@@ -79,6 +79,7 @@ namespace depthwise {
 
 namespace
 {
+#if defined(__aarch64__)
   bool prefer_premultiply(const DepthwiseArgs &args) {
     if ((args.stride_rows != args.stride_cols) || (args.kernel_rows != args.kernel_cols))
     {
@@ -151,7 +152,6 @@ namespace
           ) * 2 / 3;
   }
 
-#if defined(__aarch64__)
   unsigned int multiplier_cycle_estimate(const DepthwiseArgs &args, const Nothing &)
   {
     return prefer_premultiply(args)? UINT32_MAX : 0;
