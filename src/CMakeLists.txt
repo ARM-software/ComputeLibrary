@@ -346,7 +346,7 @@ target_sources(
 )
 
 target_sources(
-    arm_compute_core
+    arm_compute
     PRIVATE
     c/AclContext.cpp
 	c/AclOperator.cpp

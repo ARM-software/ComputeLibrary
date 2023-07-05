@@ -463,6 +463,7 @@
  */
 #define READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord) read_image2d_##data_type##x##n0(img, x_coord, y_coord)
 #define READ_IMAGE2D(data_type, n0, img, x_coord, y_coord) READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord)
+/** @} */
 
 /** Utility macro to write a 2D OpenCL image object.
  *
@@ -479,6 +480,7 @@
  */
 #define WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values) write_image2d_##data_type##x##n0(img, x_coord, y_coord, values)
 #define WRITE_IMAGE2D(data_type, n0, img, x_coord, y_coord, values) WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values)
+/** @} */
 
 #define VSTORE_STR(size) vstore##size
 #define VSTORE(size) VSTORE_STR(size)

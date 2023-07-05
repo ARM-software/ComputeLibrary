@@ -26,10 +26,14 @@
 cc_binary(
     name = "neon_cnn",
     srcs = ["neon_cnn.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -39,10 +43,14 @@ cc_binary(
 cc_binary(
     name = "neon_copy_objects",
     srcs = ["neon_copy_objects.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -52,10 +60,14 @@ cc_binary(
 cc_binary(
     name = "neon_gemm_qasymm8",
     srcs = ["neon_gemm_qasymm8.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -65,10 +77,14 @@ cc_binary(
 cc_binary(
     name = "neon_permute",
     srcs = ["neon_permute.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -78,10 +94,14 @@ cc_binary(
 cc_binary(
     name = "neon_scale",
     srcs = ["neon_scale.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -91,10 +111,14 @@ cc_binary(
 cc_binary(
     name = "neon_sgemm",
     srcs = ["neon_sgemm.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -107,10 +131,14 @@ cc_binary(
 cc_binary(
     name = "graph_alexnet",
     srcs = ["graph_alexnet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -120,10 +148,14 @@ cc_binary(
 cc_binary(
     name = "graph_deepspeech_v0_4_1",
     srcs = ["graph_deepspeech_v0_4_1.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -136,10 +168,14 @@ cc_binary(
         "graph_edsr.cpp",
         "graph_edsr.h",
     ],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -149,10 +185,14 @@ cc_binary(
 cc_binary(
     name = "graph_googlenet",
     srcs = ["graph_googlenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -162,10 +202,14 @@ cc_binary(
 cc_binary(
     name = "graph_inception_resnet_v1",
     srcs = ["graph_inception_resnet_v1.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -175,10 +219,14 @@ cc_binary(
 cc_binary(
     name = "graph_inception_resnet_v2",
     srcs = ["graph_inception_resnet_v2.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -188,10 +236,14 @@ cc_binary(
 cc_binary(
     name = "graph_inception_v3",
     srcs = ["graph_inception_v3.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -201,10 +253,14 @@ cc_binary(
 cc_binary(
     name = "graph_inception_v4",
     srcs = ["graph_inception_v4.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -214,10 +270,14 @@ cc_binary(
 cc_binary(
     name = "graph_lenet",
     srcs = ["graph_lenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -227,10 +287,14 @@ cc_binary(
 cc_binary(
     name = "graph_mobilenet",
     srcs = ["graph_mobilenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -240,10 +304,14 @@ cc_binary(
 cc_binary(
     name = "graph_mobilenet_v2",
     srcs = ["graph_mobilenet_v2.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -253,10 +321,14 @@ cc_binary(
 cc_binary(
     name = "graph_resnet12",
     srcs = ["graph_resnet12.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -266,10 +338,14 @@ cc_binary(
 cc_binary(
     name = "graph_resnet50",
     srcs = ["graph_resnet50.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -279,10 +355,14 @@ cc_binary(
 cc_binary(
     name = "graph_resnet_v2_50",
     srcs = ["graph_resnet_v2_50.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -292,10 +372,14 @@ cc_binary(
 cc_binary(
     name = "graph_resnext50",
     srcs = ["graph_resnext50.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -305,10 +389,14 @@ cc_binary(
 cc_binary(
     name = "graph_shufflenet",
     srcs = ["graph_shufflenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -318,10 +406,14 @@ cc_binary(
 cc_binary(
     name = "graph_squeezenet",
     srcs = ["graph_squeezenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -331,10 +423,14 @@ cc_binary(
 cc_binary(
     name = "graph_squeezenet_v1_1",
     srcs = ["graph_squeezenet_v1_1.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -344,10 +440,14 @@ cc_binary(
 cc_binary(
     name = "graph_srcnn955",
     srcs = ["graph_srcnn955.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -357,10 +457,14 @@ cc_binary(
 cc_binary(
     name = "graph_ssd_mobilenet",
     srcs = ["graph_ssd_mobilenet.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -370,10 +474,14 @@ cc_binary(
 cc_binary(
     name = "graph_vgg16",
     srcs = ["graph_vgg16.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -383,10 +491,14 @@ cc_binary(
 cc_binary(
     name = "graph_vgg19",
     srcs = ["graph_vgg19.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -396,10 +508,14 @@ cc_binary(
 cc_binary(
     name = "graph_vgg_vdsr",
     srcs = ["graph_vgg_vdsr.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",
@@ -409,10 +525,14 @@ cc_binary(
 cc_binary(
     name = "graph_yolov3",
     srcs = ["graph_yolov3.cpp"],
-    copts = ["-march=armv8.2-a+fp16"],
+    copts = select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }),
     linkstatic = False,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//include",
         "//utils",

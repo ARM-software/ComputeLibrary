@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,8 +121,6 @@ public:
      * registering test cases.
      *
      * @param[in] name Name of the added test suite.
-     *
-     * @return Name of the current test suite.
      */
     void push_suite(std::string name);
 

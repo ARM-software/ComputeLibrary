@@ -34,9 +34,11 @@ cc_library(
         "validation/reference/*.h",
         "validation/**/*.h",
     ]),
-    copts = [
-                "-march=armv8.2-a+fp16",
-            ] + select({
+    copts = [] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }) + select({
                 "//:debug_flag": [
                     "-O0",
                     "-g",
@@ -54,7 +56,7 @@ cc_library(
             }),
     linkstatic = True,
     deps = [
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:common_defines",
         "//tests/framework",
     ],
@@ -74,9 +76,11 @@ cc_binary(
         "datasets/*.h",
         "instruments/*.h",
     ]),
-    copts = [
-                "-march=armv8.2-a+fp16",
-            ] + select({
+    copts = [] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }) + select({
                 "//:debug_flag": [
                     "-O0",
                     "-g",
@@ -95,12 +99,12 @@ cc_binary(
     linkstatic = True,
     deps = [
         ":validation_framework",
-        "//:arm_compute_core",
+        "//:arm_compute",
         "//:arm_compute_graph",
         "//:common_defines",
         "//tests/framework",
     ],
-    local_defines = [] + 
+    local_defines = [] +
         select({
                 "//:bf16_validation_flag": [
                 "ARM_COMPUTE_ENABLE_BF16",
@@ -125,9 +129,11 @@ cc_binary(
         "benchmark/NEON/*.cpp",
         "*.cpp",
     ]),
-    copts = [
-                "-march=armv8.2-a+fp16",
-            ] + select({
+    copts = [] + select({
+                  "//:arch_armv8-a": ["-march=armv8-a"],
+                  "//:arch_armv8.2-a+fp16": ["-march=armv8.2-a+fp16"],
+                  "//conditions:default": ["-march=armv8-a"],
+              }) + select({
                 "//:debug_flag": [
                     "-O0",
                     "-g",
@@ -147,6 +153,6 @@ cc_binary(
     deps = [
         ":arm_compute_validation",
         ":validation_framework",
-        "//:arm_compute_core",
+        "//:arm_compute",
     ],
 )

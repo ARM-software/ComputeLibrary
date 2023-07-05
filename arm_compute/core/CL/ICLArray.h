@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,8 +66,6 @@ public:
      * @param[in]     blocking If true, then the mapping will be ready to use by the time
      *                         this method returns, else it is the caller's responsibility
      *                         to flush the queue and wait for the mapping operation to have completed before using the returned mapping pointer.
-     *
-     * @return The mapping address.
      */
     void map(cl::CommandQueue &q, bool blocking = true)
     {

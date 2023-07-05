@@ -43,6 +43,8 @@ if(ARM_COMPUTE_LOGGING)
   add_definitions(-DARM_COMPUTE_LOGGING_ENABLED)
 endif()
 
+set(ARM_COMPUTE_ARCH armv8-a CACHE STRING "Architecture to use")
+
 # ---------------------------------------------------------------------
 # Backends
 
@@ -52,9 +54,7 @@ option(ARM_COMPUTE_ENABLE_SVE_VALIDATION "" OFF)
 option(ENABLE_NEON "Enable Arm® Neon™ support" ON)
 option(ARM_COMPUTE_CPU_ENABLED "" ON)
 option(ARM_COMPUTE_ENABLE_NEON "" ON)
-option(ARM_COMPUTE_ENABLE_FP16 "" ON)
 option(ARM_COMPUTE_ENABLE_I8MM "" ON)
-option(ENABLE_FP16_KERNELS "" ON)
 option(ENABLE_FP32_KERNELS "" ON)
 option(ENABLE_QASYMM8_KERNELS "" ON)
 option(ENABLE_QASYMM8_SIGNED_KERNELS "" ON)
@@ -65,6 +65,8 @@ option(ENABLE_NCHW_KERNELS "" ON)
 option(ARM_COMPUTE_GRAPH_ENABLED "" ON)
 option(ARM_COMPUTE_ENABLE_SVEF32MM "" ON)
 option(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS "" ON)
+option(ENABLE_FP16_KERNELS "" OFF)
+option(ARM_COMPUTE_ENABLE_FP16 "" OFF)
 
 if(ENABLE_NEON)
   add_definitions(-DENABLE_NEON)

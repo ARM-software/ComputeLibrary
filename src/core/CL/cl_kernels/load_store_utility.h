@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -463,8 +463,6 @@
     }
 /** @} */ // end of group STORE_BLOCK_PARTIAL
 
-#if defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
-
 /** Boundary-aware GEMM block store
  * @name STORE_BLOCK_BOUNDARY_AWARE
  * This macro assumes the following schemes to achieve boundary-awareness:
@@ -516,6 +514,7 @@
  * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  * @{
  */
+#if defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 #if PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case1: No partial blocks in either x or y
 #define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
@@ -541,7 +540,6 @@
 #endif    // defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 /** @} */ // end of group STORE_BLOCK_BOUNDARY_AWARE
 
-#if defined(PARTIAL_STORE_M0)
 /** Compute the start m0 row (LHS, BIAS and DST) in a boundary-aware way so as to avoid padding
  * @name COMPUTE_M0_START_ROW
  * If there're any partial blocks in y dimension, they are placed at the beginning of the rows.
@@ -558,6 +556,7 @@
  * @param[in] PARTIAL_STORE_M0 The partial size in y, for partial blocks. Supported: [0, @p M0)
  * @{
  */
+#if defined(PARTIAL_STORE_M0)
 #define COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) \
     ((uint)(max(0, (int)(y * M0) - (int)((M0 - PARTIAL_STORE_M0) % M0))))
 #else // defined(PARTIAL_STORE_M0)
@@ -567,7 +566,7 @@
 /** @} */ // end of group COMPUTE_M0_START_ROW
 
 /** Store a vector that can only be partial in x.
- *
+ * @name STORE_VECTOR_SELECT
  * @note in case @p vec_size or @p leftover != 1, 2, 3, 4, 8, 16, extra vstore(s) will be invoked, thus incurring small performance penalty.
  *
  * The data to store is expected to end in a 0.

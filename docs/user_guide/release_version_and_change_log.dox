@@ -40,6 +40,12 @@ If there is more than one release in a month then an extra sequential number is 
 @note Starting from release 22.05, 'master' branch is no longer being used, it has been replaced by 'main'. Please update your clone jobs accordingly.
 
 @section S2_2_changelog Changelog
+v23.05.1 Public patch release
+ - Enable CMake and Bazel option to build multi_isa without FP16 support.
+ - Fix compilation error in NEReorderLayer (aarch64 only).
+ - Disable invalid (false-negative) validation test with CPU scale layer on FP16.
+ - Various bug fixes
+
 v23.05 Public major release
  - New features:
    - Add new Arm® Neon™ kernels / functions:

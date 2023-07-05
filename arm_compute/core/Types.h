@@ -677,7 +677,7 @@ public:
      * @param[in] stride_y (Optional) Stride, in elements, across y. Defaults to 1.
      * @param[in] pad_x    (Optional) Padding, in elements, across x. Defaults to 0.
      * @param[in] pad_y    (Optional) Padding, in elements, across y. Defaults to 0.
-     * @param[in] round    (Optional) Dimensions rounding. Defaults to @ref FLOOR.
+     * @param[in] round    (Optional) Dimensions rounding. Defaults to @ref DimensionRoundingType::FLOOR.
      */
     PadStrideInfo(unsigned int stride_x = 1, unsigned int stride_y = 1,
                   unsigned int pad_x = 0, unsigned int pad_y = 0,
@@ -1336,7 +1336,7 @@ struct Pooling3dLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
-     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref DimensionRoundingType::FLOOR
      */
     explicit Pooling3dLayerInfo(PoolingType           pool_type,
                                 unsigned int          pool_size,
@@ -1366,7 +1366,7 @@ struct Pooling3dLayerInfo
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                               Defaults to false;
      * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
-     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref FLOOR
+     * @param[in] round_type         (Optional) Dimensions rounding. Defaults to @ref DimensionRoundingType::FLOOR
      */
     explicit Pooling3dLayerInfo(PoolingType           pool_type,
                                 Size3D                pool_size,

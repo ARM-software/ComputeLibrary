@@ -49,7 +49,7 @@ public:
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
     NEReorderLayer &operator=(NEReorderLayer &&) = delete;
     /** Default destructor */
-    ~NEReorderLayer() = default;
+    ~NEReorderLayer();
     /** Set the input and output tensors.
      *
      * Valid data layouts:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,9 @@ struct DepthwiseImplementation
   }
 };
 
+/**
+ * \relates DepthwiseImplementation
+ */
 template <typename TInput, typename TWeight = TInput, typename TOutput = TInput, class OutputStage = Nothing>
 const DepthwiseImplementation<TInput, TWeight, TOutput, OutputStage> *depthwise_implementation_list();
 

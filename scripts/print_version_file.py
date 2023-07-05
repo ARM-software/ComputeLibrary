@@ -31,6 +31,25 @@ def make_version_file(build_args, git_hash):
         VERSION, build_args, git_hash.strip())
     return build_info
 
+def make_version_file_from_sconscript(build_args, git_hash):
+    VERSION = "v0.0-unreleased"
+    fp = None
+    if os.path.exists("external/compute_library/SConscript"):
+        fp = "external/compute_library/SConscript"
+    elif os.path.exists("SConscript"):
+        fp = "SConscript"
+    if fp:
+        with open(fp) as scons_file:
+            for line in scons_file:
+                if "VERSION = " in line:
+                    VERSION = line.split("=")[-1].strip().replace("\"", "")
+                    break
+    return "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (
+        VERSION, build_args, git_hash.strip())
 
-if __name__ == "__main__":
-    print(make_version_file(sys.argv[1], sys.argv[2]))
+if __name__ == "__main__":        
+    if len(sys.argv) == 4 and sys.argv[3].lower() == "true":
+        print(make_version_file_from_sconscript(sys.argv[1], sys.argv[2]))
+    else:
+        print(make_version_file(sys.argv[1], sys.argv[2]))
+    

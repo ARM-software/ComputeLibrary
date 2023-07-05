@@ -92,8 +92,6 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
  * @param[in]  output                 Output tensor info.
  * @param[out] output_multipliers_ptr Pointer to the buffer where to store per-channel multipliers.
  * @param[out] output_shifts_ptr      Pointer to the buffer where to store per-channel shifts.
- *
- * @return min and max values for the quantized data type
  */
 void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               const ITensorInfo *weights,
