@@ -21,41 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
-#define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 
-#include "src/ITile.h"
-#include "src/cl/ICLTile.h"
 #include "ckw/ITileOperand.h"
-
-#include <string>
 
 namespace ckw
 {
-// Forward declarations
-class TileInfo;
-
-/** OpenCL specific tile */
-class CLTile : public ICLTile, public ITileOperand
-{
-public:
-    /** Constructor
-     *
-     * @param[in] name Tile name
-     * @param[in] info Tile info
-    */
-    CLTile(const std::string& name, const TileInfo &info);
-
-    // Inherited method overridden
-    TileVariable scalar(int32_t row, int32_t col) const override;
-    TileVariable vector(int32_t row) const override;
-    TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
-    std::vector<TileVariable> all() const override;
-    bool is_assignable() const override;
-
-private:
-    std::string create_var_name(int32_t row) const;
-};
-} // namespace ckw
-
-#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H */
+    ITileOperand::~ITileOperand() = default;
+}
