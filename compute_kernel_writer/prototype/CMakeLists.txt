@@ -43,6 +43,8 @@ target_compile_options(ckw_prototype
     "$<$<CONFIG:Debug>:${CKW_ASSERTS_OPTS}>"
     "$<$<BOOL:${CKW_ASSERTS}>:${CKW_ASSERTS_OPTS}>"
     ${CMAKE_CXX_FLAGS}
+    PRIVATE
+    $<$<CONFIG:Release>:-Os>
 )
 
 target_compile_definitions(ckw_prototype PUBLIC

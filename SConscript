@@ -56,8 +56,6 @@ def build_bootcode_objs(sources):
     return obj
 
 
-
-
 # @brief Create a list of object from a given file list.
 #
 # @param  arch_info      A dictionary represents the architecture info such as the
@@ -120,6 +118,24 @@ def build_lib_objects():
     return lib_static_objs, lib_shared_objs
 
 
+# The built-in SCons Glob() method does not support recursive searching of directories, thus we implement our own:
+def recursive_glob(root_dir, pattern):
+    files = []
+    regex = re.compile(pattern)
+
+    for dirpath, _, filenames in os.walk(root_dir):
+        for f in filenames:
+            f = os.path.join(dirpath, f)
+            if regex.match(f):
+                files.append(f)
+
+    return files
+
+
+def get_ckw_obj_list():
+    cmake_obj_dir = os.path.abspath("prototype/CMakeFiles/ckw_prototype.dir/src")
+    return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o")
+
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     cloned_build_env = build_env.Clone()
@@ -127,12 +143,25 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
 
-    if env['experimental_dynamic_fusion']:
-        libs.append('libckw_prototype.a')
-
+    # -- Static Library --
     if static:
-        obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        # Recreate the list to avoid mutating the original
+        static_sources = list(sources)
+
+        # Dynamic Fusion has a direct dependency on the Compute Kernel Writer (CKW) subproject, therefore we collect the
+        # built CKW objects to pack into the Compute Library archive.
+        if env['experimental_dynamic_fusion'] and name == "arm_compute-static":
+            static_sources += get_ckw_obj_list()
+
+        obj = cloned_build_env.StaticLibrary(name, source=static_sources, LIBS=arm_compute_env["LIBS"] + libs)
+
+    # -- Shared Library --
     else:
+        # Always statically link Compute Library against CKW
+        if env['experimental_dynamic_fusion'] and name == "arm_compute":
+            libs.append('libckw_prototype.a')
+
+        # Add shared library versioning
         if env['set_soname']:
             obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
@@ -560,7 +589,7 @@ custom_operators = []
 custom_types = []
 custom_layouts = []
 
-use_custom_ops = env['high_priority'] or env['build_config'];
+use_custom_ops = env['high_priority'] or env['build_config']
 
 if env['high_priority']:
     custom_operators = filelist['high_priority']
@@ -695,7 +724,7 @@ arm_compute_graph_env = arm_compute_env.Clone()
 # Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a ])
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True)
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:

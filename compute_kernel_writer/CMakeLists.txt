@@ -43,6 +43,7 @@ message(STATUS "${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_VERSION}")
 option(CKW_ENABLE_OPENCL "Enable OpenCL code generation" OFF)
 option(CKW_ENABLE_ASSERTS "Enable assertions. Always enabled in Debug builds" OFF)
 option(CKW_BUILD_TESTING "Build the Compute Kernel Writer validation test suite" OFF)
+option(CKW_BUILD_PROTOTYPE "Build the prototype implementation of kernel writer." OFF)
 option(CKW_CCACHE "Use compiler cache for faster recompilation" OFF)
 
 #---------------------------------------------------------------------
@@ -105,6 +106,7 @@ target_compile_options(ckw
     # Set CMAKE_CXX_FLAGS last so user can overwrite options
     ${CMAKE_CXX_FLAGS}
     PRIVATE
+    # Always optimize for binary size
     $<$<CONFIG:Release>:-Os>
 )
 

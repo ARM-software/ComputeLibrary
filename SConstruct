@@ -453,9 +453,9 @@ if env['experimental_dynamic_fusion']:
 
     # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
     CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
-                                                                          NUM_JOBS=GetOption('num_jobs')
-                                                                          )
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw_prototype -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
+                                                                                                 NUM_JOBS=GetOption('num_jobs')
+                                                                                                 )
 
     # Build Compute Kernel Writer Static Library
     subprocess.check_call(CKW_CMAKE_CONFIGURE_STATIC, stderr=subprocess.STDOUT, shell=True)
