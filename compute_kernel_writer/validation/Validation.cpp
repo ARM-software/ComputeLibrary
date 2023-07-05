@@ -26,6 +26,7 @@
 #include "tests/CLTileTest.hpp"
 #include "tests/TensorBitMaskTest.hpp"
 #include "tests/UtilsTest.hpp"
+#include "tests/CLKernelWriterTest.h"
 
 #include <memory>
 #include <vector>
@@ -59,6 +60,7 @@ int32_t main()
     const auto test12 = std::make_unique<CLConstantTileAccessScalarVariableBroadcastYTest>();
     const auto test13 = std::make_unique<CLConstantTileAccessVectorVariablesTest>();
     const auto test14 = std::make_unique<CLConstantTileAccessSubVectorVariablesTest>();
+    const auto test15 = std::make_unique<CLKernelWriterCommentTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -72,6 +74,7 @@ int32_t main()
     tests.push_back(test12.get());
     tests.push_back(test13.get());
     tests.push_back(test14.get());
+    tests.push_back(test15.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

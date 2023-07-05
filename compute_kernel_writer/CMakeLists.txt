@@ -124,6 +124,8 @@ target_sources(ckw PRIVATE
     src/TensorUtils.cpp
     src/TileInfo.cpp
     src/ITileOperand.cpp
+    src/Kernel.cpp
+    src/KernelWriter.cpp
 )
 
 if(CKW_ENABLE_OPENCL)
@@ -132,6 +134,7 @@ if(CKW_ENABLE_OPENCL)
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
         src/cl/ICLTile.cpp
+        src/cl/CLKernelWriter.cpp
     )
 endif()
 
@@ -145,9 +148,6 @@ target_include_directories(ckw
 
 if(CKW_BUILD_TESTING)
     add_executable(ckw_validation
-        validation/tests/common/Common.h
-        validation/tests/TensorBitMaskTest.hpp
-        validation/tests/UtilsTest.hpp
         validation/Validation.cpp
     )
     if(CKW_ENABLE_OPENCL)
