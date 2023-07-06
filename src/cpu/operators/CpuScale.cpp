@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,9 @@
  */
 #include "src/cpu/operators/CpuScale.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "src/common/utils/Log.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/cpu/kernels/CpuScaleKernel.h"

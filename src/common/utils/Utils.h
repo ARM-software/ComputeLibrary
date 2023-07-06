@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 #ifndef SRC_COMMON_UTILS_H
 #define SRC_COMMON_UTILS_H
 
+#include <algorithm>
+#include <initializer_list>
 #include <type_traits>
 
 namespace arm_compute
@@ -72,7 +74,7 @@ constexpr SE as_enum(const E val) noexcept
 template <typename E>
 bool is_in(E check, std::initializer_list<E> list)
 {
-    return std::any_of(std::cbegin(list), std::cend(list), [&check](E e)
+    return std::any_of(list.begin(), list.end(), [&check](E e)
     {
         return check == e;
     });

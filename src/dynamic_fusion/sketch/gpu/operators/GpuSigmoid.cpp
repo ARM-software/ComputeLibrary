@@ -23,6 +23,7 @@
  */
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSigmoid.h"
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/experimental/Types.h"
 
 #include "src/common/utils/Log.h"

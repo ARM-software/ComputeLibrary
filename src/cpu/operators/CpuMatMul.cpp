@@ -23,6 +23,7 @@
  */
 
 #include "src/cpu/operators/CpuMatMul.h"
+#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/experimental/Types.h"
