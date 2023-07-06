@@ -132,11 +132,7 @@ private:
     TensorInfo _flattened_src{};
     TensorInfo _converted_weights{};
     TensorInfo _reshaped_weights{};
-
-    // Saved tensor shapes for reshaping when using matmul
-    TensorShape _lhs_shape_original{};
     TensorInfo  _lhs_to_use{};
-
     TensorInfo _weights_to_use{};
     int        _weights_to_use_idx{ ACL_SRC_1 };
 

@@ -115,7 +115,7 @@ Status validate_mm(const ITensorInfo &src, const ITensorInfo &weights, const ITe
 {
     // If weights are dynamic, data is not batched, and bias is nullptr validate using matmul.
     const bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
-    const bool use_matmul       = !weights.are_values_constant() && !weights_reshaped && !(dst.dimension(1) > 1) && (bias != nullptr);
+    const bool use_matmul       = !weights.are_values_constant() && !weights_reshaped && !(dst.dimension(1) > 1) && (bias == nullptr);
 
     if(use_matmul)
     {
@@ -317,7 +317,7 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
     // Note: No matmul with biases for the moment.
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
     _dynamic_weights               = !weights->are_values_constant() && !_are_weights_reshaped;
-    _use_matmul                    = _dynamic_weights && !is_batched_fc_layer && !(biases);
+    _use_matmul                    = _dynamic_weights && !is_batched_fc_layer && (biases == nullptr);
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -442,7 +442,7 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     // Note: Pre-Shaped RHS is a deprecated use case and is therefore not supported with matmul.
     const bool dynamic_weights     = !weights->are_values_constant() && !weights_reshaped;
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    const bool use_matmul          = dynamic_weights && !is_batched_fc_layer && (biases != nullptr);
+    const bool use_matmul          = dynamic_weights && !is_batched_fc_layer && (biases == nullptr);
 
     const ITensorInfo &flatten_src       = TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(src)).set_data_layout(DataLayout::NCHW));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
