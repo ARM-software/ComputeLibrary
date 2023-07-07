@@ -116,7 +116,7 @@ namespace
   {
     if (args.channel_multiplier > 1 && !prefer_premultiply(args))
     {
-      return UINT32_MAX;
+      return std::numeric_limits<unsigned int>::max();
     }
 
     // First-pass: compute the number of output pixels which will be computed.
@@ -154,7 +154,7 @@ namespace
 
   unsigned int multiplier_cycle_estimate(const DepthwiseArgs &args, const Nothing &)
   {
-    return prefer_premultiply(args)? UINT32_MAX : 0;
+    return prefer_premultiply(args)? std::numeric_limits<unsigned int>::max() : 0;
   }
 
   unsigned int not_preferred(const DepthwiseArgs &, const Nothing &)

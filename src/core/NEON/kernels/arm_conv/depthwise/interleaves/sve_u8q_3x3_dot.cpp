@@ -42,7 +42,7 @@ size_t interleave_sve_u8q_3x3_dot::get_packed_size(const DepthwiseArgs &args)
 {
   // We store 7 vectors for every <vector_of_ints> of channels.
   const unsigned int n = arm_gemm::roundup(
-    arm_gemm::iceildiv((long unsigned int) args.input_channels,
+    arm_gemm::iceildiv((long unsigned int) args.input_channels * args.channel_multiplier,
                        get_vector_length<int32_t>(arm_gemm::VLType::SVE)), 4lu
   );
   return n * 7 * get_vector_length<uint8_t>(arm_gemm::VLType::SVE);
