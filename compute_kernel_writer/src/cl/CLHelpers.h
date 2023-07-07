@@ -24,14 +24,15 @@
 #ifndef CKW_SRC_CL_CLHELPERS_H
 #define CKW_SRC_CL_CLHELPERS_H
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 /** OpenCL specific helper functions */
 namespace ckw
 {
 // Forward declarations
 enum class DataType;
+enum class TensorStorageType : uint32_t;
 
 /** Helper function to validate the vector length of OpenCL vector data types
  *
@@ -58,6 +59,13 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len);
 */
 int32_t width_to_cl_vector_size(int32_t width);
 
+/** Helper function to return the OpenCL storage type as a string from a @ref TensorStorage
+ *
+ * @param[in] storage Storage type
+ *
+ * @return the OpenCL storage type as a string
+ */
+std::string cl_get_variable_storagetype_as_string(TensorStorageType storage);
 } // namespace ckw
 
 #endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLHELPERS_H */

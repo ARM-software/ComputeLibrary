@@ -22,36 +22,40 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_SRC_TENSORUTILS_H
-#define CKW_SRC_TENSORUTILS_H
+#ifndef CKW_INCLUDE_CKW_TYPES_TENSORCOMPONENTTYPE_H
+#define CKW_INCLUDE_CKW_TYPES_TENSORCOMPONENTTYPE_H
 
 #include <cstdint>
 
-/** Tensor specific utility functions */
 namespace ckw
 {
-// Forward declarations
-enum class TensorDataLayout;
-enum class TensorDataLayoutComponent;
-enum class TensorComponentType : uint32_t;
 
-/** Get tensor dimension from a given data layout and data layout component
+/** Compute Kernel Writer tensor component.
  *
- * @param[in] layout    Layout of the tensor
- * @param[in] component Data layout component
- *
- * @return the @ref TensorComponent
+ * The tensor components are used to access specific backend-agnostic tensor arguments,
+ * such as the tensor dimensions and tensor strides.
+ * The tensor component is represented as an unsigned integer. The value of the integer value
+ * is assigned to retrieve the information through the @ref TensorComponentBitmask.
  */
-TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutComponent component);
+enum class TensorComponentType : uint32_t
+{
+    Unknown            = 0x00000000,
+    OffsetFirstElement = 0x01000000,
+    Stride0            = 0x02000001,
+    Stride1            = 0x02000002,
+    Stride2            = 0x02000003,
+    Stride3            = 0x02000004,
+    Stride4            = 0x02000005,
+    Dim0               = 0x04000001,
+    Dim1               = 0x04000002,
+    Dim2               = 0x04000003,
+    Dim3               = 0x04000004,
+    Dim4               = 0x04000005,
+    Dim1xDim2          = 0x08000032,
+    Dim2xDim3          = 0x08000043,
+    Dim1xDim2xDim3     = 0x08000432
+};
 
-/** Get tensor stride from a given data layout and data layout component
- *
- * @param[in] layout    Layout of the tensor
- * @param[in] component Data layout component
- *
- * @return the @ref TensorComponent
- */
-TensorComponentType get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component);
 } // namespace ckw
 
-#endif // CKW_SRC_TENSORUTILS_H
+#endif // CKW_INCLUDE_CKW_TYPES_TENSORCOMPONENTTYPE_H

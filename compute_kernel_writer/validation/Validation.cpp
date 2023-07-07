@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
+#include "tests/CLConstantTileTest.hpp"
 #include "tests/CLKernelWriterCommentTest.h"
 #include "tests/CLKernelWriterDeclareTileTest.h"
-#include "tests/CLConstantTileTest.hpp"
+#include "tests/CLTensorArgumentTest.h"
 #include "tests/CLTileTest.hpp"
-#include "tests/TensorBitMaskTest.hpp"
-#include "tests/UtilsTest.hpp"
+#include "tests/TensorBitMaskTest.h"
+#include "tests/UtilsTest.h"
 
 #include <memory>
 #include <vector>
@@ -65,6 +66,13 @@ int32_t main()
     const auto test15 = std::make_unique<CLKernelWriterCommentTest>();
 #endif /* COMPUTE_KERNEL_WRITER_DEBUG_ENABLED */
     const auto test16 = std::make_unique<CLKernelWriterDeclareTileTest>();
+    const auto test17 = std::make_unique<CLTensorArgumentComponentNamesTest>();
+    const auto test18 = std::make_unique<CLTensorArgumentStorageNamesTest>();
+    const auto test19 = std::make_unique<CLTensorArgumentComponentValuesTest>();
+    const auto test20 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueFalseTest>();
+    const auto test21 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueTest>();
+    const auto test22 = std::make_unique<CLTensorArgumentStoragesUsedTest>();
+    const auto test23 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueDynamicDimTrueTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -82,6 +90,13 @@ int32_t main()
     tests.push_back(test15.get());
 #endif /* COMPUTE_KERNEL_WRITER_DEBUG_ENABLED */
     tests.push_back(test16.get());
+    tests.push_back(test17.get());
+    tests.push_back(test18.get());
+    tests.push_back(test19.get());
+    tests.push_back(test20.get());
+    tests.push_back(test21.get());
+    tests.push_back(test22.get());
+    tests.push_back(test23.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

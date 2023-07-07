@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
+#include "src/TensorUtils.h"
 #include "ckw/Error.h"
 #include "ckw/TensorInfo.h"
-
-#include "src/TensorUtils.h"
+#include "ckw/types/TensorComponentType.h"
 
 namespace ckw
 {
-TensorComponent get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutComponent component)
+TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutComponent component)
 {
     switch(layout)
     {
@@ -37,41 +37,41 @@ TensorComponent get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutCo
             switch(component)
             {
                 case TensorDataLayoutComponent::C:
-                    return TensorComponent::Dim0;
+                    return TensorComponentType::Dim0;
                 case TensorDataLayoutComponent::W:
-                    return TensorComponent::Dim1;
+                    return TensorComponentType::Dim1;
                 case TensorDataLayoutComponent::H:
-                    return TensorComponent::Dim2;
+                    return TensorComponentType::Dim2;
                 case TensorDataLayoutComponent::N:
-                    return TensorComponent::Dim3;
+                    return TensorComponentType::Dim3;
                 default:
                     COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor component for NHWC");
-                    return TensorComponent::Unknown;
+                    return TensorComponentType::Unknown;
             }
         case TensorDataLayout::Ndhwc:
             switch(component)
             {
                 case TensorDataLayoutComponent::C:
-                    return TensorComponent::Dim0;
+                    return TensorComponentType::Dim0;
                 case TensorDataLayoutComponent::W:
-                    return TensorComponent::Dim1;
+                    return TensorComponentType::Dim1;
                 case TensorDataLayoutComponent::H:
-                    return TensorComponent::Dim2;
+                    return TensorComponentType::Dim2;
                 case TensorDataLayoutComponent::D:
-                    return TensorComponent::Dim3;
+                    return TensorComponentType::Dim3;
                 case TensorDataLayoutComponent::N:
-                    return TensorComponent::Dim4;
+                    return TensorComponentType::Dim4;
                 default:
                     COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor component for NDHWC");
-                    return TensorComponent::Unknown;
+                    return TensorComponentType::Unknown;
             }
         default:
             COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor data layout");
-            return TensorComponent::Unknown;
+            return TensorComponentType::Unknown;
     }
 }
 
-TensorComponent get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component)
+TensorComponentType get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component)
 {
     switch(layout)
     {
@@ -79,37 +79,37 @@ TensorComponent get_tensor_stride(TensorDataLayout layout, TensorDataLayoutCompo
             switch(component)
             {
                 case TensorDataLayoutComponent::C:
-                    return TensorComponent::Stride0;
+                    return TensorComponentType::Stride0;
                 case TensorDataLayoutComponent::W:
-                    return TensorComponent::Stride1;
+                    return TensorComponentType::Stride1;
                 case TensorDataLayoutComponent::H:
-                    return TensorComponent::Stride2;
+                    return TensorComponentType::Stride2;
                 case TensorDataLayoutComponent::N:
-                    return TensorComponent::Stride3;
+                    return TensorComponentType::Stride3;
                 default:
                     COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor component for NHWC");
-                    return TensorComponent::Unknown;
+                    return TensorComponentType::Unknown;
             }
         case TensorDataLayout::Ndhwc:
             switch(component)
             {
                 case TensorDataLayoutComponent::C:
-                    return TensorComponent::Stride0;
+                    return TensorComponentType::Stride0;
                 case TensorDataLayoutComponent::W:
-                    return TensorComponent::Stride1;
+                    return TensorComponentType::Stride1;
                 case TensorDataLayoutComponent::H:
-                    return TensorComponent::Stride2;
+                    return TensorComponentType::Stride2;
                 case TensorDataLayoutComponent::D:
-                    return TensorComponent::Stride3;
+                    return TensorComponentType::Stride3;
                 case TensorDataLayoutComponent::N:
-                    return TensorComponent::Stride4;
+                    return TensorComponentType::Stride4;
                 default:
                     COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor component for NDHWC");
-                    return TensorComponent::Unknown;
+                    return TensorComponentType::Unknown;
             }
         default:
             COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported tensor data layout");
-            return TensorComponent::Unknown;
+            return TensorComponentType::Unknown;
     }
 }
 } // namespace ckw

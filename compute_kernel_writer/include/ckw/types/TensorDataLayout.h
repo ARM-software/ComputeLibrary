@@ -22,36 +22,31 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_SRC_TENSORUTILS_H
-#define CKW_SRC_TENSORUTILS_H
+#ifndef CKW_INCLUDE_CKW_TYPES_TENSORDATALAYOUT_H
+#define CKW_INCLUDE_CKW_TYPES_TENSORDATALAYOUT_H
 
-#include <cstdint>
-
-/** Tensor specific utility functions */
 namespace ckw
 {
-// Forward declarations
-enum class TensorDataLayout;
-enum class TensorDataLayoutComponent;
-enum class TensorComponentType : uint32_t;
 
-/** Get tensor dimension from a given data layout and data layout component
- *
- * @param[in] layout    Layout of the tensor
- * @param[in] component Data layout component
- *
- * @return the @ref TensorComponent
- */
-TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutComponent component);
+/** Compute Kernel Writer tensor data layout (or memory format) */
+enum class TensorDataLayout
+{
+    Unknown,
+    Nhwc,
+    Ndhwc
+};
 
-/** Get tensor stride from a given data layout and data layout component
- *
- * @param[in] layout    Layout of the tensor
- * @param[in] component Data layout component
- *
- * @return the @ref TensorComponent
- */
-TensorComponentType get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component);
+/** Compute Kernel Writer tensor data layout component */
+enum class TensorDataLayoutComponent
+{
+    Unknown,
+    N,
+    D,
+    H,
+    W,
+    C,
+};
+
 } // namespace ckw
 
-#endif // CKW_SRC_TENSORUTILS_H
+#endif // CKW_INCLUDE_CKW_TYPES_TENSORDATALAYOUT_H

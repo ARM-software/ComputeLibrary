@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_TESTS_TENSORBITMASK_HPP
-#define COMPUTE_KERNEL_WRITER_TESTS_TENSORBITMASK_HPP
+#ifndef CKW_TESTS_TENSORBITMASKTEST_H
+#define CKW_TESTS_TENSORBITMASKTEST_H
 
 #include "ckw/TensorInfo.h"
+#include "ckw/types/TensorComponentType.h"
 #include "common/Common.h"
+#include "src/types/TensorComponentType.h"
 
 #include <vector>
 
@@ -36,20 +38,20 @@ class TensorBitMaskTrueTest : public ITest
 public:
     TensorBitMaskTrueTest()
     {
-        _component.push_back(TensorComponent::Dim0);
-        _component.push_back(TensorComponent::Dim1);
-        _component.push_back(TensorComponent::Dim2);
-        _component.push_back(TensorComponent::Dim3);
-        _component.push_back(TensorComponent::Dim4);
-        _component.push_back(TensorComponent::Stride0);
-        _component.push_back(TensorComponent::Stride1);
-        _component.push_back(TensorComponent::Stride2);
-        _component.push_back(TensorComponent::Stride3);
-        _component.push_back(TensorComponent::Stride4);
-        _component.push_back(TensorComponent::Dim1xDim2);
-        _component.push_back(TensorComponent::Dim1xDim2xDim3);
-        _component.push_back(TensorComponent::Dim2xDim3);
-        _component.push_back(TensorComponent::OffsetFirstElement);
+        _component.push_back(TensorComponentType::Dim0);
+        _component.push_back(TensorComponentType::Dim1);
+        _component.push_back(TensorComponentType::Dim2);
+        _component.push_back(TensorComponentType::Dim3);
+        _component.push_back(TensorComponentType::Dim4);
+        _component.push_back(TensorComponentType::Stride0);
+        _component.push_back(TensorComponentType::Stride1);
+        _component.push_back(TensorComponentType::Stride2);
+        _component.push_back(TensorComponentType::Stride3);
+        _component.push_back(TensorComponentType::Stride4);
+        _component.push_back(TensorComponentType::Dim1xDim2);
+        _component.push_back(TensorComponentType::Dim1xDim2xDim3);
+        _component.push_back(TensorComponentType::Dim2xDim3);
+        _component.push_back(TensorComponentType::OffsetFirstElement);
 
         _bitmask.push_back(TensorComponentBitmask::Dimension);
         _bitmask.push_back(TensorComponentBitmask::Dimension);
@@ -77,7 +79,7 @@ public:
         const size_t num_tests = _component.size();
         for(size_t i = 0; i < num_tests; ++i)
         {
-            const TensorComponent        component = _component[i];
+            const TensorComponentType    component = _component[i];
             const TensorComponentBitmask bitmask   = _bitmask[i];
             const bool                   out       = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
             VALIDATE_TEST(out == true, all_tests_passed, i);
@@ -91,7 +93,7 @@ public:
     }
 
 private:
-    std::vector<TensorComponent>        _component{};
+    std::vector<TensorComponentType>    _component{};
     std::vector<TensorComponentBitmask> _bitmask{};
 };
 
@@ -100,48 +102,48 @@ class TensorBitMaskFalseTest : public ITest
 public:
     TensorBitMaskFalseTest()
     {
-        _component.push_back(TensorComponent::Dim0);
-        _component.push_back(TensorComponent::Dim1);
-        _component.push_back(TensorComponent::Dim2);
-        _component.push_back(TensorComponent::Dim3);
-        _component.push_back(TensorComponent::Dim4);
-        _component.push_back(TensorComponent::Dim0);
-        _component.push_back(TensorComponent::Dim1);
-        _component.push_back(TensorComponent::Dim2);
-        _component.push_back(TensorComponent::Dim3);
-        _component.push_back(TensorComponent::Dim4);
-        _component.push_back(TensorComponent::Dim0);
-        _component.push_back(TensorComponent::Dim1);
-        _component.push_back(TensorComponent::Dim2);
-        _component.push_back(TensorComponent::Dim3);
-        _component.push_back(TensorComponent::Dim4);
-        _component.push_back(TensorComponent::Stride0);
-        _component.push_back(TensorComponent::Stride1);
-        _component.push_back(TensorComponent::Stride2);
-        _component.push_back(TensorComponent::Stride3);
-        _component.push_back(TensorComponent::Stride4);
-        _component.push_back(TensorComponent::Stride0);
-        _component.push_back(TensorComponent::Stride1);
-        _component.push_back(TensorComponent::Stride2);
-        _component.push_back(TensorComponent::Stride3);
-        _component.push_back(TensorComponent::Stride4);
-        _component.push_back(TensorComponent::Stride0);
-        _component.push_back(TensorComponent::Stride1);
-        _component.push_back(TensorComponent::Stride2);
-        _component.push_back(TensorComponent::Stride3);
-        _component.push_back(TensorComponent::Stride4);
-        _component.push_back(TensorComponent::Dim1xDim2);
-        _component.push_back(TensorComponent::Dim1xDim2xDim3);
-        _component.push_back(TensorComponent::Dim2xDim3);
-        _component.push_back(TensorComponent::Dim1xDim2);
-        _component.push_back(TensorComponent::Dim1xDim2xDim3);
-        _component.push_back(TensorComponent::Dim2xDim3);
-        _component.push_back(TensorComponent::Dim1xDim2);
-        _component.push_back(TensorComponent::Dim1xDim2xDim3);
-        _component.push_back(TensorComponent::Dim2xDim3);
-        _component.push_back(TensorComponent::OffsetFirstElement);
-        _component.push_back(TensorComponent::OffsetFirstElement);
-        _component.push_back(TensorComponent::OffsetFirstElement);
+        _component.push_back(TensorComponentType::Dim0);
+        _component.push_back(TensorComponentType::Dim1);
+        _component.push_back(TensorComponentType::Dim2);
+        _component.push_back(TensorComponentType::Dim3);
+        _component.push_back(TensorComponentType::Dim4);
+        _component.push_back(TensorComponentType::Dim0);
+        _component.push_back(TensorComponentType::Dim1);
+        _component.push_back(TensorComponentType::Dim2);
+        _component.push_back(TensorComponentType::Dim3);
+        _component.push_back(TensorComponentType::Dim4);
+        _component.push_back(TensorComponentType::Dim0);
+        _component.push_back(TensorComponentType::Dim1);
+        _component.push_back(TensorComponentType::Dim2);
+        _component.push_back(TensorComponentType::Dim3);
+        _component.push_back(TensorComponentType::Dim4);
+        _component.push_back(TensorComponentType::Stride0);
+        _component.push_back(TensorComponentType::Stride1);
+        _component.push_back(TensorComponentType::Stride2);
+        _component.push_back(TensorComponentType::Stride3);
+        _component.push_back(TensorComponentType::Stride4);
+        _component.push_back(TensorComponentType::Stride0);
+        _component.push_back(TensorComponentType::Stride1);
+        _component.push_back(TensorComponentType::Stride2);
+        _component.push_back(TensorComponentType::Stride3);
+        _component.push_back(TensorComponentType::Stride4);
+        _component.push_back(TensorComponentType::Stride0);
+        _component.push_back(TensorComponentType::Stride1);
+        _component.push_back(TensorComponentType::Stride2);
+        _component.push_back(TensorComponentType::Stride3);
+        _component.push_back(TensorComponentType::Stride4);
+        _component.push_back(TensorComponentType::Dim1xDim2);
+        _component.push_back(TensorComponentType::Dim1xDim2xDim3);
+        _component.push_back(TensorComponentType::Dim2xDim3);
+        _component.push_back(TensorComponentType::Dim1xDim2);
+        _component.push_back(TensorComponentType::Dim1xDim2xDim3);
+        _component.push_back(TensorComponentType::Dim2xDim3);
+        _component.push_back(TensorComponentType::Dim1xDim2);
+        _component.push_back(TensorComponentType::Dim1xDim2xDim3);
+        _component.push_back(TensorComponentType::Dim2xDim3);
+        _component.push_back(TensorComponentType::OffsetFirstElement);
+        _component.push_back(TensorComponentType::OffsetFirstElement);
+        _component.push_back(TensorComponentType::OffsetFirstElement);
 
         _bitmask.push_back(TensorComponentBitmask::Stride);
         _bitmask.push_back(TensorComponentBitmask::Stride);
@@ -197,7 +199,7 @@ public:
         const size_t num_tests = _component.size();
         for(size_t i = 0; i < num_tests; ++i)
         {
-            const TensorComponent        component = _component[i];
+            const TensorComponentType    component = _component[i];
             const TensorComponentBitmask bitmask   = _bitmask[i];
             const bool                   out       = static_cast<uint32_t>(component) & static_cast<uint32_t>(bitmask);
             VALIDATE_TEST(out == false, all_tests_passed, i);
@@ -211,9 +213,9 @@ public:
     }
 
 private:
-    std::vector<TensorComponent>        _component{};
+    std::vector<TensorComponentType>    _component{};
     std::vector<TensorComponentBitmask> _bitmask{};
 };
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_TESTS_TENSORBITMASK_HPP */
+#endif // CKW_TESTS_TENSORBITMASKTEST_H

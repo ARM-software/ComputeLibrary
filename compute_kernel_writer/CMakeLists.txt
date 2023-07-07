@@ -131,6 +131,7 @@ target_sources(ckw PRIVATE
 if(CKW_ENABLE_OPENCL)
     target_sources(ckw PRIVATE
         src/cl/CLConstantTile.cpp
+        src/cl/CLTensorArgument.cpp
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
         src/cl/ICLTile.cpp
@@ -150,11 +151,6 @@ if(CKW_BUILD_TESTING)
     add_executable(ckw_validation
         validation/Validation.cpp
     )
-    if(CKW_ENABLE_OPENCL)
-        target_sources(ckw_validation PRIVATE
-            validation/tests/CLConstantTileTest.hpp
-            validation/tests/CLTileTest.hpp)
-    endif()
 
     target_link_libraries(ckw_validation PRIVATE ckw)
     target_include_directories(ckw_validation

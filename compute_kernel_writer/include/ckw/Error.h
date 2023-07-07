@@ -87,7 +87,7 @@ inline void ignore_unused(T &&...)
 
 #ifdef COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
 
-/** If the condition is not met, throw an std::runtime_error with the specified message.
+/** If the condition is not met, throw an std::runtime_error with the specified message if assertion is enabled.
  *
  * @param[in] cond The condition that is expected to be true.
  * @param[in] msg  The error message when the condition is not met.
@@ -101,18 +101,23 @@ inline void ignore_unused(T &&...)
         }                         \
     } while(false)
 
-/** If the condition is not met, throw an std::runtime_error.
+#else // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+
+#define CKW_ASSERT_MSG(cond, msg)
+
+#endif // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+
+/** If the condition is not met, throw an std::runtime_error if assertion is enabled.
  *
  * @param[in] cond The condition that is expected to be true.
  */
 #define CKW_ASSERT(cond) CKW_ASSERT_MSG(cond, #cond)
 
-#else // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
-
-#define CKW_ASSERT_MSG(cond, msg)
-#define CKW_ASSERT(cond)
-
-#endif // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+/** Throw an std::runtime_error with the specified message if assertion is enabled.
+ *
+ * @param[in] msg  The error message when the condition is not met.
+ */
+#define CKW_ASSERT_FAILED_MSG(msg) CKW_ASSERT_MSG(false, msg)
 
 } // namespace ckw
 

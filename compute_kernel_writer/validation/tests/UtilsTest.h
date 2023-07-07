@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_TESTS_UTILSTEST_HPP
-#define COMPUTE_KERNEL_WRITER_TESTS_UTILSTEST_HPP
+#ifndef CKW_TESTS_UTILSTEST_H
+#define CKW_TESTS_UTILSTEST_H
 
 #include "ckw/TensorInfo.h"
+#include "ckw/types/TensorDataLayout.h"
 #include "common/Common.h"
 #include "src/TensorUtils.h"
 
@@ -57,15 +58,15 @@ public:
         _component.push_back(TensorDataLayoutComponent::W);
         _component.push_back(TensorDataLayoutComponent::C);
 
-        _expected.push_back(TensorComponent::Dim3);
-        _expected.push_back(TensorComponent::Dim2);
-        _expected.push_back(TensorComponent::Dim1);
-        _expected.push_back(TensorComponent::Dim0);
-        _expected.push_back(TensorComponent::Dim4);
-        _expected.push_back(TensorComponent::Dim3);
-        _expected.push_back(TensorComponent::Dim2);
-        _expected.push_back(TensorComponent::Dim1);
-        _expected.push_back(TensorComponent::Dim0);
+        _expected.push_back(TensorComponentType::Dim3);
+        _expected.push_back(TensorComponentType::Dim2);
+        _expected.push_back(TensorComponentType::Dim1);
+        _expected.push_back(TensorComponentType::Dim0);
+        _expected.push_back(TensorComponentType::Dim4);
+        _expected.push_back(TensorComponentType::Dim3);
+        _expected.push_back(TensorComponentType::Dim2);
+        _expected.push_back(TensorComponentType::Dim1);
+        _expected.push_back(TensorComponentType::Dim0);
     }
 
     bool run() override
@@ -81,8 +82,8 @@ public:
         {
             const TensorDataLayout          layout    = _layout[i];
             const TensorDataLayoutComponent component = _component[i];
-            const TensorComponent           expected  = _expected[i];
-            const TensorComponent           out       = get_tensor_dimension(layout, component);
+            const TensorComponentType       expected  = _expected[i];
+            const TensorComponentType       out       = get_tensor_dimension(layout, component);
             VALIDATE_TEST(out == expected, all_tests_passed, i);
         }
         return all_tests_passed;
@@ -96,8 +97,8 @@ public:
 private:
     std::vector<TensorDataLayout>          _layout{};
     std::vector<TensorDataLayoutComponent> _component{};
-    std::vector<TensorComponent>           _expected{};
+    std::vector<TensorComponentType>       _expected{};
 };
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_TESTS_UTILSTEST_HPP */
+#endif // CKW_TESTS_UTILSTEST_H

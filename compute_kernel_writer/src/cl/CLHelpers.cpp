@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/cl/CLHelpers.h"
 #include "ckw/Error.h"
 #include "ckw/types/DataType.h"
-
-#include "src/cl/CLHelpers.h"
+#include "ckw/types/TensorStorageType.h"
 
 namespace ckw
 {
@@ -120,4 +120,26 @@ int32_t width_to_cl_vector_size(int32_t width)
             return 0;
     }
 }
+
+std::string cl_get_variable_storagetype_as_string(TensorStorageType storage)
+{
+    std::string res;
+    switch(storage)
+    {
+        case TensorStorageType::BufferUint8Ptr:
+            res += "__global uchar*";
+            break;
+        case TensorStorageType::Texture2dReadOnly:
+            res += "__read_only image2d_t";
+            break;
+        case TensorStorageType::Texture2dWriteOnly:
+            res += "__write_only image2d_t";
+            break;
+        default:
+            COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported storage type");
+    }
+
+    return res;
+}
+
 } // namespace ckw
