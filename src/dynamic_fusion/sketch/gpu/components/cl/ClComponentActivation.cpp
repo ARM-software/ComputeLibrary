@@ -24,6 +24,7 @@
 #include "ClComponentActivation.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwActivation.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
 
 namespace arm_compute
@@ -65,7 +66,8 @@ ClComponentActivation::ClComponentActivation(ComponentId                        
                                              const ArgumentPack<ITensorInfo>       &tensors,
                                              const Attributes                      &attributes)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateActivation>(id, tensors, attributes) }
+      _component_writer{ std::make_unique<ClTemplateActivation>(id, tensors, attributes) },
+      _ckw_driver{ std::make_unique<GpuCkwActivation>(id, tensors, attributes) }
 {
 }
 
@@ -76,6 +78,11 @@ ClComponentActivation::~ClComponentActivation()
 const IGpuTemplateComponentWriter *ClComponentActivation::template_writer() const
 {
     return _component_writer.get();
+}
+
+const IGpuCkwComponentDriver *ClComponentActivation::ckw_component_driver() const
+{
+    return _ckw_driver.get();
 }
 } // namespace dynamic_fusion
 } // namespace experimental

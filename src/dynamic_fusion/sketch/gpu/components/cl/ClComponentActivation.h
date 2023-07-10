@@ -24,6 +24,7 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 
+#include "arm_compute/core/ActivationLayerInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
@@ -40,6 +41,7 @@ class ArgumentPack;
 
 /** Forward declaration */
 class ClTemplateActivation;
+class GpuCkwActivation;
 
 class ClComponentActivation final : public IGpuKernelComponent
 {
@@ -105,6 +107,8 @@ public:
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
 
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
+
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -113,6 +117,7 @@ public:
 
 private:
     std::unique_ptr<ClTemplateActivation> _component_writer;
+    std::unique_ptr<GpuCkwActivation>     _ckw_driver;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -2340,6 +2340,7 @@
       "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.cpp",
       "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.cpp",
       "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwDriver.cpp",
+      "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwActivation.cpp",
       "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.cpp",
       "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.cpp",
       "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.cpp",

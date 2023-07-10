@@ -62,6 +62,32 @@ inline void load_lhs_rhs_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &wri
     }
 }
 
+/** Load src and dst tiles of dimension [m0, n0] only when not loaded and prepare the sampler
+ */
+inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &writer, GpuCkwComponentArgument *src, GpuCkwComponentArgument *dst, int32_t m0, int32_t n0, SamplerCreator create_sampler)
+{
+    if(!src->has_tile())
+    {
+        const auto sampler = create_sampler(writer, m0, n0);
+        writer->op_load_once(src, sampler);
+    }
+    else
+    {
+        const auto &sampler = src->tile_sampler();
+        writer->op_load_once(src, sampler);
+    }
+
+    auto       &src_tile = src->tile();
+    const auto &sampler  = src->tile_sampler();
+
+    // Prepare the output tile.
+    if(!dst->has_tile())
+    {
+        auto &tile = writer->declare_tile("dst_tile", src_tile.tile_info());
+        dst->init_virtual_tensor(tile, sampler);
+    }
+}
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

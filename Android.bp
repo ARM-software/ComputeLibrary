@@ -638,6 +638,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwActivation.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.cpp",
         "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.cpp",
