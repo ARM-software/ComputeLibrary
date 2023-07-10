@@ -86,7 +86,9 @@ void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, 
     _op             = op;
 
     // Set build options
-    const auto     vector_size = adjust_vec_size(16U, input->info()->dimension(0));
+    const auto adjusted_vector_size = adjust_vec_size(16U, input->info()->dimension(0));
+    const auto vector_size          = (adjusted_vector_size == 3U && axis == 0U) ? 2U : adjusted_vector_size; // the opencl kernel only supports sizes 2, 4, 8 and 16.
+
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % vector_size));

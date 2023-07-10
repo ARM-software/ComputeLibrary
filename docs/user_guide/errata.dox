@@ -31,7 +31,7 @@ namespace arm_compute
 @section S7_1_errata Errata
 
 - (COMPMID-6271) Under certain conditions, CLArgMinMaxLayer validation tests may fail
-    - Versions Affected: >= v20.02
+    - Versions Affected: >= v20.02 && < v23.08
     - OSs Affected: Linux
     - Conditions:
         - Backend: OpenCL
