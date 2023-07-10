@@ -48,12 +48,14 @@ inline ckw::DataType to_ckw(DataType dt)
         case DataType::S16:
             return ckw::DataType::Int16;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
             return ckw::DataType::Int8;
         case DataType::U32:
             return ckw::DataType::Uint32;
         case DataType::U16:
             return ckw::DataType::Uint16;
         case DataType::U8:
+        case DataType::QASYMM8:
             return ckw::DataType::Uint8;
         default:
             return ckw::DataType::Unknown;

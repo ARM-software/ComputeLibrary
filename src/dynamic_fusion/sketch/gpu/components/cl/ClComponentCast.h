@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,7 @@ private:
 
 /** Forward declaration */
 class ClTemplateCast;
+class GpuCkwCast;
 
 class ClComponentCast final : public IGpuKernelComponent
 {
@@ -117,6 +118,8 @@ public:
     ClComponentCast &operator=(ClComponentCast &&component) = default;
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
+    /** Get GPU kernel writer for the component */
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -125,6 +128,7 @@ public:
 
 private:
     std::unique_ptr<ClTemplateCast> _component_writer;
+    std::unique_ptr<GpuCkwCast>     _ckw_driver;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

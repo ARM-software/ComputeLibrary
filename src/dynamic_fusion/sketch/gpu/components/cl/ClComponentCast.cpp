@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwCast.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateCast.h"
 
 namespace arm_compute
@@ -66,7 +67,8 @@ ClComponentCast::ClComponentCast(ComponentId                      id,
                                  const Attributes                &attributes,
                                  const Settings                  &settings)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateCast>(id, tensors, attributes) }
+      _component_writer{ std::make_unique<ClTemplateCast>(id, tensors, attributes) },
+      _ckw_driver{ std::make_unique<GpuCkwCast>(id, tensors, attributes) }
 {
     ARM_COMPUTE_UNUSED(attributes, settings);
 }
@@ -76,6 +78,11 @@ ClComponentCast::~ClComponentCast()
 const IGpuTemplateComponentWriter *ClComponentCast::template_writer() const
 {
     return _component_writer.get();
+}
+
+const IGpuCkwComponentDriver *ClComponentCast::ckw_component_driver() const
+{
+    return _ckw_driver.get();
 }
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -33,6 +33,7 @@ namespace ckw
 enum class UnaryOp : int32_t
 {
     LogicalNot = 0x0000, // !
+    BitwiseNot = 0x0001, // ~
 };
 
 /* Binary operations
@@ -60,6 +61,8 @@ enum class BinaryOp : int32_t
     // Logical
     LogicalAnd = 0x3000, // &&
     LogicalOr  = 0x3001, // ||
+    // Bitwise
+    BitwiseXOR = 0x4000, // ^
 };
 
 enum class AssignmentOp : int32_t

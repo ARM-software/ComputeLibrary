@@ -1581,6 +1581,8 @@ inline std::string to_string(UnaryOp op)
     {
         case UnaryOp::LogicalNot:
             return "!";
+        case UnaryOp::BitwiseNot:
+            return "~";
         default:
             assert(false);
             return "";
@@ -1615,6 +1617,8 @@ inline std::string to_string(BinaryOp op)
             return "&&";
         case BinaryOp::LogicalOr:
             return "||";
+        case BinaryOp::BitwiseXOR:
+            return "^";
         default:
             assert(false);
             return "";
@@ -3570,11 +3574,11 @@ public:
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *src = operands.unpack(o_src);
         const IVectorTile *dst = operands.unpack(o_dst);
-
         // const int32_t dst_w  = dst->format().w;
         const int32_t     dst_h = dst->format().h;
         const std::string dt    = dst->underlying_source_variables()[0].type.str;
-        const std::string sat   = (policy == ConvertPolicy::Saturate ? "_sat" : "");
+        const bool is_float     = (dst->format().dt == DataType::Fp32) || (dst->format().dt == DataType::Fp16);
+        const std::string sat   = ((policy == ConvertPolicy::Saturate && !is_float) ? "_sat" : "");
 
         // Broadcasting on Y is automatic
         for(int32_t y = 0; y < dst_h; ++y)
