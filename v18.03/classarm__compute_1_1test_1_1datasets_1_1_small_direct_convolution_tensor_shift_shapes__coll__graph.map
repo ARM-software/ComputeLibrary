@@ -1,5 +1,0 @@
-<map id="SmallDirectConvolutionTensorShiftShapes" name="SmallDirectConvolutionTensorShiftShapes">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml" title="Implementation of a dataset created from a container. " alt="" coords="54,155,169,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml" title="Abstract implementation of a named dataset. " alt="" coords="51,80,171,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class. " alt="" coords="75,5,148,32"/>
-</map>

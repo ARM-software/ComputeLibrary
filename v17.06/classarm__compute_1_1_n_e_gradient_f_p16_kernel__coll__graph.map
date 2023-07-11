@@ -1,5 +1,0 @@
-<map id="NEGradientFP16Kernel" name="NEGradientFP16Kernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_n_e_gradient_kernel.xhtml" title="Computes magnitude and quantised phase from inputs gradients. " alt="" coords="21,155,148,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="43,80,126,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="53,5,116,32"/>
-</map>

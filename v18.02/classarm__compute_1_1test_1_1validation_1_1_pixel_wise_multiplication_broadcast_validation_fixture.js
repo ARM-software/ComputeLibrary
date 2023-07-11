@@ -1,4 +1,0 @@
-var classarm__compute_1_1test_1_1validation_1_1_pixel_wise_multiplication_broadcast_validation_fixture =
-[
-    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_pixel_wise_multiplication_broadcast_validation_fixture.xhtml#a80250810216daaa7ce0bf0ca59d15415", null ]
-];

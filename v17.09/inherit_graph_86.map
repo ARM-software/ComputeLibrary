@@ -1,8 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface. " alt="" coords="5,107,63,133"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_activation_layer.xhtml" title="Activation Layer node. " alt="" coords="127,5,239,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_convolution_layer.xhtml" title="Convolution layer node. " alt="" coords="122,56,245,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml" title="Fully connected layer node. " alt="" coords="111,107,256,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1_pooling_layer.xhtml" title="Pooling layer node. " alt="" coords="135,157,232,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1_softmax_layer.xhtml" title="Softmax layer node. " alt="" coords="132,208,235,235"/>
-</map>

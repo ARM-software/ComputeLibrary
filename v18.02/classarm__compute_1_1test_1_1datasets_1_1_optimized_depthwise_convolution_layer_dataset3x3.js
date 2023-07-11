@@ -1,4 +1,0 @@
-var classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3 =
-[
-    [ "OptimizedDepthwiseConvolutionLayerDataset3x3", "classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml#a1a49769e224786240199be07b5003e61", null ]
-];
