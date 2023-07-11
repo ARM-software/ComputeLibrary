@@ -22,15 +22,22 @@
  * SOFTWARE.
  */
 
-#include "ckw/KernelWriter.h"
 #include "ckw/Error.h"
+#include "ckw/ITileOperand.h"
+#include "ckw/KernelWriter.h"
+#include "ckw/types/TargetArchitecture.h"
+#include "ckw/types/TargetLanguage.h"
 #include "src/cl/CLKernelWriter.h"
 
+#include <iterator>
 namespace ckw
 {
 
+KernelWriter::~KernelWriter() = default;
+
 std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture architecture, TargetLanguage language)
 {
+    CKW_UNUSED(architecture);
     switch(language)
     {
         case TargetLanguage::OpenCL:
@@ -43,6 +50,20 @@ std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture a
     }
 }
 
-KernelWriter::~KernelWriter() = default;
+int32_t KernelWriter::id_space() const
+{
+    return _id_space;
+}
+
+ITileOperand &KernelWriter::add_operand(std::unique_ptr<ITileOperand> &operand_ptr)
+{
+    auto it = _operands.insert(std::move(operand_ptr));
+    return *it.first->get();
+}
+
+std::string KernelWriter::generate_full_name(const std::string &name) const
+{
+    return "G" + std::to_string(id_space()) + "__" + name;
+}
 
 } // namespace ckw

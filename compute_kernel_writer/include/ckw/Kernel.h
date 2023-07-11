@@ -25,11 +25,16 @@
 #ifndef CKW_INCLUDE_CKW_KERNEL_H
 #define CKW_INCLUDE_CKW_KERNEL_H
 
-#include "ckw/types/TargetLanguage.h"
 #include <string>
 
 namespace ckw
 {
+
+// Forward Declerations
+class TileInfo;
+class ITileOperand;
+
+enum class TargetLanguage;
 
 /** The kernel that has been emitted by the kernel writer.
  *
@@ -38,6 +43,8 @@ namespace ckw
 class Kernel
 {
 public:
+    virtual ~Kernel();
+
     /** Initialize a new instance of @ref Kernel class with all emitted kernel information.
      *
      * @param[in] language    The target language of the kernel.
@@ -50,6 +57,9 @@ public:
 
     /** Get the source code. */
     const std::string &source_code() const;
+
+    /** Add a tile operand */
+    virtual ITileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
 
 private:
     TargetLanguage _language;

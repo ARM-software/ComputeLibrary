@@ -57,6 +57,13 @@ public:
 
     std::unique_ptr<Kernel> emit_kernel(const std::string &name) override;
 
+    /** Declare a tile given name and tile information
+     *
+     * Similar to @ref KernelWriter::declare_tile()
+    */
+    ITileOperand &declare_tile(const ::std::string &name, const TileInfo &tile_info) override;
+
+
 protected:
     /** Append the specified code to the kernel body source code. */
     template <typename T, typename... TArgs>
@@ -75,6 +82,9 @@ protected:
 
     /** Get the current kernel body source code. */
     const std::string &body_source_code() const;
+
+    /** Add a tile operand to the kernel and return it */
+    ITileOperand &add_operand(const std::string &code, const TileInfo &tile_info) override;
 
 private:
     /** This string contains the kernel body source code, not the full CL source code.

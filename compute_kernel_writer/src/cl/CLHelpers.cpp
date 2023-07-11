@@ -88,4 +88,36 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
 
     return res;
 }
+
+int32_t width_to_cl_vector_size(int32_t width)
+{
+    switch(width)
+    {
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+            return 3;
+        case 4:
+            return 4;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            return 8;
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+            return 16;
+        default:
+            CKW_THROW_MSG("Unsupported width to convert to OpenCL vector");
+            return 0;
+    }
+}
 } // namespace ckw

@@ -23,9 +23,12 @@
  */
 
 #include "ckw/Kernel.h"
+#include "ckw/types/TargetLanguage.h"
 
 namespace ckw
 {
+
+Kernel::~Kernel() = default;
 
 Kernel::Kernel(TargetLanguage language, const std::string &source_code)
     : _language(language), _source_code(source_code)

@@ -25,15 +25,21 @@
 #ifndef CKW_INCLUDE_CKW_KERNELWRITER_H
 #define CKW_INCLUDE_CKW_KERNELWRITER_H
 
-#include "ckw/types/TargetArchitecture.h"
-#include "ckw/types/TargetLanguage.h"
+#include "ckw/ITileOperand.h"
+
 #include <memory>
+#include <set>
 #include <string>
 
 namespace ckw
 {
 
 class Kernel;
+
+/** Forward Declerations */
+class TileInfo;
+enum class TargetArchitecture;
+enum class TargetLanguage;
 
 /** A kernel writer.
  *
@@ -71,6 +77,7 @@ public:
     // =============================================================================================
 
     /** Write the line comment in debug build.
+     *
      * This function does not take effect on release build.
      *
      * The comment must only contain one line (i.e. no newline character is allowed).
@@ -88,6 +95,31 @@ public:
      * @param[in] name The name of the kernel object to be generated.
      */
     virtual std::unique_ptr<Kernel> emit_kernel(const std::string &name) = 0;
+
+    /** Declare a tile given its name and tile info
+     *
+     * @param[in] name Name of the tile
+     * @param[in] tile_info Shape and data type of the tile
+     *
+     * @returns The created tile operand
+     */
+    virtual ITileOperand &declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
+
+protected:
+    int32_t id_space() const;
+
+    /** Pure virtual function to be overridden by language specific subclasses to add a tile operand to the kernel */
+    virtual ITileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
+
+    /** Add a tile operand to the operand list */
+    ITileOperand &add_operand(std::unique_ptr<ITileOperand> &operand_ptr);
+
+    /** Generate full variable name by prefixing it with id space */
+    std::string generate_full_name(const std::string &name) const;
+
+private:
+    int32_t _id_space{ 0 };
+    std::set<std::unique_ptr<ITileOperand>> _operands {};
 };
 
 } // namespace ckw

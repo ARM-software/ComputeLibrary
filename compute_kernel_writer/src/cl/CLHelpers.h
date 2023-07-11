@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLHELPERS_H
-#define COMPUTE_KERNEL_WRITER_SRC_CL_CLHELPERS_H
+#ifndef CKW_SRC_CL_CLHELPERS_H
+#define CKW_SRC_CL_CLHELPERS_H
 
 #include <string>
+#include <cstdint>
 
 /** OpenCL specific helper functions */
 namespace ckw
@@ -48,6 +49,15 @@ bool cl_validate_vector_length(int32_t len);
  * @return the OpenCL datatype as a string
  */
 std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len);
+
+/** Helper function to return the OpenCL vector size that accommodate the the desired width
+ *
+ * @param[in] width The desired width
+ *
+ * @return the OpenCL vector size
+*/
+int32_t width_to_cl_vector_size(int32_t width);
+
 } // namespace ckw
 
 #endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLHELPERS_H */

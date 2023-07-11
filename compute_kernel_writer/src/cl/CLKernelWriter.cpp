@@ -24,14 +24,14 @@
 
 #include "src/cl/CLKernelWriter.h"
 #include "ckw/Error.h"
+#include "src/cl/CLTile.h"
+#include "src/cl/CLHelpers.h"
+#include <cstdint>
 
 namespace ckw
 {
 
-CLKernelWriter::CLKernelWriter()
-{
-}
-
+CLKernelWriter::CLKernelWriter() = default;
 CLKernelWriter::~CLKernelWriter() = default;
 
 std::unique_ptr<Kernel> CLKernelWriter::emit_kernel(const std::string &name)
@@ -59,6 +59,29 @@ void CLKernelWriter::comment(const std::string &text)
 const std::string &CLKernelWriter::body_source_code() const
 {
     return _body_source_code;
+}
+
+ITileOperand &CLKernelWriter::declare_tile(const std::string &name, const TileInfo &tile_info)
+{
+    const std::string fullname = generate_full_name(name);
+
+    const int32_t height = tile_info.height();
+    const int32_t width = tile_info.width();
+    const DataType data_type = tile_info.data_type();
+
+    for(int32_t row = 0; row < height; ++row)
+    {
+        const std::string cl_type = cl_get_variable_datatype_as_string(data_type, width);
+        append_code(cl_type, " ", fullname, std::to_string(row), ";\n");
+    }
+
+    return add_operand(fullname, tile_info);
+}
+
+ITileOperand &CLKernelWriter::add_operand(const std::string &name, const TileInfo &tile_info)
+{
+    std::unique_ptr<ITileOperand> operand = std::make_unique<CLTile>(name, tile_info);
+    return KernelWriter::add_operand(operand);
 }
 
 } // namespace ckw
