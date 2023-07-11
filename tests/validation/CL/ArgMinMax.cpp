@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,15 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
-#include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/datasets/SplitDataset.h"
-#include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ArgMinMaxFixture.h"
@@ -46,11 +42,25 @@ namespace
 const auto ArgMinMaxSmallDataset = framework::dataset::make("Shape",
 {
     TensorShape{ 1U, 7U, 1U, 3U },
+    TensorShape{ 3U, 1U, 3U, 2U },
+    TensorShape{ 2U, 1U, 3U, 2U },
     TensorShape{ 149U, 5U, 1U, 2U },
     TensorShape{ 166U, 5U, 1U, 2U },
     TensorShape{ 322U, 5U, 1U, 2U },
     TensorShape{ 128U, 5U, 21U, 3U },
     TensorShape{ 2560, 2U, 2U, 2U },
+});
+
+const auto ArgMinMaxSmallDatasetAxis0 = framework::dataset::make("Shape",
+{
+    TensorShape{ 1U, 5U },
+    TensorShape{ 2U, 3U },
+    TensorShape{ 1U },
+    TensorShape{ 3U },
+    TensorShape{ 2U },
+    TensorShape{ 5U },
+    TensorShape{ 17U },
+    TensorShape{ 15U, 2U },
 });
 
 const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape",
@@ -89,6 +99,16 @@ template <typename T>
 using CLArgMinMaxValidationFixture = ArgMinMaxValidationFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T>;
 
 TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
+                       CLArgMinMaxValidationFixture<int32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(ArgMinMaxSmallDatasetAxis0, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLArgMinMaxValidationFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
