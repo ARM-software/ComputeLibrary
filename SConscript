@@ -134,7 +134,7 @@ def recursive_glob(root_dir, pattern):
 
 def get_ckw_obj_list():
     cmake_obj_dir = os.path.abspath("prototype/CMakeFiles/ckw_prototype.dir/src")
-    return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o")
+    return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o$")
 
 
 def build_library(name, build_env, sources, static=False, libs=[]):
