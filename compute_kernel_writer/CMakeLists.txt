@@ -120,12 +120,12 @@ target_compile_definitions(ckw PUBLIC
 target_sources(ckw PRIVATE
     src/Error.cpp
     src/Helpers.cpp
+    src/Kernel.cpp
+    src/KernelWriter.cpp
     src/TensorInfo.cpp
     src/TensorUtils.cpp
     src/TileInfo.cpp
-    src/ITileOperand.cpp
-    src/Kernel.cpp
-    src/KernelWriter.cpp
+    src/TileOperand.cpp
 )
 
 if(CKW_ENABLE_OPENCL)

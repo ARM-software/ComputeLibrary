@@ -23,7 +23,7 @@
  */
 
 #include "ckw/Error.h"
-#include "ckw/ITileOperand.h"
+#include "ckw/TileOperand.h"
 #include "ckw/KernelWriter.h"
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
@@ -55,7 +55,7 @@ int32_t KernelWriter::id_space() const
     return _id_space;
 }
 
-ITileOperand &KernelWriter::add_operand(std::unique_ptr<ITileOperand> &operand_ptr)
+TileOperand &KernelWriter::add_operand(std::unique_ptr<TileOperand> &operand_ptr)
 {
     auto it = _operands.insert(std::move(operand_ptr));
     return *it.first->get();

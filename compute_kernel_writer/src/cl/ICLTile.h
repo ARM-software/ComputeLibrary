@@ -32,7 +32,8 @@ namespace ckw
 class TileInfo;
 
 /** Interface for the OpenCL specific tile */
-class ICLTile : public IVectorTile
+class ICLTile : public ITile,                              // classes inherited
+                public IVectorAccess, public IScalarAccess // interfaces implemented
 {
 public:
     // Inherited method overridden

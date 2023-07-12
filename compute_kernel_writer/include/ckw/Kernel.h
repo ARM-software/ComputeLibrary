@@ -32,7 +32,7 @@ namespace ckw
 
 // Forward Declerations
 class TileInfo;
-class ITileOperand;
+class TileOperand;
 
 enum class TargetLanguage;
 
@@ -59,7 +59,7 @@ public:
     const std::string &source_code() const;
 
     /** Add a tile operand */
-    virtual ITileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
+    virtual TileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
 
 private:
     TargetLanguage _language;

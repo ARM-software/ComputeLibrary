@@ -61,7 +61,7 @@ const std::string &CLKernelWriter::body_source_code() const
     return _body_source_code;
 }
 
-ITileOperand &CLKernelWriter::declare_tile(const std::string &name, const TileInfo &tile_info)
+TileOperand &CLKernelWriter::declare_tile(const std::string &name, const TileInfo &tile_info)
 {
     const std::string fullname = generate_full_name(name);
 
@@ -78,9 +78,9 @@ ITileOperand &CLKernelWriter::declare_tile(const std::string &name, const TileIn
     return add_operand(fullname, tile_info);
 }
 
-ITileOperand &CLKernelWriter::add_operand(const std::string &name, const TileInfo &tile_info)
+TileOperand &CLKernelWriter::add_operand(const std::string &name, const TileInfo &tile_info)
 {
-    std::unique_ptr<ITileOperand> operand = std::make_unique<CLTile>(name, tile_info);
+    std::unique_ptr<TileOperand> operand = std::make_unique<CLTile>(name, tile_info);
     return KernelWriter::add_operand(operand);
 }
 

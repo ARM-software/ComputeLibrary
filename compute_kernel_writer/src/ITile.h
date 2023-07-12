@@ -92,12 +92,12 @@ protected:
     std::string _basename{ "" };            // Tile name
 };
 
-/** Tile base class to store scalar variables.
+/** Interface to provide support for scalar access for a Tile.
  */
-class IScalarTile : public ITile
+class IScalarAccess
 {
 public:
-    virtual ~IScalarTile() = default;
+    virtual ~IScalarAccess() = default;
 
     /** Method to get the scalar variable from a tile as a string
      * @param[in] row Tile row. If out-of-bound, the row is clamped to the nearest valid edge
@@ -108,12 +108,12 @@ public:
     virtual TileVariable scalar(int32_t row, int32_t col) const = 0;
 };
 
-/** Tile base class to store vector variables. It derives from IScalarTile since we can still access the scalar variable
+/** Interface to provide support for vector access for a tile.
  */
-class IVectorTile : public IScalarTile
+class IVectorAccess
 {
 public:
-    virtual ~IVectorTile() = default;
+    virtual ~IVectorAccess() = default;
 
     /** Method to get the vector variable from a tile.
      *  The user can query the list of supported vector lengths through the supported_vector_lengths() method.
@@ -124,11 +124,11 @@ public:
      */
     virtual TileVariable vector(int32_t row) const = 0;
 
-    /** Method to get a sub-vector variable. The length of the sub-vector must be supported by the derived IVectorTile class
+    /** Method to get a sub-vector variable. The length of the sub-vector must be supported by the derived IVectorAccess class
      *
      * @param[in] row       Tile row. If out-of-bound, the row is clamped to the nearest valid edge
-     * @param[in] col_start Tile starting column to get the sub-vector. If out-of-bound, the derived IVectorTile class may throw an assert.
-     * @param[in] width     The width of the sub-vector. The width must be supported by the derived IVectorTile class and the last element must be in-bound.
+     * @param[in] col_start Tile starting column to get the sub-vector. If out-of-bound, the derived IVectorAccess class may throw an assert.
+     * @param[in] width     The width of the sub-vector. The width must be supported by the derived IVectorAccess class and the last element must be in-bound.
      *
      * @return the vector variable as a @ref TileVariable
      */

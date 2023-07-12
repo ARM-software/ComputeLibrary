@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#ifndef COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TILEOPERAND
-#define COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TILEOPERAND
+#ifndef CKW_INCLUDE_CKW_TILEOPERAND
+#define CKW_INCLUDE_CKW_TILEOPERAND
 
 namespace ckw
 {
 
 /** Tile operand which can be either scalar, vector or 2D tile. */
-class ITileOperand
+class TileOperand
 {
 public:
     /* Destructor */
-    virtual ~ITileOperand();
+    virtual ~TileOperand();
 };
 
 } // namespace ckw

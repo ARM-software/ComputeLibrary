@@ -26,7 +26,7 @@
 
 #include "src/ITile.h"
 #include "src/cl/ICLTile.h"
-#include "ckw/ITileOperand.h"
+#include "ckw/TileOperand.h"
 
 #include <string>
 
@@ -36,7 +36,7 @@ namespace ckw
 class TileInfo;
 
 /** OpenCL specific tile */
-class CLTile : public ICLTile, public ITileOperand
+class CLTile : public ICLTile, public TileOperand
 {
 public:
     /** Constructor

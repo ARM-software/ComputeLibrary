@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-#include "ckw/ITileOperand.h"
+#include "ckw/TileOperand.h"
 
 namespace ckw
 {
-    ITileOperand::~ITileOperand() = default;
+    TileOperand::~TileOperand() = default;
 }
