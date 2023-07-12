@@ -48,7 +48,7 @@ v23.08 Public major release
    - Add new OpenCL™ kernels:
      - @ref opencl::kernels::ClMatMulNativeMMULKernel support for FP32 and FP16, with batch support
    - Enable transposed convolution with non-square kernels on CPU and GPU.
-
+   - Added support for input data type U64/S64 in CLCast.
 v23.05.1 Public patch release
  - Enable CMake and Bazel option to build multi_isa without FP16 support.
  - Fix compilation error in NEReorderLayer (aarch64 only).

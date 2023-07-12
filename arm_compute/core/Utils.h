@@ -164,6 +164,9 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::S32:
         case DataType::F32:
             return 4;
+        case DataType::U64:
+        case DataType::S64:
+            return 8;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
             return 0;
@@ -712,7 +715,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
  *
  * @return The pair with minimum and maximum values
  */
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo& act_info, DataType data_type, UniformQuantizationInfo oq_info);
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info, DataType data_type, UniformQuantizationInfo oq_info);
 
 /** Convert a tensor format into a string.
  *
@@ -749,7 +752,7 @@ const std::string &string_from_data_type(DataType dt);
  *
  * @return The string describing the activation function.
  */
-const std::string &string_from_activation_func(const ActivationFunction& act);
+const std::string &string_from_activation_func(const ActivationFunction &act);
 /** Translates a given interpolation policy to a string.
  *
  * @param[in] policy @ref InterpolationPolicy to be translated to string.
@@ -798,7 +801,7 @@ bool is_pool_3d_region_entirely_outside_input(const Pooling3dLayerInfo &info);
  *
  * @return True if padding is symmetric
  */
-inline bool is_symmetric(const Padding3D& info)
+inline bool is_symmetric(const Padding3D &info)
 {
     return ((info.left == info.right) && (info.top == info.bottom) && (info.front == info.back));
 }

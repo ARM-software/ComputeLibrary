@@ -85,6 +85,16 @@ protected:
                     library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(signed_min), static_cast<int32_t>(signed_max));
                     break;
                 }
+                case DataType::U64:
+                {
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint64_t>(unsigned_min), static_cast<uint64_t>(unsigned_max));
+                    break;
+                }
+                case DataType::S64:
+                {
+                    library->fill_tensor_uniform(tensor, i, static_cast<int64_t>(signed_min), static_cast<int64_t>(signed_max));
+                    break;
+                }
                 default:
                     ARM_COMPUTE_ERROR("NOT SUPPORTED!");
             }

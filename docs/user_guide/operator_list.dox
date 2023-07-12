@@ -437,12 +437,15 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <table>
     <tr><th>src<th>dst
     <tr><td>U8<td>S8, U16, S16, U32, S32, F16, F32
+    <tr><td>S8<td>U8, U16, S16, U32, S32, F16, F32
     <tr><td>U16<td>U8, S8, S16, U32, S32, F16, F32
     <tr><td>S16<td>U8, S8, U16, U32, S32, F16, F32
     <tr><td>U32<td>U8, S8, U16, S16, S32, F16, F32
     <tr><td>S32<td>U8, S8, U16, S16, U32, F16, F32
-    <tr><td>F16<td>U8, S8, U16, S16, U32, F32
-    <tr><td>F32<td>U8, S8, U16, S16, U32, F16
+    <tr><td>U64<td>U8, S8, U16, S16, U32, S32, F16, F32
+    <tr><td>S64<td>U8, S8, U16, S16, U32, S32, F16, F32
+    <tr><td>F16<td>U8, S8, U16, S16, S32, U32, F32
+    <tr><td>F32<td>U8, S8, U16, S16, S32, U32, F16
     </table>
 <tr>
   <td rowspan="2">ChannelShuffleLayer

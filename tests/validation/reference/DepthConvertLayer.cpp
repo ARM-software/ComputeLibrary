@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -186,6 +186,23 @@ template SimpleTensor<int32_t> depth_convert(const SimpleTensor<float> &src, Dat
 template SimpleTensor<half> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<bfloat16> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 
+// S64
+template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int8_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<uint16_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int16_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int32_t> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<half> depth_convert(const SimpleTensor<int64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+
+// U64
+template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int8_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<uint16_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int16_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<int32_t> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<half> depth_convert(const SimpleTensor<uint64_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 } // namespace reference
 } // namespace validation
 } // namespace test
