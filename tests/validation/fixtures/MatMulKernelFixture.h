@@ -51,7 +51,6 @@ template <typename T, typename KernelType, bool use_mmul = false>
 class MatMulKernelGenericValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type,
                bool enable_bias)
     {
@@ -355,7 +354,6 @@ template <typename T, typename KernelType, bool use_mmul = false>
 class MatMulKernelValidationFixture : public MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type)
     {
         MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>::setup(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type,
@@ -367,7 +365,6 @@ template <typename T, typename KernelType, bool use_mmul = false>
 class MatMulKernelWithBiasValidation : public MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool pretranspose_a, bool pretranspose_b, int M0, int N0, int K0, bool export_rhs_to_cl_image, DataType data_type)
     {
         MatMulKernelGenericValidationFixture<T, KernelType, use_mmul>::setup(shape_a, shape_b, output_shape, pretranspose_a, pretranspose_b, M0, N0, K0, export_rhs_to_cl_image, data_type,

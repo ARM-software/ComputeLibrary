@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename OperatorType>
 class IndirectConv2dAddressPrecalculationValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int src_w,
                unsigned int src_h,
                unsigned int src_b,

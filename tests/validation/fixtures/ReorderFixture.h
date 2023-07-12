@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReorderValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape output_shape, WeightFormat input_wf, WeightFormat output_wf, DataType data_type)
     {
         _target    = compute_target(input_shape, output_shape, input_wf, output_wf, data_type);

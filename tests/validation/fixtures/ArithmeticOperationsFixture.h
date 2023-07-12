@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticOperationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(reference::ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, ActivationLayerInfo act_info, bool is_inplace)
     {
@@ -150,7 +149,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionBroadcastValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape0, shape1, data_type, convert_policy,
@@ -162,7 +160,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape, shape, data_type, convert_policy,
@@ -174,7 +171,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionBroadcastValidationFloatFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape0, shape1, data_type, convert_policy,
@@ -186,7 +182,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionValidationFloatFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape, shape, data_type, convert_policy,
@@ -198,7 +193,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionValidationQuantizedFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
     {
@@ -211,7 +205,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticAdditionValidationQuantizedBroadcastFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out,
                bool is_inplace)
     {
@@ -224,7 +217,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionBroadcastValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape0, shape1, data_type, convert_policy,
@@ -236,7 +228,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionBroadcastValidationFloatFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, ActivationLayerInfo act_info,
                bool is_inplace)
     {
@@ -249,7 +240,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape, shape, data_type, convert_policy,
@@ -261,7 +251,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionValidationFloatFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape, shape, data_type, convert_policy,
@@ -273,7 +262,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionValidationQuantizedFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ConvertPolicy convert_policy, QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
     {
@@ -286,7 +274,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticSubtractionValidationQuantizedBroadcastFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, ConvertPolicy convert_policy, QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out,
                bool is_inplace)
     {

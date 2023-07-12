@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
 
@@ -243,7 +242,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class WinogradInputTransformValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataLayout data_layout, DataType data_type)
     {
         TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
@@ -355,7 +353,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class WinogradFilterTransformValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, Size2D output_tile, DataLayout data_layout, DataType data_type)
     {
         WinogradInfo winograd_info(output_tile, Size2D(input_shape[0], input_shape[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, DataLayout::NCHW /* Not needed */);
@@ -470,7 +467,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class WinogradOutputTransformValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataType data_type, ActivationLayerInfo act_info = ActivationLayerInfo())
     {
         _target    = compute_target(input_shape, winograd_info, data_type, act_info);

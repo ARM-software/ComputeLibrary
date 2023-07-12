@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthConvertLayerValidationBaseFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
     {
         _shift             = shift;
@@ -130,7 +129,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthConvertLayerValidationFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,
@@ -142,7 +140,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthConvertLayerValidationQuantizedFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
     {
         DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionBroadcastValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type)
     {
         _target    = compute_target(shape0, shape1, data_type);
@@ -117,7 +116,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionValidationFixture : public ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type);

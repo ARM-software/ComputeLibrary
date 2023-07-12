@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SelectValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, bool has_same_same_rank, DataType data_type)
     {
         TensorShape condition_shape = detail::select_condition_shape(shape, has_same_same_rank);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizationValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
     {
         NormalizationLayerInfo info(norm_type, norm_size, 5, beta, 1.f, is_scaled);
@@ -119,7 +118,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizationValidationFixture : public NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
     {
         NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, is_scaled, data_type, data_layout);

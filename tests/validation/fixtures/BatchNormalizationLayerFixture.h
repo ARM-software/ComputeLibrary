@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BatchNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
     {
         _data_type = dt;

@@ -50,7 +50,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementWiseUnaryValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, DataType input_data_type, bool in_place, ElementWiseUnary op,
                bool use_dynamic_shape = false, QuantizationInfo qinfo = QuantizationInfo(), QuantizationInfo qinfo_out = QuantizationInfo())
     {
@@ -277,7 +276,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RsqrtQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo qinfo, QuantizationInfo qinfo_out)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, false, qinfo, qinfo_out);
@@ -288,7 +286,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RsqrtValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT);
@@ -299,7 +296,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RsqrtDynamicShapeValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::RSQRT, true);
@@ -310,7 +306,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ExpValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::EXP);
@@ -321,7 +316,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ExpQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::EXP, false, iq, oq);
@@ -332,7 +326,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NegValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::NEG);
@@ -343,7 +336,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NegQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::NEG, false, iq, oq);
@@ -354,7 +346,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NegValidationInPlaceFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, bool in_place)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, in_place, ElementWiseUnary::NEG);
@@ -365,7 +356,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NegQuantizedValidationInPlaceFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, bool in_place, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, in_place, ElementWiseUnary::NEG, false, iq, oq);
@@ -376,7 +366,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class LogValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::LOG);
@@ -387,7 +376,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class LogQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::LOG, false, iq, oq);
@@ -398,7 +386,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class AbsValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::ABS);
@@ -409,7 +396,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class AbsQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::ABS, false, iq, oq);
@@ -420,7 +406,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SinValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::SIN);
@@ -431,7 +416,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SinQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::SIN, false, iq, oq);
@@ -442,7 +426,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RoundValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::ROUND);
@@ -453,7 +436,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RoundQuantizedValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo iq, QuantizationInfo oq)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, false, ElementWiseUnary::ROUND, false, iq, oq);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReduceMeanValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
     {
         _target    = compute_target(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
@@ -155,7 +154,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReduceMeanQuantizedFixture : public ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
     {
         ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
@@ -166,7 +164,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReduceMeanFixture : public ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims)
     {
         ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, keep_dims, QuantizationInfo(), QuantizationInfo());

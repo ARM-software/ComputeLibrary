@@ -54,7 +54,6 @@ public:
     using TBias  = typename std::conditional < (std::is_same<TDecay, uint8_t>::value || std::is_same<TDecay, int8_t>::value), int32_t, T >::type;
 
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo activation_info, bool mixed_layout = false)
     {
@@ -248,7 +247,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedLayerValidationFixture : public FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights, DataType data_type,
                ActivationLayerInfo activation_info)
     {
@@ -262,7 +260,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedLayerValidationQuantizedFixture : public FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights, DataType data_type,
                QuantizationInfo quantization_info, ActivationLayerInfo activation_info)
     {
@@ -358,7 +355,6 @@ public:
     using TDecay = typename std::decay<T>::type;
     using TBias  = typename std::conditional < (std::is_same<TDecay, uint8_t>::value || std::is_same<TDecay, int8_t>::value), int32_t, T >::type;
 
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
                DataType data_type, ActivationLayerInfo activation_info, bool constant_weights, bool constant_bias, bool weights_reshaped, bool remove_bias = false)
     {
@@ -496,7 +492,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedWithDynamicWeightsFixture : public FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
                DataType data_type, ActivationLayerInfo activation_info, bool weights_reshaped)
     {
@@ -509,7 +504,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedDynamicNoBiasFixture : public FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
                DataType data_type, ActivationLayerInfo activation_info, bool weights_reshaped)
     {
@@ -522,7 +516,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedWithDynamicBiasFixture : public FullyConnectedWithDynamicTensorsFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape dst_shape,
                DataType data_type, ActivationLayerInfo activation_info)
     {

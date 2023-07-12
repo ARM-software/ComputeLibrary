@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,6 @@ class DirectConvolution3DValidationGenericFixture : public framework::Fixture
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
-    template <typename...>
     void setup(const TensorShape &input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
                unsigned int num_kernels, bool has_bias, const ActivationLayerInfo &act_info, const DataType &data_type, const DataLayout &data_layout,
                const QuantizationInfo &src_qinfo = QuantizationInfo(), const QuantizationInfo &weights_qinfo = QuantizationInfo(), const QuantizationInfo &dst_qinfo = QuantizationInfo())
@@ -157,7 +156,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolution3DValidationFixture : public DirectConvolution3DValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
                unsigned int num_kernels, bool has_bias, ActivationLayerInfo act_info, DataType data_type, DataLayout data_layout)
     {
@@ -170,7 +168,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolution3DValidationQuantizedFixture : public DirectConvolution3DValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int stride_z, int pad_x, int pad_y, int pad_z, unsigned int kernel_width, int kernel_height, int kernel_depth,
                unsigned int num_kernels, bool has_bias, ActivationLayerInfo act_info, DataType data_type, DataLayout data_layout, QuantizationInfo src_qinfo, QuantizationInfo weights_qinfo,
                QuantizationInfo dst_qinfo)

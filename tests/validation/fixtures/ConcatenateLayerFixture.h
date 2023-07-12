@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,6 @@ private:
     using SrcITensorType = typename std::conditional<CI, const ITensorType, ITensorType>::type;
 
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, unsigned int axis)
     {
         // Create input shapes

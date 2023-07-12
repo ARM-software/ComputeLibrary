@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
         _quantization_info = quantization_info;
@@ -131,7 +130,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SoftmaxValidationFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, float beta, size_t axis)
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>::setup(shape,
@@ -146,7 +144,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SoftmaxValidationQuantizedFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>::setup(shape,

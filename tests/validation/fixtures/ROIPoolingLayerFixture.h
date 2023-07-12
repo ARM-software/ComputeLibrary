@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIPoolingLayerGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
     {
         _target    = compute_target(input_shape, data_type, data_layout, pool_info, rois_shape, qinfo, output_qinfo);
@@ -174,7 +173,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIPoolingLayerQuantizedFixture : public ROIPoolingLayerGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type,
                DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
     {
@@ -187,7 +185,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIPoolingLayerFixture : public ROIPoolingLayerGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout)
     {
         ROIPoolingLayerGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, pool_info, rois_shape, data_type, data_layout,

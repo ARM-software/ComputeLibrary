@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReductionOperationValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info, bool keep_dims = false)
     {
         const bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
@@ -149,7 +148,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReductionOperationQuantizedFixture : public ReductionOperationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, unsigned int axis, ReductionOperation op, QuantizationInfo quantization_info = QuantizationInfo(), bool keep_dims = false)
     {
         ReductionOperationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, op, quantization_info, keep_dims);
@@ -160,7 +158,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReductionOperationFixture : public ReductionOperationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, unsigned int axis, ReductionOperation op, bool keep_dims = false)
     {
         ReductionOperationValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, op, QuantizationInfo(), keep_dims);

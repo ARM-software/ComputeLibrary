@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, int
 class FuseBatchNormalizationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_w, DataType data_type, DataLayout data_layout, bool in_place, bool with_bias, bool with_gamma, bool with_beta)
     {
         std::tie(_target_w, _target_b)       = compute_target(shape_w, data_type, data_layout, in_place, with_bias, with_gamma, with_beta);

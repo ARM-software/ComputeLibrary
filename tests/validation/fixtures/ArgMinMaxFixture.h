@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArgMinMaxValidationBaseFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, int axis, ReductionOperation op, QuantizationInfo q_info)
     {
         _target    = compute_target(shape, data_type, axis, op, q_info);
@@ -147,7 +146,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArgMinMaxValidationQuantizedFixture : public ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, int axis, ReductionOperation op, QuantizationInfo quantization_info)
     {
         ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, op, quantization_info);
@@ -158,7 +156,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArgMinMaxValidationFixture : public ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, int axis, ReductionOperation op)
     {
         ArgMinMaxValidationBaseFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, op, QuantizationInfo());

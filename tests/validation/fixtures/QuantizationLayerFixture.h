@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class QuantizationValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
     {
         _target    = compute_target(shape, data_type_in, data_type_out, qinfo, qinfo_in);
@@ -108,7 +107,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class QuantizationValidationFixture : public QuantizationValidationGenericFixture<TensorType, AccessorType, FunctionType, Tin, Tout>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
     {
         QuantizationValidationGenericFixture<TensorType, AccessorType, FunctionType, Tin, Tout>::setup(shape, data_type_in, data_type_out, qinfo, QuantizationInfo());

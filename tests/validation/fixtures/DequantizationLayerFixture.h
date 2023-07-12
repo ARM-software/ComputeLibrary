@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DequantizationValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
         _quantization_info = generate_quantization_info(src_data_type, shape.z());

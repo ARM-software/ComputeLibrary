@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class CastValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
         _target    = compute_target(shape, dt_in, dt_out, policy);

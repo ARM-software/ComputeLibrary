@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,6 @@ class LogicalBinaryOperationValidationFixture : public LogicalOperationValidatio
     using Parent = LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>;
 
 public:
-    template <typename...>
     void setup(TensorShape shape0, TensorShape shape1)
     {
         Parent::_target    = compute_target(shape0, shape1);
@@ -135,7 +134,6 @@ class LogicalNotValidationFixture : public LogicalOperationValidationFixtureBase
     using Parent = LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>;
 
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type)
     {
         Parent::_target    = compute_target(shape, data_type);

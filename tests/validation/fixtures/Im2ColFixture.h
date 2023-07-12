@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Im2ColOpValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
                unsigned int num_groups)
     {

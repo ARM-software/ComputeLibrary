@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizePlanarYUVLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         _data_type = dt;
@@ -144,7 +143,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizePlanarYUVLayerValidationFixture : public NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout)
     {
         NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, dt, data_layout, QuantizationInfo());
@@ -155,7 +153,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizePlanarYUVLayerValidationQuantizedFixture : public NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, dt, data_layout, quantization_info);

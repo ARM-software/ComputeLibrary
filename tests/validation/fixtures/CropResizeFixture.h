@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class CropResizeFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape boxes_shape, Coordinates2D crop_size, InterpolationPolicy method,
                float extrapolation_value, bool is_outside_bounds, DataType data_type)
     {

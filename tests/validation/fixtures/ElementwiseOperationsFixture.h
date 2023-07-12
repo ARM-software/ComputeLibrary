@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticOperationsGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1,
                DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace = false, bool use_dynamic_shape = false)
@@ -187,7 +186,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticOperationsFuseActivationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1,
                DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, ActivationLayerInfo act_info, bool is_inplace = true)
@@ -277,7 +275,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape0, shape1,
@@ -290,7 +287,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
@@ -303,7 +299,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionBroadcastDynamicShapeValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape0, shape1,
@@ -316,7 +311,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionDynamicShapeValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
@@ -329,7 +323,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionBroadcastValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape0, shape1,
@@ -342,7 +335,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
@@ -355,7 +347,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionValidationIntegerFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::DIV, shape, shape,
@@ -368,7 +359,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ArithmeticDivisionValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -383,7 +373,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MAX, shape0, shape1,
@@ -396,7 +385,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MAX, shape, shape,
@@ -409,7 +397,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxBroadcastValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MAX, shape0, shape1,
@@ -422,7 +409,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MAX, shape, shape,
@@ -435,7 +421,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -450,7 +435,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMaxQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -465,7 +449,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MIN, shape0, shape1,
@@ -478,7 +461,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MIN, shape, shape,
@@ -491,7 +473,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinBroadcastValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MIN, shape0, shape1,
@@ -504,7 +485,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MIN, shape, shape,
@@ -517,7 +497,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -532,7 +511,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseMinQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -547,7 +525,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape0, shape1,
@@ -560,7 +537,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape, shape,
@@ -573,7 +549,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffBroadcastValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape0, shape1,
@@ -586,7 +561,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape, shape,
@@ -599,7 +573,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -614,7 +587,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwiseSquaredDiffQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
 
@@ -629,7 +601,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class PReluLayerBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::PRELU, shape0, shape1,
@@ -642,7 +613,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class PReluLayerValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::PRELU, shape, shape,
@@ -655,7 +625,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class PReluLayerValidationQuantizedFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
 
@@ -670,7 +639,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class PReluLayerQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
 
@@ -685,7 +653,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwisePowerBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::POWER, shape0, shape1,
@@ -698,7 +665,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwisePowerValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::POWER, shape, shape,
@@ -711,7 +677,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwisePowerBroadcastValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::POWER, shape0, shape1,
@@ -724,7 +689,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ElementwisePowerValidationFloatFixture : public ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ActivationLayerInfo act_info, bool is_inplace)
     {
         ArithmeticOperationsFuseActivationFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::POWER, shape, shape,

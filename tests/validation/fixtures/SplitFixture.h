@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,6 @@ template <typename TensorType, typename ITensorType, typename AccessorType, type
 class SplitFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, unsigned int axis, unsigned int splits, DataType data_type)
     {
         _target    = compute_target(shape, axis, splits, data_type);
@@ -149,7 +148,6 @@ template <typename TensorType, typename ITensorType, typename AccessorType, type
 class SplitShapesFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
     {
         _target    = compute_target(shape, axis, split_shapes, data_type);

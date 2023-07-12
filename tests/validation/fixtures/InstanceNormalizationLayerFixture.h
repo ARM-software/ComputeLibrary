@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class InstanceNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, DataLayout data_layout, bool in_place)
     {
         _target    = compute_target(shape, data_type, data_layout, in_place);

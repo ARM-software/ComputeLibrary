@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MeanStdDevNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt, bool in_place, float epsilon = 1e-8)
     {
         QuantizationInfo qi = QuantizationInfo(0.5f, 10);

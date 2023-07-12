@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,6 @@ public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
 public:
-    template <typename...>
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation,
                unsigned int depth_multiplier, DataType input_data_type, DataType weights_data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo weights_quantization_info, QuantizationInfo output_quantization_info,
@@ -289,7 +288,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthwiseConvolutionLayerValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type, DataLayout data_layout,
                ActivationLayerInfo act_info)
     {
@@ -303,7 +301,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthwiseConvolutionLayerNativeValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
                DataLayout data_layout)
     {
@@ -442,7 +439,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthwiseConvolutionLayerNativeConfigurableValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
                DataLayout data_layout, const ActivationLayerInfo &act_info, unsigned int n0, bool export_to_cl_image)
     {
@@ -640,7 +636,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, ActivationLayerInfo act_info)
     {
@@ -654,7 +649,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthwiseConvolutionLayerValidationQuantizedPerChannelFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
-    template <typename...>
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType input_data_type, DataType weights_data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, ActivationLayerInfo act_info)
     {

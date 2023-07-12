@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,7 +102,6 @@ class BoundingBoxTransformGenericFixture : public framework::Fixture
 public:
     using TDeltas = typename std::conditional<std::is_same<typename std::decay<T>::type, uint16_t>::value, uint8_t, T>::type;
 
-    template <typename...>
     void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type, QuantizationInfo deltas_qinfo)
     {
         const bool is_qasymm16 = data_type == DataType::QASYMM16;
@@ -215,7 +214,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BoundingBoxTransformFixture : public BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type)
     {
         BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(deltas_shape, info, data_type, QuantizationInfo());
@@ -228,7 +226,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BoundingBoxTransformQuantizedFixture : public BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type, QuantizationInfo deltas_qinfo)
     {
         BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(deltas_shape, info, data_type, deltas_qinfo);

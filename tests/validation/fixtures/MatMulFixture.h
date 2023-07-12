@@ -48,7 +48,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MatMulGenericValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs,
                Settings settings, QuantizationInfo a_qinfo = QuantizationInfo(), QuantizationInfo b_qinfo = QuantizationInfo(), QuantizationInfo o_qinfo = QuantizationInfo())
     {
@@ -271,7 +270,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MatMulValidationFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type)
     {
         MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>::setup(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, ActivationLayerInfo(), 0,
@@ -283,7 +281,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MatMulValidationWithDynamicTensorsFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs)
     {
         MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>::setup(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, num_extra_runs, Settings());
@@ -294,7 +291,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class QuantizedMatMulValidationFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info, int num_extra_runs,
                QuantizationInfo a_qinfo, QuantizationInfo b_qinfo, QuantizationInfo o_qinfo)
     {
@@ -307,7 +303,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MatMulValidationWithActivationFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo act_info)
     {
         MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>::setup(shape_a, shape_b, output_shape, transpose_a, transpose_b, data_type, act_info, 0, Settings());
@@ -318,7 +313,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class MatMulValidationWithActivationAlphaBetaFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo::ActivationFunction function,
                float alpha_beta)
     {
@@ -331,7 +325,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class QuantizedMatMulValidationWithActivationFixture : public MatMulGenericValidationFixture<TensorType, AccessorType, FunctionType, Settings, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape output_shape, bool transpose_a, bool transpose_b, DataType data_type, ActivationLayerInfo::ActivationFunction function,
                float alpha_beta, int num_extra_runs,
                QuantizationInfo a_qinfo, QuantizationInfo b_qinfo, QuantizationInfo o_qinfo)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename ConvolutionFuncti
 class BatchNormalizationLayerFusionValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, TensorShape w_shape, TensorShape b_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation,
                bool use_conv_b, bool use_beta, bool use_gamma, float epsilon, DataType dt, DataLayout data_layout)
     {
