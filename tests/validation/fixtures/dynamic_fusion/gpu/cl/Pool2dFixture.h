@@ -51,7 +51,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuPool2dValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const Pool2dAttributes &pool_attr, DataType data_type, bool mixed_precision)
     {
         _target    = compute_target(input_shape, pool_attr, data_type, mixed_precision);
@@ -151,7 +150,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuPool2dValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, PoolingType pool_type, Size2D pool_size, Padding2D pad, Size2D stride, bool exclude_padding, DataType data_type)
     {
         DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape,
@@ -164,7 +162,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuPool2dMixedPrecisionValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, PoolingType pool_type, Size2D pool_size, Padding2D pad, Size2D stride, bool exclude_padding, DataType data_type, bool mixed_precision)
     {
         DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape,
@@ -177,7 +174,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuPool2dSpecialValidationFixture : public DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, Pool2dAttributes pool_attr, DataType data_type)
     {
         DynamicFusionGpuPool2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, pool_attr, data_type, false);

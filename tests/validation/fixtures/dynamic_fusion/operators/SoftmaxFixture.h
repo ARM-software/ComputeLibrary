@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionSoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, float beta, size_t axis, bool is_log)
     {
         _reference = compute_reference(shape, data_type, beta, axis, is_log);
@@ -143,7 +142,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionSoftmaxValidationFixture : public DynamicFusionSoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, float beta, size_t axis, bool is_log)
     {
         DynamicFusionSoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,

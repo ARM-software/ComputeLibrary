@@ -88,7 +88,6 @@ public:
                   || std::is_same<typename std::decay<T>::type, int8_t>::value,
                   int32_t, T >::type; // If T: uint8_t or int8_t then TBias: int32_t, otherwise TBias: T
 
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info, const Size2D &dilation, DataType data_type,
                DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info)
     {
@@ -203,7 +202,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuConv2dValidationFixture : public DynamicFusionGpuConv2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape output_shape, TensorShape bias_shape,
                const PadStrideInfo &info, const Size2D &dialation, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
@@ -222,7 +220,6 @@ class DynamicFusionDirectConv2dValidationGenericFixture : public framework::Fixt
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
                DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout)
     {
@@ -341,7 +338,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionDirectConv2dValidationFixture : public DynamicFusionDirectConv2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type,
                DataLayout data_layout)
     {

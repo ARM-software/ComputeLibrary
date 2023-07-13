@@ -52,7 +52,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionResizeGenericValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout,
                InterpolationPolicy interpolation_policy, SamplingPolicy sampling_policy,
                bool align_corners, QuantizationInfo output_quantization_info)
@@ -223,7 +222,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionResizeValidationFixture : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, DataLayout data_layout, InterpolationPolicy policy, SamplingPolicy sampling_policy, bool align_corners)
     {
         DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
@@ -241,7 +239,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionResizeQuantizedValidationFixture : public DynamicFusionResizeGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, SamplingPolicy sampling_policy,
                bool align_corners)
     {

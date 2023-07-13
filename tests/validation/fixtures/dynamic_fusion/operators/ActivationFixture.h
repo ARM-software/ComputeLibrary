@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionActivationValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, bool fuse, DataType data_type, ActivationLayerInfo act_info, TArgs... args)
     {
         _fuse       = fuse;
@@ -177,7 +176,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionSigmoidValidationFixture : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, bool fuse, DataType data_type)
     {
         ActivationLayerInfo act_info{ ActivationLayerInfo::ActivationFunction::LOGISTIC };
@@ -189,7 +187,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionTanhValidationFixture : public DynamicFusionActivationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, bool fuse, DataType data_type)
     {
         ActivationLayerInfo act_info{ ActivationLayerInfo::ActivationFunction::TANH };

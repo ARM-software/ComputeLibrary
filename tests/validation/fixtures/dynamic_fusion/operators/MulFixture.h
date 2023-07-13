@@ -52,7 +52,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionMulValidationFixture : public framework::Fixture
 {
 public:
-   template <typename...>
    void setup(const TensorShape &shape0, const TensorShape &shape1, const TensorShape &shape2, DataType data_type, bool is_inplace, bool fuse_two_ops = false)
    {
        _data_type  = data_type;
@@ -200,7 +199,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionMulOneOpValidationFixture : public DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-   template <typename...>
    void setup(const TensorShape &shape0, DataType data_type, bool is_inplace)
    {
        DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape0, TensorShape(), data_type, is_inplace);
@@ -211,7 +209,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionMulBroadcastValidationFixture : public DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-   template <typename...>
    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type, bool is_inplace)
    {
        DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, TensorShape(), data_type, is_inplace);
@@ -222,7 +219,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionMulTwoOpsValidationFixture : public DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-   template <typename...>
    void setup(const TensorShape &shape0, const TensorShape &shape1, const TensorShape &shape2, DataType data_type, bool is_inplace, bool fuse_two_ops)
    {
        DynamicFusionMulValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, shape2, data_type, is_inplace, fuse_two_ops);

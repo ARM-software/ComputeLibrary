@@ -50,7 +50,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuReshapeLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
     {
         _target    = compute_target(input_shape, output_shape, data_type);

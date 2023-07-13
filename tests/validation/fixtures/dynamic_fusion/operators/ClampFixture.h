@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionClampValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, ClampAttributes attributes, bool fuse, DataType data_type)
     {
         // CLAMP is implemented as LU_BOUNDED_RELU with the alpha and beta variables swapped.
