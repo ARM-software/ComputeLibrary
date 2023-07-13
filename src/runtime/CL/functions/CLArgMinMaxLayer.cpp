@@ -96,10 +96,15 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
     DataType          output_data_type = (output->info()->data_type() == DataType::UNKNOWN) ? DataType::S32 : output->info()->data_type();
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
+    TensorShape not_reshaped_output_shape{ input->info()->tensor_shape() };
+    not_reshaped_output_shape.set(axis, 1);
+    auto_init_if_empty(*_not_reshaped_output.info(), input->info()->clone()->set_tensor_shape(not_reshaped_output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
+
     _arg_min_max_kernel = std::make_unique<CLArgMinMaxLayerKernel>();
     _arg_min_max_kernel->configure(compile_context, input, &_not_reshaped_output, axis, op);
 
     _memory_group.manage(&_not_reshaped_output);
+
     _reshape.configure(compile_context, &_not_reshaped_output, output);
     _not_reshaped_output.allocator()->allocate();
 }

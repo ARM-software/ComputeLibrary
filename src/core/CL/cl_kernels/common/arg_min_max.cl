@@ -85,9 +85,9 @@ inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_4(DATA_TYPE *min_max_val,
     VEC_DATA_TYPE(COND_DATA_TYPE, 2)
     idx_sel       = VECTOR_PREDICATE_EQ(in.s01, in.s23);
     in.s01      = select(in.s23, in.s01, idx_sel);
-    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel, int2));
+    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel, VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 2) ));
     idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
-    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, DATA_TYPE_OUTPUT));
     *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
     *min_max_idx  = res.s0;
 }
@@ -97,12 +97,12 @@ inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_8(DATA_TYPE *min_max_val,
     VEC_DATA_TYPE(COND_DATA_TYPE, 4)
     idx_sel       = VECTOR_PREDICATE_EQ(in.s0123, in.s4567);
     in.s0123      = select(in.s4567, in.s0123, idx_sel);
-    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel, int4));
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel,  VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 4) ));
     idx_sel.s01   = (VECTOR_PREDICATE(in.s01, in.s23)) || (in.s01 == in.s23 && CONVERT(((res.s01 < res.s23)), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
     in.s01        = select(in.s23, in.s01, idx_sel.s01);
-    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01,  VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 2) ));
     idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
-    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, DATA_TYPE_OUTPUT));
     *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
     *min_max_idx  = res.s0;
 }
@@ -112,15 +112,15 @@ inline DATA_TYPE_OUTPUT vectorized_compute_arg_min_max_16(DATA_TYPE *min_max_val
     VEC_DATA_TYPE(COND_DATA_TYPE, 8)
     idx_sel       = VECTOR_PREDICATE_EQ(in.s01234567, in.s89abcdef);
     in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
-    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
+    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel,  VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 8) ));
     idx_sel.s0123 = VECTOR_PREDICATE(in.s0123, in.s4567) || (in.s0123 == in.s4567 && CONVERT(((res.s0123 < res.s4567)), VEC_DATA_TYPE(COND_DATA_TYPE, 4)));
     in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
-    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123,  VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 4) ));
     idx_sel.s01   = (VECTOR_PREDICATE(in.s01, in.s23)) || (in.s01 == in.s23 && CONVERT(((res.s01 < res.s23)), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
     in.s01        = select(in.s23, in.s01, idx_sel.s01);
-    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+    res.s01       = select(res.s23, res.s01, CONVERT(idx_sel.s01,  VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 2) ));
     idx_sel.s0    = VECTOR_PREDICATE(in.s0, in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
-    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+    res.s0        = select(res.s1, res.s0, CONVERT(idx_sel.s0, DATA_TYPE_OUTPUT));
     *min_max_val  = SCALAR_SELECT_OP(in.s0, in.s1);
     *min_max_idx  = res.s0;
 }
