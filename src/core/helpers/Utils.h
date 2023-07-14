@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020-2021 Arm Limited.
+* Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 #define SRC_CORE_HELPERS_UTILS_H
 
 #include "arm_compute/core/ITensorInfo.h"
-
 namespace arm_compute
 {
 /** Create a strides object based on the provided strides and the tensor dimensions.
@@ -38,7 +37,7 @@ namespace arm_compute
  *         calculated based on the tensor shape and the strides of lower dimensions.
  */
 template <typename T, typename... Ts>
-inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&... fixed_strides)
+inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&...fixed_strides)
 {
     const TensorShape &shape = info.tensor_shape();
 
@@ -92,6 +91,32 @@ inline unsigned int get_next_power_two(unsigned int x)
 
     return x;
 }
+
+/** Check if the tensor has any holes.
+ *
+ * @param[in] info      Tensor info object defining the shape of the input tensor.
+ * @param[in] dimension Highest dimension to check.
+ *
+ * @note This function checks for holes in all the dimensions upto and including the highest dimension.
+ *
+ */
+inline bool has_holes(const ITensorInfo &info, size_t dimension)
+{
+    const auto &shape          = info.tensor_shape();
+    const auto &strides        = info.strides_in_bytes();
+    size_t      squashed_bytes = info.element_size();
+
+    for(size_t dim = 0; dim <= dimension; ++dim)
+    {
+        if(strides[dim] != squashed_bytes)
+        {
+            return true;
+        }
+        squashed_bytes *= shape[dim];
+    }
+    return false;
+}
+
 } // namespace arm_compute
 
 #endif /* SRC_CORE_HELPERS_UTILS_H */

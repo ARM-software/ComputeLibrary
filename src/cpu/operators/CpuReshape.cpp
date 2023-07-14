@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 
 #include "src/common/utils/Log.h"
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 namespace arm_compute
 {
 namespace cpu
@@ -42,6 +44,18 @@ void CpuReshape::configure(const ITensorInfo *src, ITensorInfo *dst)
 Status CpuReshape::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     return kernels::CpuReshapeKernel::validate(src, dst);
+}
+
+void CpuReshape::run(ITensorPack &tensors)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
+    if(!_is_prepared)
+    {
+        static_cast<kernels::CpuReshapeKernel *>(_kernel.get())->prepare(tensors);
+        _is_prepared = true;
+    }
+    const auto split_dimension = static_cast<kernels::CpuReshapeKernel *>(_kernel.get())->get_split_dimension();
+    NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 } // namespace cpu
 } // namespace arm_compute
