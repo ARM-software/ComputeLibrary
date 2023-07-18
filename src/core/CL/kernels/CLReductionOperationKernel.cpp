@@ -143,7 +143,10 @@ void CLReductionOperationKernel::configure(const CLCompileContext &compile_conte
             build_opts.add_option(("-DOPERATION=sum"));
             break;
         case ReductionOperation::MIN:
+            build_opts.add_option(("-DOPERATION=min_"));
+            break;
         case ReductionOperation::MAX:
+            build_opts.add_option(("-DOPERATION=max_"));
             break;
         case ReductionOperation::PROD:
             build_opts.add_option(("-DOPERATION=product"));

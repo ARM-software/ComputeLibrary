@@ -390,7 +390,7 @@ bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int
     const bool is_quantized_type = is_data_type_quantized(dt);
     const bool is_first_dim      = (axis == 0);
 
-    return !is_first_dim || is_min_max || is_quantized_type;
+    return !is_first_dim || (is_quantized_type && !is_min_max);
 }
 
 QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log)

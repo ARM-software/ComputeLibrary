@@ -824,6 +824,16 @@
 #define MAX_REDUCE_STR(x, size) max_reduce_##size(x)
 #define MAX_REDUCE(x, size) MAX_REDUCE_STR(x, size)
 
+#define min_reduce_1(x) (x)
+#define min_reduce_2(x) min(((x).s0), ((x).s1))
+#define min_reduce_3(x) min(min_reduce_2((x).s01), ((x).s2))
+#define min_reduce_4(x) min(min_reduce_2((x).s01), min_reduce_2((x).s23))
+#define min_reduce_8(x) min(min_reduce_4((x).s0123), min_reduce_4((x).s4567))
+#define min_reduce_16(x) min(min_reduce_8((x).s01234567), min_reduce_8((x).s89ABCDEF))
+
+#define MIN_REDUCE_STR(x, size) min_reduce_##size(x)
+#define MIN_REDUCE(x, size) MIN_REDUCE_STR(x, size)
+
 #define VECTOR_DECLARATION(name)     \
     __global uchar *name##_ptr,      \
     uint        name##_stride_x, \

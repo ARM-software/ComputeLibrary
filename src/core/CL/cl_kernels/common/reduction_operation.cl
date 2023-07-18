@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,8 @@
 #define sum(in0, in1, size) (in0 + SUM_REDUCE(in1, size))
 #define square_sum(in0, in1, size) (in0 + SUM_REDUCE((in1 * in1), size))
 #define product(in0, in1, size) (in0 * PROD_REDUCE(in1, size))
+#define min_(in0, in1, size) (min(in0, MIN_REDUCE(in1, size)))
+#define max_(in0, in1, size) (max(in0, MAX_REDUCE(in1, size)))
 
 /** This kernel performs parallel reduction given an operation on x-axis.
  *
@@ -79,12 +81,15 @@ __kernel void reduction_operation_x(
     __global uchar *input_addr  = input_ptr + input_offset_first_element_in_bytes + y * input_stride_y + z * input_stride_z;
     __global uchar *output_addr = output_ptr + output_offset_first_element_in_bytes + y * output_stride_y + z * output_stride_z;
 
+#if !defined(MIN) && !defined(MAX)
 #if defined(PROD)
     DATA_TYPE res = (DATA_TYPE)1;
 #else  // defined(PROD)
     DATA_TYPE res = (DATA_TYPE)0;
 #endif // defined(PROD)
-
+#else  // #if !defined(MIN) && !defined(MAX)
+    DATA_TYPE res = *((__global DATA_TYPE *)input_addr);
+#endif // #if defined(MIN) || defined(MAX)
     int x = 0;
 
     for(; x <= (WIDTH - VEC_SIZE); x += VEC_SIZE)
