@@ -101,12 +101,19 @@ const auto CastF32toS32Dataset            = combine(framework::dataset::make("Da
 const auto CastF32toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8));
 const auto CastF32toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 
+// U64
+const auto CastU64toF32Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::F32));
+
+// S64
+const auto CastS64toF32Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::F32));
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(Cast)
 template <typename T>
 using NECastToU8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint8_t>;
+template <typename T>
+using NECastToS8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, int8_t>;
 template <typename T>
 using NECastToU16Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint16_t>;
 template <typename T>
@@ -115,6 +122,10 @@ template <typename T>
 using NECastToU32Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint32_t>;
 template <typename T>
 using NECastToS32Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, int32_t>;
+template <typename T>
+using NECastToU64Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint64_t>;
+template <typename T>
+using NECastToS64Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, int64_t>;
 template <typename T>
 using NECastToF16Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, half>;
 template <typename T>
@@ -188,6 +199,14 @@ CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, NECastToF16Fixture<float>, 
 #endif //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 CAST_SUITE(F32_to_S32, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
 CAST_SUITE(F32_to_U8, DataType::F32, DataType::S32, NECastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
+
+#ifdef __aarch64__
+// S64
+CAST_SUITE(S64_to_F32, DataType::S64, DataType::F32, NECastToF32Fixture<int64_t>, CastS64toF32Dataset, zero_tolerance)
+
+// U64
+CAST_SUITE(U64_to_F32, DataType::U64, DataType::F32, NECastToF32Fixture<uint64_t>, CastU64toF32Dataset, zero_tolerance)
+#endif // __aarch64__
 
 DATA_TEST_CASE(KernelSelectionDstFP16, framework::DatasetMode::ALL,
                combine(framework::dataset::make("CpuExt", std::string("NEON")),

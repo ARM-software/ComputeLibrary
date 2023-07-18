@@ -52,8 +52,9 @@ public:
      * |F16            | QASYMM8_SIGNED, QASYMM8, F32, S32, U8          |
      * |S32            | QASYMM8_SIGNED, QASYMM8, F16, F32, U8          |
      * |F32            | QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8|
+     * |S64            | F32                                            |
      *
-     * @param[in]  src    The source tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  src    The source tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/S64/F16/F32.
      * @param[out] dst    The destination tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
      *

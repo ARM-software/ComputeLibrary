@@ -81,6 +81,8 @@ enum class Format
     U16,      /**< 1 channel, 1 U16 per channel */
     S32,      /**< 1 channel, 1 S32 per channel */
     U32,      /**< 1 channel, 1 U32 per channel */
+    S64,      /**< 1 channel, 1 S64 per channel */
+    U64,      /**< 1 channel, 1 U64 per channel */
     BFLOAT16, /**< 16-bit brain floating-point number */
     F16,      /**< 1 channel, 1 F16 per channel */
     F32,      /**< 1 channel, 1 F32 per channel */

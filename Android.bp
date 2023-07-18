@@ -167,7 +167,8 @@ arm_compute_library_defaults {
             "-Wno-unused-parameter",
             "-DNO_DOT_IN_TOOLCHAIN",
             "-Wno-implicit-fallthrough",
-            "-fPIC"
+            "-fPIC",
+            "-DACL_INTERNAL_TEST_CKW_IN_DF"
     ],
     rtti: true,
 }

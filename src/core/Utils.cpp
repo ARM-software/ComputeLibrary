@@ -414,7 +414,7 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
     return QuantizationInfo(1.f / 256, 0);
 }
 
-std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo& act_info, DataType data_type, UniformQuantizationInfo oq_info)
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(const ActivationLayerInfo &act_info, DataType data_type, UniformQuantizationInfo oq_info)
 {
     const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
     const auto a                 = act_info.a();
@@ -497,6 +497,12 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
         case DataType::S32:
             print_consecutive_elements_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n, stream_width, element_delim);
             break;
+        case DataType::U64:
+            print_consecutive_elements_impl<uint64_t>(s, reinterpret_cast<const uint64_t *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::S64:
+            print_consecutive_elements_impl<int64_t>(s, reinterpret_cast<const int64_t *>(ptr), n, stream_width, element_delim);
+            break;
         case DataType::BFLOAT16:
             print_consecutive_elements_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n, stream_width, element_delim);
             break;
@@ -533,6 +539,10 @@ int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const u
             return max_consecutive_elements_display_width_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n);
         case DataType::S32:
             return max_consecutive_elements_display_width_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n);
+        case DataType::U64:
+            return max_consecutive_elements_display_width_impl<uint64_t>(s, reinterpret_cast<const uint64_t *>(ptr), n);
+        case DataType::S64:
+            return max_consecutive_elements_display_width_impl<int64_t>(s, reinterpret_cast<const int64_t *>(ptr), n);
         case DataType::BFLOAT16:
             return max_consecutive_elements_display_width_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n);
         case DataType::F16:
