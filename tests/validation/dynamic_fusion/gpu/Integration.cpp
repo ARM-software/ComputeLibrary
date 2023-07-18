@@ -63,6 +63,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(INTEGRATION)
 TEST_SUITE(DYNAMIC_FUSION)
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Conv2d is not ported to ckw yet. COMPMID-6259
 TEST_CASE(Conv2d, framework::DatasetMode::ALL)
 {
     /* Computation:
@@ -152,6 +153,7 @@ TEST_CASE(Conv2d, framework::DatasetMode::ALL)
     RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
     validate(CLAccessor(t_dst), ref_t_dst_nchw, tolerance_f32);
 }
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 TEST_CASE(Add_Output_Add_Output, framework::DatasetMode::ALL)
 {
     /* Computation:
@@ -358,6 +360,7 @@ TEST_CASE(Add_Output_Add_Cast_Cast_Output, framework::DatasetMode::ALL)
     validate(CLAccessor(t_out_1), ref_t_out_1, tolerance_cast_f32);
 }
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Conv2d is not ported to ckw yet. COMPMID-6259
 TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
 {
     //   (tensor0)
@@ -422,7 +425,7 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     // Initialize the context.
     CLScheduler::get().default_reinit();
 
-    auto cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
+    auto               cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
     GpuWorkloadContext context(&cl_compile_ctx);
 
     auto tensor0_info = context.create_tensor_info(conv2d_src_shape, 1, DataType::F32, DataLayout::NHWC);
@@ -431,8 +434,8 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     GpuWorkloadSketch sketch0(&context);
 
     Conv2dAttributes conv2d_attr;
-    auto tensor1_info = context.create_tensor_info(conv2d_wei_shape, 1, DataType::F32, DataLayout::NHWC);
-    auto tensor2_info = context.create_tensor_info(conv2d_bia_shape, 1, DataType::F32, DataLayout::NHWC);
+    auto             tensor1_info = context.create_tensor_info(conv2d_wei_shape, 1, DataType::F32, DataLayout::NHWC);
+    auto             tensor2_info = context.create_tensor_info(conv2d_bia_shape, 1, DataType::F32, DataLayout::NHWC);
     ARM_COMPUTE_EXPECT(GpuConv2d::validate_op(sketch0, &tensor0_info, &tensor1_info, &tensor2_info, conv2d_attr), framework::LogLevel::ERRORS);
     auto ans_info = GpuConv2d::create_op(sketch0, &tensor0_info, &tensor1_info, &tensor2_info, conv2d_attr);
 
@@ -440,8 +443,8 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     ans_info = GpuSigmoid::create_op(sketch0, ans_info);
 
     DepthwiseConv2dAttributes dwc_attr;
-    auto tensor3_info = context.create_tensor_info(dwc_wei_shape, 1, DataType::F32, DataLayout::NHWC);
-    auto tensor4_info = context.create_tensor_info(dwc_bia_shape, 1, DataType::F32, DataLayout::NHWC);
+    auto                      tensor3_info = context.create_tensor_info(dwc_wei_shape, 1, DataType::F32, DataLayout::NHWC);
+    auto                      tensor4_info = context.create_tensor_info(dwc_bia_shape, 1, DataType::F32, DataLayout::NHWC);
     ARM_COMPUTE_EXPECT(!GpuDepthwiseConv2d::validate_op(sketch0, ans_info, &tensor3_info, &tensor4_info, dwc_attr), framework::LogLevel::ERRORS);
 
     auto tensor5_info = context.create_tensor_info();
@@ -497,9 +500,9 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     // Allocate the auxiliary tensors.
     for(auto &data : runtime0.get_auxiliary_tensors())
     {
-        auto tensor = std::get<0>(data);
+        auto  tensor      = std::get<0>(data);
         auto &tensor_info = std::get<1>(data);
-        auto mem_req = std::get<2>(data);
+        auto  mem_req     = std::get<2>(data);
 
         tensor->allocator()->init(tensor_info, mem_req.alignment);
         tensor->allocator()->allocate();
@@ -507,9 +510,9 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
 
     for(auto &data : runtime1.get_auxiliary_tensors())
     {
-        auto tensor = std::get<0>(data);
+        auto  tensor      = std::get<0>(data);
         auto &tensor_info = std::get<1>(data);
-        auto mem_req = std::get<2>(data);
+        auto  mem_req     = std::get<2>(data);
 
         tensor->allocator()->init(tensor_info, mem_req.alignment);
         tensor->allocator()->allocate();
@@ -556,11 +559,13 @@ TEST_CASE(Conv2d_Sigmoid_DepthwiseConv2d_Mul, framework::DatasetMode::ALL)
     const auto ref_dwc_bia_nchw = reference::permute(ref_dwc_bia, nhwc_to_nchw);
     const auto ref_dwc_dst_nchw = reference::depthwise_convolution(ref_sigmoid_dst_nchw, ref_dwc_wei_nchw, ref_dwc_bia_nchw, dwc_dst_shape_nchw, PadStrideInfo(), 1);
 
-    const auto ref_mul_dst_nchw = reference::pixel_wise_multiplication<float, float, float>(ref_dwc_dst_nchw, ref_conv2d_bia_nchw, 1.0, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_UP, DataType::F32);
+    const auto ref_mul_dst_nchw = reference::pixel_wise_multiplication<float, float, float>(ref_dwc_dst_nchw, ref_conv2d_bia_nchw, 1.0, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_UP,
+                                                                                            DataType::F32);
 
     constexpr RelativeTolerance<float> tolerance(0.001f);
     validate(CLAccessor(tensor6), ref_mul_dst_nchw, tolerance);
 }
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 TEST_SUITE(Invalid_Fusion_Should_Fail)
 TEST_CASE(Multiple_Complex_Ops_0, framework::DatasetMode::ALL)

@@ -49,6 +49,7 @@ public:
     ~GpuCkwStore() override = default;
     // Inherited methods overriden:
     virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
+    std::string get_name(const ComponentGroup &comp_group) const override;
 
 private:
     const ITensorInfo *_src;

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H
 
 #include <string>
+#include <vector>
 
 namespace arm_compute
 {
@@ -51,5 +52,14 @@ std::string upper_string(const std::string &val);
  * @return String with the floating point value.
  */
 std::string float_to_string_with_full_precision(float val);
+
+/** Join a sequence of strings with separator @p sep
+ *
+ * @param[in] strings Strings to join
+ * @param[in] sep     Separator to join consecutive strings in the sequence
+ *
+ * @return std::string
+ */
+std::string join(const std::vector<std::string> strings, const std::string &sep);
 }
 #endif /*ARM_COMPUTE_CORE_UTILS_STRINGUTILS_H */

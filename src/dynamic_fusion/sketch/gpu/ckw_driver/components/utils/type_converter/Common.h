@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPECONVERTER
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPECONVERTER
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_COMMON
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_COMMON
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -106,46 +106,32 @@ inline TensorComponentType from_ckw(const ckw::TensorComponentType &component)
     {
         case ckw::TensorComponentType::OffsetFirstElement:
             return TensorComponentType::OffsetFirstElement;
-            break;
         case ckw::TensorComponentType::Stride0:
             return TensorComponentType::Stride0;
-            break;
         case ckw::TensorComponentType::Stride1:
             return TensorComponentType::Stride1;
-            break;
         case ckw::TensorComponentType::Stride2:
             return TensorComponentType::Stride2;
-            break;
         case ckw::TensorComponentType::Stride3:
             return TensorComponentType::Stride3;
-            break;
         case ckw::TensorComponentType::Stride4:
             return TensorComponentType::Stride4;
-            break;
         case ckw::TensorComponentType::Dim0:
             return TensorComponentType::Dim0;
-            break;
         case ckw::TensorComponentType::Dim1:
             return TensorComponentType::Dim1;
-            break;
         case ckw::TensorComponentType::Dim2:
             return TensorComponentType::Dim2;
-            break;
         case ckw::TensorComponentType::Dim3:
             return TensorComponentType::Dim3;
-            break;
         case ckw::TensorComponentType::Dim4:
             return TensorComponentType::Dim4;
-            break;
         case ckw::TensorComponentType::Dim1xDim2:
             return TensorComponentType::Dim1xDim2;
-            break;
         case ckw::TensorComponentType::Dim2xDim3:
             return TensorComponentType::Dim2xDim3;
-            break;
         case ckw::TensorComponentType::Dim1xDim2xDim3:
             return TensorComponentType::Dim1xDim2xDim3;
-            break;
         case ckw::TensorComponentType::Unknown:
             return TensorComponentType::Unknown;
         default:
@@ -160,16 +146,12 @@ inline ckw::TensorStorageType to_ckw(const TensorStorageType &storage)
     {
         case TensorStorageType::ClBufferUint8Ptr:
             return ckw::TensorStorageType::BufferUint8Ptr;
-            break;
         case TensorStorageType::ClImage2dReadOnly:
             return ckw::TensorStorageType::Texture2dReadOnly;
-            break;
         case TensorStorageType::ClImage2dWriteOnly:
             return ckw::TensorStorageType::Texture2dWriteOnly;
-            break;
         case TensorStorageType::Unknown:
             return ckw::TensorStorageType::Unknown;
-            break;
         default:
             ARM_COMPUTE_ERROR("Unknown tensor storage type");
             return ckw::TensorStorageType::Unknown;
@@ -181,16 +163,12 @@ inline TensorStorageType from_ckw(const ckw::TensorStorageType &storage)
     {
         case ckw::TensorStorageType::BufferUint8Ptr:
             return TensorStorageType::ClBufferUint8Ptr;
-            break;
         case ckw::TensorStorageType::Texture2dReadOnly:
             return TensorStorageType::ClImage2dReadOnly;
-            break;
         case ckw::TensorStorageType::Texture2dWriteOnly:
             return TensorStorageType::ClImage2dWriteOnly;
-            break;
         case ckw::TensorStorageType::Unknown:
             return TensorStorageType::Unknown;
-            break;
         default:
             ARM_COMPUTE_ERROR("Unknown CKW tensor storage type");
             return TensorStorageType::Unknown;
@@ -199,4 +177,4 @@ inline TensorStorageType from_ckw(const ckw::TensorStorageType &storage)
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPECONVERTER */
+#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_COMMON */

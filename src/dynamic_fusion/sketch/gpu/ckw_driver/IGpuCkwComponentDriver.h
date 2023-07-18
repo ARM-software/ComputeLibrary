@@ -100,6 +100,27 @@ public:
     {
         return Window{};
     }
+    /** Generate the name of the component
+     *
+     * This will be concatenated with other components' names to form the name of the kernel
+     */
+    virtual std::string get_name(const ComponentGroup &comp_group) const
+    {
+        ARM_COMPUTE_UNUSED(comp_group);
+        return "unnamed";
+    }
+    /** Generate the tuner id of the component
+     *  This id should capture all the parameters that distinguish one kernel's lws tuning from another.
+     *  e.g. two components that are identical in every other way, but have output tensor dimensions should
+     *  have different tuner ids, because the lws of one may not be optimal on the other.
+     *
+     * This will be concatenated with other components' tuner id to form the tuner id of the kernel
+     */
+    virtual std::string get_tuner_id(const ComponentGroup &comp_group) const
+    {
+        ARM_COMPUTE_UNUSED(comp_group);
+        return "";
+    }
     /** Get component id */
     ComponentId id() const
     {

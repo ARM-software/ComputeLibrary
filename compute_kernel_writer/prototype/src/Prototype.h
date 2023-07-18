@@ -2194,10 +2194,34 @@ struct GpuKernel
     std::vector<std::pair<int32_t, TensorComponentType>>  list_tensor_components; // List of tensor components (width, stride,..), required for the dispatch stage)
 };
 
+// Generate all extension pragmas (hardcoded for now)
+inline std::string generate_extensions()
+{
+    std::string ext = R"(
+#if defined(cl_khr_fp16)
+#pragma OPENCL EXTENSION cl_khr_fp16 : enable
+#endif // defined(cl_khr_fp16)
+
+#if defined(cl_arm_integer_dot_product_int8)
+#pragma OPENCL EXTENSION cl_arm_integer_dot_product_int8 : enable
+#endif // defined(cl_arm_integer_dot_product_int8)
+
+#if defined(cl_arm_integer_dot_product_accumulate_int8)
+#pragma OPENCL EXTENSION cl_arm_integer_dot_product_accumulate_int8 : enable
+#endif // defined(cl_arm_integer_dot_product_accumulate_int8)
+
+#if defined(cl_arm_printf)
+#pragma OPENCL EXTENSION cl_arm_printf : enable
+#endif // defined(cl_arm_printf);
+)";
+    return ext;
+}
+
 // This function should produce an object with the source
 inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::string &name)
 {
     std::string code;
+    code += generate_extensions();
     code += "__kernel void ";
     code += name;
     code += "(\n";
@@ -2783,6 +2807,8 @@ private:
             case TensorSamplerAddressModeY::SkipMinEdgeOnly:
                 _writer->compound_statement_end();
                 break;
+            case TensorSamplerAddressModeY::None:
+                break;
 
             default:
                 assert(false);
@@ -2798,6 +2824,8 @@ private:
                 _writer->write_text(dst);
                 _writer->write_text(" = 0.0f;\n");
                 _writer->compound_statement_end();
+                break;
+            case TensorSamplerAddressModeY::None:
                 break;
 
             default:
@@ -2856,6 +2884,8 @@ private:
             case TensorSamplerAddressModeZ::SkipMinEdgeOnly:
             case TensorSamplerAddressModeZ::SkipMaxEdgeOnly:
                 _writer->compound_statement_end();
+                break;
+            case TensorSamplerAddressModeZ::None:
                 break;
 
             default:
@@ -3622,14 +3652,15 @@ public:
         const IVectorTile *src = operands.unpack(src_name);
         const IVectorTile *dst = operands.unpack(dst_name);
 
-        const int32_t     dst_w = dst->format().w;
         const int32_t     dst_h = dst->format().h;
-        const int32_t     src_w = src->format().w;
         const std::string dt    = dst->underlying_source_variables()[0].type.str;
 
-        const bool broadcast_src_x = dst_w != 1 && src_w == 1;
-
-        const std::string src_prefix = broadcast_src_x ? "(" + dt + ")" : "";
+        // Always perform an explicit cast. This automatically covers at least the 2 scenarios:
+        // 1. Widen a scalar into a vector type. This enables scalar-vector broadcasting
+        // 2. Ensure non-ambiguity over function overloads.
+        //    E.g. a constant tile may be accidentally initialized with a double literal. By casting it to single float,
+        //    it avoids ambiguous function calls
+        const std::string src_prefix = "(" + dt + ")";
 
         // Broadcasting on Y is automatic
         for(int32_t y = 0; y < dst_h; ++y)
@@ -3679,18 +3710,13 @@ public:
         const IVectorTile *second = operands.unpack(second_name);
         const IVectorTile *dst    = operands.unpack(dst_name);
 
-        const int32_t     dst_w        = dst->format().w;
         const int32_t     dst_h        = dst->format().h;
-        const int32_t     first_w      = first->format().w;
-        const int32_t     second_w     = second->format().w;
         const auto        datatype     = dst->underlying_source_variables()[0].type;
         const std::string datatype_str = datatype.str;
 
-        const bool broadcast_first_x  = dst_w != 1 && first_w == 1;
-        const bool broadcast_second_x = dst_w != 1 && second_w == 1;
-
-        const std::string first_prefix  = broadcast_first_x ? "(" + datatype_str + ")" : "";
-        const std::string second_prefix = broadcast_second_x ? "(" + datatype_str + ")" : "";
+        // Always perform an explicit cast. See similar comments in op_unary_elementwise_function
+        const std::string first_prefix  = "(" + datatype_str + ")";
+        const std::string second_prefix = "(" + datatype_str + ")";
 
         const bool is_float = (datatype.dt == DataType::Fp32 || datatype.dt == DataType::Fp16);
 
@@ -3727,20 +3753,13 @@ public:
         const IVectorTile *third  = operands.unpack(third_name);
         const IVectorTile *dst    = operands.unpack(dst_name);
 
-        const int32_t     dst_w    = dst->format().w;
         const int32_t     dst_h    = dst->format().h;
-        const int32_t     first_w  = first->format().w;
-        const int32_t     second_w = second->format().w;
-        const int32_t     third_w  = third->format().w;
         const std::string dt       = dst->underlying_source_variables()[0].type.str;
 
-        const bool broadcast_first_x  = dst_w != 1 && first_w == 1;
-        const bool broadcast_second_x = dst_w != 1 && second_w == 1;
-        const bool broadcast_third_x  = dst_w != 1 && third_w == 1;
-
-        const std::string first_prefix  = broadcast_first_x ? "(" + dt + ")" : "";
-        const std::string second_prefix = broadcast_second_x ? "(" + dt + ")" : "";
-        const std::string third_prefix  = broadcast_third_x ? "(" + dt + ")" : "";
+        // Always perform an explicit cast. See similar comments in op_unary_elementwise_function
+        const std::string first_prefix  = "(" + dt + ")";
+        const std::string second_prefix = "(" + dt + ")";
+        const std::string third_prefix  = "(" + dt + ")";
 
         // Broadcasting on Y is automatic
         for(int32_t y = 0; y < dst_h; ++y)

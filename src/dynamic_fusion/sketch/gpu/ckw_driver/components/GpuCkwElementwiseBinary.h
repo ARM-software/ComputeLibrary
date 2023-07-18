@@ -54,12 +54,15 @@ public:
     ~GpuCkwElementwiseBinary() override = default;
     // Inherited methods overriden:
     virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
-    Window get_window() const override;
+    Window      get_window() const override;
+    std::string get_name(const ComponentGroup &comp_group) const override;
+    std::string get_tuner_id(const ComponentGroup &comp_group) const override;
 
 private:
     const ITensorInfo *_lhs;
     const ITensorInfo *_rhs;
     const ITensorInfo *_dst;
+    Attributes         _attributes;
 };
 } // namespace dynamic_fusion
 } // namespace experimental

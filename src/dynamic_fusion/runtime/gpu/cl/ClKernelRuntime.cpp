@@ -45,6 +45,7 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
     opencl::ClKernelLibrary &klib = opencl::ClKernelLibrary::get();
     _kernel                       = static_cast<cl::Kernel>(compile_ctx.create_kernel(code.name(),
                                                                                       code.name(), // program name has to be provided to differentiate between different unfusable components' kernels.
+                                                                                      // Each program contains exactly one kernel
                                                                                       code.code(),
                                                                                       klib.kernel_path() /* Kernel path: Used in cases of embedded kernels */,
                                                                                       code.build_options().options(),

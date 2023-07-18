@@ -30,7 +30,7 @@
 #include "arm_compute/core/Window.h"
 #include "src/common/utils/Log.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/TypeConverter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
@@ -43,46 +43,52 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuCkwDriver::GpuCkwDriver(const GpuKernelComponentGroup &components)
-    : _components{ components }, _kernel{ GpuTargetLanguage::OpenCL }
+    : _components{ components }, _kernel{ GpuTargetLanguage::OpenCL }, _code{}
 {
-}
+    // Generate kernel name
+    std::string name = "";
+    for(auto &comp : _components)
+    {
+        auto ckw_driver = comp->ckw_component_driver();
+        ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
+        name += ckw_driver->get_name(_components) + "__";
+    }
 
-std::string GpuCkwDriver::get_name()
-{
-    ARM_COMPUTE_LOG_PARAMS(std::string("[V1] TODO"));
-    return "unnamed";
-}
-
-std::string GpuCkwDriver::get_code()
-{
-    _kernel.name(get_name());
+    // Generate kernel code
+    _kernel.name(name);
     GpuCkwKernelWriter       root_writer(_kernel);
     GpuCkwScopedKernelWriter writer(&root_writer);
     GpuCkwVariableTable      vtable{};
 
-    // Global Kernel Writer Driver code
     for(auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
         ckw_driver->write_component_code(_components, vtable, writer);
     }
-
-    std::string code = root_writer.generate_code();
-
-    return code;
+    _code = root_writer.generate_code();
 }
 
-CLBuildOptions GpuCkwDriver::get_build_options()
+std::string GpuCkwDriver::get_name()
 {
-    ARM_COMPUTE_LOG_PARAMS(std::string("[V1] TO REMOVE"));
-    return CLBuildOptions{};
+    return _kernel.name();
+}
+
+std::string GpuCkwDriver::get_code()
+{
+    return _code;
 }
 
 std::string GpuCkwDriver::get_config_id()
 {
-    ARM_COMPUTE_LOG_PARAMS(std::string("[V1] TODO"));
-    return "";
+    std::string id = "";
+    for(auto &comp : _components)
+    {
+        auto ckw_driver = comp->ckw_component_driver();
+        ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
+        id = ckw_driver->get_tuner_id(_components) + "__";
+    }
+    return id;
 }
 
 Window GpuCkwDriver::get_window() const

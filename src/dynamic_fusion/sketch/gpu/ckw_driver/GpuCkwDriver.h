@@ -37,7 +37,6 @@ namespace arm_compute
 {
 /** Forward declarations */
 class Window;
-class CLBuildOptions;
 
 namespace experimental
 {
@@ -62,8 +61,6 @@ public:
     std::string get_name() override;
     /** Generate kernel code */
     std::string get_code() override;
-    /** Generate build options */
-    CLBuildOptions get_build_options() override;
     /** Generate config id string of the entire kernel. This is used for tuning */
     std::string get_config_id() override;
     /** Generate execution window */
@@ -74,6 +71,7 @@ public:
 private:
     GpuKernelComponentGroup _components{};
     ckw::Kernel             _kernel;
+    std::string             _code;
 };
 
 } // namespace dynamic_fusion

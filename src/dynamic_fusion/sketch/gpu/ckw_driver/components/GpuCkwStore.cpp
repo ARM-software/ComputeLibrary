@@ -53,6 +53,12 @@ void GpuCkwStore::write_component_code(const ComponentGroup &comp_group, GpuCkwV
 
     writer->op_store(dst_tensor, src_tile, sampler);
 }
+
+std::string GpuCkwStore::get_name(const ComponentGroup &comp_group) const
+{
+    ARM_COMPUTE_UNUSED(comp_group);
+    return "store";
+}
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

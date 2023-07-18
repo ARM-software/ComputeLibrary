@@ -23,13 +23,14 @@
  */
 #include "arm_compute/core/utils/StringUtils.h"
 
-#include <limits>
-#include <sstream>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <fstream>
+#include <limits>
 #include <map>
+#include <numeric>
+#include <sstream>
 #include <string>
 
 namespace arm_compute
@@ -60,5 +61,21 @@ std::string float_to_string_with_full_precision(float val)
     }
 
     return ss.str();
+}
+
+std::string join(const std::vector<std::string> strings, const std::string &sep)
+{
+    if(strings.empty())
+    {
+        return "";
+    }
+    return std::accumulate(
+               std::next(strings.begin()),
+               strings.end(),
+               strings.at(0),
+               [&sep](const std::string & a, const std::string & b)
+    {
+        return a + sep + b;
+    });
 }
 }

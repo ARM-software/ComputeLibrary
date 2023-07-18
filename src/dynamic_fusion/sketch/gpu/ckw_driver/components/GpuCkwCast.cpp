@@ -33,7 +33,7 @@
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/TypeConverter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
 #include <string>
 
 using namespace ckw;

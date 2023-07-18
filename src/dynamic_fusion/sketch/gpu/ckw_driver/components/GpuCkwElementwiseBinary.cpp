@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "ckw/TensorTileSampler.h"
 #include "ckw/types/TensorSamplerTypes.h"
@@ -35,6 +36,11 @@
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/ElementwiseBinary.h"
+#include "src/dynamic_fusion/sketch/gpu/components/utils/type_printer/ElementwiseBinary.h"
+#include "support/StringSupport.h"
+#include <algorithm>
 #include <string>
 
 using namespace ckw;
@@ -44,13 +50,30 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-namespace
+GpuCkwElementwiseBinary::GpuCkwElementwiseBinary(ComponentId                      id,
+                                                 const ArgumentPack<ITensorInfo> &tensors,
+                                                 const Attributes                &attributes)
+    : IGpuCkwComponentDriver{ id, tensors },
+      _lhs{},
+      _rhs{},
+      _dst{},
+      _attributes{ attributes }
 {
-/** Create a simple sampler from tile of dimension [m0, n0]
- */
-inline TensorTileSampler create_simple_sampler(GpuCkwScopedKernelWriter &writer, int32_t m0, int32_t n0)
+    _lhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
+    _rhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
+    _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_lhs, _rhs, _dst);
+}
+
+void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
 {
-    TensorTileSampler sampler;
+    const auto root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
+    const auto n0          = static_cast<int32_t>(root_window.x().step());
+    const auto m0          = static_cast<int32_t>(root_window.y().step());
+
+    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, TensorStorageType::ClBufferUint8Ptr, "lhs");
+    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, TensorStorageType::ClBufferUint8Ptr, "rhs");
+    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     auto &gid_0 = writer->declare_tile("gid_0", ckw::DataType::Int32);
     auto &gid_1 = writer->declare_tile("gid_1", ckw::DataType::Int32);
@@ -60,75 +83,44 @@ inline TensorTileSampler create_simple_sampler(GpuCkwScopedKernelWriter &writer,
     writer->op_get_global_id(gid_1, 1);
     writer->op_get_global_id(gid_2, 2);
 
-    auto &x_coord = writer->declare_tile("x_coord", ckw::DataType::Int32);
-    auto &y_coord = writer->declare_tile("y_coord", ckw::DataType::Int32);
-    auto &m0_t    = writer->declare_tile("m0", m0);
-    auto &n0_t    = writer->declare_tile("n0", n0);
-    writer->op_binary_expression(x_coord, gid_0, ckw::BinaryOp::Mul, n0_t);
-    writer->op_binary_expression(y_coord, gid_1, ckw::BinaryOp::Mul, m0_t);
-
-    sampler.x(x_coord);
-    sampler.y(y_coord);
     auto &const_0 = writer->declare_tile("0", 0);
-    sampler.z(const_0); // 3rd dimension collapsed with 2nd dimension
-    sampler.b(gid_2);
 
-    sampler.width(n0);
-    sampler.height(m0);
+    // Load the LHS and RHS tiles
+    if(!lhs->has_tile())
+    {
+        auto sampler = create_boundary_aware_2d_sampler(writer, gid_0, gid_1, _lhs->dimension(0), _lhs->dimension(1), n0, m0, "lhs_", const_0);
+        sampler.format(TensorSamplerFormat::C_WH_1); // 3rd dimension collapsed with 2nd dimension
+        sampler.z(const_0);
+        sampler.b(gid_2);
+        writer->op_load_once(lhs, sampler);
+    }
+    if(!rhs->has_tile())
+    {
+        auto sampler = create_boundary_aware_2d_sampler(writer, gid_0, gid_1, _rhs->dimension(0), _rhs->dimension(1), n0, m0, "rhs_", const_0);
+        sampler.format(TensorSamplerFormat::C_WH_1); // 3rd dimension collapsed with 2nd dimension
+        sampler.z(const_0);
+        sampler.b(gid_2);
+        writer->op_load_once(rhs, sampler);
+    }
 
-    sampler.format(TensorSamplerFormat::C_WH_1); // 3rd dimension collapsed with 2nd dimension
-    sampler.address_mode_x(TensorSamplerAddressModeX::None);
-    sampler.address_mode_y(TensorSamplerAddressModeY::ClampToBorder);
-    sampler.address_mode_z(TensorSamplerAddressModeZ::Skip); // Dimensions higher than 3 not supported yet
-
-    return sampler;
-}
-} // namespace
-
-GpuCkwElementwiseBinary::GpuCkwElementwiseBinary(ComponentId                      id,
-                                                 const ArgumentPack<ITensorInfo> &tensors,
-                                                 const Attributes                &attributes)
-    : IGpuCkwComponentDriver{ id, tensors },
-      _lhs{},
-      _rhs{},
-      _dst{}
-{
-    ARM_COMPUTE_UNUSED(attributes);
-
-    _lhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
-    _rhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
-    _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_lhs, _rhs, _dst);
-}
-
-void GpuCkwElementwiseBinary::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
-{
-    const auto         root_window = comp_group.get_root_component()->ckw_component_driver()->get_window();
-    const unsigned int n0          = root_window.x().step();
-    const unsigned int m0          = root_window.y().step();
-
-    GpuCkwComponentArgument *lhs = vtable.declare_variable(comp_group, writer, _lhs, TensorStorageType::ClBufferUint8Ptr, "lhs");
-    GpuCkwComponentArgument *rhs = vtable.declare_variable(comp_group, writer, _rhs, TensorStorageType::ClBufferUint8Ptr, "rhs");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
-
-    // Load the LHS and RHS tiles and prepare the tensor sampler.
-    load_lhs_rhs_tiles_and_prepare_sampler(writer, lhs, rhs, m0, n0, create_simple_sampler);
-
-    auto       &lhs_tile = lhs->tile();
-    auto       &rhs_tile = rhs->tile();
-    const auto &sampler  = lhs->tile_sampler();
+    auto dst_sampler = create_boundary_aware_2d_sampler(writer, gid_0, gid_1, _dst->dimension(0), _dst->dimension(1), n0, m0, "dst_", const_0);
+    dst_sampler.format(TensorSamplerFormat::C_WH_1); // 3rd dimension collapsed with 2nd dimension
+    dst_sampler.z(const_0);
+    dst_sampler.b(gid_2);
 
     // Prepare the output tile.
     if(!dst->has_tile())
     {
-        auto &tile = writer->declare_tile("dst_tile", lhs_tile.tile_info());
-        dst->init_virtual_tensor(tile, sampler);
+        auto &tile = writer->declare_tile("dst_tile", ckw::TileInfo(to_ckw(_dst->data_type()), dst_sampler.height(), dst_sampler.width()));
+        dst->init_virtual_tensor(tile, dst_sampler);
     }
 
+    auto &lhs_tile = lhs->tile();
+    auto &rhs_tile = rhs->tile();
     auto &dst_tile = dst->tile();
 
     // Perform the operation.
-    writer->op_binary_expression(dst_tile, lhs_tile, BinaryOp::Add, rhs_tile);
+    writer->op_binary_expression(dst_tile, lhs_tile, to_ckw(_attributes), rhs_tile);
 }
 
 Window GpuCkwElementwiseBinary::get_window() const
@@ -146,6 +138,32 @@ Window GpuCkwElementwiseBinary::get_window() const
     return win;
 }
 
+std::string GpuCkwElementwiseBinary::get_name(const ComponentGroup &comp_group) const
+{
+    ARM_COMPUTE_UNUSED(comp_group);
+    const std::vector<std::string> build_params =
+    {
+        "elementwise_binary",
+        "op", to_string(_attributes.operation()),
+        "dt", lower_string(string_from_data_type(_dst->data_type())),
+    };
+    return join(build_params, "_");
+}
+
+std::string GpuCkwElementwiseBinary::get_tuner_id(const ComponentGroup &comp_group) const
+{
+    ARM_COMPUTE_UNUSED(comp_group);
+    /// NOTE: Hardcoded for now, the parameters should ideally be exported by ckw (a selection of constant tiles)
+    std::vector<std::string> build_params =
+    {
+        "elementwise_binary",
+        "op", to_string(_attributes.operation()),
+        "dt", lower_string(string_from_data_type(_dst->data_type())),
+        "dst_dim0", support::cpp11::to_string(_dst->dimension(0)),
+        "dst_dim1", support::cpp11::to_string(_dst->dimension(1)),
+    };
+    return join(build_params, "_");
+}
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

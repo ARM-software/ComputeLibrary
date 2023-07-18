@@ -53,7 +53,10 @@ public:
     /** Generate kernel code */
     virtual std::string get_code() = 0;
     /** Generate build options */
-    virtual CLBuildOptions get_build_options() = 0;
+    virtual CLBuildOptions get_build_options()
+    {
+        return {};
+    }
     /** Generate config id string of the entire kernel. This is used for tuning */
     virtual std::string get_config_id() = 0;
     /** Generate execution window */
