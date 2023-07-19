@@ -133,6 +133,7 @@ vars.AddVariables(
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
     ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc. If unspecified, use default(auto) prefixes; if passed an empty string '' prefixes would be disabled", "auto"),
     ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; this is for when the compiler prefixes are different from that of the linkers, archivers etc. If unspecified, this is the same as toolchain_prefix; if passed an empty string '' prefixes would be disabled", "auto"),
+    BoolVariable("thread_sanitizer", "Enable ThreadSanitizer", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
@@ -612,6 +613,10 @@ if env['asserts']:
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
+
+if env['thread_sanitizer']:
+    env.Append(CXXFLAGS = ['-fsanitize=thread'])
+    env.Append(LINKFLAGS = ['-fsanitize=thread'])
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])

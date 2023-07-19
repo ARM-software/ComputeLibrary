@@ -534,7 +534,8 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 # Don't allow undefined references in the libraries:
 undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
-arm_compute_env.Append(LINKFLAGS=[undefined_flag])
+if not env['thread_sanitizer']:
+    arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
