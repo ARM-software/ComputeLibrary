@@ -1,5 +1,5 @@
 //
-// Copyright © 2020-2021 Arm Ltd. All rights reserved.
+// Copyright © 2020-2023 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 
@@ -22,6 +22,7 @@ func isVersionAtLeast(version_name string, target_version int) bool {
     "R": 11, "11": 11,
     "S": 12, "12": 12,
     "T": 13, "13": 13,
+    "U": 14, "14": 14,
     }
     if _, ok := name_map[version_name]; ok {
         return name_map[version_name] >= target_version
