@@ -35,11 +35,9 @@
 #include "src/gpu/cl/operators/ClFlatten.h"
 #include "src/gpu/cl/operators/ClGemm.h"
 #include "src/gpu/cl/operators/ClGemmLowpMatrixMultiplyCore.h"
+#include "src/gpu/cl/operators/ClMatMul.h"
 #include "src/gpu/cl/operators/ClTranspose.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
-
-#include "src/gpu/cl/operators/ClMatMul.h"
-#include "utils/TypePrinter.h"
 
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeKernelConfig.h"
 #include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
@@ -111,11 +109,10 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &src, const ITensorInfo
     return Status{};
 }
 
-Status validate_mm(const ITensorInfo &src, const ITensorInfo &weights, const ITensorInfo *bias, const ITensorInfo &dst, const FullyConnectedLayerInfo &fc_info)
+Status validate_mm(const ITensorInfo &src, const ITensorInfo &weights, const ITensorInfo *bias, const ITensorInfo &dst, const FullyConnectedLayerInfo &fc_info, bool use_matmul)
 {
     // Note : If input is dynamic and data is not batched, use matmul, else use gemm
     const bool transpose_weights = fc_info.transpose_weights ? !fc_info.are_weights_reshaped : false;
-    const bool use_matmul        = !weights.are_values_constant() && !(dst.dimension(1) > 1);
     const bool use_dynamic_gemm  = !use_matmul && !weights.are_values_constant() && transpose_weights; // use dynamic gemm as fallback for matmul
     const bool is_quantized      = is_data_type_quantized_asymmetric(src.data_type());
 
@@ -314,9 +311,12 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
     _weights_to_use_idx = ACL_SRC_1;
 
     // When using dynamic weights - use matmul kernels.
-    // Note: MatMul does not support broadcasting batch dimension, and therefore is disabled if fc is batched. Gemm is used as fallback.
+    // Note: MatMul is not used in the following cases (Gemm is used as fallback) :
+    // 1. When the weights tensor is not dynamic
+    // 2. MatMul does not support broadcasting batch dimension, and therefore is disabled if fc is batched.
+    // 3. When FC is after convolution and src tensor data layout does not match weights trained data layout (weights conversion kernel is required)
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    _use_matmul                    = !weights->are_values_constant() && !is_batched_fc_layer;
+    _use_matmul                    = !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
     _dynamic_gemm                  = !weights->are_values_constant() && _transpose_weights && !_use_matmul;
 
     // With the Fully Connected layer we can have 4 different cases:
@@ -439,11 +439,11 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     // When using dynamic weights - use matmul kernels.
     // Note: MatMul does not support broadcasting so fallback with batched cases.
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    const bool use_matmul          = !weights->are_values_constant() && !is_batched_fc_layer;
+    const bool use_matmul          = !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
 
     const ITensorInfo &flatten_src       = TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(src)).set_data_layout(DataLayout::NCHW));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
-    const ITensorInfo &converted_weights = transpose_weights ? TensorInfo(*reshaped_weights.clone()) : TensorInfo(weights->clone()->set_is_resizable(true).reset_padding());
+    const ITensorInfo &converted_weights = (transpose_weights && !use_matmul) ? TensorInfo(*reshaped_weights.clone()) : TensorInfo(weights->clone()->set_is_resizable(true).reset_padding());
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -517,7 +517,7 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     }
 
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*src_to_use, *weights_to_use, biases, *dst, fc_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*src_to_use, *weights_to_use, biases, *dst, fc_info, use_matmul));
 
     return Status{};
 }
@@ -580,7 +580,7 @@ void ClFullyConnected::run(ITensorPack &tensors)
 void ClFullyConnected::prepare(ITensorPack &tensors)
 {
     // Note : Running prepare() each run when _use_matmul is true is unnecessary unless weights conversion is needed.
-    if(!_is_prepared || _dynamic_gemm || (_use_matmul && _run_convert_weights))
+    if(!_is_prepared || _dynamic_gemm)
     {
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
         ++_asrt_prepare_count;
