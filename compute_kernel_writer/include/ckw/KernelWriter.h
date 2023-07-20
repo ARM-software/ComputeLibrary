@@ -28,7 +28,6 @@
 #include "ckw/TileOperand.h"
 
 #include <memory>
-#include <set>
 #include <string>
 
 namespace ckw
@@ -103,23 +102,30 @@ public:
      *
      * @returns The created tile operand
      */
-    virtual TileOperand &declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
+    virtual TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
 
 protected:
     int32_t id_space() const;
 
-    /** Pure virtual function to be overridden by language specific subclasses to add a tile operand to the kernel */
-    virtual TileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
-
-    /** Add a tile operand to the operand list */
-    TileOperand &add_operand(std::unique_ptr<TileOperand> &operand_ptr);
-
     /** Generate full variable name by prefixing it with id space */
     std::string generate_full_name(const std::string &name) const;
 
+    /** Create a new tile operand referring to the specified tile object.
+     *
+     * This class has friendship relationship with @ref TileOperand which allows it
+     * to access the private constructor.
+     */
+    static TileOperand create_tile_operand(ITile &tile);
+
+    /** Get the reference to tile object from the tile operand.
+     *
+     * This class has friendship relationship with @ref TileOperand which allows it
+     * to access the private reference to the private tile field.
+     */
+    static ITile &get_tile(const TileOperand &operand);
+
 private:
     int32_t _id_space{ 0 };
-    std::set<std::unique_ptr<TileOperand>> _operands {};
 };
 
 } // namespace ckw

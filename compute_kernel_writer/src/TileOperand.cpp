@@ -26,5 +26,10 @@
 
 namespace ckw
 {
-    TileOperand::~TileOperand() = default;
+
+TileOperand::TileOperand(ITile &tile)
+    : _tile(tile)
+{
 }
+
+} // namespace ckw

@@ -24,10 +24,7 @@
 #ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 #define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 
-#include "src/ITile.h"
 #include "src/cl/ICLTile.h"
-#include "ckw/TileOperand.h"
-
 #include <string>
 
 namespace ckw
@@ -36,7 +33,7 @@ namespace ckw
 class TileInfo;
 
 /** OpenCL specific tile */
-class CLTile : public ICLTile, public TileOperand
+class CLTile : public ICLTile
 {
 public:
     /** Constructor
@@ -47,15 +44,15 @@ public:
     CLTile(const std::string &name, const TileInfo &info);
 
     // Inherited method overridden
-    TileVariable              scalar(int32_t row, int32_t col) const override;
+    TileVariable scalar(int32_t row, int32_t col) const override;
 
-    TileVariable              vector(int32_t row) const override;
+    TileVariable vector(int32_t row) const override;
 
-    TileVariable              vector(int32_t row, int32_t col_start, int32_t width) const override;
+    TileVariable vector(int32_t row, int32_t col_start, int32_t width) const override;
 
     std::vector<TileVariable> all() const override;
 
-    bool                      is_assignable() const override;
+    bool is_assignable() const override;
 
 private:
     std::string create_var_name(int32_t row) const;

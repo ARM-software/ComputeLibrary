@@ -26,7 +26,10 @@
 #define CKW_SRC_CL_CLKERNELWRITER_H
 
 #include "ckw/KernelWriter.h"
+#include "src/cl/CLTile.h"
 
+#include <memory>
+#include <set>
 #include <utility>
 
 namespace ckw
@@ -62,8 +65,7 @@ public:
      *
      * Similar to @ref KernelWriter::declare_tile()
     */
-    TileOperand &declare_tile(const ::std::string &name, const TileInfo &tile_info) override;
-
+    TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) override;
 
 protected:
     /** Append the specified code to the kernel body source code. */
@@ -84,9 +86,6 @@ protected:
     /** Get the current kernel body source code. */
     const std::string &body_source_code() const;
 
-    /** Add a tile operand to the kernel and return it */
-    TileOperand &add_operand(const std::string &code, const TileInfo &tile_info) override;
-
 private:
     /** This string contains the kernel body source code, not the full CL source code.
      * The full source code will only be generated when the user calls @ref KernelWriter::emit_kernel.
@@ -95,6 +94,8 @@ private:
      * Do not attempt to concatenate and alter this string directly.
      */
     std::string _body_source_code{};
+
+    std::set<std::unique_ptr<CLTile>> _tiles{};
 };
 
 } // namespace ckw

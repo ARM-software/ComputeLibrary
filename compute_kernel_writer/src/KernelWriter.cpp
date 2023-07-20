@@ -22,14 +22,13 @@
  * SOFTWARE.
  */
 
+#include "ckw/KernelWriter.h"
 #include "ckw/Error.h"
 #include "ckw/TileOperand.h"
-#include "ckw/KernelWriter.h"
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
 #include "src/cl/CLKernelWriter.h"
 
-#include <iterator>
 namespace ckw
 {
 
@@ -55,15 +54,19 @@ int32_t KernelWriter::id_space() const
     return _id_space;
 }
 
-TileOperand &KernelWriter::add_operand(std::unique_ptr<TileOperand> &operand_ptr)
-{
-    auto it = _operands.insert(std::move(operand_ptr));
-    return *it.first->get();
-}
-
 std::string KernelWriter::generate_full_name(const std::string &name) const
 {
     return "G" + std::to_string(id_space()) + "__" + name;
+}
+
+TileOperand KernelWriter::create_tile_operand(ITile &tile)
+{
+    return TileOperand(tile);
+}
+
+ITile &KernelWriter::get_tile(const TileOperand &operand)
+{
+    return operand._tile;
 }
 
 } // namespace ckw

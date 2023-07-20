@@ -22,20 +22,32 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TILEOPERAND
-#define CKW_INCLUDE_CKW_TILEOPERAND
+#ifndef CKW_INCLUDE_CKW_TILEOPERAND_H
+#define CKW_INCLUDE_CKW_TILEOPERAND_H
 
 namespace ckw
 {
 
-/** Tile operand which can be either scalar, vector or 2D tile. */
+class KernelWriter;
+class ITile;
+
+/** A tile operand refers to a tile object that can be used for kernel writing. */
 class TileOperand
 {
 public:
-    /* Destructor */
-    virtual ~TileOperand();
+    // The constructor and _tile field is completely hidden from the public API to avoid any misuse.
+    // Only kernel writer class interacts with tile operand hence we allow it to access this field.
+    friend class KernelWriter;
+
+private:
+    // These are hidden from the public API to avoid any misuse.
+
+    /** Initialize a new instance of @ref TileOperand class for the given tile. */
+    TileOperand(ITile &tile);
+
+    ITile &_tile;
 };
 
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_INCLUDE_CKW_TILEOPERAND */
+#endif // CKW_INCLUDE_CKW_TILEOPERAND_H
