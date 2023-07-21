@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/IFunction.h"

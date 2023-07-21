@@ -24,7 +24,7 @@
 #ifndef ACL_SRC_GPU_CL_KERNELS_CLMATMULLOWPNATIVEKERNEL
 #define ACL_SRC_GPU_CL_KERNELS_CLMATMULLOWPNATIVEKERNEL
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"

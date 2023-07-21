@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/cpu/CpuTypes.h"
 
 #include <cstddef>

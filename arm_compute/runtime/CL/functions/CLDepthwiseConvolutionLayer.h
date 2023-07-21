@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 #define ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"

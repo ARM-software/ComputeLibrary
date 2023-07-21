@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/cpu/kernels/lut/list.h"
 
 namespace arm_compute

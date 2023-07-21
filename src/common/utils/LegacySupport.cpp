@@ -23,7 +23,7 @@
  */
 #include "src/common/utils/LegacySupport.h"
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {

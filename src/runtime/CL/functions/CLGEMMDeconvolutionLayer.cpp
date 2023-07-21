@@ -23,11 +23,11 @@
  */
 #include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "src/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"

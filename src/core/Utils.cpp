@@ -24,9 +24,9 @@
 
 #include "arm_compute/core/Utils.h"
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include <algorithm>
 #include <cmath>

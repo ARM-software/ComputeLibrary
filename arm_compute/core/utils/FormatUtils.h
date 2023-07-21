@@ -24,7 +24,8 @@
 #ifndef ARM_COMPUTE_CORE_UTILS_FORMATUTILS_H
 #define ARM_COMPUTE_CORE_UTILS_FORMATUTILS_H
 
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
@@ -339,6 +340,5 @@ inline size_t num_channels_from_format(Format format)
  * @return The string describing the format.
  */
 const std::string &string_from_format(Format format);
-
 }
 #endif /*ARM_COMPUTE_CORE_UTILS_FORMATUTILS_H */

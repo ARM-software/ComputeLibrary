@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include <cmath>
 #include <cstddef>
@@ -49,16 +49,15 @@ void sve2_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
-    const auto                    va              = svdup_n_u8(quantize_qasymm8(act_info.a(), qi_in));
-    const auto                    vb              = svdup_n_u8(quantize_qasymm8(act_info.b(), qi_in));
-    const auto                    const_0         = quantize_qasymm8(0.f, qi_in);
-    const auto                    vconst_0        = svdup_n_u8(const_0);
-    const auto                    vconst_1        = svdup_n_f32(1.f);
-    const auto                    va_f32          = svdup_n_f32(act_info.a());
-    const auto                    vb_f32          = svdup_n_f32(act_info.b());
-
+    const UniformQuantizationInfo qi_in    = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out   = dst->info()->quantization_info().uniform();
+    const auto                    va       = svdup_n_u8(quantize_qasymm8(act_info.a(), qi_in));
+    const auto                    vb       = svdup_n_u8(quantize_qasymm8(act_info.b(), qi_in));
+    const auto                    const_0  = quantize_qasymm8(0.f, qi_in);
+    const auto                    vconst_0 = svdup_n_u8(const_0);
+    const auto                    vconst_1 = svdup_n_f32(1.f);
+    const auto                    va_f32   = svdup_n_f32(act_info.a());
+    const auto                    vb_f32   = svdup_n_f32(act_info.b());
 
     // Initialise scale/offset for re-quantization
     bool requant = true;

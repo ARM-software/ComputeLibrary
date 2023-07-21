@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include <cstddef>
 #include <cstdint>

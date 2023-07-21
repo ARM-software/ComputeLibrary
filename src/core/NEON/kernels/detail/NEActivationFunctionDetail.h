@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_DETAIL_NEACTIVATION_FUNCTION_DETAIL_H
 #define ARM_COMPUTE_DETAIL_NEACTIVATION_FUNCTION_DETAIL_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute

@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CPU_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 #define ARM_COMPUTE_CPU_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 
-#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 

@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 #define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 
-#include "arm_compute/core/GEMMInfo.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"

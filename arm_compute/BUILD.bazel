@@ -28,6 +28,7 @@ cc_library(
         "*.h",
         "*.hpp",
         "dynamic_fusion/**/*.h",
+        "function_info/**/*.h",
     ]),
     visibility = ["//visibility:public"],
 )

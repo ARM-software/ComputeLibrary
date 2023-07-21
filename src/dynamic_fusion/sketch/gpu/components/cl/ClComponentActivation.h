@@ -24,10 +24,10 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {

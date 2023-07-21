@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CL_ELEMENTWISE_KERNEL_H
 #define ARM_COMPUTE_CL_ELEMENTWISE_KERNEL_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/KernelTypes.h"
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"

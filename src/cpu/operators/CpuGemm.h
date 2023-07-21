@@ -26,10 +26,10 @@
 
 #include "src/cpu/ICpuOperator.h"
 
-#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmMatrixAdditionKernel.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"

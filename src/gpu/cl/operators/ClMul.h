@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CL_MUL_H
 #define ARM_COMPUTE_CL_MUL_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"

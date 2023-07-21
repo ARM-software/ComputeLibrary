@@ -21,30 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_ACTIVATIONLAYERINFO_H
-#define ARM_COMPUTE_ACTIVATIONLAYERINFO_H
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO
 
-#include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/QuantizationInfo.h"
-#include "arm_compute/core/Size2D.h"
-#include "arm_compute/core/Size3D.h"
-#include "arm_compute/core/Strides.h"
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/IPostOp.h"
-#include "arm_compute/core/utils/misc/Macros.h"
-#include "support/Bfloat16.h"
-#include "support/Half.h"
 
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <string>
-#include <utility>
+#include <array>
 
 namespace arm_compute
 {
+/** Available activation functions */
+enum class ActivationFunction
+{
+    LOGISTIC,        /**< Logistic ( \f$ f(x) = \frac{1}{1 + e^{-x}} \f$ ) */
+    TANH,            /**< Hyperbolic tangent ( \f$ f(x) = a \cdot tanh(b \cdot x) \f$ ) */
+    RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
+    BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
+    LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
+    LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+    ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
+    ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
+    SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
+    SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
+    LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+    IDENTITY,        /**< Identity ( \f$ f(x)= x \f$ ) */
+    HARD_SWISH,      /**< Hard-swish ( \f$ f(x) = (x \text{ReLU6}(x+3))/6 = x \min(\max(0,x+3),6)/6 \f$ ) */
+    SWISH,           /**< Swish ( \f$ f(x) = \frac{x}{1 + e^{-ax}} = x \text{logistic}(ax) \f$ ) */
+    GELU             /**< GELU ( \f$ f(x) = x * 1/2 * 1 + erf(x / \sqrt{2}) \f$ ) */
+};
 /** Activation Layer Information class */
 class ActivationLayerInfo
 {
@@ -108,4 +114,4 @@ private:
 #endif // __aarch64__
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_ACTIVATIONLAYERINFO_H */
+#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO */

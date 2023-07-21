@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CLPIXELWISEMULTIPLICATION_H
 #define ARM_COMPUTE_CLPIXELWISEMULTIPLICATION_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Rounding.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 

@@ -26,8 +26,8 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {

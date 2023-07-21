@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
 #define ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute

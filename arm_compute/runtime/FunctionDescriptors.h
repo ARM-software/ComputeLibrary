@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 #define ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include <utility>
 

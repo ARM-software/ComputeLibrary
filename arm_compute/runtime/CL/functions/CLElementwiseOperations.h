@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
 #define ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/IFunction.h"
 

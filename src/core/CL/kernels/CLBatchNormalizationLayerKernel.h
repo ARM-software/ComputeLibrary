@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CLBATCHNORMALIZATIONLAYERKERNEL_H
 #define ARM_COMPUTE_CLBATCHNORMALIZATIONLAYERKERNEL_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute

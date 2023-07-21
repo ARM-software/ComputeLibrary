@@ -21,59 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_MATMULINFO_H
-#define ARM_COMPUTE_MATMULINFO_H
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO
 
-#include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/Size2D.h"
-#include "arm_compute/core/Size3D.h"
-#include "arm_compute/core/Strides.h"
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/experimental/IPostOp.h"
-#include "arm_compute/core/utils/misc/Macros.h"
-#include "support/Bfloat16.h"
-#include "support/Half.h"
-
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <map>
-#include <string>
-#include <utility>
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {
-/** Class for holding information related to matrix multiplication function
- */
-class MatMulInfo
+struct ConvolutionInfo
 {
-public:
-    /* Get Adjoint LHS flag value */
-    bool adj_lhs() const
+    ConvolutionInfo() = default;
+    ConvolutionInfo(const PadStrideInfo &pad_stride_info, unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
+        : pad_stride_info(pad_stride_info), depth_multiplier(depth_multiplier), act_info(act_info), dilation(dilation)
     {
-        return _adj_lhs;
     }
-    /* Get Adjoint RHS flag value */
-    bool adj_rhs() const
-    {
-        return _adj_rhs;
-    }
-    /* Set Adjoint LHS flag */
-    MatMulInfo &adj_lhs(bool adj_lhs)
-    {
-        _adj_lhs = adj_lhs;
-        return *this;
-    }
-    /* Set Adjoint RHS flag */
-    MatMulInfo &adj_rhs(bool adj_rhs)
-    {
-        _adj_rhs = adj_rhs;
-        return *this;
-    }
-
-private:
-    bool                _adj_lhs{ false };
-    bool                _adj_rhs{ false };
+    PadStrideInfo       pad_stride_info{};        /**< Convolution info (Pads, strides,...) */
+    unsigned int        depth_multiplier{ 1 };    /**< Multiplier to apply to input's depth to retrieve the output depth. Defaults to 1 */
+    ActivationLayerInfo act_info{};               /**< Fused activation to apply after convolution. */
+    Size2D              dilation{ Size2D(1, 1) }; /**< Dilation, in elements, across x and y. Defaults to (1, 1). */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_MATMULINFO_H */
+#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_CONVOLUTIONINFO */

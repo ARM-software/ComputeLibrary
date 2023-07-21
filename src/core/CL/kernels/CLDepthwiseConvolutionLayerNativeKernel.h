@@ -26,8 +26,8 @@
 
 #include "src/core/CL/ICLKernel.h"
 
-#include "arm_compute/core/ConvolutionInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/function_info/ConvolutionInfo.h"
 
 namespace arm_compute
 {

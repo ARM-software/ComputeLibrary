@@ -24,8 +24,8 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include <memory>
 

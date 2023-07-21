@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CPU_GEMM_CONV2D_H
 #define ARM_COMPUTE_CPU_GEMM_CONV2D_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/cpu/ICpuOperator.h"
 
 #include <memory>

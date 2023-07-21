@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 #define ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_CORE_H
 
-#include "arm_compute/core/GEMMInfo.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 
 #include "src/gpu/cl/ClCompileContext.h"

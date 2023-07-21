@@ -24,8 +24,8 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL
 #define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLMATMUL
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include <memory>
 

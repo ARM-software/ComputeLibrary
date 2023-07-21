@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
 #define ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
 
-#include "arm_compute/core/FullyConnectedLayerInfo.h"
+#include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/runtime/CL/CLTensor.h"

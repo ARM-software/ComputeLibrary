@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/ConvolutionInfo.h"
 #include "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/function_info/ConvolutionInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute

@@ -23,12 +23,12 @@
  */
 
 #include "src/cpu/operators/CpuMatMul.h"
-#include "arm_compute/core/MatMulInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/function_info/MatMulInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEMatMul.h"
 #include "src/common/utils/Log.h"

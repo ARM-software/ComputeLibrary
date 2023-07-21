@@ -25,9 +25,9 @@
 #define SRC_COMMON_LEGACY_SUPPORT_H
 
 #include "arm_compute/Acl.h"
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {

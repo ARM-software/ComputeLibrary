@@ -21,14 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GEMMINFO_H
-#define ARM_COMPUTE_GEMMINFO_H
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
 
-#include "arm_compute/core/ActivationLayerInfo.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/experimental/IPostOp.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
+#include <vector>
 
 namespace arm_compute
 {
+class ITensorInfo;
+/** GEMMLowp output stage type */
+enum class GEMMLowpOutputStageType
+{
+    NONE,                     /**< No quantization */
+    QUANTIZE_DOWN,            /**< Quantize using an integer multiplication */
+    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize using a fixed point multiplication */
+    QUANTIZE_DOWN_FLOAT       /**< Quantize using a floating point multiplication */
+};
+
+/** GEMMLowp output stage info */
+struct GEMMLowpOutputStageInfo
+{
+    GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE };                        /**< GEMMLowp output stage type */
+    int32_t                 gemmlowp_offset{ 0 };                                         /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_multiplier{ 0 };                                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_shift{ 0 };                                          /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int32_t                 gemmlowp_min_bound{ std::numeric_limits<int32_t>::lowest() }; /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_max_bound{ std::numeric_limits<int32_t>::max() };    /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_multipliers{};                                       /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_shifts{};                                            /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    float                   gemmlowp_real_multiplier{ 0 };                                /**< GEMMLowp output stage real multiplier used for quantizing to QASYMM8 */
+    bool                    is_quantized_per_channel{ false };                            /**< GEMMLowp quantized per-channel flag */
+    DataType                output_data_type{ DataType::UNKNOWN };                        /**< Output tensor data type to use if the output is not initialized */
+};
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped
@@ -311,4 +338,4 @@ private:
     arm_compute::WeightFormat               _weight_format;
 };
 } //namespace arm_compute
-#endif /* ARM_COMPUTE_GEMMINFO_H */
+#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO */

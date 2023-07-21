@@ -24,8 +24,8 @@
 #ifndef ACL_SRC_GPU_CL_OPERATORS_CLMATMUL
 #define ACL_SRC_GPU_CL_OPERATORS_CLMATMUL
 
-#include "arm_compute/core/ActivationLayerInfo.h"
-#include "arm_compute/core/MatMulInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "arm_compute/function_info/MatMulInfo.h"
 #include "src/gpu/cl/IClOperator.h"
 #include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
 #include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"

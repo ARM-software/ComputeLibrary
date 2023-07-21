@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_FULLYCONNECTEDLAYERINFO_H
-#define ARM_COMPUTE_FULLYCONNECTEDLAYERINFO_H
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO
 
-#include "arm_compute/core/ActivationLayerInfo.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {
@@ -68,4 +68,4 @@ struct FullyConnectedLayerInfo
 };
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_FULLYCONNECTEDLAYERINFO_H */
+#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_FULLYCONNECTEDLAYERINFO */

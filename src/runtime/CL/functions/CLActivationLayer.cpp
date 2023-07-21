@@ -23,10 +23,10 @@
  */
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 
-#include "arm_compute/core/ActivationLayerInfo.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClActivation.h"

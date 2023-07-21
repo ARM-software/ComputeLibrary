@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H
 #define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_ASSEMBLY_DISPATCH_H
 
-#include "arm_compute/core/ActivationLayerInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
