@@ -22,32 +22,46 @@
  * SOFTWARE.
  */
 
-#include "ckw/Kernel.h"
-#include "ckw/types/TargetLanguage.h"
+#include "ckw/KernelArgument.h"
+#include "ckw/Error.h"
 
 namespace ckw
 {
 
-Kernel::~Kernel() = default;
-
-Kernel::Kernel(TargetLanguage language, const std::vector<KernelArgument> &arguments, const std::string &source_code)
-    : _language(language), _arguments(arguments), _source_code(source_code)
+KernelArgument::KernelArgument(int32_t tensor_id, TensorStorageType storage_type)
+    : _type(Type::TensorStorage), _id(tensor_id)
 {
+    _sub_id.tensor_storage_type = storage_type;
 }
 
-TargetLanguage Kernel::target_language() const
+KernelArgument::KernelArgument(int32_t tensor_id, TensorComponentType component_type)
+    : _type(Type::TensorComponent), _id(tensor_id)
 {
-    return _language;
+    _sub_id.tensor_component_type = component_type;
 }
 
-const std::vector<KernelArgument> &Kernel::arguments() const
+KernelArgument::Type KernelArgument::type() const
 {
-    return _arguments;
+    return _type;
 }
 
-const std::string &Kernel::source_code() const
+int32_t KernelArgument::id() const
 {
-    return _source_code;
+    return _id;
+}
+
+TensorStorageType KernelArgument::tensor_storage_type() const
+{
+    CKW_ASSERT(_type == Type::TensorStorage);
+
+    return _sub_id.tensor_storage_type;
+}
+
+TensorComponentType KernelArgument::tensor_component_type() const
+{
+    CKW_ASSERT(_type == Type::TensorComponent);
+
+    return _sub_id.tensor_component_type;
 }
 
 } // namespace ckw

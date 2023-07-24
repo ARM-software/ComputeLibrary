@@ -29,6 +29,7 @@
 #include "tests/CLTileTest.hpp"
 #include "tests/TensorBitMaskTest.h"
 #include "tests/UtilsTest.h"
+#include "validation/tests/CLKernelWriterDeclareTensorTest.h"
 
 #include <memory>
 #include <vector>
@@ -73,6 +74,7 @@ int32_t main()
     const auto test21 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueTest>();
     const auto test22 = std::make_unique<CLTensorArgumentStoragesUsedTest>();
     const auto test23 = std::make_unique<CLTensorArgumentComponentsUsedPassByValueTrueDynamicDimTrueTest>();
+    const auto test24 = std::make_unique<CLKernelWriterDeclareTensorTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -97,6 +99,7 @@ int32_t main()
     tests.push_back(test21.get());
     tests.push_back(test22.get());
     tests.push_back(test23.get());
+    tests.push_back(test24.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

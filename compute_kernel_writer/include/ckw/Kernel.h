@@ -25,7 +25,9 @@
 #ifndef CKW_INCLUDE_CKW_KERNEL_H
 #define CKW_INCLUDE_CKW_KERNEL_H
 
+#include "ckw/KernelArgument.h"
 #include <string>
+#include <vector>
 
 namespace ckw
 {
@@ -48,22 +50,24 @@ public:
     /** Initialize a new instance of @ref Kernel class with all emitted kernel information.
      *
      * @param[in] language    The target language of the kernel.
+     * @param[in] arguments   The list of kernel arguments.
      * @param[in] source_code The source code of the kernel.
      */
-    Kernel(TargetLanguage language, const std::string &source_code);
+    Kernel(TargetLanguage language, const std::vector<KernelArgument> &arguments, const std::string &source_code);
 
     /** Get the target language. */
     TargetLanguage target_language() const;
 
+    /** Get the list of arguments. */
+    const std::vector<KernelArgument> &arguments() const;
+
     /** Get the source code. */
     const std::string &source_code() const;
 
-    /** Add a tile operand */
-    virtual TileOperand &add_operand(const std::string &name, const TileInfo &tile_info) = 0;
-
 private:
-    TargetLanguage _language;
-    std::string    _source_code;
+    TargetLanguage              _language;
+    std::vector<KernelArgument> _arguments;
+    std::string                 _source_code;
 };
 
 } // namespace ckw
