@@ -66,19 +66,13 @@ public:
      *
      * @return the name of the tile
      */
-    std::string name() const
-    {
-        return _basename;
-    }
+    virtual const std::string &name() const = 0;
 
     /** Method to get the tile info
      *
      * @return the @ref TileInfo
      */
-    TileInfo info() const
-    {
-        return _info;
-    }
+    virtual const TileInfo &info() const = 0;
 
     /** Method to know whether the tile is assignable or not.
      *  For example, a constant tile is not assignable.
@@ -86,10 +80,6 @@ public:
      * @return true if the tile is assignable
      */
     virtual bool is_assignable() const = 0;
-
-protected:
-    TileInfo    _info{ DataType::Unknown }; // Tile info
-    std::string _basename{ "" };            // Tile name
 };
 
 /** Interface to provide support for scalar access for a Tile.

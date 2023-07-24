@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#ifndef COMPUTE_KERNEL_WRITER_TESTS_CLCONSTANTTILETEST_HPP
-#define COMPUTE_KERNEL_WRITER_TESTS_CLCONSTANTTILETEST_HPP
+#ifndef CKW_TESTS_CLCONSTANTTILETEST_HPP
+#define CKW_TESTS_CLCONSTANTTILETEST_HPP
 
 #include "common/Common.h"
 #include "src/Helpers.h"
-#include "src/cl/CLConstantTile.h"
 #include "src/cl/CLHelpers.h"
+#include "src/cl/CLTile.h"
 
 #include <random>
 #include <string>
@@ -55,10 +55,10 @@ public:
         int32_t test_idx = 0;
         for(const auto &test : _values)
         {
-            const CLConstantTile tile(test, DataType::Fp16);
-            const auto           vars     = tile.all();
-            const int32_t        num_vars = vars.size();
-            const int32_t        width    = tile.info().width();
+            const CLTile  tile(test, DataType::Fp16);
+            const auto    vars     = tile.all();
+            const int32_t num_vars = vars.size();
+            const int32_t width    = tile.info().width();
 
             for(int32_t y = 0; y < num_vars; ++y)
             {
@@ -136,7 +136,7 @@ public:
                 }
             }
 
-            const CLConstantTile tile(container, dt);
+            const CLTile tile(container, dt);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
@@ -214,7 +214,7 @@ public:
                 }
             }
 
-            const CLConstantTile tile(container, dt);
+            const CLTile tile(container, dt);
 
             const TileVariable var = tile.scalar(y_coord, x_coord);
 
@@ -260,9 +260,9 @@ public:
 
         for(const auto &test : _values)
         {
-            const CLConstantTile tile(test, dt);
-            const int32_t        width  = tile.info().width();
-            const int32_t        height = tile.info().height();
+            const CLTile  tile(test, dt);
+            const int32_t width  = tile.info().width();
+            const int32_t height = tile.info().height();
 
             for(int32_t row = 0; row < height; ++row)
             {
@@ -326,8 +326,8 @@ public:
             {
                 for(auto &subwidth : _subwidths)
                 {
-                    const CLConstantTile tile(test, dt);
-                    const int32_t        height = tile.info().height();
+                    const CLTile  tile(test, dt);
+                    const int32_t height = tile.info().height();
 
                     for(int32_t row = 0; row < height; ++row)
                     {
@@ -368,4 +368,4 @@ private:
 
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_TESTS_CLCONSTANTTILETEST_HPP */
+#endif // CKW_TESTS_CLCONSTANTTILETEST_HPP

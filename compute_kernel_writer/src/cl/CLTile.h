@@ -24,7 +24,7 @@
 #ifndef COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 #define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 
-#include "src/cl/ICLTile.h"
+#include "src/ITile.h"
 #include <string>
 
 namespace ckw
@@ -33,17 +33,31 @@ namespace ckw
 class TileInfo;
 
 /** OpenCL specific tile */
-class CLTile : public ICLTile
+class CLTile : public ITile, public IVectorAccess, public IScalarAccess
 {
 public:
-    /** Constructor
+    /** Initialize a new instance of @ref CLTile class for variable tile.
      *
      * @param[in] name Tile name
      * @param[in] info Tile info
     */
     CLTile(const std::string &name, const TileInfo &info);
 
+    /** Initialize a new instane of @ref CLTile class for compile-time constant tile.
+     *
+     * @note A constant tile does not need a name since this object does not return variable's name but rather
+     *       values stored as string type
+     *
+     * @param[in] vals The tile container with the constant values as std::string
+     * @param[in] dt   Datatype of the values stored in the tile container
+    */
+    CLTile(const TileContainer &vals, DataType dt);
+
     // Inherited method overridden
+    const std::string &name() const override;
+
+    const TileInfo &info() const override;
+
     TileVariable scalar(int32_t row, int32_t col) const override;
 
     TileVariable vector(int32_t row) const override;
@@ -54,8 +68,17 @@ public:
 
     bool is_assignable() const override;
 
+    std::vector<int32_t> supported_vector_lengths() const override;
+
 private:
+    void validate_tile_info(const TileInfo &info) const;
+
     std::string create_var_name(int32_t row) const;
+
+    TileInfo      _info{ DataType::Unknown };
+    std::string   _basename{ "" };
+    bool          _is_constant{ false };
+    TileContainer _vals{};
 };
 } // namespace ckw
 

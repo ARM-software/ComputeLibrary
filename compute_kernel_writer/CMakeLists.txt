@@ -130,11 +130,9 @@ target_sources(ckw PRIVATE
 
 if(CKW_ENABLE_OPENCL)
     target_sources(ckw PRIVATE
-        src/cl/CLConstantTile.cpp
         src/cl/CLTensorArgument.cpp
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
-        src/cl/ICLTile.cpp
         src/cl/CLKernelWriter.cpp
     )
 endif()
