@@ -282,7 +282,7 @@ public:
      * @param[out] dst The tile to be written to.
      * @param[in]  dim The global ID dimension.
      */
-    void op_get_global_id(TileOperand &dst, int32_t dim);
+    void op_get_global_id(const TileOperand &dst, int32_t dim);
 
     // =============================================================================================
     // Code generation

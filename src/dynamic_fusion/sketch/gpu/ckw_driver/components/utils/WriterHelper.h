@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER
-#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER_H
 
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "ckw/TensorTileSampler.h"
@@ -77,7 +77,7 @@ inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &wri
  * @param[in]     prefix          Prefix to all the tiles declared within this function
  * @param[in]     const_0         Constant tile of value 0
  */
-inline void get_coord(GpuCkwScopedKernelWriter writer, TileOperand &coord, TileOperand &gid, int32_t step_v, int32_t leftover_step_v, const std::string &prefix, TileOperand &const_0)
+inline void get_coord(GpuCkwScopedKernelWriter writer, TileOperand &coord, const TileOperand &gid, int32_t step_v, int32_t leftover_step_v, const std::string &prefix, const TileOperand &const_0)
 {
     auto &step          = writer->declare_tile(prefix + "step", step_v);
     auto &leftover_step = writer->declare_tile(prefix + "leftover_step", leftover_step_v);
@@ -158,4 +158,4 @@ inline TensorTileSampler create_boundary_aware_2d_sampler(GpuCkwScopedKernelWrit
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_WRITERHELPER_H

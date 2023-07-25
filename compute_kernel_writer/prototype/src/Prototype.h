@@ -3694,6 +3694,9 @@ public:
                 case UnaryFunction::Round:
                     _data->code += "round(";
                     break;
+                case UnaryFunction::Floor:
+                    _data->code += "floor(";
+                    break;
                 default:
                     CKW_ASSERT_MSG(false, "Unexpected UnaryFunction used.");
             }
@@ -3771,6 +3774,9 @@ public:
             {
                 case TernaryFunction::Select:
                     _data->code += "select(";
+                    break;
+                case TernaryFunction::Clamp:
+                    _data->code += "clamp(";
                     break;
                 default:
                     CKW_ASSERT_MSG(false, "Unexpected TernaryFunction used.");

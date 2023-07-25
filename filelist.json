@@ -2353,6 +2353,7 @@
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwCast.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwDirectConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwResize.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwStore.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.cpp",

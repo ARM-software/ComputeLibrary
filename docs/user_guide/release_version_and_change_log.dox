@@ -45,6 +45,8 @@ v23.11 Public major release
  - New features
    - Add support for input data type U64/S64 in CLCast and NECast.
    - Add support for output data type S64 in NEArgMinMaxLayer and CLArgMinMaxLayer
+   - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface:
+     - @ref experimental::dynamic_fusion::GpuCkwResize
  - Update OpenCL™ API headers to v2023.04.17.
  - Performance optimizations:
    - Optimize @ref cpu::CpuReshape

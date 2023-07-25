@@ -341,7 +341,7 @@ void KernelWriter::op_for_loop(const TileOperand &var_name, BinaryOp cond_op, co
 // Misc
 // =================================================================================================
 
-void KernelWriter::op_get_global_id(TileOperand &dst, int32_t dim)
+void KernelWriter::op_get_global_id(const TileOperand &dst, int32_t dim)
 {
     _impl->op_get_global_id(prototype::Operand(dst.name()), dim);
 }
