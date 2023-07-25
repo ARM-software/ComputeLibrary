@@ -33,7 +33,7 @@ namespace ckw
 class TileInfo;
 
 /** OpenCL specific tile */
-class CLTile : public ITile, public IVectorAccess, public IScalarAccess
+class CLTile : public ITile, public IVectorAccess
 {
 public:
     /** Initialize a new instance of @ref CLTile class for variable tile.

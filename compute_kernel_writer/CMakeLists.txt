@@ -122,6 +122,7 @@ target_sources(ckw PRIVATE
     src/Helpers.cpp
     src/Kernel.cpp
     src/KernelWriter.cpp
+    src/Tensor3dMapper.cpp
     src/TensorInfo.cpp
     src/TensorOperand.cpp
     src/TensorSampler.cpp

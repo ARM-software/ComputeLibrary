@@ -33,9 +33,9 @@ namespace ckw
 // This enum class defines how the dimensions of a 3d tensor is mapped into x,y and z coordianates.
 enum class TensorSamplerFormat : int32_t
 {
-    Unknown    = 0,
-    D0_D1xD2_1 = 1, // Original dimensions 1 and 2 are collapsed onto y-axis
-    D0_D1_D2   = 2  // Original dimensions stays as they're defined. No collapsing.
+    Unknown          = 0,
+    Dim0_Dim1xDim2_1 = 1, // Original dimensions 1 and 2 are collapsed onto y-axis
+    Dim0_Dim1_Dim2   = 2  // Original dimensions stays as they're defined. No collapsing.
 };
 
 /** Tensor sampler address mode enum class for X dimension
@@ -53,9 +53,8 @@ enum class TensorSamplerFormat : int32_t
 enum class TensorSamplerAddressModeX : int32_t
 {
     Unknown        = 0,
-    None           = 1, // The user guarantees that the coordinate is always in-bound
-    OverlappingMin = 2  // (FIXED shapes only) Reduce the load/store length when x == 0 (MIN). The load length will be width % original length
-                        // Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
+    None           = 1,
+    OverlappingMin = 2
 };
 
 /**
