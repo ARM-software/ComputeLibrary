@@ -28,6 +28,8 @@
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
 #include "src/cl/CLKernelWriter.h"
+#include "src/cl/CLTensorArgument.h"
+#include "src/cl/CLTile.h"
 
 namespace ckw
 {
@@ -67,6 +69,16 @@ TileOperand KernelWriter::create_tile_operand(ITile &tile)
 ITile &KernelWriter::get_tile(const TileOperand &operand)
 {
     return operand._tile;
+}
+
+TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)
+{
+    return TensorOperand(tensor);
+}
+
+ITensor &KernelWriter::get_tensor(const TensorOperand &operand)
+{
+    return operand._tensor;
 }
 
 } // namespace ckw

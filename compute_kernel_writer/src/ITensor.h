@@ -22,34 +22,25 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TILEOPERAND_H
-#define CKW_INCLUDE_CKW_TILEOPERAND_H
+#ifndef CKW_SRC_ITENSOR_H
+#define CKW_SRC_ITENSOR_H
+
+#include "src/ITensorArgument.h"
 
 namespace ckw
 {
 
-class KernelWriter;
-class TensorOperand;
-class ITile;
-
-/** A tile operand refers to a tile object that can be used for kernel writing. */
-class TileOperand
+/** The generic class for all tensor objects in CKW.
+ *
+ * Tensors in CKW are always kernel arguments consisting of:
+ *   - Essential information such as name, tensor info, etc.
+ *   - Tensor storage access: allowing load/store operation to perform.
+ *   - Tensor component access: allowing interaction with tensor information such as shape, strides, etc. in the form of tile objects.
+ */
+class ITensor : public ITensorArgument, public ITensorStorageAccess, public ITensorComponentAccess
 {
-public:
-    // The constructor and _tile field is completely hidden from the public API to avoid any misuse.
-    // Only kernel writer and tensor operand classes create and interact with tile operand hence we allow them to access this field.
-    friend class KernelWriter;
-    friend class TensorOperand;
-
-private:
-    // These are hidden from the public API to avoid any misuse.
-
-    /** Initialize a new instance of @ref TileOperand class for the given tile. */
-    TileOperand(ITile &tile);
-
-    ITile &_tile;
 };
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_TILEOPERAND_H
+#endif // CKW_SRC_ITENSOR_H

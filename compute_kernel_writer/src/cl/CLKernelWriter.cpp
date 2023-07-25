@@ -24,8 +24,10 @@
 
 #include "src/cl/CLKernelWriter.h"
 #include "ckw/Error.h"
+#include "ckw/Kernel.h"
 #include "ckw/TileOperand.h"
 #include "src/cl/CLHelpers.h"
+#include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
 #include <cstdint>
 
@@ -60,6 +62,18 @@ void CLKernelWriter::comment(const std::string &text)
 const std::string &CLKernelWriter::body_source_code() const
 {
     return _body_source_code;
+}
+
+TensorOperand CLKernelWriter::declare_tensor_argument(const std::string &name, const TensorInfo &info)
+{
+    const auto fullname = generate_full_name(name);
+
+    auto       tensor  = std::make_unique<CLTensorArgument>(fullname, info, false /* return_dims_by_value */);
+    const auto operand = create_tensor_operand(*tensor);
+
+    _tensors.insert(std::move(tensor));
+
+    return operand;
 }
 
 TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo &tile_info)

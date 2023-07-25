@@ -26,7 +26,6 @@
 #define CKW_SRC_CL_CLKERNELWRITER_H
 
 #include "ckw/KernelWriter.h"
-#include "src/cl/CLTile.h"
 
 #include <memory>
 #include <set>
@@ -34,6 +33,9 @@
 
 namespace ckw
 {
+
+class CLTile;
+class CLTensorArgument;
 
 /** OpenCL kernel writer. */
 class CLKernelWriter : public KernelWriter
@@ -60,6 +62,12 @@ public:
     // =============================================================================================
 
     std::unique_ptr<Kernel> emit_kernel(const std::string &name) override;
+
+    // =============================================================================================
+    // Tensor and tile declaration
+    // =============================================================================================
+
+    TensorOperand declare_tensor_argument(const std::string &name, const TensorInfo &info) override;
 
     /** Declare a tile given name and tile information
      *
@@ -95,7 +103,8 @@ private:
      */
     std::string _body_source_code{};
 
-    std::set<std::unique_ptr<CLTile>> _tiles{};
+    std::set<std::unique_ptr<CLTensorArgument>> _tensors{};
+    std::set<std::unique_ptr<CLTile>>           _tiles{};
 };
 
 } // namespace ckw

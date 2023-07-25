@@ -123,6 +123,7 @@ target_sources(ckw PRIVATE
     src/Kernel.cpp
     src/KernelWriter.cpp
     src/TensorInfo.cpp
+    src/TensorOperand.cpp
     src/TensorSampler.cpp
     src/TensorUtils.cpp
     src/TileInfo.cpp
@@ -132,6 +133,7 @@ target_sources(ckw PRIVATE
 if(CKW_ENABLE_OPENCL)
     target_sources(ckw PRIVATE
         src/cl/CLTensorArgument.cpp
+        src/cl/CLTensorComponent.cpp
         src/cl/CLHelpers.cpp
         src/cl/CLTile.cpp
         src/cl/CLKernelWriter.cpp

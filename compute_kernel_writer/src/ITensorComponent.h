@@ -22,34 +22,32 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TILEOPERAND_H
-#define CKW_INCLUDE_CKW_TILEOPERAND_H
+#ifndef CKW_SRC_ITENSORCOMPONENT_H
+#define CKW_SRC_ITENSORCOMPONENT_H
+
+#include "ckw/types/TensorComponentType.h"
+#include "src/ITile.h"
 
 namespace ckw
 {
 
-class KernelWriter;
-class TensorOperand;
-class ITile;
-
-/** A tile operand refers to a tile object that can be used for kernel writing. */
-class TileOperand
+/** A tensor component provides access to tensor information such as shape, strides, etc. in the form of @ref ITile objects. */
+class ITensorComponent
 {
 public:
-    // The constructor and _tile field is completely hidden from the public API to avoid any misuse.
-    // Only kernel writer and tensor operand classes create and interact with tile operand hence we allow them to access this field.
-    friend class KernelWriter;
-    friend class TensorOperand;
+    /** Destructor. */
+    virtual ~ITensorComponent() = default;
 
-private:
-    // These are hidden from the public API to avoid any misuse.
+    /** Get the tile variable for the component. */
+    virtual ITile &tile() = 0;
 
-    /** Initialize a new instance of @ref TileOperand class for the given tile. */
-    TileOperand(ITile &tile);
+    /** Get the const tile variable for the component. */
+    virtual const ITile &tile() const = 0;
 
-    ITile &_tile;
+    /** Get the component type. */
+    virtual TensorComponentType component_type() const = 0;
 };
 
 } // namespace ckw
 
-#endif // CKW_INCLUDE_CKW_TILEOPERAND_H
+#endif // CKW_SRC_ITENSORCOMPONENT_H

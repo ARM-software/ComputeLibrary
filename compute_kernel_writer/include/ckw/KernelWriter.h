@@ -25,6 +25,7 @@
 #ifndef CKW_INCLUDE_CKW_KERNELWRITER_H
 #define CKW_INCLUDE_CKW_KERNELWRITER_H
 
+#include "ckw/TensorOperand.h"
 #include "ckw/TileOperand.h"
 
 #include <memory>
@@ -36,6 +37,7 @@ namespace ckw
 class Kernel;
 
 /** Forward Declerations */
+class TensorInfo;
 class TileInfo;
 enum class TargetArchitecture;
 enum class TargetLanguage;
@@ -95,6 +97,19 @@ public:
      */
     virtual std::unique_ptr<Kernel> emit_kernel(const std::string &name) = 0;
 
+    // =============================================================================================
+    // Tensor and tile declaration
+    // =============================================================================================
+
+    /** Declare a tensor argument.
+     *
+     * @param[in] name         The name of the tensor.
+     * @param[in] info         The tensor info.
+     *
+     * @return The @ref TensorOperand object.
+     */
+    virtual TensorOperand declare_tensor_argument(const std::string &name, const TensorInfo &info) = 0;
+
     /** Declare a tile given its name and tile info
      *
      * @param[in] name Name of the tile
@@ -110,19 +125,17 @@ protected:
     /** Generate full variable name by prefixing it with id space */
     std::string generate_full_name(const std::string &name) const;
 
-    /** Create a new tile operand referring to the specified tile object.
-     *
-     * This class has friendship relationship with @ref TileOperand which allows it
-     * to access the private constructor.
-     */
+    /** Create a new tile operand referring to the specified tile object. */
     static TileOperand create_tile_operand(ITile &tile);
 
-    /** Get the reference to tile object from the tile operand.
-     *
-     * This class has friendship relationship with @ref TileOperand which allows it
-     * to access the private reference to the private tile field.
-     */
+    /** Get the reference to tile object from the tile operand. */
     static ITile &get_tile(const TileOperand &operand);
+
+    /** Create a new tensor operand from a tensor object. */
+    static TensorOperand create_tensor_operand(ITensor &tensor);
+
+    /** Get the reference to tensor object from the tensor operand. */
+    static ITensor &get_tensor(const TensorOperand &operand);
 
 private:
     int32_t _id_space{ 0 };
