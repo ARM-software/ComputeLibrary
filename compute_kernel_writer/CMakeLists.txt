@@ -123,6 +123,7 @@ target_sources(ckw PRIVATE
     src/Kernel.cpp
     src/KernelWriter.cpp
     src/TensorInfo.cpp
+    src/TensorSampler.cpp
     src/TensorUtils.cpp
     src/TileInfo.cpp
     src/TileOperand.cpp
