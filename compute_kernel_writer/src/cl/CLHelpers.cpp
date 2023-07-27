@@ -42,7 +42,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
 {
     if(cl_validate_vector_length(len) == false)
     {
-        COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported vector length");
+        CKW_THROW_MSG("Unsupported vector length");
         return "";
     }
 
@@ -77,7 +77,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
             res += "bool";
             break;
         default:
-            COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported datatype");
+            CKW_THROW_MSG("Unsupported datatype");
             return "";
     }
 
@@ -89,7 +89,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len)
     return res;
 }
 
-int32_t width_to_cl_vector_size(int32_t width)
+int32_t cl_round_up_to_nearest_valid_vector_width(int32_t width)
 {
     switch(width)
     {
@@ -136,10 +136,88 @@ std::string cl_get_variable_storagetype_as_string(TensorStorageType storage)
             res += "__write_only image2d_t";
             break;
         default:
-            COMPUTE_KERNEL_WRITER_ERROR_ON_MSG("Unsupported storage type");
+            CKW_THROW_MSG("Unsupported storage type");
     }
 
     return res;
+}
+
+std::string cl_data_type_rounded_up_to_valid_vector_width(DataType dt, int32_t width)
+{
+    std::string data_type;
+    const int32_t     w = cl_round_up_to_nearest_valid_vector_width(width);
+    data_type += cl_get_variable_datatype_as_string(dt, 1);
+    if(w != 1)
+    {
+        data_type += std::to_string(w);
+    }
+    return data_type;
+}
+
+std::vector<int32_t> cl_decompose_vector_width(int32_t vector_width)
+{
+    std::vector<int32_t> x;
+
+    switch(vector_width)
+    {
+        case 0:
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 8:
+        case 16:
+            x.push_back(vector_width);
+            break;
+        case 5:
+            x.push_back(4);
+            x.push_back(1);
+            break;
+        case 6:
+            x.push_back(4);
+            x.push_back(2);
+            break;
+        case 7:
+            x.push_back(4);
+            x.push_back(3);
+            break;
+        case 9:
+            x.push_back(8);
+            x.push_back(1);
+            break;
+        case 10:
+            x.push_back(8);
+            x.push_back(2);
+            break;
+        case 11:
+            x.push_back(8);
+            x.push_back(3);
+            break;
+        case 12:
+            x.push_back(8);
+            x.push_back(4);
+            break;
+        case 13:
+            x.push_back(8);
+            x.push_back(4);
+            x.push_back(1);
+            break;
+        case 14:
+            x.push_back(8);
+            x.push_back(4);
+            x.push_back(2);
+            break;
+        case 15:
+            x.push_back(8);
+            x.push_back(4);
+            x.push_back(3);
+            break;
+
+        default:
+            CKW_THROW_MSG("Vector width is too large");
+    }
+    return x;
 }
 
 } // namespace ckw

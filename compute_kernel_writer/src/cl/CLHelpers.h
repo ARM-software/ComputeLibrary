@@ -26,6 +26,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 /** OpenCL specific helper functions */
 namespace ckw
@@ -57,7 +58,7 @@ std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len);
  *
  * @return the OpenCL vector size
 */
-int32_t width_to_cl_vector_size(int32_t width);
+int32_t cl_round_up_to_nearest_valid_vector_width(int32_t width);
 
 /** Helper function to return the OpenCL storage type as a string from a @ref TensorStorage
  *
@@ -66,6 +67,24 @@ int32_t width_to_cl_vector_size(int32_t width);
  * @return the OpenCL storage type as a string
  */
 std::string cl_get_variable_storagetype_as_string(TensorStorageType storage);
+
+/** Helper function to decompose a vector width into a summation of valid OpenCL vector widths.
+ *
+ * @param[in] vector_width Vector width to be decomposed
+ *
+ * @return a vector of OpenCL vector widths
+ */
+std::vector<int32_t> cl_decompose_vector_width(int32_t vector_width);
+
+/** Helper function to get OpenCL data type from the data type enum and width
+ *  It'll round up the given vector width to the nearest valid OpenCL vector width.
+ *
+ *  @param[in] dt    data type enum
+ *  @param[in] width vector width
+ *
+ * @return a string representation of the data type
+ */
+std::string cl_data_type_rounded_up_to_valid_vector_width(DataType dt, int32_t width);
 } // namespace ckw
 
-#endif /* COMPUTE_KERNEL_WRITER_SRC_CL_CLHELPERS_H */
+#endif /* CKW_SRC_CL_CLHELPERS_H */
