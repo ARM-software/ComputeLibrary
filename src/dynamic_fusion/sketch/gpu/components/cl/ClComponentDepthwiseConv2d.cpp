@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,11 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
 
 #include "src/core/CL/CLValidate.h"
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDepthwiseConv2d.h"
+#else //ACL_INTERNAL_TEST_CKW_IN_DF
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwDepthwiseConv2d.h"
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 namespace arm_compute
 {
@@ -208,13 +212,22 @@ ClComponentDepthwiseConv2d::ClComponentDepthwiseConv2d(ComponentId              
                                                        const Attributes                &attributes,
                                                        const Settings                  &settings)
     : IGpuKernelComponent{id, properties, tensors},
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
       _component_writer{std::make_unique<ClTemplateDepthwiseConv2d>(id, tensors, attributes, settings)}
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer{std::make_unique<GpuCkwDepthwiseConv2d>(id, tensors, attributes, settings)}
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
+    ARM_COMPUTE_UNUSED(attributes, settings);
 }
 ClComponentDepthwiseConv2d::~ClComponentDepthwiseConv2d()
 {
 }
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuTemplateComponentWriter *ClComponentDepthwiseConv2d::template_writer() const
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+const IGpuCkwComponentDriver *ClComponentDepthwiseConv2d::ckw_component_driver() const
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
     return _component_writer.get();
 }

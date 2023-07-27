@@ -636,6 +636,7 @@ cc_library_static {
         "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwActivation.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwCast.cpp",
+        "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwDepthwiseConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwDirectConv2d.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.cpp",
         "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwPool2d.cpp",

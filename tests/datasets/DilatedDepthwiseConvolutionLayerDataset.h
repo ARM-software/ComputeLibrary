@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DILATED_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_DILATED_CONVOLUTION_LAYER_DATASET
+#ifndef ACL_TESTS_DATASETS_DILATEDDEPTHWISECONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_DILATEDDEPTHWISECONVOLUTIONLAYERDATASET_H
 
 #include "utils/TypePrinter.h"
 
@@ -48,6 +48,7 @@ public:
         add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 2U), PadStrideInfo(1, 1, 0, 0), Size2D(2U, 1U));
         add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 2U), PadStrideInfo(2, 1, 0, 0), Size2D(2U, 2U));
         add_config(TensorShape(7U, 7U, 1U), Size2D(3U, 2U), PadStrideInfo(2, 2, 0, 0), Size2D(1U, 2U));
+        add_config(TensorShape(7U, 8U, 5U, 9U), Size2D(8U, 6U), PadStrideInfo(2, 3, 1, 1, 1, 3, DimensionRoundingType::CEIL), Size2D(1U, 2U));
 
         add_config(TensorShape(7U, 8U, 1U), Size2D(2U, 3U), PadStrideInfo(1, 2, 0, 0), Size2D(2U, 2U));
         add_config(TensorShape(23U, 27U, 5U), Size2D(3U, 5U), PadStrideInfo(2, 1, 0, 0), Size2D(2U, 1U));
@@ -139,4 +140,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DILATED_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_DILATEDDEPTHWISECONVOLUTIONLAYERDATASET_H

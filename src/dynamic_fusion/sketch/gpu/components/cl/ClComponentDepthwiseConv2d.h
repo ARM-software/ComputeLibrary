@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D_H
 
 #include "arm_compute/core/Error.h"
 
@@ -42,6 +42,13 @@ namespace dynamic_fusion
 template <typename T>
 class ArgumentPack;
 class DepthwiseConv2dAttributes;
+
+/** Forward declaration */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+class ClTemplateDepthwiseConv2d;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwDepthwiseConv2d;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 /** Component specific settings
  */
@@ -155,7 +162,12 @@ public:
     /** Allow instances of this class to be moved */
     ClComponentDepthwiseConv2d &operator=(ClComponentDepthwiseConv2d &&component) = default;
     /** Get template writer for the component */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    const IGpuCkwComponentDriver          *ckw_component_driver() const override;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
+
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -163,9 +175,13 @@ public:
     }
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplateDepthwiseConv2d> _component_writer;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwDepthwiseConv2d> _component_writer;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D_H
