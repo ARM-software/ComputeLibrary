@@ -119,6 +119,15 @@ public:
      */
     virtual TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
 
+    /** Write the given raw code to kernel source code
+     *  It's used to address the cases where the user needs to
+     *  explicitly add a code where it's not (yet) supported by
+     *  the kernel writer utility calls.
+     *
+     * @param[in] raw_code raw code to write as string
+    */
+    virtual void op_write_raw_code(const std::string &raw_code) = 0;
+
 protected:
     int32_t id_space() const;
 

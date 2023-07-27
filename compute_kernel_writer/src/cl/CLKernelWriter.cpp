@@ -98,4 +98,9 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
     return operand;
 }
 
+void CLKernelWriter::op_write_raw_code(const std::string &raw_code)
+{
+    append_code(raw_code);
+}
+
 } // namespace ckw

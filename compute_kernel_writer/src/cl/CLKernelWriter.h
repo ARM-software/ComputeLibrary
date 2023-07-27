@@ -55,7 +55,11 @@ public:
     // Misc
     // =============================================================================================
 
+    /** Similar to @ref KernelWriter::comment() */
     void comment(const std::string &text) override;
+
+    /** Similar to @ref KernelWriter::op_write_raw_code() */
+    void op_write_raw_code(const std::string &raw_code) override;
 
     // =============================================================================================
     // Code generation
