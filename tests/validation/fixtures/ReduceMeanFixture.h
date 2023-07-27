@@ -127,9 +127,9 @@ protected:
 
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
             is_opencl = std::is_same<CLTensor, TensorType>::value; // Round down to zero on opencl to match kernel
-#endif /* ARM_COMPUTE_OPENCL_ENABLED */
-            out = reference::reduction_operation<T, T>(i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM, quantization_info_output, is_opencl ? RoundingPolicy::TO_ZERO : RoundingPolicy::TO_NEAREST_UP);
-
+#endif                                                             /* ARM_COMPUTE_OPENCL_ENABLED */
+            out = reference::reduction_operation<T, T>(i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM, data_type, quantization_info_output,
+                                                       is_opencl ? RoundingPolicy::TO_ZERO : RoundingPolicy::TO_NEAREST_UP);
         }
 
         if(!keep_dims)

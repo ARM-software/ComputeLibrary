@@ -63,6 +63,10 @@ const auto ArgMinMaxSmallDatasetAxis0 = framework::dataset::make("Shape",
     TensorShape{ 15U, 2U },
 });
 
+const auto OpsDataset   = framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX });
+const auto AxisDataset  = framework::dataset::make("Axis", { 0, 1, 2, 3 });
+const auto QInfoDataset = framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) });
+
 const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape",
 { TensorShape{ 517U, 123U, 13U, 2U } });
 } // namespace
@@ -95,57 +99,78 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-template <typename T>
-using CLArgMinMaxValidationFixture = ArgMinMaxValidationFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T>;
+template <typename T1, typename T2>
+using CLArgMinMaxValidationFixture = ArgMinMaxValidationFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T1, T2>;
+
+using CLArgMinMaxValidationFixture_S32_S32 = CLArgMinMaxValidationFixture<int32_t, int32_t>;
+using CLArgMinMaxValidationFixture_F16_S32 = CLArgMinMaxValidationFixture<half, int32_t>;
+using CLArgMinMaxValidationFixture_F32_S32 = CLArgMinMaxValidationFixture<float, int32_t>;
+using CLArgMinMaxValidationFixture_F32_S64 = CLArgMinMaxValidationFixture<float, int64_t>;
 
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
-                       CLArgMinMaxValidationFixture<int32_t>,
+                       CLArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(ArgMinMaxSmallDatasetAxis0, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxSmallDatasetAxis0,
+                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       framework::dataset::make("Axis", { 0 })),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLArgMinMaxValidationFixture<int32_t>,
+                       CLArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge,
-                       CLArgMinMaxValidationFixture<int32_t>,
+                       CLArgMinMaxValidationFixture_S32_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxLargeDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::S32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+
 TEST_SUITE_END() // S32
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLArgMinMaxValidationFixture<half>,
+                       CLArgMinMaxValidationFixture_F16_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::F16)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
-                       CLArgMinMaxValidationFixture<half>,
+                       CLArgMinMaxValidationFixture_F16_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxLargeDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::F16)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -154,49 +179,77 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLArgMinMaxValidationFixture<float>,
+                       CLArgMinMaxValidationFixture_F32_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
+                       CLArgMinMaxValidationFixture_F32_S64,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S64)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
-                       CLArgMinMaxValidationFixture<float>,
+                       CLArgMinMaxValidationFixture_F32_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(combine(ArgMinMaxLargeDataset,
+                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
-template <typename T>
-using CLArgMinMaxQuantizedValidationFixture = ArgMinMaxValidationQuantizedFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T>;
+template <typename T1, typename T2>
+using CLArgMinMaxQuantizedValidationFixture = ArgMinMaxValidationQuantizedFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T1, T2>;
+
+using CLArgMinMaxQuantizedValidationFixture_U8_S32 = CLArgMinMaxQuantizedValidationFixture<uint8_t, int32_t>;
+using CLArgMinMaxQuantizedValidationFixture_S8_S32 = CLArgMinMaxQuantizedValidationFixture<int8_t, int32_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLArgMinMaxQuantizedValidationFixture<uint8_t>,
+                       CLArgMinMaxQuantizedValidationFixture_U8_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })))
+                       combine(combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
+                                               AxisDataset),
+                                       OpsDataset),
+                               QInfoDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-
 FIXTURE_DATA_TEST_CASE(RunLarge,
-                       CLArgMinMaxQuantizedValidationFixture<uint8_t>,
+                       CLArgMinMaxQuantizedValidationFixture_U8_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })))
+                       combine(combine(combine(combine(combine(ArgMinMaxLargeDataset,
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8)),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
+                                               AxisDataset),
+                                       OpsDataset),
+                               QInfoDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -205,28 +258,32 @@ TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall,
-                       CLArgMinMaxQuantizedValidationFixture<int8_t>,
+                       CLArgMinMaxQuantizedValidationFixture_S8_S32,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })))
+                       combine(combine(combine(combine(combine(ArgMinMaxSmallDataset,
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
+                                               AxisDataset),
+                                       OpsDataset),
+                               QInfoDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-
 FIXTURE_DATA_TEST_CASE(RunLarge,
-                       CLArgMinMaxQuantizedValidationFixture<int8_t>,
+                       CLArgMinMaxQuantizedValidationFixture_S8_S32,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })))
+                       combine(combine(combine(combine(combine(ArgMinMaxLargeDataset,
+                                                               framework::dataset::make("DataTypeIn", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("DataTypeOut", DataType::S32)),
+                                               AxisDataset),
+                                       OpsDataset),
+                               QInfoDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
-
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ArgMinMax
 TEST_SUITE_END() // CL
