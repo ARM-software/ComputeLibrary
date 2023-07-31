@@ -129,11 +129,38 @@ public:
 
     /** Load the data from the tensor memory to the tile using the sampling information.
      *
+     * @param[out] tile       The tile to be loaded.
+     * @param[in]  tensor     The tensor to be read.
+     * @param[in]  sampler    The tensor sampling information.
+     * @param[in]  dilation_y Dilation in the Y dimension.
+     */
+    void op_load(TileOperand &tile, const TensorOperand &tensor, const TensorTileSampler &sampler, const TileOperand &dilation_y = TileOperand("dil_y", 1));
+
+    /** Load the data from the tensor memory to the tile using the indirect buffer approach and respective of the sampling information.
+     *
      * @param[out] tile    The tile to be loaded.
      * @param[in]  tensor  The tensor to be read.
      * @param[in]  sampler The tensor sampling information.
      */
-    void op_load(TileOperand &tile, TensorOperand &tensor, const TensorTileSampler &sampler);
+    void op_load_indirect(TileOperand &tile, const TensorOperand &tensor, const TensorTileSampler &sampler);
+
+    /** Construct an indirection buffer in @p tile containing the precalculated addresses of elements in the source tensor.
+     *
+     * @param[out] tile    The tile to be loaded.
+     * @param[in]  tensor  The tensor the be read.
+     * @param[in]  sampler The tensor sampling information.
+     * @param[in]  x       The X coordinate.
+     * @param[in]  y       The Y coordinate.
+     * @param[in]  x_off   Offset in the X dimension.
+     * @param[in]  y_off   Offset in the Y dimension.
+     */
+    void util_get_indirect_buffer(TileOperand             &tile,
+                                  const TensorOperand     &tensor,
+                                  const TensorTileSampler &sampler,
+                                  const TileOperand       &x,
+                                  const TileOperand       &y,
+                                  const TileOperand       &x_off,
+                                  const TileOperand       &y_off);
 
     /** Store the tile to the tensor using the specified sampling information.
      *

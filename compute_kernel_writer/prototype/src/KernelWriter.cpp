@@ -128,6 +128,10 @@ TileOperand &KernelWriter::declare_tile_operand(std::unique_ptr<TileOperand> ope
             name,
             prototype::TileInfo(info.data_type(), info.width(), info.height()));
     }
+    else
+    {
+        _impl->declare_const_tile(name, operand.value(), operand.data_type());
+    }
 
     return operand;
 }
@@ -136,7 +140,30 @@ TileOperand &KernelWriter::declare_tile_operand(std::unique_ptr<TileOperand> ope
 // Load and store
 // =================================================================================================
 
-void KernelWriter::op_load(TileOperand &tile, TensorOperand &tensor, const TensorTileSampler &sampler)
+void KernelWriter::op_load(TileOperand &tile, const TensorOperand &tensor, const TensorTileSampler &sampler, const TileOperand &dilation_y)
+{
+    prototype::TensorOperand impl_tensor(
+        tensor.name(),
+        prototype::GpuSampler{
+            sampler.format(),
+            prototype::to_gpu_tensor_storage(tensor.storage_type()),
+            sampler.address_mode_x(),
+            sampler.address_mode_y(),
+            sampler.address_mode_z() });
+
+    auto impl_x = sampler.x().create_impl_operand(_impl.get());
+    auto impl_y = sampler.y().create_impl_operand(_impl.get());
+    auto impl_z = sampler.z().create_impl_operand(_impl.get());
+    auto impl_b = sampler.b().create_impl_operand(_impl.get());
+
+    auto impl_dilation_y = dilation_y.create_impl_operand(_impl.get());
+
+    auto impl_dst = tile.create_impl_operand(_impl.get());
+
+    _impl->op_load_immediate(impl_tensor, impl_dst, impl_x, impl_y, impl_z, impl_b, impl_dilation_y);
+}
+
+void KernelWriter::op_load_indirect(TileOperand &tile, const TensorOperand &tensor, const TensorTileSampler &sampler)
 {
     prototype::TensorOperand impl_tensor(
         tensor.name(),
@@ -154,7 +181,34 @@ void KernelWriter::op_load(TileOperand &tile, TensorOperand &tensor, const Tenso
 
     auto impl_dst = tile.create_impl_operand(_impl.get());
 
-    _impl->op_load_immediate(impl_tensor, impl_dst, impl_x, impl_y, impl_z, impl_b);
+    _impl->op_load_indirect(impl_tensor, impl_dst, impl_x, impl_y, impl_z, impl_b);
+}
+
+void KernelWriter::util_get_indirect_buffer(TileOperand             &tile,
+                                            const TensorOperand     &tensor,
+                                            const TensorTileSampler &sampler,
+                                            const TileOperand       &x,
+                                            const TileOperand       &y,
+                                            const TileOperand       &x_off,
+                                            const TileOperand       &y_off)
+{
+    prototype::TensorOperand impl_tensor(
+        tensor.name(),
+        prototype::GpuSampler{
+            sampler.format(),
+            prototype::to_gpu_tensor_storage(tensor.storage_type()),
+            sampler.address_mode_x(),
+            sampler.address_mode_y(),
+            sampler.address_mode_z() });
+
+    auto impl_x     = x.create_impl_operand(_impl.get());
+    auto impl_y     = y.create_impl_operand(_impl.get());
+    auto impl_x_off = x_off.create_impl_operand(_impl.get());
+    auto impl_y_off = y_off.create_impl_operand(_impl.get());
+
+    auto impl_dst = tile.create_impl_operand(_impl.get());
+
+    _impl->util_get_indirect_buffer(impl_dst, impl_tensor, impl_x, impl_y, impl_x_off, impl_y_off);
 }
 
 void KernelWriter::op_store(TensorOperand &tensor, const TileOperand &tile, const TensorTileSampler &sampler)

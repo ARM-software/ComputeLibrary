@@ -3009,7 +3009,7 @@ private:
             address += " + (";
             address += x + ") * sizeof(" + dst_type + ")";
         }
-        if(y != "0" && (_mapper.is_one_component_y() != true))
+        if(y != "0")
         {
             const std::string stride_y = _mapper.tensor_component_stride_y();
             address += " + (";
@@ -3249,7 +3249,7 @@ private:
         std::string coord_x = "(" + x + ") >> 2";
         std::string coord_y = "(";
 
-        if(y != "0" && (_mapper.is_one_component_y() != true))
+        if(y != "0")
         {
             coord_y += y;
         }
@@ -4024,13 +4024,6 @@ public:
             _data->code += ", ";
             _data->code += x_s->scalar(0, i).str;
             _data->code += " >= 0);\n";
-            // mi_0 = select(wxh, mi_0, y_s >= 0);
-            _data->code += dst->scalar(0, i).str;
-            _data->code += " = select(-1, ";
-            _data->code += dst->scalar(0, i).str;
-            _data->code += ", ";
-            _data->code += y_s->scalar(0, i).str;
-            _data->code += " >= 0);\n";
             // mi_0 = select(wxh, mi_0, x_s < width);
             _data->code += dst->scalar(0, i).str;
             _data->code += " = select(-1, ";
@@ -4039,6 +4032,13 @@ public:
             _data->code += x_s->scalar(0, i).str;
             _data->code += " < ";
             _data->code += width + ");\n";
+            // mi_0 = select(wxh, mi_0, y_s >= 0);
+            _data->code += dst->scalar(0, i).str;
+            _data->code += " = select(-1, ";
+            _data->code += dst->scalar(0, i).str;
+            _data->code += ", ";
+            _data->code += y_s->scalar(0, i).str;
+            _data->code += " >= 0);\n";
             // mi_0 = select(wxh, mi_0, y_s < height);
             _data->code += dst->scalar(0, i).str;
             _data->code += " = select(-1, ";

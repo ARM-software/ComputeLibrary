@@ -48,6 +48,13 @@ v23.08 Public major release
      - @ref opencl::kernels::ClMatMulNativeMMULKernel support for FP32 and FP16, with batch support
    - Enable transposed convolution with non-square kernels on CPU and GPU.
    - Added support for input data type U64/S64 in CLCast.
+   - Added new Compute Kernel Writer (CKW) subproject that offers a C++ interface to generate tile-based OpenCL code in just-in-time fashion.
+   - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface with support for FP16/FP32 only:
+     - @ref experimental::dynamic_fusion::GpuCkwActivation
+     - @ref experimental::dynamic_fusion::GpuCkwCast
+     - @ref experimental::dynamic_fusion::GpuCkwDirectConv2d
+     - @ref experimental::dynamic_fusion::GpuCkwElementwiseBinary
+     - @ref experimental::dynamic_fusion::GpuCkwStore
  - Various optimizations and bug fixes.
 
 v23.05.1 Public patch release

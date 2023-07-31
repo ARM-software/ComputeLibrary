@@ -66,7 +66,11 @@ private:
 };
 
 /** Forward declaration */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 class ClTemplateDirectConv2d;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwDirectConv2d;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentDirectConv2d final : public IGpuKernelComponent
 {
@@ -134,8 +138,12 @@ public:
     ClComponentDirectConv2d(ClComponentDirectConv2d &&component) = default;
     /** Allow instances of this class to be moved */
     ClComponentDirectConv2d &operator=(ClComponentDirectConv2d &&component) = default;
-    /** Get template writer for the component */
+    /** Get writer for the component */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -143,7 +151,11 @@ public:
     }
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplateDirectConv2d> _component_writer;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwDirectConv2d> _component_writer;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental

@@ -37,6 +37,8 @@ namespace ckw
 
 class Kernel;
 
+using TileContainer = std::vector<std::vector<std::string>>;
+
 /** Tile operand which can be either scalar, vector or 2D tile. */
 class TileOperand : public OperandBase
 {
@@ -69,6 +71,13 @@ public:
      */
     TileOperand(const ::std::string &name, float value);
 
+    /** Initialize a new instance of @ref TileOperand for compile-time constant variable.
+     *
+     * @param[in] name  The name of the tile.
+     * @param[in] value The value of the tile.
+     */
+    TileOperand(const ::std::string &name, const ::std::vector<std::vector<std::string>> &value, DataType dt);
+
     /** Prohibit copy of tile operand. */
     TileOperand(const TileOperand &) = delete;
 
@@ -96,13 +105,21 @@ public:
     /** Get the scalar value of the tile.
      *
      * The tile must have the shape of 1, 1 (i.e. scalar).
+     *
+     * @return Scalar value as a string.
      */
-    ScalarValue scalar_value() const;
+    std::string scalar_value() const;
+
+    /** Get the values of the tile.
+     *
+     * @return 2D container of values.
+     */
+    const TileContainer &value() const;
 
 private:
-    TileInfo    _info;
-    ScalarValue _value{};
-    bool        _constant;
+    TileInfo      _info;
+    TileContainer _value{};
+    bool          _constant;
 };
 
 } // namespace ckw
