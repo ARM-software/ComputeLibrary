@@ -113,6 +113,13 @@ inline void ignore_unused(T &&...)
  */
 #define CKW_ASSERT(cond) CKW_ASSERT_MSG(cond, #cond)
 
+/** If the precondition is met but the condition is not met, throw an std::runtime_error if assertion is enabled.
+ *
+ * @param[in] precond The precondition that triggers the check.
+ * @param[in] cond    The condition that is expected to be true if precondition is true.
+ */
+#define CKW_ASSERT_IF(precond, cond) CKW_ASSERT(!(precond) || (cond))
+
 /** Throw an std::runtime_error with the specified message if assertion is enabled.
  *
  * @param[in] msg  The error message when the condition is not met.

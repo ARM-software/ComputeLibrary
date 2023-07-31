@@ -57,13 +57,21 @@ public:
     ~CLKernelWriter();
 
     // =============================================================================================
+    // Data processing
+    // =============================================================================================
+
+    void op_assign(const TileOperand &dst, const TileOperand &src) override;
+
+    void op_cast(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy) override;
+
+    void op_unary(const TileOperand &dst, const TileOperand &src, UnaryOp op) override;
+
+    // =============================================================================================
     // Misc
     // =============================================================================================
 
-    /** Similar to @ref KernelWriter::comment() */
-    void comment(const std::string &text) override;
+    void op_comment(const std::string &text) override;
 
-    /** Similar to @ref KernelWriter::op_write_raw_code() */
     void op_write_raw_code(const std::string &raw_code) override;
 
     // =============================================================================================
@@ -92,14 +100,16 @@ public:
      *
      * Similar to @ref KernelWriter::op_load()
      */
-    void op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    void op_load(
+        const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
     /** Load the data from the tensor memory to the tile in a dilated way using the sampling information.
      *
      * Similar to @ref KernelWriter::op_load_dilated()
      */
-    void op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    void op_load_dilated(
+        const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) override;
 
@@ -107,18 +117,26 @@ public:
      *
      * Similar to @ref KernelWriter::op_store()
      */
-    void op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+    void op_store(
+        const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
     /** Store the data to the tensor memory from the tile in a dilated way using the sampling information.
      *
      * Similar to @ref KernelWriter::op_store_dilated()
      */
-    void op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+    void op_store_dilated(
+        const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) override;
 
 protected:
+    /** Return @ref CLTile object from the @ref TileOperand object.
+     *
+     * This function performs appropriate check before doing type casting.
+     */
+    const CLTile &to_cl_tile(const TileOperand &operand);
+
     /** Append the specified code to the kernel body source code. */
     template <typename T, typename... TArgs>
     void append_code(T &&code, TArgs &&...args)
@@ -137,20 +155,15 @@ protected:
     /** Get the current kernel body source code. */
     const std::string &body_source_code() const;
 
-// For helper functions
+    // For helper functions
 private:
-    /** Return @ref CLTile object from the @ref TileOperand object.
-     *
-     * This function performs appropriate check before doing type casting.
-     */
-    const CLTile &to_cl_tile(const TileOperand &operand);
-
     /** Helper function to consolidate all load/store logic in this class */
-    void op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    void op_load_store(
+        MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const CLTile &dilation_x, const CLTile &dilation_y);
 
-// For attributes
+    // For attributes
 private:
     /** This string contains the kernel body source code, not the full CL source code.
      * The full source code will only be generated when the user calls @ref KernelWriter::emit_kernel.

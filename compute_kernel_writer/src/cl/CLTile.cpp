@@ -210,7 +210,7 @@ std::string CLTile::create_var_name(int32_t row) const
     // If a scalar variable, we do not append the row index
     if(_info.height() > 1)
     {
-        var_name += "_";
+        var_name += "__";
         var_name += std::to_string(row);
     }
 

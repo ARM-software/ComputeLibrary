@@ -23,6 +23,7 @@
  */
 
 #include "src/cl/CLKernelWriter.h"
+
 #include "ckw/Error.h"
 #include "ckw/Kernel.h"
 #include "ckw/TensorSampler.h"
@@ -37,6 +38,9 @@
 #include "src/cl/helpers/CLMemoryOpImage2dHelper.h"
 #include "src/cl/helpers/ICLMemoryOpHelper.h"
 
+#include "src/types/DataTypeHelpers.h"
+
+#include <algorithm>
 #include <cstdint>
 
 namespace ckw
@@ -106,7 +110,95 @@ std::unique_ptr<Kernel> CLKernelWriter::emit_kernel(const std::string &name)
     return std::make_unique<Kernel>(TargetLanguage::OpenCL, arguments, code);
 }
 
-void CLKernelWriter::comment(const std::string &text)
+void CLKernelWriter::op_assign(const TileOperand &dst, const TileOperand &src)
+{
+    const auto &dst_tile = to_cl_tile(dst);
+    const auto &src_tile = to_cl_tile(src);
+
+    const auto dst_w = dst_tile.info().width();
+    const auto dst_h = dst_tile.info().height();
+    const auto src_w = src_tile.info().width();
+
+    const auto data_type_str = cl_get_variable_datatype_as_string(dst_tile.info().data_type(), dst_w);
+
+    const auto        broadcast_src_x = dst_w != 1 && src_w == 1;
+    const std::string src_prefix      = broadcast_src_x ? "(" + data_type_str + ")" : "";
+
+    CKW_ASSERT_MSG(src_tile.info().data_type() == dst_tile.info().data_type(), "Source and destination type must match.");
+    CKW_ASSERT_MSG(src_tile.info().height() == dst_h || src_tile.info().height() == 1, "Tile height must match or source is broadcasting in y dimension.");
+    CKW_ASSERT_MSG(src_w == dst_w || src_w == 1, "Tile width must match or source is broadcasting in x dimension.");
+
+    // Broadcasting on y dimension is automatic (see CLTile::vector).
+    for(int32_t y = 0; y < dst_h; ++y)
+    {
+        append_code(dst_tile.vector(y).str, " = ", src_prefix, src_tile.vector(y).str, ";\n");
+    }
+}
+
+void CLKernelWriter::op_cast(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy)
+{
+    const auto &dst_tile = to_cl_tile(dst);
+    const auto &src_tile = to_cl_tile(src);
+
+    const auto dst_w = dst_tile.info().width();
+    const auto dst_h = dst_tile.info().height();
+    const auto src_w = src_tile.info().width();
+
+    const auto dst_type = dst_tile.info().data_type();
+
+    const auto convert_type_str = cl_get_variable_datatype_as_string(dst_type, src_w);
+    const auto dst_type_str     = cl_get_variable_datatype_as_string(dst_type, dst_w);
+
+    const std::string sat = policy == ConvertPolicy::Saturate ? "_sat" : "";
+    CKW_ASSERT_IF(policy == ConvertPolicy::Saturate, !is_data_type_float(dst_type));
+
+    const auto        broadcast_x = dst_w != 1 && src_w == 1;
+    const std::string prefix      = broadcast_x ? "(" + dst_type_str + ")" : "";
+
+    CKW_ASSERT_MSG(src_tile.info().data_type() != dst_tile.info().data_type(), "Source and destination type must be different.");
+    CKW_ASSERT_MSG(src_tile.info().height() == dst_h || src_tile.info().height() == 1, "Tile height must match or source is broadcasting in y dimension.");
+    CKW_ASSERT_MSG(src_w == dst_w || src_w == 1, "Tile width must match or source is broadcasting in x dimension.");
+
+    // Broadcasting on y dimension is automatic (see CLTile::vector).
+    for(int32_t y = 0; y < dst_h; ++y)
+    {
+        append_code(dst_tile.vector(y).str, " = ", prefix, "convert_", convert_type_str, sat, "(", src_tile.vector(y).str, ");\n");
+    }
+}
+
+void CLKernelWriter::op_unary(const TileOperand &dst, const TileOperand &src, UnaryOp op)
+{
+    const auto &dst_tile = to_cl_tile(dst);
+    const auto &src_tile = to_cl_tile(src);
+
+    const auto dst_w = dst_tile.info().width();
+    const auto dst_h = dst_tile.info().height();
+    const auto src_w = src_tile.info().width();
+
+    const auto data_type_str   = cl_get_variable_datatype_as_string(dst_tile.info().data_type(), dst_w);
+    const auto broadcast_src_x = dst_w != 1 && src_w == 1;
+
+    const std::string src_prefix = broadcast_src_x ? "(" + data_type_str + ")" : "";
+
+    const auto  op_info    = cl_get_unary_op(op);
+    const auto  op_is_func = std::get<0>(op_info);
+    const auto &op_name    = std::get<1>(op_info);
+    const auto  op_prefix  = op_is_func ? op_name + "(" : op_name;
+    const auto  op_suffix  = op_is_func ? ")" : "";
+
+    CKW_ASSERT_MSG(src_tile.info().data_type() == dst_tile.info().data_type(), "Source and destination type must match.");
+    CKW_ASSERT_MSG(!is_data_type_float(src_tile.info().data_type()), "Logical and bitwise not only work with integer.");
+    CKW_ASSERT_MSG(src_tile.info().height() == dst_h || src_tile.info().height() == 1, "Tile height must match or source is broadcasting in y dimension.");
+    CKW_ASSERT_MSG(src_w == dst_w || src_w == 1, "Tile width must match or source is broadcasting in x dimension.");
+
+    // Broadcasting on y dimension is automatic (see CLTile::vector).
+    for(int32_t y = 0; y < dst_h; ++y)
+    {
+        append_code(dst_tile.vector(y).str, " = ", src_prefix, op_prefix, src_tile.vector(y).str, op_suffix, ";\n");
+    }
+}
+
+void CLKernelWriter::op_comment(const std::string &text)
 {
 #ifdef COMPUTE_KERNEL_WRITER_DEBUG_ENABLED
 
@@ -147,13 +239,24 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
     const int32_t  width     = tile_info.width();
     const DataType data_type = tile_info.data_type();
 
+    CKW_ASSERT_MSG(
+        std::find_if(
+            _tiles.begin(), _tiles.end(),
+            [=](const std::unique_ptr<CLTile> &e)
+            {
+                return e->name() == fullname;
+            })
+            == _tiles.end(),
+        "Tile name must be unique.");
+
+    auto tile = std::make_unique<CLTile>(fullname, tile_info);
+
     for(int32_t row = 0; row < height; ++row)
     {
         const std::string cl_type = cl_get_variable_datatype_as_string(data_type, width);
-        append_code(cl_type, " ", fullname, std::to_string(row), ";\n");
+        append_code(cl_type, " ", tile->vector(row).str, ";\n");
     }
 
-    auto       tile    = std::make_unique<CLTile>(name, tile_info);
     const auto operand = create_tile_operand(*tile);
 
     _tiles.insert(std::move(tile));
@@ -169,10 +272,12 @@ void CLKernelWriter::op_write_raw_code(const std::string &raw_code)
 const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand)
 {
     const auto &tile = get_tile(operand);
+
 #ifdef COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
     // Check if the tile is a CLTile created by this kernel writer.
     {
         bool found = false;
+
         for(const auto &t : _tiles)
         {
             if(&tile == t.get())
@@ -181,11 +286,13 @@ const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand)
                 break;
             }
         }
+
         if(!found)
         {
             for(const auto &t : _tensors)
             {
                 const auto components = t->components();
+
                 for(const auto component : components)
                 {
                     if(&tile == &component->tile())
@@ -194,16 +301,23 @@ const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand)
                         break;
                     }
                 }
+
+                if(found)
+                {
+                    break;
+                }
             }
         }
+
         CKW_ASSERT_MSG(found, "The tile is not found!");
     }
 #endif // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+
     return static_cast<const CLTile &>(tile);
 }
 
 void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-    const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
+                             const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
     const CLTile dilation_x("1", DataType::Int32);
     const CLTile dilation_y("1", DataType::Int32);
@@ -212,8 +326,8 @@ void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &te
 }
 
 void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-        const TileOperand &dilation_x, const TileOperand &dilation_y)
+                                     const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+                                     const TileOperand &dilation_x, const TileOperand &dilation_y)
 {
     const auto &dil_x_tile = to_cl_tile(dilation_x);
     const auto &dil_y_tile = to_cl_tile(dilation_y);
@@ -222,7 +336,7 @@ void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOpe
 }
 
 void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
-    const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
+                              const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
     const CLTile dilation_x("1", DataType::Int32);
     const CLTile dilation_y("1", DataType::Int32);
@@ -231,8 +345,8 @@ void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand 
 }
 
 void CLKernelWriter::op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-        const TileOperand &dilation_x, const TileOperand &dilation_y)
+                                      const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+                                      const TileOperand &dilation_x, const TileOperand &dilation_y)
 {
     const auto &dil_x_tile = to_cl_tile(dilation_x);
     const auto &dil_y_tile = to_cl_tile(dilation_y);
@@ -241,11 +355,11 @@ void CLKernelWriter::op_store_dilated(const TensorOperand &tensor_op, const Tile
 }
 
 void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-        const CLTile &dilation_x, const CLTile &dilation_y)
+                                   const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+                                   const CLTile &dilation_x, const CLTile &dilation_y)
 {
     CKW_UNUSED(dilation_x);
-    CKW_ASSERT(dilation_x.scalar(0,0).str == "1");  // Dilation in x dimension is not implemented yet
+    CKW_ASSERT(dilation_x.scalar(0, 0).str == "1"); // Dilation in x dimension is not implemented yet
 
     ITensor &tensor = get_tensor(tensor_op);
 
@@ -263,10 +377,10 @@ void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_o
             CKW_THROW_MSG("Unsupported tensor storage");
     }
 
-    const auto &tile = to_cl_tile(tile_op);
-    const auto &x_tile = to_cl_tile(x);
-    const auto &y_tile = to_cl_tile(y);
-    const auto &z_tile = to_cl_tile(z);
+    const auto &tile       = to_cl_tile(tile_op);
+    const auto &x_tile     = to_cl_tile(x);
+    const auto &y_tile     = to_cl_tile(y);
+    const auto &z_tile     = to_cl_tile(z);
     const auto &batch_tile = to_cl_tile(batch);
 
     helper->initialize(&tile, &x_tile, &z_tile, &batch_tile);

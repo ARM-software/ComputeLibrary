@@ -24,8 +24,11 @@
 #ifndef CKW_SRC_CL_CLHELPERS_H
 #define CKW_SRC_CL_CLHELPERS_H
 
+#include "ckw/types/Operators.h"
+
 #include <cstdint>
 #include <string>
+#include <tuple>
 #include <vector>
 
 /** OpenCL specific helper functions */
@@ -51,6 +54,24 @@ bool cl_validate_vector_length(int32_t len);
  * @return the OpenCL datatype as a string
  */
 std::string cl_get_variable_datatype_as_string(DataType dt, int32_t len);
+
+/** Return the assignment operator in OpenCL language.
+ *
+ * @param[in] op The assignment operator.
+ *
+ * @return The operator in OpenCL language as a string.
+ */
+std::string cl_get_assignment_op_as_string(AssignmentOp op);
+
+/** Return the information about the unary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's an unary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op The unary operator.
+ */
+std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op);
 
 /** Helper function to return the OpenCL vector size that accommodate the the desired width
  *

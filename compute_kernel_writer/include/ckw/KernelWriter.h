@@ -27,7 +27,10 @@
 
 #include "ckw/TensorOperand.h"
 #include "ckw/TileOperand.h"
+#include "ckw/types/ConvertPolicy.h"
+#include "ckw/types/Operators.h"
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -76,6 +79,33 @@ public:
     virtual ~KernelWriter();
 
     // =============================================================================================
+    // Data processing
+    // =============================================================================================
+
+    /** Write assignment statement: `<dst> = <src>;`.
+     *
+     * @param[in] dst The destination tile.
+     * @param[in] src The source tile.
+     */
+    virtual void op_assign(const TileOperand &dst, const TileOperand &src) = 0;
+
+    /** Write the cast statement: `<dst> = convert_<dst.type><policy>(<src>);`.
+     *
+     * @param[in] dst    The destination tile.
+     * @param[in] src    The source tile.
+     * @param[in] policy The policy governing the behavior of the cast.
+     */
+    virtual void op_cast(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy) = 0;
+
+    /** Write the unary expression statement: `<dst> = <op> <src>;`.
+     *
+     * @param[in] dst The destination tile.
+     * @param[in] src The source tile.
+     * @param[in] op  The unary operator.
+     */
+    virtual void op_unary(const TileOperand &dst, const TileOperand &src, UnaryOp op) = 0;
+
+    // =============================================================================================
     // Misc
     // =============================================================================================
 
@@ -87,7 +117,16 @@ public:
      *
      * @param[in] text The comment to be written.
      */
-    virtual void comment(const std::string &text) = 0;
+    virtual void op_comment(const std::string &text) = 0;
+
+    /** Write the given raw code to kernel source code
+     *  It's used to address the cases where the user needs to
+     *  explicitly add a code where it's not (yet) supported by
+     *  the kernel writer utility calls.
+     *
+     * @param[in] raw_code raw code to write as string
+    */
+    virtual void op_write_raw_code(const std::string &raw_code) = 0;
 
     // =============================================================================================
     // Code generation
@@ -121,15 +160,6 @@ public:
      */
     virtual TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
 
-    /** Write the given raw code to kernel source code
-     *  It's used to address the cases where the user needs to
-     *  explicitly add a code where it's not (yet) supported by
-     *  the kernel writer utility calls.
-     *
-     * @param[in] raw_code raw code to write as string
-    */
-    virtual void op_write_raw_code(const std::string &raw_code) = 0;
-
     /** Load the data from the tensor memory to the tile using the sampling information.
      *
      * @param[in] tile_op   The tile to be loaded.
@@ -140,7 +170,8 @@ public:
      * @param[in] z         z-coordinate
      * @param[in] batch     batch offset
      */
-    virtual void op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    virtual void op_load(
+        const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) = 0;
 
     /** Load the data from the tensor memory to the tile in a dilated way using the sampling information.
@@ -150,7 +181,8 @@ public:
      * @param[in] dilation_x Dilation while reading in x-dimension
      * @param[in] dilation_y Dilation while reading in y-dimension
      */
-    virtual void op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    virtual void op_load_dilated(
+        const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
 
@@ -158,14 +190,16 @@ public:
      *
      * Similar to @ref KernelWriter::op_load()
      */
-    virtual void op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+    virtual void op_store(
+        const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) = 0;
 
     /** Store the data to the tensor memory from the tile in a dilated way using the sampling information.
      *
      * Similar to @ref KernelWriter::op_load_dilated()
      */
-    virtual void op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+    virtual void op_store_dilated(
+        const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
 
