@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ namespace validation
 namespace
 {
 const auto MultiplesDataset = framework::dataset::make("Multiples", { Multiples{ 3 },
+                                                                      Multiples{ 7 },
                                                                       Multiples{ 2, 2 },
                                                                       Multiples{ 1, 1, 3, 4 },
                                                                       Multiples{ 2, 1, 2, 2 },
