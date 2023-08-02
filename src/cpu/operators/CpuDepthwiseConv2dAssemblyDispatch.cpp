@@ -60,8 +60,8 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
                                                    const ConvolutionInfo &info)
 {
     ARM_COMPUTE_LOG_PARAMS(src, weights, bias, dst, info);
-    const CPUInfo     &ci          = NEScheduler::get().cpu_info();
-    const unsigned int num_threads = NEScheduler::get().num_threads();
+    const CPUInfo     &ci          = CPUInfo::get();
+    const unsigned int num_threads = NEScheduler::num_threads();
     _pImpl->is_prepared            = false;
     _pImpl->are_weights_const      = weights->are_values_constant();
 

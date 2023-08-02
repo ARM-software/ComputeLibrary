@@ -579,9 +579,8 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::prepare(ITensorPack &tensors)
 
             CpuAuxTensorHandler pretranspose(offset_int_vec(Pretranspose), _pretranspose_info, tensors, false);
             ARM_COMPUTE_ERROR_ON(pretranspose.get()->buffer() == nullptr);
-            run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(_gemm_kernel_asm.get(), pretranspose.get(),
-                                                                     in1_ptr, ldb, multi_stride_b,
-                                                                     NEScheduler::get().num_threads());
+            run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(
+                _gemm_kernel_asm.get(), pretranspose.get(), in1_ptr, ldb, multi_stride_b, NEScheduler::num_threads());
 
             b->mark_as_unused();
             // Note that we don't need to mark b_to_use as unused, as if it's been assigned to pre_pretransposed_b, its memory will be auto-managed by the handler
@@ -691,9 +690,8 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
             }
             else
             {
-                run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(_gemm_kernel_asm.get(), pretranspose.get(),
-                                                                         b_ptr, ldb, multi_stride_b,
-                                                                         NEScheduler::get().num_threads());
+                run_parallel_pretranspose_B_array<TypeInput, TypeOutput>(
+                    _gemm_kernel_asm.get(), pretranspose.get(), b_ptr, ldb, multi_stride_b, NEScheduler::num_threads());
             }
         }
     }
@@ -707,7 +705,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run(ITensorPack &tensors)
         _gemm_kernel_asm->set_working_space(reinterpret_cast<void *>(workspace.get()->buffer()));
         const unsigned int split_dim   = scheduling_hint.split_dimension();
         const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
-        unsigned int       num_threads = NEScheduler::get().num_threads();
+        unsigned int       num_threads = NEScheduler::num_threads();
         if (window_size < num_threads)
         {
             num_threads = window_size;
@@ -756,8 +754,8 @@ void create_arm_gemm(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &arm_ge
                      const AsmGemmInfo                                   &info)
 {
     Params         p           = extract_parameters(a, b, d, info);
-    const CPUInfo &ci          = NEScheduler::get().cpu_info();
-    unsigned int   num_threads = NEScheduler::get().num_threads();
+    const CPUInfo &ci          = CPUInfo::get();
+    unsigned int   num_threads = NEScheduler::num_threads();
 
     arm_gemm::GemmConfig cfg;
     cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
@@ -781,8 +779,8 @@ void create_arm_gemm_quant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback> &
 {
     ARM_COMPUTE_UNUSED(activation);
     Params             p           = extract_parameters(a, b, d, info);
-    const CPUInfo     &ci          = NEScheduler::get().cpu_info();
-    const unsigned int num_threads = NEScheduler::get().num_threads();
+    const CPUInfo     &ci          = CPUInfo::get();
+    const unsigned int num_threads = NEScheduler::num_threads();
 
     arm_gemm::GemmConfig cfg;
     cfg.weight_format = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
@@ -836,8 +834,8 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
     ARM_COMPUTE_UNUSED(c);
     arm_gemm::Activation act         = assembly_utils::map_to_arm_gemm_activation(info.activation_info);
     Params               p           = extract_parameters(a, b, d, info);
-    const CPUInfo       &ci          = NEScheduler::get().cpu_info();
-    unsigned int         num_threads = NEScheduler::get().num_threads();
+    const CPUInfo       &ci          = CPUInfo::get();
+    unsigned int         num_threads = NEScheduler::num_threads();
     arm_gemm::GemmConfig cfg;
     cfg.weight_format                           = assembly_utils::map_to_arm_gemm_weight_format(info.weight_format);
     arm_gemm::WeightFormat arm_gemm_expected_wf = assembly_utils::map_to_arm_gemm_weight_format(expected_weight_format);

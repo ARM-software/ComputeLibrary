@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+* Copyright (c) 2017-2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_SCHEDULER_H
-#define ARM_COMPUTE_SCHEDULER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_SCHEDULER_H
+#define ACL_ARM_COMPUTE_RUNTIME_SCHEDULER_H
 
 #include "arm_compute/runtime/IScheduler.h"
 
@@ -72,13 +72,27 @@ public:
      * @return true if the given scheduler type is supported. False otherwise.
      */
     static bool is_available(Type t);
+    /** Returns true if a scheduler has been set.
+     *
+     * @return true if a scheduler has been set. False otherwise.
+     */
+    static bool is_set();
+    /** Returns number of threads from scheduler if scheduler is set, otherwise queries CPUInfo.
+     *
+     * @return number of threads from scheduler if scheduler is set, otherwise queries CPUInfo.
+     */
+    static unsigned int num_threads();
 
 private:
-    static Type                                        _scheduler_type;
-    static std::shared_ptr<IScheduler>                 _custom_scheduler;
+    static Type _scheduler_type;
+#ifndef ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
+    static std::shared_ptr<IScheduler> _custom_scheduler;
+#else  // ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
+    static std::shared_ptr<IScheduler> thread_local _custom_scheduler;
+#endif // ARM_COMPUTE_THREAD_LOCAL_SCHEDULER
     static std::map<Type, std::unique_ptr<IScheduler>> _schedulers;
 
     Scheduler();
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_SCHEDULER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_SCHEDULER_H
