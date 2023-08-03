@@ -126,7 +126,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
     <tr><th>src<th>dst
     <tr><td>QASYMM8<td>U32, S32
     <tr><td>QASYMM8_SIGNED<td>U32, S32
-    <tr><td>S32<td>U32, S32
+    <tr><td>S32<td>U32, S32, S64
     <tr><td>F16<td>U32, S32
     <tr><td>F32<td>U32, S32
     </table>

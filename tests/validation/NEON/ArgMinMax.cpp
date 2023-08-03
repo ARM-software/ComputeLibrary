@@ -97,6 +97,8 @@ using NEArgMinMaxValidationFixture = ArgMinMaxValidationFixture<Tensor, Accessor
 using NEArgMinMaxValidationFixture_S32_S32 = NEArgMinMaxValidationFixture<int32_t, int32_t>;
 using NEArgMinMaxValidationFixture_F16_S32 = NEArgMinMaxValidationFixture<half, int32_t>;
 using NEArgMinMaxValidationFixture_F32_S32 = NEArgMinMaxValidationFixture<float, int32_t>;
+using NEArgMinMaxValidationFixture_F32_S64 = NEArgMinMaxValidationFixture<float, int64_t>;
+
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
                        NEArgMinMaxValidationFixture_S32_S32,
@@ -175,6 +177,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(combine(combine(combine(ArgMinMaxSmallDataset(),
                                                        framework::dataset::make("DataTypeIn", DataType::F32)),
                                                framework::dataset::make("DataTypeOut", DataType::S32)),
+                                       AxisDataset),
+                               OpsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
+                       NEArgMinMaxValidationFixture_F32_S64,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(ArgMinMaxSmallDataset(),
+                                                       framework::dataset::make("DataTypeIn", DataType::F32)),
+                                               framework::dataset::make("DataTypeOut", DataType::S64)),
                                        AxisDataset),
                                OpsDataset))
 {

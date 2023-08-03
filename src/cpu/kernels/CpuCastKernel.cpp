@@ -103,15 +103,20 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
                                                          DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
                                                          DataType::F32, DataType::S32, DataType::S64, DataType::U64);
-#else // __aarch64__
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
+                                                         DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
+                                                         DataType::U32, DataType::S32, DataType::F32, DataType::S64);
+
+#else  // __aarch64__
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
                                                          DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
                                                          DataType::F32, DataType::S32);
-#endif // __aarch64__
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
                                                          DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
                                                          DataType::U32, DataType::S32, DataType::F32);
+#endif // __aarch64__
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::QASYMM8_SIGNED && (dst->data_type() != DataType::S16 && dst->data_type() != DataType::S32
                                                                                      && dst->data_type() != DataType::F16 && dst->data_type() != DataType::F32),
@@ -146,13 +151,15 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::S32 && (dst->data_type() != DataType::QASYMM8_SIGNED && dst->data_type() != DataType::QASYMM8
                                                                           && dst->data_type() != DataType::F16
-                                                                          && dst->data_type() != DataType::F32 && dst->data_type() != DataType::U8),
-                                    "Only data_types supported [in] S32 ->  [out] QASYMM8, F16, F32, U8");
+                                                                          && dst->data_type() != DataType::F32
+                                                                          && dst->data_type() != DataType::U8
+                                                                          && dst->data_type() != DataType::S64),
+                                    "Only data_types supported [in] S32 ->  [out] QASYMM8, F16, F32, U8, S64");
 #ifdef __aarch64__
-     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::S64 && dst->data_type() != DataType::F32,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::S64 && dst->data_type() != DataType::F32,
                                     "Only data_types supported [in] S64 ->  [out] F32");
 
-     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::U64 && dst->data_type() != DataType::F32,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::U64 && dst->data_type() != DataType::F32,
                                     "Only data_types supported [in] U64 ->  [out] F32");
 #endif // __aarch64__
 
@@ -196,6 +203,28 @@ inline void internal_neon_convert(const T1 *src_ptr, T2 *dst_ptr)
 {
     ARM_COMPUTE_UNUSED(src_ptr);
     ARM_COMPUTE_UNUSED(dst_ptr);
+}
+
+template <>
+inline void internal_neon_convert<int32_t, int64_t>(const int32_t *src_ptr, int64_t *dst_ptr)
+{
+    const int32x4x4_t texels =
+    {
+        {
+            vld1q_s32(src_ptr),
+            vld1q_s32(src_ptr + 4),
+            vld1q_s32(src_ptr + 8),
+            vld1q_s32(src_ptr + 12)
+        }
+    };
+    vst1q_s64(dst_ptr, vmovl_s32(vget_low_s32(texels.val[0])));
+    vst1q_s64(dst_ptr + 2, vmovl_s32(vget_high_s32(texels.val[0])));
+    vst1q_s64(dst_ptr + 4, vmovl_s32(vget_low_s32(texels.val[1])));
+    vst1q_s64(dst_ptr + 6, vmovl_s32(vget_high_s32(texels.val[1])));
+    vst1q_s64(dst_ptr + 8, vmovl_s32(vget_low_s32(texels.val[2])));
+    vst1q_s64(dst_ptr + 10, vmovl_s32(vget_high_s32(texels.val[2])));
+    vst1q_s64(dst_ptr + 12, vmovl_s32(vget_low_s32(texels.val[3])));
+    vst1q_s64(dst_ptr + 14, vmovl_s32(vget_high_s32(texels.val[3])));
 }
 
 template <>
@@ -1062,6 +1091,13 @@ void CpuCastKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
         case DataType::S32:
             switch(_dst->info()->data_type())
             {
+#if __aarch64__
+                case DataType::S64:
+                {
+                    convert64<int32_t, int64_t>(src, dst, win, window_start_x, window_end_x, window_step_x);
+                    break;
+                }
+#endif // __aarch64__
                 case DataType::F16:
                 {
                     /* Down-conversion S32 -> F16 */

@@ -61,8 +61,10 @@ public:
      *   - F32            -> QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8
      *
      * @param[in]  src    The src tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/S32/S64/BFLOAT16/F16/F32.
-     * @param[out] dst    The dst tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/BFLOAT16/F16/F32.
+     * @param[out] dst    The dst tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/S64/BFLOAT16/F16/F32.
      * @param[in]  policy Conversion policy.
+     *
+     * @note S64 is only supported in aarch64
      *
      * @deprecated Support for BFLOAT16 will be removed in 23.05 release
      */
