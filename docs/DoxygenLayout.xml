@@ -8,6 +8,7 @@
         <tab type="user" url="@ref architecture" title="Library Architecture"/>
         <tab type="user" url="@ref data_type_support" title="Data Type Support"/>
         <tab type="user" url="@ref data_layout_support" title="Data Layout Support"/>
+        <tab type="user" url="@ref conv2d_heuristic" title="Convolution 2D heuristic"/>
         <tab type="user" url="@ref operators_list" title="Operator List"/>
         <tab type="user" url="@ref tests" title="Validation and benchmarks"/>
         <tab type="user" url="@ref advanced" title="Advanced"/>

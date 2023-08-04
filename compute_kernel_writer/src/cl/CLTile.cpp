@@ -224,6 +224,7 @@ std::vector<int32_t> CLTile::supported_vector_lengths() const
 
 void CLTile::validate_tile_info(const TileInfo &info) const
 {
+    CKW_UNUSED(info);
     CKW_ASSERT_MSG(cl_validate_vector_length(info.width()), "Unsupported TileInfo width");
     CKW_ASSERT_MSG(info.data_type() != DataType::Unknown, "DataType::Unknown is not supported");
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -177,10 +177,6 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo *input, co
            && (CpuDirectConv2d::validate(input, weights, nullptr, output, conv_info, act_info)))
         {
             return ConvolutionMethod::DIRECT;
-        }
-        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (NEFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
-        {
-            return ConvolutionMethod::FFT;
         }
         if(input->dimension(idx_c) < 16)
         {
