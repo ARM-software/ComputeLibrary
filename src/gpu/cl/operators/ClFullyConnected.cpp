@@ -298,6 +298,7 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
                                  FullyConnectedLayerInfo fc_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
+    const GPUTarget gpu_target = get_arch_from_target(CLScheduler::get().target());
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(ClFullyConnected::validate(src, weights, biases, dst, fc_info));
@@ -316,7 +317,7 @@ void ClFullyConnected::configure(const CLCompileContext &compile_context, ITenso
     // 2. MatMul does not support broadcasting batch dimension, and therefore is disabled if fc is batched.
     // 3. When FC is after convolution and src tensor data layout does not match weights trained data layout (weights conversion kernel is required)
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    _use_matmul                    = !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
+    _use_matmul                    = gpu_target != GPUTarget::MIDGARD && !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
     _dynamic_gemm                  = !weights->are_values_constant() && _transpose_weights && !_use_matmul;
 
     // With the Fully Connected layer we can have 4 different cases:
@@ -432,6 +433,7 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
                                 && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
+    const GPUTarget gpu_target = get_arch_from_target(CLScheduler::get().target());
 
     const bool transpose_weights = fc_info.transpose_weights ? !fc_info.are_weights_reshaped : false;
     bool       is_fc_after_conv  = true;
@@ -439,7 +441,7 @@ Status ClFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *wei
     // When using dynamic weights - use matmul kernels.
     // Note: MatMul does not support broadcasting so fallback with batched cases.
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    const bool use_matmul          = !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
+    const bool use_matmul          = gpu_target != GPUTarget::MIDGARD && !weights->are_values_constant() && !is_batched_fc_layer && !(src->num_dimensions() > 1 && (src->data_layout() != fc_info.weights_trained_layout));
 
     const ITensorInfo &flatten_src       = TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(src)).set_data_layout(DataLayout::NCHW));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
