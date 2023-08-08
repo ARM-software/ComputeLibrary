@@ -138,7 +138,7 @@ protected:
             std::sort(axis.begin(), axis.begin() + axis.num_dimensions());
             for(unsigned int i = 0; i < axis.num_dimensions(); ++i)
             {
-                output_shape.remove_dimension(axis[i] - i);
+                output_shape.remove_dimension(axis[i] - i, false);
             }
 
             out = reference::reshape_layer(out, output_shape);

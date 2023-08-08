@@ -64,7 +64,7 @@ inline TensorShape calculate_reduce_mean_shape(ITensorInfo *input, const Coordin
         std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
         for(int i = 0; i < reduction_ops; ++i)
         {
-            out_shape.remove_dimension(axis_local[i] - i);
+            out_shape.remove_dimension(axis_local[i] - i, false);
         }
         return out_shape;
     }
