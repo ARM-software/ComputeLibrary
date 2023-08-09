@@ -49,11 +49,19 @@ v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
  Users must no longer link their applications to this library and instead link only to the main `libarm_compute` library for core functionality.
  - New features
+   - Rewrite CLArgMinMaxLayer for axis 0 and enable S64 output.
+   - Add multi-sketch support for dynamic fusion.
+   - Break up arm_compute/core/Types.h and utils/Utils.h a bit to reduce unused code in each inclusion of these headers.
+   - Add Fused Activation to CLMatMul.
+   - Implement FP32/FP16 @ref opencl::kernels::ClMatMulNativeMMULKernel using the MMUL extension.
+   - Use MatMul in fully connected layer with dynamic weights when supported.
+   - Optimize CPU depthwise convolution with channel multiplier.
+   - Add support in CpuCastKernel for conversion of S64/U64 to F32.
    - Add new OpenCL™ kernels:
      - @ref opencl::kernels::ClMatMulNativeMMULKernel support for FP32 and FP16, with batch support
    - Enable transposed convolution with non-square kernels on CPU and GPU.
-   - Added support for input data type U64/S64 in CLCast.
-   - Added new Compute Kernel Writer (CKW) subproject that offers a C++ interface to generate tile-based OpenCL code in just-in-time fashion.
+   - Add support for input data type U64/S64 in CLCast.
+   - Add new Compute Kernel Writer (CKW) subproject that offers a C++ interface to generate tile-based OpenCL code in just-in-time fashion.
    - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface with support for FP16/FP32 only:
      - @ref experimental::dynamic_fusion::GpuCkwActivation
      - @ref experimental::dynamic_fusion::GpuCkwCast
