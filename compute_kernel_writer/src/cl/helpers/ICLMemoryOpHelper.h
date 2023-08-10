@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_SRC_IMEMORYOPHELPER_H
-#define CKW_SRC_IMEMORYOPHELPER_H
+#ifndef CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H
+#define CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H
 
 #include <cstdint>
 #include <string>
@@ -32,36 +32,36 @@ namespace ckw
 {
 
 // Forward Declarations
-class ITile;
-class KernelWriter;
+class CLTile;
+class CLKernelWriter;
 class Tensor3dMapper;
 enum class MemoryOperation;
 
-/** Base class for the backend specific helper classes
+/** Base class OpenCL memory operation helper classes
  *  that helps writing code for memory operations like load/store.
  */
-class IMemoryOpHelper
+class ICLMemoryOpHelper
 {
 public:
     /** Constructor
      *
-     * @param[in] x      @ref ckw::KernelWriter object to write the code
+     * @param[in] x      @ref ckw::CLKernelWriter object to write the code
      * @param[in] mapper @ref ckw::Tensor3dMapper object that tells how to map the Nd tensor to 3d
      * @param[in] op     The memory operation to be done (e.g. Load/Store)
      */
-    IMemoryOpHelper(KernelWriter *x, Tensor3dMapper *mapper, MemoryOperation op)
+    ICLMemoryOpHelper(CLKernelWriter *x, Tensor3dMapper *mapper, MemoryOperation op)
         : _writer(x), _mapper(mapper), _op(op)
     {
     }
 
     /** Copy constructor */
-    IMemoryOpHelper(const IMemoryOpHelper &) = default;
+    ICLMemoryOpHelper(const ICLMemoryOpHelper &) = default;
 
     /** Assignment operator overload */
-    IMemoryOpHelper &operator=(const IMemoryOpHelper &) = default;
+    ICLMemoryOpHelper &operator=(const ICLMemoryOpHelper &) = default;
 
     /** Destructor */
-    virtual ~IMemoryOpHelper() = default;
+    virtual ~ICLMemoryOpHelper() = default;
 
     /** Initialization method that takes a 3D tensor's x, z dimensions and
      *  the batch offset as a tile object, and initializes the code inside
@@ -72,15 +72,16 @@ public:
      * @param[in] z    tile object that describes the z-coordinate of the tensor involved
      * @param[in] b    tile object that describes the batch offset of the tensor involved
      */
-    virtual void initialize(ITile *dst, ITile *x, ITile *z, ITile *b) = 0;
+    virtual void initialize(CLTile *dst, CLTile *x, CLTile *z, CLTile *b) = 0;
 
     /** Method that writes the actual code to the writer that performs the mentioned memory
      *  operation on the tile initialized. It writes the code for a specific row given in the
      *  arguments.
      *
-     * @param[in] y   a pair where the elements are (row_id, y-coordinate string)
+     * @param[in] row_id   row id
+     * @param[in] coord_y  y-coordinate as string
      */
-    virtual void write(const std::pair<int32_t, std::string> &y) = 0;
+    virtual void write(int32_t row_id, const std::string &coord_y) = 0;
 
     /** Method that finalizes the code in the writer object. This part is usually for taking
      *  care of finalizing anything that's been initialized inside @ref IMemoryHelper::initialize()
@@ -90,10 +91,15 @@ public:
     virtual void finalize() = 0;
 
 protected:
-    KernelWriter *_writer;
-    Tensor3dMapper *_mapper;
-    MemoryOperation  _op;
+    CLKernelWriter  *_writer;
+    Tensor3dMapper  *_mapper;
+    MemoryOperation _op;
+    CLTile          *_dst{ nullptr };
+    int32_t         _ls_width_full{ 0 };
+    std::string     _coord_x{};
+    std::string     _coord_z{};
+    std::string     _coord_b{};
 };
 } // namespace ckw
 
-#endif /* CKW_SRC_IMEMORYOPHELPER_H */
+#endif /* CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H */
