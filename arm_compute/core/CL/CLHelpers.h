@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -267,5 +267,22 @@ void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<in
  * @return True if the extension is supported
  */
 bool arm_matrix_multiply_supported(const cl::Device &device);
+
+/** Check whether cl_khr_command_buffer extension is supported by the specified CL device.
+ *
+ * @param[in] device The CL device
+ *
+ * @return True if the extension is supported by the CL device.
+ */
+bool command_buffer_supported(const cl::Device &device);
+
+/** Check whether cl_khr_command_buffer_mutable_dispatch extension is supported by the specified CL device.
+ *
+ * @param[in] device The CL device
+ *
+ * @return True if the extension is supported by the CL device.
+ */
+bool command_buffer_mutable_dispatch_supported(const cl::Device &device);
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLHELPERS_H */

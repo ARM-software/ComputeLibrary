@@ -495,4 +495,15 @@ bool arm_matrix_multiply_supported(const cl::Device &device)
 {
     return device_supports_extension(device, "cl_arm_matrix_multiply");
 }
+
+bool command_buffer_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_khr_command_buffer");
+}
+
+bool command_buffer_mutable_dispatch_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_khr_command_buffer_mutable_dispatch");
+}
+
 } // namespace arm_compute
