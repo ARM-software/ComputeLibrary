@@ -140,6 +140,7 @@ if(CKW_ENABLE_OPENCL)
         src/cl/CLTile.cpp
         src/cl/CLKernelWriter.cpp
         src/cl/helpers/CLMemoryOpBufferHelper.cpp
+        src/cl/helpers/CLMemoryOpImage2dHelper.cpp
     )
 endif()
 
