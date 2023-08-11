@@ -42,8 +42,10 @@ If there is more than one release in a month then an extra sequential number is 
 @section S2_2_changelog Changelog
 
 v23.11 Public major release
+ - New features
    - Add support for input data type U64/S64 in CLCast and NECast.
    - Add support for output data type S64 in NEArgMinMaxLayer and CLArgMinMaxLayer
+ - Update OpenCL™ API headers to v2023.04.17.
 
 v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
