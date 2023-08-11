@@ -105,6 +105,7 @@ public:
      * @param[in] buffer Buffer to be used as a memory region
      */
     CLBufferMemoryRegion(const cl::Buffer &buffer);
+    virtual ~CLBufferMemoryRegion() override;
 
     // Inherited methods overridden :
     void *ptr() final;
