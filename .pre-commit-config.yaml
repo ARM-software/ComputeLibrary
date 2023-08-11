@@ -32,6 +32,18 @@ repos:
         language: python
         entry: python ./scripts/generate_build_files.py --bazel
         pass_filenames: false
+      - id: fix-header-guards-ckw
+        name: Fix header guards in CKW
+        stages: [commit]
+        language: python
+        entry: python ./scripts/check_header_guards.py --extensions=h,hpp,inl --comment_style=double_slash --prefix=CKW --include=compute_kernel_writer/ --add_extension --drop_outermost_subdir
+        pass_filenames: true
+      - id: fix-header-guards-acl
+        name: Fix header guards in ACL
+        stages: [commit]
+        language: python
+        entry: python ./scripts/check_header_guards.py --extensions=h,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=compute_kernel_writer/,src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/ --add_extension
+        pass_filenames: true
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
