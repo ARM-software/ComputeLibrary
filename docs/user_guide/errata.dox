@@ -30,6 +30,17 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-6493) Crash when running Arm Compute Library compiled for SVE2 on a computer that support SVE only.
+    - Versions: >= v21.02 && <=v23.08
+    - OSs: Linux, Android.
+    - Conditions:
+        - Compile the latest Arm Compute Library for SVE2 (arch=armv8.6-a-sve2).
+        - multi_isa = 0
+        - Device with SVE but without SVE2 support.
+    - Result:
+        - Crash due to illegal instruction.
+        - To run SVE only, build with arch="armv8.2-a-sve", arch="armv8.6-a-sve", or with multi_isa=1.
+
 - (COMPMID-6404) Under certain conditions, CLTile may produce incorrect result.
     - Versions: >= v19.02 && < v23.08
     - OSs: Linux, Android.
