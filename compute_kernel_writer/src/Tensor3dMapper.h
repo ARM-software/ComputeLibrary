@@ -25,56 +25,57 @@
 #ifndef CKW_SRC_TENSOR3DMAPPER_H
 #define CKW_SRC_TENSOR3DMAPPER_H
 
-#include "ckw/TensorSampler.h"
-
 #include <string>
+
 namespace ckw
 {
-
+// Forward declarations
 class ITensor;
-class TensorSampler;
+enum class TensorSamplerFormat;
+struct TileVariable;
 
-/** This internal-only class is responsible to map an Nd tensor to a 3d tensor with the
- *  help of TensorSampler object. The aim of the dimensionality reduction is to reduce
+/** This internal-only class is responsible to map an Nd tensor spatial dimensions to a 3d tensor spatial dimensions with the
+ *  help of TensorSamplerFormat.
+ *  Attention: The batch is not considered as a spatial dimension and it is treated as an offset
+ *
+ *  The aim of the dimensionality reduction is primarily to reduce
  *  the address calculation to:
- *      x + y * stride_y + z * stride_z + offset, where offset is determined by the batch.
+ *      x + y * stride_y + z * stride_z + offset, where offset is determined by the batch (for example, b * stride_batch).
+ *
  */
 class Tensor3dMapper
 {
 public:
     /** Constructor */
-    Tensor3dMapper(ITensor *tensor, TensorSampler sampler);
+    Tensor3dMapper(ITensor *tensor, TensorSamplerFormat format);
 
     /** Get dimension x as string */
-    std::string tensor_component_x() const;
+    TileVariable dim_x() const;
 
     /** Get dimension y as string */
-    std::string tensor_component_y() const;
+    TileVariable dim_y() const;
 
     /** Get dimension z as string */
-    std::string tensor_component_z() const;
+    TileVariable dim_z() const;
+
+    /** Get batch dimension as string */
+    TileVariable dim_batch() const;
 
     /** Get stride for dimension x as string */
-    std::string tensor_component_stride_x() const;
+    TileVariable stride_x() const;
 
     /** Get stride for dimension y as string */
-    std::string tensor_component_stride_y() const;
+    TileVariable stride_y() const;
 
     /** Get stride for dimension z as string */
-    std::string tensor_component_stride_z() const;
+    TileVariable stride_z() const;
 
     /** Get stride for batch dimension as string */
-    std::string tensor_component_stride_batch() const;
-
-    /** Get the tensor sampler */
-    TensorSampler sampler() const;
-
-    /** Get the associated tensor */
-    ITensor *tensor() const;
+    TileVariable stride_batch() const;
 
 private:
-    ITensor         *_tensor;
-    TensorSampler    _sampler;
+    ITensor             *_tensor;
+    TensorSamplerFormat  _format;
 };
 } // namespace ckw
 
