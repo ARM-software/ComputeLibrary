@@ -350,29 +350,6 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
     }
 }
 
-void add_padding_y(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout)
-{
-    if(data_layout == DataLayout::NHWC)
-    {
-        constexpr unsigned int lower = 1U;
-        constexpr unsigned int upper = 4U;
-
-        std::uniform_int_distribution<unsigned int> distribution(lower, upper);
-        size_t                                      seed_offset = 0;
-
-        for(ITensor *tensor : tensors)
-        {
-            ARM_COMPUTE_ERROR_ON(!tensor->info()->is_resizable());
-
-            std::mt19937 gen(library->seed() + seed_offset++);
-
-            const unsigned int top    = distribution(gen);
-            const unsigned int bottom = distribution(gen);
-
-            tensor->info()->extend_padding(PaddingSize(top, 0U, bottom, 0U));
-        }
-    }
-}
 
 QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int m, int n, int k, DataType data_type)
 {

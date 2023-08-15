@@ -342,7 +342,6 @@ public:
 
         add_padding_x({ &_src, &_biases, &_target }, _data_layout);
         add_padding_x({ &_weights }, _data_layout, true);
-        add_padding_y({ &_src, &_target }, _data_layout);
 
         // Create Depthwise Convolution configure function
         const ConvolutionInfo info

@@ -243,16 +243,6 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
  */
 void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
 
-/** Add random padding along the Y axis (between 1 and 4 rows per side) to all the input tensors.
- *  This is used in our validation suite in order to simulate implicit padding addition after configuring, but before allocating.
- *
- * @param[in] tensors     List of tensors to add padding to
- * @param[in] data_layout (Optional) Data layout of the operator
- *
- * @note This function adds padding to the input tensors only if data_layout == DataLayout::NHWC
- */
-void add_padding_y(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC);
-
 /** For MatMulLowp, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
  *  calculate a suitable output quantization for obtaining non-saturated outputs with high probability.
  */
