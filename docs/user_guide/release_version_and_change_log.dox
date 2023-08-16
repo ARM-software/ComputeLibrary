@@ -44,6 +44,8 @@ If there is more than one release in a month then an extra sequential number is 
 v24.01 Public major release
  - Remove the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
   You should link only to the main `libarm_compute` library for core functionality.
+ - New features
+   - Add support for FP16 in all multi_isa builds.
 
 v23.11 Public major release
  - New features

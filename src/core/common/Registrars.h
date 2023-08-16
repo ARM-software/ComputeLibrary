@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_COMMON_REGISTRARS_H
-#define SRC_CORE_COMMON_REGISTRARS_H
+#ifndef ACL_SRC_CORE_COMMON_REGISTRARS_H
+#define ACL_SRC_CORE_COMMON_REGISTRARS_H
 
 #if defined(ENABLE_FP16_KERNELS)
 
@@ -38,11 +38,11 @@
 #define REGISTER_FP16_SVE2(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
-#if defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if defined(ARM_COMPUTE_ENABLE_NEON)
 #define REGISTER_FP16_NEON(func_name) &(func_name)
 #else /* !defined(ARM_COMPUTE_ENABLE_NEON) */
 #define REGISTER_FP16_NEON(func_name) nullptr
-#endif /* defined(ARM_COMPUTE_ENABLE_NEON) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) */
+#endif /* defined(ARM_COMPUTE_ENABLE_NEON) */
 
 #else /* !defined(ENABLE_FP16_KERNELS) */
 #define REGISTER_FP16_NEON(func_name) nullptr
@@ -179,4 +179,4 @@
 #define REGISTER_BF16_NEON(func_name) nullptr
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16)*/
 
-#endif /* SRC_CORE_COMMON_REGISTRARS_H */
+#endif // ACL_SRC_CORE_COMMON_REGISTRARS_H
