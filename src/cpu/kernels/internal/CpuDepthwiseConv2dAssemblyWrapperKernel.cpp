@@ -306,11 +306,15 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo *src,
 
     // Assembly kernels cannot work with padding greater than the kernel.
     const auto &padding = info.pad_stride_info;
+    const auto &dilation = info.dilation;
     const auto &wei_shape = weights->tensor_shape();
 
+    const auto dilated_wei_w = wei_shape[1] + (wei_shape[1] - 1) * (dilation.x() - 1);
+    const auto dilated_wei_h = wei_shape[2] + (wei_shape[2] - 1) * (dilation.y() - 1);
+
     ARM_COMPUTE_RETURN_ERROR_ON(
-        padding.pad_top() >= wei_shape[2] || padding.pad_bottom() >= wei_shape[2] ||
-        padding.pad_left() >= wei_shape[1] || padding.pad_right() >= wei_shape[1]
+        padding.pad_left() >= dilated_wei_w || padding.pad_right() >= dilated_wei_w ||
+        padding.pad_top() >= dilated_wei_h || padding.pad_bottom() >= dilated_wei_h
     );
 
     return Status{};
