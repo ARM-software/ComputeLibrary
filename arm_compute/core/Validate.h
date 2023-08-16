@@ -490,9 +490,9 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_2 == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
-    const std::array < const ITensorInfo *, 2 + sizeof...(Ts) > tensors_info_array{ { tensor_info_1, tensor_info_2, std::forward<Ts>(tensor_infos)... } };
+    const std::array < const ITensorInfo *, 2 + sizeof...(Ts) > tensors_info_array{ { tensor_info_1, tensor_info_2, tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(std::next(tensors_info_array.cbegin()), tensors_info_array.cend(), [&](const ITensorInfo * tensor_info)
     {
         return detail::have_different_dimensions((*tensors_info_array.cbegin())->tensor_shape(), tensor_info->tensor_shape(), upper_dim);
@@ -518,7 +518,7 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_2 == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_shapes(function, file, line, upper_dim, tensor_1->info(), tensor_2->info(),
                                                                            detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
@@ -543,10 +543,10 @@ inline arm_compute::Status error_on_mismatching_data_layouts(const char *functio
                                                              const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
     DataLayout &&tensor_data_layout = tensor_info->data_layout();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { std::forward<Ts>(tensor_infos)... } };
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
     {
         return tensor_info_obj->data_layout() != tensor_data_layout;
@@ -594,10 +594,10 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
                                                            const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
     DataType &&tensor_data_type = tensor_info->data_type();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { std::forward<Ts>(tensor_infos)... } };
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
     {
         return tensor_info_obj->data_type() != tensor_data_type;
@@ -620,7 +620,7 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
                                                            const ITensor *tensor, Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(function, file, line, tensor->info(),
                                                                                detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
