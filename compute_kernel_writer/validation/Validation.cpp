@@ -33,6 +33,7 @@
 #include "validation/tests/CLKernelWriterForTest.h"
 #include "validation/tests/CLKernelWriterGetGlobalIdTest.h"
 #include "validation/tests/CLKernelWriterIfTest.h"
+#include "validation/tests/CLKernelWriterOpLoadIndirectTest.h"
 #include "validation/tests/CLKernelWriterOpLoadStoreTest.h"
 #include "validation/tests/CLKernelWriterPrintTest.h"
 #include "validation/tests/CLKernelWriterReturnTest.h"
@@ -43,6 +44,7 @@
 #include "validation/tests/TensorBitMaskTest.h"
 #include "validation/tests/UtilsTest.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -99,6 +101,7 @@ int32_t main()
     const auto test34 = std::make_unique<CLKernelWriterReturnTest>();
     const auto test35 = std::make_unique<CLKernelWriterGetGlobalIdTest>();
     const auto test36 = std::make_unique<CLKernelWriterPrintTest>();
+    const auto test37 = std::make_unique<CLKernelWriterOpLoadIndirectTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -136,6 +139,7 @@ int32_t main()
     tests.push_back(test34.get());
     tests.push_back(test35.get());
     tests.push_back(test36.get());
+    tests.push_back(test37.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

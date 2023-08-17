@@ -131,39 +131,26 @@ public:
     // Memory Operations
     // =============================================================================================
 
-    /** Load the data from the tensor memory to the tile using the sampling information.
-     *
-     * Similar to @ref KernelWriter::op_load()
-     */
     void op_load(
         const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
-    /** Load the data from the tensor memory to the tile in a dilated way using the sampling information.
-     *
-     * Similar to @ref KernelWriter::op_load_dilated()
-     */
     void op_load_dilated(
         const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) override;
 
-    /** Store the data to the tensor memory from the tile using the sampling information.
-     *
-     * Similar to @ref KernelWriter::op_store()
-     */
     void op_store(
         const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
-    /** Store the data to the tensor memory from the tile in a dilated way using the sampling information.
-     *
-     * Similar to @ref KernelWriter::op_store_dilated()
-     */
     void op_store_dilated(
         const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) override;
+
+    void op_load_indirect(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
 protected:
     /** Return @ref CLTile object from the @ref TileOperand object.
@@ -192,11 +179,10 @@ protected:
 
     // For helper functions
 private:
-    /** Helper function to consolidate all load/store logic in this class */
-    void op_load_store(
-        MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    /** Helper method to consolidate all load/store logic in this class */
+    void op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-        const CLTile &dilation_x, const CLTile &dilation_y);
+        const CLTile &dilation_x, const CLTile &dilation_y, bool indirect_buffer);
 
     /** This function is the generic function to write both `if` and `else if` blocks.
      *

@@ -42,6 +42,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <vector>
 
 namespace ckw
 {
@@ -628,7 +629,7 @@ void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &te
     const CLTile dilation_x({ { "1" } }, DataType::Int32);
     const CLTile dilation_y({ { "1" } }, DataType::Int32);
 
-    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
+    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y, false /* indirect buffer */);
 }
 
 void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
@@ -638,7 +639,7 @@ void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOpe
     const auto &dil_x_tile = to_cl_tile(dilation_x);
     const auto &dil_y_tile = to_cl_tile(dilation_y);
 
-    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile);
+    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile, false /* indirect buffer */);
 }
 
 void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
@@ -647,7 +648,7 @@ void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand 
     const CLTile dilation_x({ { "1" } }, DataType::Int32);
     const CLTile dilation_y({ { "1" } }, DataType::Int32);
 
-    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
+    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y, false /* indirect buffer */);
 }
 
 void CLKernelWriter::op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
@@ -657,15 +658,31 @@ void CLKernelWriter::op_store_dilated(const TensorOperand &tensor_op, const Tile
     const auto &dil_x_tile = to_cl_tile(dilation_x);
     const auto &dil_y_tile = to_cl_tile(dilation_y);
 
-    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile);
+    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile, false /* indirect buffer */);
+}
+
+void CLKernelWriter::op_load_indirect(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
+{
+    const CLTile dilation_x({ { "1" } }, DataType::Int32);
+    const CLTile dilation_y({ { "1" } }, DataType::Int32);
+
+    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y, true /* indirect buffer */);
 }
 
 void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-                                   const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-                                   const CLTile &dilation_x, const CLTile &dilation_y)
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const CLTile &dilation_x, const CLTile &dilation_y, bool indirect_buffer)
 {
     CKW_UNUSED(dilation_x);
+    CKW_ASSERT(dilation_x.is_scalar());
+    CKW_ASSERT(dilation_y.is_scalar());
     CKW_ASSERT(dilation_x.scalar(0, 0).str == "((int)(1))"); // Dilation in x dimension is not implemented yet
+
+    if(indirect_buffer)
+    {
+        CKW_ASSERT(dilation_y.scalar(0,0).str == "((int)(1))" && dilation_x.scalar(0,0).str == "((int)(1))");
+    }
 
     ITensor &tensor = get_tensor(tensor_op);
 
@@ -689,18 +706,31 @@ void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_o
     const auto &z_tile     = to_cl_tile(z);
     const auto &batch_tile = to_cl_tile(batch);
 
+    CKW_ASSERT(x_tile.is_scalar());
+    CKW_ASSERT(z_tile.is_scalar());
+    CKW_ASSERT_IF(indirect_buffer, y_tile.info().width() == 1);
+    CKW_ASSERT_IF(!indirect_buffer, y_tile.is_scalar());
+    CKW_ASSERT(batch_tile.is_scalar());
+
     helper->initialize(&tile, &x_tile, &z_tile, &batch_tile);
 
     for(int row = 0; row < tile.info().height(); ++row)
     {
-        std::string coord_y = y_tile.scalar(0, 0).str + " + " + std::to_string(row);
-
-        if(dilation_y.scalar(0, 0).str != "1")
+        if(!indirect_buffer)
         {
-            coord_y += " * " + dilation_y.scalar(0, 0).str;
-        }
+            std::string coord_y = y_tile.scalar(0, 0).str + " + " + std::to_string(row);
 
-        helper->write_row(row, coord_y);
+            if(dilation_y.scalar(0, 0).str != "((int)(1))")
+            {
+                coord_y += " * " + dilation_y.scalar(0, 0).str;
+            }
+
+            helper->write_row(row, coord_y);
+        }
+        else
+        {
+            helper->write_row(row, y_tile.scalar(row, 0).str);
+        }
     }
 
     helper->finalize();

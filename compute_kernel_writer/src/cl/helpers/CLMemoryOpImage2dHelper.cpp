@@ -104,6 +104,9 @@ void CLMemoryOpImage2dHelper::out_of_bound_initialize_y(const std::string &coord
     const TensorSamplerAddressModeY address_mode_y = _sampler->address_mode_y();
     switch(address_mode_y)
     {
+        case TensorSamplerAddressModeY::SkipLessThanZero:
+            _writer->op_write_raw_code("if(" + coord + " >= 0)\n{\n");
+            break;
         case TensorSamplerAddressModeY::ClampToBorderMaxOnly:
         case TensorSamplerAddressModeY::None:
             break;
@@ -117,6 +120,9 @@ void CLMemoryOpImage2dHelper::out_of_bound_finalize_y()
     const TensorSamplerAddressModeY address_mode_y = _sampler->address_mode_y();
     switch(address_mode_y)
     {
+        case TensorSamplerAddressModeY::SkipLessThanZero:
+            _writer->op_write_raw_code("}\n");
+            break;
         case TensorSamplerAddressModeY::ClampToBorderMaxOnly:
         case TensorSamplerAddressModeY::None:
             break;
@@ -153,6 +159,7 @@ std::string CLMemoryOpImage2dHelper::to_ls_image2d_sampler() const
     {
         case TensorSamplerAddressModeY::None:
             return "CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST";
+        case TensorSamplerAddressModeY::SkipLessThanZero:
         case TensorSamplerAddressModeY::ClampToBorderMaxOnly:
             return "CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST";
         default:

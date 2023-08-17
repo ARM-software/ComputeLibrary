@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
-#define CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
+#ifndef CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H
+#define CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H
 
 #include <cstdint>
 
@@ -47,6 +47,7 @@ enum class TensorSamplerFormat : int32_t
  *                             Leftover elements can be handled using overlapping. This involves processing some of the elements in the array twice.
  *      ClampToBorderMaxOnly : Clamp to max value allowed in the corresponding dimension, and construct an if/else guard to prevent out of bound access,
  *                             e.g. if( y < size-of-dimension-y ){ <do the operation>  }
+ *      SkipLessThanZero     : Skip loading/storing if the index is less than 0
  *
  *  Individual dimensions choose which adddress mode to implement in their respective enum classes.
  */
@@ -65,7 +66,8 @@ enum class TensorSamplerAddressModeY : int32_t
     Unknown              = 0,
     None                 = 1,
     OverlappingMin       = 2,
-    ClampToBorderMaxOnly = 3
+    ClampToBorderMaxOnly = 3,
+    SkipLessThanZero     = 4
 };
 
 /**
@@ -79,4 +81,4 @@ enum class TensorSamplerAddressModeZ : int32_t
 
 } // namespace ckw
 
-#endif //CKW_INCLUDE_CKW_TENSORSAMPLERTYPES_H
+#endif // CKW_INCLUDE_CKW_TYPES_TENSORSAMPLERTYPES_H

@@ -267,7 +267,7 @@ public:
      * @param[in] x         x-coordinate
      * @param[in] y         y-coordinate
      * @param[in] z         z-coordinate
-     * @param[in] batch     batch offset
+     * @param[in] batch     batch
      */
     virtual void op_load(
         const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
@@ -301,6 +301,19 @@ public:
         const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
+
+    /** Load the data from the tensor memory to the tile using the indirect buffer approach and respecting the sampling information.
+     *
+     * @param[in] tile_op   The tile to be loaded.
+     * @param[in] tensor_op The tensor to be read.
+     * @param[in] sampler   The tensor sampling information.
+     * @param[in] x         x-coordinate
+     * @param[in] y         y-coordinate
+     * @param[in] z         z-coordinate
+     * @param[in] batch     batch
+     */
+    virtual void op_load_indirect(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch_op) = 0;
 
 protected:
     // =============================================================================================

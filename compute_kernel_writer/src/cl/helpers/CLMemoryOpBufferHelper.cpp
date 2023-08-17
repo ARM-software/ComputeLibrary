@@ -198,6 +198,9 @@ void CLMemoryOpBufferHelper::out_of_bound_initialize_y(const std::string &coord)
             max = _mapper->dim_y().str;
             _writer->op_write_raw_code("if(" + coord + " < " + max + ")\n{\n");
             break;
+        case TensorSamplerAddressModeY::SkipLessThanZero:
+            _writer->op_write_raw_code("if(" + coord + " >= 0)\n{\n");
+            break;
         case TensorSamplerAddressModeY::None:
             break;
         default:
@@ -215,6 +218,9 @@ void CLMemoryOpBufferHelper::out_of_bound_finalize_y(const std::string &dst)
             _writer->op_write_raw_code("}\nelse\n{\n");
             _writer->op_write_raw_code(dst);
             _writer->op_write_raw_code(" = 0.0f;\n}\n");
+            break;
+        case TensorSamplerAddressModeY::SkipLessThanZero:
+            _writer->op_write_raw_code("}\n");
             break;
         case TensorSamplerAddressModeY::None:
             break;
