@@ -970,7 +970,6 @@
           ],
           "neon": {
             "common": [
-              "src/cpu/kernels/fuse_batch_normalization/generic/impl.cpp",
               "src/cpu/kernels/fuse_batch_normalization/nchw/all.cpp",
               "src/cpu/kernels/fuse_batch_normalization/nhwc/neon/impl.cpp"
             ],

@@ -755,7 +755,6 @@ target_sources(
 	cpu/kernels/floor/neon/fp32.cpp
 	cpu/kernels/fuse_batch_normalization/generic/fp16.cpp
 	cpu/kernels/fuse_batch_normalization/generic/fp32.cpp
-	cpu/kernels/fuse_batch_normalization/generic/impl.cpp
 	cpu/kernels/fuse_batch_normalization/nchw/all.cpp
 	cpu/kernels/fuse_batch_normalization/nhwc/neon/fp16.cpp
 	cpu/kernels/fuse_batch_normalization/nhwc/neon/fp32.cpp
