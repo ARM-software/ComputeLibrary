@@ -38,7 +38,9 @@ class Kernel;
 
 /** Forward Declerations */
 class TensorInfo;
+class TensorSampler;
 class TileInfo;
+
 enum class TargetArchitecture;
 enum class TargetLanguage;
 
@@ -127,6 +129,45 @@ public:
      * @param[in] raw_code raw code to write as string
     */
     virtual void op_write_raw_code(const std::string &raw_code) = 0;
+
+    /** Load the data from the tensor memory to the tile using the sampling information.
+     *
+     * @param[in] tile_op   The tile to be loaded.
+     * @param[in] tensor_op The tensor to be read.
+     * @param[in] sampler   The tensor sampling information.
+     * @param[in] x         x-coordinate
+     * @param[in] y         y-coordinate
+     * @param[in] z         z-coordinate
+     * @param[in] batch     batch offset
+     */
+    virtual void op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) = 0;
+
+    /** Load the data from the tensor memory to the tile in a dilated way using the sampling information.
+     *
+     * Similar to @ref KernelWriter::op_load() and
+     *
+     * @param[in] dilation_x Dilation while reading in x-dimension
+     * @param[in] dilation_y Dilation while reading in y-dimension
+     */
+    virtual void op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
+
+    /** Store the data to the tensor memory from the tile using the sampling information.
+     *
+     * Similar to @ref KernelWriter::op_load()
+     */
+    virtual void op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) = 0;
+
+    /** Store the data to the tensor memory from the tile in a dilated way using the sampling information.
+     *
+     * Similar to @ref KernelWriter::op_load_dilated()
+     */
+    virtual void op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
 
 protected:
     int32_t id_space() const;

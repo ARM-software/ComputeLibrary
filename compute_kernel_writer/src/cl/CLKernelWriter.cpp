@@ -25,12 +25,18 @@
 #include "src/cl/CLKernelWriter.h"
 #include "ckw/Error.h"
 #include "ckw/Kernel.h"
+#include "ckw/TensorSampler.h"
 #include "ckw/TileOperand.h"
+#include "ckw/types/MemoryOperation.h"
 #include "ckw/types/TargetLanguage.h"
 #include "src/ITensorComponent.h"
 #include "src/cl/CLHelpers.h"
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
+#include "src/cl/helpers/CLMemoryOpBufferHelper.h"
+#include "src/cl/helpers/CLMemoryOpImage2dHelper.h"
+#include "src/cl/helpers/ICLMemoryOpHelper.h"
+
 #include <cstdint>
 
 namespace ckw
@@ -158,6 +164,126 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
 void CLKernelWriter::op_write_raw_code(const std::string &raw_code)
 {
     append_code(raw_code);
+}
+
+const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand)
+{
+    const auto &tile = get_tile(operand);
+#ifdef COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+    // Check if the tile is a CLTile created by this kernel writer.
+    {
+        bool found = false;
+        for(const auto &t : _tiles)
+        {
+            if(&tile == t.get())
+            {
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+        {
+            for(const auto &t : _tensors)
+            {
+                const auto components = t->components();
+                for(const auto component : components)
+                {
+                    if(&tile == &component->tile())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        CKW_ASSERT_MSG(found, "The tile is not found!");
+    }
+#endif // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
+    return static_cast<const CLTile &>(tile);
+}
+
+void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+    const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
+{
+    const CLTile dilation_x("1", DataType::Int32);
+    const CLTile dilation_y("1", DataType::Int32);
+
+    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
+}
+
+void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const TileOperand &dilation_x, const TileOperand &dilation_y)
+{
+    const auto &dil_x_tile = to_cl_tile(dilation_x);
+    const auto &dil_y_tile = to_cl_tile(dilation_y);
+
+    op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile);
+}
+
+void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+    const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
+{
+    const CLTile dilation_x("1", DataType::Int32);
+    const CLTile dilation_y("1", DataType::Int32);
+
+    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
+}
+
+void CLKernelWriter::op_store_dilated(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const TileOperand &dilation_x, const TileOperand &dilation_y)
+{
+    const auto &dil_x_tile = to_cl_tile(dilation_x);
+    const auto &dil_y_tile = to_cl_tile(dilation_y);
+
+    op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dil_x_tile, dil_y_tile);
+}
+
+void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
+        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+        const CLTile &dilation_x, const CLTile &dilation_y)
+{
+    CKW_UNUSED(dilation_x);
+    CKW_ASSERT(dilation_x.scalar(0,0).str == "1");  // Dilation in x dimension is not implemented yet
+
+    ITensor &tensor = get_tensor(tensor_op);
+
+    std::unique_ptr<ICLMemoryOpHelper> helper;
+    switch(sampler.storage())
+    {
+        case TensorStorageType::BufferUint8Ptr:
+            helper = std::make_unique<CLMemoryOpBufferHelper>(this, &tensor, &sampler, op);
+            break;
+        case TensorStorageType::Texture2dReadOnly:
+        case TensorStorageType::Texture2dWriteOnly:
+            helper = std::make_unique<CLMemoryOpImage2dHelper>(this, &tensor, &sampler, op);
+            break;
+        default:
+            CKW_THROW_MSG("Unsupported tensor storage");
+    }
+
+    const auto &tile = to_cl_tile(tile_op);
+    const auto &x_tile = to_cl_tile(x);
+    const auto &y_tile = to_cl_tile(y);
+    const auto &z_tile = to_cl_tile(z);
+    const auto &batch_tile = to_cl_tile(batch);
+
+    helper->initialize(&tile, &x_tile, &z_tile, &batch_tile);
+
+    for(int row = 0; row < tile.info().height(); ++row)
+    {
+        std::string coord_y = y_tile.scalar(0, 0).str + " + " + std::to_string(row);
+
+        if(dilation_y.scalar(0, 0).str != "1")
+        {
+            coord_y += " * " + dilation_y.scalar(0, 0).str;
+        }
+
+        helper->write_row(row, coord_y);
+    }
+
+    helper->finalize();
 }
 
 } // namespace ckw
