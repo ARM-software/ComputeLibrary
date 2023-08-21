@@ -34,6 +34,7 @@ enum class UnaryOp : int32_t
 {
     LogicalNot = 0x0000, // !
     BitwiseNot = 0x0001, // ~
+    Negate     = 0x0002, // -
 };
 
 /* Binary operations

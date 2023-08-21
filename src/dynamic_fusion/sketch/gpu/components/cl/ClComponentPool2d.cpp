@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwPool2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplatePool2d.h"
 #include "src/dynamic_fusion/utils/Utils.h"
 #include <memory>
@@ -89,16 +90,33 @@ ClComponentPool2d::ClComponentPool2d(
     const Attributes                &attributes,
     const Settings                  &settings)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplatePool2d>(id, tensors, attributes, settings) }
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer
+{
+    std::make_unique<ClTemplatePool2d>(id, tensors, attributes, settings)
+}
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer
+{
+    std::make_unique<GpuCkwPool2d>(id, tensors, attributes, settings)
+}
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }
 ClComponentPool2d::~ClComponentPool2d()
 {
 }
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuTemplateComponentWriter *ClComponentPool2d::template_writer() const
 {
     return _component_writer.get();
 }
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+const IGpuCkwComponentDriver *ClComponentPool2d::ckw_component_driver() const
+{
+    return _component_writer.get();
+}
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

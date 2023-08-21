@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D
-#define ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D
+#ifndef ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D_H
+#define ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
@@ -83,27 +83,22 @@ public:
      *
      * @param[in,out] sketch     Workload sketch into which the operator will be fused
      * @param[in]     src        Source tensor
-     * @param[out]    dst        Destination tensor
      * @param[in]     attributes Operator attributes
      * @param[in]     settings   Operator settings
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *dst,
-                          const Attributes &attributes,
-                          const Settings    &settings);
+    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
+                                  ITensorInfo       *src,
+                                  const Attributes  &attributes,
+                                  const Settings    &settings);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
-     * @param[in]  context    Workload context within which the operator is running
-     * @param[in]  src        Left hand side tensor info. Data types supported: F16/F32.
-     * @param[out] dst        Destination tensor info. Data types supported: F16/F32.
-     *                        If an uninitialized ITensorInfo is passed in, it will be auto-initialized
-     * @param[in]  attributes Operator attributes
-     * @param[in]  settings   Operator settings
+     * @param[in] context    Workload context within which the operator is running
+     * @param[in] src        Left hand side tensor info. Data types supported: F16/F32.
+     * @param[in] attributes Operator attributes
+     * @param[in] settings   Operator settings
      */
     static Status is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,
-                                  const ITensorInfo        *dst,
                                   const Attributes         &attributes,
                                   const Settings           &settings);
     /** Validate the operator and check if it can be fused into the workload sketch.
@@ -111,11 +106,10 @@ public:
      */
     static Status validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
-                              const ITensorInfo       *dst,
                               const Attributes        &attributes,
                               const Settings          &settings);
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D */
+#endif // ACL_ARM_COMPUTE_DYNAMIC_FUSION_SKETCH_GPU_OPERATORS_GPUPOOL2D_H

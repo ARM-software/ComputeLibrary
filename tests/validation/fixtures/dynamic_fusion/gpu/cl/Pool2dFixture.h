@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE
-#define TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -33,6 +33,7 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
+#include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuOutput.h"
 #include "src/dynamic_fusion/utils/Utils.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -100,7 +101,8 @@ protected:
         // Create Pool2dSettings
         GpuPool2dSettings pool_settings = GpuPool2dSettings().mixed_precision(mixed_precision);
 
-        FunctionType::create_op(sketch, &input_info, &dst_info, pool_attr, pool_settings);
+        ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, pool_attr, pool_settings);
+        GpuOutput::create_op(sketch, ans_info, &dst_info);
 
         // Configure runtime
         ClWorkloadRuntime runtime;
@@ -184,4 +186,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_DYNAMIC_FUSION_GPU_CL_POOL2DFIXTURE_H

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D_H
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D_H
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
@@ -41,7 +41,11 @@ class ArgumentPack;
 class Pool2dAttributes;
 
 /** Forward declaration */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 class ClTemplatePool2d;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwPool2d;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentPool2d final : public IGpuKernelComponent
 {
@@ -113,20 +117,28 @@ public:
 
     /** Allow instances of this class to be moved */
     ClComponentPool2d &operator=(ClComponentPool2d &&component) = default;
-
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get template writer for the component */
     const IGpuTemplateComponentWriter *template_writer() const override;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+    /** Get GPU kernel writer for the component */
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
     /** Get component type */
     GpuComponentType type() const override
     {
-        return GpuComponentType::Unfusable;
+        return GpuComponentType::Complex;
     }
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplatePool2d> _component_writer;
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwPool2d> _component_writer;
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D */
+#endif // ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D_H

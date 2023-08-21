@@ -46,7 +46,16 @@ namespace dynamic_fusion
 {
 namespace
 {
-constexpr GpuOperatorType operator_type = GpuOperatorType::Unfusable;
+void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, const Pool2dAttributes &attributes, const GpuPool2dSettings &settings)
+{
+    if(dst->total_size() == 0U)
+    {
+        auto shape = misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision()));
+        auto_init_if_empty(*dst, src->clone()->set_tensor_shape(shape));
+    }
+}
+
+constexpr GpuOperatorType operator_type = GpuOperatorType::Complex;
 } // namespace
 
 GpuPool2dSettings &GpuPool2dSettings::mixed_precision(bool mixed_precision)
@@ -73,19 +82,16 @@ bool GpuPool2dSettings::use_inf_as_limit() const
 
 Status GpuPool2d::validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
-                              const ITensorInfo       *dst,
                               const Pool2dAttributes &attributes,
                               const GpuPool2dSettings &settings)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !dst->has_valid_id());
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
 
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
-    {
-        auto shape = misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision()));
-        auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(shape));
-    }
+    TensorInfo dst_info_to_validate;
+
+    calculate_and_init_dst_if_empty(&dst_info_to_validate, src, attributes, settings);
 
     // Perform fusion test
     // Pack tensor infos
@@ -98,16 +104,15 @@ Status GpuPool2d::validate_op(const GpuWorkloadSketch &sketch,
                                     "Operator fusion test failed. This operator cannot be fused into the workload");
 
     // Check if configuration is supported
-    return is_supported_op(*sketch.gpu_context(), src, &dst_info_to_validate, attributes, settings);
+    return is_supported_op(*sketch.gpu_context(), src, attributes, settings);
 }
 
 Status GpuPool2d::is_supported_op(const GpuWorkloadContext &context,
                                   const ITensorInfo        *src,
-                                  const ITensorInfo        *dst,
                                   const Pool2dAttributes   &attributes,
                                   const GpuPool2dSettings &settings)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     // Data type
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
     // Data layout
@@ -116,11 +121,9 @@ Status GpuPool2d::is_supported_op(const GpuWorkloadContext &context,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!attributes.exclude_padding(), "Exclude padding must be set to true in Attributes!");
 
     // Auto initialize dst tensor info
-    TensorInfo dst_info_to_validate = *dst;
-    {
-        auto shape = misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision()));
-        auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(shape));
-    }
+    TensorInfo dst_info_to_validate;
+
+    calculate_and_init_dst_if_empty(&dst_info_to_validate, src, attributes, settings);
 
     // Check components
     if(context.gpu_language() == GpuLanguage::OpenCL)
@@ -145,21 +148,20 @@ Status GpuPool2d::is_supported_op(const GpuWorkloadContext &context,
     return Status{};
 }
 
-void GpuPool2d::create_op(GpuWorkloadSketch       &sketch,
-                          ITensorInfo             *src,
-                          ITensorInfo             *dst,
-                          const Pool2dAttributes &attributes,
-                          const GpuPool2dSettings &settings)
+ITensorInfo *GpuPool2d::create_op(GpuWorkloadSketch  &sketch,
+                          ITensorInfo                *src,
+                          const Pool2dAttributes     &attributes,
+                          const GpuPool2dSettings    &settings)
 {
     // Assert validation
-    ARM_COMPUTE_ERROR_THROW_ON(GpuPool2d::validate_op(sketch, src, dst, attributes, settings));
-    ARM_COMPUTE_LOG_PARAMS(src, dst, attributes, settings);
+    ARM_COMPUTE_ERROR_THROW_ON(GpuPool2d::validate_op(sketch, src, attributes, settings));
+    ARM_COMPUTE_LOG_PARAMS(src, attributes, settings);
+
+    ITensorInfo *dst = sketch.implementation().create_virtual_tensor();
+    ARM_COMPUTE_ERROR_ON_NULLPTR(dst);
 
     // Auto initialize dst tensor
-    {
-        auto shape = misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())); // use the default DimensionRoundingType
-        auto_init_if_empty(*dst, src->clone()->set_tensor_shape(shape));
-    }
+    calculate_and_init_dst_if_empty(dst, src, attributes, settings);
 
     // Translate into components and add to component graph
     auto &comp_graph = sketch.implementation().component_graph();
@@ -198,6 +200,8 @@ void GpuPool2d::create_op(GpuWorkloadSketch       &sketch,
 
     const auto op = sketch.implementation().operator_group().new_operator(operator_type, tensors);
     sketch.implementation().operator_group().add_operator(op);
+
+    return dst;
 }
 
 } // namespace dynamic_fusion

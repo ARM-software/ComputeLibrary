@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
+#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -111,7 +110,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     // Validate Pool2d Configuration
     auto                   src_info    = context.create_tensor_info(input_info);
     auto                   dst_info    = context.create_tensor_info(output_info);
-    bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, &dst_info, pool2d_attr, settings));
+    bool                   res         = bool(GpuPool2d::validate_op(sketch, &src_info, pool2d_attr, settings));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
 
@@ -232,5 +231,4 @@ TEST_SUITE_END() // CL
 }
 }
 }
-
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF

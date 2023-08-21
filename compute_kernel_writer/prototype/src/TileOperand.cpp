@@ -85,6 +85,9 @@ prototype::Operand TileOperand::create_impl_operand(prototype::IGpuKernelWriter 
                 case DataType::Fp32:
                     return prototype::Operand(_value[0][0], prototype::OperandType::ScalarFp32);
 
+                case DataType::Fp16:
+                    return prototype::Operand(_value[0][0], prototype::OperandType::ScalarFp16);
+
                 default:
                     CKW_ASSERT(false);
             }

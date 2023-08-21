@@ -1583,6 +1583,8 @@ inline std::string to_string(UnaryOp op)
             return "!";
         case UnaryOp::BitwiseNot:
             return "~";
+        case UnaryOp::Negate:
+            return "-";
         default:
             assert(false);
             return "";
