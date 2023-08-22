@@ -100,10 +100,29 @@ public:
     /** Write the unary expression statement: `<dst> = <op> <src>;`.
      *
      * @param[in] dst The destination tile.
-     * @param[in] src The source tile.
      * @param[in] op  The unary operator.
+     * @param[in] src The source tile.
      */
-    virtual void op_unary(const TileOperand &dst, const TileOperand &src, UnaryOp op) = 0;
+    virtual void op_unary(const TileOperand &dst, UnaryOp op, const TileOperand &src) = 0;
+
+    /** Write the binary expression statement: `<dst> = <op>(<first>, <second>);`.
+     *
+     * @param[in] dst    The destination tile.
+     * @param[in] op     The binary operator.
+     * @param[in] first  The first source tile.
+     * @param[in] second The second source tile.
+     */
+    virtual void op_binary(const TileOperand &dst, BinaryOp op, const TileOperand &first, const TileOperand &second) = 0;
+
+    /** Write ternary expression statement: `<dst> = <op>(<first>, <second>, <third>);`.
+     *
+     * @param[in] dst    The destination tile.
+     * @param[in] op     The ternary operator.
+     * @param[in] first  The first source tile.
+     * @param[in] second The second source tile.
+     * @param[in] third  The third source tile.
+     */
+    virtual void op_ternary(const TileOperand &dst, TernaryOp op, const TileOperand &first, const TileOperand &second, const TileOperand &third) = 0;
 
     // =============================================================================================
     // Misc

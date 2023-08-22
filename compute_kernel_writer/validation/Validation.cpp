@@ -24,11 +24,13 @@
 
 #include "validation/tests/CLConstantTileTest.hpp"
 #include "validation/tests/CLKernelWriterAssignTest.h"
+#include "validation/tests/CLKernelWriterBinaryOpTest.h"
 #include "validation/tests/CLKernelWriterCastTest.h"
 #include "validation/tests/CLKernelWriterCommentTest.h"
 #include "validation/tests/CLKernelWriterDeclareTensorTest.h"
 #include "validation/tests/CLKernelWriterDeclareTileTest.h"
 #include "validation/tests/CLKernelWriterOpLoadStoreTest.h"
+#include "validation/tests/CLKernelWriterTernaryOpTest.h"
 #include "validation/tests/CLKernelWriterUnaryExpressionTest.h"
 #include "validation/tests/CLTensorArgumentTest.h"
 #include "validation/tests/CLTileTest.hpp"
@@ -83,6 +85,8 @@ int32_t main()
     const auto test26 = std::make_unique<CLKernelWriterAssignTest>();
     const auto test27 = std::make_unique<CLKernelWriterCastTest>();
     const auto test28 = std::make_unique<CLKernelWriterUnaryExpressionTest>();
+    const auto test29 = std::make_unique<CLKernelWriterBinaryOpTest>();
+    const auto test30 = std::make_unique<CLKernelWriterTernaryOpTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -112,6 +116,8 @@ int32_t main()
     tests.push_back(test26.get());
     tests.push_back(test27.get());
     tests.push_back(test28.get());
+    tests.push_back(test29.get());
+    tests.push_back(test30.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;

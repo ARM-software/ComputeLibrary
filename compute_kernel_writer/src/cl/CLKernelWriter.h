@@ -64,7 +64,11 @@ public:
 
     void op_cast(const TileOperand &dst, const TileOperand &src, ConvertPolicy policy) override;
 
-    void op_unary(const TileOperand &dst, const TileOperand &src, UnaryOp op) override;
+    void op_unary(const TileOperand &dst, UnaryOp op, const TileOperand &src) override;
+
+    void op_binary(const TileOperand &dst, BinaryOp op, const TileOperand &first, const TileOperand &second) override;
+
+    void op_ternary(const TileOperand &dst, TernaryOp op, const TileOperand &first, const TileOperand &second, const TileOperand &third) override;
 
     // =============================================================================================
     // Misc

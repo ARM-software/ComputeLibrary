@@ -52,6 +52,49 @@ enum class AssignmentOp : int32_t
     Decrement = 0x0001, // -=
 };
 
+/** Binary operators. */
+enum class BinaryOp : int32_t
+{
+    // Elementwise
+    Add = 0x0000, // +
+    Sub = 0x0001, // -
+    Mul = 0x0002, // *
+    Div = 0x0003, // /
+    Mod = 0x0004, // %
+
+    // Relational
+    Equal        = 0x1000, // ==
+    Less         = 0x1001, // <
+    LessEqual    = 0x1002, // <=
+    Greater      = 0x1003, // >
+    GreaterEqual = 0x1004, // >=
+
+    // Algebra
+    MatMul_Nt_Nt = 0x2000, // X
+    MatMul_Nt_T  = 0x2001, // X
+    MatMul_T_Nt  = 0x2002, // X
+    MatMul_T_T   = 0x2003, // X
+    Dot          = 0x2004, // .
+
+    // Logical
+    LogicalAnd = 0x3000, // &&
+    LogicalOr  = 0x3001, // ||
+
+    // Bitwise
+    BitwiseXOR = 0x4000, // ^
+
+    // Functions
+    Min = 0x8000,
+    Max = 0x8001,
+};
+
+/** Ternary operators. */
+enum class TernaryOp : int32_t
+{
+    Select = 0x0000,
+    Clamp  = 0x0001,
+};
+
 } // namespace ckw
 
 #endif // CKW_INCLUDE_CKW_TYPES_OPERATORS_H

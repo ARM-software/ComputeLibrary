@@ -181,6 +181,77 @@ std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op)
     }
 }
 
+std::tuple<bool, std::string> cl_get_binary_op(BinaryOp op, DataType data_type)
+{
+    const auto is_float = is_data_type_float(data_type);
+
+    switch(op)
+    {
+        case BinaryOp::Add:
+            return { false, "+" };
+
+        case BinaryOp::Sub:
+            return { false, "-" };
+
+        case BinaryOp::Mul:
+            return { false, "*" };
+
+        case BinaryOp::Div:
+            return { false, "/" };
+
+        case BinaryOp::Mod:
+            return { false, "%" };
+
+        case BinaryOp::Equal:
+            return { false, "==" };
+
+        case BinaryOp::Less:
+            return { false, "<" };
+
+        case BinaryOp::LessEqual:
+            return { false, "<=" };
+
+        case BinaryOp::Greater:
+            return { false, ">" };
+
+        case BinaryOp::GreaterEqual:
+            return { false, ">=" };
+
+        case BinaryOp::LogicalAnd:
+            return { false, "&&" };
+
+        case BinaryOp::LogicalOr:
+            return { false, "||" };
+
+        case BinaryOp::BitwiseXOR:
+            return { false, "^" };
+
+        case BinaryOp::Min:
+            return { true, is_float ? "fmin" : "min" };
+
+        case BinaryOp::Max:
+            return { true, is_float ? "fmax" : "max" };
+
+        default:
+            CKW_THROW_MSG("Unsupported binary operator/function!");
+    }
+}
+
+std::tuple<bool, std::string> cl_get_ternary_op(TernaryOp op)
+{
+    switch(op)
+    {
+        case TernaryOp::Select:
+            return { true, "select" };
+
+        case TernaryOp::Clamp:
+            return { true, "clamp" };
+
+        default:
+            CKW_THROW_MSG("Unsupported ternary function!");
+    }
+}
+
 std::string cl_data_type_rounded_up_to_valid_vector_width(DataType dt, int32_t width)
 {
     std::string   data_type;

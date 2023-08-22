@@ -43,6 +43,8 @@ class CLKernelWriterUnaryExpressionTest : public ITest
 public:
     CLKernelWriterUnaryExpressionTest()
     {
+        // dst_height, dst_width, src_height, src_width, data_type, op, expected_code
+
         _tests.push_back({ 1, 1, 1, 1, DataType::Uint32, UnaryOp::BitwiseNot, "G0__dst = ~G0__src;\n" }); // Scalar.
 
         _tests.push_back({ 1, 3, 1, 3, DataType::Int16, UnaryOp::LogicalNot, "G0__dst = !G0__src;\n" }); // Whole vector.
@@ -70,7 +72,7 @@ public:
 
             writer.start_capture_code();
 
-            writer.op_unary(dst, src, test.op);
+            writer.op_unary(dst, test.op, src);
 
             VALIDATE_TEST(writer.check_added_code(test.expected_code), all_tests_passed, test_no++);
         }

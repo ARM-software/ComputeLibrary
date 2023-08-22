@@ -70,8 +70,35 @@ std::string cl_get_assignment_op_as_string(AssignmentOp op);
  *   - str: the function name or the operator in OpenCL language.
  *
  * @param[in] op The unary operator.
+ *
+ * @return The information about the unary operation.
  */
 std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op);
+
+/** Return the information about the binary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's an binary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op        The binary operator.
+ * @param[in] data_type The input data type.
+ *
+ * @return The information about the binary operation.
+ */
+std::tuple<bool, std::string> cl_get_binary_op(BinaryOp op, DataType data_type);
+
+/** Return the information about the ternary operation.
+ *
+ * The result contains:
+ *   - is_func: true if it's a function and false if it's a ternary operator in OpenCL language.
+ *   - str: the function name or the operator in OpenCL language.
+ *
+ * @param[in] op The ternary operator.
+ *
+ * @return The information about the ternary operation.
+ */
+std::tuple<bool, std::string> cl_get_ternary_op(TernaryOp op);
 
 /** Helper function to return the OpenCL vector size that accommodate the the desired width
  *
