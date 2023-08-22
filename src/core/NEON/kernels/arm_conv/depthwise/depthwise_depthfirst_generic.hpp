@@ -186,7 +186,7 @@ class GenericInputArrayElement
   static size_t get_element_size(const WorkspaceArgs<IDepthfirstStrategy, OutputStage> &args)
   {
     const auto kernel_points = args.depthwise_args.kernel_rows * args.depthwise_args.kernel_cols;
-    return sizeof(T **) * args.strategy->get_input_rows() * args.strategy->get_input_cols() * kernel_points;
+    return sizeof(T **) * args.strategy->get_output_rows() * args.strategy->get_output_cols() * kernel_points;
   }
 
   template <class WorkspaceType, class OutputStage>

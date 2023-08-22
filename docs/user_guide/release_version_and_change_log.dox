@@ -47,7 +47,7 @@ v23.11 Public major release
    - Add support for output data type S64 in NEArgMinMaxLayer and CLArgMinMaxLayer
  - Update OpenCL™ API headers to v2023.04.17.
  - Performance optimizations:
-   - Optimize @ref CpuReshape
+   - Optimize @ref cpu::CpuReshape
 
 v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.
