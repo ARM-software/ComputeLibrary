@@ -35,11 +35,11 @@
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuCol2ImKernel.h"
 #include "src/cpu/kernels/CpuIm2ColKernel.h"
-#include "src/cpu/kernels/CpuReshapeKernel.h"
 #include "src/cpu/kernels/CpuWeightsReshapeKernel.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 #include "src/cpu/operators/CpuGemmLowpOutputStage.h"
+#include "src/cpu/operators/CpuReshape.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
 
 #include <set>
@@ -92,7 +92,7 @@ CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo *src, 
 }
 
 CpuGemmConv2d::CpuGemmConv2d()
-    : _weights_reshape_kernel(nullptr), _im2col_kernel(), _mm_gemm(), _mm_gemmlowp(), _col2im_kernel(), _reshape_kernel(), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(),
+    : _weights_reshape_kernel(nullptr), _im2col_kernel(), _mm_gemm(), _mm_gemmlowp(), _col2im_kernel(), _reshape(), _im2col_output(), _weights_reshaped(), _gemm_output(), _gemm_output_3d(),
       _data_layout(DataLayout::NCHW), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_prepared(false), _aux_mem(AuxTensorIdx::Count)
 {
 }
@@ -379,8 +379,8 @@ void CpuGemmConv2d::configure(const ITensorInfo *src, const ITensorInfo *weights
     else
     {
         // Configure reshape layer
-        _reshape_kernel = std::make_unique<kernels::CpuReshapeKernel>();
-        _reshape_kernel->configure(gemm_output_to_use, dst);
+        _reshape = std::make_unique<CpuReshape>();
+        _reshape->configure(gemm_output_to_use, dst);
     }
 
     // Check if GEMM transforms weights
@@ -642,7 +642,7 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
                 { TensorType::ACL_SRC, gemm_output_to_use },
                 { TensorType::ACL_DST, dst }
             };
-            NEScheduler::get().schedule_op(_reshape_kernel.get(), Window::DimY, _reshape_kernel->window(), pack);
+            _reshape->run(pack);
         }
     }
     else if(out_has_padding)
@@ -652,7 +652,7 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
             { TensorType::ACL_SRC, gemm_output_to_use },
             { TensorType::ACL_DST, dst }
         };
-        NEScheduler::get().schedule_op(_reshape_kernel.get(), Window::DimY, _reshape_kernel->window(), pack);
+        _reshape->run(pack);
     }
 }
 

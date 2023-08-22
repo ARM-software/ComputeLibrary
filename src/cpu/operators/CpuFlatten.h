@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FLATTEN_H
-#define ARM_COMPUTE_CPU_FLATTEN_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUFLATTEN_H
+#define ACL_SRC_CPU_OPERATORS_CPUFLATTEN_H
 
 #include "src/cpu/ICpuOperator.h"
 
@@ -30,10 +30,15 @@ namespace arm_compute
 {
 namespace cpu
 {
+class CpuReshape;
 /** Basic function to flatten a given input */
 class CpuFlatten : public ICpuOperator
 {
 public:
+    /** Constructor */
+    CpuFlatten();
+    /** Destructor */
+    ~CpuFlatten();
     /** Configure operator for a given list of arguments
      *
      * Valid data layouts:
@@ -58,7 +63,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
+
+    // Inherited methods overridden:
+    void run(ITensorPack &tensors) override;
+
+private:
+    std::unique_ptr<CpuReshape> _reshape;
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FLATTEN_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUFLATTEN_H

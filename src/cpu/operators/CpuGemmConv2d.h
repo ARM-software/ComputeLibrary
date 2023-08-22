@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMM_CONV2D_H
-#define ARM_COMPUTE_CPU_GEMM_CONV2D_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -38,12 +38,12 @@ namespace cpu
 class CpuGemm;
 class CpuGemmLowpMatrixMultiplyCore;
 class CpuGemmLowpOutputStage;
+class CpuReshape;
 namespace kernels
 {
 class CpuWeightsReshapeKernel;
 class CpuIm2ColKernel;
 class CpuCol2ImKernel;
-class CpuReshapeKernel;
 } // namespace kernels
 
 /** Basic function to compute the convolution layer. This function calls the following kernels/functions:
@@ -130,8 +130,8 @@ public:
                                const bool enable_fast_math = false);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -222,7 +222,7 @@ private:
     std::unique_ptr<CpuGemm>                          _mm_gemm;
     std::unique_ptr<CpuGemmLowpMatrixMultiplyCore>    _mm_gemmlowp;
     std::unique_ptr<kernels::CpuCol2ImKernel>         _col2im_kernel;
-    std::unique_ptr<kernels::CpuReshapeKernel>        _reshape_kernel;
+    std::unique_ptr<CpuReshape>                       _reshape;
 
     TensorInfo _im2col_output;
     TensorInfo _weights_reshaped;
@@ -240,4 +240,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_GEMM_CONV2D_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUGEMMCONV2D_H
