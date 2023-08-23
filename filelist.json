@@ -26,6 +26,7 @@
     "src/core/Validate.cpp",
     "src/core/Version.cpp",
     "src/core/helpers/SoftmaxHelpers.cpp",
+    "src/core/helpers/Utils.cpp",
     "src/core/helpers/WindowHelpers.cpp",
     "src/core/utils/ActivationFunctionUtils.cpp",
     "src/core/utils/AssemblyUtils.cpp",

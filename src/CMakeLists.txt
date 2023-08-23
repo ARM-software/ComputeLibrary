@@ -634,6 +634,7 @@ target_sources(
 	core/Validate.cpp
 	core/Version.cpp
 	core/helpers/SoftmaxHelpers.cpp
+	core/helpers/Utils.cpp
 	core/helpers/WindowHelpers.cpp
 	core/utils/ActivationFunctionUtils.cpp
 	core/utils/AssemblyUtils.cpp

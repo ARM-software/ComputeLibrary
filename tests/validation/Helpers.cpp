@@ -350,7 +350,6 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
     }
 }
 
-
 QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int m, int n, int k, DataType data_type)
 {
     ARM_COMPUTE_UNUSED(m, n);

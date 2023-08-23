@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_HELPERS_UTILS_H
-#define SRC_CORE_HELPERS_UTILS_H
+#ifndef ACL_SRC_CORE_HELPERS_UTILS_H
+#define ACL_SRC_CORE_HELPERS_UTILS_H
 
 #include "arm_compute/core/ITensorInfo.h"
+
 namespace arm_compute
 {
 /** Create a strides object based on the provided strides and the tensor dimensions.
@@ -100,23 +101,8 @@ inline unsigned int get_next_power_two(unsigned int x)
  * @note This function checks for holes in all the dimensions upto and including the highest dimension.
  *
  */
-inline bool has_holes(const ITensorInfo &info, size_t dimension)
-{
-    const auto &shape          = info.tensor_shape();
-    const auto &strides        = info.strides_in_bytes();
-    size_t      squashed_bytes = info.element_size();
-
-    for(size_t dim = 0; dim <= dimension; ++dim)
-    {
-        if(strides[dim] != squashed_bytes)
-        {
-            return true;
-        }
-        squashed_bytes *= shape[dim];
-    }
-    return false;
-}
+bool has_holes(const ITensorInfo &info, size_t dimension);
 
 } // namespace arm_compute
 
-#endif /* SRC_CORE_HELPERS_UTILS_H */
+#endif // ACL_SRC_CORE_HELPERS_UTILS_H

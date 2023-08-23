@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_VALIDATION_HELPERS
-#define ACL_TESTS_VALIDATION_HELPERS
+#ifndef ACL_TESTS_VALIDATION_HELPERS_H
+#define ACL_TESTS_VALIDATION_HELPERS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -111,23 +111,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 
     return bounds;
 }
-
-/** Calculate output tensor shape give a vector of input tensor to concatenate
- *
- * @param[in] input_shapes Shapes of the tensors to concatenate across depth.
- *
- * @return The shape of output concatenated tensor.
- */
-TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
-
-/** Calculate output tensor shape for the concatenate operation along a given axis
- *
- * @param[in] input_shapes Shapes of the tensors to concatenate across width.
- * @param[in] axis         Axis to use for the concatenate operation
- *
- * @return The shape of output concatenated tensor.
- */
-TensorShape calculate_concatenate_shape(const std::vector<TensorShape> &input_shapes, size_t axis);
 
 /** Convert an asymmetric quantized simple tensor into float using tensor quantization information.
  *
@@ -250,4 +233,4 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &lhs_q_info
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_VALIDATION_HELPERS */
+#endif // ACL_TESTS_VALIDATION_HELPERS_H

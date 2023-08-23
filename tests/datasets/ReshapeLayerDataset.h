@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RESHAPE_LAYER_DATASET
-#define ARM_COMPUTE_TEST_RESHAPE_LAYER_DATASET
+#ifndef ACL_TESTS_DATASETS_RESHAPELAYERDATASET_H
+#define ACL_TESTS_DATASETS_RESHAPELAYERDATASET_H
 
 #include "utils/TypePrinter.h"
 
@@ -111,9 +111,10 @@ public:
         add_config(TensorShape(17U, 3U, 12U), TensorShape(1U, 1U, 612U));
         add_config(TensorShape(26U, 26U, 32U), TensorShape(13U, 13U, 128U));
         add_config(TensorShape(31U, 23U, 4U, 7U), TensorShape(2U, 14U, 713U));
+        add_config(TensorShape(8U, 8U, 8U), TensorShape(8U, 64U));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RESHAPE_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_RESHAPELAYERDATASET_H
