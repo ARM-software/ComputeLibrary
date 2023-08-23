@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -274,7 +274,13 @@ void MergeResults<8, 6, false>(float *out, const float *in, const int ldout, con
                         "VMIN.f32	q6, q6, %q[maxv]\n"
                         "VMIN.f32	q7, q7, %q[maxv]\n"
                         "VST1.32	{d12-d15}, [%[outptr3]]!\n"
+                    : [outptr0] "+r" (outptr0), [outptr1] "+r" (outptr1), [outptr2] "+r" (outptr2), [outptr3] "+r" (outptr3),
+                      [inptr] "+r" (inptr)
+                    : [minv] "w" (minv), [maxv] "w" (maxv), [biasptr] "r" (biasptr)
+                    : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "memory"
+                    );
 
+                    __asm __volatile (
                         // Rows 4-5
                         "VLD1.32	{d8-d11},   [%[inptr]]!\n"
                         "VLD1.32	{d12-d15},  [%[inptr]]!\n"
@@ -296,7 +302,7 @@ void MergeResults<8, 6, false>(float *out, const float *in, const int ldout, con
                         "VMIN.f32	q6, q6, %q[maxv]\n"
                         "VMIN.f32	q7, q7, %q[maxv]\n"
                         "VST1.32	{d12-d15}, [%[outptr5]]!\n"
-                    : [outptr0] "+r" (outptr0), [outptr1] "+r" (outptr1), [outptr2] "+r" (outptr2), [outptr3] "+r" (outptr3),
+                    : [outptr3] "+r" (outptr3),
                       [outptr4] "+r" (outptr4), [outptr5] "+r" (outptr5), [inptr] "+r" (inptr)
                     : [minv] "w" (minv), [maxv] "w" (maxv), [biasptr] "r" (biasptr)
                     : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "memory"
