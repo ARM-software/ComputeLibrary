@@ -28,6 +28,7 @@
 #include "ckw/Kernel.h"
 #include "ckw/TensorSampler.h"
 #include "ckw/TileOperand.h"
+#include "ckw/types/DataType.h"
 #include "ckw/types/MemoryOperation.h"
 #include "ckw/types/TargetLanguage.h"
 #include "src/ITensorComponent.h"
@@ -37,7 +38,6 @@
 #include "src/cl/helpers/CLMemoryOpBufferHelper.h"
 #include "src/cl/helpers/CLMemoryOpImage2dHelper.h"
 #include "src/cl/helpers/ICLMemoryOpHelper.h"
-
 #include "src/types/DataTypeHelpers.h"
 
 #include <algorithm>
@@ -364,7 +364,7 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
                 return e->name() == fullname;
             })
             == _tiles.end(),
-        "Tile name must be unique.");
+        "There is already a tile with name: " + fullname);
 
     auto tile = std::make_unique<CLTile>(fullname, tile_info);
 
@@ -381,21 +381,40 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
     return operand;
 }
 
+TileOperand CLKernelWriter::declare_constant_tile(const ConstantData &data)
+{
+    auto tile = std::make_unique<CLTile>(get_values(data), get_data_type(data));
+    const TileOperand operand = create_tile_operand(*tile);
+    _constant_tiles.insert(std::move(tile));
+
+    return operand;
+}
+
 void CLKernelWriter::op_write_raw_code(const std::string &raw_code)
 {
     append_code(raw_code);
 }
 
-const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand)
+const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand) const
 {
     const auto &tile = get_tile(operand);
 
 #ifdef COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
     // Check if the tile is a CLTile created by this kernel writer.
+
     {
         bool found = false;
 
         for(const auto &t : _tiles)
+        {
+            if(&tile == t.get())
+            {
+                found = true;
+                break;
+            }
+        }
+
+        for(const auto &t : _constant_tiles)
         {
             if(&tile == t.get())
             {

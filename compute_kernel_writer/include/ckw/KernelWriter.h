@@ -27,6 +27,7 @@
 
 #include "ckw/TensorOperand.h"
 #include "ckw/TileOperand.h"
+#include "ckw/types/ConstantData.h"
 #include "ckw/types/ConvertPolicy.h"
 #include "ckw/types/Operators.h"
 
@@ -37,13 +38,13 @@
 namespace ckw
 {
 
-class Kernel;
-
 /** Forward Declerations */
+class Kernel;
 class TensorInfo;
 class TensorSampler;
 class TileInfo;
 
+enum class DataType;
 enum class TargetArchitecture;
 enum class TargetLanguage;
 
@@ -175,9 +176,18 @@ public:
      * @param[in] name Name of the tile
      * @param[in] tile_info Shape and data type of the tile
      *
-     * @returns The created tile operand
+     * @return The created tile operand
      */
     virtual TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) = 0;
+
+    /** Declare a constant tile given a @ref:ConstantData object
+     *
+     * @param[in] data a @ref ckw::ConstantData object that has the values and the
+     *                 underlying data type of the constant tile
+     *
+     * @return The created constant tile operand
+     */
+    virtual TileOperand declare_constant_tile(const ConstantData &data) = 0;
 
     /** Load the data from the tensor memory to the tile using the sampling information.
      *
@@ -239,6 +249,12 @@ protected:
 
     /** Get the reference to tensor object from the tensor operand. */
     static ITensor &get_tensor(const TensorOperand &operand);
+
+    /** Get the values of a constant data object. */
+    static const std::vector<std::vector<std::string>> &get_values(const ConstantData &data);
+
+    /** Get the data type of a constant data object. */
+    static DataType get_data_type(const ConstantData &data);
 
 private:
     int32_t _id_space{ 0 };

@@ -81,4 +81,14 @@ ITensor &KernelWriter::get_tensor(const TensorOperand &operand)
     return operand._tensor;
 }
 
+const std::vector<std::vector<std::string>> &KernelWriter::get_values(const ConstantData &data)
+{
+    return data.values();
+}
+
+DataType KernelWriter::get_data_type(const ConstantData &data)
+{
+    return data.data_type();
+}
+
 } // namespace ckw

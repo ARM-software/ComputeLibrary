@@ -118,6 +118,7 @@ target_compile_definitions(ckw PUBLIC
 )
 
 target_sources(ckw PRIVATE
+    src/types/ConstantData.cpp
     src/types/DataTypeHelpers.cpp
     src/Error.cpp
     src/Helpers.cpp

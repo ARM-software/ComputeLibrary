@@ -29,17 +29,21 @@
 
 #include <memory>
 #include <set>
+#include <string>
 #include <utility>
 
 namespace ckw
 {
 
+// Forward Declarations
 class CLTile;
 class CLTensorArgument;
+class ConstantData;
+class TensorOperand;
 class TensorSampler;
 class TileOperand;
-class TensorOperand;
 
+enum class DataType;
 enum class MemoryOperation;
 
 /** OpenCL kernel writer. */
@@ -96,6 +100,12 @@ public:
      */
     TileOperand declare_tile(const std::string &name, const TileInfo &tile_info) override;
 
+    /** Declare a constant tile given a @ref:ConstantData object
+     *
+     * Similar to @ref KernelWriter::declare_constant_tile()
+     */
+    TileOperand declare_constant_tile(const ConstantData &data) override;
+
     // =============================================================================================
     // Memory Operations
     // =============================================================================================
@@ -139,7 +149,7 @@ protected:
      *
      * This function performs appropriate check before doing type casting.
      */
-    const CLTile &to_cl_tile(const TileOperand &operand);
+    const CLTile &to_cl_tile(const TileOperand &operand) const;
 
     /** Append the specified code to the kernel body source code. */
     template <typename T, typename... TArgs>
@@ -179,6 +189,7 @@ private:
 
     std::set<std::unique_ptr<CLTensorArgument>> _tensors{};
     std::set<std::unique_ptr<CLTile>>           _tiles{};
+    std::set<std::unique_ptr<CLTile>>           _constant_tiles{};
 };
 
 } // namespace ckw
