@@ -1,0 +1,6 @@
+<map id="src/cpu/kernels/lut/generic" name="src/cpu/kernels/lut/generic">
+<area shape="rect" id="node2" href="dir_bcdcfeafa1fc614e266e5c60698ef6ce.xhtml" title="neon" alt="" coords="133,63,205,111"/>
+<area shape="rect" id="node3" href="dir_a74e00f66144c1bac567807c2c6b8a84.xhtml" title="sve2" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="clust2" href="dir_759ad130c4d2ade5bdd75789c156321e.xhtml" alt="" coords="27,52,312,121"/>
+<area shape="rect" id="clust1" href="dir_a5a25de4bd483a211edd2f30cef0dda2.xhtml" title="lut" alt="" coords="16,16,323,132"/>
+</map>

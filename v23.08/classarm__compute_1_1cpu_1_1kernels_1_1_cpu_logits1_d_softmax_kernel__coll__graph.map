@@ -1,0 +1,7 @@
+<map id="CpuLogits1DSoftmaxKernel&lt; IS_LOG &gt;" name="CpuLogits1DSoftmaxKernel&lt; IS_LOG &gt;">
+<area shape="rect" id="node1" title="Interface for softmax computation for QASYMM8 with pre&#45;computed max." alt="" coords="27,352,226,393"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="5,261,248,303"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="75,81,167,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cpu_1_1_i_cpu_kernel.xhtml" title=" " alt="" coords="143,157,316,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="88,5,155,32"/>
+</map>

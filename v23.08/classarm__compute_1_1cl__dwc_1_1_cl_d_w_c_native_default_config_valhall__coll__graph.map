@@ -1,0 +1,4 @@
+<map id="ClDWCNativeDefaultConfigValhall" name="ClDWCNativeDefaultConfigValhall">
+<area shape="rect" id="node1" title="Valhall based OpenCL depthwise convolution configuration." alt="" coords="5,80,204,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__dwc_1_1_i_cl_d_w_c_native_kernel_config.xhtml" title="Basic interface for the depthwise convolution kernel configuration." alt="" coords="7,5,203,32"/>
+</map>

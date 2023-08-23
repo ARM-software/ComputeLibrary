@@ -1,0 +1,5 @@
+<map id="EltwiseLayerDescriptor" name="EltwiseLayerDescriptor">
+<area shape="rect" id="node1" title="Elementwise layer descriptor." alt="" coords="66,95,238,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="5,5,136,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_activation_layer_info.xhtml" title="Activation Layer Information class." alt="" coords="160,5,309,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="FullyConnectedParams" name="FullyConnectedParams">
+<area shape="rect" id="node1" title="Structure holding all the fully_connected layer graph parameters." alt="" coords="11,184,182,211"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1_fully_connected_layer_info.xhtml" title="Fully connected layer info." alt="" coords="5,95,188,121"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_activation_layer_info.xhtml" title="Activation Layer Information class." alt="" coords="22,5,171,32"/>
+</map>

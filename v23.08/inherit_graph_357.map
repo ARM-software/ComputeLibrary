@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_manageable.xhtml" title="Interface of an object than can be memory managed." alt="" coords="5,10,165,36"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_tensor.xhtml" title="Basic implementation of the OpenCL tensor interface." alt="" coords="395,22,474,48"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface." alt="" coords="242,22,306,48"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for CPU tensor." alt="" coords="51,86,119,112"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1experimental_1_1_operator_tensor.xhtml" title="Basic implementation of the tensor interface." alt="" coords="213,72,335,99"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor." alt="" coords="233,123,315,150"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_sub_tensor.xhtml" title="Basic implementation of the sub&#45;tensor interface." alt="" coords="230,174,318,200"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_c_l_sub_tensor.xhtml" title="Basic implementation of the OpenCL sub&#45;tensor interface." alt="" coords="383,123,487,150"/>
+</map>

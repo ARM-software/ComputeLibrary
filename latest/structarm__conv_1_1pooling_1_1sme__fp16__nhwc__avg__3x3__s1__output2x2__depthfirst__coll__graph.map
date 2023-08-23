@@ -1,6 +1,0 @@
-<map id="sme_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst" name="sme_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst">
-<area shape="rect" id="node1" title=" " alt="" coords="5,276,195,317"/>
-<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title=" " alt="" coords="27,185,173,227"/>
-<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_i_depthfirst_strategy.xhtml" title=" " alt="" coords="22,5,167,32"/>
-<area shape="rect" id="node4" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title=" " alt="" coords="117,81,270,123"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst" name="a64_fp32_nhwc_max_2x2_s1_output2x2_depthfirst">
-<area shape="rect" id="node1" title=" " alt="" coords="5,276,196,317"/>
-<area shape="rect" id="node2" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title=" " alt="" coords="30,185,171,227"/>
-<area shape="rect" id="node3" href="$classarm__conv_1_1pooling_1_1_i_depthfirst_strategy.xhtml" title=" " alt="" coords="23,5,168,32"/>
-<area shape="rect" id="node4" href="$classarm__conv_1_1pooling_1_1_depthfirst_strategy.xhtml" title=" " alt="" coords="117,81,271,123"/>
-</map>

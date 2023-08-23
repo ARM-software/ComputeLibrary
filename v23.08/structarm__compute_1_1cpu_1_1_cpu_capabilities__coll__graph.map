@@ -1,0 +1,4 @@
+<map id="CpuCapabilities" name="CpuCapabilities">
+<area shape="rect" id="node1" title="Structure that encodes the CPU capabilities to be used." alt="" coords="5,95,129,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cpuinfo_1_1_cpu_info.xhtml" title="Aggregate class that contains CPU related information." alt="" coords="31,5,103,32"/>
+</map>
