@@ -93,79 +93,79 @@ public:
     {
         // Cases
         const std::string load_fp_2x3_tile = R"_(
-tile_0 = vload3(0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 0) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3));
-tile_1 = vload3(0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 1) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3));
+G0__tile__0 = vload3(0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3));
+G0__tile__1 = vload3(0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3));
 )_";
         const std::string load_half_2x4_tile_image_clamp_y = R"_(
-tile_0 = read_imageh(G0__tensor_img2d, CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST, (int2)((x) >> 2, (y + 0 + (z) * G0__tensor_dim1 + (b) * G0__tensor_dim1 * G0__tensor_dim2)));
-tile_1 = read_imageh(G0__tensor_img2d, CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST, (int2)((x) >> 2, (y + 1 + (z) * G0__tensor_dim1 + (b) * G0__tensor_dim1 * G0__tensor_dim2)));
+G0__tile__0 = read_imageh(G0__tensor_img2d, CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST, (int2)((G0__x) >> 2, (G0__y + 0 * ((int)(1)) + (G0__z) * G0__tensor_dim1 + (G0__b) * G0__tensor_dim1 * G0__tensor_dim2)));
+G0__tile__1 = read_imageh(G0__tensor_img2d, CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST, (int2)((G0__x) >> 2, (G0__y + 1 * ((int)(1)) + (G0__z) * G0__tensor_dim1 + (G0__b) * G0__tensor_dim1 * G0__tensor_dim2)));
 )_";
         const std::string store_fp_2x3_tile = R"_(
-vstore3(tile_0, 0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 0) * G0__tensor_stride1 + (b) * G0__tensor_stride3));
-vstore3(tile_1, 0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 1) * G0__tensor_stride1 + (b) * G0__tensor_stride3));
+vstore3(G0__tile__0, 0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__b) * G0__tensor_stride3));
+vstore3(G0__tile__1, 0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__b) * G0__tensor_stride3));
 )_";
         const std::string store_int8_4x4_y_dilation_batch_eq_0 = R"_(
-vstore4(tile_0, 0, (__global char*)(G0__tensor_ptr + (1) * sizeof(char) + (y + 0 * y_dilation) * G0__tensor_stride1 + (z) * G0__tensor_stride2));
-vstore4(tile_1, 0, (__global char*)(G0__tensor_ptr + (1) * sizeof(char) + (y + 1 * y_dilation) * G0__tensor_stride1 + (z) * G0__tensor_stride2));
-vstore4(tile_2, 0, (__global char*)(G0__tensor_ptr + (1) * sizeof(char) + (y + 2 * y_dilation) * G0__tensor_stride1 + (z) * G0__tensor_stride2));
-vstore4(tile_3, 0, (__global char*)(G0__tensor_ptr + (1) * sizeof(char) + (y + 3 * y_dilation) * G0__tensor_stride1 + (z) * G0__tensor_stride2));
+vstore4(G0__tile__0, 0, (__global char*)(G0__tensor_ptr + (((int)(1))) * sizeof(char) + (G0__y + 0 * G0__y_dilation) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(0))) * G0__tensor_stride3));
+vstore4(G0__tile__1, 0, (__global char*)(G0__tensor_ptr + (((int)(1))) * sizeof(char) + (G0__y + 1 * G0__y_dilation) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(0))) * G0__tensor_stride3));
+vstore4(G0__tile__2, 0, (__global char*)(G0__tensor_ptr + (((int)(1))) * sizeof(char) + (G0__y + 2 * G0__y_dilation) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(0))) * G0__tensor_stride3));
+vstore4(G0__tile__3, 0, (__global char*)(G0__tensor_ptr + (((int)(1))) * sizeof(char) + (G0__y + 3 * G0__y_dilation) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(0))) * G0__tensor_stride3));
 )_";
         // tensor dimension is 10
         const std::string load_fp_2x3_tile_x_overlapping_min_y_eq_0_batch_eq_1 = R"_(
-if(x > 0)
+if(G0__x > 0)
 {
-tile_0 = vload3(0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (0 + 0) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (1) * G0__tensor_stride3));
-tile_1 = vload3(0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (0 + 1) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (1) * G0__tensor_stride3));
+G0__tile__0 = vload3(0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (((int)(0)) + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(1))) * G0__tensor_stride3));
+G0__tile__1 = vload3(0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (((int)(0)) + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(1))) * G0__tensor_stride3));
 }
 else
 {
-tile_0.s0 = *((__global float*)(G0__tensor_ptr + (x + 0) * sizeof(float) + (0 + 0) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (1) * G0__tensor_stride3));
-tile_1.s0 = *((__global float*)(G0__tensor_ptr + (x + 0) * sizeof(float) + (0 + 1) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (1) * G0__tensor_stride3));
+G0__tile__0.s0 = *((__global float*)(G0__tensor_ptr + (G0__x + 0) * sizeof(float) + (((int)(0)) + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(1))) * G0__tensor_stride3));
+G0__tile__1.s0 = *((__global float*)(G0__tensor_ptr + (G0__x + 0) * sizeof(float) + (((int)(0)) + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (((int)(1))) * G0__tensor_stride3));
 }
 )_";
         const std::string store_fp_2x3_tile_x_overlapping_min_y_clamp_to_border_max_only = R"_(
-if(x > 0)
+if(G0__x > 0)
 {
-if(y + 0 < G0__tensor_dim1)
+if(G0__y + 0 * ((int)(1)) < G0__tensor_dim1)
 {
-vstore3(tile_0, 0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 0) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3));
+vstore3(G0__tile__0, 0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3));
 }
 else
 {
-tile_0 = 0.0f;
+G0__tile__0 = 0.0f;
 }
-if(y + 1 < G0__tensor_dim1)
+if(G0__y + 1 * ((int)(1)) < G0__tensor_dim1)
 {
-vstore3(tile_1, 0, (__global float*)(G0__tensor_ptr + (x) * sizeof(float) + (y + 1) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3));
-}
-else
-{
-tile_1 = 0.0f;
-}
+vstore3(G0__tile__1, 0, (__global float*)(G0__tensor_ptr + (G0__x) * sizeof(float) + (G0__y + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3));
 }
 else
 {
-if(y + 0 < G0__tensor_dim1)
-{
-*((__global float*)(G0__tensor_ptr + (x + 0) * sizeof(float) + (y + 0) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3)) = tile_0.s0;
+G0__tile__1 = 0.0f;
+}
 }
 else
 {
-tile_0.s0 = 0.0f;
-}
-if(y + 1 < G0__tensor_dim1)
+if(G0__y + 0 * ((int)(1)) < G0__tensor_dim1)
 {
-*((__global float*)(G0__tensor_ptr + (x + 0) * sizeof(float) + (y + 1) * G0__tensor_stride1 + (z) * G0__tensor_stride2 + (b) * G0__tensor_stride3)) = tile_1.s0;
+*((__global float*)(G0__tensor_ptr + (G0__x + 0) * sizeof(float) + (G0__y + 0 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3)) = G0__tile__0.s0;
 }
 else
 {
-tile_1.s0 = 0.0f;
+G0__tile__0.s0 = 0.0f;
+}
+if(G0__y + 1 * ((int)(1)) < G0__tensor_dim1)
+{
+*((__global float*)(G0__tensor_ptr + (G0__x + 0) * sizeof(float) + (G0__y + 1 * ((int)(1))) * G0__tensor_stride1 + (G0__z) * G0__tensor_stride2 + (G0__b) * G0__tensor_stride3)) = G0__tile__1.s0;
+}
+else
+{
+G0__tile__1.s0 = 0.0f;
 }
 }
 )_";
         const std::string store_half_2x4_tile_x_image_y_dilation = R"_(
-write_imageh(G0__tensor_img2d, (int2)((x) >> 2, (0 + 0 * y_dilation + (z) * G0__tensor_dim1 + (1) * G0__tensor_dim1 * G0__tensor_dim2)), tile_0);
-write_imageh(G0__tensor_img2d, (int2)((x) >> 2, (0 + 1 * y_dilation + (z) * G0__tensor_dim1 + (1) * G0__tensor_dim1 * G0__tensor_dim2)), tile_1);
+write_imageh(G0__tensor_img2d, (int2)((G0__x) >> 2, (((int)(0)) + 0 * G0__y_dilation + (G0__z) * G0__tensor_dim1 + (((int)(1))) * G0__tensor_dim1 * G0__tensor_dim2)), G0__tile__0);
+write_imageh(G0__tensor_img2d, (int2)((G0__x) >> 2, (((int)(0)) + 1 * G0__y_dilation + (G0__z) * G0__tensor_dim1 + (((int)(1))) * G0__tensor_dim1 * G0__tensor_dim2)), G0__tile__1);
 )_";
 
         // Configs Bundled
@@ -237,6 +237,18 @@ write_imageh(G0__tensor_img2d, (int2)((x) >> 2, (0 + 1 * y_dilation + (z) * G0__
         };
     }
 
+    TileOperand declare_tile_helper(KernelWriter &writer, std::string tile)
+    {
+        if(tile == "0" || tile == "1")
+        {
+            return writer.declare_constant_tile(ConstantData({{std::stoi(tile)}}, DataType::Int32));
+        }
+        else
+        {
+            return writer.declare_tile(tile, TileInfo(DataType::Int32));
+        }
+    }
+
     bool run() override
     {
         bool all_tests_passed = true;
@@ -255,12 +267,12 @@ write_imageh(G0__tensor_img2d, (int2)((x) >> 2, (0 + 1 * y_dilation + (z) * G0__
             const std::string expected_code = std::get<6>(_config).substr(1); // ignore initial newline, which was added for convenience
 
             TileOperand tile_op = writer.declare_tile("tile", tile_info);
-            TileOperand x_op = writer.declare_tile(coord.x, TileInfo(DataType::Int32));
-            TileOperand y_op = writer.declare_tile(coord.y, TileInfo(DataType::Int32));
-            TileOperand z_op = writer.declare_tile(coord.z, TileInfo(DataType::Int32));
-            TileOperand batch_op = writer.declare_tile(coord.batch, TileInfo(DataType::Int32));
-            TileOperand dil_x_op = writer.declare_tile(dilations.dilation_x, TileInfo(DataType::Int32));
-            TileOperand dil_y_op = writer.declare_tile(dilations.dilation_y, TileInfo(DataType::Int32));
+            TileOperand x_op = declare_tile_helper(writer, coord.x);
+            TileOperand y_op = declare_tile_helper(writer, coord.y);
+            TileOperand z_op = declare_tile_helper(writer, coord.z);
+            TileOperand batch_op = declare_tile_helper(writer, coord.batch);
+            TileOperand dil_x_op = declare_tile_helper(writer, dilations.dilation_x);
+            TileOperand dil_y_op = declare_tile_helper(writer, dilations.dilation_y);
 
             TensorShape tensor_shape {10, 10, 10, 10};
             TensorInfo tensor_info(tile_info.data_type(), tensor_shape, TensorDataLayout::Nhwc, 0 /* id */);

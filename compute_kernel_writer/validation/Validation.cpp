@@ -120,7 +120,7 @@ int32_t main()
     tests.push_back(test22.get());
     tests.push_back(test23.get());
     tests.push_back(test24.get());
-    CKW_UNUSED(test25); // CLKernelWriterOpLoadStoreTest test needs further changes.
+    tests.push_back(test25.get());
     tests.push_back(test26.get());
     tests.push_back(test27.get());
     tests.push_back(test28.get());

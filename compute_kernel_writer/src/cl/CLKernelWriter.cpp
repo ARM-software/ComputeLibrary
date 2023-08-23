@@ -525,8 +525,8 @@ const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand) const
 void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
                              const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
-    const CLTile dilation_x("1", DataType::Int32);
-    const CLTile dilation_y("1", DataType::Int32);
+    const CLTile dilation_x({{"1"}}, DataType::Int32);
+    const CLTile dilation_y({{"1"}}, DataType::Int32);
 
     op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
 }
@@ -544,8 +544,8 @@ void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOpe
 void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
                               const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
-    const CLTile dilation_x("1", DataType::Int32);
-    const CLTile dilation_y("1", DataType::Int32);
+    const CLTile dilation_x({{"1"}}, DataType::Int32);
+    const CLTile dilation_y({{"1"}}, DataType::Int32);
 
     op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
 }
@@ -565,7 +565,7 @@ void CLKernelWriter::op_load_store(MemoryOperation op, const TileOperand &tile_o
                                    const CLTile &dilation_x, const CLTile &dilation_y)
 {
     CKW_UNUSED(dilation_x);
-    CKW_ASSERT(dilation_x.scalar(0, 0).str == "1"); // Dilation in x dimension is not implemented yet
+    CKW_ASSERT(dilation_x.scalar(0, 0).str == "((int)(1))"); // Dilation in x dimension is not implemented yet
 
     ITensor &tensor = get_tensor(tensor_op);
 
