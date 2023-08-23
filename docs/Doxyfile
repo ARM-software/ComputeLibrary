@@ -38,7 +38,7 @@ PROJECT_NAME           = "Compute Library"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 23.05.1
+PROJECT_NUMBER         = 23.08
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -773,6 +773,7 @@ INPUT                  = ./docs/user_guide/introduction.dox \
                          ./docs/user_guide/library.dox \
                          ./docs/user_guide/data_type.dox \
                          ./docs/user_guide/data_layout.dox \
+                         ./docs/user_guide/conv2d_heuristic.dox \
                          ./docs/user_guide/operator_list.dox \
                          ./docs/user_guide/tests.dox \
                          ./docs/user_guide/advanced.dox \

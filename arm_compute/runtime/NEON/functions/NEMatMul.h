@@ -24,6 +24,8 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEMATMUL
 
+#include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
 #include <memory>
 
@@ -91,16 +93,23 @@ public:
      * @param[in]  rhs      Right-hand side tensor info. Data types supported: same as @p lhs.
      * @param[out] dst      Output tensor to store the result of the batched matrix multiplication. Data types supported: same as @p lhs / @p rhs.
      * @param[in]  info     Contains MatMul operation information described in @ref MatMulInfo.
-     * @param[in]  settings Class containing flags for function level settings i.e fast math
+     * @param[in]  settings Contains flags for function level settings i.e fast math
+     * @param[in]  act_info (Optional) Contains activation function and lower and upper bound values for bounded activation functions.
      */
-    void configure(ITensor *lhs, ITensor *rhs, ITensor *dst, const MatMulInfo &info, const CpuMatMulSettings &settings);
+    void configure(ITensor *lhs, ITensor *rhs, ITensor *dst, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEMatMul
      *
-     * Parameters are similar to @ref NEMatMul::configure()
+     * @param[in]  lhs      Left-hand side tensor info. Data types supported: F16/F32/QASYMM8_SIGNED/QASYMM8.
+     * @param[in]  rhs      Right-hand side tensor info. Data types supported: same as @p lhs.
+     * @param[out] dst      Output tensor info to store the result of the batched matrix multiplication. Data types supported: same as @p lhs / @p rhs.
+     * @param[in]  info     Contains MatMul operation information described in @ref MatMulInfo.
+     * @param[in]  settings Contains flags for function level settings i.e fast math
+     * @param[in]  act_info (Optional) Contains activation function and lower and upper bound values for bounded activation functions.
      *
      * @return Status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden
     void run() override;

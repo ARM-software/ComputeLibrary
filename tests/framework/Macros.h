@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -127,13 +127,13 @@
     void do_setup() override                                     \
     {                                                            \
         framework::Framework::get().set_new_fixture_call(false); \
-        apply(this, &FIXTURE::setup<As...>, _data);              \
+        apply(this, &FIXTURE::setup, _data);              \
     }
 #define FIXTURE_DATA_SETUP_NEW(FIXTURE)                         \
     void do_setup() override                                    \
     {                                                           \
         framework::Framework::get().set_new_fixture_call(true); \
-        apply(this, &FIXTURE::setup<As...>, _data);             \
+        apply(this, &FIXTURE::setup, _data);             \
         configure_target();                                     \
         if(!framework::Framework::get().configure_only())       \
         {                                                       \

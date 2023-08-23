@@ -49,7 +49,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class AddMulAddGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo &act_info, bool interm_out)
     {
         compute_target(shape, data_type, act_info, interm_out);
@@ -138,7 +137,6 @@ class AddMulAddFloatValidationFixture : public AddMulAddGenericFixture<TensorTyp
 public:
     using Parent = AddMulAddGenericFixture<TensorType, AccessorType, FunctionType, T>;
 
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo act_info)
     {
         Parent::setup(shape, data_type, act_info, interm_out);
@@ -195,7 +193,6 @@ class AddMulAddQuantizedValidationFixture : public AddMulAddGenericFixture<Tenso
 public:
     using Parent = AddMulAddGenericFixture<TensorType, AccessorType, FunctionType, T>;
 
-    template <typename...>
     void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo act_info,
                QuantizationInfo input1_qinfo, QuantizationInfo input2_qinfo, QuantizationInfo bn_mul_qinfo,
                QuantizationInfo bn_add_qinfo, QuantizationInfo add_output_qinfo, QuantizationInfo final_output_qinfo)

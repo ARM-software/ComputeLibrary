@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,6 @@ template <typename TensorType, typename Function, typename Accessor, typename T>
 class ScaleLayerFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, float sx, float sy, DataType data_type)
     {
         constexpr float max_width  = 8192.0f;

@@ -27,10 +27,6 @@
 #include "depthwise_depthfirst.hpp"
 #include "interleaves/generic_quantized_dot_product.hpp"
 
-#ifdef CYCLE_PROFILING
-#include "profiler.hpp"
-#endif
-
 #include <limits>
 
 namespace arm_conv {
@@ -46,7 +42,7 @@ class DepthfirstMultiplierStrategy : public DepthwiseDepthfirstStrategyCommon<TI
   {
     return interleaves::PackingArguments(
       args.kernel_rows, args.kernel_cols, sizeof(TWeight),
-      true, sizeof(TAccum),
+      true, sizeof(TAccum), this->uses_premultiply(),
       this->get_vl_type(),
       sizeof(TAccum), 1,
       [args] (unsigned int pos, unsigned int &x, unsigned int &y) -> bool
@@ -60,6 +56,10 @@ class DepthfirstMultiplierStrategy : public DepthwiseDepthfirstStrategyCommon<TI
         return false;
       }
     );
+  }
+  
+  bool uses_premultiply() const override {
+    return false;
   }
 
   public:
@@ -196,7 +196,7 @@ class GenericDepthfirstMultiplierStrategy : public DepthwiseDepthfirstStrategyCo
   {
     return interleaves::PackingArguments(
       args.kernel_rows, args.kernel_cols, sizeof(TWeight),
-      false, sizeof(TAccum),
+      false, sizeof(TAccum), this->uses_premultiply(),
       this->get_vl_type(),
       sizeof(TAccum), 1,
       [args] (unsigned int pos, unsigned int &x, unsigned int &y) -> bool
@@ -210,6 +210,10 @@ class GenericDepthfirstMultiplierStrategy : public DepthwiseDepthfirstStrategyCo
         return false;
       }
     );
+  }
+  
+  bool uses_premultiply() const override {
+    return false;
   }
 
   public:
@@ -487,6 +491,10 @@ class DepthwiseDepthfirstMultiplier : public DepthfirstDriver<TInput, TWeight, T
   OutputStage m_os;  // Copy of the output parameters
   const void *m_bias = nullptr;  // Copy of the bias (should we need it)
 
+  bool uses_premultiply() const override {
+    return false;
+  }
+
   public:
   DepthwiseDepthfirstMultiplier(StratType *const strat, const DepthwiseArgs &args, const OutputStage &os = {})
   : DepthfirstDriver<TInput, TWeight, TOutput>(strat, args), m_os(os)
@@ -510,17 +518,15 @@ class DepthwiseDepthfirstMultiplier : public DepthfirstDriver<TInput, TWeight, T
     depthwise_depthfirst::stash_bias(m_os, biases);
   }
 
-  size_t get_working_size_per_thread(const unsigned int n_input_channels) const override
+  size_t get_working_size_per_thread() const override
   {
     DepthwiseArgs args(this->m_args);
-    args.input_channels = n_input_channels;
     return WorkspaceManager::get_sizeof_workspace(WorkspaceArgs<IDepthfirstStrategy, OutputStage>(this->m_strat.get(), args, m_os));
   }
 
-  void initialise_working_space(void *buffer, unsigned int n_input_channels) const override
+  void initialise_working_space(void *buffer) const override
   {
     DepthwiseArgs args(this->m_args);
-    args.input_channels = n_input_channels;
     return WorkspaceManager::initialise(buffer, WorkspaceArgs<IDepthfirstStrategy, OutputStage>(this->m_strat.get(), args, m_os));
   }
 

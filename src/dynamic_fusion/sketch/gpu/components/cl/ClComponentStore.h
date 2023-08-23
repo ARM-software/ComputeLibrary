@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,7 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTSTORE
 
-#include "arm_compute/core/Error.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
-#include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateStore.h"
 #include <memory>
 
 namespace arm_compute
@@ -40,6 +38,11 @@ namespace dynamic_fusion
 /** Forward declaration */
 template <typename T>
 class ArgumentPack;
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+class ClTemplateStore;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwStore;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentStore final : public IGpuKernelComponent
 {
@@ -85,8 +88,12 @@ public:
     ClComponentStore(ClComponentStore &&component) = default;
     /** Allow instances of this class to be moved */
     ClComponentStore &operator=(ClComponentStore &&component) = default;
-    /** Get template writer for the component */
+    /** Get writer for the component */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    const IGpuCkwComponentDriver *ckw_component_driver() const override;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
     /** Get component type */
     GpuComponentType type() const override
     {
@@ -94,7 +101,11 @@ public:
     }
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplateStore> _component_writer;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwStore>  _component_writer;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental

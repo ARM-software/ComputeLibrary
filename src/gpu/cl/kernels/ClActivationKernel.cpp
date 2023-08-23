@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,10 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
+#include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"

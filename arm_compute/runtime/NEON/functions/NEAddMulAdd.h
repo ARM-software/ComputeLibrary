@@ -34,6 +34,7 @@ namespace arm_compute
 {
 class ITensor;
 class ITensorInfo;
+class ActivationLayerInfo;
 
 /** Function to compute Add+Mul+Add fused operation */
 class NEAddMulAdd : public IFunction

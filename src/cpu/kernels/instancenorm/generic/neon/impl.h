@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,9 @@
 #ifndef SRC_CORE_SVE_KERNELS_INSTANCENORM_IMPL_H
 #define SRC_CORE_SVE_KERNELS_INSTANCENORM_IMPL_H
 #include "arm_compute/core/Helpers.h"
+
+#include "arm_neon.h"
+
 namespace arm_compute
 {
 namespace cpu

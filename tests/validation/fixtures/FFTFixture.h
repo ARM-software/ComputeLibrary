@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FFTValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type)
     {
         _target    = compute_target(shape, data_type);
@@ -134,7 +133,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FFTConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false)
     {
@@ -271,7 +269,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FFTConvolutionValidationFixture : public FFTConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, DataLayout data_layout, ActivationLayerInfo act_info)
     {

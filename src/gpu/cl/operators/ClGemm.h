@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_GEMM_H
 
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/function_info/GEMMInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 

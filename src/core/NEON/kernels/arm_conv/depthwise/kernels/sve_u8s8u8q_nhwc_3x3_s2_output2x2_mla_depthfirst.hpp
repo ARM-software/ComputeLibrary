@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 #include "src/core/NEON/kernels/arm_conv/depthwise/interleaves/list.hpp"
 
 #include <cstdint>
 
 #pragma once
 
-#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
@@ -47,17 +47,16 @@ class sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfi
   constexpr static unsigned int stride_rows = 2;
   constexpr static unsigned int stride_cols = 2;
 
-  arm_gemm::VLType get_vl_type(void) const override { return arm_gemm::VLType::SVE; }
-  unsigned int get_accumulator_depth_vl(void) const override { return 2; }
-
   sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst(const CPUInfo *) : Parent(2, 2, 3, 3, 2, 2) {}
 
-  Parent::KernelType kernel = sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst_impl;
+  arm_gemm::VLType get_vl_type(void) const override { return arm_gemm::VLType::SVE; }
 
+  Parent::KernelType kernel = sve_u8s8u8q_nhwc_3x3_s2_output2x2_mla_depthfirst_impl;
   Parent::KernelType get_kernel(void) const override { return kernel; }
+  unsigned int get_accumulator_depth_vl(void) const override { return 2; }
 };
 
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

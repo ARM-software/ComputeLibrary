@@ -40,7 +40,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BatchToSpaceLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(const TensorShape &input_shape, const std::vector<int32_t> &block_shape, const CropInfo &crop_info, const TensorShape &output_shape, DataType data_type, DataLayout data_layout)
     {
         _target    = compute_target(input_shape, block_shape, crop_info, output_shape, data_type, data_layout);

@@ -170,7 +170,6 @@ void interleave_block<4, 16, VLType::None, false>(
       "str q16, [%x[out_ptr], #0x30]\n"
       "add %x[out_ptr], %x[out_ptr], #0x40\n"
       "12:"  // Odds skip
-
       : [out_ptr] "+&r" (out_ptr), [width] "+&r" (width)
       : [height] "r" (height), [in] "r" (in), [row_offset] "r" (row_offset)
       : "cc", "memory", "v16", "v17", "v18", "v19", "x20", "x21", "x22", "x23"

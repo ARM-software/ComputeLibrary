@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ __kernel void tile(
     TENSOR4D_DECLARATION(input),
     TENSOR4D_DECLARATION(output))
 {
-    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
+    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, DST_DEPTH);
     Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, SRC_DEPTH);
 
     // For all coordinates but x, each tile copies from the input
@@ -62,22 +62,18 @@ __kernel void tile(
     // If we are loading/storing multiple elements at time, we need to
     // not exceed the input boundaries. The last threads need to backtrack
     // of OFFSET elements. Those elements cumulates for previous tiles
-    const int id = (int)(get_global_id(0));
-    int       x  = id * VEC_SIZE;
 
-    // Shift x based on the previous offsets
-    const int tile_number = x / SRC_WIDTH;
-    x -= (tile_number) * OFFSET;
-    int x_input = x % SRC_WIDTH;
+    const int id          = (int)(get_global_id(0));
+    const int multiple_no = id / SRC_WIDTH_TILES;
+    const int tile_no     = id % SRC_WIDTH_TILES;
+    const int last_tile   = (int)(tile_no == SRC_WIDTH_TILES - 1);
 
-    // Shift x based on being the last tile
-    const int last_tile = (int)(x_input + VEC_SIZE > SRC_WIDTH);
-    x -= last_tile * OFFSET;
-    x_input = x % SRC_WIDTH;
-    output.ptr -= (tile_number + last_tile) * OFFSET * output_stride_x;
+    const int x_input  = tile_no * VEC_SIZE - last_tile * OFFSET;
+    const int x_output = multiple_no * SRC_WIDTH + x_input;
 
-    // Update the input pointer
-    input.ptr = tensor4D_offset(&input, x_input, y % SRC_HEIGHT, z % SRC_DEPTH, batch % SRC_BATCHES);
+    // Update the input and output pointers.
+    input.ptr  = tensor4D_offset(&input, x_input, y % SRC_HEIGHT, z % SRC_DEPTH, batch % SRC_BATCHES);
+    output.ptr = tensor4D_offset(&output, x_output, y, z, batch);
 
     // Copy the data
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
@@ -88,8 +84,9 @@ __kernel void tile(
 #else  // !defined(VEC_SIZE) || !defined(OFFSET)
     const int x = get_global_id(0);
 
-    // Update the input pointer
-    input.ptr = tensor4D_offset(&input, x % SRC_WIDTH, y % SRC_HEIGHT, z % SRC_DEPTH, batch % SRC_BATCHES);
+    // Update the input and output pointers.
+    input.ptr  = tensor4D_offset(&input, x % SRC_WIDTH, y % SRC_HEIGHT, z % SRC_DEPTH, batch % SRC_BATCHES);
+    output.ptr = tensor4D_offset(&output, x, y, z, batch);
 
     *((__global DATA_TYPE *)(output.ptr)) = *((__global DATA_TYPE *)(input.ptr));
 #endif // defined(VEC_SIZE) && defined(OFFSET)

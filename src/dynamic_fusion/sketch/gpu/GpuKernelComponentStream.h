@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,10 +49,11 @@ class GpuKernelComponentStream
 public:
     /** Constructor
      *
+     * @param[in] context  @ref GpuWorkloadContext to be used throughout the stream
      * @param[in] services @ref GpuComponentServices to be used throughout the stream
      * @param[in] mem_map  @ref MemoryDescriptor map used to assemble the @ref GpuWorkloadSourceCode
      */
-    GpuKernelComponentStream(GpuComponentServices *services, const MemoryDescriptorMap &mem_map);
+    GpuKernelComponentStream(GpuWorkloadContext *context, GpuComponentServices *services, const MemoryDescriptorMap &mem_map);
     /** Allow instances of this class to be copy constructed */
     GpuKernelComponentStream(const GpuKernelComponentStream &stream) = default;
     /** Allow instances of this class to be copied */
@@ -78,6 +79,7 @@ public:
     bool add_component(IGpuKernelComponent *component);
 
 private:
+    GpuWorkloadContext                  *_context;
     GpuComponentServices                *_services;
     std::vector<GpuKernelComponentGroup> _component_groups{};
     MemoryDescriptorMap                  _mem_map{};

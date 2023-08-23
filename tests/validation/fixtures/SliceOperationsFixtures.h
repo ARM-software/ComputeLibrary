@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SliceFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, Coordinates starts, Coordinates ends, DataType data_type)
     {
         _target    = compute_target(shape, starts, ends, data_type);
@@ -108,7 +107,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class StridedSliceFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape,
                Coordinates starts, Coordinates ends, BiStrides strides,
                int32_t begin_mask, int32_t end_mask, int32_t shrink_mask,

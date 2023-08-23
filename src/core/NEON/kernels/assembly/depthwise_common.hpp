@@ -85,7 +85,7 @@ public:
         size_t      ld_weight_row = 0) = 0;
 
     // Determine the amount of working space required
-    virtual size_t get_working_size(unsigned int n_threads, unsigned int n_input_channels) const = 0;
+    virtual size_t get_working_size(unsigned int n_threads) const = 0;
 
     // Execute the convolution over the specified area of memory.
     virtual void execute(

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuDepthwiseConv2d.h"
 
 #include "tests/CL/CLAccessor.h"
@@ -242,12 +243,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                 input_info, weights_info, biases_info, padding, stride, depth_multiplier, dilation, expected)
 {
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    GpuWorkloadContext context = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
-    const TensorInfo sketch_input_info   = sketch.create_tensor_info(input_info);
-    const TensorInfo sketch_weights_info = sketch.create_tensor_info(weights_info);
-    const TensorInfo sketch_biases_info  = sketch.create_tensor_info(biases_info);
+    const TensorInfo sketch_input_info   = context.create_tensor_info(input_info);
+    const TensorInfo sketch_weights_info = context.create_tensor_info(weights_info);
+    const TensorInfo sketch_biases_info  = context.create_tensor_info(biases_info);
 
     DepthwiseConv2dAttributes attributes {};
     attributes.pad(padding)
@@ -432,3 +433,5 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF

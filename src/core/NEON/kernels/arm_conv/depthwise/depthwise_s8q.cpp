@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,6 +75,11 @@ bool qp_weights_are_symmetric(const DepthwiseArgs &, const void *_qp)
   const auto qp = static_cast<const arm_gemm::Requantize32 *>(_qp);
   return qp->b_offset == 0;
 }
+
+uint64_t not_preferred(const DepthwiseArgs &, const Requantize32 &)
+{
+  return std::numeric_limits<uint64_t>::max();
+}
 #endif // defined(__aarch64__)
 }
 
@@ -139,7 +144,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "sve_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst",
     constraint<Requantize32>(is_supported<sve_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              qp_weights_are_symmetric,
                              cpu_has_sve2),
@@ -153,7 +157,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst",
     constraint<Requantize32>(is_supported<sve_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              cpu_has_sve2),
     nullptr,
@@ -166,7 +169,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "sve_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<sve_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              cpu_has_sve2),
     nullptr,
@@ -179,7 +181,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "sve_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<sve_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              cpu_has_sve2),
     nullptr,
@@ -192,7 +193,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "sve_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<sve_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              cpu_has_sve2),
     nullptr,
@@ -208,7 +208,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
                              qp_has_no_left_shift,
                              has_channel_multiplier,
                              cpu_has_sve2),
-    nullptr,
+    not_preferred,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto strat = new sve_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst(args.cpu_info);
       return new DepthwiseDepthfirstMultiplier<int8_t, int8_t, int8_t, int32_t, false>(strat, args, qp);
@@ -221,7 +221,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
                              qp_has_no_left_shift,
                              has_channel_multiplier,
                              cpu_has_sve2),
-    nullptr,
+    not_preferred,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto strat = new sve_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst(args.cpu_info);
       return new DepthwiseDepthfirstMultiplier<int8_t, int8_t, int8_t, int32_t, false>(strat, args, qp);
@@ -232,7 +232,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst",
     constraint<Requantize32>(is_supported<a64_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_weights_are_symmetric,
                              qp_has_no_left_shift,
                              cpu_has_dot_product),
@@ -246,7 +245,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst",
     constraint<Requantize32>(is_supported<a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift,
                              cpu_has_dot_product),
     nullptr,
@@ -259,7 +257,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<a64_s8q_nhwc_3x3_s1_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift),
     nullptr,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
@@ -271,7 +268,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<a64_s8q_nhwc_3x3_s2_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift),
     nullptr,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
@@ -283,7 +279,6 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst",
     constraint<Requantize32>(is_supported<a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst>,
-                             has_no_channel_multiplier,
                              qp_has_no_left_shift),
     nullptr,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
@@ -294,7 +289,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
   {
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_nhwc_generic_output3x3_mla_depthfirst",
-    constraint<Requantize32>(has_no_channel_multiplier),
+    nullptr,
     nullptr,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto kernel = new a64_s8q_nhwc_generic_output9_mla_depthfirst(args.cpu_info);
@@ -309,7 +304,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
                              qp_has_no_left_shift,
                              has_channel_multiplier,
                              cpu_has_dot_product),
-    nullptr,
+    not_preferred,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto strat = new a64_s8q_packed_to_nhwc_3x3_s2_with_multiplier_output2x4_dot_depthfirst(args.cpu_info);
       return new DepthwiseDepthfirstMultiplier<int8_t, int8_t, int8_t, int32_t, false>(strat, args, qp);
@@ -322,7 +317,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
                              qp_has_no_left_shift,
                              has_channel_multiplier,
                              cpu_has_dot_product),
-    nullptr,
+    not_preferred,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto strat = new a64_s8q_packed_to_nhwc_5x5_s1_with_multiplier_output4x2_dot_depthfirst(args.cpu_info);
       return new DepthwiseDepthfirstMultiplier<int8_t, int8_t, int8_t, int32_t, false>(strat, args, qp);
@@ -332,7 +327,7 @@ static const DepthwiseImplementation<int8_t, int8_t, int8_t, Requantize32> depth
     DepthwiseMethod::DEPTHFIRST,
     "a64_s8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst",
     constraint<Requantize32>(has_channel_multiplier),
-    nullptr,
+    not_preferred,
     [] (const DepthwiseArgs &args, const Requantize32 &qp) -> DepthwiseCommon<int8_t, int8_t, int8_t> * {
       auto kern = new a64_s8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst(args.cpu_info);
       auto strat = new GenericDepthfirstMultiplierStrategy<int8_t>(kern, args);

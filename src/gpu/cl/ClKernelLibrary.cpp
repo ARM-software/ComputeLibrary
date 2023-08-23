@@ -319,6 +319,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "l2_normalize_x", "common/l2_normalize.cl" },
     { "l2_normalize_y", "common/l2_normalize.cl" },
     { "l2_normalize_z", "common/l2_normalize.cl" },
+    { "mat_mul_native_mmul_nt_nt", "common/mat_mul_mmul.cl" },
+    { "mat_mul_native_mmul_t_nt", "common/mat_mul_mmul.cl" },
+    { "mat_mul_native_mmul_nt_t", "common/mat_mul_mmul.cl" },
+    { "mat_mul_native_mmul_t_t", "common/mat_mul_mmul.cl" },
     { "mat_mul_native_nt_nt", "common/mat_mul.cl" },
     { "mat_mul_native_nt_t", "common/mat_mul.cl" },
     { "mat_mul_native_t_nt", "common/mat_mul.cl" },
@@ -797,6 +801,10 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/mat_mul.cl",
 #include "./cl_kernels/common/mat_mul.clembed"
+    },
+    {
+        "common/mat_mul_mmul.cl",
+#include "./cl_kernels/common/mat_mul_mmul.clembed"
     },
     {
         "common/mat_mul_quantized.cl",

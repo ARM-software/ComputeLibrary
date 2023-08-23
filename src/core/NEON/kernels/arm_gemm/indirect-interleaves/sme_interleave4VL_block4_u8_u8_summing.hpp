@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 template <>
 void interleave_block<4, 4, VLType::SME, true>(
@@ -112,22 +112,22 @@ void interleave_block<4, 4, VLType::SME, true>(
       ".inst 0x25306d20  // psel p0.s, p11.s/Z, p9.s[w12]\n"
       ".inst 0xe0bf8120  // st1w { za0v.s[x12] }, p0/Z, [x9, XZR, LSL #2]\n"
       ".inst 0x25306d20  // psel p0.s, p11.s/Z, p9.s[w12]\n"
-      ".inst 0xc0828813  // mova z19.s, p2/M, za0v.s[x12]\n"
+      ".inst 0xc0828810  // mova z16.s, p2/M, za0v.s[x12]\n"
       ".inst 0xe0af8124  // st1w { za1v.s[x12] }, p0/Z, [x9, x15, LSL #2]\n"
       ".inst 0x25306d21  // psel p1.s, p11.s/Z, p9.s[w12]\n"
       ".inst 0x25306d20  // psel p0.s, p11.s/Z, p9.s[w12]\n"
       ".inst 0xc0828891  // mova z17.s, p2/M, za1v.s[x12]\n"
       ".inst 0xe0ae8528  // st1w { za2v.s[x12] }, p1/Z, [x9, x14, LSL #2]\n"
-      ".inst 0xc0828912  // mova z18.s, p2/M, za2v.s[x12]\n"
-      "udot z23.s, z19.b, z24.b\n"
+      ".inst 0xc0828913  // mova z19.s, p2/M, za2v.s[x12]\n"
+      "udot z23.s, z16.b, z24.b\n"
       ".inst 0xe0ad812c  // st1w { za3v.s[x12] }, p0/Z, [x9, x13, LSL #2]\n"
-      ".inst 0xc0828990  // mova z16.s, p2/M, za3v.s[x12]\n"
+      ".inst 0xc0828992  // mova z18.s, p2/M, za3v.s[x12]\n"
       "add x12, x12, #0x1\n"
       "cmp x12, x20\n"
       "udot z22.s, z17.b, z24.b\n"
-      "udot z21.s, z18.b, z24.b\n"
+      "udot z21.s, z19.b, z24.b\n"
       "addvl x9, x9, #4\n"
-      "udot z20.s, z16.b, z24.b\n"
+      "udot z20.s, z18.b, z24.b\n"
       "blt 5b\n"
       "incb x28\n"
       "whilelt p9.b, x28, %x[width]\n"
@@ -147,4 +147,4 @@ void interleave_block<4, 4, VLType::SME, true>(
     );
 }
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

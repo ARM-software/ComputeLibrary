@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 template <>
 void interleave_block<1, 4, VLType::SME, true>(
@@ -200,12 +200,12 @@ void interleave_block<1, 4, VLType::SME, true>(
       "10:"  // K loop: Tails: Even: First
       ".inst 0x25306d20  // psel p0.s, p11.s/Z, p9.s[w12]\n"
       ".inst 0xe0bf8300  // st1w { za0v.s[x12] }, p0/Z, [x24, XZR, LSL #2]\n"
-      "ldr x22, [x23, #0x0]\n"
+      "ldr x20, [x23, #0x0]\n"
       ".inst 0xc0828810  // mova z16.s, p2/M, za0v.s[x12]\n"
       "add x12, x12, #0x1\n"
       ".inst 0x25356140  // psel p0.b, p8.b/Z, p10.b[w13, #2]\n"
       "sdot z17.s, z16.b, z18.b\n"
-      ".inst 0xe01922c2  // ld1b { za0h.b[x13, #2] }, p0/Z, [x22, x25]\n"
+      ".inst 0xe0192282  // ld1b { za0h.b[x13, #2] }, p0/Z, [x20, x25]\n"
       "cmp x12, x9\n"
       "add x23, x23, #0x8\n"
       "addvl x24, x24, #1\n"
@@ -225,7 +225,7 @@ void interleave_block<1, 4, VLType::SME, true>(
       "addvl x24, x24, #1\n"
       "add x20, x20, #0x4\n"
       "blt 11b\n"
-      "whilelt p9.b, x28, %x[width]\n"
+      "whilelt p8.b, x28, %x[width]\n"
       "b 14f\n"
       "12:"  // K loop: Tails: Odd
       "mov x12, #0x0\n"
@@ -249,4 +249,4 @@ void interleave_block<1, 4, VLType::SME, true>(
     );
 }
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

@@ -382,6 +382,7 @@ cc_library(
             }),
     includes = [
         "arm_compute/runtime",
+        "src/core/NEON/kernels/arm_gemm",
         "src/core/NEON/kernels/assembly",
         "src/core/NEON/kernels/convolution/common",
         "src/core/NEON/kernels/convolution/winograd",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #define BENCHMARK_EXAMPLES
 #include "utils/Utils.cpp"
 
+#include "arm_compute/core/Version.h"
 #include "arm_compute/runtime/Scheduler.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"

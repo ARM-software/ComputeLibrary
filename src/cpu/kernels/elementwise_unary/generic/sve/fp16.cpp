@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
+#include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
 namespace arm_compute

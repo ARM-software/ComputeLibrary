@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "arm_compute/core/Error.h"
 #include "depthfirst_driver.hpp"
 #include "utils.hpp"
 #if !defined(_WIN64) && !defined(__OpenBSD__)
@@ -137,8 +136,8 @@ class PoolingDepthfirstGeneric : public DepthfirstDriver<TInput, TOutput>
   const OutputStage m_os;
 
   protected:
-  size_t get_working_size_per_thread(unsigned int) const override { return 0; }
-  void initialise_working_space(void *, unsigned int) const override { /* Nothing */ }
+  size_t get_working_size_per_thread() const override { return 0; }
+  void initialise_working_space(void *) const override { /* Nothing */ }
 
   /* Compute a portion of the output tensor with padding. */
   void compute_tile_padded(
@@ -208,10 +207,9 @@ class PoolingDepthfirstGeneric : public DepthfirstDriver<TInput, TOutput>
     const unsigned int channel_start, const unsigned int channel_end,
     const TensorSpec<const TInput *> &input,
     const TensorSpec<TOutput *> &output,
-    void *working_space
+    void *
   ) const override
   {
-    ARM_COMPUTE_UNUSED(working_space);
     // Determine start position and padding
     const int start_i = static_cast<int>(output_i * this->m_args.pool_stride.rows) - this->m_args.padding.top;
     const auto input_i = static_cast<unsigned int>(start_i < 0 ? 0 : start_i);

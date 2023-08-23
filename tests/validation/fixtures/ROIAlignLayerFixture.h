@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIAlignLayerGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
     {
         _rois_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::QASYMM16 : data_type;
@@ -189,7 +188,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIAlignLayerFixture : public ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout)
     {
         ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>::setup(input_shape, pool_info, rois_shape, data_type, data_layout,
@@ -201,7 +199,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIAlignLayerQuantizedFixture : public ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type,
                DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
     {

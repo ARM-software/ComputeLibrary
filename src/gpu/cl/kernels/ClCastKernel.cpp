@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,8 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -54,7 +56,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
                                                          1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32);
+                                                         DataType::F32, DataType::S64, DataType::U64);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst,
                                                          1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8, DataType::S16,

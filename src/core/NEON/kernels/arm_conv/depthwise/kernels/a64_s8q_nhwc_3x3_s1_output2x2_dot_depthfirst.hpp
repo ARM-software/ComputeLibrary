@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 #include "src/core/NEON/kernels/arm_conv/depthwise/interleaves/list.hpp"
 
 #include <cstdint>
@@ -34,15 +34,7 @@
 namespace arm_conv {
 namespace depthwise {
 
-void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(
-  const unsigned int,
-  const int8_t *const *const,
-  const int8_t *,
-  const int32_t *,
-  const arm_gemm::Requantize32&,
-  const int32_t *, const int32_t *,
-  int8_t *const *const
-);
+void a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst_impl(unsigned int, const int8_t *const *, const int8_t *, const int32_t *, const arm_gemm::Requantize32&, const int32_t *, const int32_t *, int8_t *const *);
 
 class a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst : public DepthwiseDepthfirstStrategy<int8_t, int8_t, int8_t, int32_t>
 {
@@ -72,7 +64,7 @@ class a64_s8q_nhwc_3x3_s1_output2x2_dot_depthfirst : public DepthwiseDepthfirstS
   ) const override
   {
     interleave_a64_s8q_3x3_dot::pack_parameters(
-      args.input_channels, buffer, reinterpret_cast<const int32_t *>(biases),
+      args.input_channels * args.channel_multiplier, buffer, reinterpret_cast<const int32_t *>(biases),
       reinterpret_cast<const int8_t *>(weights), qp, ld_weight_col, ld_weight_row
     );
   }

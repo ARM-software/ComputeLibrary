@@ -25,7 +25,7 @@
 import SCons
 import json
 import os
-from subprocess import check_output
+import subprocess
 
 def version_at_least(version, required):
 
@@ -125,7 +125,7 @@ vars.AddVariables(
             ├── datasets
             ├── fixtures
             └── Neon\n""", "", PathVariable.PathAccept),
-    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files", False),
+    BoolVariable("experimental_dynamic_fusion", "Build the experimental dynamic fusion files. This option also enables opencl=1 on which it has a direct dependency.", False),
     BoolVariable("fixed_format_kernels", "Enable fixed format kernels for GEMM", False),
     BoolVariable("mapfile", "Generate a map file", False),
     ListVariable("custom_options", "Custom options that can be used to turn on/off features", "none", ["disable_mmla_fp"]),
@@ -133,6 +133,7 @@ vars.AddVariables(
     ListVariable("data_layout_support", "Enable a list of data layout to support", "all", ["nhwc", "nchw"]),
     ("toolchain_prefix", "Override the toolchain prefix; used by all toolchain components: compilers, linker, assembler etc. If unspecified, use default(auto) prefixes; if passed an empty string '' prefixes would be disabled", "auto"),
     ("compiler_prefix", "Override the compiler prefix; used by just compilers (CC,CXX); further overrides toolchain_prefix for compilers; this is for when the compiler prefixes are different from that of the linkers, archivers etc. If unspecified, this is the same as toolchain_prefix; if passed an empty string '' prefixes would be disabled", "auto"),
+    BoolVariable("thread_sanitizer", "Enable ThreadSanitizer", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", ""),
@@ -160,7 +161,7 @@ install_path = env['install_dir']
 if not env['install_dir'].startswith('/') and install_path != "":
     install_path = "%s/%s" % (build_path, install_path)
 
-env.Append(LIBPATH = [build_path])
+env.Append(LIBPATH = [build_path, os.path.join(build_path, "prototype")])
 Export('env')
 Export('vars')
 
@@ -213,6 +214,10 @@ if env['os'] == 'bare_metal':
     if env['cppthreads'] or env['openmp']:
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
+
+if env['experimental_dynamic_fusion']:
+    # Dynamic Fusion on GPU has a direct dependency on OpenCL and Compute Kernel Writer
+    env['opencl'] = 1
 
 if env['opencl'] and env['embed_kernels'] and env['compress_kernels'] and env['os'] not in ['android']:
     print("Compressed kernels are supported only for android builds")
@@ -415,12 +420,57 @@ print("Using compilers:")
 print("CC", env['CC'])
 print("CXX", env['CXX'])
 
+"""Build the Compute Kernel Writer subproject"""
+if env['experimental_dynamic_fusion']:
+    # Strip ccache prefix from CC and CXX to obtain only the target triple
+    CKW_CC = env['CC'].replace(env['compiler_cache'] + " ", "")
+    CKW_CXX = env['CXX'].replace(env['compiler_cache'] + " ", "")
+    CKW_CCACHE = 1 if env['compiler_cache'] else 0
+
+    CKW_BUILD_TYPE = "Debug" if env['debug'] else "Release"
+
+    CKW_ENABLE_OPENCL = env['opencl']
+    CKW_ENABLE_ASSERTS = env['debug'] or env['asserts']
+
+    CKW_PROJECT_DIR = Dir('.').path + "/compute_kernel_writer"
+    CKW_INCLUDE_DIR = CKW_PROJECT_DIR + "/prototype/include"
+    CKW_BUILD_DIR = build_path.replace("#", "")
+
+    CKW_CMAKE_CMD = "CC={CKW_CC} CXX={CKW_CXX} cmake -G \"Unix Makefiles\" " \
+                    "-S {CKW_PROJECT_DIR} -B {CKW_BUILD_DIR} " \
+                    "-DCMAKE_BUILD_TYPE={CKW_BUILD_TYPE} " \
+                    "-DCKW_ENABLE_OPENCL={CKW_ENABLE_OPENCL} " \
+                    "-DCKW_ENABLE_ASSERTS={CKW_ENABLE_ASSERTS} " \
+                    "-DCKW_BUILD_PROTOTYPE=ON " \
+                    "-DCKW_CCACHE={CKW_CCACHE} ".format(CKW_CC=CKW_CC,
+                                                        CKW_CXX=CKW_CXX,
+                                                        CKW_PROJECT_DIR=CKW_PROJECT_DIR,
+                                                        CKW_BUILD_DIR=CKW_BUILD_DIR,
+                                                        CKW_BUILD_TYPE=CKW_BUILD_TYPE,
+                                                        CKW_ENABLE_OPENCL=CKW_ENABLE_OPENCL,
+                                                        CKW_ENABLE_ASSERTS=CKW_ENABLE_ASSERTS,
+                                                        CKW_CCACHE=CKW_CCACHE
+                                                        )
+
+    # Configure CKW static objects with -fPIC (CMAKE_POSITION_INDEPENDENT_CODE) option to enable linking statically to ACL
+    CKW_CMAKE_CONFIGURE_STATIC = CKW_CMAKE_CMD + "-DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+    CKW_CMAKE_BUILD = "cmake --build {CKW_BUILD_DIR} --target ckw_prototype -j{NUM_JOBS}".format(CKW_BUILD_DIR=CKW_BUILD_DIR,
+                                                                                                 NUM_JOBS=GetOption('num_jobs')
+                                                                                                 )
+
+    # Build Compute Kernel Writer Static Library
+    subprocess.check_call(CKW_CMAKE_CONFIGURE_STATIC, stderr=subprocess.STDOUT, shell=True)
+    subprocess.check_call(CKW_CMAKE_BUILD, stderr=subprocess.STDOUT, shell=True)
+
+    # Let ACL know where to find CKW headers
+    env.Append(CPPPATH = CKW_INCLUDE_DIR)
+
 if not GetOption("help"):
     try:
         if env['os'] == 'windows':
-            compiler_ver = check_output("clang++ -dumpversion").decode().strip()
+            compiler_ver = subprocess.check_output("clang++ -dumpversion").decode().strip()
         else:
-            compiler_ver = check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
+            compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).decode().strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
@@ -563,6 +613,10 @@ if env['asserts']:
 
 if env['logging']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
+
+if env['thread_sanitizer']:
+    env.Append(CXXFLAGS = ['-fsanitize=thread'])
+    env.Append(LINKFLAGS = ['-fsanitize=thread'])
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])

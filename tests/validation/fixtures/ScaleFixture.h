@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScaleValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                bool align_corners, bool mixed_layout, QuantizationInfo output_quantization_info)
     {
@@ -211,7 +210,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScaleValidationQuantizedFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                bool align_corners)
     {
@@ -231,7 +229,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScaleValidationDifferentOutputQuantizedFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, InterpolationPolicy policy,
                BorderMode border_mode, SamplingPolicy sampling_policy,
                bool align_corners)
@@ -252,7 +249,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScaleValidationFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType data_type, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
     {
         ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,

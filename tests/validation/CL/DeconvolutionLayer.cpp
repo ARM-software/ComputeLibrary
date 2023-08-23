@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,6 +79,9 @@ const auto data2x2_precommit = datasets::SmallDeconvolutionShapes() * framework:
                                * framework::dataset::make("PadY", 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
+                     * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
+
+const auto data5x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
@@ -185,6 +188,9 @@ using CLDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<CLTensor, 
 template <typename T>
 using CLDeconvolutionLayerAsymmFixture9x9 = DeconvolutionValidationAsymmFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 9, 9>;
 
+template <typename T>
+using CLDeconvolutionLayerFixture5x1 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 5, 1>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
@@ -265,6 +271,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerAsymmFixture9x9<float>, fra
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END() // W9x9
+
+TEST_SUITE(W5x1)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture5x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data5x1, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                    data_layouts_dataset),
+                                                                                                            add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // W5x1
+
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
@@ -318,6 +335,16 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::Dat
 }
 TEST_SUITE_END() // W1x1
 
+TEST_SUITE(W5x1)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture5x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data5x1, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                   data_layouts_dataset),
+                                                                                                           add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END() // W5x1
+
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
@@ -334,6 +361,9 @@ template <typename T>
 using CLDeconvolutionLayerQuantizedFixture1x1 = DeconvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 1, 1>;
 
 template <typename T>
+using CLDeconvolutionLayerQuantizedFixture5x1 = DeconvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 5, 1>;
+
+template <typename T>
 using CLDeconvolutionLayerQuantizedPerChannelFixture4x4 = DeconvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, int8_t, 4, 4>;
 
 template <typename T>
@@ -344,6 +374,9 @@ using CLDeconvolutionLayerQuantizedPerChannelFixture2x2 = DeconvolutionValidatio
 
 template <typename T>
 using CLDeconvolutionLayerQuantizedPerChannelFixture1x1 = DeconvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, int8_t, 1, 1>;
+
+template <typename T>
+using CLDeconvolutionLayerQuantizedPerChannelFixture5x1 = DeconvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, int8_t, 5, 1>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -411,6 +444,19 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, fr
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
 TEST_SUITE_END() // W1x1
+
+TEST_SUITE(W5x1)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture5x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data5x1, framework::dataset::make("DataType",
+                                                                                                                       DataType::QASYMM8)),
+                                                                                                                       data_layouts_dataset),
+                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
+                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
+                                                                                                                       add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W5x1
 
 TEST_SUITE_END() // QASYMM8
 
@@ -484,6 +530,19 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<int8_t>, fra
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
 TEST_SUITE_END() // W1x1
+
+TEST_SUITE(W5x1)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture5x1<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data5x1, framework::dataset::make("DataType",
+                                                                                                                      DataType::QASYMM8_SIGNED)),
+                                                                                                                      data_layouts_dataset),
+                                                                                                                      framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
+                                                                                                                      framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
+                                                                                                                      add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W5x1
 
 TEST_SUITE_END() // QASYMM8_SIGNED
 
@@ -618,6 +677,31 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFi
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
 TEST_SUITE_END() // W1x1
+
+TEST_SUITE(W5x1)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedPerChannelFixture5x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(data5x1,
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       data_layouts_dataset),
+                       input_qinfo_dataset),
+                       output_qinfo_dataset),
+                       add_bias_dataset),
+                       framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFixture5x1<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(data5x1,
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       data_layouts_dataset),
+                       input_signed_qinfo_dataset),
+                       output_signed_qinfo_dataset),
+                       add_bias_dataset),
+                       framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W5x1
 
 TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 

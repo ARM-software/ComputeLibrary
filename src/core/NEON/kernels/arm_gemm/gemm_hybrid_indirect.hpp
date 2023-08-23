@@ -440,7 +440,7 @@ public:
             in_row_strings = std::vector<const To * const *>(_args._Ksections, nullptr);
 
             for (unsigned int i=0; i<_args._Ksections; i++) {
-                in_row_strings[i] = &(in_row_ptrs[i * strategy::out_height()]);
+                in_row_strings[i] = &(in_row_ptrs.data()[i * strategy::out_height()]);
             }
         }
 

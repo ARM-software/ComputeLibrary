@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH
-#define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH
+#ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH
+#define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH
 
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuComponentServices.h"
@@ -49,9 +49,10 @@ class GpuKernelComponentGraph
 public:
     /** Constructor
      *
+     * @param[in] context  @ref GpuWorkloadContext to be used by the graph
      * @param[in] services @ref GpuComponentServices to be used by the graph
      */
-    GpuKernelComponentGraph(GpuComponentServices *services);
+    GpuKernelComponentGraph(GpuWorkloadContext *context, GpuComponentServices *services);
     /** Prevent instances of this class from being copy constructed */
     GpuKernelComponentGraph(const GpuKernelComponentGraph &graph) = delete;
     /** Prevent instances of this class from being copied */
@@ -98,6 +99,7 @@ public:
 
 private:
     static std::vector<DependencyGraph::TensorId> get_tensor_ids(const std::vector<const ITensorInfo *> tensors);
+    GpuWorkloadContext   *_context;
     GpuComponentServices *_services;
     std::map<ComponentId, std::unique_ptr<IGpuKernelComponent>> _components;
     std::map<ITensorInfo::Id, const ITensorInfo *>              _tensors;
@@ -106,4 +108,4 @@ private:
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute
-#endif /* SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH */
+#endif /* ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGRAPH */

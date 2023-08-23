@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
 #pragma once
 
-#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
 namespace arm_conv {
 namespace depthwise {
 
-void sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst_indirect_impl(const __fp16 *const *const, __fp16 *const *const, const void *, unsigned int, const __fp16, const __fp16);
-void sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst_direct_impl(const unsigned int, const unsigned int, const __fp16 *, int64_t, int64_t, __fp16 *, int64_t, int64_t, const void *, unsigned int, const __fp16, const __fp16);
+void sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst_indirect_impl(const __fp16 *const *const input_ptrs, __fp16 *const *const outptrs, const void *params, unsigned int n_channels, const __fp16 activation_min, const __fp16 activation_max);
+void sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst_direct_impl(const unsigned int n_tile_rows, const unsigned int n_tile_cols, const __fp16 *inptr, int64_t ld_input_row, int64_t ld_input_col, __fp16 *outptr, int64_t ld_output_row, int64_t ld_output_col, const void *params, unsigned int n_channels, const __fp16 activation_min, const __fp16 activation_max);
 
 class sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<__fp16, __fp16, __fp16, __fp16>
 {
@@ -57,7 +57,7 @@ class sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirst
   constexpr static unsigned int output_cols = 2;
 
   sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst(const CPUInfo *)
-  : DepthwiseDepthfirstStrategy<__fp16, __fp16, __fp16, __fp16>(2, 3, 2) {}
+  : Parent(output_rows, output_cols, kernel_rows, kernel_cols, stride_rows, stride_cols) {}
 
   arm_gemm::VLType get_vl_type(void) const override { return vl_type; }
 
@@ -68,4 +68,4 @@ class sve_fp16_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirst
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(__ARM_FP16_ARGS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

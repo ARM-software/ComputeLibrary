@@ -27,6 +27,7 @@
 #include "src/cpu/ICpuOperator.h"
 
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 
 #include <memory>
 
@@ -107,8 +108,8 @@ public:
                                FullyConnectedLayerInfo fc_info, WeightsInfo weights_info);
 
     //Inherited methods override
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &tensors) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -158,8 +159,8 @@ private:
     bool                      _dynamic_weights;
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    int                       _asrt_run_count{};
-    int                       _asrt_prepare_count{};
+    int _asrt_run_count{};
+    int _asrt_prepare_count{};
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 };
 } // namespace cpu

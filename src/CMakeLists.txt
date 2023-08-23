@@ -105,8 +105,7 @@ target_sources(
 target_sources(
     arm_compute_sve
     PRIVATE
-    core/NEON/kernels/arm_conv/depthwise/interleaves/sve_8b_mla.cpp
-	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp
+    core/NEON/kernels/arm_conv/depthwise/interleaves/sve_s8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/sve_u8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_direct.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/sme2_fp16_nhwc_3x3_s1_output2x2_mla_depthfirst/generic_indirect.cpp
@@ -425,7 +424,6 @@ target_sources(
 	core/NEON/kernels/arm_conv/depthwise/depthwise_strategies_common.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_u8q.cpp
 	core/NEON/kernels/arm_conv/depthwise/depthwise_u8s8u8q.cpp
-	core/NEON/kernels/arm_conv/depthwise/interleaves/8b_mla.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/a64_s8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/a64_u8q_3x3_dot.cpp
 	core/NEON/kernels/arm_conv/depthwise/interleaves/generic.cpp
@@ -481,6 +479,7 @@ target_sources(
 	core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_5x5_s1_output2x2_mla_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_nhwc_generic_output9_mla_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/depthwise/kernels/a64_u8s8u8q_packed_to_nhwc_generic_with_multiplier_output2x8_mla_depthfirst/generic.cpp
+	core/NEON/kernels/arm_conv/depthwise/premultiply.cpp
 	core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_avg_generic_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/pooling/kernels/a64_fp16_nhwc_max_2x2_s1_output2x2_depthfirst/generic.cpp
@@ -638,8 +637,14 @@ target_sources(
 	core/Version.cpp
 	core/helpers/SoftmaxHelpers.cpp
 	core/helpers/WindowHelpers.cpp
+	core/utils/ActivationFunctionUtils.cpp
 	core/utils/AssemblyUtils.cpp
+	core/utils/DataLayoutUtils.cpp
+	core/utils/DataTypeUtils.cpp
+	core/utils/FormatUtils.cpp
+	core/utils/InterpolationPolicyUtils.cpp
 	core/utils/ScaleUtils.cpp
+	core/utils/StringUtils.cpp
 	core/utils/helpers/fft.cpp
 	core/utils/helpers/tensor_transform.cpp
 	core/utils/io/FileHandler.cpp

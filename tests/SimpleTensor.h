@@ -392,6 +392,8 @@ int SimpleTensor<T>::num_channels() const
         case Format::S16:
         case Format::U32:
         case Format::S32:
+        case Format::U64:
+        case Format::S64:
         case Format::F16:
         case Format::F32:
             return 1;

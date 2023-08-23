@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/function_info/ConvolutionInfo.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
@@ -63,7 +64,7 @@ inline TensorShape calculate_reduce_mean_shape(ITensorInfo *input, const Coordin
         std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
         for(int i = 0; i < reduction_ops; ++i)
         {
-            out_shape.remove_dimension(axis_local[i] - i);
+            out_shape.remove_dimension(axis_local[i] - i, false);
         }
         return out_shape;
     }
@@ -404,8 +405,8 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 {
     TensorShape shape_transposed{ input.tensor_shape() };
 
-    shape_transposed.set(0, input.dimension(1));
-    shape_transposed.set(1, input.dimension(0));
+    shape_transposed.set(0, input.dimension(1), false);
+    shape_transposed.set(1, input.dimension(0), false);
 
     return shape_transposed;
 }
@@ -432,8 +433,8 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     const int        weights_width_idx   = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::WIDTH);
     const int        weights_height_idx  = get_data_layout_dimension_index(weights_data_layout, DataLayoutDimension::HEIGHT);
 
-    unsigned int output_width             = 0;
-    unsigned int output_height            = 0;
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
                                                               weights_shape[weights_width_idx], weights_shape[weights_height_idx],
                                                               info.pad_stride_info, info.dilation);
@@ -683,8 +684,8 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
     const DataLayout    data_layout      = winograd_info.output_data_layout;
 
     // Compute output shape
-    unsigned int output_width             = 0;
-    unsigned int output_height            = 0;
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_dimensions.width, input_dimensions.height,
                                                               kernel_size.width, kernel_size.height, conv_info);
 
@@ -724,7 +725,7 @@ inline TensorShape compute_deep_convolution_shape(const TensorShape &input_shape
     const unsigned int weights_out_channel = weights_shape[3];
     unsigned int       output_width        = 0;
     unsigned int       output_height       = 0;
-    std::tie(output_width, output_height)  = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
+    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(idx_width, output_width);

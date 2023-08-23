@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,13 +107,11 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                          _memory_group;
-    std::vector<CLTensor>                                _results_vector;
-    CLTensor                                             _not_reshaped_output;
-    std::vector<std::unique_ptr<CLArgMinMaxLayerKernel>> _reduction_kernels_vector;
-    CLReshapeLayer                                       _reshape;
-    unsigned int                                         _num_of_stages;
-    unsigned int                                         _reduction_axis;
+    MemoryGroup                             _memory_group;
+    CLTensor                                _not_reshaped_output;
+    std::unique_ptr<CLArgMinMaxLayerKernel> _arg_min_max_kernel;
+    CLReshapeLayer                          _reshape;
+    unsigned int                            _reduction_axis;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLARGMINMAXLAYER_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,6 @@ template <typename TensorType, typename AccessorType, typename OperatorType, typ
 class GEMMReshapeLHSMatrixValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_in, unsigned int batch_size, DataType data_type, unsigned int m0, unsigned int k0, unsigned int v0, bool interleave, bool transpose)
     {
         GEMMLHSMatrixInfo lhs_info;

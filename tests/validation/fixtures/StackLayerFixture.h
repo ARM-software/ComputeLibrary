@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,6 @@ template <typename TensorType, typename AbstractTensorType, typename AccessorTyp
 class StackLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_src, int axis, DataType data_type, int num_tensors)
     {
         _target    = compute_target(shape_src, axis, data_type, num_tensors);

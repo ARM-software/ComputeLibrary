@@ -92,7 +92,6 @@ public:
                   int32_t, T >::type;
 
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
                bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}))
@@ -362,7 +361,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ConvolutionValidationFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, ActivationLayerInfo act_info)
     {
@@ -376,7 +374,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ConvolutionValidationWithPaddingFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
     {
@@ -390,7 +387,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
@@ -403,7 +399,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ConvolutionValidationQuantizedPerChannelFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataType weights_data_type)
     {
@@ -514,7 +509,6 @@ template <typename ConvolutionFunction, typename TensorClass, typename AccessorT
 class VariableWeightsFixtureBaseClass : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataLayout data_layout,
                const DataType data_type)
     {
@@ -702,7 +696,6 @@ template <typename ConvolutionClass, bool enable_fast_math>
 class HasOptImplFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(DataType data_type, arm_compute::WeightFormat query_weight_format)
     {
         auto              conv        = std::make_unique<ConvolutionClass>();

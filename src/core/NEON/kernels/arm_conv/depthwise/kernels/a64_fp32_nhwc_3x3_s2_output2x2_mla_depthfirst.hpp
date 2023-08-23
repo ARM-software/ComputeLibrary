@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
@@ -33,8 +33,8 @@
 namespace arm_conv {
 namespace depthwise {
 
-void a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst_indirect_impl(const float *const *const, float *const *const, const void *, unsigned int, const float, const float);
-void a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst_direct_impl(const unsigned int, const unsigned int, const float *, int64_t, int64_t, float *, int64_t, int64_t, const void *, unsigned int, const float, const float);
+void a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst_indirect_impl(const float *const *const input_ptrs, float *const *const outptrs, const void *params, unsigned int n_channels, const float activation_min, const float activation_max);
+void a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst_direct_impl(const unsigned int n_tile_rows, const unsigned int n_tile_cols, const float *inptr, int64_t ld_input_row, int64_t ld_input_col, float *outptr, int64_t ld_output_row, int64_t ld_output_col, const void *params, unsigned int n_channels, const float activation_min, const float activation_max);
 
 class a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<float, float, float, float>
 {
@@ -57,7 +57,7 @@ class a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst : public DepthwiseDepthfirst
   constexpr static unsigned int output_cols = 2;
 
   a64_fp32_nhwc_3x3_s2_output2x2_mla_depthfirst(const CPUInfo *)
-  : DepthwiseDepthfirstStrategy<float, float, float, float>(2, 3, 2) {}
+  : Parent(output_rows, output_cols, kernel_rows, kernel_cols, stride_rows, stride_cols) {}
 
   arm_gemm::VLType get_vl_type(void) const override { return vl_type; }
 

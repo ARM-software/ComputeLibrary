@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
@@ -48,4 +48,4 @@ class a64_fp32_nhwc_generic_output9_mla_depthfirst : public GenericDepthfirstKer
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif // defined(__aarch64__)
+#endif  // defined(__aarch64__)

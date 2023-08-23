@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,17 +91,17 @@ class PoolingDepthfirst : public DepthfirstDriver<TInput, TOutput>
 
   protected:
   /* Compute the amount of working space required for a single thread. */
-  size_t get_working_size_per_thread(unsigned int n_channels) const override
+  size_t get_working_size_per_thread() const override
   {
-    return sizeof(WorkingSpace) + n_channels * (sizeof(TInput) + sizeof(TOutput));
+    return sizeof(WorkingSpace) + this->m_args.n_channels * (sizeof(TInput) + sizeof(TOutput));
   }
 
   /* Initialise the working space for a thread. */
-  void initialise_working_space(void *raw_ws, unsigned int n_channels) const override
+  void initialise_working_space(void *raw_ws) const override
   {
     auto ws = reinterpret_cast<WorkingSpace *>(raw_ws);
     ws->input_buffer = ws + 1;
-    ws->output_buffer = reinterpret_cast<TInput *>(ws + 1) + n_channels;
+    ws->output_buffer = reinterpret_cast<char *>(ws + 1) + sizeof(TInput) * this->m_args.n_channels;
 
     // Fill the input buffer with an appropriate value
     TInput fill_val = 0;
@@ -119,6 +119,7 @@ class PoolingDepthfirst : public DepthfirstDriver<TInput, TOutput>
     }
 
     auto ptr = reinterpret_cast<TInput *>(ws->input_buffer);
+    auto n_channels = this->m_args.n_channels;
     for (; n_channels; n_channels--)
     {
       *(ptr++) = fill_val;

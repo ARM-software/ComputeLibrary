@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,9 +27,11 @@
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Window.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace arm_compute
 {
@@ -51,13 +53,28 @@ public:
     /** Generate kernel code */
     virtual std::string get_code() = 0;
     /** Generate build options */
-    virtual CLBuildOptions get_build_options() = 0;
+    virtual CLBuildOptions get_build_options()
+    {
+        return {};
+    }
     /** Generate config id string of the entire kernel. This is used for tuning */
     virtual std::string get_config_id() = 0;
     /** Generate execution window */
     virtual Window get_window() const = 0;
-    /** Get the kernel argument lists of the kernel*/
-    virtual std::map<ITensorInfo::Id, GpuKernelArgument> get_tensors() = 0;
+    /** Get the kernel argument lists of the kernel
+     * @deprecated To be removed along with ClTemplateWriter
+     */
+    virtual std::map<ITensorInfo::Id, GpuKernelArgument> get_tensors()
+    {
+        return {};
+    }
+#ifdef ACL_INTERNAL_TEST_CKW_IN_DF
+    /** Get the flat list of arguments of the kernel*/
+    virtual GpuKernelArgumentList get_kernel_arguments()
+    {
+        return {};
+    }
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };
 
 } // namespace dynamic_fusion

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,6 @@ class DirectConvolutionValidationGenericFixture : public framework::Fixture
 public:
     using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout, bool mixed_layout = false)
     {
@@ -73,7 +72,6 @@ public:
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, quantization_info, act_info);
     }
 
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
@@ -230,7 +228,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolutionValidationFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, ActivationLayerInfo act_info,
                DataLayout data_layout)
     {
@@ -243,7 +240,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolutionValidationQuantizedFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, QuantizationInfo quantization_info,
                ActivationLayerInfo act_info, DataLayout data_layout)
     {
@@ -256,7 +252,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolutionValidationWithTensorShapesQuantizedFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
@@ -269,7 +264,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolutionValidationWithTensorShapesFixture : public DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
                DataType data_type, ActivationLayerInfo act_info)
     {

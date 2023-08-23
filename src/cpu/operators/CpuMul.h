@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_MUL_H
 
 #include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute

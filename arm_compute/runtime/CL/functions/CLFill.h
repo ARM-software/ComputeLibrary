@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLFILL_H
 #define ARM_COMPUTE_CLFILL_H
 
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"

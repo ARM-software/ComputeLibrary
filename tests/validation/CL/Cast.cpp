@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2022 Arm Limited.
+ * Copyright (c) 2018-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,26 @@ const auto CastF32toS16Dataset = combine(framework::dataset::make("DataType", Da
 const auto CastF32toU32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::U32));
 const auto CastF32toS32Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::S32));
 const auto CastF32toF16Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
+
+// U64
+const auto CastU64toU8Dataset  = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::U8));
+const auto CastU64toS8Dataset  = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::S8));
+const auto CastU64toU16Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::U16));
+const auto CastU64toS16Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::S16));
+const auto CastU64toU32Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::U32));
+const auto CastU64toS32Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::S32));
+const auto CastU64toF16Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::F16));
+const auto CastU64toF32Dataset = combine(framework::dataset::make("DataType", DataType::U64), framework::dataset::make("DataType", DataType::F32));
+
+// S64
+const auto CastS64toU8Dataset  = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::U8));
+const auto CastS64toS8Dataset  = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::S8));
+const auto CastS64toU16Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::U16));
+const auto CastS64toS16Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::S16));
+const auto CastS64toU32Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::U32));
+const auto CastS64toS32Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::S32));
+const auto CastS64toF16Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::F16));
+const auto CastS64toF32Dataset = combine(framework::dataset::make("DataType", DataType::S64), framework::dataset::make("DataType", DataType::F32));
 } // namespace
 
 TEST_SUITE(CL)
@@ -226,6 +246,26 @@ CAST_SUITE(F32_to_S16, DataType::F32, DataType::S16, CLCastToS16Fixture<float>, 
 CAST_SUITE(F32_to_U32, DataType::F32, DataType::U32, CLCastToU32Fixture<float>, CastF32toU32Dataset, one_tolerance)
 CAST_SUITE(F32_to_S32, DataType::F32, DataType::S32, CLCastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
 CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, CLCastToF16Fixture<float>, CastF32toF16Dataset, zero_tolerance)
+
+// S64
+CAST_SUITE(S64_to_U8, DataType::S64, DataType::U8, CLCastToU8Fixture<int64_t>, CastS64toU8Dataset, one_tolerance)
+CAST_SUITE(S64_to_S8, DataType::S64, DataType::S8, CLCastToS8Fixture<int64_t>, CastS64toS8Dataset, one_tolerance)
+CAST_SUITE(S64_to_U16, DataType::S64, DataType::U16, CLCastToU16Fixture<int64_t>, CastS64toU16Dataset, one_tolerance)
+CAST_SUITE(S64_to_S16, DataType::S64, DataType::S16, CLCastToS16Fixture<int64_t>, CastS64toS16Dataset, one_tolerance)
+CAST_SUITE(S64_to_U32, DataType::S64, DataType::U32, CLCastToU32Fixture<int64_t>, CastS64toU32Dataset, one_tolerance)
+CAST_SUITE(S64_to_S32, DataType::S64, DataType::S32, CLCastToS32Fixture<int64_t>, CastS64toS32Dataset, one_tolerance)
+CAST_SUITE(S64_to_F16, DataType::S64, DataType::F16, CLCastToF16Fixture<int64_t>, CastS64toF16Dataset, zero_tolerance)
+CAST_SUITE(S64_to_F32, DataType::S64, DataType::F32, CLCastToF32Fixture<int64_t>, CastS64toF32Dataset, zero_tolerance)
+
+// U64
+CAST_SUITE(U64_to_U8, DataType::U64, DataType::U8, CLCastToU8Fixture<uint64_t>, CastU64toU8Dataset, one_tolerance)
+CAST_SUITE(U64_to_S8, DataType::U64, DataType::S8, CLCastToS8Fixture<uint64_t>, CastU64toS8Dataset, one_tolerance)
+CAST_SUITE(U64_to_U16, DataType::U64, DataType::U16, CLCastToU16Fixture<uint64_t>, CastU64toU16Dataset, one_tolerance)
+CAST_SUITE(U64_to_S16, DataType::U64, DataType::S16, CLCastToS16Fixture<uint64_t>, CastU64toS16Dataset, one_tolerance)
+CAST_SUITE(U64_to_U32, DataType::U64, DataType::U32, CLCastToU32Fixture<uint64_t>, CastU64toU32Dataset, one_tolerance)
+CAST_SUITE(U64_to_S32, DataType::U64, DataType::S32, CLCastToS32Fixture<uint64_t>, CastU64toS32Dataset, one_tolerance)
+CAST_SUITE(U64_to_F16, DataType::U64, DataType::F16, CLCastToF16Fixture<uint64_t>, CastU64toF16Dataset, zero_tolerance)
+CAST_SUITE(U64_to_F32, DataType::U64, DataType::F32, CLCastToF32Fixture<uint64_t>, CastU64toF32Dataset, zero_tolerance)
 
 TEST_SUITE_END() // Cast
 TEST_SUITE_END() // CL

@@ -24,6 +24,7 @@
 
 #include "arm_compute/runtime/NEON/functions/NEAddMulAdd.h"
 
+#include "arm_compute/runtime/Tensor.h"
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuAddMulAdd.h"

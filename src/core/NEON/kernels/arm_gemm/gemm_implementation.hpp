@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2022 Arm Limited.
+ * Copyright (c) 2018-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -212,9 +212,11 @@ struct GemmImplementation<Top, Tret, Nothing> {
                        instantiate(instantiate) {   }
 };
 
-/* "Main" function implemented for each valid combination of types.
- * Returns a list of GEMM implementation descriptors for processing by the
- * other functions, ended by an implementation with
+/* Provides the list of implementation descriptors which is processed by the
+ * other functions.
+ *
+ * A specialised version is provided for each supported combination of types.
+ * The end of the list is indicated by a sentinel descriptor with
  * method==GemmMethod::DEFAULT.  */
 template<typename Top, typename Tret, class OutputStage = Nothing>
 const GemmImplementation<Top, Tret, OutputStage> *gemm_implementation_list();

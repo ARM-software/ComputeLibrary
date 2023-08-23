@@ -24,8 +24,7 @@
 
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace {
 
@@ -283,4 +282,5 @@ void Transform<8, 4, true, VLType::SVE>(
     );
 }
 
-#endif
+
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

@@ -383,7 +383,22 @@ public:
 
             // Check if the typestring matches the given one
             std::string expect_typestr = get_typestring(tensor.info()->data_type());
-            ARM_COMPUTE_ERROR_ON_MSG(_typestring != expect_typestr, "Typestrings mismatch");
+
+            bool enable_f32_to_f16_conversion = false;
+            if(_typestring != expect_typestr)
+            {
+                const std::string f32_typestring = "<f4";
+                const std::string f16_typestring = "<f2";
+                // if typestring does not match, check whether _typestring is F32 and can be downcasted to expect_typestr
+                if(_typestring == f32_typestring && expect_typestr == f16_typestring)
+                {
+                    enable_f32_to_f16_conversion = true;
+                }
+                else
+                {
+                    ARM_COMPUTE_ERROR("Typestrings mismatch");
+                }
+            }
 
             bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
             // Correct dimensions (Needs to match TensorShape dimension corrections)
@@ -427,7 +442,7 @@ public:
                 case arm_compute::DataType::F16:
                 {
                     // Read data
-                    if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty())
+                    if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty() && !enable_f32_to_f16_conversion)
                     {
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
@@ -466,7 +481,17 @@ public:
                         {
                             Coordinates dst(id);
                             arm_compute::permute(dst, perm);
-                            _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(dst)), tensor.info()->element_size());
+                            if(enable_f32_to_f16_conversion)
+                            {
+                                float f32_val = 0;
+                                _fs.read(reinterpret_cast<char *>(&f32_val), 4u);
+                                half f16_val                                            = half_float::half_cast<half, std::round_to_nearest>(f32_val);
+                                *(reinterpret_cast<half *>(tensor.ptr_to_element(dst))) = f16_val;
+                            }
+                            else
+                            {
+                                _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(dst)), tensor.info()->element_size());
+                            }
                         });
                     }
 

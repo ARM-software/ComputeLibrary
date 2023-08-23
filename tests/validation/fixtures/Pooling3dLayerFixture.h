@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Pooling3dLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, Pooling3dLayerInfo pool_info, DataType data_type, QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
     {
         _target    = compute_target(shape, pool_info, data_type, input_qinfo, output_qinfo);
@@ -120,7 +119,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Pooling3dLayerValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size3D pool_size, Size3D stride, Padding3D padding, bool exclude_padding, DataType data_type)
     {
         Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding),
@@ -132,7 +130,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Pooling3dLayerValidationQuantizedFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size3D pool_size, Size3D stride, Padding3D padding, bool exclude_padding, DataType data_type,
                QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
     {
@@ -145,7 +142,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Pooling3dLayerGlobalValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, DataType data_type)
     {
         Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type), data_type);
@@ -156,7 +152,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpecialPooling3dLayerValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape src_shape, Pooling3dLayerInfo pool_info, DataType data_type)
     {
         Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type);

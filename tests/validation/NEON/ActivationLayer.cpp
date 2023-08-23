@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/RuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -316,10 +317,16 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL, concat(concat(
     const auto *selected_impl = CpuActivationKernel::get_implementation(ActivationDataTypeISASelectorData{data_type, CPUModel::GENERIC, cpu_isa,ActivationLayerInfo::ActivationFunction::BOUNDED_RELU}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
-
     std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_activation";
+    if( data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED)
+    {
+#ifdef __aarch64__
+        expected = "neon_q8_activation_lut";
+#else  // __aarch64__
+        expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_activation";
+#endif // __aarch64__
+    }
     std::string actual   = selected_impl->name;
-
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 }
 // clang-format on

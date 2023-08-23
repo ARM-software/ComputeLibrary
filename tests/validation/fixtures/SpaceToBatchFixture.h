@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpaceToBatchLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
                DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
@@ -140,7 +139,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpaceToBatchLayerValidationFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
                DataType data_type, DataLayout data_layout)
     {
@@ -152,7 +150,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpaceToBatchLayerValidationQuantizedFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
                DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {

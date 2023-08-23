@@ -24,7 +24,7 @@
 
 #pragma once
 
-#ifdef __aarch64__
+#if defined(__aarch64__)
 
 namespace {
 
@@ -158,7 +158,6 @@ void a64_transpose_interleave_24(uint16_t *out, const uint16_t *in, size_t width
       "bge 1b\n"
       "cbz %x[height], 20f\n"
       "10:"  // Main loop skip
-
       "11:"  // Tail row loop: Head
       "mov x20, %x[width]\n"
       "mov x25, %x[in]\n"
@@ -268,4 +267,5 @@ void Transform<12, 1, true, VLType::None>(
     );
 }
 
-#endif
+
+#endif  // defined(__aarch64__)

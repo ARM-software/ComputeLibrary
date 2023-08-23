@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
 #define ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute

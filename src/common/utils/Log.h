@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,22 @@
 #ifndef SRC_COMMON_LOG_H
 #define SRC_COMMON_LOG_H
 
+#ifndef ARM_COMPUTE_LOGGING_ENABLED
+
+#define ARM_COMPUTE_CREATE_ACL_LOGGER()
+#define ARM_COMPUTE_LOG_MSG_ACL(log_level, msg)
+#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT_ACL(log_level, fmt, ...)
+#define ARM_COMPUTE_LOG_ERROR_ACL(msg)
+#define ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL(msg)
+#define ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(msg)
+#define ARM_COMPUTE_LOG_PARAMS(...)
+
+#else /* ARM_COMPUTE_LOGGING_ENABLED */
+
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/logging/Macros.h"
 #include "utils/TypePrinter.h"
 
-#ifdef ARM_COMPUTE_LOGGING_ENABLED
 /** Create a logger
  *
  * @note It will eventually create all default loggers in don't exist
@@ -41,9 +52,6 @@
             arm_compute::logging::LoggerRegistry::get().create_logger("ComputeLibrary", arm_compute::logging::LogLevel::INFO); \
         }                                                                                                                      \
     } while(false)
-#else /* ARM_COMPUTE_LOGGING_ENABLED */
-#define ARM_COMPUTE_CREATE_ACL_LOGGER()
-#endif /* ARM_COMPUTE_LOGGING_ENABLED */
 
 /** Log a message to the logger
  *
@@ -218,4 +226,5 @@ inline const std::string constructDataLog(const std::vector<std::string> &params
         ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(constructDataLog(getParamsNames(#__VA_ARGS__), \
                                                                 logParams(__VA_ARGS__)));     \
     } while(false)
+#endif /* ARM_COMPUTE_LOGGING_ENABLED */
 #endif /* SRC_COMMON_LOG_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, 2021 Arm Limited.
+ * Copyright (c) 2016-2019, 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -204,9 +204,10 @@ Status create_error_msg(ErrorCode error_code, const char *func, const char *file
 #define ARM_COMPUTE_RETURN_ON_ERROR(status) \
     do                                      \
     {                                       \
-        if(!bool(status))                   \
+        const auto s = status;              \
+        if(!bool(s))                        \
         {                                   \
-            return status;                  \
+            return s;                       \
         }                                   \
     } while(false)
 

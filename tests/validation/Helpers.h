@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "support/Half.h"
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"

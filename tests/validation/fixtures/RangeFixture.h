@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RangeFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(const DataType data_type0, float start, float step, const QuantizationInfo qinfo0 = QuantizationInfo())
     {
         _target    = compute_target(data_type0, qinfo0, start, step);

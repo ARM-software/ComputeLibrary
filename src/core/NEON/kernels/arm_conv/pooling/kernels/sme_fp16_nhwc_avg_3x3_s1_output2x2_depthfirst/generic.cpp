@@ -26,7 +26,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#if defined(__ARM_FEATURE_SVE) && defined(__ARM_FP16_ARGS) && defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME) && defined(__ARM_FP16_ARGS)
 
 namespace arm_conv {
 namespace pooling {
@@ -91,34 +91,34 @@ void sme_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
     "add x20, %x[args], %[offsetof_rescale]\n"
     "ld1rqh { z4.h }, p0/Z, [x20]\n"
     "ldr x5, [%x[args], %[offsetof_n_channels]]\n"
-    "whilelt p1.h, x3, x5\n"
+    "whilelt p0.h, x3, x5\n"
     "mov x6, #0x0\n"
     "ldp x7, x8, [x21, #0x0]\n"
     "ldp x17, x16, [x21, #0x10]\n"
     "ldp x15, x14, [x4, #0x0]\n"
-    "ld1h { z3.h }, p1/Z, [x14, x3, LSL #1]\n"
+    "ld1h { z3.h }, p0/Z, [x14, x3, LSL #1]\n"
     "ldp x13, x12, [x4, #0x10]\n"
-    "ld1h { z2.h }, p1/Z, [x13, x3, LSL #1]\n"
+    "ld1h { z2.h }, p0/Z, [x13, x3, LSL #1]\n"
     "ldp x11, x10, [x4, #0x20]\n"
-    "ld1h { z1.h }, p1/Z, [x10, x3, LSL #1]\n"
+    "ld1h { z1.h }, p0/Z, [x10, x3, LSL #1]\n"
     "ldp x9, x28, [x4, #0x30]\n"
-    "ld1h { z0.h }, p1/Z, [x9, x3, LSL #1]\n"
+    "ld1h { z0.h }, p0/Z, [x9, x3, LSL #1]\n"
     "ldp x27, x26, [x4, #0x40]\n"
-    "ld1h { z31.h }, p1/Z, [x26, x3, LSL #1]\n"
+    "ld1h { z31.h }, p0/Z, [x26, x3, LSL #1]\n"
     "ldp x25, x24, [x4, #0x50]\n"
-    "ld1h { z30.h }, p1/Z, [x25, x3, LSL #1]\n"
+    "ld1h { z30.h }, p0/Z, [x25, x3, LSL #1]\n"
     "ldp x23, x22, [x4, #0x60]\n"
-    "ld1h { z29.h }, p1/Z, [x11, x3, LSL #1]\n"
+    "ld1h { z29.h }, p0/Z, [x11, x3, LSL #1]\n"
     "ldp x21, x20, [x4, #0x70]\n"
-    "ld1h { z28.h }, p1/Z, [x27, x3, LSL #1]\n"
-    "ld1h { z27.h }, p1/Z, [x28, x3, LSL #1]\n"
-    "ld1h { z22.h }, p1/Z, [x24, x3, LSL #1]\n"
-    "ld1h { z21.h }, p1/Z, [x22, x3, LSL #1]\n"
-    "ld1h { z20.h }, p1/Z, [x21, x3, LSL #1]\n"
-    "ld1h { z26.h }, p1/Z, [x15, x3, LSL #1]\n"
-    "ld1h { z25.h }, p1/Z, [x12, x3, LSL #1]\n"
-    "ld1h { z24.h }, p1/Z, [x23, x3, LSL #1]\n"
-    "ld1h { z23.h }, p1/Z, [x20, x3, LSL #1]\n"
+    "ld1h { z28.h }, p0/Z, [x27, x3, LSL #1]\n"
+    "ld1h { z27.h }, p0/Z, [x28, x3, LSL #1]\n"
+    "ld1h { z22.h }, p0/Z, [x24, x3, LSL #1]\n"
+    "ld1h { z21.h }, p0/Z, [x22, x3, LSL #1]\n"
+    "ld1h { z20.h }, p0/Z, [x21, x3, LSL #1]\n"
+    "ld1h { z26.h }, p0/Z, [x15, x3, LSL #1]\n"
+    "ld1h { z25.h }, p0/Z, [x12, x3, LSL #1]\n"
+    "ld1h { z24.h }, p0/Z, [x23, x3, LSL #1]\n"
+    "ld1h { z23.h }, p0/Z, [x20, x3, LSL #1]\n"
     "incw x3\n"
     "whilelt p1.h, x3, x5\n"
     "b.none 2f\n"
@@ -206,4 +206,4 @@ void sme_fp16_nhwc_avg_3x3_s1_output2x2_depthfirst_impl(
 }  // namespace pooling
 }  // namespace arm_conv
 
-#endif  // defined(__ARM_FEATURE_SVE) && defined(__ARM_FP16_ARGS) && defined(ARM_COMPUTE_ENABLE_SME)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME) && defined(__ARM_FP16_ARGS)

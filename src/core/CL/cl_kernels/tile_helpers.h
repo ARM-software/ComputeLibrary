@@ -1144,19 +1144,21 @@
         })                                                                                     \
     })
 
-// RELU Activation
-#define relu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (max((DATA_TYPE)ZERO_VALUE, x))
-// Bounded RELU Activation
-#define brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (min((DATA_TYPE)A_VAL, max((DATA_TYPE)ZERO_VALUE, x)))
-// Lower Upper Bounded RELU Activation
-#define lu_brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (min(max(x, (DATA_TYPE)B_VAL), (DATA_TYPE)A_VAL))
-// Hard Swish Activation
-#define hard_swish_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (x * ((min(max((DATA_TYPE)(x + (DATA_TYPE)3.f), (DATA_TYPE)0.f), (DATA_TYPE)6.f)) * (DATA_TYPE)0.166666667f))
-// Identity Activation
-#define identity_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) (x)
 
-#define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
-#define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_VALUE, A_VAL, B_VAL, x)
+// NOTE : A_VAL and B_VAL should be quantized values (using same quantization info as x)
+// RELU Activation
+#define relu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) (max((DATA_TYPE)ZERO_POINT, x))
+// Bounded RELU Activation
+#define brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) (min((DATA_TYPE)A_VAL, max((DATA_TYPE)ZERO_POINT, x)))
+// Lower Upper Bounded RELU Activation
+#define lu_brelu_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) (min(max(x, (DATA_TYPE)B_VAL), (DATA_TYPE)A_VAL))
+// Hard Swish Activation
+#define hard_swish_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) (x * ((min(max((DATA_TYPE)(x + (DATA_TYPE)3.f), (DATA_TYPE)0.f), (DATA_TYPE)6.f)) * (DATA_TYPE)0.166666667f))
+// Identity Activation
+#define identity_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) (x)
+
+#define ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) op##_op_quantized(DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x)
+#define ACTIVATION_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x) ACT_OP_QUANTIZED(op, DATA_TYPE, VEC_SIZE, ZERO_POINT, A_VAL, B_VAL, x)
 
 #define V_ADD(A_VAL, B_VAL) ((A_VAL) + (B_VAL))
 #define V_SUB(A_VAL, B_VAL) ((A_VAL) - (B_VAL))
@@ -1171,17 +1173,17 @@
  * @param[in]  M0              Number of SRC/DST rows
  * @param[in]  N0              Number of SRC/DST columns
  * @param[in]  ACTIVATION_TYPE Activation type
- * @param[in]  ZERO_VALUE      The zero value to consider in the computation
- * @param[in]  A_VAL           A value used for the activation (e.g. tanh_op, brelu,..)
- * @param[in]  B_VAL           B value used for the activation (e.g. tanh_op, brelu,..)
+ * @param[in]  ZERO_POINT      The zero value to consider in the computation
+ * @param[in]  A_VAL           Quantized A value used for the activation (e.g. tanh_op, brelu,..)
+ * @param[in]  B_VAL           Quantized B value used for the activation (e.g. tanh_op, brelu,..)
  * @param[out] src             SRC tile
  * @param[out] dst             DST tile
  */
-#define T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_VALUE, A_VAL, B_VAL, src, dst)               \
+#define T_ACTIVATION_QUANTIZED(DATA_TYPE, M0, N0, ACTIVATION_TYPE, ZERO_POINT, A_VAL, B_VAL, src, dst)               \
     ({ \
         LOOP_UNROLLING(int, _m0, 0, 1, M0, \
         { \
-            dst[_m0].v = ACTIVATION_QUANTIZED(ACTIVATION_TYPE, DATA_TYPE, N0, ZERO_VALUE, A_VAL, B_VAL, src[_m0].v); \
+            dst[_m0].v = ACTIVATION_QUANTIZED(ACTIVATION_TYPE, DATA_TYPE, N0, ZERO_POINT, A_VAL, B_VAL, src[_m0].v); \
         })                                                                                          \
     })
 

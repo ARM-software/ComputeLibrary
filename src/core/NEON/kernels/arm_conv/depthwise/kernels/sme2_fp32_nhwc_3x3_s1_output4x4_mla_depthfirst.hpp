@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
 #pragma once
 
-#if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_SME2)
 
 namespace arm_conv {
 namespace depthwise {
@@ -68,4 +68,4 @@ class sme2_fp32_nhwc_3x3_s1_output4x4_mla_depthfirst : public DepthwiseDepthfirs
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME2)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -231,7 +231,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, boo
 class GEMMLowpMatrixMultiplyCoreValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset)
     {
         _target    = compute_target(shape_a, shape_b, shape_output, a_offset, b_offset);
@@ -258,7 +257,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, boo
 class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b,
                bool reshape_b_only_on_first_run)
     {
@@ -332,7 +330,6 @@ class GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture : public
     GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_output, int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage, DataType data_type_b)
     {
         GEMMLowpMatrixMultiplyCoreFusedOffsetOutputGenericValidationFixture<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d, reinterpret_output_as_3d, TI, TW>::setup(shape_a, shape_b,
@@ -344,7 +341,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(shape, result_offset, result_mult_int, result_shift, min, max, add_bias);
@@ -446,7 +442,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToInt8ScaleValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(shape, result_offset, result_mult_int, result_shift, min, max, add_bias);
@@ -548,7 +543,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias);
@@ -643,7 +637,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias);
@@ -738,7 +731,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMLowpQuantizeDownInt32ScaleByFloatValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(DataType data_type, TensorShape shape, float result_real_multiplier, int32_t result_offset, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(data_type, shape, result_real_multiplier, result_offset, min, max, add_bias);
@@ -841,7 +833,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
         _target    = compute_target(shape, result_fixedpoint_multiplier, result_shift, min, max, add_bias);
@@ -936,7 +927,6 @@ template <typename TensorType, typename AccessorType, typename ReshapeLHSOperato
 class GEMMLowpMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
                bool interleave_rhs, DataType data_type)
     {
@@ -1087,7 +1077,6 @@ template <typename TensorType, typename AccessorType, typename ReshapeLHSOperato
 class GEMMLowpMatrixMultiplyReshaped3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                bool interleave_lhs, bool interleave_rhs, DataType data_type)
     {
@@ -1244,7 +1233,6 @@ template <typename TensorType, typename AccessorType, typename ReshapeRHSOperato
 class GEMMLowpMatrixMultiplyReshapedOnlyRHSValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
                unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, DataType data_type)
     {
@@ -1387,7 +1375,6 @@ template <typename T, typename TensorType, typename AccessorType, typename Resha
 class GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
                unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, bool broadcast_bias, DataType data_type)
     {
@@ -1595,7 +1582,6 @@ template <typename TensorType, typename AccessorType, typename ReshapeRHSOperato
 class GEMMLowpMatrixMultiplyReshapedOnlyRHSMMULValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
                unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, DataType data_type)
     {
@@ -1751,7 +1737,6 @@ template <typename TensorType, typename AccessorType, typename ReshapeRHSOperato
 class GEMMLowpMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0,
                unsigned int k0, unsigned int h0, bool interleave_rhs, bool transpose_rhs, DataType data_type)
     {
@@ -1900,7 +1885,6 @@ template <typename TensorType, typename AccessorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyNativeValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0)
     {
         GEMMLHSMatrixInfo lhs_info;
@@ -1995,7 +1979,6 @@ template <typename TensorType, typename AccessorType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyNative3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0)
     {
         GEMMLHSMatrixInfo lhs_info;

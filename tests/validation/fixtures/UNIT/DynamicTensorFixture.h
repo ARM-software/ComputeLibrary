@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -127,7 +127,6 @@ class DynamicTensorType3SingleFunction : public framework::Fixture
     using T = float;
 
 public:
-    template <typename...>
     void setup(TensorShape input_level0, TensorShape input_level1)
     {
         input_l0 = input_level0;
@@ -251,7 +250,6 @@ class DynamicTensorType3ComplexFunction : public framework::Fixture
     using T = float;
 
 public:
-    template <typename...>
     void setup(std::vector<TensorShape> input_shapes, TensorShape weights_shape, TensorShape bias_shape, std::vector<TensorShape> output_shapes, PadStrideInfo info)
     {
         num_iterations = input_shapes.size();
@@ -390,7 +388,6 @@ class DynamicTensorType2PipelineFunction : public framework::Fixture
     using T = float;
 
 public:
-    template <typename...>
     void setup(std::vector<TensorShape> input_shapes)
     {
         _data_type    = DataType::F32;

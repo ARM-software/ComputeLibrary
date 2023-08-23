@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,13 @@
 #ifndef ARM_COMPUTE_VALIDATE_H
 #define ARM_COMPUTE_VALIDATE_H
 
+#include "arm_compute/core/utils/DataLayoutUtils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/FormatUtils.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>
@@ -284,6 +288,60 @@ arm_compute::Status error_on_mismatching_dimensions(const char *function, const 
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
+/** Return true if the given format has horizontal subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled horizontaly.
+ */
+inline bool has_format_horizontal_subsampling(Format format)
+{
+    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
+/** Return true if the given format has vertical subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled verticaly.
+ */
+inline bool has_format_vertical_subsampling(Format format)
+{
+    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
+/** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
+ *
+ * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
+ *       <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java">Android Source</a>
+ *       <a href="https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM">WebM</a>
+ *       <a href="https://bugs.chromium.org/p/libyuv/issues/detail?id=198&amp;can=1&amp;q=odd%20width">libYUV</a>
+ *       <a href="https://sourceforge.net/p/raw-yuvplayer/bugs/1/">YUVPlayer</a> *
+ *
+ * @param[in, out] shape  Tensor shape of 2D size
+ * @param[in]      format Format of the tensor
+ *
+ * @return The adjusted tensor shape.
+ */
+inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
+{
+    TensorShape output{ shape };
+
+    // Force width to be even for formats which require subsampling of the U and V channels
+    if(has_format_horizontal_subsampling(format))
+    {
+        output.set(0, (output.x() + 1) & ~1U);
+    }
+
+    // Force height to be even for formats which require subsampling of the U and V channels
+    if(has_format_vertical_subsampling(format))
+    {
+        output.set(1, (output.y() + 1) & ~1U);
+    }
+
+    return output;
+}
+
 /** Return an error if the passed tensor objects are not even.
  *
  * @param[in] function Function in which the error occurred.
@@ -315,6 +373,37 @@ arm_compute::Status error_on_tensors_not_even(const char *function, const char *
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_EVEN(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
+/** Calculate subsampled shape for a given format and channel
+ *
+ * @param[in] shape   Shape of the tensor to calculate the extracted channel.
+ * @param[in] format  Format of the tensor.
+ * @param[in] channel Channel to create tensor shape to be extracted.
+ *
+ * @return The subsampled tensor shape.
+ */
+inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
+{
+    TensorShape output{ shape };
+
+    // Subsample shape only for U or V channel
+    if(Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
+    {
+        // Subsample width for the tensor shape when channel is U or V
+        if(has_format_horizontal_subsampling(format))
+        {
+            output.set(0, output.x() / 2U);
+        }
+
+        // Subsample height for the tensor shape when channel is U or V
+        if(has_format_vertical_subsampling(format))
+        {
+            output.set(1, output.y() / 2U);
+        }
+    }
+
+    return output;
+}
 
 /** Return an error if the passed tensor objects are not sub-sampled.
  *
@@ -401,9 +490,9 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_2 == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
-    const std::array < const ITensorInfo *, 2 + sizeof...(Ts) > tensors_info_array{ { tensor_info_1, tensor_info_2, std::forward<Ts>(tensor_infos)... } };
+    const std::array < const ITensorInfo *, 2 + sizeof...(Ts) > tensors_info_array{ { tensor_info_1, tensor_info_2, tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(std::next(tensors_info_array.cbegin()), tensors_info_array.cend(), [&](const ITensorInfo * tensor_info)
     {
         return detail::have_different_dimensions((*tensors_info_array.cbegin())->tensor_shape(), tensor_info->tensor_shape(), upper_dim);
@@ -429,7 +518,7 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_2 == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_shapes(function, file, line, upper_dim, tensor_1->info(), tensor_2->info(),
                                                                            detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
@@ -454,10 +543,10 @@ inline arm_compute::Status error_on_mismatching_data_layouts(const char *functio
                                                              const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
     DataLayout &&tensor_data_layout = tensor_info->data_layout();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { std::forward<Ts>(tensor_infos)... } };
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
     {
         return tensor_info_obj->data_layout() != tensor_data_layout;
@@ -505,10 +594,10 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
                                                            const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
     DataType &&tensor_data_type = tensor_info->data_type();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { std::forward<Ts>(tensor_infos)... } };
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
     {
         return tensor_info_obj->data_type() != tensor_data_type;
@@ -531,7 +620,7 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
                                                            const ITensor *tensor, Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(function, file, line, tensor->info(),
                                                                                detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};

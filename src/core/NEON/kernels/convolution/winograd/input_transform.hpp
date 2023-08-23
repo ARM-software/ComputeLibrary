@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,7 @@
 
 #pragma once
 
-#include "arm_compute/core/Error.h"
-
-#include "src/core/NEON/kernels/assembly/winograd.hpp"
+#include "winograd.hpp"
 
 #include "src/core/NEON/kernels/arm_conv/addressing.hpp"
 #include <algorithm>
@@ -191,10 +189,9 @@ class TransformDirect : public TransformBase<TIn, TOut>
     TOut *outptr, size_t ld_out_matrix,
     unsigned int pad_top, unsigned int valid_rows,
     unsigned int pad_left, unsigned int valid_cols,
-    void *working_space
+    void *
   ) const override
   {
-    ARM_COMPUTE_UNUSED(working_space);
     const auto end_i = this->get_input_rows() - pad_top;
     const auto pad_bottom = end_i < valid_rows ? 0 : end_i - valid_rows;
     const auto end_j = this->get_input_cols() - pad_left;

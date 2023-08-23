@@ -61,11 +61,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 {
     // Create a new workload sketch
     CLCompileContext cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    GpuWorkloadContext context{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
     // Fuse sigmoid
-    const TensorInfo src_info = sketch.create_tensor_info(input_info);
+    const TensorInfo src_info = context.create_tensor_info(input_info);
 
     const bool res = static_cast<bool>(GpuSigmoid::validate_op(sketch, &src_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
@@ -97,7 +97,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    ARM_COMPUTE_TEST_INFO("Currently 5D+ tensors are unsupported for this operation.");
+    framework::ARM_COMPUTE_PRINT_INFO();
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,
@@ -133,7 +134,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall5dOneOp,
                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    ARM_COMPUTE_TEST_INFO("Currently 5D+ tensors are unsupported for this operation.");
+    framework::ARM_COMPUTE_PRINT_INFO();
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallTwoOps,

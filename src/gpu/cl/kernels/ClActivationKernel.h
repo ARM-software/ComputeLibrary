@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CL_ACTIVATION_KERNEL_H
 #define ARM_COMPUTE_CL_ACTIVATION_KERNEL_H
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"

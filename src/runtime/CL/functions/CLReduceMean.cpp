@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,7 +82,7 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
                 ARM_COMPUTE_RETURN_ERROR_ON(i > static_cast<unsigned int>(axis_local[i]));
                 const unsigned int remove_index = axis_local[i] - i;
                 ARM_COMPUTE_RETURN_ERROR_ON(remove_index >= out_shape.num_dimensions());
-                out_shape.remove_dimension(remove_index);
+                out_shape.remove_dimension(remove_index, false);
             }
         }
         const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
@@ -182,7 +182,7 @@ void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor 
         std::sort(axis_local.begin(), axis_local.begin() + _reduction_ops);
         for(int i = 0; i < _reduction_ops; ++i)
         {
-            out_shape.remove_dimension(axis_local[i] - i);
+            out_shape.remove_dimension(axis_local[i] - i, false);
         }
         auto_init_if_empty(*tmp_output->info(), tmp_input->info()->clone()->set_tensor_shape(out_shape));
         _reshape.configure(compile_context, &_reduced_outs[_reduction_ops - 1], tmp_output);

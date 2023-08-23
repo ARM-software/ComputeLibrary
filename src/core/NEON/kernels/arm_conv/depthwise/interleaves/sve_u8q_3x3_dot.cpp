@@ -25,8 +25,8 @@
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 
 #include "arm_gemm.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
+#include "utils.hpp"
+#include "depthwise.hpp"
 #include <cstdint>
 
 namespace arm_conv {
@@ -42,7 +42,7 @@ size_t interleave_sve_u8q_3x3_dot::get_packed_size(const DepthwiseArgs &args)
 {
   // We store 7 vectors for every <vector_of_ints> of channels.
   const unsigned int n = arm_gemm::roundup(
-    arm_gemm::iceildiv((long unsigned int) args.input_channels,
+    arm_gemm::iceildiv((long unsigned int) args.input_channels * args.channel_multiplier,
                        get_vector_length<int32_t>(arm_gemm::VLType::SVE)), 4lu
   );
   return n * 7 * get_vector_length<uint8_t>(arm_gemm::VLType::SVE);
@@ -76,7 +76,6 @@ void interleave_sve_u8q_3x3_dot::pack_parameters(unsigned int n_channels, void *
     "cbz %x[bias], 1f\n"
     "ptrue p8.s\n"
     "1:"  // No bias
-
     "2:"  // Loop
     "cntp x20, p2, p1.s\n"
     "whilelt p0.b, XZR, x20\n"

@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuElementwiseBinaryValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation ref_op, const TensorShape &shape0, const TensorShape &shape1, const TensorShape &shape2, DataType data_type, bool is_inplace, bool fuse_two_ops = false)
     {
         _ref_op         = ref_op;
@@ -99,13 +98,13 @@ protected:
     {
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Fuse first element wise binary Op
-        TensorInfo lhs_info = sketch.create_tensor_info(TensorInfo(shape0, 1, _data_type));
-        TensorInfo rhs_info = sketch.create_tensor_info(TensorInfo(shape1, 1, _data_type));
-        TensorInfo dst_info = sketch.create_tensor_info();
+        TensorInfo lhs_info = context.create_tensor_info(TensorInfo(shape0, 1, _data_type));
+        TensorInfo rhs_info = context.create_tensor_info(TensorInfo(shape1, 1, _data_type));
+        TensorInfo dst_info = context.create_tensor_info();
 
         TensorInfo rhs_info_fuse;
 
@@ -113,7 +112,7 @@ protected:
 
         if(_fuse)
         {
-            rhs_info_fuse          = sketch.create_tensor_info(TensorInfo(shape2, 1, _data_type));
+            rhs_info_fuse          = context.create_tensor_info(TensorInfo(shape2, 1, _data_type));
             ITensorInfo *ans2_info = FunctionType::create_op(sketch, ans_info, &rhs_info_fuse);
             GpuOutput::create_op(sketch, ans2_info, &dst_info);
         }
@@ -220,7 +219,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuElementwiseBinaryOneOpValidationFixture : public DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation ref_op, const TensorShape &shape0, DataType data_type, bool is_inplace)
     {
         DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ref_op, shape0, shape0, TensorShape(), data_type, is_inplace);
@@ -231,7 +229,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuElementwiseBinaryBroadcastOneOpValidationFixture : public DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation ref_op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, bool is_inplace)
     {
         DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ref_op, shape0, shape1, TensorShape(), data_type, is_inplace);
@@ -242,7 +239,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuElementwiseBinaryTwoOpsValidationFixture : public DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ArithmeticOperation ref_op, const TensorShape &shape0, const TensorShape &shape1, const TensorShape &shape2, DataType data_type, bool is_inplace, bool fuse_two_ops)
     {
         DynamicFusionGpuElementwiseBinaryValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ref_op, shape0, shape1, shape2, data_type, is_inplace, fuse_two_ops);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,10 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTACTIVATION
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {
@@ -39,7 +42,11 @@ template <typename T>
 class ArgumentPack;
 
 /** Forward declaration */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 class ClTemplateActivation;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+class GpuCkwActivation;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 class ClComponentActivation final : public IGpuKernelComponent
 {
@@ -88,7 +95,7 @@ public:
         const Attributes                &attributes);
 
     /** Destructor */
-    ~ClComponentActivation() override = default;
+    ~ClComponentActivation() override;
 
     /** Prevent instances of this class from being copy constructed */
     ClComponentActivation(const ClComponentActivation &component) = delete;
@@ -102,8 +109,12 @@ public:
     /** Allow instances of this class to be moved */
     ClComponentActivation &operator=(ClComponentActivation &&component) = default;
 
-    /** Get template writer for the component */
+    /** Get writer for the component */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    const IGpuCkwComponentDriver     *ckw_component_driver() const override;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
     /** Get component type */
     GpuComponentType type() const override
@@ -112,7 +123,11 @@ public:
     }
 
 private:
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplateActivation> _component_writer;
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+    std::unique_ptr<GpuCkwActivation> _component_writer;
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 };
 } // namespace dynamic_fusion
 } // namespace experimental

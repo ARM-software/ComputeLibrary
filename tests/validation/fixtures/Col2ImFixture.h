@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Col2ImOpValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, const unsigned int convolved_width, unsigned int convolved_height, unsigned int num_groups, DataType data_type)
     {
         const Size2D convolved_dims(convolved_width, convolved_height);

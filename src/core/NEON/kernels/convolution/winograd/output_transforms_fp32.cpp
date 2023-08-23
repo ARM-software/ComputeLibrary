@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,9 +30,9 @@ namespace winograd {
 namespace output_transform {
 
 #if defined(__aarch64__)
-#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 void sme_fp32_mopa_4x4_3x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #endif  // defined(__aarch64__)
 void arm_fp32_4x4_3x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
 void arm_fp32_2x2_3x3(unsigned int, const float *, size_t, const float *, float *, size_t, size_t, float, float);
@@ -49,9 +49,9 @@ void arm_fp32_1x2_1x7(unsigned int, const float *, size_t, const float *, float 
 
 static const TransformImplementation<float> transforms_fp32[] = {
 #if defined(__aarch64__)
-#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME)
   { IMPL(4, 4, 3, 3, sme_fp32_mopa_4x4_3x3, Unpadded), MethodConstraints::RequiresSME },
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #endif  // defined(__aarch64__)
   { IMPL(4, 4, 3, 3, arm_fp32_4x4_3x3, Unpadded), MethodConstraints::LargerShape },
   { IMPL(2, 2, 3, 3, arm_fp32_2x2_3x3, Unpadded) },

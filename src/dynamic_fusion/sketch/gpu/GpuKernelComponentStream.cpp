@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,8 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-GpuKernelComponentStream::GpuKernelComponentStream(GpuComponentServices *services, const MemoryDescriptorMap &mem_map)
-    : _services{ services }, _component_groups{}, _mem_map{ mem_map }
+GpuKernelComponentStream::GpuKernelComponentStream(GpuWorkloadContext *context, GpuComponentServices *services, const MemoryDescriptorMap &mem_map)
+    : _context{ context }, _services{ services }, _component_groups{}, _mem_map{ mem_map }
 {
 }
 
@@ -51,7 +51,7 @@ GpuWorkloadSourceCode GpuKernelComponentStream::write_workload_code()
         const GpuKernelSourceCode kernel_code = logical_kernel.write_kernel_code();
         // The whole unit workload stage is determined by the root component
         const auto unit_workload_stage = group.get_root_component()->properties().stage();
-        source_code.add_unit_workload(kernel_code, unit_workload_stage, _mem_map);
+        source_code.add_unit_workload(kernel_code, unit_workload_stage, _mem_map, _context);
     }
     return source_code;
 }

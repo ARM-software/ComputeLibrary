@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -331,8 +331,8 @@ const cl::Device &CLCompileContext::get_device() const
 
 void CLCompileContext::set_device(cl::Device device)
 {
-    _device            = std::move(device);
     _is_wbsm_supported = get_wbsm_support_info(device);
+    _device            = std::move(device);
 }
 
 cl::NDRange CLCompileContext::default_ndrange() const

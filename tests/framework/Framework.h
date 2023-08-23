@@ -64,6 +64,8 @@ struct FrameworkConfig
     float                                          cooldown_sec{ -1.f };        /**< Delay between tests in seconds. */
     LogLevel                                       log_level{ LogLevel::NONE }; /**< Verbosity of the output. */
     bool                                           configure_only{ false };     /**< Only configure kernels */
+    bool                                           print_rerun_cmd{ false };    /**< Print the command to rerun the failed testcase */
+    unsigned int                                   seed{ 0 };                   /**< The seed that is used to fill tensors with random values.*/
 };
 
 /** Information about a test case.
@@ -328,7 +330,7 @@ private:
     Framework(const Framework &) = delete;
     Framework &operator=(const Framework &) = delete;
 
-    void run_test(const TestInfo &info, TestCaseFactory &test_factory);
+    TestResult::Status run_test(const TestInfo &info, TestCaseFactory &test_factory);
     std::map<TestResult::Status, int> count_test_results() const;
 
     /** Returns the current test suite name.
@@ -356,6 +358,8 @@ private:
     std::vector<Printer *> _printers{};
     bool                   _configure_only{ false };
     bool                   _new_fixture_call{ false };
+    bool                   _print_rerun_cmd{ false };
+    unsigned int           _seed{ 0 };
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentsDescription, create_function *> _available_instruments{};

@@ -50,7 +50,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuReshapeLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
     {
         _target    = compute_target(input_shape, output_shape, data_type);
@@ -71,12 +70,12 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo        src_info = sketch.create_tensor_info(TensorInfo(input_shape, 1, data_type));
-        TensorInfo        dst_info = sketch.create_tensor_info(TensorInfo(output_shape, 1, data_type));
+        TensorInfo        src_info = context.create_tensor_info(TensorInfo(input_shape, 1, data_type));
+        TensorInfo        dst_info = context.create_tensor_info(TensorInfo(output_shape, 1, data_type));
         ReshapeAttributes attributes;
         attributes.shape(output_shape);
 

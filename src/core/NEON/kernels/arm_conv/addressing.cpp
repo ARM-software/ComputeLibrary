@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,8 @@
  */
 
 #include "addressing.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
+#include <algorithm>
 #include <cstring>
 
 namespace arm_conv {

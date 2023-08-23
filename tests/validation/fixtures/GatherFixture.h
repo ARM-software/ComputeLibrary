@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GatherFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape indices_shape, int axis, DataType data_type)
     {
         _target    = compute_target(input_shape, data_type, axis, indices_shape);

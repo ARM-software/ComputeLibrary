@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,10 @@
 
 #include <cstdint>
 #include <cstring>
+#ifdef ARM_COMPUTE_ENABLE_BF16
+#include "bfloat.hpp"
+using arm_gemm::bfloat16;
+#endif
 
 namespace arm_conv {
 namespace pooling {
@@ -41,9 +45,15 @@ void cpp_nhwc_1x1_stride_any_depthfirst_impl(
 }
 
 template void cpp_nhwc_1x1_stride_any_depthfirst_impl(uint64_t, uint64_t, uint64_t, const float *const *, float *);
-#if defined(__ARM_FP16_ARGS)
+
+#ifdef __ARM_FP16_ARGS
 template void cpp_nhwc_1x1_stride_any_depthfirst_impl(uint64_t, uint64_t, uint64_t, const __fp16 *const *, __fp16 *);
-#endif  // defined(__ARM_FP16_ARGS)
+#endif
+
+#ifdef ARM_COMPUTE_ENABLE_BF16
+template void cpp_nhwc_1x1_stride_any_depthfirst_impl(uint64_t, uint64_t, uint64_t, const bfloat16 *const *, bfloat16 *);
+#endif
+
 template void cpp_nhwc_1x1_stride_any_depthfirst_impl(uint64_t, uint64_t, uint64_t, const int8_t *const *, int8_t *);
 template void cpp_nhwc_1x1_stride_any_depthfirst_impl(uint64_t, uint64_t, uint64_t, const uint8_t *const *, uint8_t *);
 

@@ -25,6 +25,7 @@
 #ifndef SRC_CPU_KERNELS_CPUADDMULADDKERNEL
 #define SRC_CPU_KERNELS_CPUADDMULADDKERNEL
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/wrapper/wrapper.h"

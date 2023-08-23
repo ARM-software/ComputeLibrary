@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@
 #define posix_memalign_free _aligned_free
 #endif // defined(_WIN64)
 #endif // !defined(__APPLE__) && !defined(__OpenBSD__)
+
+#ifndef BARE_METAL
+#include <thread>
+#endif /* BARE_METAL */
 
 namespace arm_compute
 {

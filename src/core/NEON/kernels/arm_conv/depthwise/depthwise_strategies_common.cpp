@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,8 @@ unsigned int DepthfirstStrategyUntyped::get_input_cols() const
 unsigned int DepthfirstStrategyUntyped::get_n_input_points() const { return this->get_input_rows() * this->get_input_cols(); }
 unsigned int DepthfirstStrategyUntyped::get_n_output_points() const { return this->get_output_rows() * this->get_output_cols(); }
 unsigned int DepthfirstStrategyUntyped::get_n_kernel_points() const { return this->get_kernel_rows() * this->get_kernel_cols(); }
+
+bool DepthfirstStrategyUntyped::uses_premultiply() const { return true; }
 
 unsigned int DepthfirstStrategyUntyped::get_accumulator_depth_vl() const { return 1; }
 

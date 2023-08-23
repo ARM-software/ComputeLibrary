@@ -23,17 +23,22 @@
  */
 #include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
 
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/ClCompileContext.h"
+
+#include "arm_compute/core/QuantizationInfo.h"
 
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -98,34 +103,48 @@ ClMatMulLowpNativeKernel::ClMatMulLowpNativeKernel()
 {
     _type = CLKernelType::GEMM;
 }
-Status ClMatMulLowpNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
+Status ClMatMulLowpNativeKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                                          const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_matmul_kernel_info(matmul_kernel_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_input_shapes(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info));
 
-    if(output->total_size() != 0)
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.activation() != ActivationFunction::IDENTITY && act_info.activation() != ActivationFunction::RELU
+                                     && act_info.activation() != ActivationFunction::LU_BOUNDED_RELU && act_info.activation() != ActivationFunction::BOUNDED_RELU),
+                                    "Activation Function specified is unsupported.");
+    const TensorShape expected_output_shape = misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info);
+
+    if(dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, output);
+        const TensorInfo tensor_info_output = dst->clone()->set_tensor_shape(expected_output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
+    }
+
+    if(bias != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(expected_output_shape[0] != bias->dimension(0));
     }
 
     return Status{};
 }
-void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *output, const MatMulKernelInfo &matmul_kernel_info)
+void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                                         const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, output, &compile_context, &matmul_kernel_info);
-    ARM_COMPUTE_LOG_PARAMS(lhs, rhs, output, matmul_kernel_info);
-    ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, output, matmul_kernel_info));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst, &compile_context, &matmul_kernel_info);
+    ARM_COMPUTE_LOG_PARAMS(lhs, rhs, bias, dst, matmul_kernel_info);
+    ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, bias, dst, matmul_kernel_info));
 
-    // output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
+    // dst tensor auto initialization if not yet initialized
+    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
 
-    const int  m       = output->dimension(1);
-    const int  n       = output->dimension(0);
+    const int  m       = dst->dimension(1);
+    const int  n       = dst->dimension(0);
     const int  k       = matmul_kernel_info.adj_lhs ? lhs->tensor_shape().y() : lhs->tensor_shape().x();
     const bool adj_lhs = matmul_kernel_info.adj_lhs;
 
@@ -133,7 +152,7 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     int n0 = adjust_vec_size(matmul_kernel_info.n0, n);
 
     // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(n0, m0));
+    Window win = calculate_max_window(*dst, Steps(n0, m0));
     win        = win.collapse(win, Window::DimZ);
     IClKernel::configure_internal(win);
 
@@ -152,7 +171,7 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
 
     const UniformQuantizationInfo lqinfo = lhs->quantization_info().uniform();
     const UniformQuantizationInfo rqinfo = rhs->quantization_info().uniform();
-    const UniformQuantizationInfo dqinfo = output->quantization_info().uniform();
+    const UniformQuantizationInfo dqinfo = dst->quantization_info().uniform();
 
     float multiplier        = lqinfo.scale * rqinfo.scale / dqinfo.scale;
     int   output_multiplier = 0;
@@ -162,9 +181,22 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     build_opts.add_option("-DDST_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
     build_opts.add_option("-DDST_SHIFT=" + support::cpp11::to_string(output_shift));
 
-    build_opts.add_option("-DLHS_OFFSET=" + support::cpp11::to_string(-lqinfo.offset)); // Note this is passed as negative to maintain similarity with CLDirectConv2D
-    build_opts.add_option("-DRHS_OFFSET=" + support::cpp11::to_string(-rqinfo.offset)); // Note this is passed as negative to maintain similarity with CLDirectConv2D
-    build_opts.add_option("-DDST_OFFSET=" + support::cpp11::to_string(dqinfo.offset));  // Passed as positive (unlike the above two)
+    // Note : Offset is not negated, unlike gemmlowp kernels
+    build_opts.add_option("-DLHS_OFFSET=" + support::cpp11::to_string(lqinfo.offset));
+    build_opts.add_option("-DRHS_OFFSET=" + support::cpp11::to_string(rqinfo.offset));
+    build_opts.add_option("-DDST_OFFSET=" + support::cpp11::to_string(dqinfo.offset));
+    build_opts.add_option_if(bias != nullptr, "-DBIAS");
+
+    // Floating point boundaries are quantized prior to being passed as arguments.
+    // Note: We expect the input and output tensors to always adopt a per-tensor quantization approach
+    int a_val{};
+    int b_val{};
+    std::tie(b_val, a_val) = get_quantized_activation_min_max(act_info, dst->data_type(), dqinfo);
+
+    build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
+    build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DZERO_POINT=" + support::cpp11::to_string(dqinfo.offset));
 
     std::string kernel_name("mat_mul_native_quantized");
     kernel_name += matmul_kernel_info.adj_lhs ? "_t" : "_nt";
@@ -177,7 +209,7 @@ void ClMatMulLowpNativeKernel::configure(const ClCompileContext &compile_context
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
-    const size_t number_of_batches = output->tensor_shape().total_size() / (m * n);
+    const size_t number_of_batches = dst->tensor_shape().total_size() / (m * n);
 
     _config_id = kernel_name;
     _config_id += "_";
@@ -203,18 +235,23 @@ void ClMatMulLowpNativeKernel::run_op(ITensorPack &tensors, const Window &window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const ICLTensor *lhs    = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const ICLTensor *rhs    = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    ICLTensor       *output = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, output);
-    ARM_COMPUTE_LOG_PARAMS(lhs, rhs, output);
+    const ICLTensor *lhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const ICLTensor *rhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const ICLTensor *bias = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    ICLTensor       *dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
+    ARM_COMPUTE_LOG_PARAMS(lhs, rhs, bias, dst);
 
     unsigned int idx              = 0;
     Window       window_collapsed = window.collapse(ICLKernel::window(), Window::DimZ);
 
     add_3d_tensor_nhw_argument(idx, lhs);
     add_3d_tensor_nhw_argument(idx, rhs);
-    add_3d_tensor_nhw_argument(idx, output);
+    if(bias != nullptr)
+    {
+        add_3d_tensor_nhw_argument(idx, bias);
+    }
+    add_3d_tensor_nhw_argument(idx, dst);
 
     enqueue(queue, *this, window_collapsed, lws_hint());
 }

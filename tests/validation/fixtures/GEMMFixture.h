@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
         ARM_COMPUTE_UNUSED(pretranspose);
@@ -230,7 +229,6 @@ template <typename TensorType, typename AccessorType, typename T, typename GEMMO
 class GEMMMatrixMultiplyValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision, const ActivationLayerInfo &act_info,
                DataType data_type, GPUTarget gpu_arch)
     {
@@ -354,7 +352,6 @@ template <typename TensorType, typename AccessorType, typename T, typename GEMMO
 class GEMMMatrixMultiply3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision,
                const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
     {
@@ -476,7 +473,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyInterleavedTransposedValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, unsigned int v0, unsigned int h0, bool broadcast_bias, bool fp16_mixed_precision,
                const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
     {
@@ -632,7 +628,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyInterleavedTransposed3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, unsigned int v0, unsigned int h0, bool broadcast_bias,
                bool fp16_mixed_precision, const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
     {
@@ -786,7 +781,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
                bool interleave_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, bool lhs_transpose, const ActivationLayerInfo &act_info)
     {
@@ -973,7 +967,6 @@ class GEMMMatrixMultiplyReshapedWithPostOpsValidationFixture : public framework:
 public:
     using PostOpArgBroadcast = std::tuple<bool, bool, bool>; // Instruct fixture if we need broadcasting in dimension 0, 1, 2 of each PostOp argument
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
                bool interleave_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, bool lhs_transpose, const ActivationLayerInfo &act_info,
                const experimental::PostOpList<PostOpArgBroadcast> &post_ops)
@@ -1227,7 +1220,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyReshaped3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                bool interleave_lhs, bool interleave_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool lhs_transpose, const ActivationLayerInfo &act_info)
     {
@@ -1407,7 +1399,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyReshapedOnlyRHSValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
                bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
@@ -1575,7 +1566,6 @@ class GEMMMatrixMultiplyReshapedOnlyRHSWithPostOpsValidationFixture : public fra
 {
 public:
     using PostOpArgBroadcast = std::tuple<bool, bool, bool>; // Instruct fixture if we need broadcasting in dimension 0, 1, 2 of each PostOp argument
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
                bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info,
                const experimental::PostOpList<PostOpArgBroadcast> &post_ops)
@@ -1810,7 +1800,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
                bool interleave_rhs, bool transpose_rhs, bool export_to_cl_image, bool has_pad_y, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
@@ -1980,7 +1969,6 @@ template <typename TensorType, typename AccessorType, typename T, typename GEMMO
 class GEMMMatrixMultiplyNativeValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias,
                const ActivationLayerInfo &act_info)
     {
@@ -2119,7 +2107,6 @@ class GEMMMatrixMultiplyNativeWithPostOpsValidationFixture : public framework::F
 public:
     using PostOpArgBroadcast = std::tuple<bool, bool, bool>; // Instruct fixture if we need broadcasting in dimension 0, 1, 2 of each PostOp argument
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias,
                const ActivationLayerInfo &act_info, const experimental::PostOpList<PostOpArgBroadcast> &post_ops)
     {
@@ -2324,7 +2311,6 @@ template <typename TensorType, typename AccessorType, typename T, typename GEMMO
 class GEMMMatrixMultiplyNative3DValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta,
                const ActivationLayerInfo &act_info)
     {
@@ -2459,7 +2445,6 @@ template <typename TensorType, typename AccessorType, typename T, typename Resha
 class GEMMMatrixMultiplyReshapedOnlyRhsMMULValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, bool export_to_cl_image, DataType data_type, float alpha,
                float beta, bool broadcast_bias,
                const ActivationLayerInfo &act_info)

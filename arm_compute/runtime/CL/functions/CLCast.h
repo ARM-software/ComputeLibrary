@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,43 +61,28 @@ public:
      * |src            |dst                                    |
      * |:--------------|:--------------------------------------|
      * |U8             | S8, U16, S16, U32, S32, F16, F32      |
+     * |S8             | U8, U16, S16, U32, S32, F16, F32      |
      * |U16            | U8, S8, S16, U32, S32, F16, F32       |
      * |S16            | U8, S8, U16, U32, S32, F16, F32       |
      * |U32            | U8, S8, U16, S16, S32, F16, F32       |
      * |S32            | U8, S8, U16, S16, U32, F16, F32       |
-     * |F16            | U8, S8, U16, S16, U32, F32            |
-     * |F32            | U8, S8, U16, S16, U32, F16            |
+     * |U64            | U8, S8, U16, S16, U32, S32, F16, F32  |
+     * |S64            | U8, S8, U16, S16, U32, S32, F16, F32  |
+     * |F16            | U8, S8, U16, S16, S32, U32, F32       |
+     * |F32            | U8, S8, U16, S16, S32, U32, F16       |
      *
      * Input data type must be different than output data type.
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/U64/S64/F16/F32.
      * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
-    /** Initialize the function's source, destination
-     *
-     * Input data type must be different than output data type.
-     *
-     * Valid conversions Input -> Output :
-     *
-     *   - U8  -> S8, U16, S16, U32, S32, F16, F32
-     *   - U16 -> U8, S8, S16, U32, S32, F16, F32
-     *   - S16 -> U8, S8, U16, U32, S32, F16, F32
-     *   - U32 -> U8, S8, U16, S16, S32, F16, F32
-     *   - S32 -> U8, S8, U16, S16, U32, F16, F32
-     *   - F16 -> U8, S8, U16, S16, U32, F32
-     *   - F32 -> U8, S8, U16, S16, U32, F16
-     *
-     * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
-     * @param[out] output          The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
-     * @param[in]  policy          Conversion policy.
-     */
+    // Initialize the function's source, destination
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCast
      *
-     * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/U64/S64/F16/F32.
      * @param[in] output Destination tensor info. Data type supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy.
      *

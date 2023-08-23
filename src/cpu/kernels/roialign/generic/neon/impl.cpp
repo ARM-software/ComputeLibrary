@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,10 @@
  * SOFTWARE.
  */
 #include "src/cpu/kernels/roialign/generic/neon/impl.h"
+
 #include "src/core/NEON/INEKernel.h"
+#include "src/cpu/CpuTypes.h"
+
 namespace arm_compute
 {
 namespace cpu

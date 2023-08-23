@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 #include "src/core/NEON/kernels/arm_conv/depthwise/interleaves/list.hpp"
 
 #include <cstdint>
@@ -34,15 +34,7 @@
 namespace arm_conv {
 namespace depthwise {
 
-void a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst_impl(
-  const unsigned int,
-  const int8_t *const *const,
-  const int8_t *const,
-  const int32_t *const,
-  const arm_gemm::Requantize32 &,
-  const int32_t *const,
-  const int32_t *const,
-  int8_t *const *const);
+void a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst_impl(unsigned int, const int8_t *const *, const int8_t *, const int32_t *, const arm_gemm::Requantize32 &, const int32_t *, const int32_t *, int8_t *const *);
 
 class a64_s8q_nhwc_5x5_s1_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<int8_t, int8_t, int8_t, int32_t>
 {

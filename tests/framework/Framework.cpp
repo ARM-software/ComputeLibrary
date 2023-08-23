@@ -130,10 +130,12 @@ Framework &Framework::get()
 void Framework::init(const FrameworkConfig &config)
 {
     _test_filter.reset(new TestFilter(config.mode, config.name_filter, config.id_filter));
-    _num_iterations = config.num_iterations;
-    _log_level      = config.log_level;
-    _cooldown_sec   = config.cooldown_sec;
-    _configure_only = config.configure_only;
+    _num_iterations  = config.num_iterations;
+    _log_level       = config.log_level;
+    _cooldown_sec    = config.cooldown_sec;
+    _configure_only  = config.configure_only;
+    _print_rerun_cmd = config.print_rerun_cmd;
+    _seed            = config.seed;
 
     _instruments = std::set<framework::InstrumentsDescription>(std::begin(config.instruments), std::end(config.instruments));
 }
@@ -292,13 +294,13 @@ bool Framework::error_on_missing_assets() const
     return _error_on_missing_assets;
 }
 
-void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
+TestResult::Status Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 {
     if(test_factory.status() == TestCaseFactory::Status::DISABLED)
     {
         log_test_skipped(info);
         set_test_result(info, TestResult(TestResult::Status::DISABLED));
-        return;
+        return TestResult::Status::DISABLED;
     }
 
     log_test_start(info);
@@ -538,6 +540,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
     set_test_result(info, result);
     log_test_end(info);
+    return result.status;
 }
 
 bool Framework::run()
@@ -581,9 +584,11 @@ bool Framework::run()
                 CLScheduler::get().set_queue(new_queue);
             }
 #endif // ARM_COMPUTE_CL
-
-            run_test(test_info, *test_factory);
-
+            TestResult::Status result = run_test(test_info, *test_factory);
+            if((_print_rerun_cmd) && (result == TestResult::Status::CRASHED || result == TestResult::Status::FAILED))
+            {
+                std::cout << "Rerun command: ./arm_compute_validation --filter='^" << test_info.name << "$' --seed=" << _seed << std::endl;
+            }
             ++id_run_test;
 
             // Run test delay

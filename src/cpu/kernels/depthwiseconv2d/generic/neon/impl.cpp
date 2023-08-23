@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "src/cpu/kernels/depthwiseconv2d/generic/neon/impl.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/function_info/ConvolutionInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute

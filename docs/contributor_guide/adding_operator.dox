@@ -55,13 +55,13 @@ Following are the steps involved in adding support for a new operator in Compute
 @subsection S4_1_1_add_datatypes Adding new data types
 
 Compute Library declares a few new datatypes related to its domain, kernels, and functions in the library process Tensors and Images (Computer Vision functions). Tensors are multi-dimensional arrays with a maximum of Coordinates::num_max_dimensions dimensions; depending on the number of dimensions tensors can be interpreted as various objects. A scalar can be represented as a zero-dimensional tensor and a vector of numbers can be represented as a one-dimensional tensor. Furthermore, an image is just a 2D tensor, a 3D tensor can be seen as an array of images and a 4D tensor as a 2D array of images, etc.
-All the datatype classes or structures are grouped in the core library folder arm_compute/core  like the @ref ITensor, @ref ITensorInfo (all the information of a tensor), TensorShape and simpler types are in arm_compute/core/Types.h.
+All the datatype classes or structures are grouped in the core library folder arm_compute/core  like the @ref ITensor, @ref ITensorInfo (all the information of a tensor), TensorShape and simpler types are in arm_compute/core/CoreTypes.h.
 
 If an operator handles a new datatype, it must be added to the library. While adding a new data type to the library, it's necessary to implement the function to enable printing, the to_string() method and the output stream insertion (<<) operator. Every datatype implements these two functions in utils/TypePrinter.h
 
-A quick example, in <a href="https://github.com/ARM-software/ComputeLibrary/blob/main/arm_compute/core/Types.h">Types.h</a> we add:
+A quick example, in <a href="https://github.com/ARM-software/ComputeLibrary/blob/main/arm_compute/core/CoreTypes.h">CoreTypes.h</a> we add:
 
-@snippet arm_compute/core/Types.h DataLayout enum definition
+@snippet arm_compute/core/CoreTypes.h DataLayout enum definition
 
 And for printing:
 

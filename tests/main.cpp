@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Version.h"
 #include "support/StringSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/DatasetModes.h"
@@ -127,6 +128,8 @@ int main(int argc, char **argv)
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<utils::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
+    auto print_rerun_command = parser.add_option<utils::ToggleOption>("rerun-cmd");
+    print_rerun_command->set_help("Print out the command to rerun the exact failed testcase");
 #ifdef ARM_COMPUTE_CL
     auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
@@ -270,14 +273,16 @@ int main(int argc, char **argv)
 
         // Initialize framework
         framework::FrameworkConfig fconfig;
-        fconfig.instruments    = options.instruments->value();
-        fconfig.name_filter    = filter->value();
-        fconfig.id_filter      = filter_id->value();
-        fconfig.num_iterations = options.iterations->value();
-        fconfig.mode           = dataset_mode->value();
-        fconfig.log_level      = options.log_level->value();
-        fconfig.cooldown_sec   = cooldown_sec->value();
-        fconfig.configure_only = configure_only->value();
+        fconfig.instruments     = options.instruments->value();
+        fconfig.name_filter     = filter->value();
+        fconfig.id_filter       = filter_id->value();
+        fconfig.num_iterations  = options.iterations->value();
+        fconfig.mode            = dataset_mode->value();
+        fconfig.log_level       = options.log_level->value();
+        fconfig.cooldown_sec    = cooldown_sec->value();
+        fconfig.configure_only  = configure_only->value();
+        fconfig.print_rerun_cmd = print_rerun_command->value();
+        fconfig.seed            = seed->value();
         framework.init(fconfig);
 
         for(auto &p : printers)

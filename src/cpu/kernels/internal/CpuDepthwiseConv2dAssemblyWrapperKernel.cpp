@@ -303,6 +303,20 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo *src,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
+
+    // Assembly kernels cannot work with padding greater than the kernel.
+    const auto &padding = info.pad_stride_info;
+    const auto &dilation = info.dilation;
+    const auto &wei_shape = weights->tensor_shape();
+
+    const auto dilated_wei_w = wei_shape[1] + (wei_shape[1] - 1) * (dilation.x() - 1);
+    const auto dilated_wei_h = wei_shape[2] + (wei_shape[2] - 1) * (dilation.y() - 1);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        padding.pad_left() >= dilated_wei_w || padding.pad_right() >= dilated_wei_w ||
+        padding.pad_top() >= dilated_wei_h || padding.pad_bottom() >= dilated_wei_h
+    );
+
     return Status{};
 }
 
@@ -353,9 +367,9 @@ size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_storage_size() const
     return _kernel_asm->get_storage_size();
 }
 
-size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_working_size(unsigned int num_threads, unsigned int num_input_channels) const
+size_t CpuDepthwiseConv2dAssemblyWrapperKernel::get_working_size(unsigned int num_threads) const
 {
-    return _kernel_asm->get_working_size(num_threads, num_input_channels);
+    return _kernel_asm->get_working_size(num_threads);
 }
 
 bool CpuDepthwiseConv2dAssemblyWrapperKernel::is_configured() const

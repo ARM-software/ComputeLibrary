@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class RNNLayerValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape recurrent_weights_shape, TensorShape bias_shape, TensorShape output_shape, ActivationLayerInfo info,
                DataType data_type)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,6 @@ namespace arm_compute
 {
 ICLMemoryRegion::ICLMemoryRegion(size_t size)
     : IMemoryRegion(size),
-      _queue(CLScheduler::get().queue()),
       _ctx(CLScheduler::get().context()),
       _mapping(nullptr),
       _mem()
@@ -73,6 +72,14 @@ CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer)
     _mem = buffer;
 }
 
+CLBufferMemoryRegion::~CLBufferMemoryRegion()
+{
+    // Flush the command queue to ensure all commands that may use this memory buffer are scheduled to be finished before
+    // this buffer is freed
+    // Do not call finish as it is a blocking call which affects the performance
+    CLScheduler::get().queue().flush();
+}
+
 void *CLBufferMemoryRegion::ptr()
 {
     return nullptr;
@@ -111,7 +118,10 @@ ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
     {
         try
         {
-            clFinish(_queue.get());
+            // Can only use the blocking finish instead of the non-blocking flush here, because clSVMFree requires all
+            // commands that may use the svm pointer to finish beforehand
+            // https://registry.khronos.org/OpenCL/sdk/3.0/docs/man/html/clSVMFree.html
+            clFinish(CLScheduler::get().queue().get());
             _mem = cl::Buffer();
             clSVMFree(_ctx.get(), _ptr);
         }

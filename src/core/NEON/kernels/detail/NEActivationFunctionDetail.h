@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_DETAIL_NEACTIVATION_FUNCTION_DETAIL_H
 #define ARM_COMPUTE_DETAIL_NEACTIVATION_FUNCTION_DETAIL_H
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute

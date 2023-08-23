@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ConvertFullyConnectedWeightsValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, unsigned int weights_w, DataLayout training_data_layout, DataType data_type)
     {
         const unsigned int height = input_shape.x() * input_shape.y() * input_shape.z();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 #include "src/core/NEON/kernels/arm_conv/depthwise/interleaves/list.hpp"
 
 #include <cstdint>
@@ -64,7 +64,7 @@ class sve_s8qs_nhwc_3x3_s1_output2x2_dot_depthfirst : public DepthwiseDepthfirst
   ) const override
   {
     interleave_sve_s8q_3x3_dot::pack_parameters(
-      args.input_channels, buffer, reinterpret_cast<const int32_t *>(biases),
+      args.input_channels * args.channel_multiplier, buffer, reinterpret_cast<const int32_t *>(biases),
       reinterpret_cast<const int8_t *>(weights), qp, ld_weight_col, ld_weight_row
     );
   }

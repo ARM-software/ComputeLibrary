@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,9 @@
 #include "src/gpu/cl/kernels/ClTransposedConvolutionKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"

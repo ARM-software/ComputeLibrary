@@ -27,6 +27,7 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/function_info/MatMulInfo.h"
 #include "src/core/common/Macros.h"
 
 namespace arm_compute
@@ -110,6 +111,6 @@ public:
 protected:
     GPUTarget _target;
 };
-} // namespace opencl
+} // namespace cl_matmul
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_ICLMATMULNATIVEKERNELCONFIG */

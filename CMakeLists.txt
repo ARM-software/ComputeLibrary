@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 list(APPEND CMAKE_MESSAGE_CONTEXT ArmCompute)
 project(
   ArmCompute
-  VERSION 31.0.1
+  VERSION 32.0.0
   DESCRIPTION
     "The Arm Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A CPU and Arm® Mali™ GPU architectures"
   LANGUAGES C CXX ASM)
@@ -197,6 +197,7 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE src
           src/cpu/kernels/assembly
+          src/core/NEON/kernels/arm_gemm
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise
@@ -223,6 +224,7 @@ target_include_directories(
          ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE src
           src/cpu/kernels/assembly
+          src/core/NEON/kernels/arm_gemm
           src/core/NEON/kernels/assembly
           src/core/NEON/kernels/convolution/common
           src/core/NEON/kernels/arm_conv/depthwise

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_INTERNAL_CPU_GEMM_ASSEMBLY_DISPATCH_H
 #define ARM_COMPUTE_CPU_INTERNAL_CPU_GEMM_ASSEMBLY_DISPATCH_H
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 

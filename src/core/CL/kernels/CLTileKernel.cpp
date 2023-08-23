@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "src/core/CL/kernels/CLTileKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -79,11 +80,13 @@ void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLT
     _input  = input;
     _output = output;
 
-    const DataType     data_type      = input->info()->data_type();
-    const int          vec_size_x     = 16 / input->info()->element_size();
-    const int          input_width_x  = input->info()->tensor_shape().x();
-    const unsigned int offset         = ceil_to_multiple(input_width_x, vec_size_x) - input_width_x;
-    const bool         multi_access_x = (input_width_x / vec_size_x > 0);
+    const DataType     data_type         = input->info()->data_type();
+    const int          vec_size_x        = 16 / input->info()->element_size();
+    const int          input_width_x     = input->info()->tensor_shape().x();
+    const unsigned int input_width_ceil  = ceil_to_multiple(input_width_x, vec_size_x);
+    const unsigned int input_width_tiles = input_width_ceil / vec_size_x;
+    const unsigned int offset            = input_width_ceil - input_width_x;
+    const bool         multi_access_x    = (input_width_x / vec_size_x > 0);
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -95,6 +98,7 @@ void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLT
     build_opts.add_option("-DDST_DEPTH=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if(multi_access_x, "-DOFFSET=" + support::cpp11::to_string(offset));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
+    build_opts.add_option_if(multi_access_x, "-DSRC_WIDTH_TILES=" + support::cpp11::to_string(input_width_tiles));
     _kernel = create_kernel(compile_context, "tile", build_opts.options());
 
     // Configure window without padding

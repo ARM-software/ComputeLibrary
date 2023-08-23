@@ -102,12 +102,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 {
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
     // Validate Elementwise Mul
-    auto          lhs_info         = sketch.create_tensor_info(input1_info);
-    auto          rhs_info         = sketch.create_tensor_info(input2_info);
+    auto          lhs_info         = context.create_tensor_info(input1_info);
+    auto          rhs_info         = context.create_tensor_info(input2_info);
 
     bool res = bool(GpuMul::validate_op(sketch, &lhs_info, &rhs_info));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);

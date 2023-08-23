@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,9 +106,10 @@ public:
      *
      * @note The upper dimensions of the tensor shape will be shifted down by 1
      *
-     * @param[in] n Dimension to remove
+     * @param[in] n                    Dimension to remove
+     * @param[in] apply_dim_correction (Optional) Flag to state whether apply dimension correction (removing trailing dimensions with size of 1) after removing a dimension.
      */
-    void remove_dimension(size_t n)
+    void remove_dimension(size_t n, bool apply_dim_correction = true)
     {
         ARM_COMPUTE_ERROR_ON(_num_dimensions < 1);
         ARM_COMPUTE_ERROR_ON(n >= _num_dimensions);
@@ -122,7 +123,10 @@ public:
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
 
         // Correct number dimensions to ignore trailing dimensions of size 1
-        apply_dimension_correction();
+        if(apply_dim_correction)
+        {
+            apply_dimension_correction();
+        }
     }
 
     /** Collapse the first n dimensions.

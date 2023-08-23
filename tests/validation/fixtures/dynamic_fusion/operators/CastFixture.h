@@ -47,7 +47,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionCastValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
         _target    = compute_target(shape, dt_in, dt_out, policy);
@@ -112,12 +111,12 @@ protected:
     {
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo src_info = sketch.create_tensor_info(TensorInfo(shape, 1, dt_in, DataLayout::NCHW)); // layout is not important
-        TensorInfo dst_info = sketch.create_tensor_info();
+        TensorInfo src_info = context.create_tensor_info(TensorInfo(shape, 1, dt_in, DataLayout::NCHW)); // layout is not important
+        TensorInfo dst_info = context.create_tensor_info();
 
         CastAttributes attributes;
         attributes.convert_policy(policy).data_type(dt_out);

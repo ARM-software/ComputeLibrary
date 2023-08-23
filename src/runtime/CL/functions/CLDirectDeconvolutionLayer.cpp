@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,8 +67,8 @@ Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITen
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const size_t idx_c = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) != weights->dimension(idx_h));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) < 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) < 1);
 
     auto out_dims = deconvolution_output_dimensions(input->dimension(idx_w), input->dimension(idx_h), weights->dimension(idx_w), weights->dimension(idx_h), info);
 

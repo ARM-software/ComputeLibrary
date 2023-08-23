@@ -31,10 +31,17 @@ import zlib
 import json
 import codecs
 
-VERSION = "v23.05.1"
-LIBRARY_VERSION_MAJOR = 31
+from SCons.Warnings import warn, DeprecatedWarning
+
+warn(DeprecatedWarning,
+     "DEPRECATION NOTICE: Legacy libarm_compute_core has been deprecated and is scheduled for removal in 24.02 release."
+     " Link your application only to libarm_compute for core library functionality"
+     )
+
+VERSION = "v23.08"
+LIBRARY_VERSION_MAJOR = 32
 LIBRARY_VERSION_MINOR =  0
-LIBRARY_VERSION_PATCH =  1
+LIBRARY_VERSION_PATCH =  0
 SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
@@ -47,8 +54,6 @@ def build_bootcode_objs(sources):
     obj = install_lib(obj)
     Default(obj)
     return obj
-
-
 
 
 # @brief Create a list of object from a given file list.
@@ -113,6 +118,24 @@ def build_lib_objects():
     return lib_static_objs, lib_shared_objs
 
 
+# The built-in SCons Glob() method does not support recursive searching of directories, thus we implement our own:
+def recursive_glob(root_dir, pattern):
+    files = []
+    regex = re.compile(pattern)
+
+    for dirpath, _, filenames in os.walk(root_dir):
+        for f in filenames:
+            f = os.path.join(dirpath, f)
+            if regex.match(f):
+                files.append(f)
+
+    return files
+
+
+def get_ckw_obj_list():
+    cmake_obj_dir = os.path.abspath("prototype/CMakeFiles/ckw_prototype.dir/src")
+    return recursive_glob(root_dir=cmake_obj_dir, pattern=".*.o$")
+
 
 def build_library(name, build_env, sources, static=False, libs=[]):
     cloned_build_env = build_env.Clone()
@@ -120,9 +143,25 @@ def build_library(name, build_env, sources, static=False, libs=[]):
         cloned_build_env["LINKFLAGS"].remove('-pie')
         cloned_build_env["LINKFLAGS"].remove('-static-libstdc++')
 
+    # -- Static Library --
     if static:
-        obj = cloned_build_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
+        # Recreate the list to avoid mutating the original
+        static_sources = list(sources)
+
+        # Dynamic Fusion has a direct dependency on the Compute Kernel Writer (CKW) subproject, therefore we collect the
+        # built CKW objects to pack into the Compute Library archive.
+        if env['experimental_dynamic_fusion'] and name == "arm_compute-static":
+            static_sources += get_ckw_obj_list()
+
+        obj = cloned_build_env.StaticLibrary(name, source=static_sources, LIBS=arm_compute_env["LIBS"] + libs)
+
+    # -- Shared Library --
     else:
+        # Always statically link Compute Library against CKW
+        if env['experimental_dynamic_fusion'] and name == "arm_compute":
+            libs.append('libckw_prototype.a')
+
+        # Add shared library versioning
         if env['set_soname']:
             obj = cloned_build_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
         else:
@@ -220,7 +259,8 @@ def create_version_file(target, source, env):
     except (OSError, subprocess.CalledProcessError):
         git_hash="unknown"
 
-    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
+    build_options = str(vars.args).replace('"', '\\"')
+    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION,build_options, git_hash.strip())
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
@@ -394,6 +434,7 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/instance_normalization.cl',
                        'src/core/CL/cl_kernels/common/l2_normalize.cl',
                        'src/core/CL/cl_kernels/common/mat_mul.cl',
+                       'src/core/CL/cl_kernels/common/mat_mul_mmul.cl',
                        'src/core/CL/cl_kernels/common/mat_mul_quantized.cl',
                        'src/core/CL/cl_kernels/common/mean_stddev_normalization.cl',
                        'src/core/CL/cl_kernels/common/memset.cl',
@@ -493,7 +534,8 @@ arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSI
 
 # Don't allow undefined references in the libraries:
 undefined_flag = '-Wl,-undefined,error' if 'macos' in arm_compute_env["os"] else '-Wl,--no-undefined'
-arm_compute_env.Append(LINKFLAGS=[undefined_flag])
+if not env['thread_sanitizer']:
+    arm_compute_env.Append(LINKFLAGS=[undefined_flag])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env['os'] != 'openbsd':
@@ -522,7 +564,14 @@ if env['fixed_format_kernels']:
 # Experimental files
 # Dynamic fusion
 if env['experimental_dynamic_fusion']:
-    lib_files += filelist['experimental']['dynamic_fusion']
+    lib_files += filelist['experimental']['dynamic_fusion']['common']
+    lib_files += filelist['experimental']['dynamic_fusion']['template_writer']
+
+if "ACL_INTERNAL_TEST_CKW_IN_DF" in env["extra_cxx_flags"]:
+    if not env["experimental_dynamic_fusion"]:
+        print("To use ACL_INTERNAL_TEST_CKW_IN_DF experimental_dynamic_fusion must be set to 1")
+        Exit(1)
+    lib_files += filelist['experimental']['dynamic_fusion']['ckw_driver']
 
 # Logging files
 if env["logging"]:
@@ -548,7 +597,7 @@ custom_operators = []
 custom_types = []
 custom_layouts = []
 
-use_custom_ops = env['high_priority'] or env['build_config'];
+use_custom_ops = env['high_priority'] or env['build_config']
 
 if env['high_priority']:
     custom_operators = filelist['high_priority']
@@ -574,7 +623,8 @@ lib_files_sve2 = []
 
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
-    arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/convolution/common/",
+    arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/arm_gemm",
+                                      "src/core/NEON/kernels/convolution/common/",
                                       "src/core/NEON/kernels/convolution/winograd/",
                                       "src/core/NEON/kernels/arm_conv/depthwise/",
                                       "src/core/NEON/kernels/arm_conv/pooling/",
@@ -682,7 +732,7 @@ arm_compute_graph_env = arm_compute_env.Clone()
 # Build graph libraries
 arm_compute_graph_env.Append(CXXFLAGS = ['-Wno-redundant-move', '-Wno-pessimizing-move'])
 
-arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True, libs = [ arm_compute_a ])
+arm_compute_graph_a = build_library('arm_compute_graph-static', arm_compute_graph_env, graph_files, static=True)
 Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:

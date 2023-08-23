@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "arm_compute/core/Types.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuSoftmax.h"
 
@@ -104,13 +105,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 {
     // Create a new workload sketch
     CLCompileContext   cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    GpuWorkloadContext gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch  sketch{ &gpu_ctx };
+    GpuWorkloadContext context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch  sketch{ &context };
 
     SoftmaxAttributes softmax_attr{};
     softmax_attr.axis(axis).beta(beta).is_log_softmax(false);
-    TensorInfo src_info  = sketch.create_tensor_info(input_info);
-    TensorInfo dst_info = sketch.create_tensor_info(output_info);
+    TensorInfo src_info  = context.create_tensor_info(input_info);
+    TensorInfo dst_info = context.create_tensor_info(output_info);
     const bool res = static_cast<bool>(GpuSoftmax::validate_op(sketch, &src_info, &dst_info, softmax_attr));
     ARM_COMPUTE_EXPECT(res == expected, framework::LogLevel::ERRORS);
 }
@@ -196,3 +197,5 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF

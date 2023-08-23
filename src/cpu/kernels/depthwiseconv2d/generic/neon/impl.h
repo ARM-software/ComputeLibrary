@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 #include "arm_compute/core/Helpers.h"
 namespace arm_compute
 {
+struct ConvolutionInfo;
+
 namespace cpu
 {
 template <typename T, typename TW>

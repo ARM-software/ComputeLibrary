@@ -28,7 +28,6 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "support/ICloneable.h"
 
@@ -36,6 +35,7 @@
 
 namespace arm_compute
 {
+class QuantizationInfo;
 // Note: Any changes to the fields of the class below that have setters should be mirrored
 // (if possible) in the auto_init_if_empty function in AutoConfiguration.h
 

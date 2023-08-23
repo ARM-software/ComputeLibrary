@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #ifndef SRC_CORE_NEON_KERNELS_CONV2D_IMPL_H
 #define SRC_CORE_NEON_KERNELS_CONV2D_IMPL_H
 
+#include "arm_compute/core/ITensor.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 namespace arm_compute

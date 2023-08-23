@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 #include <cstddef>
 
@@ -888,5 +888,4 @@ void sme_fp32_mopa_4x4_3x3(
 }  // namespace winograd
 }  // namespace arm_conv
 
-#endif //defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(ARM_COMPUTE_ENABLE_SME)
-
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

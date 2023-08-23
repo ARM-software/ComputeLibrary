@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,6 @@ public:
     using TBias = typename std::conditional < std::is_same<typename std::decay<T>::type, uint8_t>::value || std::is_same<typename std::decay<T>::type, int8_t>::value, int32_t, T >::type;
 
 public:
-    template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
                DataType data_type, DataType weights_data_type, DataLayout data_layout,
                QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, QuantizationInfo weights_quantization_info, bool add_bias)
@@ -246,11 +245,9 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionValidationFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
@@ -267,11 +264,9 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionValidationAsymmFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int pad_left, unsigned int pad_right, unsigned int pad_top,
                unsigned int pad_bottom, unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, pad_left, pad_right, pad_top, pad_bottom, DimensionRoundingType::CEIL);
@@ -288,11 +283,9 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionValidationQuantizedFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
@@ -310,12 +303,10 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionValidationQuantizedPerChannelFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
                unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias,
                DataType weights_data_type)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);

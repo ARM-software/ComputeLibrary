@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "src/core/utils/AssemblyUtils.h"
+
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 
 namespace arm_compute
 {

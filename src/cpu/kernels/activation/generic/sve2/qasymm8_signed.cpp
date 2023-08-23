@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 #include <cmath>

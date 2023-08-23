@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF // Do not include this test if ACL_INTERNAL_TEST_CKW_IN_DF and the op has not been ported to ckw
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/framework/Macros.h"
@@ -53,13 +54,13 @@ input_info, output_shape, expected)
 {
     // Create a new workload sketch
     auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-    auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-    GpuWorkloadSketch sketch{ &gpu_ctx };
+    auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+    GpuWorkloadSketch sketch{ &context };
 
     // Create sketch tensors
     TensorShape input_shape = input_info.tensor_shape();
     ARM_COMPUTE_UNUSED(input_shape);
-    TensorInfo src_info = sketch.create_tensor_info(input_info);
+    TensorInfo src_info = context.create_tensor_info(input_info);
 
     ReshapeAttributes attributes;
     attributes.shape(output_shape);
@@ -121,3 +122,5 @@ TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_INTERNAL_TEST_CKW_IN_DF

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,6 @@
 #include "arm_compute/graph/nodes/Nodes.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
-#include "support/Cast.h"
-#include "support/ToolchainSupport.h"
 
 using namespace arm_compute::utils::cast;
 

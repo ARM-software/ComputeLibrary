@@ -24,6 +24,7 @@
 #ifndef ACL_SRC_GPU_CL_KERNELS_CLMATMULLOWPNATIVEKERNEL
 #define ACL_SRC_GPU_CL_KERNELS_CLMATMULLOWPNATIVEKERNEL
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -43,22 +44,26 @@ public:
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(ClMatMulLowpNativeKernel);
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  compile_context The compile context to be used.
-     * @param[in]  lhs             Input tensor for the LHS matrix. Data type supported: QASYMM8_SIGNED/QASYMM8.
-     *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
-     * @param[in]  rhs             Input tensor for the RHS matrix. Data type supported: same as @p lhs.
-     *                             Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
-     * @param[out] dst             Output tensor info. Data type supported: same as @p lhs
-     * @param[in]  matmul_info     Attributes for Batch MatMul Kernel
+     * @param[in]  compile_context    The compile context to be used.
+     * @param[in]  lhs                Input tensor info for the LHS matrix. Data type supported: QASYMM8_SIGNED/QASYMM8.
+     *                                Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
+     * @param[in]  rhs                Input tensor info for the RHS matrix. Data type supported: same as @p lhs.
+     *                                Dimensions above 2 are collapsed onto dimension 2 and represent the batch.
+     * @param[in]  bias               Bias tensor info. Can be nullptr. Data type supported: S32.
+     * @param[out] dst                Output tensor info. Data type supported: same as @p lhs
+     * @param[in]  matmul_kernel_info Attributes for Batch MatMul Kernel
+     * @param[in]  act_info           (Optional) Class containing information about fused activation function.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMatMulLowpNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

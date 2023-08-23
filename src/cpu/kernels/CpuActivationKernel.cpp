@@ -48,7 +48,7 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
 #ifdef ARM_COMPUTE_ENABLE_SVE
     {
         "sve2_q8_activation_lut",
-        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt) && data.cpumodel == CPUModel::A510 && data.isa.sve2; },
+        [](const ActivationDataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) && data.cpumodel == CPUModel::A510 && data.isa.sve2; },
         REGISTER_QASYMM8_SVE2(arm_compute::cpu::sve2_q8_activation_lut)
     },
 #endif // ARM_COMPUTE_ENABLE_SVE
@@ -56,7 +56,7 @@ static const std::vector<CpuActivationKernel::ActivationKernel> available_kernel
     {
         // Neon LUT implementantion takes precedence
         "neon_q8_activation_lut",
-        [](const ActivationDataTypeISASelectorData & data) { return ActivationLayerInfo::is_lut_supported(data.f, data.dt); },
+        [](const ActivationDataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_Q8_NEON(arm_compute::cpu::neon_q8_activation_lut)
     },
 #endif // __aarch64__
@@ -184,6 +184,72 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
 
     return std::make_pair(Status{}, win);
 }
+#ifdef __aarch64__
+void init_lut(ActivationLayerInfo::ActivationFunction act_func, DataType data_type,
+              const UniformQuantizationInfo &qi_in, const UniformQuantizationInfo &qi_out,
+              ActivationLayerInfo::LookupTable256 &lut, float a, float b)
+{
+    for(size_t i = 0; i < lut.size(); ++i)
+    {
+        float tmp_f = (data_type == DataType::QASYMM8) ? dequantize_qasymm8(i, qi_in) : dequantize_qasymm8_signed(i, qi_in);
+        switch(act_func)
+        {
+            case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+                tmp_f = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
+                break;
+            case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+                tmp_f = tmp_f > 0 ? tmp_f : tmp_f * a;
+                break;
+            case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+                tmp_f = 1.f / (1.f + std::exp(-tmp_f));
+                break;
+            case ActivationLayerInfo::ActivationFunction::ABS:
+                tmp_f = std::abs(tmp_f);
+                break;
+            case ActivationLayerInfo::ActivationFunction::LINEAR:
+                tmp_f = a * tmp_f + b;
+                break;
+            case ActivationLayerInfo::ActivationFunction::RELU:
+                tmp_f = std::max<>(0.f, tmp_f);
+                break;
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+                tmp_f = std::min<>(a, std::max(0.f, tmp_f));
+                break;
+            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+                tmp_f = std::min<>(a, std::max<>(b, tmp_f));
+                break;
+            case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+                tmp_f = (tmp_f > 12.f) ? tmp_f : std::log(1.f + std::exp(tmp_f));
+                break;
+            case ActivationLayerInfo::ActivationFunction::ELU:
+                tmp_f = (tmp_f >= 0) ? tmp_f : a * (std::exp(tmp_f) - 1);
+                break;
+            case ActivationLayerInfo::ActivationFunction::SQRT:
+                tmp_f = std::sqrt(tmp_f);
+                break;
+            case ActivationLayerInfo::ActivationFunction::SQUARE:
+                tmp_f = tmp_f * tmp_f;
+                break;
+            case ActivationLayerInfo::ActivationFunction::TANH:
+                tmp_f = a * std::tanh(b * tmp_f);
+                break;
+            case ActivationLayerInfo::ActivationFunction::IDENTITY:
+                break;
+            case ActivationLayerInfo::ActivationFunction::SWISH:
+                tmp_f = tmp_f / (1.f + std::exp(-a * tmp_f));
+                break;
+            case ActivationLayerInfo::ActivationFunction::GELU:
+                tmp_f = tmp_f * (0.5f * (1.0f + erff(tmp_f / 1.41421356237f)));
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not supported");
+                tmp_f = 0;
+                break;
+        }
+        lut[i] = (data_type == DataType::QASYMM8) ? quantize_qasymm8(tmp_f, qi_out) : quantize_qasymm8_signed(tmp_f, qi_out);
+    }
+}
+#endif // __aarch64__
 } // namespace
 
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
@@ -205,9 +271,12 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
     _name       = std::string("CpuActivationKernel").append("/").append(uk->name);
 
 #ifdef __aarch64__
-    if(ActivationLayerInfo::is_lut_supported(activation_info.activation(), src->data_type()))
+    if(src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
     {
-        activation_info.init_lut(src->data_type(), src->quantization_info().uniform(), (dst) ? dst->quantization_info().uniform() : src->quantization_info().uniform());
+        ActivationLayerInfo::LookupTable256 tmp_lut;
+        init_lut(activation_info.activation(), src->data_type(), src->quantization_info().uniform(), (dst) ? dst->quantization_info().uniform() : src->quantization_info().uniform(),
+                 tmp_lut, activation_info.a(), activation_info.b());
+        activation_info.setLookupTable256(tmp_lut);
     }
 #endif // __aarch64__
     _act_info = activation_info;

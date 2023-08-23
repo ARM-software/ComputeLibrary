@@ -25,7 +25,11 @@
 
 #include "arm_compute/core/Validate.h"
 #include "src/core/CL/CLValidate.h"
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateElementwiseBinary.h"
+#else //ACL_INTERNAL_TEST_CKW_IN_DF
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwElementwiseBinary.h"
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 
 namespace arm_compute
 {
@@ -105,22 +109,38 @@ Status ClComponentElementwiseBinary::validate(const ArgumentPack<ITensorInfo> &t
     return Status{};
 }
 
+ClComponentElementwiseBinary::~ClComponentElementwiseBinary()
+{
+}
 ClComponentElementwiseBinary::ClComponentElementwiseBinary(
     ComponentId                      id,
     const Properties                &properties,
     const ArgumentPack<ITensorInfo> &tensors,
     const Attributes                &attributes)
     : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateElementwiseBinary>(id, tensors, attributes) }
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer
+{
+    std::make_unique<ClTemplateElementwiseBinary>(id, tensors, attributes)
+}
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer
+{
+    std::make_unique<GpuCkwElementwiseBinary>(id, tensors, attributes)
+}
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }
-ClComponentElementwiseBinary::~ClComponentElementwiseBinary()
-{
-}
+
+#ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuTemplateComponentWriter *ClComponentElementwiseBinary::template_writer() const
+#else  //ACL_INTERNAL_TEST_CKW_IN_DF
+const IGpuCkwComponentDriver *ClComponentElementwiseBinary::ckw_component_driver() const
+#endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
     return _component_writer.get();
 }
+
 } // namespace dynamic_fusion
 } // namespace experimental
 } // namespace arm_compute

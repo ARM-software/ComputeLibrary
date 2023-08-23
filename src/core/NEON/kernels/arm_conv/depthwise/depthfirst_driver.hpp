@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "depthwise.hpp"
+#include "utils.hpp"
 
 namespace arm_conv {
 namespace depthwise {
@@ -72,10 +72,10 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
   std::unique_ptr<const IDepthfirstStrategy> m_strat;
 
   /* Compute the amount of working space required for a single thread. */
-  virtual size_t get_working_size_per_thread(unsigned int n_input_channels) const = 0;
+  virtual size_t get_working_size_per_thread() const = 0;
 
   /* Initialise the working space for a thread. */
-  virtual void initialise_working_space(void *, unsigned int n_input_channels) const = 0;
+  virtual void initialise_working_space(void *) const = 0;
 
   /* Compute a portion of the output tensor with padding. */
   virtual void compute_tile_padded(
@@ -164,8 +164,8 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
   {
     // Get and initialise the working space for this thread.
     void *thread_working_space =
-      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread(args.input_channels);
-    this->initialise_working_space(thread_working_space, args.input_channels);
+      static_cast<uint8_t *>(working_space) + thread_id * this->get_working_size_per_thread();
+    this->initialise_working_space(thread_working_space);
 
     // Construct convenient representations of the input/output tensors.
     TensorSpec<const TInput *> input_tensor(reinterpret_cast<const TInput *>(input), ld_input_row, ld_input_col);
@@ -189,7 +189,9 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
         const bool pad_input_top = start_input_i < 0;
         const int end_input_i = start_input_i + m_strat->get_input_rows();
         const bool pad_input_bottom = static_cast<int>(args.input_rows) < end_input_i;
-        const bool pad_row = pad_input_top || pad_input_bottom || pad_output_bottom;
+        // We only need to account for input padding if direct padding is not supported.
+        const bool pad_row = ((pad_input_top || pad_input_bottom) && !this->supports_direct_padding())
+                || pad_output_bottom;
 
         // Iterate over the columns of the output tensor; we attempt to grab as
         // much as possible of the unpadded regions, so the loop structure is a
@@ -202,7 +204,7 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
 
           // Determine if we can process a number of unpadded tiles in one go.
           int n_unpadded_tiles = 0;
-          if (!pad_input_left)
+          if ((!pad_input_left) || this->supports_direct_padding())
           {
             // Determine the maximum number of tiles we could handle.
             n_unpadded_tiles = (args.output_cols - start_output_j) / m_strat->get_output_cols();
@@ -273,9 +275,14 @@ class DepthfirstDriver : public DepthwiseCommon<TInput, TWeight, TOutput>
   {
   }
 
-  size_t get_working_size(unsigned int n_threads, unsigned int n_input_channels) const override final
+  size_t get_working_size(unsigned int n_threads) const override final
   {
-    return n_threads * this->get_working_size_per_thread(n_input_channels);
+    return n_threads * this->get_working_size_per_thread();
+  }
+
+  virtual bool supports_direct_padding() const
+  {
+    return false;
   }
 };
 

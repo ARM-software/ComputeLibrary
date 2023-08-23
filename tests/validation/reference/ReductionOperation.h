@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_TEST_REDUCTION_OPERATION_H
 #define ARM_COMPUTE_TEST_REDUCTION_OPERATION_H
 
-#include "tests/SimpleTensor.h"
 #include "arm_compute/core/Rounding.h"
+#include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -37,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T, typename OT>
-SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op,
+SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op, DataType output_type = DataType::S32,
                                      QuantizationInfo quantization_info_output = QuantizationInfo(), RoundingPolicy policy = RoundingPolicy::TO_ZERO);
 } // namespace reference
 } // namespace validation

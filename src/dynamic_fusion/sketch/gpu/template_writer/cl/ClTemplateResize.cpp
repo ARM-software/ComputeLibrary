@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,9 @@
 
 #include "ClTemplateResize.h"
 
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2022 Arm Limited.
+ * Copyright (c) 2016-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/math/Math.h"
 
 namespace arm_compute
 {

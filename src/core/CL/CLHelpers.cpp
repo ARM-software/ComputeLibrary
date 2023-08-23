@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
@@ -144,7 +145,6 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
-            return "uchar";
         case DataType::S8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:

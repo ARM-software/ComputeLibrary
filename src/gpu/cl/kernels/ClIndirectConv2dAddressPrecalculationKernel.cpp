@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "src/cpu/kernels/assembly/arm_gemm.hpp"
+#include "arm_gemm.hpp"
 #include <cstddef>
 
 namespace arm_conv

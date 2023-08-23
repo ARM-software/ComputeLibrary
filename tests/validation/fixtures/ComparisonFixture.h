@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
     {
         _target    = compute_target(op, shape0, shape1, data_type, qinfo0, qinfo1);
@@ -117,7 +116,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonBroadcastValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type)
     {
         ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1, data_type, QuantizationInfo(), QuantizationInfo());
@@ -128,7 +126,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ComparisonOperation op, const TensorShape &shape, DataType data_type)
     {
         ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape, shape, data_type, QuantizationInfo(), QuantizationInfo());
@@ -139,7 +136,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonValidationQuantizedFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ComparisonOperation op, const TensorShape &shape, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
 
     {
@@ -151,7 +147,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonQuantizedBroadcastValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
     {
         ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1, data_type, qinfo0, qinfo1);

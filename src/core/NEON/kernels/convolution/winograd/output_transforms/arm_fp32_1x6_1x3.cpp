@@ -34,13 +34,13 @@ namespace output_transform {
 void arm_fp32_1x6_1x3(
   unsigned int n_channels,
   const float* inptr,
-  size_t matrix_stride,
+  const size_t matrix_stride,
   const float* bptr,
   float *outptr,
   size_t,  // No need to stride across rows
-  size_t output_col_stride,
-  float output_min,
-  float output_max
+  const size_t output_col_stride,
+  const float output_min,
+  const float output_max
 )
 {
   constexpr unsigned int inner_tile_cols = 8, output_tile_cols = 6;

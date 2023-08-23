@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 #include "depthwise.hpp"
 
 #include <functional>
@@ -40,6 +40,7 @@ struct PackingArguments
   const size_t weight_element_size;
   const bool include_bias;
   const size_t bias_element_size;
+  const bool premultiply;
   arm_gemm::VLType vl_type;
   const size_t accumulator_element_size;
   const unsigned int accumulator_depth_vl;
@@ -53,6 +54,7 @@ struct PackingArguments
     size_t weight_element_size,
     bool include_bias,
     size_t bias_element_size,
+    bool premultiply,
     arm_gemm::VLType vl_type,
     size_t accumulator_element_size,
     unsigned int accumulator_depth_vl,

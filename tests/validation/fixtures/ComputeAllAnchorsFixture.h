@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComputeAllAnchorsGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
         _target    = compute_target(num_anchors, data_type, info, qinfo);
@@ -107,7 +106,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComputeAllAnchorsFixture : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type)
     {
         ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, QuantizationInfo());
@@ -118,7 +116,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComputeAllAnchorsQuantizedFixture : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
         ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, qinfo);

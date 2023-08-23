@@ -28,7 +28,8 @@ import re
 import sys
 
 def get_list_includes():
-    return "src/cpu/kernels/assembly " \
+    return "compute_kernel_writer/prototype/include " \
+           "src/cpu/kernels/assembly " \
            "src/core/NEON/kernels/assembly " \
            "src/core/NEON/kernels/convolution/winograd " \
            "include/linux include " \
@@ -42,6 +43,9 @@ def get_list_flags( filename, arch):
     flags.append("-DARM_COMPUTE_OPENCL_ENABLED")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
+    if "ckw_driver" in filename:
+        flags.append("-DACL_INTERNAL_TEST_CKW_IN_DF")
+
     return flags
 
 def filter_files( list_files ):
@@ -68,6 +72,9 @@ def filter_clang_tidy_lines( lines ):
             continue
 
         if "/arm_gemm/" in line:
+            continue
+
+        if "compute_kernel_writer/" in line:
             continue
 
         if "/convolution/" in line:

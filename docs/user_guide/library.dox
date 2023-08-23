@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2021 Arm Limited.
+/// Copyright (c) 2017-2021, 2023 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -28,20 +28,18 @@ namespace arm_compute
 
 @tableofcontents
 
-@section architecture_core_vs_runtime Core vs Runtime libraries
+@section architecture_compute_library Compute Library architecture
 
-The Core library is a low level collection of algorithms implementations, it is designed to be embedded in existing projects and applications:
+The Compute Library is a collection of low level algorithm implementations known as kernels @ref IKernel.
+These kernels are implemented as operators @ref IOperator that do not allocate any memory (i.e. all the memory allocations/mappings have to be handled by the caller)
+and are are designed to be embedded in existing projects and applications.
 
-- It doesn't allocate any memory (All the memory allocations/mappings have to be handled by the caller).
-- It doesn't perform any kind of multi-threading (but provide information to the caller about how the workload can be split).
+A higher-level interface wraps the operators into functions @ref IFunction that:
+- Performs memory allocation of images and tensors through the use of standard malloc().
+- Enables multi-threading of Arm® Neon™ code in a very basic way using a very simple pool of threads.
+- For OpenCL, uses the default CLScheduler command queue for all mapping operations and kernels.
 
-The Runtime library is a very basic wrapper around the Core library which can be used for quick prototyping, it is basic in the sense that:
-
-- It allocates images and tensors by using standard malloc().
-- It multi-threads Arm® Neon™ code in a very basic way using a very simple pool of threads.
-- For OpenCL it uses the default CLScheduler command queue for all mapping operations and kernels.
-
-For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between Arm® Neon™ and OpenCL, etc.)
+For maximum performance, it is expected that the users would re-implement an equivalent to the function interface which suits better their needs (With a more clever multi-threading strategy, load-balancing between Arm® Neon™ and OpenCL, etc.)
 
 @section architecture_fast_math Fast-math support
 

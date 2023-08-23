@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPU_SUB_H
 #define ARM_COMPUTE_CPU_SUB_H
 
+#include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute

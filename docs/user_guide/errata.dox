@@ -30,8 +30,17 @@ namespace arm_compute
 
 @section S7_1_errata Errata
 
+- (COMPMID-6404) Under certain conditions, CLTile may produce incorrect result.
+    - Versions: >= v19.02 && < v23.08
+    - OSs: Linux, Android.
+    - Conditions:
+        - The size of the lowest dimension of the input tensor is greater than 16 bytes.
+        - The size of the lowest dimension of the input tensor is not a multiple of 16.
+    - Result:
+        - Incorrect result is produced.
+
 - (COMPMID-6271) Under certain conditions, CLArgMinMaxLayer validation tests may fail
-    - Versions Affected: >= v20.02
+    - Versions Affected: >= v20.02 && < v23.08
     - OSs Affected: Linux
     - Conditions:
         - Backend: OpenCL

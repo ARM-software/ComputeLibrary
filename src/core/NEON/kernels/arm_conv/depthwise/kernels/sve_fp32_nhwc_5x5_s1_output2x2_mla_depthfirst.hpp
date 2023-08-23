@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "utils.hpp"
 
 #include <cstdint>
 
 #pragma once
 
-#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE)
 
 namespace arm_conv {
 namespace depthwise {
 
-void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_indirect_impl(const float *const *const, float *const *const, const void *, unsigned int, const float, const float);
-void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(const unsigned int, const unsigned int, const float *, int64_t, int64_t, float *, int64_t, int64_t, const void *, unsigned int, const float, const float);
+void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_indirect_impl(const float *const *const input_ptrs, float *const *const outptrs, const void *params, unsigned int n_channels, const float activation_min, const float activation_max);
+void sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst_direct_impl(const unsigned int n_tile_rows, const unsigned int n_tile_cols, const float *inptr, int64_t ld_input_row, int64_t ld_input_col, float *outptr, int64_t ld_output_row, int64_t ld_output_col, const void *params, unsigned int n_channels, const float activation_min, const float activation_max);
 
 class sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst : public DepthwiseDepthfirstStrategy<float, float, float, float>
 {
@@ -57,7 +57,7 @@ class sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst : public DepthwiseDepthfirst
   constexpr static unsigned int output_cols = 2;
 
   sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst(const CPUInfo *)
-  : DepthwiseDepthfirstStrategy<float, float, float, float>(2, 5, 1) {}
+  : Parent(output_rows, output_cols, kernel_rows, kernel_cols, stride_rows, stride_cols) {}
 
   arm_gemm::VLType get_vl_type(void) const override { return vl_type; }
 
@@ -68,4 +68,4 @@ class sve_fp32_nhwc_5x5_s1_output2x2_mla_depthfirst : public DepthwiseDepthfirst
 }  // namespace depthwise
 }  // namespace arm_conv
 
-#endif  // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

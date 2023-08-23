@@ -26,6 +26,8 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "src/cpu/CpuTypes.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -34,6 +36,8 @@
 #if defined(__aarch64__) && defined(ENABLE_FP16_KERNELS) && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 namespace
 {
+using arm_compute::float16_t;
+
 void a64_add_bn_clamp_direct_fp16_2x32(
     float16_t *out, size_t out_stride,
     float16_t *out_direct, size_t out_direct_stride,

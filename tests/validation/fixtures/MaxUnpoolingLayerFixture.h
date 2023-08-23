@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename PoolingFunctionTy
 class MaxUnpoolingLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout)
     {
         std::mt19937                    gen(library->seed());
@@ -150,7 +149,6 @@ template <typename TensorType, typename AccessorType, typename F1, typename F2, 
 class MaxUnpoolingLayerValidationFixture : public MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, DataType data_type, DataLayout data_layout)
     {
         MaxUnpoolingLayerValidationGenericFixture<TensorType, AccessorType, F1, F2, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, true),

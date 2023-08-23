@@ -22,16 +22,14 @@
  * SOFTWARE.
  */
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SME)
 
 template <>
 void interleave_block<1, 2, VLType::SME, false>(
   bfloat16 * &out, const bfloat16 * const *in,
-  size_t width, size_t height, size_t row_offset, bool first
+  size_t width, size_t height, size_t row_offset, bool
 )
 {
-  ARM_COMPUTE_UNUSED(first);
-
   __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
       "cnth x22\n"
@@ -176,11 +174,11 @@ void interleave_block<1, 2, VLType::SME, false>(
       "9:"  // K loop: Tails: Even: First
       ".inst 0x25306d20  // psel p0.s, p11.s/Z, p9.s[w12]\n"
       ".inst 0xe0bf82a0  // st1w { za0v.s[x12] }, p0/Z, [x21, XZR, LSL #2]\n"
-      "ldr x25, [x26, #0x0]\n"
+      "ldr x20, [x26, #0x0]\n"
       "add x12, x12, #0x1\n"
       ".inst 0x25396140  // psel p0.h, p8.h/Z, p10.h[w13, #1]\n"
       "cmp x12, x10\n"
-      ".inst 0xe0562321  // ld1h { za0h.h[x13, #1] }, p0/Z, [x25, x22, LSL #1]\n"
+      ".inst 0xe0562281  // ld1h { za0h.h[x13, #1] }, p0/Z, [x20, x22, LSL #1]\n"
       "add x26, x26, #0x8\n"
       "addvl x21, x21, #1\n"
       "add x13, x13, #0x2\n"
@@ -197,7 +195,7 @@ void interleave_block<1, 2, VLType::SME, false>(
       "addvl x21, x21, #1\n"
       "add x20, x20, #0x2\n"
       "blt 10b\n"
-      "whilelt p9.h, x27, %x[width]\n"
+      "whilelt p8.h, x27, %x[width]\n"
       "b 13f\n"
       "11:"  // K loop: Tails: Odd
       "mov x12, #0x0\n"
@@ -217,4 +215,4 @@ void interleave_block<1, 2, VLType::SME, false>(
     );
 }
 
-#endif  // defined(__ARM_FEATURE_SVE)
+#endif  // defined(ARM_COMPUTE_ENABLE_SME)

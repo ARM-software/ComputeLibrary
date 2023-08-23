@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class GEMMTranspose1xWValidationFixture : public framework::Fixture
 {
 public:
-    template <typename...>
     void setup(size_t x, size_t y, DataType data_type)
     {
         _data_type = data_type;

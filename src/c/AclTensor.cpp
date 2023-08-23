@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/AclEntrypoints.h"
 #include "arm_compute/AclUtils.h"
+#include "arm_compute/core/Error.h"
 #include "src/common/ITensorV2.h"
 #include "src/common/utils/Macros.h"
 

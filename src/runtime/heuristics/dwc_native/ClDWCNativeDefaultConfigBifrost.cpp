@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 
 namespace arm_compute
 {

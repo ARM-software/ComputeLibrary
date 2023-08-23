@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -172,7 +172,7 @@ public:
     void start();
 
     /** Wait for the current kernel execution to complete. */
-    void wait();
+    std::exception_ptr wait();
 
     /** Function ran by the worker thread. */
     void worker_thread();
@@ -244,17 +244,13 @@ void Thread::start()
     _cv.notify_one();
 }
 
-void Thread::wait()
+std::exception_ptr Thread::wait()
 {
     {
         std::unique_lock<std::mutex> lock(_m);
         _cv.wait(lock, [&] { return _job_complete; });
     }
-
-    if(_current_exception)
-    {
-        std::rethrow_exception(_current_exception);
-    }
+    return _current_exception;
 }
 
 void Thread::worker_thread()
@@ -509,15 +505,34 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
         thread_it->start();
     }
     info.thread_id = t;                         // Set main thread's thread_id
-    process_workloads(workloads, feeder, info); // Main thread processes workloads
+    std::exception_ptr last_exception = nullptr;
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    try
+    {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+        process_workloads(workloads, feeder, info); // Main thread processes workloads
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    }
+    catch (...)
+    {
+        last_exception = std::current_exception();
+    }
+
     try
     {
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         thread_it = _impl->_threads.begin();
         for(unsigned int i = 0; i < num_threads_to_use - 1; ++i, ++thread_it)
         {
-            thread_it->wait();
+            std::exception_ptr current_exception = thread_it->wait();
+            if (current_exception)
+            {
+                last_exception = current_exception;
+            }
+        }
+        if (last_exception)
+        {
+            std::rethrow_exception(last_exception);
         }
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,12 @@
  */
 #include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "src/common/utils/Validate.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"

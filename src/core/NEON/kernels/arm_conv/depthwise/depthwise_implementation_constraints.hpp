@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@
 #pragma once
 
 #include "arm_gemm.hpp"
-#include "src/core/NEON/kernels/assembly/depthwise.hpp"
+#include "depthwise.hpp"
 
 namespace arm_conv
 {

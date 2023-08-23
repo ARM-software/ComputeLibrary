@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include "depthfirst_driver.hpp"
 #include "interleaves/generic.hpp"
 
@@ -52,7 +54,7 @@ struct PlanarKernelType;
 template <typename TInput, typename TWeight, typename TOutput, typename TAccum>
 struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
 {
-  using Type = std::function<void(
+  typedef void (*Type)(
     const TInput *, size_t ld_in_row, size_t ld_in_col, size_t ld_in_vl,
     unsigned int pad_top, unsigned int valid_input_rows,
     unsigned int pad_left, unsigned int valid_input_cols,
@@ -60,7 +62,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
     TOutput **, const size_t *, const size_t *, unsigned int output_cols,
     unsigned int start_channels, unsigned int valid_channels,
     TAccum act_min, TAccum act_max
-  )>;
+  );
 
   template <typename WorkspaceType>
   static inline void execute(
@@ -89,7 +91,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, TAccum, Nothing>
 template <typename TInput, typename TWeight, typename TOutput>
 struct PlanarKernelType<TInput, TWeight, TOutput, int32_t, arm_gemm::Requantize32>
 {
-  using Type = std::function<void(
+  typedef void (*Type)(
     const TInput *, size_t ld_in_row, size_t ld_in_col, size_t ld_in_vl,
     unsigned int pad_top, unsigned int valid_input_rows,
     unsigned int pad_left, unsigned int valid_input_cols,
@@ -97,7 +99,7 @@ struct PlanarKernelType<TInput, TWeight, TOutput, int32_t, arm_gemm::Requantize3
     TOutput **, const size_t *, const size_t *, unsigned int output_cols,
     unsigned int start_channel, unsigned int valid_channels,
     const arm_gemm::Requantize32 &
-  )>;
+  );
 
   template <typename WorkspaceType>
   static inline void execute(
@@ -151,7 +153,7 @@ class PlanarStrategy : public IPlanarStrategy<OutputStage>
   {
     return interleaves::PackingArguments(
       m_kernel_rows, m_kernel_cols, sizeof(TWeight),
-      false, sizeof(TAccum),  // Don't pack the bias
+      false, sizeof(TAccum), true,  // Don't pack the bias
       m_vl_type, sizeof(TAccum), 1,  // Accumulator depth of 1 TODO
       [this] (unsigned int idx, unsigned int &x, unsigned int &y) -> bool
       { return this->get_kernel_packing_point(idx, x, y); }
@@ -274,7 +276,7 @@ class DepthwisePlanar : public DepthwiseCommon<TInput, TWeight, TOutput>
     depthwise_depthfirst::stash_bias(this->m_os, biases);
   }
 
-  size_t get_working_size(unsigned int n_threads, unsigned int) const override
+  size_t get_working_size(unsigned int n_threads) const override
   {
     return this->get_working_size_per_thread() * n_threads;
   }

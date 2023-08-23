@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021,2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-
-#include "support/ToolchainSupport.h"
 
 #include "arm_compute/runtime/IFunction.h"
 

@@ -34,7 +34,7 @@ namespace arm_compute
 The Compute Library is a collection of low-level machine learning functions optimized for both Arm CPUs and GPUs using SIMD technologies.
 
 Several builds of the library are available using various configurations:
- - OS: Linux, Android, macOS or bare metal.
+ - OS: Linux®, Android™, macOS or bare metal.
  - Architecture: armv7a (32bit) or armv8a (64bit).
  - Technology: Arm® Neon™ / OpenCL / Arm® Neon™ and OpenCL.
  - Debug / Asserts / Release: Use a build with asserts enabled to debug your application and enable extra validation. Once you are sure your application works as expected you can switch to a release build of the library for maximum performance.
@@ -49,7 +49,7 @@ Several builds of the library are available using various configurations:
   <th>Architecture
   <th>Minimum Toolchain
 <tr>
-  <td rowspan="4">Linux
+  <td rowspan="4">Linux®
   <td>armv7a
   <td>gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
   <tr>
@@ -61,11 +61,14 @@ Several builds of the library are available using various configurations:
   <td>armv8.2-a-sve
   <td>gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
 <tr>
-  <td rowspan="2">Android
+  <td rowspan="3">Android™
   <td>armv8a
   <td rowspan="2">NDK r20b
   <tr>
   <td>armv8.2-a
+  <tr>
+  <td>armv8.2-a-sve
+  <td>NDK r23b
 <tr>
   <td rowspan="1">macOS
   <td>armv8.2-a
@@ -86,13 +89,14 @@ In order to facilitate the work of the support team please provide the build inf
 For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases).
 
 These binaries have been built using the following toolchains:
-            - Linux armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
-            - Linux armv8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
-            - Linux armv8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
-            - Linux armv8.2-a (multi-ISA binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
-            - Linux armv8.2-a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
-            - Android armv8a: clang++ / libc++ NDK r20b
-            - Android armv8.2-a: clang++ / libc++ NDK r20b
+            - Linux® armv7a: gcc-linaro-7.2.1-2017.11-x86_64_arm-linux-gnueabihf
+            - Linux® armv8a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux® armv8.2-a: gcc-linaro-7.2.1-2017.11-x86_64_aarch64-linux-gnu
+            - Linux® armv8.2-a (multi-ISA binary): gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
+            - Linux® armv8.2-a-sve: gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu
+            - Android™ armv8a: clang++ / libc++ NDK r20b
+            - Android™ armv8.2-a: clang++ / libc++ NDK r20b
+            - Android™ armv8.2-a-sve: clang++ / libc++ NDK r23b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 

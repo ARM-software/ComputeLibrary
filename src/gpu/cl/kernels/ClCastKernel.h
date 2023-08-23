@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,12 +53,14 @@ public:
      *   - U16 -> U8, S8, S16, U32, S32, F16, F32
      *   - S16 -> U8, S8, U16, U32, S32, F16, F32
      *   - U32 -> U8, S8, U16, S16, S32, F16, F32
+     *   - S64 -> U8, S8, U16, S16, U32, S32, F16, F32
+     *   - U64 -> U8, S8, U16, S16, U32, S32, F16, F32
      *   - S32 -> U8, S8, U16, S16, U32, F16, F32
-     *   - F16 -> U8, S8, U16, S16, U32, F32
-     *   - F32 -> U8, S8, U16, S16, U32, F16
+     *   - F16 -> U8, S8, U16, S16, U32, S32, F32
+     *   - F32 -> U8, S8, U16, S16, U32, S32, F16
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  src             The source tensor to convert. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.
+     * @param[in]  src             The source tensor to convert. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/U64/S64/F16/F32.
      * @param[out] dst             The destination tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy          Conversion policy
      */

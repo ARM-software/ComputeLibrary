@@ -21,19 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/core/CL/CLUtils.h"
+
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLCompileContext.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/StringUtils.h"
 #include "support/StringSupport.h"
 
-#include "src/core/CL/CLUtils.h"
 #include "src/core/experimental/PostOpUtils.h"
 
 namespace arm_compute
 {
-cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType type)
+cl::Image2D create_image2d_from_tensor(const ICLTensor *tensor, CLImage2DType image_type)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+
+    const cl::Context &ctx    = CLKernelLibrary::get().context();
+    const cl::Buffer  &buffer = tensor->cl_buffer();
+    const ITensorInfo *info   = tensor->info();
+    ARM_COMPUTE_ERROR_ON_MSG(info->lock_paddings(),
+                             "Tensor paddings must not be locked to allow extending paddings to satisfy cl_image pitch alignment requirement");
+
+    const size_t image_w{ info->dimension(0) / 4 };
+    const size_t image_h{ info->tensor_shape().total_size() / info->dimension(0) };
+    const size_t max_image_w{ CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>() };
+    const size_t max_image_h{ CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>() };
+
+    ARM_COMPUTE_UNUSED(max_image_w, max_image_h);
+    ARM_COMPUTE_ERROR_ON_MSG(image_w > max_image_w, "Image width exceeds maximum width for exporting to cl_image");
+    ARM_COMPUTE_ERROR_ON_MSG(image_h > max_image_h, "Image height exceeds maximum height for exporting to cl_image");
+
+    const TensorShape shape2d(image_w, image_h);
+    const size_t      image_row_pitch = info->strides_in_bytes()[1];
+
+    return create_image2d_from_buffer(ctx, buffer, shape2d, info->data_type(), image_row_pitch, image_type);
+}
+
+cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType image_type)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()),
+                             "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
+    ARM_COMPUTE_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0,
+                             "Impossible to retrieve the cl_image pitch alignment");
+    ARM_COMPUTE_ERROR_ON_MSG(buffer.get() == nullptr,
+                             "Cannot create cl_image from empty cl_buffer");
+
     cl_channel_type cl_data_type;
 
     switch(data_type)
@@ -61,7 +96,7 @@ cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer 
     desc.image_width     = shape2d[0];
     desc.image_height    = shape2d[1];
 
-    switch(type)
+    switch(image_type)
     {
         case CLImage2DType::ReadOnly:
             cl_image = clCreateImage(ctx(), CL_MEM_READ_ONLY, &format, &desc, nullptr, &err);

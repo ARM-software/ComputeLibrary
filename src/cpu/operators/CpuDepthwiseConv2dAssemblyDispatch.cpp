@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,7 +77,7 @@ void CpuDepthwiseConv2dAssemblyDispatch::configure(const ITensorInfo     *src,
 
     // Compute memory requirements for assembly kernels
     constexpr size_t alignment = 4096;
-    _pImpl->mem_req.push_back({ TensorType::ACL_INT_0, dwc_wrapper->get_working_size(num_threads, src->dimension(0)), alignment });
+    _pImpl->mem_req.push_back({ TensorType::ACL_INT_0, dwc_wrapper->get_working_size(num_threads), alignment });
     _pImpl->mem_req.push_back({ TensorType::ACL_INT_1, dwc_wrapper->get_storage_size(), alignment });
     _pImpl->asm_kernel = std::move(dwc_wrapper);
 }

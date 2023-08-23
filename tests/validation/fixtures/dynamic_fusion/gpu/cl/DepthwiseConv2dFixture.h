@@ -60,7 +60,6 @@ public:
                   || std::is_same<typename std::decay<T>::type, int8_t>::value,
                   int32_t, T >::type; // If T: uint8_t or int8_t then TBias: int32_t, otherwise TBias: T
 
-    template <typename...>
     void setup(TensorShape input_shape, Size2D kernel_size, const PadStrideInfo &pad_stride, const Size2D &dilation,
                const unsigned int depth_multiplier, const DataType data_type, const DataLayout data_layout)
     {
@@ -126,14 +125,14 @@ protected:
 
         // Create a new workload sketch
         auto              cl_compile_ctx = CLKernelLibrary::get().get_compile_context();
-        auto              gpu_ctx        = GpuWorkloadContext{ &cl_compile_ctx };
-        GpuWorkloadSketch sketch{ &gpu_ctx };
+        auto              context        = GpuWorkloadContext{ &cl_compile_ctx };
+        GpuWorkloadSketch sketch{ &context };
 
         // Create sketch tensors
-        TensorInfo input_info  = sketch.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
-        TensorInfo weight_info = sketch.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
-        TensorInfo bias_info   = sketch.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
-        TensorInfo dst_info    = sketch.create_tensor_info();
+        TensorInfo input_info  = context.create_tensor_info(TensorInfo(input_shape, 1, _data_type, _data_layout));
+        TensorInfo weight_info = context.create_tensor_info(TensorInfo(weights_shape, 1, _data_type, _data_layout));
+        TensorInfo bias_info   = context.create_tensor_info(TensorInfo(bias_shape, 1, _data_type, _data_layout));
+        TensorInfo dst_info    = context.create_tensor_info();
 
         ITensorInfo *ans_info = FunctionType::create_op(sketch, &input_info, &weight_info, &bias_info, dwc_conv2d_attr);
         GpuOutput::create_op(sketch, ans_info, &dst_info);
@@ -213,7 +212,6 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DynamicFusionGpuDepthwiseConv2dValidationFixture : public DynamicFusionGpuDepthwiseConv2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    template <typename...>
     void setup(TensorShape input_shape, Size2D kernel_size, const PadStrideInfo &info, const Size2D &dilation, const unsigned int depth_multiplier, DataType data_type, DataLayout data_layout)
     {
         DynamicFusionGpuDepthwiseConv2dValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, kernel_size, info, dilation,

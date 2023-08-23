@@ -46,6 +46,10 @@
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
+#include "arm_compute/function_info/ConvolutionInfo.h"
+#include "arm_compute/function_info/FullyConnectedLayerInfo.h"
+#include "arm_compute/function_info/GEMMInfo.h"
+#include "arm_compute/function_info/MatMulInfo.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
@@ -484,10 +488,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransform
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 inline ::std::ostream &operator<<(::std::ostream &os, const bfloat16 &v)
 {
-    std::stringstream str;
-    str << v;
-    os << str.str();
-    return os;
+    return os << float(v);
 }
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
@@ -3690,9 +3691,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulI
     os << "MatMulKernelInfo="
        << "["
        << "adj_lhs=" << matmul_info.adj_lhs() << ", "
-       << "adj_rhs=" << matmul_info.adj_rhs() << ", "
-       << "fused_activation=" << matmul_info.fused_activation().activation() << "]";
-
+       << "adj_rhs=" << matmul_info.adj_rhs() << "] ";
     return os;
 }
 /** Formatted output of the arm_compute::MatMulInfo type.

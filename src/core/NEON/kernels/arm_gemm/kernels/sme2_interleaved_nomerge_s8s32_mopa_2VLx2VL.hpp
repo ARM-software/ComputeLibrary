@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#ifdef __aarch64__
+#ifdef ARM_COMPUTE_ENABLE_SME2
 
 #include <cstdint>
 #include "../std_transforms_sme.hpp"
@@ -32,7 +32,7 @@ namespace arm_gemm
 {
 
 // Implementations
-void sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL(const int8_t *const A, const int8_t *const B, int32_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Activation act, bool accumulate, int32_t *const accumulator_buffer);
+void sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL(const int8_t *const A, const int8_t *const B, int32_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Activation, bool accumulate, int32_t *const accumulator_buffer);
 
 class cls_sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL
 {
@@ -40,7 +40,7 @@ public:
   typedef int8_t operand_type;
   typedef int32_t result_type;
 
-  typedef void (*kern_type)(const int8_t *const A, const int8_t *const B, int32_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Activation act, bool accumulate, int32_t *const accumulator_buffer);
+  typedef void (*kern_type)(const int8_t *const A, const int8_t *const B, int32_t *const C, int ldc, const int M, const int N, const int K, const int32_t *const bias, const Activation, bool accumulate, int32_t *const accumulator_buffer);
 
   /* Kernel blocking parameters */
   static unsigned int out_height()
@@ -83,12 +83,11 @@ public:
 
   StdTransformsSME<operand_type, result_type, 2, 2, 4> transforms = {};
 
-  cls_sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL(const CPUInfo *ci)
+  cls_sme2_interleaved_nomerge_s8s32_mopa_2VLx2VL(const CPUInfo *)
   {
-    ARM_COMPUTE_UNUSED(ci);
   }
 };
 
 } // namespace arm_gemm
 
-#endif // __aarch64__
+#endif // ARM_COMPUTE_ENABLE_SME2
