@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEKERNELS_H
-#define ARM_COMPUTE_NEKERNELS_H
+#ifndef ACL_SRC_CORE_NEON_NEKERNELS_H
+#define ACL_SRC_CORE_NEON_NEKERNELS_H
 
 #include "src/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 #include "src/core/NEON/kernels/NEBatchToSpaceLayerKernel.h"
@@ -50,13 +50,13 @@
 #include "src/core/NEON/kernels/NEPadLayerKernel.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
-#include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
-#include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/NEON/kernels/NEReorderKernel.h"
 #include "src/core/NEON/kernels/NEReorgLayerKernel.h"
 #include "src/core/NEON/kernels/NEReverseKernel.h"
+#include "src/core/NEON/kernels/NEROIAlignLayerKernel.h"
+#include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "src/core/NEON/kernels/NESelectKernel.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 #include "src/core/NEON/kernels/NESpaceToDepthLayerKernel.h"
@@ -64,4 +64,4 @@
 #include "src/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "src/core/NEON/kernels/NETileKernel.h"
 
-#endif /* ARM_COMPUTE_NEKERNELS_H */
+#endif // ACL_SRC_CORE_NEON_NEKERNELS_H

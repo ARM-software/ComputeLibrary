@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLFUNCTIONS_H
-#define ARM_COMPUTE_CLFUNCTIONS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_CLFUNCTIONS_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_CLFUNCTIONS_H
 
 /* Header regrouping all the CL functions */
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -62,44 +62,44 @@
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFuseBatchNormalization.h"
+#include "arm_compute/runtime/CL/functions/CLGather.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/CL/functions/CLGather.h"
 #include "arm_compute/runtime/CL/functions/CLGenerateProposalsLayer.h"
 #include "arm_compute/runtime/CL/functions/CLIndirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
-#include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"
-#include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalAnd.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalNot.h"
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
+#include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"
+#include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 #include "arm_compute/runtime/CL/functions/CLMatMul.h"
 #include "arm_compute/runtime/CL/functions/CLMaxUnpoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
-#include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLPooling3dLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPriorBoxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLQLSTMLayer.h"
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
-#include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
-#include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
-#include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLRange.h"
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReverse.h"
+#include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
+#include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
+#include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/CL/functions/CLSelect.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
@@ -114,4 +114,4 @@
 #include "arm_compute/runtime/CL/functions/CLUnstack.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 
-#endif /* ARM_COMPUTE_CLFUNCTIONS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_CLFUNCTIONS_H

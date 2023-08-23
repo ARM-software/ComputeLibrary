@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLKERNELS_H
-#define ARM_COMPUTE_CLKERNELS_H
+#ifndef ACL_SRC_CORE_CL_CLKERNELS_H
+#define ACL_SRC_CORE_CL_CLKERNELS_H
 
 /* Header regrouping all the CL kernels */
 #include "src/core/CL/kernels/CLArgMinMaxLayerKernel.h"
@@ -52,12 +52,12 @@
 #include "src/core/CL/kernels/CLPadLayerKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 #include "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
-#include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
-#include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLRangeKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "src/core/CL/kernels/CLReorgLayerKernel.h"
 #include "src/core/CL/kernels/CLReverseKernel.h"
+#include "src/core/CL/kernels/CLROIAlignLayerKernel.h"
+#include "src/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "src/core/CL/kernels/CLSelectKernel.h"
 #include "src/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 #include "src/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
@@ -65,4 +65,4 @@
 #include "src/core/CL/kernels/CLStridedSliceKernel.h"
 #include "src/core/CL/kernels/CLTileKernel.h"
 
-#endif /* ARM_COMPUTE_CLKERNELS_H */
+#endif // ACL_SRC_CORE_CL_CLKERNELS_H

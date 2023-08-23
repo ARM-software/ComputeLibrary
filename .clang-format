@@ -1,48 +1,85 @@
+# Copyright (c) 2017, 2023 Arm Limited.
+#
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 ---
 Language: Cpp
-AccessModifierOffset: '0'
+BasedOnStyle: LLVM
+Standard: c++14
+ColumnLimit: 120
+
+# Override LLVM style options
+AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: 'true'
-AlignConsecutiveDeclarations: 'true'
-AlignEscapedNewlinesLeft: 'true'
-AlignTrailingComments: 'true'
-AllowShortBlocksOnASingleLine: 'false'
-AllowShortCaseLabelsOnASingleLine: 'false'
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: 'false'
-AllowShortLoopsOnASingleLine: 'false'
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: 'true'
-AlwaysBreakTemplateDeclarations: 'true'
-BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeBraces: Allman
-BreakBeforeTernaryOperators: 'false'
-BreakConstructorInitializersBeforeComma: 'false'
-#BreakStringLiterals: 'true'
-ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
-Cpp11BracedListStyle: 'false'
-DerivePointerAlignment: 'false'
-IndentCaseLabels: 'true'
-IndentWidth: '4'
-IndentWrappedFunctionNames: 'false'
-KeepEmptyLinesAtTheStartOfBlocks: 'false'
-MaxEmptyLinesToKeep: '1'
-NamespaceIndentation: None
-PointerAlignment: Right
-SortIncludes: 'true'
-SpaceAfterCStyleCast: 'false'
-SpaceBeforeAssignmentOperators: 'true'
-SpaceBeforeParens: Never
-SpaceInEmptyParentheses: 'false'
-SpacesInAngles: 'false'
-SpacesInCStyleCastParentheses: 'false'
-SpacesInParentheses: 'false'
-SpacesInSquareBrackets: 'false'
-Standard: Cpp11
-TabWidth: '4'
-UseTab: Never
-ReflowComments: 'false'
-ContinuationIndentWidth: '4'
-ColumnLimit: 0
----
+AlwaysBreakTemplateDeclarations: Yes
+BinPackParameters: false
+BraceWrapping:
+  AfterCaseLabel:  true
+  AfterClass:      true
+  AfterControlStatement: Always
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: false
+  BeforeCatch:     true
+  BeforeElse:      true
+  BeforeLambdaBody: true
+  BeforeWhile:     false
+  IndentBraces:    false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BreakBeforeBraces: Custom
+IndentCaseLabels: true
+IndentExternBlock: AfterExternBlock
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+PackConstructorInitializers: NextLine
+ReflowComments: false
+
+# Includes order
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Project headers
+  - Regex: '^"(arm_compute|ckw)/'
+    Priority: 1
+    SortPriority: 1
+  # Third-party headers
+  - Regex: '^"(cl|opencl|half|npy|stb)/'
+    Priority: 2
+    SortPriority: 2
+  # Private headers
+  - Regex: '^"(src|tests|examples|utils|support)/'
+    Priority: 3
+    SortPriority: 3
+  # System headers
+  - Regex: '.*'
+    Priority: 10
+    SortPriority: 10

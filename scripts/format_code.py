@@ -36,23 +36,7 @@ from modules.Shell import Shell
 
 logger = logging.getLogger("format_code")
 
-ASTYLE_PARAMETERS ="--style=ansi \
-    --indent=spaces \
-    --indent-switches \
-    --indent-col1-comments \
-    --min-conditional-indent=0 \
-    --max-instatement-indent=120 \
-    --pad-oper \
-    --align-pointer=name \
-    --align-reference=name \
-    --break-closing-brackets \
-    --keep-one-line-statements \
-    --max-code-length=200 \
-    --mode=c \
-    --lineend=linux \
-    --indent-preprocessor \
-    "
-
+# List of directories to exclude
 exceptions = [
     "src/core/NEON/kernels/assembly/gemm",
     "src/core/NEON/kernels/assembly/arm",
@@ -60,7 +44,6 @@ exceptions = [
     "/convolution/",
     "/arm_gemm/",
     "/arm_conv/",
-    "compute_kernel_writer/",
     "SConscript",
     "SConstruct"
 ]
@@ -241,7 +224,7 @@ class FormatCodeRun:
             skip_copyright = True
 
         grep_folder = "grep -e \"^\\(arm_compute\\|src\\|examples\\|tests\\|utils\\|support\\)/\""
-        grep_extension = "grep -e \"\\.\\(cpp\\|h\\|inl\\|cl\\|cs\\|hpp\\)$\""
+        grep_extension = "grep -e \"\\.\\(cpp\\|h\\|hh\\|inl\\|cl\\|cs\\|hpp\\)$\""
         list_files = shell.run_single_to_str(cmd+" | { "+ grep_folder+" | "+grep_extension + " || true; }")
         to_check = [ f for f in list_files.split("\n") if len(f) > 0]
 
@@ -277,16 +260,7 @@ class FormatCodeRun:
         try:
             self.shell.cd(self.folder)
             self.shell.prepend_env("PATH","%s/../bin" % this_dir)
-            clang_format = "clang-format -i -style=file "
-            astyle = "astyle -n -q %s " % (ASTYLE_PARAMETERS)
 
-            if sys.platform == 'darwin':
-                # this platform explicitly needs an extension for the temporary file
-                sed = "sed -i '.log' 's/\\t/    /g' "
-            else:
-                sed = "sed -i 's/\\t/    /g' "
-
-            single_eol = "%s/ensure_single_eol.py " % this_dir
             for f in self.files:
                 skip_this_file = False
                 for e in exceptions:
@@ -300,21 +274,6 @@ class FormatCodeRun:
                 logger.info("Formatting %s" % f)
                 if not self.skip_copyright:
                     check_copyright(f)
-                cmds = [
-                        sed + f,
-                        clang_format + f,
-                        astyle + f,
-                        single_eol + f
-                       ]
-
-                if sys.platform == 'darwin':
-                    # the temporary file creted by 'sed' will be removed here
-                    cmds.append(f"rm {f}.log")
-
-                for cmd in cmds:
-                    output = self.shell.run_single_to_str(cmd)
-                    if len(output) > 0:
-                        logger.info(output)
 
             check_license("LICENSE")
 
