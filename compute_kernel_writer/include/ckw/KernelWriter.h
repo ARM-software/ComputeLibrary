@@ -126,6 +126,52 @@ public:
     virtual void op_ternary(const TileOperand &dst, TernaryOp op, const TileOperand &first, const TileOperand &second, const TileOperand &third) = 0;
 
     // =============================================================================================
+    // Flow control
+    // =============================================================================================
+
+    /** Write if block: `if(<lhs> <op> <rhs>) { <body> }`.
+     *
+     * @param[in] lhs  The LHS tile of the condition.
+     * @param[in] op   The relational binary operator.
+     * @param[in] rhs  The RHS tile of the condition.
+     * @param[in] body The function that writes the body of the if block.
+     */
+    virtual void op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) = 0;
+
+    /** Write else-if block: `else if(<lhs> <op> <rhs>) { <body> }`.
+     *
+     * @param[in] lhs  The LHS tile of the condition.
+     * @param[in] op   The relational binary operator.
+     * @param[in] rhs  The RHS tile of the condition.
+     * @param[in] body The function that writes the body of the else-if block.
+     */
+    virtual void op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) = 0;
+
+    /** Write an else block: `else { <body> }`.
+     *
+     * @param[in] body The function that writes the body of the else block.
+     */
+    virtual void op_else(const std::function<void()> &body) = 0;
+
+    /** Write for-loop block: `for(; <var> <cond_op> <cond_value>; <update_var> <update_op> <update_value>) { body }`.
+     *
+     * @param[in] var          The scalar tile used in loop condition.
+     * @param[in] cond_op      The relational binary operator used in loop condition.
+     * @param[in] cond_value   The value which the variable is compared against.
+     * @param[in] update_var   The scalar tile which is updated each iteration.
+     * @param[in] update_op    The assignment operator used for updating the update value.
+     * @param[in] update_value The value which is updated at every iteration.
+     * @param[in] body         The function that writes the body of the for-loop block.
+     */
+    virtual void op_for_loop(
+        const TileOperand &var, BinaryOp cond_op, const TileOperand &cond_value,
+        const TileOperand &update_var, AssignmentOp update_op, const TileOperand &update_value,
+        const std::function<void()> &body) = 0;
+
+    /** Write the return statement. */
+    virtual void op_return() = 0;
+
+    // =============================================================================================
     // Misc
     // =============================================================================================
 
@@ -233,8 +279,39 @@ public:
         const TileOperand &dilation_x, const TileOperand &dilation_y) = 0;
 
 protected:
+    // =============================================================================================
+    // ID space management
+    // =============================================================================================
+
+    /** Create the new unique ID space and return the value.
+     *
+     * This function changes the ID space to a new number which hasn't been used since the creation
+     * of this kernel writer object.
+     *
+     * @return The new ID space value.
+     */
+    int32_t new_id_space();
+
+    /** Get the current ID space. */
     int32_t id_space() const;
 
+    /** Set the current ID space.
+     *
+     * @param[in] value The ID space to be used.
+     */
+    KernelWriter &id_space(int32_t value);
+
+    /** Write the body code using the specified function.
+     *
+     * This function makes sure that a new ID space is created before and then is used solely
+     * by the specified body writing function.
+     * The ID space will not be reused after that.
+     *
+     * @param[in] body The function that writes the body code.
+     */
+    void write_body(const std::function<void()> &body);
+
+protected:
     /** Generate full variable name by prefixing it with id space */
     std::string generate_full_name(const std::string &name) const;
 
@@ -258,6 +335,7 @@ protected:
 
 private:
     int32_t _id_space{ 0 };
+    int32_t _last_created_id_space{ 0 };
 };
 
 } // namespace ckw

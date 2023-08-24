@@ -75,6 +75,23 @@ public:
     void op_ternary(const TileOperand &dst, TernaryOp op, const TileOperand &first, const TileOperand &second, const TileOperand &third) override;
 
     // =============================================================================================
+    // Flow control
+    // =============================================================================================
+
+    void op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) override;
+
+    void op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body) override;
+
+    void op_else(const std::function<void()> &body) override;
+
+    void op_for_loop(
+        const TileOperand &var, BinaryOp cond_op, const TileOperand &cond_value,
+        const TileOperand &update_var, AssignmentOp update_op, const TileOperand &update_value,
+        const std::function<void()> &body) override;
+
+    void op_return() override;
+
+    // =============================================================================================
     // Misc
     // =============================================================================================
 
@@ -176,6 +193,18 @@ private:
         MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
         const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
         const CLTile &dilation_x, const CLTile &dilation_y);
+
+    /** This function is the generic function to write both `if` and `else if` blocks.
+     *
+     * It is used for both @ref CLKernelWriter::op_if and @ref CLKernelWriter::op_else_if.
+     *
+     * @param[in] is_else True if this is an `else if` block, otherwise this is an `if` block.
+     * @param[in] lhs     The LHS tile of the condition.
+     * @param[in] op      The relational binary operator.
+     * @param[in] rhs     The RHS tile of the condition.
+     * @param[in] body    The function that writes the body of the else-if block.
+     */
+    void op_if_generic(bool is_else, const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body);
 
     // For attributes
 private:

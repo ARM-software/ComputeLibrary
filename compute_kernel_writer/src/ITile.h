@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef CKW_SRC_ITILE
-#define CKW_SRC_ITILE
+#ifndef CKW_SRC_ITILE_H
+#define CKW_SRC_ITILE_H
 
 #include "ckw/TileInfo.h"
 
@@ -100,7 +100,7 @@ public:
 /** Tile base class.
  *  A Tile is a collection of variables (either program variables or constants) used to express a 2D data.
  */
-class ITile: public IScalarAccess
+class ITile : public IScalarAccess
 {
 public:
     virtual ~ITile() = default;
@@ -129,7 +129,13 @@ public:
      * @return true if the tile is assignable
      */
     virtual bool is_assignable() const = 0;
+
+    /** Get whether the tile is scalar, i.e. the width and height are both 1.
+     *
+     * @return true if the tile is scalar.
+     */
+    bool is_scalar() const;
 };
 } // namespace ckw
 
-#endif /* CKW_SRC_ITILE */
+#endif // CKW_SRC_ITILE_H

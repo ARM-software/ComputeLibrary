@@ -51,9 +51,33 @@ std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture a
     }
 }
 
+int32_t KernelWriter::new_id_space()
+{
+    _id_space = ++_last_created_id_space;
+
+    return _id_space;
+}
+
 int32_t KernelWriter::id_space() const
 {
     return _id_space;
+}
+
+KernelWriter &KernelWriter::id_space(int32_t value)
+{
+    CKW_ASSERT(value <= _last_created_id_space);
+
+    _id_space = value;
+
+    return *this;
+}
+
+void KernelWriter::write_body(const std::function<void()> &body)
+{
+    const auto curr_id_space = id_space();
+    new_id_space();
+    body();
+    id_space(curr_id_space);
 }
 
 std::string KernelWriter::generate_full_name(const std::string &name) const

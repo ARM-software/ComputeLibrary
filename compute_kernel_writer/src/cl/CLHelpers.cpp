@@ -26,6 +26,7 @@
 
 #include "ckw/Error.h"
 #include "ckw/types/DataType.h"
+#include "ckw/types/Operators.h"
 #include "ckw/types/TensorStorageType.h"
 #include "src/types/DataTypeHelpers.h"
 
@@ -143,6 +144,21 @@ std::string cl_get_variable_storagetype_as_string(TensorStorageType storage)
     }
 
     return res;
+}
+
+std::string cl_get_assignment_op_as_string(AssignmentOp op)
+{
+    switch(op)
+    {
+        case AssignmentOp::Increment:
+            return "+=";
+
+        case AssignmentOp::Decrement:
+            return "-=";
+
+        default:
+            CKW_THROW_MSG("Unsupported assignment operator!");
+    }
 }
 
 std::tuple<bool, std::string> cl_get_unary_op(UnaryOp op)

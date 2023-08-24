@@ -82,8 +82,7 @@ std::unique_ptr<Kernel> CLKernelWriter::emit_kernel(const std::string &name)
             const auto &tile      = component->tile();
             const auto &tile_info = tile.info();
 
-            CKW_ASSERT(tile_info.height() == 1);
-            CKW_ASSERT(tile_info.width() == 1);
+            CKW_ASSERT(tile.is_scalar());
 
             code += cl_get_variable_datatype_as_string(tile_info.data_type(), 1);
             code += " ";
@@ -313,6 +312,77 @@ void CLKernelWriter::op_ternary(const TileOperand &dst, TernaryOp op, const Tile
             second_prefix, second_tile.vector(y).str, ", ",
             third_prefix, third_tile.vector(y).str, ");\n");
     }
+}
+
+void CLKernelWriter::op_if_generic(bool is_else, const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
+{
+    const auto &lhs_tile = to_cl_tile(lhs);
+    const auto &rhs_tile = to_cl_tile(rhs);
+
+    const auto op_name = std::get<1>(cl_get_binary_op(op, lhs_tile.info().data_type()));
+    CKW_ASSERT(op == BinaryOp::Less || op == BinaryOp::LessEqual || op == BinaryOp::Equal || op == BinaryOp::GreaterEqual || op == BinaryOp::Greater);
+
+    CKW_ASSERT(lhs_tile.is_scalar());
+    CKW_ASSERT(rhs_tile.is_scalar());
+
+    if(is_else)
+    {
+        append_code("else ");
+    }
+
+    append_code("if (", lhs_tile.scalar(0, 0).str, " ", op_name, " ", rhs_tile.scalar(0, 0).str, ")\n{\n");
+    write_body(body);
+    append_code("}\n");
+}
+
+void CLKernelWriter::op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
+{
+    op_if_generic(false, lhs, op, rhs, body);
+}
+
+void CLKernelWriter::op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
+{
+    op_if_generic(true, lhs, op, rhs, body);
+}
+
+void CLKernelWriter::op_else(const std::function<void()> &body)
+{
+    append_code("else\n{\n");
+    write_body(body);
+    append_code("}\n");
+}
+
+void CLKernelWriter::op_for_loop(
+    const TileOperand &var, BinaryOp cond_op, const TileOperand &cond_value,
+    const TileOperand &update_var, AssignmentOp update_op, const TileOperand &update_value,
+    const std::function<void()> &body)
+{
+    const auto &var_tile          = to_cl_tile(var);
+    const auto &cond_value_tile   = to_cl_tile(cond_value);
+    const auto &update_var_tile   = to_cl_tile(update_var);
+    const auto &update_value_tile = to_cl_tile(update_value);
+
+    CKW_ASSERT(var_tile.is_scalar());
+    CKW_ASSERT(cond_value_tile.is_scalar());
+    CKW_ASSERT(update_var_tile.is_scalar());
+    CKW_ASSERT(update_value_tile.is_scalar());
+
+    CKW_ASSERT(var_tile.info().data_type() == cond_value_tile.info().data_type());
+    CKW_ASSERT(update_var_tile.info().data_type() == update_value_tile.info().data_type());
+
+    const auto cond_op_name = std::get<1>(cl_get_binary_op(cond_op, var_tile.info().data_type()));
+    CKW_ASSERT(cond_op == BinaryOp::Less || cond_op == BinaryOp::LessEqual || cond_op == BinaryOp::Equal || cond_op == BinaryOp::GreaterEqual || cond_op == BinaryOp::Greater);
+
+    append_code(
+        "for (; ", var_tile.scalar(0, 0).str, " ", cond_op_name, " ", cond_value_tile.scalar(0, 0).str, "; ",
+        update_var_tile.scalar(0, 0).str, " ", cl_get_assignment_op_as_string(update_op), " ", update_value_tile.scalar(0, 0).str, ")\n{\n");
+    write_body(body);
+    append_code("}\n");
+}
+
+void CLKernelWriter::op_return()
+{
+    append_code("return;\n");
 }
 
 void CLKernelWriter::op_comment(const std::string &text)

@@ -122,6 +122,7 @@ target_sources(ckw PRIVATE
     src/types/DataTypeHelpers.cpp
     src/Error.cpp
     src/Helpers.cpp
+    src/ITile.cpp
     src/Kernel.cpp
     src/KernelArgument.cpp
     src/KernelWriter.cpp
