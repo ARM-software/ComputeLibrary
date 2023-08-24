@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_NODES_FWD_H
-#define ARM_COMPUTE_GRAPH_NODES_FWD_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_NODES_NODESFWD_H
+#define ACL_ARM_COMPUTE_GRAPH_NODES_NODESFWD_H
 
 namespace arm_compute
 {
@@ -49,9 +49,7 @@ class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
 class FusedConvolutionBatchNormalizationNode;
-class FusedConvolutionWithPostOpNode;
 class FusedDepthwiseConvolutionBatchNormalizationNode;
-class FusedConvolutionBatchNormalizationWithPostOpsNode;
 class GenerateProposalsLayerNode;
 class InputNode;
 class L2NormalizeLayerNode;
@@ -77,4 +75,4 @@ class StackLayerNode;
 class StridedSliceLayerNode;
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_NODES_FWD_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODESFWD_H

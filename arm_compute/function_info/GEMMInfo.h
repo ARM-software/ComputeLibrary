@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
-#define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO
+#ifndef ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
+#define ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H
 
 #include "arm_compute/core/CoreTypes.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include <vector>
 
@@ -79,7 +78,6 @@ public:
           _pretranspose_A(false),
           _pretranspose_B(false),
           _activation_info(),
-          _post_ops(),
           _fixed_format(false),
           _weight_format(arm_compute::WeightFormat::UNSPECIFIED)
     {
@@ -99,14 +97,12 @@ public:
      * @param[in] fast_math                   (Optional) Use a data type of shorter width to improve performance
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
-     * @param[in] post_ops                    (Optional) A sequence of post operations that are performed after the main operation.
      * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_compute::WeightFormat.
      * @param[in] weight_format               (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_compute::WeightFormat::UNSPECIFIED.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
              GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool fast_math = false, bool broadcast_bias = false,
-             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), const experimental::PostOpList<ITensorInfo *> &post_ops = experimental::PostOpList<ITensorInfo *>(),
-             bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED) noexcept
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo(), bool fixed_format = false, arm_compute::WeightFormat weight_format = arm_compute::WeightFormat::UNSPECIFIED) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -120,7 +116,6 @@ public:
           _pretranspose_A(false),
           _pretranspose_B(false),
           _activation_info(activation_info),
-          _post_ops(post_ops),
           _fixed_format(fixed_format),
           _weight_format(weight_format)
     {
@@ -271,22 +266,6 @@ public:
     {
         _activation_info = activation_info;
     }
-    /** Post operations to apply after the matrix multiplication
-     *
-     * @return experimental::PostOpList object
-     */
-    const experimental::PostOpList<ITensorInfo *> &post_ops() const
-    {
-        return _post_ops;
-    }
-    /** Set post ops
-     *
-     * @param[in] post_ops experimental::PostOpList object to set
-     */
-    void set_post_ops(const experimental::PostOpList<ITensorInfo *> &post_ops)
-    {
-        _post_ops = post_ops;
-    }
     /** Flag which specifies if the GEMM operation is running fixed-format kernels.
      *
      * @return True if the GEMM operation is running fixed-format kernel else false.
@@ -320,22 +299,21 @@ public:
     }
 
 private:
-    bool                                    _is_a_reshaped;
-    bool                                    _is_b_reshaped;
-    bool                                    _reshape_b_only_on_first_run;
-    int                                     _depth_output_gemm3d;
-    bool                                    _reinterpret_input_as_3d;
-    bool                                    _retain_internal_weights;
-    GEMMLowpOutputStageInfo                 _gemmlowp_output_stage;
-    bool                                    _fast_math;
-    bool                                    _fp_mixed_precision;
-    bool                                    _broadcast_bias;
-    bool                                    _pretranspose_A;
-    bool                                    _pretranspose_B;
-    ActivationLayerInfo                     _activation_info;
-    experimental::PostOpList<ITensorInfo *> _post_ops;
-    bool                                    _fixed_format;
-    arm_compute::WeightFormat               _weight_format;
+    bool                      _is_a_reshaped;
+    bool                      _is_b_reshaped;
+    bool                      _reshape_b_only_on_first_run;
+    int                       _depth_output_gemm3d;
+    bool                      _reinterpret_input_as_3d;
+    bool                      _retain_internal_weights;
+    GEMMLowpOutputStageInfo   _gemmlowp_output_stage;
+    bool                      _fast_math;
+    bool                      _fp_mixed_precision;
+    bool                      _broadcast_bias;
+    bool                      _pretranspose_A;
+    bool                      _pretranspose_B;
+    ActivationLayerInfo       _activation_info;
+    bool                      _fixed_format;
+    arm_compute::WeightFormat _weight_format;
 };
 } //namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO */
+#endif // ACL_ARM_COMPUTE_FUNCTION_INFO_GEMMINFO_H

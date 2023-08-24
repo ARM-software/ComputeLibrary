@@ -73,8 +73,6 @@ target_sources(
 	graph/nodes/FlattenLayerNode.cpp
 	graph/nodes/FullyConnectedLayer.cpp
 	graph/nodes/FusedConvolutionBatchNormalizationNode.cpp
-	graph/nodes/FusedConvolutionBatchNormalizationWithPostOpsNode.cpp
-	graph/nodes/FusedConvolutionWithPostOpNode.cpp
 	graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.cpp
 	graph/nodes/GenerateProposalsLayerNode.cpp
 	graph/nodes/InputNode.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_DATALAYERPRINTER_H
-#define ARM_COMPUTE_GRAPH_DATALAYERPRINTER_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_DATALAYERVISITOR_H
+#define ACL_ARM_COMPUTE_GRAPH_DATALAYERVISITOR_H
 
 #include "arm_compute/graph/IGraphPrinter.h"
 #include "arm_compute/graph/INodeVisitor.h"
@@ -48,7 +48,6 @@ public:
     void visit(ConvolutionLayerNode &n) override;
     void visit(DepthwiseConvolutionLayerNode &n) override;
     void visit(FusedConvolutionBatchNormalizationNode &n) override;
-    void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) override;
     void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     void visit(OutputNode &n) override;
 
@@ -59,4 +58,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_DATALAYERPRINTER_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_DATALAYERVISITOR_H

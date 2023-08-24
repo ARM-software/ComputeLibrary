@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_VALIDATE_HELPERS_H
-#define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_VALIDATE_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
 
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
@@ -181,42 +181,6 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     }
 
     return status;
-}
-
-/** Validates a Convolution layer node
- *
- * @tparam GEMMConvolutionLayer      GEMM Convolution layer function type
- *
- * @param[in] node Node to validate
- *
- * @return Status
- */
-template <typename GEMMConvolutionLayer>
-Status validate_fused_convolution_with_post_op(FusedConvolutionWithPostOpNode &node)
-{
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating fused ConvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 4);
-    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
-
-    // Extract IO and info
-    arm_compute::ITensorInfo *input   = get_backing_tensor_info(node.input(0));
-    arm_compute::ITensorInfo *weights = get_backing_tensor_info(node.input(1));
-    arm_compute::ITensorInfo *biases  = get_backing_tensor_info(node.input(2));
-    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
-
-    if(is_data_type_quantized_asymmetric(input->data_type()))
-    {
-        biases->set_data_type(DataType::S32);
-    }
-
-    const PadStrideInfo conv_info = node.convolution_info();
-    //const ConvolutionMethod conv_algorithm = node.convolution_method();
-    //const bool              fast_math      = node.fast_math_hint() == FastMathHint::Enabled;
-    const unsigned int num_groups = node.num_groups();
-
-    // Validate function
-    return GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info,
-                                          WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), num_groups);
 }
 
 /** Validates a Depthwise Convolution layer node
@@ -775,4 +739,4 @@ Status validate_unary_eltwise_layer(UnaryEltwiseLayerNode &node)
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_VALIDATE_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H

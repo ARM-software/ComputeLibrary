@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_CORE_TYPES
-#define ACL_ARM_COMPUTE_CORE_TYPES
+#ifndef ACL_ARM_COMPUTE_CORE_TYPES_H
+#define ACL_ARM_COMPUTE_CORE_TYPES_H
 
 /** The following symbols have been moved to:
  * half
@@ -65,7 +65,6 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Size3D.h"
 #include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "arm_compute/core/utils/misc/Macros.h"
 #include "support/Bfloat16.h"
 
@@ -751,14 +750,14 @@ public:
     }
 
 private:
-    std::vector<float> _min_sizes;
-    std::vector<float> _variances;
-    float              _offset;
-    bool               _flip;
-    bool               _clip;
-    std::vector<float> _max_sizes;
-    std::vector<float> _aspect_ratios;
-    Coordinates2D      _img_size;
+    std::vector<float>   _min_sizes;
+    std::vector<float>   _variances;
+    float                _offset;
+    bool                 _flip;
+    bool                 _clip;
+    std::vector<float>   _max_sizes;
+    std::vector<float>   _aspect_ratios;
+    Coordinates2D        _img_size;
     std::array<float, 2> _steps;
 };
 
@@ -1003,15 +1002,15 @@ public:
     }
 
 private:
-    unsigned int _max_detections;
-    unsigned int _max_classes_per_detection;
-    float        _nms_score_threshold;
-    float        _iou_threshold;
-    unsigned int _num_classes;
+    unsigned int         _max_detections;
+    unsigned int         _max_classes_per_detection;
+    float                _nms_score_threshold;
+    float                _iou_threshold;
+    unsigned int         _num_classes;
     std::array<float, 4> _scales_values;
-    bool         _use_regular_nms;
-    unsigned int _detection_per_class;
-    bool         _dequantize_scores;
+    bool                 _use_regular_nms;
+    unsigned int         _detection_per_class;
+    bool                 _dequantize_scores;
 };
 
 /** Pooling Layer Information struct*/
@@ -1462,13 +1461,13 @@ public:
     }
 
 private:
-    float _img_width;
-    float _img_height;
-    float _scale;
-    bool  _apply_scale;
-    bool  _correct_transform_coords;
+    float                _img_width;
+    float                _img_height;
+    float                _scale;
+    bool                 _apply_scale;
+    bool                 _correct_transform_coords;
     std::array<float, 4> _weights;
-    float _bbox_xform_clip;
+    float                _bbox_xform_clip;
 };
 
 /** Normalization Layer Information class */
@@ -1915,4 +1914,4 @@ struct IOFormatInfo
 /** Class for holding information related to cropping */
 using CropInfo = Padding2D;
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_CORE_TYPES */
+#endif // ACL_ARM_COMPUTE_CORE_TYPES_H

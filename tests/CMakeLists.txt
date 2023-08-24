@@ -67,7 +67,6 @@ target_sources(
           validation/reference/L2NormalizeLayer.cpp
           validation/reference/ActivationLayer.cpp
           validation/reference/SpaceToBatch.cpp
-          validation/reference/PostOps.cpp
           validation/reference/Im2Col.cpp
           validation/reference/DequantizationLayer.cpp
           validation/reference/DeconvolutionLayer.cpp

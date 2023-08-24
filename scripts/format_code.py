@@ -60,7 +60,9 @@ exceptions = [
     "/convolution/",
     "/arm_gemm/",
     "/arm_conv/",
-    "compute_kernel_writer/"
+    "compute_kernel_writer/",
+    "SConscript",
+    "SConstruct"
 ]
 
 def adjust_copyright_year(copyright_years, curr_year):

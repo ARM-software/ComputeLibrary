@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,6 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         case ConvolutionMethod::WINOGRAD:
         {
             ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
-            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
             auto f = std::make_unique<ClWinogradConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info, conv2d_info.enable_fast_math);
             _operator = std::move(f);
@@ -99,7 +98,6 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         case ConvolutionMethod::DIRECT:
         {
             ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
-            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
             auto f = std::make_unique<ClDirectConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info);
             _operator = std::move(f);
@@ -108,7 +106,6 @@ void ClConv2d::configure(const CLCompileContext &compile_context, ITensorInfo *s
         case ConvolutionMethod::INDIRECT:
         {
             ARM_COMPUTE_ERROR_ON(conv2d_info.num_groups != 1);
-            ARM_COMPUTE_ERROR_ON(conv2d_info.post_ops.size() > 0);
             auto f = std::make_unique<ClIndirectConv2d>();
             f->configure(compile_context, src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info);
             _operator = std::move(f);
@@ -142,7 +139,6 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             //Validate Winograd
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClWinogradConv2d is not supported");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClWinogradConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClWinogradConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info, conv2d_info.enable_fast_math));
             break;
         }
@@ -150,7 +146,6 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             // Validate direct convolution layer
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClDirectConv2d is not supported");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClDirectConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClDirectConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info));
             break;
         }
@@ -158,7 +153,6 @@ Status ClConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights, co
         {
             // Validate indirect convolution layer
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.num_groups != 1, "Grouping (num_groups != 1) with ClIndirectConv2d is not supported");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClIndirectConv2d does not support PostOps");
             ARM_COMPUTE_RETURN_ON_ERROR(ClIndirectConv2d::validate(src, weights, biases, dst, conv2d_info.conv_info, conv2d_info.act_info));
             break;
         }
@@ -271,17 +265,17 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
             if(is_data_type_float(src->data_type()))
             {
                 // Get dst shape
-                TensorShape output_shape       = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
-                const bool  is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
-                const bool  is_ifm_ge_8        = src->dimension(idx_c) >= 8;
-                const bool  is_ifm_ge_16       = src->dimension(idx_c) >= 16;
-                const bool  is_ofm_lte_8       = weights->dimension(3U) <= 8;
-                const bool  is_ofm_lt_64       = weights->dimension(3U) < 64;
-                const bool  workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
-                const bool  is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
-                const bool  is_m_one           = output_shape[1] * output_shape[2] == 1;
-                const bool  is_unit_stride     = (conv2d_info.conv_info.stride().first == 1) && (conv2d_info.conv_info.stride().second == 1);
-                const int32_t kernel_sz        = weights->dimension(idx_w) * weights->dimension(idx_h);
+                TensorShape   output_shape       = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
+                const bool    is_large_kernel_sz = (weights->dimension(idx_w) >= kernel_sz_direct_conv_thr) && (weights->dimension(idx_h) >= kernel_sz_direct_conv_thr);
+                const bool    is_ifm_ge_8        = src->dimension(idx_c) >= 8;
+                const bool    is_ifm_ge_16       = src->dimension(idx_c) >= 16;
+                const bool    is_ofm_lte_8       = weights->dimension(3U) <= 8;
+                const bool    is_ofm_lt_64       = weights->dimension(3U) < 64;
+                const bool    workload_gte_8192  = (output_shape[0] * output_shape[1] * output_shape[2]) / 16 >= 8192;
+                const bool    is_ifm_gt_ofm      = src->dimension(idx_c) > weights->dimension(3U);
+                const bool    is_m_one           = output_shape[1] * output_shape[2] == 1;
+                const bool    is_unit_stride     = (conv2d_info.conv_info.stride().first == 1) && (conv2d_info.conv_info.stride().second == 1);
+                const int32_t kernel_sz          = weights->dimension(idx_w) * weights->dimension(idx_h);
 
                 // Run Winograd if valid and IFM >= 8
                 if(is_wino_valid && is_ifm_ge_8)
@@ -330,7 +324,7 @@ ConvolutionMethod ClConv2d::get_convolution_method(const ITensorInfo *src, const
                         {
                             const bool is_kernel_sz_odd = kernel_sz % 2;
                             const bool is_g77           = gpu_target == GPUTarget::G77;
-                            preferred_conv_method = (kernel_sz > 1) && (kernel_sz <= 81) && is_kernel_sz_odd && is_g77? ConvolutionMethod::INDIRECT : ConvolutionMethod::DIRECT;
+                            preferred_conv_method       = (kernel_sz > 1) && (kernel_sz <= 81) && is_kernel_sz_odd && is_g77 ? ConvolutionMethod::INDIRECT : ConvolutionMethod::DIRECT;
                         }
 
                         // Direct/indirect convolution used for the first layer of the network

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
-#define ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_FUNCTIONDESCRIPTORS_H
+#define ACL_ARM_COMPUTE_RUNTIME_FUNCTIONDESCRIPTORS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
@@ -58,24 +58,22 @@ struct Conv2dInfo
 {
     Conv2dInfo() = default;
 
-    Conv2dInfo(const PadStrideInfo                           &conv_info,
-               const Size2D                                  &dilation,
-               const ActivationLayerInfo                     &act_info,
-               bool                                           enable_fast_math,
-               unsigned int                                   num_groups,
-               const experimental::PostOpList<ITensorInfo *> &post_ops     = experimental::PostOpList<ITensorInfo *> {},
-               const WeightsInfo                             &weights_info = WeightsInfo())
-        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), post_ops(post_ops), weights_info(weights_info)
+    Conv2dInfo(const PadStrideInfo       &conv_info,
+               const Size2D              &dilation,
+               const ActivationLayerInfo &act_info,
+               bool                       enable_fast_math,
+               unsigned int               num_groups,
+               const WeightsInfo         &weights_info = WeightsInfo())
+        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), weights_info(weights_info)
     {
     }
 
-    PadStrideInfo                           conv_info{};
-    Size2D                                  dilation{ 1U, 1U };
-    ActivationLayerInfo                     act_info{};
-    bool                                    enable_fast_math{ false };
-    unsigned int                            num_groups{ 1 };
-    experimental::PostOpList<ITensorInfo *> post_ops{};
-    WeightsInfo                             weights_info{};
+    PadStrideInfo       conv_info{};
+    Size2D              dilation{ 1U, 1U };
+    ActivationLayerInfo act_info{};
+    bool                enable_fast_math{ false };
+    unsigned int        num_groups{ 1 };
+    WeightsInfo         weights_info{};
 };
 
 /** Descriptor used by the 3d Convolution function */
@@ -102,4 +100,4 @@ struct Conv3dInfo
 };
 
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_FUNCTIONDESCRIPTORS_H

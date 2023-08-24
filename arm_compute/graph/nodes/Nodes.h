@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_NODES_H
-#define ARM_COMPUTE_GRAPH_NODES_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H
+#define ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
 #include "arm_compute/graph/nodes/ArgMinMaxLayerNode.h"
@@ -43,8 +43,6 @@
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
 #include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationNode.h"
-#include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationWithPostOpsNode.h"
-#include "arm_compute/graph/nodes/FusedConvolutionWithPostOpNode.h"
 #include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
@@ -70,4 +68,4 @@
 #include "arm_compute/graph/nodes/StackLayerNode.h"
 #include "arm_compute/graph/nodes/StridedSliceLayerNode.h"
 
-#endif /* ARM_COMPUTE_GRAPH_NODES_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_NODES_NODES_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,14 +82,6 @@ void DefaultNodeVisitor::visit(FullyConnectedLayerNode &n)
     default_visit(n);
 }
 void DefaultNodeVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
-{
-    default_visit(n);
-}
-void DefaultNodeVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
-{
-    default_visit(n);
-}
-void DefaultNodeVisitor::visit(FusedConvolutionWithPostOpNode &n)
 {
     default_visit(n);
 }

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_TYPES_H
-#define ARM_COMPUTE_GRAPH_TYPES_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_TYPES_H
+#define ACL_ARM_COMPUTE_GRAPH_TYPES_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
@@ -41,32 +41,31 @@ namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::CLTunerMode;
 using arm_compute::CLBackendType;
+using arm_compute::CLTunerMode;
 using arm_compute::Status;
 
 using arm_compute::Coordinates;
-using arm_compute::DataType;
 using arm_compute::DataLayout;
 using arm_compute::DataLayoutDimension;
-using arm_compute::TensorShape;
-using arm_compute::Size2D;
+using arm_compute::DataType;
 using arm_compute::PermutationVector;
 using arm_compute::PixelValue;
+using arm_compute::Size2D;
+using arm_compute::TensorShape;
 
 using arm_compute::ActivationLayerInfo;
 using arm_compute::DetectionOutputLayerInfo;
 using arm_compute::DetectionPostProcessLayerInfo;
-using arm_compute::NormType;
-using arm_compute::NormalizationLayerInfo;
+using arm_compute::DimensionRoundingType;
 using arm_compute::FullyConnectedLayerInfo;
+using arm_compute::InterpolationPolicy;
+using arm_compute::NormalizationLayerInfo;
+using arm_compute::NormType;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 using arm_compute::PriorBoxLayerInfo;
-using arm_compute::DimensionRoundingType;
-using arm_compute::InterpolationPolicy;
-using arm_compute::experimental::PostOpType;
 
 using GraphID    = unsigned int;
 using TensorID   = unsigned int;
@@ -150,55 +149,6 @@ enum class FastMathHint
     Disabled, /**< Fast math disabled for Convolution layer */
 };
 
-/** Convolution post operator info */
-class ConvPostOpInfo
-{
-public:
-    /** Returns post op type
-     *
-     * @return Post op type
-     */
-    virtual PostOpType type() const = 0;
-    virtual ~ConvPostOpInfo()
-    {
-    }
-};
-
-class ConvPostOpInfoActivation : public ConvPostOpInfo
-{
-public:
-    ConvPostOpInfoActivation(const ActivationLayerInfo &act)
-        : _act(act)
-    {
-    }
-    ~ConvPostOpInfoActivation() override
-    {
-    }
-    PostOpType type() const override
-    {
-        return PostOpType::Activation;
-    }
-    ActivationLayerInfo _act;
-};
-
-class ConvPostOpInfoEltwiseAdd : public ConvPostOpInfo
-{
-public:
-    ConvPostOpInfoEltwiseAdd(int arg_pos, const ConvertPolicy &policy)
-        : _prev_op_dst_pos(arg_pos), _policy(policy)
-    {
-    }
-    PostOpType type() const override
-    {
-        return PostOpType::Eltwise_Add;
-    }
-    ~ConvPostOpInfoEltwiseAdd() override
-    {
-    }
-    int           _prev_op_dst_pos;
-    ConvertPolicy _policy;
-};
-
 /** Supported nodes */
 enum class NodeType
 {
@@ -219,8 +169,6 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     FusedConvolutionBatchNormalizationLayer,
-    FusedConvolutionWithPostOp,
-    FusedConvolutionBatchNormalizationLayerWithPostOpsLayer,
     FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     L2NormalizeLayer,
@@ -278,4 +226,4 @@ struct NodeParams
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_TYPES_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_TYPES_H

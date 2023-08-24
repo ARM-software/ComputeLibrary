@@ -107,7 +107,7 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
     // Create GEMMInfo structure
     const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                          gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
-                                         false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, experimental::PostOpList<ITensorInfo *>(), fixed_format, weight_format);
+                                         false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, fixed_format, weight_format);
 
     // Supported activations in GEMM
     const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
@@ -156,8 +156,8 @@ void CpuGemmConv2d::configure_mm(const ITensorInfo *src, const ITensorInfo *weig
         quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
 
         _mm_gemmlowp = std::make_unique<CpuGemmLowpMatrixMultiplyCore>();
-        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false, enable_fast_math, false, act_info,
-                                                                              experimental::PostOpList<ITensorInfo *>(), fixed_format, weight_format));
+        _mm_gemmlowp->configure(&tmp_src, &tmp_weights, biases, dst, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info, false, enable_fast_math, false, act_info, fixed_format,
+                                                                              weight_format));
 
         auto mm_mem_req = _mm_gemmlowp->workspace();
         for(unsigned int cont = 0; cont < mm_mem_req.size(); ++cont)
@@ -188,7 +188,7 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *wei
     // Create GEMMInfo structure
     const GEMMInfo gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                         gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
-                                        false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, experimental::PostOpList<ITensorInfo *>(), fixed_format, weight_format);
+                                        false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, fixed_format, weight_format);
 
     if(is_quantized)
     {
@@ -422,7 +422,7 @@ Status CpuGemmConv2d::has_opt_impl(arm_compute::WeightFormat &expected_weight_fo
     const bool         fixed_format  = weights_info.weight_format() != arm_compute::WeightFormat::UNSPECIFIED;
     const GEMMInfo     gemm_info     = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                                 gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
-                                                false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, experimental::PostOpList<ITensorInfo *>(), fixed_format, weights_info.weight_format());
+                                                false, GEMMLowpOutputStageInfo(), false, enable_fast_math, false, act_info, fixed_format, weights_info.weight_format());
 
     return CpuGemm::has_opt_impl(expected_weight_format, src, weights, biases, dst, gemm_info);
 }

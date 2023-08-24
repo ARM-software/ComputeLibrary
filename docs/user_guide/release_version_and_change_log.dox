@@ -48,6 +48,7 @@ v23.11 Public major release
    - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface:
      - @ref experimental::dynamic_fusion::GpuCkwResize
  - Update OpenCL™ API headers to v2023.04.17.
+ - Remove legacy PostOps interface. PostOps was the experimental interface for kernel fusion and is replaced by the new Dynamic Fusion interface.
  - Performance optimizations:
    - Optimize @ref cpu::CpuReshape
  - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface with support for FP16/FP32 only:

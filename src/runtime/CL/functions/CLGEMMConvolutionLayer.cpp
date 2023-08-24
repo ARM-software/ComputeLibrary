@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/experimental/PostOpUtils.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClGemmConv2d.h"
 #include "support/Cast.h"
@@ -69,24 +68,19 @@ CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> m
 CLGEMMConvolutionLayer::~CLGEMMConvolutionLayer() = default;
 
 void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                       const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups, const experimental::PostOpList<ICLTensor *> &post_ops)
+                                       const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups, post_ops);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
 }
 
 void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                        const PadStrideInfo &conv_info,
-                                       const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups, const experimental::PostOpList<ICLTensor *> &post_ops)
+                                       const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    _impl->weights = weights;
-    _impl->op      = std::make_unique<opencl::ClGemmConv2d>();
-    // Convert post op arguments to ITensorInfo
-    auto transformed_post_ops = experimental::transform_post_op_list_arguments<ICLTensor *, ITensorInfo *>(post_ops, [](auto tensor)
-    {
-        return tensor->info();
-    });
-    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups, transformed_post_ops);
+    _impl->weights               = weights;
+    _impl->op                    = std::make_unique<opencl::ClGemmConv2d>();
+    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups);
     _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr ? biases->info() : nullptr), output->info(), conv2d_info, weights_info);
 
     _impl->run_pack =
@@ -96,15 +90,6 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
         { TensorType::ACL_SRC_2, biases },
         { TensorType::ACL_DST, output }
     };
-    // Add post op tensors
-    size_t post_op_tensor_index = 0;
-    for(const auto &op : post_ops.get_list())
-    {
-        for(auto &tensor : op->arguments())
-        {
-            _impl->run_pack.add_const_tensor(experimental::get_post_op_arg_type(post_op_tensor_index++), *tensor);
-        }
-    }
     _impl->prep_pack =
     {
         { TensorType::ACL_SRC_1, weights },
@@ -115,9 +100,9 @@ void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, 
 }
 
 Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups, const experimental::PostOpList<ITensorInfo *> &post_ops)
+                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
-    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups, post_ops);
+    const Conv2dInfo conv2d_info = Conv2dInfo(conv_info, dilation, act_info, false, num_groups);
     return opencl::ClGemmConv2d::validate(input, weights, biases, output, conv2d_info, weights_info);
 }
 

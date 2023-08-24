@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
-#define __ARM_COMPUTE_TYPE_PRINTER_H__
+
+#ifndef ACL_UTILS_TYPEPRINTER_H
+#define ACL_UTILS_TYPEPRINTER_H
 
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -36,8 +37,6 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/IPostOp.h"
-#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/ClampAttributes.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
@@ -150,144 +149,6 @@ std::string to_string(const std::vector<T> &args)
     return str.str();
 }
 
-/** @name (EXPERIMENTAL_POST_OPS)
- * @{
- */
-/** Formmated output of the @ref experimental::PostOpType type
- *
- * @param[out] os           Output stream.
- * @param[in]  post_op_type Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, experimental::PostOpType post_op_type)
-{
-    os << "type=";
-    switch(post_op_type)
-    {
-        case experimental::PostOpType::Activation:
-        {
-            os << "Activation";
-            break;
-        }
-        case experimental::PostOpType::Eltwise_Add:
-        {
-            os << "Eltwise_Add";
-            break;
-        }
-        case experimental::PostOpType::Eltwise_PRelu:
-        {
-            os << "Eltwise_PRelu";
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported PostOpType");
-            break;
-        }
-    }
-    return os;
-}
-/** Converts a @ref experimental::PostOpType to string
- *
- * @param[in] post_op_type PostOpType value to be converted
- *
- * @return String representing the corresponding PostOpType
- */
-inline std::string to_string(experimental::PostOpType post_op_type)
-{
-    std::stringstream str;
-    str << post_op_type;
-    return str.str();
-}
-/** Formatted output of the @ref experimental::IPostOp type.
- *
- * @param[out] os      Output stream.
- * @param[in]  post_op Type to output.
- *
- * @return Modified output stream.
- */
-template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const experimental::IPostOp<T> &post_op)
-{
-    os << "<";
-    os << post_op.type() << ",";
-    os << "prev_dst_pos=" << post_op.prev_dst_pos() << ",";
-    switch(post_op.type())
-    {
-        case experimental::PostOpType::Activation:
-        {
-            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpAct<T> *>(&post_op);
-            os << "act_info=" << &(_post_op->_act_info);
-            break;
-        }
-        case experimental::PostOpType::Eltwise_Add:
-        {
-            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpEltwiseAdd<T> *>(&post_op);
-            os << "convert_policy=" << _post_op->_policy;
-            break;
-        }
-        case experimental::PostOpType::Eltwise_PRelu:
-        {
-            const auto _post_op = utils::cast::polymorphic_downcast<const experimental::PostOpEltwisePRelu<T> *>(&post_op);
-            os << "convert_policy=" << _post_op->_policy;
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported PostOpType");
-            break;
-        }
-    }
-    os << ">";
-    return os;
-}
-/** Converts an @ref experimental::IPostOp to string
- *
- * @param[in] post_op IPostOp value to be converted
- *
- * @return String representing the corresponding IPostOp
- */
-template <typename T>
-inline std::string to_string(const experimental::IPostOp<T> &post_op)
-{
-    std::stringstream str;
-    str << post_op;
-    return str.str();
-}
-/** Formatted output of the @ref experimental::PostOpList type.
- *
- * @param[out] os       Output stream.
- * @param[in]  post_ops Type to output.
- *
- * @return Modified output stream.
- */
-template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const experimental::PostOpList<T> &post_ops)
-{
-    os << "[";
-    for(const auto &post_op : post_ops.get_list())
-    {
-        os << *post_op << ",";
-    }
-    os << "]";
-    return os;
-}
-/** Converts a @ref experimental::PostOpList to string
- *
- * @param[in] post_ops PostOpList value to be converted
- *
- * @return String representing the corresponding PostOpList
- */
-template <typename T>
-inline std::string to_string(const experimental::PostOpList<T> &post_ops)
-{
-    std::stringstream str;
-    str << post_ops;
-    return str.str();
-}
-/** @} */ // end of group (EXPERIMENTAL_POST_OPS)
-
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -399,7 +260,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm
     os << " mult_interleave4x4_height=" << gemm_info.mult_interleave4x4_height;
     os << " a_offset=" << gemm_info.a_offset;
     os << " b_offset=" << gemm_info.b_offset;
-    os << "post_ops=" << gemm_info.post_ops;
     os << ")";
     return os;
 }
@@ -1563,7 +1423,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
     os << "broadcast_bias=" << info.broadcast_bias() << ",";
     os << "pretranspose_B=" << info.pretranspose_B() << ",";
-    os << "post_ops=" << info.post_ops() << "}";
+    os << "}";
 
     return os;
 }
@@ -2883,7 +2743,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Conv2dInfo &conv_inf
        << "act_info=" << to_string(conv_info.act_info) << ", "
        << "enable_fast_math=" << conv_info.enable_fast_math << ", "
        << "num_groups=" << conv_info.num_groups << ","
-       << "post_ops=" << conv_info.post_ops << "}";
+       << "}";
     return os;
 }
 
@@ -3772,4 +3632,4 @@ inline std::string to_string(const arm_compute::CpuMatMulSettings &settings)
 
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */
+#endif // ACL_UTILS_TYPEPRINTER_H

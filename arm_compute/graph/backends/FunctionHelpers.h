@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
-#define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUNCTIONHELPERS_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUNCTIONHELPERS_H
 
-#include "arm_compute/core/experimental/IPostOp.h"
-#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h"
-#include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationWithPostOpsFunction.h"
 #include "arm_compute/graph/backends/FusedDepthwiseConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
@@ -537,183 +534,6 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << " Output shape: " << output->info()->tensor_shape()
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
-                               << std::endl);
-    return std::move(func);
-}
-
-/** Create a backend convolution layer function with post operator
- *
- * @tparam ConvolutionLayerFunctions Backend convolution functions
- * @tparam TargetInfo                Target-specific information
- *
- * @param[in] node Node to create the backend function for
- * @param[in] ctx  Graph context
- *
- * @return Backend convolution layer function
- */
-template <typename ConvolutionLayerFunctions, typename TargetInfo>
-std::unique_ptr<IFunction> create_fused_convolution_with_post_op(FusedConvolutionWithPostOpNode &node, GraphContext &ctx)
-{
-    validate_node<TargetInfo>(node, 4 /* expected inputs */, 1 /* expected outputs */);
-
-    // Extract IO and info
-    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
-    typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
-    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-
-    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
-
-    if(is_quantized)
-    {
-        biases->info()->set_data_type(DataType::S32);
-    }
-
-    const PadStrideInfo       conv_info  = node.convolution_info();
-    const unsigned int        num_groups = node.num_groups();
-    const ActivationLayerInfo fused_act  = node.fused_activation();
-
-    experimental::PostOpList<typename TargetInfo::TensorType *> post_ops;
-
-    auto &post_op_info_list = node.post_op_info_list();
-    for(const auto &post_op_info : post_op_info_list)
-    {
-        switch(post_op_info->type())
-        {
-            case PostOpType::Activation:
-            {
-                const auto act_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoActivation *>(post_op_info.get());
-                post_ops.template push_back_op<experimental::PostOpAct<typename TargetInfo::TensorType *>>(act_info->_act);
-                break;
-            }
-            case PostOpType::Eltwise_Add:
-            {
-                typename TargetInfo::TensorType *add_input    = get_backing_tensor<TargetInfo>(node.input(3));
-                const auto                       eltwise_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoEltwiseAdd *>(post_op_info.get());
-                post_ops.template push_back_op<experimental::PostOpEltwiseAdd<typename TargetInfo::TensorType *>>(add_input, eltwise_info->_prev_op_dst_pos, eltwise_info->_policy);
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_ERROR("Unsupported PostOpType");
-            }
-        }
-    }
-
-    // Create and configure function (we assume that functions have been validated before creation)
-    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
-    std::unique_ptr<IFunction>      func;
-    std::string                     func_name;
-
-    // Fuse convolution with post ops is only supported for conv1x1, which is only implemented as gemmconv2d
-    std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::GEMMConvolutionLayer>(
-                                    std::string("GEMMConvolutionLayer"), mm,
-                                    input, weights, biases, output, conv_info,
-                                    WeightsInfo(), Size2D(1U, 1U), fused_act, num_groups, post_ops);
-
-    // Log info
-    std::ostringstream qss;
-    if(is_quantized)
-    {
-        qss << " Input QuantInfo: " << input->info()->quantization_info()
-            << " Weights QuantInfo: " << weights->info()->quantization_info()
-            << " Output QuantInfo: " << output->info()->quantization_info();
-    }
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << func_name
-                               << " Target: " << TargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Groups: " << num_groups
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Weights shape: " << weights->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << qss.str()
-                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
-                               << " Post ops" << post_ops
-                               << std::endl);
-    return std::move(func);
-}
-
-/** Create a backend convolution batch normalization layer function with post operator
- *
- * @tparam FusedLayerTypes           Backend convolution functions
- * @tparam TargetInfo                Target-specific information
- *
- * @param[in] node Node to create the backend function for
- * @param[in] ctx  Graph context
- *
- * @return Backend fused convolution with batch normalization layer function
- */
-template <typename FusedLayerTypes, typename TargetInfo>
-std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_with_post_op(FusedConvolutionBatchNormalizationWithPostOpsNode &node, GraphContext &ctx)
-{
-    validate_node<TargetInfo>(node, 8 /* expected inputs */, 1 /* expected outputs */);
-
-    // Extract IO and info
-    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
-    typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
-    typename TargetInfo::TensorType *mean    = get_backing_tensor<TargetInfo>(node.input(3));
-    typename TargetInfo::TensorType *var     = get_backing_tensor<TargetInfo>(node.input(4));
-    typename TargetInfo::TensorType *beta    = get_backing_tensor<TargetInfo>(node.input(5));
-    typename TargetInfo::TensorType *gamma   = get_backing_tensor<TargetInfo>(node.input(6));
-
-    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
-
-    const PadStrideInfo conv_info  = node.convolution_info();
-    const unsigned int  num_groups = node.num_groups();
-    const bool          fast_math  = node.fast_math_hint() == FastMathHint::Enabled;
-    const float         epsilon    = node.epsilon();
-
-    experimental::PostOpList<typename TargetInfo::TensorType *> post_ops;
-
-    auto &post_op_info_list = node.post_op_info_list();
-    for(const auto &post_op_info : post_op_info_list)
-    {
-        switch(post_op_info->type())
-        {
-            case PostOpType::Activation:
-            {
-                const auto act_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoActivation *>(post_op_info.get());
-                post_ops.template push_back_op<experimental::PostOpAct<typename TargetInfo::TensorType *>>(act_info->_act);
-                break;
-            }
-            case PostOpType::Eltwise_Add:
-            {
-                typename TargetInfo::TensorType *add_input    = get_backing_tensor<TargetInfo>(node.input(3));
-                const auto                       eltwise_info = utils::cast::polymorphic_downcast<const ConvPostOpInfoEltwiseAdd *>(post_op_info.get());
-                post_ops.template push_back_op<experimental::PostOpEltwiseAdd<typename TargetInfo::TensorType *>>(add_input, eltwise_info->_prev_op_dst_pos, eltwise_info->_policy);
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_ERROR("Unsupported PostOpType");
-            }
-        }
-    }
-
-    // Create and configure function (we assume that functions have been validated before creation)
-    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
-    std::unique_ptr<IFunction>      func;
-    std::string                     func_name;
-
-    using FType = FusedConvolutionBatchNormalizationWithPostOpsFunction<TargetInfo, FusedLayerTypes>;
-
-    // Create and configure function
-    std::tie(func, func_name) = create_named_memory_managed_function<FType>(
-                                    std::string("FusedConvolutionBatchNormalizationLayerWithPostOpsLayer"), mm, input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, num_groups, fast_math, post_ops);
-
-    // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << TargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Weights shape: " << weights->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << " Post Ops:" << post_ops
                                << std::endl);
     return std::move(func);
 }
@@ -2025,4 +1845,4 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUNCTIONHELPERS_H

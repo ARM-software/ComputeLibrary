@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,14 +54,14 @@ namespace opencl
 {
 ClGemmConv2d::ClGemmConv2d()
     : _weights_reshape_kernel(nullptr), _im2col_kernel(nullptr), _mm_gemm(nullptr), _mm_gemmlowp(nullptr), _col2im_kernel(nullptr), _activation_kernel(nullptr), _im2col_output(), _weights_reshaped(),
-      _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _append_bias(false), _is_prepared(false), _use_post_ops(false), _aux_mem(AuxTensorIdx::Count)
+      _gemm_output(), _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _fuse_activation(true), _append_bias(false), _is_prepared(false), _aux_mem(AuxTensorIdx::Count)
 {
 }
 ClGemmConv2d::~ClGemmConv2d() = default;
 
 void ClGemmConv2d::configure_mm(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
                                 const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                                int gemm_3d_depth, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops)
+                                int gemm_3d_depth, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights);
     ARM_COMPUTE_ERROR_THROW_ON(validate_mm(src, weights, biases, dst, gemmlowp_output_stage, gemm_3d_depth, _skip_im2col, act_info));
@@ -76,14 +76,12 @@ void ClGemmConv2d::configure_mm(const ClCompileContext &compile_context, const I
                                          false,                 // fast_math
                                          false,                 // fp_mixed_precision
                                          true,                  // broadcast_bias
-                                         act_info,              // activation_info
-                                         post_ops               // post ops
+                                         act_info               // activation_info
                                         );
 
     TensorInfo tmp_src{ *src };
     if(_is_quantized)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(post_ops.size() > 0, "ClGemmConv2d quantized types do not support post ops");
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
         const QuantizationInfo input_quantization_info   = src->quantization_info();
@@ -118,7 +116,7 @@ void ClGemmConv2d::configure_mm(const ClCompileContext &compile_context, const I
 }
 
 Status ClGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                 const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info, const experimental::PostOpList<ITensorInfo *> &post_ops)
+                                 const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info)
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(src->data_type());
 
@@ -132,13 +130,11 @@ Status ClGemmConv2d::validate_mm(const ITensorInfo *src, const ITensorInfo *weig
                                          false,                 // fast_math
                                          false,                 // fp_mixed_precision
                                          true,                  // broadcast_bias
-                                         act_info,              // activation_info
-                                         post_ops               // post ops
+                                         act_info               // activation_info
                                         );
 
     if(is_quantized)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(post_ops.size() > 0, "ClGemmConv2d quantized types do not support post ops");
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
         const QuantizationInfo input_quantization_info   = src->quantization_info();
@@ -189,19 +185,18 @@ void ClGemmConv2d::configure(const CLCompileContext &compile_context, ITensorInf
 
     // Only for quantize there are few cases where we cannot fuse the activation function in GEMM
     _fuse_activation = true;
-    _use_post_ops    = conv2d_info.post_ops.size() > 0;
 
     const ITensorInfo *gemm_input_to_use  = src;
     ITensorInfo       *gemm_output_to_use = dst;
 
     // Get parameters from conv_info
-    unsigned int stride_x = 0;
-    unsigned int stride_y = 0;
+    unsigned int stride_x        = 0;
+    unsigned int stride_y        = 0;
     std::tie(stride_x, stride_y) = conv2d_info.conv_info.stride();
 
     // Get convolved dimensions
-    unsigned int conv_w = 0;
-    unsigned int conv_h = 0;
+    unsigned int conv_w      = 0;
+    unsigned int conv_h      = 0;
     std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width),
                                                  src->dimension(idx_height),
                                                  kernel_width,
@@ -318,11 +313,10 @@ void ClGemmConv2d::configure(const CLCompileContext &compile_context, ITensorInf
     // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
     const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
 
-    configure_mm(compile_context, gemm_input_to_use, &_weights_reshaped, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, conv2d_info.act_info, conv2d_info.post_ops);
+    configure_mm(compile_context, gemm_input_to_use, &_weights_reshaped, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, conv2d_info.act_info);
 
     if(!_skip_col2im)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(conv2d_info.post_ops.size() > 0, "ClGemmConv2d does not support post ops with col2im operation"); // Post ops must be performed after every other op
         // Set the GPU target for col2im
         _col2im_kernel = std::make_unique<opencl::kernels::ClCol2ImKernel>();
         _col2im_kernel->set_target(CLScheduler::get().target());
@@ -334,8 +328,7 @@ void ClGemmConv2d::configure(const CLCompileContext &compile_context, ITensorInf
     ARM_COMPUTE_ERROR_ON_MSG((dst->dimension(idx_width) != conv_w) || (dst->dimension(idx_height) != conv_h),
                              "Output shape does not match the expected one");
 
-    // Disable running of activation kernel if post ops are used
-    if(!_fuse_activation && !_use_post_ops)
+    if(!_fuse_activation)
     {
         _activation_kernel = std::make_unique<opencl::kernels::ClActivationKernel>();
         _activation_kernel->configure(compile_context, dst, nullptr, conv2d_info.act_info);
@@ -383,15 +376,11 @@ Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights
     const bool         is_quantized       = is_data_type_quantized_asymmetric(data_type);
     const bool         skip_im2col        = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv2d_info.conv_info.stride().first == 1
                                              && conv2d_info.conv_info.stride().second == 1);
-    const bool skip_col2im     = data_layout == DataLayout::NHWC;
-    bool       fuse_activation = true;
-    bool       use_post_ops    = conv2d_info.post_ops.size() > 0;
+    const bool         skip_col2im        = data_layout == DataLayout::NHWC;
+    bool               fuse_activation    = true;
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * conv2d_info.num_groups) != src->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!skip_im2col
-                                    && conv2d_info.post_ops.size() > 0,
-                                    "ClGemmConv2d does not support post ops with col2im or im2col operation"); // Post ops must be performed after every other op
 
     // Validate biases
     if(biases != nullptr)
@@ -520,8 +509,7 @@ Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights
     // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
     const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, skip_im2col, conv2d_info.act_info,
-                                            conv2d_info.post_ops));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, skip_im2col, conv2d_info.act_info));
 
     // Validate Col2Im
     if(!skip_col2im)
@@ -530,8 +518,7 @@ Status ClGemmConv2d::validate(const ITensorInfo *src, const ITensorInfo *weights
     }
 
     // Validate Activation Layer
-    // Disable running (thus validation) of activation kernel if post ops are used
-    if(!fuse_activation && !use_post_ops)
+    if(!fuse_activation)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClActivationKernel::validate(dst, nullptr, conv2d_info.act_info));
     }
@@ -600,8 +587,7 @@ void ClGemmConv2d::run(ITensorPack &tensors)
     }
 
     //Run Activation Layer if we cannot fuse in GEMM
-    // Disable running of activation kernel if post ops are used
-    if(!_fuse_activation && !_use_post_ops)
+    if(!_fuse_activation)
     {
         ITensorPack pack =
         {
@@ -620,7 +606,7 @@ void ClGemmConv2d::prepare(ITensorPack &tensors)
         ICLTensor         *weights_reshaped_p = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(offset_int_vec(WeightsReshaped)));
         CLAuxTensorHandler weights_reshaped(_weights_reshaped, *weights_reshaped_p);
         auto               weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
-        ITensorPack        pack =
+        ITensorPack        pack    =
         {
             { TensorType::ACL_SRC, weights },
             { TensorType::ACL_DST, weights_reshaped.get() }

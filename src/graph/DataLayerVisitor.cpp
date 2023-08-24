@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,14 +129,6 @@ void DataLayerVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
     add_generic_layer_data<FusedConvolutionBatchNormalizationNode>(_layer_data, n);
     add_convolution_layer_data<FusedConvolutionBatchNormalizationNode>(_layer_data, n);
     add_convolution_layer_method<FusedConvolutionBatchNormalizationNode>(_layer_data, n);
-}
-
-void DataLayerVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
-{
-    _layer_data.clear();
-    add_generic_layer_data<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
-    add_convolution_layer_data<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
-    add_convolution_layer_method<FusedConvolutionBatchNormalizationWithPostOpsNode>(_layer_data, n);
 }
 
 void DataLayerVisitor::visit(FusedDepthwiseConvolutionBatchNormalizationNode &n)

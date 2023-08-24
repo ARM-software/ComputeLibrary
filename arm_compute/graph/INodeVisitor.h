@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_INODEVISITOR_H
-#define ARM_COMPUTE_GRAPH_INODEVISITOR_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_INODEVISITOR_H
+#define ACL_ARM_COMPUTE_GRAPH_INODEVISITOR_H
 
 #include "arm_compute/graph/nodes/NodesFwd.h"
 
@@ -106,16 +106,6 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
-    /** Visit FusedConvolutionBatchNormalizationWithPostOpsNode.
-     *
-     * @param[in] n Node to visit.
-     */
-    virtual void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) = 0;
-    /** Visit FusedConvolutionWithPostOpNode.
-     *
-     * @param[in] n Node to visit.
-     */
-    virtual void visit(FusedConvolutionWithPostOpNode &n) = 0;
     /** Visit FusedDepthwiseConvolutionBatchNormalizationNode.
      *
      * @param[in] n Node to visit.
@@ -215,8 +205,6 @@ public:
     virtual void visit(FlattenLayerNode &n) override;
     virtual void visit(FullyConnectedLayerNode &n) override;
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) override;
-    virtual void visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n) override;
-    virtual void visit(FusedConvolutionWithPostOpNode &n) override;
     virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override;
     virtual void visit(InputNode &n) override;
     virtual void visit(NormalizationLayerNode &n) override;
@@ -240,4 +228,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_INODEVISITOR_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_INODEVISITOR_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_TYPE_PRINTER_H
-#define ARM_COMPUTE_GRAPH_TYPE_PRINTER_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_TYPEPRINTER_H
+#define ACL_ARM_COMPUTE_GRAPH_TYPEPRINTER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -115,12 +115,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             os << "FusedConvolutionBatchNormalizationLayer";
-            break;
-        case NodeType::FusedConvolutionBatchNormalizationLayerWithPostOpsLayer:
-            os << "FusedConvolutionBatchNormalizationLayerWithPostOpsLayer";
-            break;
-        case NodeType::FusedConvolutionWithPostOp:
-            os << "FusedConvolutionWithPostOp";
             break;
         case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
             os << "FusedDepthwiseConvolutionBatchNormalizationLayer";
@@ -295,4 +289,4 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
 }
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_TYPE_PRINTER_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_TYPEPRINTER_H

@@ -38,7 +38,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
-#include "arm_compute/core/experimental/IPostOp.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"
@@ -222,7 +221,6 @@ void ClGemm::configure_native(const CLCompileContext &compile_context, ITensorIn
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _mm_native_kernel->set_target(gpu_target);
@@ -254,7 +252,6 @@ void ClGemm::configure_reshaped(const CLCompileContext &compile_context, ITensor
     kernel_info.reinterpret_input_as_3d = false;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _reshape_lhs_kernel->set_target(gpu_target);
@@ -299,7 +296,6 @@ void ClGemm::configure_reshaped_only_rhs(const CLCompileContext &compile_context
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _mm_reshaped_only_rhs_kernel->set_target(gpu_target);
@@ -346,7 +342,6 @@ void ClGemm::configure_reshaped_only_rhs_mmul(const CLCompileContext &compile_co
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     // Set the target for the kernels
     _mm_reshaped_only_rhs_mmul_kernel->set_target(gpu_target);
@@ -396,7 +391,6 @@ Status ClGemm::validate_native(const ITensorInfo *a, const ITensorInfo *b, const
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     auto config = auto_heuristics::select_mlgo_gemm_config_reshaped_only_rhs(auto_heuristics::CommonQuery{ gpu_target, data_type, m, n, k, batch_size });
 
@@ -433,7 +427,6 @@ Status ClGemm::validate_reshaped(const ITensorInfo *a, const ITensorInfo *b, con
     kernel_info.reinterpret_input_as_3d = false;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
@@ -482,7 +475,6 @@ Status ClGemm::validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInf
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
@@ -531,7 +523,6 @@ Status ClGemm::validate_reshaped_only_rhs_mmul(const ITensorInfo *a, const ITens
     kernel_info.reinterpret_input_as_3d = reinterpret_input_as_3d;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
-    kernel_info.post_ops                = gemm_info.post_ops();
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
@@ -624,7 +615,12 @@ Status ClGemm::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     // Select GEMMType
     CLGEMMKernelType gemm_kernel_type = auto_select_gemm_kernel(auto_heuristics::CommonQuery
     {
-        CLScheduler::get().target(), a->data_type(), m, n, k, batch_size,
+        CLScheduler::get().target(),
+        a->data_type(),
+        m,
+        n,
+        k,
+        batch_size,
     },
     gemm_info.reshape_b_only_on_first_run(), b->are_values_constant());
 

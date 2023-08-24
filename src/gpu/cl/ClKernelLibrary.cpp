@@ -275,23 +275,14 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map =
     { "gemm_mm_native", "common/gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_nt_mmul", "common/gemm_reshaped_only_rhs_mmul.cl" },
     { "gemm_mm_reshaped_only_rhs_nt_mmul_texture", "common/gemm_reshaped_only_rhs_mmul.cl" },
-    { "gemm_mm_native_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t_texture", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_t_rhs_nt", "common/gemm.cl" },
     { "gemm_mm_reshaped_lhs_t_rhs_nt_texture", "common/gemm.cl" },
-    { "gemm_mm_reshaped_lhs_nt_rhs_t_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
-    { "gemm_mm_reshaped_lhs_nt_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
-    { "gemm_mm_reshaped_lhs_t_rhs_nt_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
-    { "gemm_mm_reshaped_lhs_t_rhs_nt_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl" },
     { "gemm_mm_reshaped_only_rhs_nt", "common/gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_nt_texture", "common/gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_t", "common/gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_t_texture", "common/gemm.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_nt_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
-    { "gemm_mm_reshaped_only_rhs_t_texture_post_act_eltwise_op_act", "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl" },
     { "gemm_lc_vm_f32", "common/gemm.cl" },
     { "gemm_reshape_lhs_matrix_nt", "common/gemm_utils.cl" },
     { "gemm_reshape_lhs_matrix_t", "common/gemm_utils.cl" },
@@ -621,26 +612,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map =
     {
         "common/gemm_utils.cl",
 #include "./cl_kernels/common/gemm_utils.clembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.hembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.hembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.clembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.clembed"
-    },
-    {
-        "common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl",
-#include "./cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.clembed"
     },
     {
         "common/gemmlowp.cl",

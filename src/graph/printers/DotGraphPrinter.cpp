@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,22 +82,6 @@ void DotGraphVisitor::visit(FusedConvolutionBatchNormalizationNode &n)
     ARM_COMPUTE_UNUSED(n);
     std::stringstream ss;
     ss << "FusedConvolutionBatchNormalizationNode";
-    _info = ss.str();
-}
-
-void DotGraphVisitor::visit(FusedConvolutionBatchNormalizationWithPostOpsNode &n)
-{
-    ARM_COMPUTE_UNUSED(n);
-    std::stringstream ss;
-    ss << "FusedConvolutionBatchNormalizationWithPostOpsNode";
-    _info = ss.str();
-}
-
-void DotGraphVisitor::visit(FusedConvolutionWithPostOpNode &n)
-{
-    ARM_COMPUTE_UNUSED(n);
-    std::stringstream ss;
-    ss << "FusedConvolutionWithPostOpNode";
     _info = ss.str();
 }
 

@@ -222,7 +222,7 @@ def resolve_includes(target, source, env):
                 found = pattern.search(line)
                 if found:
                     # Only get the header file name and discard the relative path.
-                    # E.g. "common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h" -> "fp_mixed_precision_helpers.h"
+                    # E.g. "src/core/CL/cl_kernels/activation_float_helpers.h" -> "activation_float_helpers.h"
                     include_file = found.group(1).split('/')[-1]
                     data = files_dict[include_file].file_contents
                     updated_file.extend(data)
@@ -387,9 +387,6 @@ if env['opencl'] and env['embed_kernels']:
                         'src/core/CL/cl_kernels/tile_helpers.h',
                         'src/core/CL/cl_kernels/types.h',
                         'src/core/CL/cl_kernels/warp_helpers.h',
-                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/fp_post_ops_act_eltwise_op_act.h',
-                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_mixed_precision_helpers.h',
-                        'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/fp_elementwise_op_helpers.h',
                     ]
 
     # Common kernels
@@ -414,9 +411,6 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/elementwise_operation_quantized.cl',
                        'src/core/CL/cl_kernels/common/elementwise_unary.cl',
                        'src/core/CL/cl_kernels/common/elementwise_unary_quantized.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_native.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped.cl',
-                       'src/core/CL/cl_kernels/common/experimental/gemm_fused_post_ops/act_eltwise_op_act/gemm_mm_reshaped_only_rhs.cl',
                        'src/core/CL/cl_kernels/common/fft_digit_reverse.cl',
                        'src/core/CL/cl_kernels/common/fft.cl',
                        'src/core/CL/cl_kernels/common/fft_scale.cl',

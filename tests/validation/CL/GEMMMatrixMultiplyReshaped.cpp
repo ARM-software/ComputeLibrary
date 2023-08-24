@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/PostOps.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
@@ -62,20 +61,10 @@ using CLGEMMMatrixMultiplyReshaped = CLSynthetizeOperator<ClGemmMatrixMultiplyRe
 template <typename T>
 using CLGEMMMatrixMultiplyReshapedFixture = GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
 
-// Fixture for CLGEMMMatrixMultiplyReshaped with post ops
-template <typename T>
-using CLGEMMMatrixMultiplyReshapedWithPostOpsFixture =
-    GEMMMatrixMultiplyReshapedWithPostOpsValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
-
 // Fixture for CLGEMMMatrixMultiplyReshaped mixed precision
 template <typename T>
 using CLGEMMMatrixMultiplyReshapedMixedPrecisionFixture =
     GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
-
-// Fixture for CLGEMMMatrixMultiplyReshaped mixed precision with post ops
-template <typename T>
-using CLGEMMMatrixMultiplyReshapedMixedPrecisionWithPostOpsFixture =
-    GEMMMatrixMultiplyReshapedWithPostOpsValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D
 template <typename T>
@@ -183,108 +172,6 @@ const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { 
 
 /** LHS transposed values */
 const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { false, true } );
-
-/** Post Ops */
-using PostOpArgBroadcast =  CLGEMMMatrixMultiplyReshapedWithPostOpsFixture<float>::PostOpArgBroadcast;
-experimental::PostOpList<PostOpArgBroadcast> post_ops_1()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(true, true, false),   // If broadcast in dims 0, 1 and 2
-        0,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
-experimental::PostOpList<PostOpArgBroadcast> post_ops_2()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(false, true, true),   // If broadcast in dims 0, 1 and 2
-        1,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
-experimental::PostOpList<PostOpArgBroadcast> post_ops_3()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, true),  // If broadcast in dims 0, 1 and 2
-        1,
-        ConvertPolicy::SATURATE);
-    return post_ops;
-}
-// To test that the output of the main op is the first parameter in prelu post op
-experimental::PostOpList<PostOpArgBroadcast> post_ops_4()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
-    post_ops.push_back_op<experimental::PostOpEltwisePRelu<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, true),   // If true, broadcast in corresponding dim: 0, 1 or 2
-        0,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
-// To test that the output of the main op is the second parameter in prelu post op i.e. it is the alpha_param
-experimental::PostOpList<PostOpArgBroadcast> post_ops_5()
-{
-    experimental::PostOpList<PostOpArgBroadcast> post_ops{};
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::LINEAR, 0.5F, 0.0F});
-    post_ops.push_back_op<experimental::PostOpEltwisePRelu<PostOpArgBroadcast>>(
-        std::make_tuple(false, false, false),   // If true, broadcast in corresponding dim: 0, 1 or 2
-        1,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpAct<PostOpArgBroadcast>>(ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::RELU, 2.1F, 1.3F});
-    return post_ops;
-}
-/** Different Post Op Lists */
-const auto post_op_lists = framework::dataset::make("post_op_lists", {
-    post_ops_1(),
-    post_ops_2(),
-    post_ops_3(),
-    post_ops_4(),
-    post_ops_5()
- } );
-
-bool is_post_op_list_valid(unsigned int m, unsigned int n, unsigned int k, unsigned int batch, DataType data_type, const experimental::PostOpList<ITensorInfo*>& post_ops)
-{
-    const auto lhs_info = GEMMLHSMatrixInfo(4,4,1,false,true);
-    const auto rhs_info = GEMMRHSMatrixInfo(4,4,1,true,true,false);
-
-    // Create TensorInfo for post op arguments
-    TensorInfo input0_info(TensorShape(k, m, batch), 1, data_type);
-    TensorInfo input1_info(TensorShape(n, k, batch), 1, data_type);
-    TensorInfo input2_info(TensorShape(n), 1, data_type);
-    TensorInfo output_info(TensorShape(n, m, batch), 1, data_type);
-
-    const TensorInfo reshaped_input0_info = input0_info.clone()->set_tensor_shape(misc::shape_calculator::compute_lhs_reshaped_shape(input0_info, lhs_info));
-    const TensorInfo reshaped_input1_info = input1_info.clone()->set_tensor_shape(misc::shape_calculator::compute_rhs_reshaped_shape(input1_info, rhs_info));
-
-    GEMMKernelInfo gemm_info(m, n, k, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
-             false /**< reinterpret the input as 3D */,
-             true  /**< Flag used to broadcast the bias addition */,
-             false /**< wider accumm */,
-             false /**< has pad y */,
-           ActivationLayerInfo::ActivationFunction::IDENTITY,
-             1   /**< Multiplication factor for the width of the 1xW transposed block */,
-             1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
-             lhs_info,
-             rhs_info,
-             0  /**< Offset to be added to each element of the matrix A */,
-             0 /**< Offset to be added to each element of the matrix B */,
-             post_ops);
-    return bool(ClGemmMatrixMultiplyReshapedKernel::validate(&reshaped_input0_info.clone()->set_is_resizable(true),
-                                                          &reshaped_input1_info.clone()->set_is_resizable(true),
-                                                          &input2_info.clone()->set_is_resizable(true),
-                                                          &output_info.clone()->set_is_resizable(true),1.f,1.f,
-                                                          lhs_info,
-                                                          rhs_info,
-                                                          gemm_info));
-}
 
 } // namespace
 
@@ -450,119 +337,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                           rhs_info,
                                                           gemm_info)) == expected, framework::LogLevel::ERRORS);
 }
-TEST_SUITE(ValidateFusedPostOpsConfigs)
-TEST_SUITE(Invalid)
-TEST_CASE(UnsupportedPostOpSequence, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 17;
-    const unsigned int n = 1;
-    const unsigned int k = 13;
-    const unsigned int batch = 2;
-    TensorShape post_op_arg0_shape(n, m, batch);
-    TensorInfo post_op_arg_info(post_op_arg0_shape, 1, data_type);
-    auto post_op_arg1_info = post_op_arg_info.clone();
 
-    // Unsupported sequence of post ops
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>(
-        &post_op_arg_info,
-        1,
-        ConvertPolicy::SATURATE);
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>(
-        post_op_arg1_info.get(),
-        0,
-        ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == false, framework::LogLevel::ERRORS);
-}
-TEST_CASE(OutputWidened, framework::DatasetMode::ALL)
-{
-    // Invalid broadcast: post op tensors "widen" the output tensor
-    const auto data_type = DataType::F32;
-    const unsigned int m = 17;
-    const unsigned int n = 1;
-    const unsigned int k = 13;
-    const unsigned int batch = 2;
-    TensorShape post_op_arg_shape(n + 4, m, batch); // output's X dimension (n) is "widened", which is not allowed
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == false, framework::LogLevel::ERRORS);
-}
-TEST_CASE(BroadcastInXDimOnly, framework::DatasetMode::ALL)
-{
-    // Invalid broadcast: post op tensors broadcast in the first dimension (X) only
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    TensorShape post_op_arg_shape(1, m, batch);
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == false, framework::LogLevel::ERRORS);
-}
-TEST_SUITE_END() // Invalid
-TEST_SUITE(Valid)
-TEST_CASE(EmptyPostOpList, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
-}
-TEST_CASE(BroadcastInYDimOnly, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    TensorShape post_op_arg_shape(n, 1, batch);
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
-}
-TEST_CASE(BroadcastInBothXandYDims, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    TensorShape post_op_arg_shape(1, 1, batch);
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
-}
-TEST_CASE(BroadcastInAllDims, framework::DatasetMode::ALL)
-{
-    const auto data_type = DataType::F32;
-    const unsigned int m = 22;
-    const unsigned int n = 16;
-    const unsigned int k = 15;
-    const unsigned int batch = 3;
-    TensorShape post_op_arg_shape(1, 1, 1);
-    TensorInfo post_op_arg_info(post_op_arg_shape, 1, data_type);
-    experimental::PostOpList<ITensorInfo*> post_ops{};
-    post_ops.push_back_op<experimental::PostOpEltwiseAdd<ITensorInfo*>>( &post_op_arg_info, 0, ConvertPolicy::SATURATE);
-
-    ARM_COMPUTE_EXPECT(is_post_op_list_valid(m, n, k, batch, data_type, post_ops) == true, framework::LogLevel::ERRORS);
-}
-TEST_SUITE_END() // Valid
-TEST_SUITE_END() // ValidateFusedPostOps
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
@@ -697,44 +472,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-TEST_SUITE(FusedPostOps)
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedWithPostOpsFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   framework::dataset::make("interleave_lhs", { false })),
-                                                                   framework::dataset::make("interleave_rhs", { false })),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   framework::dataset::make("broadcast_bias", { true } )),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-                                                                   post_op_lists)
-                                                                   )
-{
-    // Validate output
-    if(validate_result)
-    {
-        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-TEST_SUITE_END() //  FusedPostOps
 
 TEST_SUITE(ExportToCLImage)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
@@ -1002,44 +739,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-TEST_SUITE(FusedPostOps)
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedWithPostOpsFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   framework::dataset::make("interleave_lhs", { false })),
-                                                                   framework::dataset::make("interleave_rhs", { false })),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   framework::dataset::make("broadcast_bias", { true } )),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-                                                                   post_op_lists)
-                                                                   )
-{
-    // Validate output only if validate() is successful
-    if(validate_result)
-    {
-        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-TEST_SUITE_END() //  FusedPostOps
 
 TEST_SUITE_END() // ExportToCLImage
 TEST_SUITE_END() // FP32
@@ -1177,45 +876,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-
-TEST_SUITE(FusedPostOps)
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedWithPostOpsFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   framework::dataset::make("interleave_lhs", { false })),
-                                                                   framework::dataset::make("interleave_rhs", { false })),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   framework::dataset::make("broadcast_bias", { true } )),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-                                                                   post_op_lists)
-                                                                   )
-{
-    // Validate output
-    if(validate_result)
-    {
-        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-TEST_SUITE_END() //  FusedPostOps
 
 TEST_SUITE(ExportToCLImage)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
@@ -1483,44 +1143,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-TEST_SUITE(FusedPostOps)
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedWithPostOpsFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   framework::dataset::make("interleave_lhs", { false })),
-                                                                   framework::dataset::make("interleave_rhs", { false })),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   framework::dataset::make("broadcast_bias", { true } )),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-                                                                   post_op_lists)
-                                                                   )
-{
-    // Validate output only if validate() is successful
-    if(validate_result)
-    {
-        validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-TEST_SUITE_END() //  FusedPostOps
 
 TEST_SUITE_END() // ExportToCLImage
 TEST_SUITE_END() // FP16
@@ -1658,45 +1280,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionF
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-
-TEST_SUITE(FusedPostOps)
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedMixedPrecisionWithPostOpsFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   framework::dataset::make("interleave_lhs", { false })),
-                                                                   framework::dataset::make("interleave_rhs", { false })),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", { true, false })),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   framework::dataset::make("broadcast_bias", { true } )),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-                                                                   post_op_lists)
-                                                                   )
-{
-    // Validate output
-    if(validate_result)
-    {
-        validate(CLAccessor(_target), _reference, rel_tolerance_f16_mixed_precision, 0.f, abs_tolerance_f16_mixed_precision);
-    }
-    else
-    {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
-    }
-}
-
-TEST_SUITE_END() // FusedPostOps
 
 TEST_SUITE_END() // MixedPrecision
 TEST_SUITE_END() // Float
