@@ -100,30 +100,20 @@ def build_lib_objects():
 
     # Build all the common files for the base architecture
     if env['arch'] == 'armv8a':
-        lib_static_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=True)
-        lib_shared_objs += build_obj_list(filedefs["armv8-a"], misa_lib_files, static=False)
+        lib_static_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8-a"], lib_files, static=False)
     else:
-        lib_static_objs += build_obj_list(filedefs["armv8.2-a"], misa_lib_files, static=True)
-        lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], misa_lib_files, static=False)
-
-    # Build the FP16 specific files
-    lib_static_objs += build_obj_list(filedefs["armv8.2-a"], misa_lib_files_neon_fp16, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], misa_lib_files_neon_fp16, static=False)
+        lib_static_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=True)
+        lib_shared_objs += build_obj_list(filedefs["armv8.2-a"], lib_files, static=False)
 
     # Build the SVE specific files
-    lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve, static=False)
-    lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve_fp16, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve_fp16, static=False)
-
+    lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], lib_files_sve, static=False)
 
     # Build the SVE2 specific files
     arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_SVE2'])
-    lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2, static=False)
-    lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2_fp16, static=True)
-    lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], misa_lib_files_sve2_fp16, static=False)
-
+    lib_static_objs += build_obj_list(filedefs["armv8.6-a-sve2"], lib_files_sve2, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.6-a-sve2"], lib_files_sve2, static=False)
 
     return lib_static_objs, lib_shared_objs
 
@@ -301,28 +291,28 @@ def get_attrs_list(env, data_types, data_layouts):
     return attrs
 
 
-def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[], include_common=True):
+def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[]):
     files = { "common" : [] }
+
     # Early return if filelist is empty
     if backend not in filelist:
         return files
+
     # Iterate over operators and create the file lists to compiler
     for operator in operators:
         if operator in filelist[backend]['operators']:
-            if include_common :
-                files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
+            files['common'] += filelist[backend]['operators'][operator]["files"]["common"]
             for tech in techs:
                 if tech in filelist[backend]['operators'][operator]["files"]:
                     # Add tech as a key to dictionary if not there
                     if tech not in files:
                         files[tech] = []
+
                     # Add tech files to the tech file list
                     tech_files = filelist[backend]['operators'][operator]["files"][tech]
-                    if include_common:
-                        files[tech] += tech_files.get('common', [])
+                    files[tech] += tech_files.get('common', [])
                     for attr in attrs:
                         files[tech] += tech_files.get(attr, [])
-
 
     # Remove duplicates if they exist
     return {k: list(set(v)) for k,v in files.items()}
@@ -631,17 +621,6 @@ if env['opencl']:
 lib_files_sve = []
 lib_files_sve2 = []
 
-# the variables below are used for the multi_isa builds
-# please note that the variables names without the _fp16 suffix
-# do not hold any fp16 files.
-
-misa_lib_files = lib_files
-misa_lib_files_sve = []
-misa_lib_files_sve2 = []
-misa_lib_files_neon_fp16 = []
-misa_lib_files_sve_fp16 = []
-misa_lib_files_sve2_fp16 = []
-
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/arm_gemm",
@@ -653,6 +632,8 @@ if env['neon']:
                                       "src/core/NEON/kernels/assembly/",
                                       "arm_compute/core/NEON/kernels/assembly/",
                                       "src/cpu/kernels/assembly/"])
+
+    lib_files += filelist['cpu']['common']
 
     # Setup SIMD file list to include
     simd = ['neon']
@@ -668,6 +649,7 @@ if env['neon']:
     else:
         attrs = get_attrs_list(env, env['data_type_support'], env['data_layout_support'])
 
+
     if env['fixed_format_kernels']:
         attrs.append("fixed_format_kernels")
 
@@ -675,46 +657,19 @@ if env['neon']:
     cpu_operators = custom_operators if use_custom_ops else filelist['cpu']['operators'].keys()
     cpu_ops_to_build = resolve_operator_dependencies(filelist, cpu_operators, 'cpu')
 
-    if env['multi_isa']:
-        misa_lib_files += filelist['cpu']['common']
+    cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
 
-        # For multi_isa builds we need to build fp16 files for armv8.2-a+fp16 so we filter them out of cpu_files removing the attribute fp16
-        attrs.remove('fp16')
-        cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
+    # Shared among ALL CPU files
+    lib_files += cpu_files.get('common', [])
 
-        # Shared among ALL CPU files
-        misa_lib_files += cpu_files.get('common', [])
+    # Arm® Neon™ specific files
+    lib_files += cpu_files.get('neon', [])
 
-        # Arm® Neon™ specific files
-        misa_lib_files += cpu_files.get('neon', [])
+    # SVE files only
+    lib_files_sve = cpu_files.get('sve', [])
 
-        # Get all the fp16 files
-        fp16_cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, ['fp16'],False)
-
-        misa_lib_files_neon_fp16 = fp16_cpu_files.get('neon',[])
-        misa_lib_files_sve_fp16 = fp16_cpu_files.get('sve',[])
-        misa_lib_files_sve2_fp16 = fp16_cpu_files.get('sve2',[])
-
-        # SVE files only minus FP16
-        misa_lib_files_sve = cpu_files.get('sve', [])
-
-        # SVE2 files only minus FP16
-        misa_lib_files_sve2 = cpu_files.get('sve2', [])
-    else:
-        lib_files += filelist['cpu']['common']
-
-        # Non multi_isa build
-        cpu_files = get_operator_backend_files(filelist, cpu_ops_to_build, 'cpu', simd, attrs)
-
-        # Shared among ALL CPU files
-        lib_files += cpu_files.get('common', [])
-
-        # Arm® Neon™ specific files
-        lib_files += cpu_files.get('neon', [])
-
-        lib_files_sve = cpu_files.get('sve', [])
-
-        lib_files_sve2 = cpu_files.get('sve2', [])
+    # SVE2 files only
+    lib_files_sve2 = cpu_files.get('sve2', [])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
