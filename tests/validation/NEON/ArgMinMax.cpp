@@ -97,7 +97,9 @@ using NEArgMinMaxValidationFixture = ArgMinMaxValidationFixture<Tensor, Accessor
 using NEArgMinMaxValidationFixture_S32_S32 = NEArgMinMaxValidationFixture<int32_t, int32_t>;
 using NEArgMinMaxValidationFixture_F16_S32 = NEArgMinMaxValidationFixture<half, int32_t>;
 using NEArgMinMaxValidationFixture_F32_S32 = NEArgMinMaxValidationFixture<float, int32_t>;
+#ifdef __aarch64__
 using NEArgMinMaxValidationFixture_F32_S64 = NEArgMinMaxValidationFixture<float, int64_t>;
+#endif // __aarch64__
 
 TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmallAxis0,
@@ -184,6 +186,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     validate(Accessor(_target), _reference);
 }
 
+#ifdef __aarch64__
 FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
                        NEArgMinMaxValidationFixture_F32_S64,
                        framework::DatasetMode::PRECOMMIT,
@@ -196,6 +199,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall_F32_S64,
     // Validate output
     validate(Accessor(_target), _reference);
 }
+#endif // __aarch64__
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEArgMinMaxValidationFixture_F32_S32,
