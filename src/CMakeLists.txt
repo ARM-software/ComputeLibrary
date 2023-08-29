@@ -803,7 +803,6 @@ target_sources(
 	cpu/kernels/range/generic/neon/integer.cpp
 	cpu/kernels/roialign/generic/neon/fp16.cpp
 	cpu/kernels/roialign/generic/neon/fp32.cpp
-	cpu/kernels/roialign/generic/neon/impl.cpp
 	cpu/kernels/roialign/generic/neon/qasymm8.cpp
 	cpu/kernels/roialign/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/scale/neon/fp16.cpp
