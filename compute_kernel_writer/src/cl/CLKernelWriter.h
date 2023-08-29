@@ -95,9 +95,13 @@ public:
     // Misc
     // =============================================================================================
 
+    void op_get_global_id(const TileOperand &dst, int32_t dim) override;
+
     void op_comment(const std::string &text) override;
 
     void op_write_raw_code(const std::string &raw_code) override;
+
+    void op_print(const std::string &prefix, const std::vector<TileOperand> &operands) override;
 
     // =============================================================================================
     // Code generation

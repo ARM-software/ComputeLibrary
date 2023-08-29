@@ -175,6 +175,13 @@ public:
     // Misc
     // =============================================================================================
 
+    /** Write the statement to get the global ID of the specified dimension.
+     *
+     * @param[in] dst The tile to write the global ID into.
+     * @param[in] dim The dimension.
+     */
+    virtual void op_get_global_id(const TileOperand &dst, int32_t dim) = 0;
+
     /** Write the line comment in debug build.
      *
      * This function does not take effect on release build.
@@ -184,6 +191,23 @@ public:
      * @param[in] text The comment to be written.
      */
     virtual void op_comment(const std::string &text) = 0;
+
+    /** Write the statement to print out the value of all the specified tiles.
+     *
+     * The printing statement is constructed so that the prefix and each of the operand are printed in separate lines.
+     * The format for each operand varies depending on whether it is a 2D tile, a vector or a scalar value.
+     *
+     * Example output of the printing statement when it is executed:
+     *
+     * prefix
+     * scalar_name = scalar_value
+     * vector_name = [vector_value_0, vector_value_1, vector_value_2]
+     * tile_name = [[tile_value_00, tile_value_01], [tile_value_10, tile_value_11]]
+     *
+     * @param[in] prefix   The first string to be printed out before the list of operands.
+     * @param[in] operands The list of tiles to be included in the printing statement.
+     */
+    virtual void op_print(const std::string &prefix, const std::vector<TileOperand> &operands) = 0;
 
     /** Write the given raw code to kernel source code
      *  It's used to address the cases where the user needs to
