@@ -198,13 +198,13 @@ private:
      *
      * It is used for both @ref CLKernelWriter::op_if and @ref CLKernelWriter::op_else_if.
      *
-     * @param[in] is_else True if this is an `else if` block, otherwise this is an `if` block.
-     * @param[in] lhs     The LHS tile of the condition.
-     * @param[in] op      The relational binary operator.
-     * @param[in] rhs     The RHS tile of the condition.
-     * @param[in] body    The function that writes the body of the else-if block.
+     * @param[in] lhs        The LHS tile of the condition.
+     * @param[in] op         The relational binary operator.
+     * @param[in] rhs        The RHS tile of the condition.
+     * @param[in] body       The function that writes the body of the else-if block.
+     * @param[in] is_else_if True if this is an `else if` block, otherwise this is an `if` block.
      */
-    void op_if_generic(bool is_else, const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body);
+    void op_if_generic(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body, bool is_else_if);
 
     // For attributes
 private:

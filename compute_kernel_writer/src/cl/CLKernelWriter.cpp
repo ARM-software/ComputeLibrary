@@ -314,7 +314,7 @@ void CLKernelWriter::op_ternary(const TileOperand &dst, TernaryOp op, const Tile
     }
 }
 
-void CLKernelWriter::op_if_generic(bool is_else, const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
+void CLKernelWriter::op_if_generic(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body, bool is_else_if)
 {
     const auto &lhs_tile = to_cl_tile(lhs);
     const auto &rhs_tile = to_cl_tile(rhs);
@@ -325,7 +325,7 @@ void CLKernelWriter::op_if_generic(bool is_else, const TileOperand &lhs, BinaryO
     CKW_ASSERT(lhs_tile.is_scalar());
     CKW_ASSERT(rhs_tile.is_scalar());
 
-    if(is_else)
+    if(is_else_if)
     {
         append_code("else ");
     }
@@ -337,12 +337,12 @@ void CLKernelWriter::op_if_generic(bool is_else, const TileOperand &lhs, BinaryO
 
 void CLKernelWriter::op_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
 {
-    op_if_generic(false, lhs, op, rhs, body);
+    op_if_generic(lhs, op, rhs, body, false /* is_else_if */);
 }
 
 void CLKernelWriter::op_else_if(const TileOperand &lhs, BinaryOp op, const TileOperand &rhs, const std::function<void()> &body)
 {
-    op_if_generic(true, lhs, op, rhs, body);
+    op_if_generic(lhs, op, rhs, body, true /* is_else_if */);
 }
 
 void CLKernelWriter::op_else(const std::function<void()> &body)
@@ -453,7 +453,7 @@ TileOperand CLKernelWriter::declare_tile(const std::string &name, const TileInfo
 
 TileOperand CLKernelWriter::declare_constant_tile(const ConstantData &data)
 {
-    auto tile = std::make_unique<CLTile>(get_values(data), get_data_type(data));
+    auto              tile    = std::make_unique<CLTile>(get_values(data), get_data_type(data));
     const TileOperand operand = create_tile_operand(*tile);
     _constant_tiles.insert(std::move(tile));
 
@@ -525,8 +525,8 @@ const CLTile &CLKernelWriter::to_cl_tile(const TileOperand &operand) const
 void CLKernelWriter::op_load(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
                              const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
-    const CLTile dilation_x({{"1"}}, DataType::Int32);
-    const CLTile dilation_y({{"1"}}, DataType::Int32);
+    const CLTile dilation_x({ { "1" } }, DataType::Int32);
+    const CLTile dilation_y({ { "1" } }, DataType::Int32);
 
     op_load_store(MemoryOperation::Load, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
 }
@@ -544,8 +544,8 @@ void CLKernelWriter::op_load_dilated(const TileOperand &tile_op, const TensorOpe
 void CLKernelWriter::op_store(const TensorOperand &tensor_op, const TileOperand &tile_op, TensorSampler &sampler,
                               const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch)
 {
-    const CLTile dilation_x({{"1"}}, DataType::Int32);
-    const CLTile dilation_y({{"1"}}, DataType::Int32);
+    const CLTile dilation_x({ { "1" } }, DataType::Int32);
+    const CLTile dilation_y({ { "1" } }, DataType::Int32);
 
     op_load_store(MemoryOperation::Store, tile_op, tensor_op, sampler, x, y, z, batch, dilation_x, dilation_y);
 }
