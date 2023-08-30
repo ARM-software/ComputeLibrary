@@ -794,7 +794,6 @@ target_sources(
 	cpu/kernels/pool2d/neon/qasymm8_signed.cpp
 	cpu/kernels/pool3d/neon/fp16.cpp
 	cpu/kernels/pool3d/neon/fp32.cpp
-	cpu/kernels/pool3d/neon/impl.cpp
 	cpu/kernels/pool3d/neon/qasymm8.cpp
 	cpu/kernels/pool3d/neon/qasymm8_signed.cpp
 	cpu/kernels/range/generic/neon/fp16.cpp
