@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,6 +149,20 @@ template <typename T, typename U>
 ZipDataset<T, U> zip(T &&dataset1, U &&dataset2)
 {
     return ZipDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
+}
+
+/** Helper function to create a @ref ZipDataset.
+ *
+ * @param[in] dataset1 First dataset.
+ * @param[in] dataset2 Second dataset.
+ * @param[in] datasets Subsequent datasets.
+ *
+ * @return A zip dataset.
+ */
+template <typename T1, typename T2, typename... Ts>
+auto zip(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(zip(std::forward<T1>(dataset1), zip(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
+{
+    return zip(std::forward<T1>(dataset1), zip(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...));
 }
 } // namespace dataset
 } // namespace framework
