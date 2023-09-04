@@ -39,15 +39,6 @@ void vector_float_sum(AccType &result, AccType &result_square, const InputType &
 
 template <typename InputType, typename AccType = InputType>
 InputType vector_float_norm(const InputType &inputs, const AccType &vec_mean, const AccType &vec_multip, const AccType &vec_beta);
-
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-template <>
-inline void vector_float_sum(float32x4_t &result, float32x4_t &result_square, const float16x8_t &inputs);
-
-template <>
-inline float16x8_t vector_float_norm(const float16x8_t &inputs, const float32x4_t &vec_mean, const float32x4_t &vec_multip, const float32x4_t &vec_beta);
-#endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-
 } // namespace cpu
 } // namespace arm_compute
 #endif //define SRC_CORE_SVE_KERNELS_INSTANCENORM_IMPL_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,35 +37,12 @@ void vector_float_sum(AccType &result, AccType &result_square, const InputType &
     result_square = wrapper::vadd(result_square, wrapper::vmul(inputs, inputs));
 }
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-template <>
-inline void vector_float_sum(float32x4_t &result, float32x4_t &result_square, const float16x8_t &inputs)
-{
-    vector_float_sum(result, result_square, wrapper::vcvt<float>(wrapper::vgetlow(inputs)));
-    vector_float_sum(result, result_square, wrapper::vcvt<float>(wrapper::vgethigh(inputs)));
-}
-template <>
-inline float16x8_t vector_float_norm(const float16x8_t &inputs, const float32x4_t &vec_mean, const float32x4_t &vec_multip, const float32x4_t &vec_beta)
-{
-    const auto  input_low   = wrapper::vcvt<float>(wrapper::vgetlow(inputs));
-    const auto  input_high  = wrapper::vcvt<float>(wrapper::vgethigh(inputs));
-    const auto  result_low  = wrapper::vcvt<float16_t>(vector_float_norm(input_low, vec_mean, vec_multip, vec_beta));
-    const auto  result_high = wrapper::vcvt<float16_t>(vector_float_norm(input_high, vec_mean, vec_multip, vec_beta));
-    float16x8_t result      = wrapper::vcombine(result_low, result_high);
-
-    return result;
-}
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 template <typename InputType, typename AccType>
 InputType vector_float_norm(const InputType &inputs, const AccType &vec_mean, const AccType &vec_multip, const AccType &vec_beta)
 {
     return wrapper::vadd(wrapper::vmul(wrapper::vsub(inputs, vec_mean), vec_multip), vec_beta);
 }
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <typename T, typename AccType>
 void instance_normalization_nchw(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window)
 {
@@ -164,9 +141,5 @@ void instance_normalization_nchw(ITensor *input, ITensor *output, float gamma, f
 }
 
 template void instance_normalization_nchw<float>(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-template void instance_normalization_nchw<float16_t, float>(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
-template void instance_normalization_nchw<float16_t>(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
-#endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 } // namespace cpu
 } // namespace arm_compute
