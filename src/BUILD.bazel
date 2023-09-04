@@ -753,7 +753,6 @@ filegroup(
 	"cpu/kernels/elementwise_binary/generic/neon/qasymm8_signed.cpp",
 	"cpu/kernels/elementwise_unary/generic/neon/fp16.cpp",
 	"cpu/kernels/elementwise_unary/generic/neon/fp32.cpp",
-	"cpu/kernels/elementwise_unary/generic/neon/impl.cpp",
 	"cpu/kernels/elementwise_unary/generic/neon/integer.cpp",
 	"cpu/kernels/elementwise_unary/generic/neon/q8.cpp",
 	"cpu/kernels/elementwise_unary/generic/neon/qasymm8.cpp",

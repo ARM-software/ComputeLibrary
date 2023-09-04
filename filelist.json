@@ -1445,7 +1445,6 @@
             "src/runtime/NEON/functions/NEElementwiseUnaryLayer.cpp"
           ],
           "neon": {
-            "common":["src/cpu/kernels/elementwise_unary/generic/neon/impl.cpp"],
             "integer": ["src/cpu/kernels/elementwise_unary/generic/neon/integer.cpp"],
             "fp32": ["src/cpu/kernels/elementwise_unary/generic/neon/fp32.cpp"],
             "fp16": ["src/cpu/kernels/elementwise_unary/generic/neon/fp16.cpp"],
