@@ -53,6 +53,8 @@ v23.11 Public major release
    - Optimize @ref cpu::CpuReshape
  - Port the following kernels in the experimental Dynamic Fusion interface to use the new Compute Kernel Writer interface with support for FP16/FP32 only:
    - @ref experimental::dynamic_fusion::GpuCkwPool2d
+ - Add new OpenCL™ kernels:
+   - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
 
 v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.

@@ -521,8 +521,10 @@
       "files": {
         "common": [
           "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.cpp",
+          "src/gpu/cl/kernels/ClMatMulLowpNativeMMULKernel.cpp",
           "src/gpu/cl/kernels/ClMatMulNativeKernel.cpp",
           "src/gpu/cl/kernels/ClMatMulNativeMMULKernel.cpp",
+          "src/gpu/cl/kernels/helpers/MatMulKernelHelpers.cpp",
           "src/gpu/cl/operators/ClMatMul.cpp",
           "src/runtime/CL/functions/CLMatMul.cpp",
           "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.cpp",
