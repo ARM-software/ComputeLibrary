@@ -728,7 +728,6 @@ target_sources(
 	cpu/kernels/cast/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp32.cpp
-	cpu/kernels/crop/generic/neon/impl.cpp
 	cpu/kernels/crop/generic/neon/integer.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp16.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/fp32.cpp
