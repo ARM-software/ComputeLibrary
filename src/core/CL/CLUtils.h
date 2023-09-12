@@ -73,6 +73,14 @@ cl::Image2D create_image2d_from_tensor(const ICLTensor *tensor, CLImage2DType im
  * @return cl::Image2D object
  */
 cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType image_type);
+
+/** Check for CL error code and throw exception accordingly.
+ *
+ * @param[in] function_name The name of the CL function being called.
+ * @param[in] error_code    The error returned by the CL function.
+ */
+void handle_cl_error(const std::string &function_name, cl_int error_code);
+
 } // namespace arm_compute
 
 #endif // ACL_SRC_CORE_CL_CLUTILS_H

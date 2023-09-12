@@ -111,4 +111,14 @@ cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer 
 
     return cl::Image2D(cl_image);
 }
+
+void handle_cl_error(const std::string &function_name, cl_int error_code)
+{
+    if(error_code != CL_SUCCESS)
+    {
+        std::string error_message = function_name + " - Error code: " + std::to_string(error_code);
+        ARM_COMPUTE_ERROR(error_message.c_str());
+    }
+}
+
 } // namespace arm_compute

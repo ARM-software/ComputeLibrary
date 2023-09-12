@@ -118,7 +118,10 @@
   ],
   "gpu": {
     "common": [
+      "src/core/CL/CLCommandBuffer.cpp",
+      "src/core/CL/CLCompatCommandBuffer.cpp",
       "src/core/CL/CLCompileContext.cpp",
+      "src/core/CL/CLMutableCommandBuffer.cpp",
       "src/core/CL/DefaultLWSHeuristics.cpp",
       "src/core/CL/CLHelpers.cpp",
       "src/core/CL/CLKernelLibrary.cpp",

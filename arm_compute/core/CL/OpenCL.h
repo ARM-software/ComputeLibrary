@@ -141,6 +141,16 @@ public:
     DECLARE_FUNCTION_PTR(clCreateImage);
     DECLARE_FUNCTION_PTR(clSetKernelExecInfo);
 
+    // Command buffer and mutable dispatch command buffer extensions
+    DECLARE_FUNCTION_PTR(clCreateCommandBufferKHR);
+    DECLARE_FUNCTION_PTR(clRetainCommandBufferKHR);
+    DECLARE_FUNCTION_PTR(clReleaseCommandBufferKHR);
+    DECLARE_FUNCTION_PTR(clFinalizeCommandBufferKHR);
+    DECLARE_FUNCTION_PTR(clEnqueueCommandBufferKHR);
+    DECLARE_FUNCTION_PTR(clCommandNDRangeKernelKHR);
+
+    DECLARE_FUNCTION_PTR(clUpdateMutableCommandsKHR);
+
     // Third-party extensions
     DECLARE_FUNCTION_PTR(clImportMemoryARM);
 

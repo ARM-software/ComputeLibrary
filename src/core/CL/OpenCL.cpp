@@ -187,6 +187,16 @@ bool CLSymbols::load(const std::vector<std::string> &libraries_filenames, bool u
     LOAD_FUNCTION_PTR(clCreateImage, handle);
     LOAD_FUNCTION_PTR(clSetKernelExecInfo, handle);
 
+    // Command buffer and mutable dispatch command buffer extensions
+    LOAD_FUNCTION_PTR(clCreateCommandBufferKHR, handle);
+    LOAD_FUNCTION_PTR(clRetainCommandBufferKHR, handle);
+    LOAD_FUNCTION_PTR(clReleaseCommandBufferKHR, handle);
+    LOAD_FUNCTION_PTR(clFinalizeCommandBufferKHR, handle);
+    LOAD_FUNCTION_PTR(clEnqueueCommandBufferKHR, handle);
+    LOAD_FUNCTION_PTR(clCommandNDRangeKernelKHR, handle);
+
+    LOAD_FUNCTION_PTR(clUpdateMutableCommandsKHR, handle);
+
     // Third-party extensions
     LOAD_FUNCTION_PTR(clImportMemoryARM, handle);
 
@@ -1080,6 +1090,141 @@ cl_int clSetKernelExecInfo(cl_kernel           kernel,
     else
     {
         return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_command_buffer_khr clCreateCommandBufferKHR(
+    cl_uint num_queues,
+    const cl_command_queue* queues,
+    const cl_command_buffer_properties_khr* properties,
+    cl_int* errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clCreateCommandBufferKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(num_queues, queues, properties, errcode_ret);
+    }
+    else
+    {
+        if(errcode_ret != nullptr)
+        {
+            *errcode_ret = CL_INVALID_OPERATION;
+        }
+
+        return {};
+    }
+}
+
+cl_int clFinalizeCommandBufferKHR(cl_command_buffer_khr command_buffer)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clFinalizeCommandBufferKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(command_buffer);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
+    }
+}
+
+cl_int clRetainCommandBufferKHR(cl_command_buffer_khr command_buffer)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clRetainCommandBufferKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(command_buffer);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
+    }
+}
+
+cl_int clReleaseCommandBufferKHR(cl_command_buffer_khr command_buffer)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clReleaseCommandBufferKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(command_buffer);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
+    }
+}
+
+cl_int clEnqueueCommandBufferKHR(
+    cl_uint num_queues,
+    cl_command_queue* queues,
+    cl_command_buffer_khr command_buffer,
+    cl_uint num_events_in_wait_list,
+    const cl_event* event_wait_list,
+    cl_event* event)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clEnqueueCommandBufferKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(num_queues, queues, command_buffer, num_events_in_wait_list, event_wait_list, event);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
+    }
+}
+
+
+cl_int clCommandNDRangeKernelKHR(
+    cl_command_buffer_khr command_buffer,
+    cl_command_queue command_queue,
+    const cl_ndrange_kernel_command_properties_khr* properties,
+    cl_kernel kernel,
+    cl_uint work_dim,
+    const size_t* global_work_offset,
+    const size_t* global_work_size,
+    const size_t* local_work_size,
+    cl_uint num_sync_points_in_wait_list,
+    const cl_sync_point_khr* sync_point_wait_list,
+    cl_sync_point_khr* sync_point,
+    cl_mutable_command_khr* mutable_handle)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clCommandNDRangeKernelKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(command_buffer, command_queue, properties, kernel, work_dim, global_work_offset, global_work_size, local_work_size, num_sync_points_in_wait_list, sync_point_wait_list, sync_point, mutable_handle);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
+    }
+}
+
+cl_int clUpdateMutableCommandsKHR(
+    cl_command_buffer_khr command_buffer,
+    const cl_mutable_base_config_khr* mutable_config)
+{
+    arm_compute::CLSymbols::get().load_default();
+    const auto func = arm_compute::CLSymbols::get().clUpdateMutableCommandsKHR_ptr;
+
+    if(func != nullptr)
+    {
+        return func(command_buffer, mutable_config);
+    }
+    else
+    {
+        return CL_INVALID_OPERATION;
     }
 }
 
