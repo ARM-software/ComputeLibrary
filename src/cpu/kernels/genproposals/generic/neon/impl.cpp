@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,40 +28,6 @@ class ITensor;
 class Window;
 namespace cpu
 {
-template <typename T>
-void compute_all_anchors(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
-{
-    Iterator all_anchors_it(all_anchors, window);
-    Iterator anchors_it(all_anchors, window);
-
-    const size_t num_anchors = anchors->info()->dimension(1);
-    const T      stride      = 1.f / anchors_info.spatial_scale();
-    const size_t feat_width  = anchors_info.feat_width();
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const size_t anchor_offset = id.y() % num_anchors;
-
-        const auto out_anchor_ptr = reinterpret_cast<T *>(all_anchors_it.ptr());
-        const auto anchor_ptr     = reinterpret_cast<T *>(anchors->ptr_to_element(Coordinates(0, anchor_offset)));
-
-        const size_t shift_idy = id.y() / num_anchors;
-        const T      shiftx    = (shift_idy % feat_width) * stride;
-        const T      shifty    = (shift_idy / feat_width) * stride;
-
-        *out_anchor_ptr       = *anchor_ptr + shiftx;
-        *(out_anchor_ptr + 1) = *(1 + anchor_ptr) + shifty;
-        *(out_anchor_ptr + 2) = *(2 + anchor_ptr) + shiftx;
-        *(out_anchor_ptr + 3) = *(3 + anchor_ptr) + shifty;
-    },
-    all_anchors_it);
-}
-
-template void compute_all_anchors<float>(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window);
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-template void compute_all_anchors<float16_t>(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window);
-#endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-
 void compute_all_anchors_qasymm16(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
 {
     Iterator all_anchors_it(all_anchors, window);
