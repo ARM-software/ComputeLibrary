@@ -34,7 +34,6 @@
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
-#include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/helpers/MatMulKernelHelpers.h"
 
 #include "support/Cast.h"
@@ -136,9 +135,7 @@ void ClMatMulNativeMMULKernel::configure(const ClCompileContext &compile_context
     const int n0 = adjust_vec_size(matmul_kernel_info.n0, n);
 
     // Configure kernel window
-    const auto win_config = validate_and_configure_window_for_mmul_kernels(lhs, rhs, dst, matmul_kernel_info, mmul_m0,
-                                                                           mmul_n0);
-
+    const auto win_config = validate_and_configure_window_for_mmul_kernels(lhs, rhs, dst, matmul_kernel_info, mmul_m0, mmul_n0);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     IClKernel::configure_internal(win_config.second);
 
