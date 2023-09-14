@@ -215,6 +215,7 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo *input, co
             }
         }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
         // For 1x1 convolutions run the default GEMM
         if(weights->dimension(idx_w) == 1 && weights->dimension(idx_h) == 1)
         {

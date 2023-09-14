@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WRAPPER_TRAITS_H
-#define ARM_COMPUTE_WRAPPER_TRAITS_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_TRAITS_H
+#define ACL_SRC_CORE_NEON_WRAPPER_TRAITS_H
+
+#include "arm_compute/core/CoreTypes.h"
+
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#include "src/cpu/CpuTypes.h" // required for float16_t
+#endif                        // defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
 #include <arm_neon.h>
 
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #include <arm_sve.h>
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+
+#include <cmath>
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -151,4 +160,4 @@ using promote_t = typename promote<T>::type;
 } // namespace traits
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_TRAITS_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_TRAITS_H

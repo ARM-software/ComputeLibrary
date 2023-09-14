@@ -23,6 +23,7 @@
  */
 #if defined(ARM_COMPUTE_ENABLE_BF16)
 
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/CpuCastKernel.h"

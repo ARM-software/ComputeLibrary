@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -200,6 +200,7 @@ inline std::pair<int64_t, int64_t> NEQLSTMLayerNormalizationKernel::sum_qsymm16(
         sum_sq += static_cast<AccType>(vaddv(vmul(val_low, val_low)));
         sum_sq += static_cast<AccType>(vaddv(vmul(val_high, val_high)));
 #else  // __aarch64__
+
         // only AArch64 supports vaddv
         const int64x2_t pair_sum_low  = vpaddl(val_low);
         const int64x2_t pair_sum_high = vpaddl(val_high);

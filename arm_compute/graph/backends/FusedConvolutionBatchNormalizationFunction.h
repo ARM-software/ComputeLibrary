@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_GRAPH_BACKENDS_FUSED_CONVOLUTION_BATCH_NORMAZLIZATION_FUNCTION_H
-#define ARM_COMPUTE_GRAPH_BACKENDS_FUSED_CONVOLUTION_BATCH_NORMAZLIZATION_FUNCTION_H
+#ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUSEDCONVOLUTIONBATCHNORMALIZATIONFUNCTION_H
+#define ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUSEDCONVOLUTIONBATCHNORMALIZATIONFUNCTION_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 namespace arm_compute
 {
@@ -130,4 +131,4 @@ private:
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_GRAPH_BACKENDS_FUSED_CONVOLUTION_BATCH_NORMAZLIZATION_FUNCTION_H */
+#endif // ACL_ARM_COMPUTE_GRAPH_BACKENDS_FUSEDCONVOLUTIONBATCHNORMALIZATIONFUNCTION_H

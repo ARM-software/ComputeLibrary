@@ -27,6 +27,7 @@
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "ckw/TensorTileSampler.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 
 #include <algorithm>

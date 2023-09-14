@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "src/cpu/kernels/CpuCastKernel.h"
 #include "src/cpu/kernels/cast/list.h"
