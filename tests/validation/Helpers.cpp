@@ -26,6 +26,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <tuple>
 
 namespace arm_compute
 {
@@ -350,9 +352,47 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
     }
 }
 
-QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int m, int n, int k, DataType data_type)
+QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
+                                                    const QuantizationInfo &rhs_q_info, int32_t m, int32_t n, int32_t k, DataType data_type,
+                                                    float bias_fraction)
 {
     ARM_COMPUTE_UNUSED(m, n);
+
+    /**  Quantization Setup of matrix multiplication
+     *
+     *  We have a matrix multiplication of the form C = A * B + D
+     *  where A is (m X k), B is (k x n) and C is therefore (m x n).
+     *  The bias, D is (1 x n).
+     *
+     *  If we have some distributional statistics of A, B and D, i.e. mean and variance,
+     *  we can estimate the mean and variance of a single value in C matrix and pick
+     *  good scale and offset values for the output and have non-saturated tests.
+     *
+     *  Each element in the output matrix can be calculated as follows:
+     *      C_ij = sum_k(A_ik * B_kj) + D_j
+     *
+     * Note: All possible A_ik, B_kj, D_j random variables are assumed mutually independent.
+     * Note: In quantized operators, bias is an integer. But, its quantization scale is
+     *       assumed to be equal to lhs_scale * rhs_scale, and offset equal to 0.
+     * Note: Since, bias is an integer that should be given as input, we need to pick responsible
+     *       values when adding it on top of the summation. This is where "bias_fraction" comes
+     *       into play. Based on the fraction given, we also return suggested bias range (min/max)
+     *       for not saturating the output.
+     *
+     * Because all random variables are mutually independent, any C_ij has the same statistics,
+     * which is why we return a single destination quantization info object; which is why we can
+     * resort to a more general calculation explained in suggest_mac_dst_q_info_and_bias().
+     *
+     * From a probabilistic perspective, the above calculation reduces to
+     *      c = sum_k (a_k * b_k) + d
+     */
+
+    return suggest_mac_dst_q_info_and_bias(lhs_q_info, rhs_q_info, k, data_type, bias_fraction);
+}
+
+QuantizationHint suggest_mac_dst_q_info_and_bias(
+    const QuantizationInfo &a_q_info, const QuantizationInfo &b_q_info, int32_t K, DataType data_type, float bias_fraction)
+{
     QuantizationInfo c_q_info;
 
     ARM_COMPUTE_ASSERT(data_type == DataType::QASYMM8 || data_type == DataType::QASYMM8_SIGNED);
@@ -360,21 +400,13 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, 
     const int32_t t_max = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::max() : std::numeric_limits<int8_t>::max());
     const int32_t t_min = static_cast<int32_t>(data_type == DataType::QASYMM8 ? std::numeric_limits<uint8_t>::min() : std::numeric_limits<int8_t>::min());
 
-    /**  Quantization Setup of matrix multiplication
+    /**  Quantization Setup of multiply-accummulate
      *
-     *  We have a matrix multiplication of the form C = A * B
-     *  where A is (M X K), B is (K x N) and C is therefore (M x N).
+     * Expression (in float):
+     *    C = sum_k ( A_k * B_k ) + D
      *
-     *  If we have some distributions statistics of A and B, i.e. mean and variance,
-     *  we can estimate the mean and variance of a single value in C matrix and
-     *  pick good scale and offset values for the output and have non-saturated tests.
-     *
-     *  Each element in the output matrix can be calculated as follows:
-     *      C_ij = sum_k(A_ik * B_kj)
-     *
-     *      All values are float above.
-     *
-     * Note: All possible A_ik, B_kj random variables are assumed mutually independent.
+     * Lemma: An affine transformation (i.e. aX + b) to a discrete uniform random variable
+     *        creates another discrete uniform random variable.
      *
      * Terminology:
      *  E[X]: Mean of the random variable X (sometimes referred as mu_x)
@@ -382,26 +414,58 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, 
      *  std(X): sqrt(var(X)), standard deviation of X
      *
      * 1) Calculate the mean:
-     *      E[C_ij] = sum_k( E[A_ik] * E[B_kj] ) = K * mean_a * mean_b
+     *      E[C] = sum_k( E[A_k] * E[B_k] ) + D = K * mean_a * mean_b + mean_d
      *
      *      Since elements of A and B are uniformly distributed random variables, we have
      *          mean_a = (max_a + min_a) / 2, mean_b = (max_b + min_b ) / 2
      *          max_a and min_a can be calculated with the scale_a/b and offset_a/b
      *              by replacing data type minimum and maximums in the equations
      *
+     *    We don't know mean_d because we have to choose it based on bias_fraction. If we call
+     *    the summation as M_int, similar to above, we have:
+     *
+     *      E[C_int] = sum_k( E[A_k_int] * E[B_k_int] ) + E[D_int] = K * mean_a_int * mean_b_int + mean_d_int
+     *                  \___________________________/
+     *                             E[M_int]
+     *
+     *      We choose a bias mean proportional to the integer summation. This proportion is "bias_fraction".
+     *      So, we have D_int = f * M_int (f: fraction), and
+     *          E[D_int] = mean_d_int = f * E[M_int]
+     *
+     *      This also means, for floating point value of D, the following:
+     *          E[D] = mean_d = E[D_int] * a_scale * b_scale
+     *
      * 2) Calculate the variance:
-     *      var(C_ij) = sum_k( var(A_ik * B_kj) )
-     *                = sum_k ( E[A_ik^2 * B_kj^2] - E[A_ik]^2E[B_kj^2] )
+     *      var(C)    = sum_k( var(A_k * B_k) ) + var(D)
+     *                = sum_k ( E[A_k^2 * B_k^2] - E[A_k]^2E[B_k^2] )
      *                = ...
-     *                = K * (var_a * var_b + var_a * mean^2_b + var_b * mean^2_a)
+     *                = K * (var_a * var_b + var_a * mean^2_b + var_b * mean^2_a) + var_d
      *
      *      Similarly, due to uniform random variable properties, we have
      *          var_a = (max_a - min_a)^2 / 12
      *          var_b = (max_b - min_b)^2 / 12
      *
+     *      Again, we don't know var_d as we don't know the bias. As set out in the previous section, we have
+     *              var(D_int) = var(f * M_int) = f^2 * var(M_int)
      *
-     * 3) Now, we have an idea of what would an average C_ij will like and how much deviation
-     *    is present around it. The exact distribution of C is not easy to come up with dependent on K.
+     *      Using the same expression, we can find var(M_int):
+     *      var(C_int)    = sum_k( var(A_k_int * B_k_int) ) + var(D_int)
+     *                    = sum_k ( E[A_k_int^2 * B_k_int^2] - E[A_k_int]^2E[B_k_int^2] )
+     *                    = ...
+     *                    = K * (var_a_int * var_b_int + var_a_int * mean^2_b_int + var_b_int * mean^2_a_int) + var_d_int
+     *                      \_______________________________________________________________________________/
+     *                                                          var(M_int)
+     *
+     *      Now, we know mean and variance of D_int, we can return a suitable bias range with
+     *          [mean_d_int +/- 2 * std_d_int]
+     *
+     *      This also means, for floating point value of D, the following:
+     *          var(D) = var_d = var(D_int) * a_scale^2 * b_scale^2
+     *
+     *      E[D] and var(D) calculated in steps (1) and (2) can be substituted into E[C] and var(C) calculatons.
+     *
+     * 3) Now, we have an idea of what would an average C will look like and how much deviation
+     *    is present around it. The exact distribution of C is difficult to come up with dependent on K.
      *    But, as K increases, due to Central Limit Theorem, it'll look more like a bell shaped figure,
      *    approaching normal distribution.
      *
@@ -424,6 +488,12 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, 
     const int32_t b_offset = b_q_info.uniform().offset;
     const float   b_scale  = b_q_info.uniform().scale;
 
+    // Integer value statistics. Valid for both Lhs/A and Rhs/B
+    const float     mean_a_int = (t_max + t_min) / 2.f;
+    constexpr float var_a_int  = (256 * 256 - 1) / 12.f; // Discrete uniform RV variance
+    const float     mean_b_int = mean_a_int;             // A_int and B_int has the same stats
+    constexpr float var_b_int  = var_a_int;
+
     // Lhs/A stats
     const float max_a  = (t_max - a_offset) * a_scale;
     const float min_a  = (t_min - a_offset) * a_scale;
@@ -436,9 +506,25 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, 
     const float mean_b = (max_b + min_b) / 2;
     const float var_b  = (max_b - min_b) * (max_b - min_b) / 12;
 
-    // Output stats
-    const float mean_out = k * mean_a * mean_b;
-    const float var_out  = k * (var_a * var_b + var_a * mean_b * mean_b + var_b * mean_a * mean_a);
+    // Integer multiplication output/M stats
+    const float mean_m_int = K * mean_a_int * mean_b_int;
+    const float var_m_int  = K * (var_a_int * var_b_int + mean_a_int * var_b_int + mean_b_int + var_a_int);
+    const float std_m_int  = sqrt(var_m_int);
+
+    // Bias/D both Int and Float statistics
+    const float mean_d_int = bias_fraction * mean_m_int;
+    const float std_d_int  = bias_fraction * std_m_int;
+    const float mean_d     = a_scale * b_scale * mean_d_int;
+    const float std_d      = a_scale * b_scale * std_d_int;
+    const float var_d      = std_d * std_d;
+
+    // Also calculate the suggested bias range
+    const int32_t min_bias = mean_d_int - 2 * std_d_int;
+    const int32_t max_bias = mean_d_int + 2 * std_d_int;
+
+    // Output/C stats
+    const float mean_out = K * mean_a * mean_b + mean_d;
+    const float var_out  = K * (var_a * var_b + var_a * mean_b * mean_b + var_b * mean_a * mean_a) + var_d;
     const float std_out  = sqrt(var_out);
 
     // Output quantization setup
@@ -446,7 +532,8 @@ QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &a_q_info, 
     const int32_t offset_out = static_cast<int32_t>(t_min - (mean_out - 2.f * std_out) / scale_out);
 
     c_q_info = QuantizationInfo(scale_out, offset_out);
-    return c_q_info;
+
+    return { c_q_info, min_bias, max_bias };
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

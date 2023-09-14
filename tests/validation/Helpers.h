@@ -31,7 +31,8 @@
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
 
-#include <math.h>
+#include <cmath>
+#include <cstdint>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -50,6 +51,19 @@ struct is_floating_point : public std::is_floating_point<T>
 template <>
 struct is_floating_point<half> : public std::true_type
 {
+};
+
+/** Helper struct to store the hints for
+ *  - destination quantization info
+ *  - minimum bias value
+ *  - maximum bias value
+ * in quantized test construction.
+ */
+struct QuantizationHint
+{
+    QuantizationInfo q_info;
+    int32_t          bias_min;
+    int32_t          bias_max;
 };
 
 /** Helper function to get the testing range for each activation layer.
@@ -226,10 +240,36 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
  */
 void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
 
-/** For MatMulLowp, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
- *  calculate a suitable output quantization for obtaining non-saturated outputs with high probability.
+/** For a matrix multiplication, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
+ *
+ * @param[in] lhs_q_info    Lhs matrix quantization info
+ * @param[in] rhs_q_info    Rhs matrix quantization info
+ * @param[in] m             Number of rows of Lhs matrix
+ * @param[in] n             Number of columns of Rhs Matrix
+ * @param[in] k             Number of rows/columns of Rhs/Lhs Matrix
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction the fraction of bias amplitude compared to integer accummulation. 0 if there is no bias.
+ *
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
-QuantizationInfo calculate_mat_mul_dst_q_info(const QuantizationInfo &lhs_q_info, const QuantizationInfo &rhs_q_info, int m, int n, int k, DataType data_type);
+QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
+                                                    const QuantizationInfo &rhs_q_info, int32_t m, int32_t n, int32_t k, DataType data_type,
+                                                    float bias_fraction);
+
+/** For a multiply-accumulate (mac), given the Lhs/Rhs vector quantization informations and the dot product dimensions,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
+ *
+ * @param[in] lhs_q_info    Lhs matrix quantization info
+ * @param[in] rhs_q_info    Rhs matrix quantization info
+ * @param[in] k             number of accumulations taking place in the sum, i.e. c_k = sum_k(a_k * b_k)
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction the fraction of bias amplitude compared to integer accummulation.
+ *
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
+ */
+QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
+                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type, float bias_fraction);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
