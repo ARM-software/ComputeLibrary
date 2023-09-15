@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CAST_KERNEL_H
-#define ARM_COMPUTE_CPU_CAST_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUCASTKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUCASTKERNEL_H
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
@@ -54,19 +54,17 @@ public:
      *   - U8             -> U16, S16, S32, F32, F16
      *   - U16            -> U8, U32
      *   - S16            -> QASYMM8_SIGNED, U8, S32
-     *   - BFLOAT16       -> F32
      *   - F16            -> QASYMM8_SIGNED, QASYMM8, F32, S32, U8
      *   - S32            -> QASYMM8_SIGNED, QASYMM8, F16, F32, U8
      *   - S64            -> F32
-     *   - F32            -> QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8
+     *   - F32            -> QASYMM8_SIGNED, QASYMM8, F16, S32, U8
      *
-     * @param[in]  src    The src tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/S32/S64/BFLOAT16/F16/F32.
-     * @param[out] dst    The dst tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/S64/BFLOAT16/F16/F32.
+     * @param[in]  src    The src tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/S32/S64/F16/F32.
+     * @param[out] dst    The dst tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/S64/F16/F32.
      * @param[in]  policy Conversion policy.
      *
      * @note S64 is only supported in aarch64
      *
-     * @deprecated Support for BFLOAT16 will be removed in 23.05 release
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration
@@ -96,4 +94,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_CAST_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUCASTKERNEL_H

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_CAST_H
-#define ARM_COMPUTE_CPU_CAST_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUCAST_H
+#define ACL_SRC_CPU_OPERATORS_CPUCAST_H
 
 #include "src/cpu/ICpuOperator.h"
 
@@ -51,14 +51,13 @@ public:
      * |S16            | QASYMM8_SIGNED, U8, S32                        |
      * |F16            | QASYMM8_SIGNED, QASYMM8, F32, S32, U8          |
      * |S32            | QASYMM8_SIGNED, QASYMM8, F16, F32, U8          |
-     * |F32            | QASYMM8_SIGNED, QASYMM8, BFLOAT16, F16, S32, U8|
+     * |F32            | QASYMM8_SIGNED, QASYMM8, F16, S32, U8|
      * |S64            | F32                                            |
      *
      * @param[in]  src    The source tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/S64/F16/F32.
      * @param[out] dst    The destination tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
      *
-     * @deprecated Support for BFLOAT16 will be removed in 23.05 release
      *
      */
     void configure(const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
@@ -72,4 +71,4 @@ public:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_ACTIVATION_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUCAST_H

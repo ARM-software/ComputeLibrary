@@ -724,7 +724,6 @@ target_sources(
 	cpu/kernels/boundingboxtransform/generic/neon/fp32.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/impl.cpp
 	cpu/kernels/boundingboxtransform/generic/neon/qsymm16.cpp
-	cpu/kernels/cast/generic/neon/bfloat16.cpp
 	cpu/kernels/cast/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp16.cpp
 	cpu/kernels/crop/generic/neon/fp32.cpp

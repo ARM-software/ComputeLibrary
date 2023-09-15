@@ -217,7 +217,6 @@ DATA_TEST_CASE(KernelSelectionDstFP16, framework::DatasetMode::ALL,
     DataType::S32,
     DataType::QASYMM8,
     DataType::QASYMM8_SIGNED,
-    DataType::BFLOAT16,
 })),
 cpu_ext, data_type)
 {
@@ -226,21 +225,9 @@ cpu_ext, data_type)
 
     cpuinfo::CpuIsaInfo cpu_isa{};
     cpu_isa.neon = (cpu_ext == "NEON");
+    cpu_isa.fp16 = true;
 
-    cpu_isa.bf16 = (data_type == DataType::BFLOAT16);
-
-    /* bf16 cast is different from all the others being converted to fp32 and not to fp16 */
-    if(cpu_isa.bf16)
-    {
-        cpu_isa.fp16  = false;
-        selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ data_type, DataType::F32, cpu_isa }, cpu::KernelSelectionType::Preferred);
-    }
-    else
-    {
-        cpu_isa.fp16  = true;
-        selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ data_type, DataType::F16, cpu_isa }, cpu::KernelSelectionType::Preferred);
-    }
-
+    selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ data_type, DataType::F16, cpu_isa }, cpu::KernelSelectionType::Preferred);
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
 
     std::string expected = lower_string(cpu_ext) + "_" + cpu_impl_dt(data_type) + "_cast";
@@ -254,7 +241,6 @@ DATA_TEST_CASE(KernelSelectionSrcFP32, framework::DatasetMode::ALL,
                        framework::dataset::make("DataType",
 {
     DataType::F16,
-    DataType::BFLOAT16,
 })),
 cpu_ext, data_type)
 {
@@ -263,7 +249,6 @@ cpu_ext, data_type)
     cpuinfo::CpuIsaInfo cpu_isa{};
     cpu_isa.neon = (cpu_ext == "NEON");
     cpu_isa.fp16 = (data_type == DataType::F16);
-    cpu_isa.bf16 = (data_type == DataType::BFLOAT16);
 
     const auto *selected_impl = CpuCastKernel::get_implementation(CastDataTypeISASelectorData{ DataType::F32, data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
 
