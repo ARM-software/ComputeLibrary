@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,13 +34,15 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
 {
+    ARM_COMPUTE_UNUSED(use_inverted_axis);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, axis);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Current implementation only supports up to 4 dimensions.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->dimension(0) > 4, "Only up to 4 dimensions can be reversed");
 
     // Checks performed when output is configured
@@ -56,41 +58,63 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 } // namespace
 
 NEReverseKernel::NEReverseKernel()
-    : _input(nullptr), _output(nullptr), _axis(nullptr)
+    : _input(nullptr), _output(nullptr), _axis(nullptr), _use_inverted_axis(false)
 {
 }
 
-void NEReverseKernel::configure(const ITensor *input, ITensor *output, const ITensor *axis)
+void NEReverseKernel::configure(const ITensor *input, ITensor *output, const ITensor *axis, bool use_inverted_axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
 
-    _input  = input;
-    _output = output;
-    _axis   = axis;
+    _input             = input;
+    _output            = output;
+    _axis              = axis;
+    _use_inverted_axis = use_inverted_axis;
 
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), *input->info()->clone());
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis->info(), use_inverted_axis));
 
     // Configure kernel window
     INEKernel::configure(calculate_max_window(*output->info()));
 }
 
-Status NEReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status NEReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, use_inverted_axis));
 
     return Status{};
 }
 
 template <typename T>
-void run_reverse(const Window &window, const ITensor *input, const ITensor *axis, ITensor *output)
+void run_reverse(const Window &window, const ITensor *input, const ITensor *axis, ITensor *output, bool use_inverted_axis)
 {
-    int axis_bit = 0;
+    unsigned int axis_bit = 0;
+    const int    rank     = input->info()->num_dimensions();
+
     for(unsigned int i = 0; i < axis->info()->dimension(0); ++i)
     {
-        const int axis_i = *(reinterpret_cast<const int *>(axis->buffer()) + i);
+        int axis_i = *(reinterpret_cast<const int *>(axis->buffer()) + i);
+
+        // The values of axis tensor must be between [-rank, rank-1].
+        if((axis_i < -rank) || (axis_i >= rank))
+        {
+            ARM_COMPUTE_ERROR("the valuses of the axis tensor must be within [-rank, rank-1].");
+        }
+
+        // In case of negative axis value i.e targeted axis(i) = rank + axis(i)
+        if(axis_i < 0)
+        {
+            axis_i = rank + axis_i;
+        }
+
+        // Reverse ACL axis indices convention i.e. (inverted)axis = (tensor_rank - 1) - axis
+        if(use_inverted_axis)
+        {
+            axis_i = (rank - 1) - axis_i;
+        }
+
         axis_bit |= 1 << axis_i;
     }
 
@@ -151,13 +175,13 @@ void NEReverseKernel::run(const Window &window, const ThreadInfo &info)
     switch(_input->info()->element_size())
     {
         case 4:
-            run_reverse<uint32_t>(window, _input, _axis, _output);
+            run_reverse<uint32_t>(window, _input, _axis, _output, _use_inverted_axis);
             break;
         case 2:
-            run_reverse<uint16_t>(window, _input, _axis, _output);
+            run_reverse<uint16_t>(window, _input, _axis, _output, _use_inverted_axis);
             break;
         case 1:
-            run_reverse<uint8_t>(window, _input, _axis, _output);
+            run_reverse<uint8_t>(window, _input, _axis, _output, _use_inverted_axis);
             break;
         default:
             ARM_COMPUTE_ERROR("Element size not supported");

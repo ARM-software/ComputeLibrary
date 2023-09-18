@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -400,10 +400,10 @@ SimpleTensor<T> conv2d_dft(const SimpleTensor<T> &src, const SimpleTensor<T> &w,
     auto              padded_src = pad_layer(src, padding_in);
 
     // Flip weights
-    std::vector<uint32_t>  axis_v = { 0, 1 };
-    SimpleTensor<uint32_t> axis{ TensorShape(2U), DataType::U32 };
+    std::vector<uint32_t> axis_v = { 0, 1 };
+    SimpleTensor<int32_t> axis{ TensorShape(2U), DataType::S32 };
     std::copy(axis_v.begin(), axis_v.begin() + axis.shape().x(), axis.data());
-    auto flipped_w = reverse(w, axis);
+    auto flipped_w = reverse(w, axis, /* use_inverted_axis */ false);
 
     // Pad weights to have the same size as input
     const PaddingList paddings_w = { { 0, src.shape()[0] - 1 }, { 0, src.shape()[1] - 1 } };

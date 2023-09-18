@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_REVERSE_H
-#define ARM_COMPUTE_TEST_REVERSE_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_REVERSE_H
+#define ACL_TESTS_VALIDATION_REFERENCE_REVERSE_H
 
 #include "tests/SimpleTensor.h"
 
@@ -35,9 +35,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<uint32_t> &axis);
+SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &axis, bool use_inverted_axis = false);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_REVERSE_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_REVERSE_H

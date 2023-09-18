@@ -57,6 +57,8 @@ v23.11 Public major release
  - Add new OpenCL™ kernels:
    - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
  - Deprecate support for Bfloat16 in @ref cpu::CpuCast.
+ - Add support for negative axis values and inverted axis values in @ref arm_compute::NEReverse.
+ - Support for U32 axis in @ref arm_compute::NEReverse will be deprecated in 24.02.
 
 v23.08 Public major release
  - Deprecate the legacy 'libarm_compute_core' library. This library is an artifact of Compute Library's legacy library architecture and no longer serves any purpose.

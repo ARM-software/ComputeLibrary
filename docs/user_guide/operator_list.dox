@@ -2655,7 +2655,7 @@ where N = batches, C = channels, H = height, W = width, D = depth
   <td>
     <table>
     <tr><th>src0<th>src1<th>dst
-    <tr><td>All<td>U32<td>All
+    <tr><td>All<td>U32, S32<td>All
     </table>
 <tr>
   <td>CLReverse

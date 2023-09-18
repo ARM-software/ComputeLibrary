@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@ namespace validation
 {
 namespace
 {
+using framework::dataset::make;
 auto run_small_dataset = combine(datasets::SmallShapes(), datasets::Tiny1DShapes());
 auto run_large_dataset = combine(datasets::LargeShapes(), datasets::Tiny1DShapes());
 
@@ -53,28 +54,31 @@ TEST_SUITE(Reverse)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8), // Invalid axis datatype
+        make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8), // Invalid axis datatype
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid axis shape
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid axis length (> 4)
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Mismatching shapes
+                                            TensorInfo(TensorShape(32U, 13U, 17U, 3U, 2U), 1, DataType::U8), // Unsupported source dimensions (>4)
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(2U), 1, DataType::U8),
         }),
-        framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8),
+        make("OutputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S8),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(2U, 13U, 2U), 1, DataType::U8),
+                                            TensorInfo(TensorShape(32U, 13U, 17U, 3U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                             TensorInfo(TensorShape(2U), 1, DataType::U8),
         })),
-        framework::dataset::make("AxisInfo", { TensorInfo(TensorShape(3U), 1, DataType::U8),
+        make("AxisInfo", { TensorInfo(TensorShape(3U), 1, DataType::U8),
                                            TensorInfo(TensorShape(2U, 10U), 1, DataType::U32),
                                            TensorInfo(TensorShape(8U), 1, DataType::U32),
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
                                            TensorInfo(TensorShape(2U), 1, DataType::U32),
+                                           TensorInfo(TensorShape(2U), 1, DataType::U32),
         })),
-        framework::dataset::make("Expected", { false, false, false, false, true, true})),
+        make("Expected", { false, false, false, false, false, true, true})),
         src_info, dst_info, axis_info, expected)
 {
     Status s = NEReverse::validate(&src_info.clone()->set_is_resizable(false),
@@ -95,7 +99,11 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReverseFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(
+                           run_small_dataset,
+                           make("DataType", DataType::F16),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -104,7 +112,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReverseFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F16)))
+                       combine(
+                           run_large_dataset,
+                           make("DataType", DataType::F16),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -116,7 +128,11 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReverseFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(
+                           run_small_dataset,
+                           make("DataType", DataType::F32),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -125,7 +141,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReverseFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::F32)))
+                       combine(
+                           run_large_dataset,
+                           make("DataType", DataType::F32),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -138,7 +158,11 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReverseFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(
+                           run_small_dataset,
+                           make("DataType", DataType::QASYMM8),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -147,7 +171,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReverseFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(run_large_dataset, framework::dataset::make("DataType", DataType::QASYMM8)))
+                       combine(
+                           run_large_dataset,
+                           make("DataType", DataType::QASYMM8),
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
