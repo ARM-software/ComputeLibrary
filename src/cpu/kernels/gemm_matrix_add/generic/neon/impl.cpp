@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,48 +72,5 @@ void matrix_addition_f32(const ITensor *src, ITensor *dst, const Window &window,
     },
     in, out);
 }
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void matrix_addition_f16(const ITensor *src, ITensor *dst, const Window &window, float beta)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
-    const float16x8_t beta_f16 = vdupq_n_f16(beta);
-
-    constexpr int window_step_x  = 16;
-    const auto    window_start_x = static_cast<int>(window.x().start());
-    const auto    window_end_x   = static_cast<int>(window.x().end());
-
-    Window win = window.collapse_if_possible(window, Window::DimZ);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator in(src, win);
-    Iterator out(dst, win);
-
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        const auto in_ptr  = reinterpret_cast<const float16_t *>(in.ptr());
-        const auto out_ptr = reinterpret_cast<float16_t *>(out.ptr());
-
-        int x = window_start_x;
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
-        {
-            float16x8x2_t       alpha_ab = vld2q_f16(out_ptr + x);
-            const float16x8x2_t c        = vld2q_f16(in_ptr + x);
-            // Multiply matrix C by its weight and accumulate
-            alpha_ab.val[0] = vaddq_f16(alpha_ab.val[0], vmulq_f16(c.val[0], beta_f16));
-            alpha_ab.val[1] = vaddq_f16(alpha_ab.val[1], vmulq_f16(c.val[1], beta_f16));
-
-            vst2q_f16(out_ptr + x, alpha_ab);
-        }
-
-        // Left-over loop
-        for(; x < window_end_x; ++x)
-        {
-            *(out_ptr + x) += *(in_ptr + x) * static_cast<float16_t>(beta);
-        }
-    },
-    in, out);
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace cpu
 } // namespace arm_compute

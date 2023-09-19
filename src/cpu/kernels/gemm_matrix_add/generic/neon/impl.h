@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,10 +30,6 @@ namespace arm_compute
 {
 namespace cpu
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void matrix_addition_f16(const ITensor *src, ITensor *dst, const Window &window, float beta);
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 void matrix_addition_f32(const ITensor *src, ITensor *dst, const Window &window, float beta);
 
 } // namespace cpu
