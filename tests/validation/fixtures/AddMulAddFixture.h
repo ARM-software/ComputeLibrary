@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE
-#define TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -86,7 +86,12 @@ protected:
 
         // Create and configure function
         FunctionType add_mul_add;
-        add_mul_add.configure(&input1, &input2, &bn_mul, &bn_add, interm_out ? &add_output : nullptr, &final_output, ConvertPolicy::SATURATE, act_info);
+        ARM_COMPUTE_ERROR_THROW_ON(add_mul_add.validate(input1.info(), input2.info(), bn_mul.info(),
+                                                        bn_add.info(), interm_out ? add_output.info() : nullptr, final_output.info(),
+                                                        ConvertPolicy::SATURATE, act_info));
+
+        add_mul_add.configure(&input1, &input2, &bn_mul, &bn_add, interm_out ? &add_output : nullptr,
+                              &final_output, ConvertPolicy::SATURATE, act_info);
 
         // Allocate tensors
         input1.allocator()->allocate();
@@ -262,4 +267,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ADDMULADDFIXTURE_H

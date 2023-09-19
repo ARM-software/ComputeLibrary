@@ -71,8 +71,8 @@ Status CpuAddMulAdd::validate(const ITensorInfo *input1, const ITensorInfo *inpu
     const DataType data_type = input1->data_type();
     if(is_data_type_quantized(data_type))
     {
-        TensorInfo dequantized_bn_mul;
-        TensorInfo dequantized_bn_add;
+        TensorInfo dequantized_bn_mul = bn_mul->clone()->set_data_type(DataType::F32);
+        TensorInfo dequantized_bn_add = bn_add->clone()->set_data_type(DataType::F32);
 
         ARM_COMPUTE_RETURN_ON_ERROR(CpuDequantize::validate(bn_mul, &dequantized_bn_mul));
         ARM_COMPUTE_RETURN_ON_ERROR(CpuDequantize::validate(bn_add, &dequantized_bn_add));
@@ -87,7 +87,7 @@ Status CpuAddMulAdd::validate(const ITensorInfo *input1, const ITensorInfo *inpu
 
 void CpuAddMulAdd::run(ITensorPack &tensors)
 {
-    const DataType data_type       = tensors.get_const_tensor(TensorType::ACL_SRC_0)->info()->data_type();
+    const DataType data_type = tensors.get_const_tensor(TensorType::ACL_SRC_0)->info()->data_type();
 
     if(is_data_type_quantized(data_type))
     {
