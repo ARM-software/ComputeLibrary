@@ -1792,7 +1792,6 @@
             "src/runtime/NEON/functions/NEL2NormalizeLayer.cpp"
           ],
           "neon":{
-            "common":["src/cpu/kernels/l2normlayer/generic/neon/impl.cpp"],
             "fp32":["src/cpu/kernels/l2normlayer/generic/neon/fp32.cpp"],
             "fp16":["src/cpu/kernels/l2normlayer/generic/neon/fp16.cpp"]
           }

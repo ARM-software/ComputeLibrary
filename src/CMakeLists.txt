@@ -771,7 +771,6 @@ target_sources(
 	cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp16.cpp
 	cpu/kernels/l2normlayer/generic/neon/fp32.cpp
-	cpu/kernels/l2normlayer/generic/neon/impl.cpp
 	cpu/kernels/lut/generic/neon/u8.cpp
 	cpu/kernels/maxunpool/generic/neon/fp16.cpp
 	cpu/kernels/maxunpool/generic/neon/fp32.cpp
