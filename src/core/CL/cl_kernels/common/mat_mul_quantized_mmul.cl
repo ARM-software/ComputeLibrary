@@ -269,14 +269,21 @@ __kernel void mat_mul_native_quantized_mmul_nt_nt(
         T_LOAD(DATA_TYPE, M0, K0, BUFFER, lhs, 0, 0, 1, lhs_stride_y, a);
         T_LOAD(DATA_TYPE, K0, N0, BUFFER, rhs, 0, 0, 1, rhs_stride_y, b);
 
-        LOOP_UNROLLING(int, m0, 0, 1, M0,
+        LOOP_UNROLLING(int, n0, 0, 1, N0,
         {
-            LOOP_UNROLLING(int, n0, 0, 1, N0,
+            VEC_DATA_TYPE(DATA_TYPE, K0)
+            vec_b = (VEC_DATA_TYPE(DATA_TYPE, K0))(b[0].s[n0], b[1].s[n0], b[2].s[n0], b[3].s[n0]);
+
+            LOOP_UNROLLING(int, m0, 0, 1, M0,
             {
-                VEC_DATA_TYPE(DATA_TYPE, K0)
-                vec_b       = (VEC_DATA_TYPE(DATA_TYPE, K0))(b[0].s[n0], b[1].s[n0], b[2].s[n0], b[3].s[n0]);
                 c[m0].s[n0] = arm_matrix_multiply(a[m0].v, vec_b, c[m0].s[n0]);
             })
+
+#if LHS_OFFSET != 0
+            // Column Sum of B: Calculate the sum of columns by multiplying B
+            // with a matrix of 1's from Left
+            b_sum[0].s[n0] = arm_matrix_multiply(vec_1, vec_b, b_sum[0].s[n0]);
+#endif // LHS_OFFSET != 0s
         })
 
 #if RHS_OFFSET != 0
@@ -287,17 +294,6 @@ __kernel void mat_mul_native_quantized_mmul_nt_nt(
             a_sum[0].s[m0] = arm_matrix_multiply(a[m0].v, vec_1, a_sum[0].s[m0]);
         })
 #endif // RHS_OFFSET != 0
-
-#if LHS_OFFSET != 0
-        // Column Sum of B: Calculate the sum of columns by multiplying B
-        // with a matrix of 1's from Left
-        LOOP_UNROLLING(int, n0, 0, 1, N0,
-        {
-            VEC_DATA_TYPE(DATA_TYPE, K0)
-            vec_b          = (VEC_DATA_TYPE(DATA_TYPE, K0))(b[0].s[n0], b[1].s[n0], b[2].s[n0], b[3].s[n0]);
-            b_sum[0].s[n0] = arm_matrix_multiply(vec_1, vec_b, b_sum[0].s[n0]);
-        })
-#endif // LHS_OFFSET != 0
 
         lhs_offset_first_element_in_bytes += MMUL_K0 * sizeof(DATA_TYPE);
         rhs_offset_first_element_in_bytes += MMUL_K0 * rhs_stride_y;
