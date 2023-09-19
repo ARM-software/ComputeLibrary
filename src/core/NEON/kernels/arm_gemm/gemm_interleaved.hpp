@@ -802,6 +802,13 @@ public:
                             }
                         }
 
+                        Tr *result_ptr = this->_Cptr + (batch * this->_C_batch_stride) + (multi * this->_C_multi_stride);
+
+                        // If we are using an accumulation buffer and this isn't the last pass, don't pass a result pointer.
+                        if (_accumulation_buffer && !last_pass) {
+                            result_ptr = nullptr;
+                        }
+
                         // Perform the kernel and merge step, either separately or together as required.
                         kernel_and_merge<MergeStep, FixedFormat, OutputStage>::run(
                         #ifdef CYCLE_PROFILING
@@ -810,7 +817,7 @@ public:
                             // Strategy and panel pointers
                             strat, a_panel, b_ptr, this->_ldb, c_panel,
                             // Result buffer pointers
-                            this->_Cptr + (batch * this->_C_batch_stride) + (multi * this->_C_multi_stride), this->_ldc,
+                            result_ptr, this->_ldc,
                             // K size, and M/N ranges
                             kern_k, start_row, end_row, start_x, end_x,
                             // Only do bias on the first pass
