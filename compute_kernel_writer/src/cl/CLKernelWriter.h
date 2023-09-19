@@ -26,6 +26,7 @@
 #define CKW_SRC_CL_CLKERNELWRITER_H
 
 #include "ckw/KernelWriter.h"
+#include "src/TileView.h"
 
 #include <memory>
 #include <set>
@@ -150,14 +151,14 @@ public:
         const TileOperand &dilation_x, const TileOperand &dilation_y) override;
 
     void op_load_indirect(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
+                          const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch) override;
 
 protected:
-    /** Return @ref CLTile object from the @ref TileOperand object.
+    /** Return a tile view containing a reference to @ref CLTile object and the active area.
      *
      * This function performs appropriate check before doing type casting.
      */
-    const CLTile &to_cl_tile(const TileOperand &operand) const;
+    TileView<CLTile> to_cl_tile_view(const TileOperand &operand) const;
 
     /** Append the specified code to the kernel body source code. */
     template <typename T, typename... TArgs>
@@ -181,8 +182,8 @@ protected:
 private:
     /** Helper method to consolidate all load/store logic in this class */
     void op_load_store(MemoryOperation op, const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
-        const CLTile &dilation_x, const CLTile &dilation_y, bool indirect_buffer);
+                       const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch,
+                       const TileView<CLTile> &dilation_x, const TileView<CLTile> &dilation_y, bool indirect_buffer);
 
     /** This function is the generic function to write both `if` and `else if` blocks.
      *

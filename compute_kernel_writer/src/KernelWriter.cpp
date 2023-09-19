@@ -27,9 +27,12 @@
 #include "ckw/TileOperand.h"
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
+#include "src/TileView.h"
 #include "src/cl/CLKernelWriter.h"
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
+
+#include <tuple>
 
 namespace ckw
 {
@@ -90,9 +93,9 @@ TileOperand KernelWriter::create_tile_operand(ITile &tile)
     return TileOperand(tile);
 }
 
-ITile &KernelWriter::get_tile(const TileOperand &operand)
+std::tuple<ITile &, TileArea> KernelWriter::get_tile(const TileOperand &operand)
 {
-    return operand._tile;
+    return { *operand._tile, { operand._row_start, operand._row_end, operand._col_start, operand._col_end } };
 }
 
 TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)

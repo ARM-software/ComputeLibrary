@@ -34,6 +34,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <tuple>
 
 namespace ckw
 {
@@ -42,6 +43,7 @@ namespace ckw
 class Kernel;
 class TensorInfo;
 class TensorSampler;
+class TileArea;
 class TileInfo;
 
 enum class DataType;
@@ -313,7 +315,7 @@ public:
      * @param[in] batch     batch
      */
     virtual void op_load_indirect(const TileOperand &tile_op, const TensorOperand &tensor_op, TensorSampler &sampler,
-        const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch_op) = 0;
+                                  const TileOperand &x, const TileOperand &y, const TileOperand &z, const TileOperand &batch_op) = 0;
 
 protected:
     // =============================================================================================
@@ -355,8 +357,8 @@ protected:
     /** Create a new tile operand referring to the specified tile object. */
     static TileOperand create_tile_operand(ITile &tile);
 
-    /** Get the reference to tile object from the tile operand. */
-    static ITile &get_tile(const TileOperand &operand);
+    /** Get the reference to the tile object and the active area from the tile operand. */
+    static std::tuple<ITile &, TileArea> get_tile(const TileOperand &operand);
 
     /** Create a new tensor operand from a tensor object. */
     static TensorOperand create_tensor_operand(ITensor &tensor);

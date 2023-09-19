@@ -125,6 +125,9 @@ TileVariable CLTile::vector(int32_t row) const
 
 TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
 {
+    CKW_ASSERT(col_start >= 0 && col_start < _info.width());
+    CKW_ASSERT(col_start + width <= _info.width());
+
     // Validate the new vector length
     cl_validate_vector_length(width);
 
@@ -154,7 +157,7 @@ TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
     {
         t.str = create_var_name(row);
 
-        if(_info.width() != 1)
+        if(_info.width() != 1 && _info.width() != width)
         {
             t.str += ".s";
             for(int i = 0; i < width; ++i)

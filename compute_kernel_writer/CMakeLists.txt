@@ -133,6 +133,7 @@ target_sources(ckw PRIVATE
     src/TensorUtils.cpp
     src/TileInfo.cpp
     src/TileOperand.cpp
+    src/TileView.cpp
 )
 
 if(CKW_ENABLE_OPENCL)

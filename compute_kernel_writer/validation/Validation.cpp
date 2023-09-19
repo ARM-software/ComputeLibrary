@@ -37,6 +37,7 @@
 #include "validation/tests/CLKernelWriterOpLoadStoreTest.h"
 #include "validation/tests/CLKernelWriterPrintTest.h"
 #include "validation/tests/CLKernelWriterReturnTest.h"
+#include "validation/tests/CLKernelWriterSubTileTest.h"
 #include "validation/tests/CLKernelWriterTernaryOpTest.h"
 #include "validation/tests/CLKernelWriterUnaryExpressionTest.h"
 #include "validation/tests/CLTensorArgumentTest.h"
@@ -102,6 +103,7 @@ int32_t main()
     const auto test35 = std::make_unique<CLKernelWriterGetGlobalIdTest>();
     const auto test36 = std::make_unique<CLKernelWriterPrintTest>();
     const auto test37 = std::make_unique<CLKernelWriterOpLoadIndirectTest>();
+    const auto test38 = std::make_unique<CLKernelWriterSubTileTest>();
 
     tests.push_back(test3.get());
     tests.push_back(test4.get());
@@ -140,6 +142,7 @@ int32_t main()
     tests.push_back(test35.get());
     tests.push_back(test36.get());
     tests.push_back(test37.get());
+    tests.push_back(test38.get());
 #endif /* COMPUTE_KERNEL_WRITER_OPENCL_ENABLED */
 
     bool all_test_passed = true;
