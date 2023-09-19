@@ -77,6 +77,9 @@ Status validate_matmul_kernel_info(const MatMulKernelInfo &matmul_kernel_info)
     // Validate K0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((k0 != 4), "Only 4 is supported for k0");
 
+    // Validate ExportToCLImage
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(matmul_kernel_info.export_rhs_to_cl_image, "Export to CLImage is not supported!");
+
     return Status{};
 }
 } // namespace

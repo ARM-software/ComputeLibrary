@@ -76,15 +76,21 @@ TEST_CASE(SupportedKernelConfigurations, framework::DatasetMode::ALL)
     const std::vector<MatMulConfigurationPair> supported_block_sizes =
     {
         // MatMulKernelInfo(adj_lhs, adj_rhs, M0, N0, K0, export_rhs_to_cl_image = false)
-        // Lhs not-transposed, Rhs-not-transposed
-        // TODO: Test Cases
+        { MatMulKernelInfo(false, false, 0, 1, 4), false }, // M0 should be > 0
+        { MatMulKernelInfo(false, true, 3, 5, 4), false },  // N0 not in {1, 2, 3, 4, 8, 16}
+        { MatMulKernelInfo(false, false, 3, 6, 4), false }, // N0 not in {1, 2, 3, 4, 8, 16}
+        { MatMulKernelInfo(false, false, 3, 3, 8), false }, // K0 not in 4
+        { MatMulKernelInfo(false, false, 9, 1, 4), true },
+        { MatMulKernelInfo(false, true, 3, 16, 4), true },
+        { MatMulKernelInfo(false, false, 7, 3, 4), true },
+        { MatMulKernelInfo(false, false, 7, 3, 4, true), false }, // export to CLImage is unsupported for quantized types
     };
 
     // Set big enough shapes so that block sizes are not truncated. Also, set all dimensions equal
     // so that it doesn't fail for different NT/T configurations. We aim to test the block sizes here,
     // not the shapes themselves.
-    const TensorInfo lhs_info = TensorInfo(TensorShape(100U, 100U), 1, DataType::QASYMM8_SIGNED);
-    const TensorInfo rhs_info = TensorInfo(TensorShape(100U, 100U), 1, DataType::QASYMM8_SIGNED);
+    const TensorInfo lhs_info = TensorInfo(TensorShape(64U, 64U), 1, DataType::QASYMM8_SIGNED);
+    const TensorInfo rhs_info = TensorInfo(TensorShape(64U, 64U), 1, DataType::QASYMM8_SIGNED);
 
     for(auto &pair : supported_block_sizes)
     {
@@ -211,7 +217,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeMMULKernelFixture<int8_t>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallMatMulLowpMMULDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_precommit,
                                n0_values_precommit,
                                make("K0", { 4 }),
@@ -229,7 +235,7 @@ FIXTURE_DATA_TEST_CASE(RunWithBias, CLMatMulLowpNativeMMULKernelWithBiasFixture<
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallMatMulLowpMMULWithBiasDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_precommit,
                                n0_values_precommit,
                                make("K0", { 4 }),
@@ -247,7 +253,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulLowpNativeMMULKernelFixture<
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeMatMulLowpMMULDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_nightly_lhs_nt,
                                n0_values_nightly_rhs_nt,
                                make("K0", { 4 }),
@@ -267,7 +273,7 @@ FIXTURE_DATA_TEST_CASE(RunHighDimensional, CLMatMulLowpNativeMMULKernelFixture<i
                        framework::DatasetMode::ALL,
                        combine(datasets::HighDimensionalMatMulLowpMMULDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                make("M0", { 2 }),
                                make("N0", { 2 }),
                                make("K0", { 4 }),
@@ -289,7 +295,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLMatMulLowpNativeMMULKernelFixture<uint8_t>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallMatMulLowpMMULDatasetSubset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_precommit,
                                n0_values_precommit,
                                make("K0", { 4 }),
@@ -307,7 +313,7 @@ FIXTURE_DATA_TEST_CASE(RunWithBias, CLMatMulLowpNativeMMULKernelWithBiasFixture<
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallMatMulLowpMMULWithBiasDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_precommit,
                                n0_values_precommit,
                                make("K0", { 4 }),
@@ -325,7 +331,7 @@ FIXTURE_DATA_TEST_CASE(RunLargeNoTranspose, CLMatMulLowpNativeMMULKernelFixture<
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeMatMulLowpMMULDataset(),
                                make("TransposeA", { false }),
-                               make("TransposeB", { false }),
+                               make("TransposeB", { false, true }),
                                m0_values_nightly_lhs_nt,
                                n0_values_nightly_rhs_nt,
                                make("K0", { 4 }),
