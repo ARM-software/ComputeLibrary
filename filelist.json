@@ -2055,7 +2055,6 @@
             "src/runtime/NEON/functions/NERange.cpp"
           ],
           "neon": {
-            "common":  [ "src/cpu/kernels/range/generic/neon/impl.cpp" ],
             "fp32":    [ "src/cpu/kernels/range/generic/neon/fp32.cpp" ],
             "fp16":    [ "src/cpu/kernels/range/generic/neon/fp16.cpp" ],
             "integer": [ "src/cpu/kernels/range/generic/neon/integer.cpp"   ]
@@ -2161,7 +2160,6 @@
             "src/runtime/NEON/functions/NESelect.cpp"
           ],
           "neon": {
-            "common": [ "src/cpu/kernels/select/generic/neon/impl.cpp" ],
             "fp32": [ "src/cpu/kernels/select/generic/neon/fp32.cpp" ],
             "fp16": [ "src/cpu/kernels/select/generic/neon/fp16.cpp" ],
             "integer": [ "src/cpu/kernels/select/generic/neon/integer.cpp"  ]

@@ -791,7 +791,6 @@ target_sources(
 	cpu/kernels/pool3d/neon/qasymm8_signed.cpp
 	cpu/kernels/range/generic/neon/fp16.cpp
 	cpu/kernels/range/generic/neon/fp32.cpp
-	cpu/kernels/range/generic/neon/impl.cpp
 	cpu/kernels/range/generic/neon/integer.cpp
 	cpu/kernels/roialign/generic/neon/fp16.cpp
 	cpu/kernels/roialign/generic/neon/fp32.cpp
@@ -803,7 +802,6 @@ target_sources(
 	cpu/kernels/scale/neon/qasymm8_signed.cpp
 	cpu/kernels/select/generic/neon/fp16.cpp
 	cpu/kernels/select/generic/neon/fp32.cpp
-	cpu/kernels/select/generic/neon/impl.cpp
 	cpu/kernels/select/generic/neon/integer.cpp
 	cpu/kernels/softmax/generic/neon/fp16.cpp
 	cpu/kernels/softmax/generic/neon/fp32.cpp
