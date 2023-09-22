@@ -783,7 +783,6 @@ filegroup(
 	"cpu/kernels/lut/generic/neon/u8.cpp",
 	"cpu/kernels/maxunpool/generic/neon/fp16.cpp",
 	"cpu/kernels/maxunpool/generic/neon/fp32.cpp",
-	"cpu/kernels/maxunpool/generic/neon/impl.cpp",
 	"cpu/kernels/maxunpool/generic/neon/qasymm8.cpp",
 	"cpu/kernels/maxunpool/generic/neon/qasymm8_signed.cpp",
 	"cpu/kernels/meanstddevnorm/generic/neon/fp16.cpp",
