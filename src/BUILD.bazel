@@ -96,7 +96,8 @@ filegroup(
 	"graph/nodes/SplitLayerNode.cpp",
 	"graph/nodes/StackLayerNode.cpp",
 	"graph/nodes/StridedSliceLayerNode.cpp",
-	"graph/printers/DotGraphPrinter.cpp"]  +
+	"graph/printers/DotGraphPrinter.cpp",
+	"//utils:CommonGraphOptions.cpp"]  +
     glob(["**/*.h",
     "**/*.hpp",
     "**/*.inl"]),

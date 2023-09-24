@@ -121,7 +121,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
                                << " InPlace : " << is_in_place_operation(input, output)
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Creates a backend argminmax layer function
@@ -158,7 +158,7 @@ std::unique_ptr<IFunction> create_arg_min_max_layer(ArgMinMaxLayerNode &node)
                                << " axis: " << axis
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend batch normalization layer function
@@ -202,7 +202,7 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
                                << " InPlace: " << is_in_place_operation(input, output)
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend batch normalization layer function
@@ -259,7 +259,7 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend fused depthwise convolution batch normalization layer function
@@ -315,7 +315,7 @@ std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalizatio
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend bounding box transform layer function
@@ -388,7 +388,7 @@ std::unique_ptr<IFunction> create_channel_shuffle_layer(ChannelShuffleLayerNode 
                                << " Num groups: " << num_groups
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend layer concatenate function
@@ -444,7 +444,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
                                << qss.str()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend convolution layer function
@@ -535,7 +535,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend deconvolution layer function
@@ -641,7 +641,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
                                << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend depth to space layer function
@@ -680,7 +680,7 @@ std::unique_ptr<IFunction> create_depth_to_space_layer(DepthToSpaceLayerNode &no
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend dequantize layer function
@@ -719,7 +719,7 @@ std::unique_ptr<IFunction> create_dequantization_layer(DequantizationLayerNode &
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 /** Create a backend detection output layer function
  *
@@ -764,7 +764,7 @@ std::unique_ptr<IFunction> create_detection_output_layer(DetectionOutputLayerNod
                                << " DetectionOutputLayer info: " << detect_info
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend detection post process layer function
@@ -819,7 +819,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer(DetectionPostProc
                                << " DetectionPostProcessLayer info: " << detect_info
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend element-wise operation layer function
@@ -894,7 +894,7 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
                                << " Shape: " << input1->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend unary element-wise operation layer function
@@ -942,7 +942,7 @@ std::unique_ptr<IFunction> create_unary_eltwise_layer(UnaryEltwiseLayerNode &nod
                                << " Shape: " << input->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend flatten layer function
@@ -980,7 +980,7 @@ std::unique_ptr<IFunction> create_flatten_layer(FlattenLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend fully connected layer function
@@ -1037,7 +1037,7 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend generate proposals layer function
@@ -1130,7 +1130,7 @@ std::unique_ptr<IFunction> create_l2_normalize_layer(L2NormalizeLayerNode &node,
                                << " Epsilon: " << epsilon
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend normalization layer function
@@ -1251,7 +1251,7 @@ std::unique_ptr<IFunction> create_pad_layer(PadLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend permute layer function
@@ -1290,7 +1290,7 @@ std::unique_ptr<IFunction> create_permute_layer(PermuteLayerNode &node)
                                << " Permutation vector: " << perm
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend pooling layer function
@@ -1329,7 +1329,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
                                << " Pooling info: " << pool_info.pool_type
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend PRelu layer function
@@ -1367,7 +1367,7 @@ std::unique_ptr<IFunction> create_prelu_layer(PReluLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend print layer function
@@ -1438,7 +1438,7 @@ std::unique_ptr<IFunction> create_priorbox_layer(PriorBoxLayerNode &node)
                                << " PriorBoxLayer info: " << prior_info
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend quantization layer function
@@ -1475,7 +1475,7 @@ std::unique_ptr<IFunction> create_quantization_layer(QuantizationLayerNode &node
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend reduction operation layer function
@@ -1519,7 +1519,7 @@ std::unique_ptr<IFunction> create_reduction_operation_layer(ReductionLayerNode &
                                << " Keep dimensions:" << keep_dims
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend reorg layer function
@@ -1556,7 +1556,7 @@ std::unique_ptr<IFunction> create_reorg_layer(ReorgLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend reshape layer function
@@ -1593,7 +1593,7 @@ std::unique_ptr<IFunction> create_reshape_layer(ReshapeLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend resize layer function
@@ -1632,7 +1632,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
                                << " Interpolation: " << policy
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend ROI align layer function
@@ -1714,7 +1714,7 @@ std::unique_ptr<IFunction> create_slice_layer(SliceLayerNode &node)
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend softmax layer function
@@ -1753,7 +1753,7 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend layer stack function
@@ -1796,7 +1796,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
                                << " Axis: " << axis
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend slice layer function
@@ -1838,7 +1838,7 @@ std::unique_ptr<IFunction> create_strided_slice_layer(StridedSliceLayerNode &nod
                                << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
-    return std::move(func);
+    return func;
 }
 } // namespace detail
 } // namespace backends
