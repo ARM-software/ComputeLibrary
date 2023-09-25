@@ -23,8 +23,8 @@
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-#include "src/cpu/kernels/gemm_matrix_mul/generic/neon/impl.h"
 #include "src/core/utils/helpers/float_ops.h"
+#include "src/cpu/kernels/gemm_matrix_mul/generic/neon/impl.h"
 
 #include <arm_neon.h>
 

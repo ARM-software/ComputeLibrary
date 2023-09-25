@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,9 @@
  */
 #ifndef ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
 #define ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
+
+#include <cmath>
+#include <cstdint>
 
 namespace arm_compute
 {
