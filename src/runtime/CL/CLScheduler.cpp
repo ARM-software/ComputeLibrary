@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,8 +95,8 @@ bool CLScheduler::is_initialised() const
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native), _job_chaining_enabled(false),
-      _job_chaining_size(), _job_chaining_count(0)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _gemm_heuristics(nullptr), _backend_type(CLBackendType::Native), _job_chaining_enabled(true),
+      _job_chaining_size(1), _job_chaining_count(0)
 {
 }
 
@@ -193,6 +193,16 @@ void CLScheduler::flush_queue(bool flush)
         if(_job_chaining_count >= _job_chaining_size)
         {
             _job_chaining_count = 0;
+            /*
+                Optimisation note: Flush the queue at the first enqueue to start the GPU
+                execution and then incrementally saturate the clFlush calls to minimize
+                the CPU activity for job-scheduling.
+                For eg. job-chain size goes from 1, 2, 4, 8 and 16
+            */
+            if(_job_chaining_size < 16)
+            {
+                _job_chaining_size <<= 1;
+            }
             _queue.flush();
         }
     }
