@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
+
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
@@ -36,14 +37,13 @@ using namespace arm_compute::graph_utils;
 class GraphMobilenetExample : public Example
 {
 public:
-    GraphMobilenetExample()
-        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "MobileNetV1")
+    GraphMobilenetExample() : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "MobileNetV1")
     {
         // Add model id option
         model_id_opt = cmd_parser.add_option<SimpleOption<int>>("model-id", 0);
         model_id_opt->set_help("Mobilenet model id (0: 1.0_224, else: 0.75_160");
     }
-    GraphMobilenetExample(const GraphMobilenetExample &) = delete;
+    GraphMobilenetExample(const GraphMobilenetExample &)            = delete;
     GraphMobilenetExample &operator=(const GraphMobilenetExample &) = delete;
     ~GraphMobilenetExample() override                               = default;
     bool do_setup(int argc, char **argv) override
@@ -56,7 +56,7 @@ public:
         common_params = consume_common_graph_parameters(common_opts);
 
         // Return when help menu is requested
-        if(common_params.help)
+        if (common_params.help)
         {
             cmd_parser.print_help(argv[0]);
             return false;
@@ -72,15 +72,17 @@ public:
         unsigned int spatial_size = (model_id == 0 || common_params.data_type == DataType::QASYMM8) ? 224 : 160;
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(spatial_size, spatial_size, 3U, common_params.batches), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const TensorShape tensor_shape =
+            permute_shape(TensorShape(spatial_size, spatial_size, 3U, common_params.batches), DataLayout::NCHW,
+                          common_params.data_layout);
+        TensorDescriptor input_descriptor =
+            TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
 
         // Set graph hints
-        graph << common_params.target
-              << common_params.fast_math_hint;
+        graph << common_params.target << common_params.fast_math_hint;
 
         // Create core graph
-        if(arm_compute::is_data_type_float(common_params.data_type))
+        if (arm_compute::is_data_type_float(common_params.data_type))
         {
             create_graph_float(input_descriptor, model_id);
         }
@@ -90,8 +92,7 @@ public:
         }
 
         // Create common tail
-        graph << ReshapeLayer(TensorShape(1001U)).set_name("Reshape")
-              << SoftmaxLayer().set_name("Softmax")
+        graph << ReshapeLayer(TensorShape(1001U)).set_name("Reshape") << SoftmaxLayer().set_name("Softmax")
               << OutputLayer(get_output_accessor(common_params, 5));
 
         // Finalize graph
@@ -115,14 +116,15 @@ public:
 private:
     CommandLineParser  cmd_parser;
     CommonGraphOptions common_opts;
-    SimpleOption<int> *model_id_opt{ nullptr };
+    SimpleOption<int> *model_id_opt{nullptr};
     CommonGraphParams  common_params;
     Stream             graph;
 
     void create_graph_float(TensorDescriptor &input_descriptor, int model_id)
     {
         float       depth_scale = (model_id == 0) ? 1.f : 0.75;
-        std::string model_path  = (model_id == 0) ? "/cnn_data/mobilenet_v1_1_224_model/" : "/cnn_data/mobilenet_v1_075_160_model/";
+        std::string model_path =
+            (model_id == 0) ? "/cnn_data/mobilenet_v1_1_224_model/" : "/cnn_data/mobilenet_v1_075_160_model/";
 
         // Create a preprocessor object
         std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>();
@@ -131,47 +133,68 @@ private:
         std::string data_path = common_params.data_path;
 
         // Add model path to data path
-        if(!data_path.empty())
+        if (!data_path.empty())
         {
             data_path += model_path;
         }
 
-        graph << InputLayer(input_descriptor,
-                            get_input_accessor(common_params, std::move(preprocessor), false))
-              << ConvolutionLayer(
-                  3U, 3U, 32U * depth_scale,
-                  get_weights_accessor(data_path, "Conv2d_0_weights.npy", DataLayout::NCHW),
-                  std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-                  PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))
-              .set_name("Conv2d_0")
-              << BatchNormalizationLayer(
-                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_mean.npy"),
-                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
-                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
-                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"),
-                  0.001f)
-              .set_name("Conv2d_0/BatchNorm")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
-        graph << get_dwsc_node_float(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_4", 256 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_5", 256 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_6", 512 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_7", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_8", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_9", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_10", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_11", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_12", 1024 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << get_dwsc_node_float(data_path, "Conv2d_13", 1024 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool_1a")
-              << ConvolutionLayer(
-                  1U, 1U, 1001U,
-                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
-                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
-                  PadStrideInfo(1, 1, 0, 0))
-              .set_name("Logits/Conv2d_1c_1x1");
+        graph << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor), false))
+              << ConvolutionLayer(3U, 3U, 32U * depth_scale,
+                                  get_weights_accessor(data_path, "Conv2d_0_weights.npy", DataLayout::NCHW),
+                                  std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
+                                  PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))
+                     .set_name("Conv2d_0")
+              << BatchNormalizationLayer(get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_mean.npy"),
+                                         get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
+                                         get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
+                                         get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"), 0.001f)
+                     .set_name("Conv2d_0/BatchNorm")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+                     .set_name("Conv2d_0/Relu6");
+        graph << get_dwsc_node_float(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_2", 128 * depth_scale,
+                                     PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_3", 128 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_4", 256 * depth_scale,
+                                     PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_5", 256 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_6", 512 * depth_scale,
+                                     PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_7", 512 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_8", 512 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_9", 512 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_10", 512 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_11", 512 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_12", 1024 * depth_scale,
+                                     PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph << get_dwsc_node_float(data_path, "Conv2d_13", 1024 * depth_scale,
+                                     PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                     PadStrideInfo(1, 1, 0, 0));
+        graph
+            << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool_1a")
+            << ConvolutionLayer(
+                   1U, 1U, 1001U, get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
+                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"), PadStrideInfo(1, 1, 0, 0))
+                   .set_name("Logits/Conv2d_1c_1x1");
     }
 
     void create_graph_qasymm(TensorDescriptor &input_descriptor)
@@ -180,7 +203,7 @@ private:
         std::string data_path = common_params.data_path;
 
         // Add model path to data path
-        if(!data_path.empty())
+        if (!data_path.empty())
         {
             data_path += "/cnn_data/mobilenet_qasymm8_model/";
         }
@@ -188,19 +211,16 @@ private:
         // Quantization info taken from the AndroidNN QASYMM8 MobileNet example
         const QuantizationInfo in_quant_info = QuantizationInfo(0.0078125f, 128);
 
-        const std::vector<QuantizationInfo> conv_weights_quant_info =
-        {
+        const std::vector<QuantizationInfo> conv_weights_quant_info = {
             QuantizationInfo(0.02182667888700962f, 151), // conv0
             QuantizationInfo(0.004986600950360298f, 74)  // conv14
         };
-        const std::vector<QuantizationInfo> conv_out_quant_info =
-        {
+        const std::vector<QuantizationInfo> conv_out_quant_info = {
             QuantizationInfo(0.023528477177023888f, 0), // conv0
             QuantizationInfo(0.16609922051429749f, 66)  // conv14
         };
 
-        const std::vector<QuantizationInfo> depth_weights_quant_info =
-        {
+        const std::vector<QuantizationInfo> depth_weights_quant_info = {
             QuantizationInfo(0.29219913482666016f, 110),  // dwsc1
             QuantizationInfo(0.40277284383773804f, 130),  // dwsc2
             QuantizationInfo(0.06053730100393295f, 160),  // dwsc3
@@ -216,8 +236,7 @@ private:
             QuantizationInfo(0.12616927921772003f, 211)   // dwsc13
         };
 
-        const std::vector<QuantizationInfo> point_weights_quant_info =
-        {
+        const std::vector<QuantizationInfo> point_weights_quant_info = {
             QuantizationInfo(0.030420949682593346f, 121), // dwsc1
             QuantizationInfo(0.015148180536925793f, 104), // dwsc2
             QuantizationInfo(0.013755458407104015f, 94),  // dwsc3
@@ -235,108 +254,121 @@ private:
 
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
                             get_input_accessor(common_params, nullptr, false))
-              << ConvolutionLayer(
-                  3U, 3U, 32U,
-                  get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
-                  get_weights_accessor(data_path, "Conv2d_0_bias.npy"),
-                  PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
-                  1, conv_weights_quant_info.at(0), conv_out_quant_info.at(0))
-              .set_name("Conv2d_0")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_1", 64U, PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(0), point_weights_quant_info.at(0));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_2", 128U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(1),
-                                      point_weights_quant_info.at(1));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_3", 128U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(2),
-                                      point_weights_quant_info.at(2));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_4", 256U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(3),
-                                      point_weights_quant_info.at(3));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_5", 256U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(4),
-                                      point_weights_quant_info.at(4));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_6", 512U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(5),
-                                      point_weights_quant_info.at(5));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_7", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(6),
-                                      point_weights_quant_info.at(6));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_8", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(7),
-                                      point_weights_quant_info.at(7));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_9", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(8),
-                                      point_weights_quant_info.at(8));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_10", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(9),
-                                      point_weights_quant_info.at(9));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_11", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(10),
-                                      point_weights_quant_info.at(10));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_12", 1024U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(11),
-                                      point_weights_quant_info.at(11));
-        graph << get_dwsc_node_qasymm(data_path, "Conv2d_13", 1024U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(12),
-                                      point_weights_quant_info.at(12))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool_1a")
-              << ConvolutionLayer(
-                  1U, 1U, 1001U,
-                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
-                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_bias.npy"),
-                  PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1), conv_out_quant_info.at(1))
-              .set_name("Logits/Conv2d_1c_1x1");
+              << ConvolutionLayer(3U, 3U, 32U, get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
+                                  get_weights_accessor(data_path, "Conv2d_0_bias.npy"),
+                                  PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), 1,
+                                  conv_weights_quant_info.at(0), conv_out_quant_info.at(0))
+                     .set_name("Conv2d_0")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))
+                     .set_name("Conv2d_0/Relu6");
+        graph << get_dwsc_node_qasymm(data_path, "Conv2d_1", 64U, PadStrideInfo(1U, 1U, 1U, 1U),
+                                      PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(0),
+                                      point_weights_quant_info.at(0));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_2", 128U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(1), point_weights_quant_info.at(1));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_3", 128U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(2), point_weights_quant_info.at(2));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_4", 256U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(3), point_weights_quant_info.at(3));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_5", 256U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(4), point_weights_quant_info.at(4));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_6", 512U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(5), point_weights_quant_info.at(5));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_7", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(6), point_weights_quant_info.at(6));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_8", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(7), point_weights_quant_info.at(7));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_9", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(8), point_weights_quant_info.at(8));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_10", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(9), point_weights_quant_info.at(9));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_11", 512U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(10), point_weights_quant_info.at(10));
+        graph << get_dwsc_node_qasymm(
+            data_path, "Conv2d_12", 1024U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
+            PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(11), point_weights_quant_info.at(11));
+        graph
+            << get_dwsc_node_qasymm(
+                   data_path, "Conv2d_13", 1024U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR),
+                   PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(12), point_weights_quant_info.at(12))
+            << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool_1a")
+            << ConvolutionLayer(1U, 1U, 1001U, get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
+                                get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_bias.npy"),
+                                PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1),
+                                conv_out_quant_info.at(1))
+                   .set_name("Logits/Conv2d_1c_1x1");
     }
 
-    ConcatLayer get_dwsc_node_float(const std::string &data_path, std::string &&param_path,
-                                    unsigned int  conv_filt,
-                                    PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info)
+    ConcatLayer get_dwsc_node_float(const std::string &data_path,
+                                    std::string      &&param_path,
+                                    unsigned int       conv_filt,
+                                    PadStrideInfo      dwc_pad_stride_info,
+                                    PadStrideInfo      conv_pad_stride_info)
     {
         std::string total_path = param_path + "_";
         SubStream   sg(graph);
         sg << DepthwiseConvolutionLayer(
-               3U, 3U,
-               get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy", DataLayout::NCHW),
-               std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-               dwc_pad_stride_info)
-           .set_name(total_path + "depthwise/depthwise")
+                  3U, 3U,
+                  get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy", DataLayout::NCHW),
+                  std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), dwc_pad_stride_info)
+                  .set_name(total_path + "depthwise/depthwise")
            << BatchNormalizationLayer(
-               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_mean.npy"),
-               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
-               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
-               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
-               0.001f)
-           .set_name(total_path + "depthwise/BatchNorm")
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
-           << ConvolutionLayer(
-               1U, 1U, conv_filt,
-               get_weights_accessor(data_path, total_path + "pointwise_weights.npy", DataLayout::NCHW),
-               std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-               conv_pad_stride_info)
-           .set_name(total_path + "pointwise/Conv2D")
+                  get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_mean.npy"),
+                  get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
+                  get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
+                  get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"), 0.001f)
+                  .set_name(total_path + "depthwise/BatchNorm")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+                  .set_name(total_path + "depthwise/Relu6")
+           << ConvolutionLayer(1U, 1U, conv_filt,
+                               get_weights_accessor(data_path, total_path + "pointwise_weights.npy", DataLayout::NCHW),
+                               std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), conv_pad_stride_info)
+                  .set_name(total_path + "pointwise/Conv2D")
            << BatchNormalizationLayer(
-               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_mean.npy"),
-               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
-               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
-               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
-               0.001f)
-           .set_name(total_path + "pointwise/BatchNorm")
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
+                  get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_mean.npy"),
+                  get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
+                  get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
+                  get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"), 0.001f)
+                  .set_name(total_path + "pointwise/BatchNorm")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+                  .set_name(total_path + "pointwise/Relu6");
 
         return ConcatLayer(std::move(sg));
     }
 
-    ConcatLayer get_dwsc_node_qasymm(const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_dwsc_node_qasymm(const std::string &data_path,
+                                     std::string      &&param_path,
                                      const unsigned int conv_filt,
-                                     PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info,
-                                     QuantizationInfo depth_weights_quant_info, QuantizationInfo point_weights_quant_info)
+                                     PadStrideInfo      dwc_pad_stride_info,
+                                     PadStrideInfo      conv_pad_stride_info,
+                                     QuantizationInfo   depth_weights_quant_info,
+                                     QuantizationInfo   point_weights_quant_info)
     {
         std::string total_path = param_path + "_";
         SubStream   sg(graph);
 
-        sg << DepthwiseConvolutionLayer(
-               3U, 3U,
-               get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
-               get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
-               dwc_pad_stride_info, 1, std::move(depth_weights_quant_info))
-           .set_name(total_path + "depthwise/depthwise")
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
-           << ConvolutionLayer(
-               1U, 1U, conv_filt,
-               get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
-               get_weights_accessor(data_path, total_path + "pointwise_bias.npy"),
-               conv_pad_stride_info, 1, std::move(point_weights_quant_info))
-           .set_name(total_path + "pointwise/Conv2D")
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
+        sg << DepthwiseConvolutionLayer(3U, 3U, get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
+                                        get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
+                                        dwc_pad_stride_info, 1, std::move(depth_weights_quant_info))
+                  .set_name(total_path + "depthwise/depthwise")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))
+                  .set_name(total_path + "depthwise/Relu6")
+           << ConvolutionLayer(1U, 1U, conv_filt, get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
+                               get_weights_accessor(data_path, total_path + "pointwise_bias.npy"), conv_pad_stride_info,
+                               1, std::move(point_weights_quant_info))
+                  .set_name(total_path + "pointwise/Conv2D")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))
+                  .set_name(total_path + "pointwise/Relu6");
 
         return ConcatLayer(std::move(sg));
     }

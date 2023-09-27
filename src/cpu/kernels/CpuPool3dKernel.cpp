@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/pool3d/list.h"
@@ -41,39 +42,28 @@ namespace
 {
 using namespace misc::shape_calculator;
 
-static const std::vector<CpuPool3dKernel::Pooling3dKernel> available_kernels =
-{
-    {
-        "neon_qu8_ndhwc_poolMxNxD",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_q8_pool3d)
-    },
-    {
-        "neon_qs8_ndhwc_poolMxNxD",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_q8_signed_pool3d)
-    },
-    {
-        "neon_fp16_ndhwc_poolMxNxD",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F16 && data.isa.fp16); },
-        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_pool3d)
-    },
-    {
-        "neon_fp32_ndhwc_poolMxNxD",
-        [](const DataTypeISASelectorData & data) { return (data.dt == DataType::F32); },
-        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_pool3d)
-    }
-};
+static const std::vector<CpuPool3dKernel::Pooling3dKernel> available_kernels = {
+    {"neon_qu8_ndhwc_poolMxNxD", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::neon_q8_pool3d)},
+    {"neon_qs8_ndhwc_poolMxNxD",
+     [](const DataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::neon_q8_signed_pool3d)},
+    {"neon_fp16_ndhwc_poolMxNxD",
+     [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F16 && data.isa.fp16); },
+     REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_pool3d)},
+    {"neon_fp32_ndhwc_poolMxNxD", [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_pool3d)}};
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type())) && (!pool_info.exclude_padding
-                                                                                && (pool_info.pool_type == PoolingType::AVG)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type())) &&
+                                        (!pool_info.exclude_padding && (pool_info.pool_type == PoolingType::AVG)),
                                     "Exclude padding is unsupported for non-float types for Avg op");
 
     const auto data_layout = src->data_layout();
@@ -97,21 +87,26 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     int output_height = 0;
     int output_depth  = 0;
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_3d_region_entirely_outside_input(pool_info), "Pooling region that is entirely outside input tensor is unsupported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_3d_region_entirely_outside_input(pool_info),
+                                    "Pooling region that is entirely outside input tensor is unsupported");
 
-    std::tie(output_width, output_height, output_depth) = scaled_3d_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height], src->tensor_shape()[idx_depth],
-                                                                                      pool_size_x, pool_size_y, pool_size_z, pool_info);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1), "Calculated output dimension size is invalid");
+    std::tie(output_width, output_height, output_depth) =
+        scaled_3d_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
+                                    src->tensor_shape()[idx_depth], pool_size_x, pool_size_y, pool_size_z, pool_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1),
+                                    "Calculated output dimension size is invalid");
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-        TensorInfo out_info(TensorInfo(compute_pool3d_shape(src->tensor_shape(), pool_info), 1, dst->data_type(), DataLayout::NDHWC));
+        TensorInfo out_info(
+            TensorInfo(compute_pool3d_shape(src->tensor_shape(), pool_info), 1, dst->data_type(), DataLayout::NDHWC));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
     }
 
-    const auto *uk = CpuPool3dKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk =
+        CpuPool3dKernel::get_implementation(DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
@@ -136,12 +131,12 @@ void CpuPool3dKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const 
 
     // Update pool size in case of global pooling
     const bool   is_global_pooling = pool_info.is_global_pooling;
-    const Size3D pool_size(
-        is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width,
-        is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height,
-        is_global_pooling ? src->dimension(idx_depth) : pool_info.pool_size.depth);
+    const Size3D pool_size(is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width,
+                           is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height,
+                           is_global_pooling ? src->dimension(idx_depth) : pool_info.pool_size.depth);
 
-    const auto *uk = CpuPool3dKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk =
+        CpuPool3dKernel::get_implementation(DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr);
 
     // Set instance variables

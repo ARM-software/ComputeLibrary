@@ -69,7 +69,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k);
+    static Status
+    validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

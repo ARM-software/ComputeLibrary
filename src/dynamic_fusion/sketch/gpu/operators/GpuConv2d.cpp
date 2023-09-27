@@ -24,15 +24,15 @@
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuConv2d.h"
 
 #include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDirectConv2d.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "src/runtime/heuristics/direct_conv/ClDirectConvKernelConfig.h"
 #include "src/runtime/heuristics/direct_conv/IClDirectConvKernelConfig.h"
@@ -45,24 +45,30 @@ namespace dynamic_fusion
 {
 namespace
 {
-DirectConvComputeKernelInfo config_direct_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo
+config_direct_convolution_nhwc(const ITensorInfo *src, const ITensorInfo *weights, const PadStrideInfo &conv_info)
 {
     // Get GPU target
     GPUTarget gpu_target = CLScheduler::get().target();
 
-    std::unique_ptr<arm_compute::cl_direct_conv::IClDirectConvKernelConfig> t = arm_compute::cl_direct_conv::ClDirectConvKernelConfigurationFactory::create(gpu_target);
+    std::unique_ptr<arm_compute::cl_direct_conv::IClDirectConvKernelConfig> t =
+        arm_compute::cl_direct_conv::ClDirectConvKernelConfigurationFactory::create(gpu_target);
 
     return t->configure(src, weights, conv_info);
 }
 
-void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *src, const ITensorInfo *wei, const Conv2dAttributes &attributes)
+void calculate_and_init_dst_if_empty(ITensorInfo            *dst,
+                                     const ITensorInfo      *src,
+                                     const ITensorInfo      *wei,
+                                     const Conv2dAttributes &attributes)
 {
-    if(dst->total_size() == 0U)
+    if (dst->total_size() == 0U)
     {
-        const auto shape = misc::shape_calculator::compute_deep_convolution_shape(src->tensor_shape(), src->data_layout(), wei->tensor_shape(),
-                                                                                  PadStrideInfo(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
-                                                                                                attributes.pad().right,
-                                                                                                attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR)); // use the default DimensionRoundingType
+        const auto shape = misc::shape_calculator::compute_deep_convolution_shape(
+            src->tensor_shape(), src->data_layout(), wei->tensor_shape(),
+            PadStrideInfo(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
+                          attributes.pad().right, attributes.pad().top, attributes.pad().bottom,
+                          DimensionRoundingType::FLOOR)); // use the default DimensionRoundingType
 
         auto_init_if_empty(*dst, src->clone()->set_tensor_shape(shape));
     }
@@ -83,7 +89,7 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -98,18 +104,20 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 
     // Check components
     const auto gpu_target = context.gpu_target();
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
         // Validate Direct Conv2d Component
         {
-            const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
-            auto       settings   = ClComponentDirectConv2d::Settings();
+            const auto properties =
+                IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
+            auto settings = ClComponentDirectConv2d::Settings();
 
             settings.fast_relaxed_math(
-                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-                && (dst_info_to_validate_ptr->data_type() == DataType::F32 || dst_info_to_validate_ptr->data_type() == DataType::F16));
+                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST) &&
+                (dst_info_to_validate_ptr->data_type() == DataType::F32 ||
+                 dst_info_to_validate_ptr->data_type() == DataType::F16));
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
@@ -142,14 +150,14 @@ Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,
                               const ITensorInfo       *src,
                               const ITensorInfo       *wei,
                               const ITensorInfo       *bia,
-                              const Conv2dAttributes &attributes)
+                              const Conv2dAttributes  &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, wei);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!wei->are_values_constant(), "Dynamic weights are not supported");
 
     // Check if tensors have valid id. I.e. they are created from a sketch
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id() || !wei->has_valid_id());
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(!bia->has_valid_id());
     }
@@ -178,16 +186,13 @@ Status GpuConv2d::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, wei, bia, &dst_info_to_validate, attributes);
 }
 
-ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
-                                  ITensorInfo            *src,
-                                  ITensorInfo            *wei,
-                                  ITensorInfo            *bia,
-                                  const Conv2dAttributes &attributes)
+ITensorInfo *GpuConv2d::create_op(
+    GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorInfo *wei, ITensorInfo *bia, const Conv2dAttributes &attributes)
 {
     ARM_COMPUTE_LOG_PARAMS(src, wei, bia, attributes);
     PadStrideInfo conv_info(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
-                            attributes.pad().right,
-                            attributes.pad().top, attributes.pad().bottom, DimensionRoundingType::FLOOR);
+                            attributes.pad().right, attributes.pad().top, attributes.pad().bottom,
+                            DimensionRoundingType::FLOOR);
     // Initialize the direct convolution descriptor
     const DirectConvComputeKernelInfo desc = config_direct_convolution_nhwc(src, wei, conv_info);
 
@@ -207,7 +212,7 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
 
     const auto gpu_target = sketch_ctx->gpu_target();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
         ARM_COMPUTE_ERROR_ON(cl_compile_ctx == nullptr);
@@ -216,17 +221,17 @@ ITensorInfo *GpuConv2d::create_op(GpuWorkloadSketch      &sketch,
         // Add Direct Conv2d Component
         {
             auto properties = IGpuKernelComponent::Properties();
-            properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+            properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
             auto settings = ClComponentDirectConv2d::Settings();
 
             settings.fast_relaxed_math(
-                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-                && (dst->data_type() == DataType::F32 || dst->data_type() == DataType::F16));
+                (gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST) &&
+                (dst->data_type() == DataType::F32 || dst->data_type() == DataType::F16));
 
             settings.direct_conv_descriptor(desc);
 
-            if(settings.export_to_cl_image())
+            if (settings.export_to_cl_image())
             {
                 arm_compute::opencl::kernels::gemm::update_padding_for_cl_image(wei);
             }

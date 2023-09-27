@@ -58,5 +58,5 @@ public:
     {
     }
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IFUNCTION_H */

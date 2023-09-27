@@ -70,15 +70,19 @@ public:
      * @param[in]  fused_act  Activation layer information in case of a fused activation.
      *
      */
-    void configure(TensorType       *input,
-                   TensorType       *weights,
-                   TensorType       *bias,
-                   TensorType       *output,
-                   const TensorType *mean,
-                   const TensorType *var,
-                   const TensorType *beta,
-                   const TensorType *gamma,
-                   float epsilon, const PadStrideInfo &conv_info, unsigned int num_groups, bool fast_math, ActivationLayerInfo const &fused_act)
+    void configure(TensorType                *input,
+                   TensorType                *weights,
+                   TensorType                *bias,
+                   TensorType                *output,
+                   const TensorType          *mean,
+                   const TensorType          *var,
+                   const TensorType          *beta,
+                   const TensorType          *gamma,
+                   float                      epsilon,
+                   const PadStrideInfo       &conv_info,
+                   unsigned int               num_groups,
+                   bool                       fast_math,
+                   ActivationLayerInfo const &fused_act)
     {
         // We don't run any validate, as we assume that the layers have been already validated
         const bool        has_bias = (bias != nullptr);
@@ -86,7 +90,7 @@ public:
 
         // We check if the layer has a bias. If yes, use it in-place. If not, we need to create one
         // as batch normalization might end up with a bias != 0
-        if(has_bias)
+        if (has_bias)
         {
             _fused_batch_norm_layer.configure(weights, mean, var, nullptr, nullptr, bias, beta, gamma, epsilon);
             bias_to_use = bias;
@@ -97,9 +101,10 @@ public:
             bias_to_use = &_fused_bias;
         }
 
-        _conv_layer.configure(input, weights, bias_to_use, output, conv_info, WeightsInfo(), Size2D(1U, 1U), fused_act, fast_math, num_groups);
+        _conv_layer.configure(input, weights, bias_to_use, output, conv_info, WeightsInfo(), Size2D(1U, 1U), fused_act,
+                              fast_math, num_groups);
 
-        if(!has_bias)
+        if (!has_bias)
         {
             _fused_bias.allocator()->allocate();
         }
@@ -114,7 +119,7 @@ public:
 
     void prepare()
     {
-        if(!_is_prepared)
+        if (!_is_prepared)
         {
             _fused_batch_norm_layer.run();
             _is_prepared = true;

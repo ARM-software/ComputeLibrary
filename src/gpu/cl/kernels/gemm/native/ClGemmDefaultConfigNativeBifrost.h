@@ -45,15 +45,22 @@ public:
     ClGemmDefaultConfigNativeBifrost(GPUTarget gpu);
 
     // Inherited overridden method
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
 private:
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+    configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace gemm
 } // namespace kernels

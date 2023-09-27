@@ -31,32 +31,35 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
+Status
+validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, std);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, std);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(mean->num_dimensions() > 1, "mean and std must be vectors");
 
-    const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+    const unsigned int channel_idx =
+        get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(channel_idx) != mean->dimension(0));
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -77,7 +80,8 @@ std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input,
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    Status err =
+        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -88,12 +92,19 @@ CLNormalizePlanarYUVLayerKernel::CLNormalizePlanarYUVLayerKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input,
+                                                ICLTensor       *output,
+                                                const ICLTensor *mean,
+                                                const ICLTensor *std)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, std);
 }
 
-void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_context,
+                                                const ICLTensor        *input,
+                                                ICLTensor              *output,
+                                                const ICLTensor        *mean,
+                                                const ICLTensor        *std)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);
@@ -102,7 +113,7 @@ void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), *input->info()->clone());
 
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input  = input;
     _output = output;
@@ -112,9 +123,10 @@ void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_
     const DataLayout data_layout = input->info()->data_layout();
 
     // Get number of elements to process per iterations
-    const unsigned int num_elems_processed_per_iteration = (data_layout == DataLayout::NHWC) ? adjust_vec_size(16 / input->info()->element_size(),
-                                                                                                               input->info()->dimension(0)) :
-                                                           (16 / input->info()->element_size());
+    const unsigned int num_elems_processed_per_iteration =
+        (data_layout == DataLayout::NHWC)
+            ? adjust_vec_size(16 / input->info()->element_size(), input->info()->dimension(0))
+            : (16 / input->info()->element_size());
     const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     const DataType     dt          = input->info()->data_type();
 
@@ -122,11 +134,12 @@ void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_
     CLBuildOptions build_opts;
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
-    build_opts.add_option(("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration)));
+    build_opts.add_option(("-DVEC_SIZE_LEFTOVER=" +
+                           support::cpp11::to_string(input->info()->dimension(0) % num_elems_processed_per_iteration)));
     build_opts.add_option(("-DNUM_CHANNELS=" + support::cpp11::to_string(input->info()->dimension(channel_idx))));
 
     std::string kernel_name = "normalize_planar_yuv_layer_";
-    if(is_data_type_quantized(dt))
+    if (is_data_type_quantized(dt))
     {
         const UniformQuantizationInfo qinfo = input->info()->quantization_info().uniform();
         build_opts.add_option(("-DOFFSET=" + support::cpp11::to_string(qinfo.offset)));
@@ -139,7 +152,7 @@ void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
-    if(data_layout == DataLayout::NHWC)
+    if (data_layout == DataLayout::NHWC)
     {
         Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
         ICLKernel::configure_internal(win);
@@ -165,12 +178,16 @@ void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_
     _config_id += support::cpp11::to_string(input->info()->dimension(2));
 }
 
-Status CLNormalizePlanarYUVLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
+Status CLNormalizePlanarYUVLayerKernel::validate(const ITensorInfo *input,
+                                                 const ITensorInfo *output,
+                                                 const ITensorInfo *mean,
+                                                 const ITensorInfo *std)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, std));
-    if(input->data_layout() == DataLayout::NCHW)
+    if (input->data_layout() == DataLayout::NCHW)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_nchw(input->clone().get(), output->clone().get()).first);
+        ARM_COMPUTE_RETURN_ON_ERROR(
+            validate_and_configure_window_nchw(input->clone().get(), output->clone().get()).first);
     }
     return Status{};
 }
@@ -196,7 +213,6 @@ void CLNormalizePlanarYUVLayerKernel::run(const Window &window, cl::CommandQueue
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

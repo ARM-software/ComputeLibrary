@@ -24,14 +24,13 @@
 #ifndef ARM_COMPUTE_CLTENSORALLOCATOR_H
 #define ARM_COMPUTE_CLTENSORALLOCATOR_H
 
+#include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLMemory.h"
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-
-#include "arm_compute/core/CL/CLTypes.h"
-#include "arm_compute/core/CL/OpenCL.h"
 
 #include <cstdint>
 
@@ -148,7 +147,7 @@ private:
     static const cl::Buffer _empty_buffer;
 
 private:
-    CLRuntimeContext *_ctx;
+    CLRuntimeContext  *_ctx;
     IMemoryManageable *_owner;                   /**< Memory manageable object that owns the allocator */
     IMemoryGroup      *_associated_memory_group; /**< Registered memory manager */
     CLMemory           _memory;                  /**< OpenCL memory */

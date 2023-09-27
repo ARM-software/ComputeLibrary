@@ -75,8 +75,8 @@ enum class TensorSamplerAddressModeY : int32_t
  */
 enum class TensorSamplerAddressModeZ : int32_t
 {
-    Unknown        = 0,
-    None           = 1,
+    Unknown = 0,
+    None    = 1,
 };
 
 } // namespace ckw

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_MUL_KERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -72,16 +73,27 @@ public:
      * @param[in]  rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale,
-                   ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMulKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale,
-                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           float                      scale,
+                           ConvertPolicy              overflow_policy,
+                           RoundingPolicy             rounding_policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
@@ -101,14 +113,21 @@ public:
      * @param[out] dst             The dst tensor info. Data types supported: same as @p src1. Number of channels supported: same as @p src1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClComplexMulKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

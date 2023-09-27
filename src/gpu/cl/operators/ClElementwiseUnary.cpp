@@ -23,9 +23,8 @@
  */
 #include "src/gpu/cl/operators/ClElementwiseUnary.h"
 
-#include "src/gpu/cl/kernels/ClElementwiseUnaryKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClElementwiseUnaryKernel.h"
 
 namespace arm_compute
 {

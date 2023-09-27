@@ -62,7 +62,11 @@ public:
      * @param[in]  y               Second input tensor. Data types supported: Same as @p x
      * @param[out] output          Output tensor. Data types supported: Same as @p x.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *c,
+                   const ICLTensor        *x,
+                   const ICLTensor        *y,
+                   ICLTensor              *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSelect
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.

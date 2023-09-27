@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-PriorBoxLayerNode::PriorBoxLayerNode(PriorBoxLayerInfo prior_info)
-    : _info(std::move(prior_info))
+PriorBoxLayerNode::PriorBoxLayerNode(PriorBoxLayerInfo prior_info) : _info(std::move(prior_info))
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -44,7 +43,7 @@ PriorBoxLayerInfo PriorBoxLayerNode::priorbox_info() const
     return _info;
 }
 
-TensorDescriptor PriorBoxLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
+TensorDescriptor PriorBoxLayerNode::compute_output_descriptor(const TensorDescriptor  &input_descriptor,
                                                               const PriorBoxLayerInfo &info)
 {
     const unsigned int layer_width  = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
@@ -61,7 +60,7 @@ TensorDescriptor PriorBoxLayerNode::compute_output_descriptor(const TensorDescri
 
 bool PriorBoxLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

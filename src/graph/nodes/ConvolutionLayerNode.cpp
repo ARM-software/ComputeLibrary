@@ -37,7 +37,12 @@ ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo     info,
                                            ConvolutionMethod method,
                                            FastMathHint      fast_math_hint,
                                            QuantizationInfo  out_quant_info)
-    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(std::move(out_quant_info)), _fused_activation()
+    : _info(std::move(info)),
+      _num_groups(num_groups),
+      _method(method),
+      _fast_math_hint(fast_math_hint),
+      _out_quant_info(std::move(out_quant_info)),
+      _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -100,20 +105,22 @@ TensorDescriptor ConvolutionLayerNode::compute_output_descriptor(const TensorDes
     const unsigned int kernel_width  = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int kernel_height = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
-    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
+    std::tie(output_width, output_height) =
+        scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
     output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL),
+                                weights_descriptor.shape[3]);
 
     return output_descriptor;
 }
 
 bool ConvolutionLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -132,7 +139,7 @@ TensorDescriptor ConvolutionLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
     TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info);
-    if(!_out_quant_info.empty())
+    if (!_out_quant_info.empty())
     {
         output_info.quant_info = _out_quant_info;
     }

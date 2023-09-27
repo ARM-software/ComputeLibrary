@@ -43,8 +43,7 @@ public:
      * @param[in] strides Values to initialize the strides.
      */
     template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
+    constexpr Strides(Ts... strides) : Dimensions{strides...}
     {
     }
     /** Allow instances of this class to be copy constructed */

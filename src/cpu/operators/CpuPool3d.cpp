@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/Scheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuPool3dKernel.h"
 
@@ -35,8 +36,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuPool3d::CpuPool3d()
-    : _aux_mem(1)
+CpuPool3d::CpuPool3d() : _aux_mem(1)
 {
 }
 

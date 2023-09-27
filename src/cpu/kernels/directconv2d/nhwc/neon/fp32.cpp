@@ -30,7 +30,8 @@ namespace cpu
 {
 namespace kernels
 {
-void neon_fp32_nhwc_directconv2d(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
+void neon_fp32_nhwc_directconv2d(
+    const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
 {
     convolve_nhwc<float>(window, src, weights, dst, conv_info);
 }

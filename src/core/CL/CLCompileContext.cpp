@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLCompileContext.h"
-#include "arm_compute/core/CL/OpenCL.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
+
 #include "support/StringSupport.h"
 
 #include <regex>
 
 namespace arm_compute
 {
-CLBuildOptions::CLBuildOptions()
-    : _build_opts()
+CLBuildOptions::CLBuildOptions() : _build_opts()
 {
 }
 
@@ -45,7 +45,7 @@ void CLBuildOptions::add_option(std::string option)
 
 void CLBuildOptions::add_option_if(bool cond, std::string option)
 {
-    if(cond)
+    if (cond)
     {
         add_option(std::move(option));
     }
@@ -63,7 +63,7 @@ void CLBuildOptions::add_options(const StringSet &options)
 
 void CLBuildOptions::add_options_if(bool cond, const StringSet &options)
 {
-    if(cond)
+    if (cond)
     {
         add_options(options);
     }
@@ -79,26 +79,35 @@ bool CLBuildOptions::operator==(const CLBuildOptions &other) const
     return _build_opts == other._build_opts;
 }
 
-Program::Program()
-    : _context(), _device(), _is_binary(false), _name(), _source(), _binary()
+Program::Program() : _context(), _device(), _is_binary(false), _name(), _source(), _binary()
 {
 }
 
 Program::Program(cl::Context context, std::string name, std::string source)
-    : _context(std::move(context)), _device(), _is_binary(false), _name(std::move(name)), _source(std::move(source)), _binary()
+    : _context(std::move(context)),
+      _device(),
+      _is_binary(false),
+      _name(std::move(name)),
+      _source(std::move(source)),
+      _binary()
 {
 }
 
 Program::Program(cl::Context context, cl::Device device, std::string name, std::vector<unsigned char> binary)
-    : _context(std::move(context)), _device(std::move(device)), _is_binary(true), _name(std::move(name)), _source(), _binary(std::move(binary))
+    : _context(std::move(context)),
+      _device(std::move(device)),
+      _is_binary(true),
+      _name(std::move(name)),
+      _source(),
+      _binary(std::move(binary))
 {
 }
 
 Program::operator cl::Program() const
 {
-    if(_is_binary)
+    if (_is_binary)
     {
-        return cl::Program(_context, { _device }, { _binary });
+        return cl::Program(_context, {_device}, {_binary});
     }
     else
     {
@@ -112,12 +121,12 @@ bool Program::build(const cl::Program &program, const std::string &build_options
     {
         return program.build(build_options.c_str()) == CL_SUCCESS;
     }
-    catch(const cl::Error &e)
+    catch (const cl::Error &e)
     {
         cl_int     err        = CL_SUCCESS;
         const auto build_info = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(&err);
 
-        for(auto &pair : build_info)
+        for (auto &pair : build_info)
         {
             std::cerr << pair.second << std::endl;
         }
@@ -133,14 +142,12 @@ cl::Program Program::build(const std::string &build_options) const
     return cl_program;
 }
 
-Kernel::Kernel()
-    : _name(), _kernel()
+Kernel::Kernel() : _name(), _kernel()
 {
 }
 
 Kernel::Kernel(std::string name, const cl::Program &program)
-    : _name(std::move(name)),
-      _kernel(cl::Kernel(program, _name.c_str()))
+    : _name(std::move(name)), _kernel(cl::Kernel(program, _name.c_str()))
 {
 }
 CLCompileContext::CLCompileContext()
@@ -156,15 +163,19 @@ CLCompileContext::CLCompileContext(cl::Context context, const cl::Device &device
     _is_wbsm_supported = get_wbsm_support_info(device);
 }
 
-Kernel CLCompileContext::create_kernel(const std::string &kernel_name, const std::string &program_name, const std::string &program_source,
-                                       const std::string &kernel_path, const StringSet &build_options_set, bool is_binary) const
+Kernel CLCompileContext::create_kernel(const std::string &kernel_name,
+                                       const std::string &program_name,
+                                       const std::string &program_source,
+                                       const std::string &kernel_path,
+                                       const StringSet   &build_options_set,
+                                       bool               is_binary) const
 {
     const std::string build_options      = generate_build_options(build_options_set, kernel_path);
     const std::string built_program_name = program_name + "_" + build_options;
     auto              built_program_it   = _built_programs_map.find(built_program_name);
     cl::Program       cl_program;
 
-    if(_built_programs_map.end() != built_program_it)
+    if (_built_programs_map.end() != built_program_it)
     {
         // If program has been built, retrieve to create kernel from it
         cl_program = built_program_it->second;
@@ -184,11 +195,12 @@ Kernel CLCompileContext::create_kernel(const std::string &kernel_name, const std
     return Kernel(kernel_name, cl_program);
 }
 
-const Program &CLCompileContext::load_program(const std::string &program_name, const std::string &program_source, bool is_binary) const
+const Program &
+CLCompileContext::load_program(const std::string &program_name, const std::string &program_source, bool is_binary) const
 {
     const auto program_it = _programs_map.find(program_name);
 
-    if(program_it != _programs_map.end())
+    if (program_it != _programs_map.end())
     {
         return program_it->second;
     }
@@ -199,9 +211,10 @@ const Program &CLCompileContext::load_program(const std::string &program_name, c
     ARM_COMPUTE_UNUSED(is_binary);
     program = Program(_context, program_name, program_source);
 #else  /* EMBEDDED_KERNELS */
-    if(is_binary)
+    if (is_binary)
     {
-        program = Program(_context, _device.cl_device(), program_name, std::vector<unsigned char>(program_source.begin(), program_source.end()));
+        program = Program(_context, _device.cl_device(), program_name,
+                          std::vector<unsigned char>(program_source.begin(), program_source.end()));
     }
     else
     {
@@ -218,18 +231,19 @@ const Program &CLCompileContext::load_program(const std::string &program_name, c
 void CLCompileContext::set_context(cl::Context context)
 {
     _context = std::move(context);
-    if(_context.get() != nullptr)
+    if (_context.get() != nullptr)
     {
         const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
 
-        if(!cl_devices.empty())
+        if (!cl_devices.empty())
         {
             _device = CLDevice(cl_devices[0]);
         }
     }
 }
 
-std::string CLCompileContext::generate_build_options(const StringSet &build_options_set, const std::string &kernel_path) const
+std::string CLCompileContext::generate_build_options(const StringSet   &build_options_set,
+                                                     const std::string &kernel_path) const
 {
     std::string concat_str;
     bool        ext_supported = false;
@@ -241,27 +255,27 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
 
     GPUTarget gpu_arch = get_arch_from_target(_device.target());
-    concat_str += " -DGPU_ARCH=" + support::cpp11::to_string(
-                      static_cast<std::underlying_type<GPUTarget>::type>(gpu_arch));
+    concat_str +=
+        " -DGPU_ARCH=" + support::cpp11::to_string(static_cast<std::underlying_type<GPUTarget>::type>(gpu_arch));
 
-    if(_device.supported("cl_khr_fp16"))
+    if (_device.supported("cl_khr_fp16"))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
 
-    if(_device.supported("cl_arm_integer_dot_product_int8") || _device.supported("cl_khr_integer_dot_product"))
+    if (_device.supported("cl_arm_integer_dot_product_int8") || _device.supported("cl_khr_integer_dot_product"))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
     }
 
-    if(_device.supported("cl_arm_integer_dot_product_accumulate_int8"))
+    if (_device.supported("cl_arm_integer_dot_product_accumulate_int8"))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED=1 ";
     }
 
     std::tie(ext_supported, ext_buildopts) = _device.is_non_uniform_workgroup_supported();
 
-    if(ext_supported)
+    if (ext_supported)
     {
         concat_str += ext_buildopts;
     }
@@ -270,7 +284,7 @@ std::string CLCompileContext::generate_build_options(const StringSet &build_opti
         ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
     }
 
-    if(gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD && get_ddk_version() >= 11)
+    if (gpu_arch != GPUTarget::UNKNOWN && gpu_arch != GPUTarget::MIDGARD && get_ddk_version() >= 11)
     {
         concat_str += " -DUNROLL_WITH_PRAGMA ";
     }
@@ -295,7 +309,7 @@ std::string CLCompileContext::stringify_set(const StringSet &s, const std::strin
 #endif /* EMBEDDED_KERNELS */
 
     // Concatenate set
-    for(const auto &el : s)
+    for (const auto &el : s)
     {
         concat_set += " " + el;
     }
@@ -340,7 +354,7 @@ cl::NDRange CLCompileContext::default_ndrange() const
     GPUTarget   _target = get_target_from_device(_device.cl_device());
     cl::NDRange default_range;
 
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::MIDGARD:
         case GPUTarget::T600:
@@ -370,7 +384,8 @@ size_t CLCompileContext::max_local_workgroup_size(const cl::Kernel &kernel) cons
     size_t result;
 
     size_t err = kernel.getWorkGroupInfo(_device.cl_device(), CL_KERNEL_WORK_GROUP_SIZE, &result);
-    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetKernelWorkGroupInfo failed to return the maximum workgroup size for the kernel");
+    ARM_COMPUTE_ERROR_ON_MSG(err != 0,
+                             "clGetKernelWorkGroupInfo failed to return the maximum workgroup size for the kernel");
     ARM_COMPUTE_UNUSED(err);
 
     return result;
@@ -392,7 +407,7 @@ int32_t CLCompileContext::get_ddk_version() const
     const std::regex  ddk_regex("r([0-9]*)p[0-9]");
     std::smatch       ddk_match;
 
-    if(std::regex_search(device_version, ddk_match, ddk_regex))
+    if (std::regex_search(device_version, ddk_match, ddk_regex))
     {
         return std::stoi(ddk_match[1]);
     }

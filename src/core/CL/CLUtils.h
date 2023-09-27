@@ -72,7 +72,12 @@ cl::Image2D create_image2d_from_tensor(const ICLTensor *tensor, CLImage2DType im
  *
  * @return cl::Image2D object
  */
-cl::Image2D create_image2d_from_buffer(const cl::Context &ctx, const cl::Buffer &buffer, const TensorShape &shape2d, DataType data_type, size_t image_row_pitch, CLImage2DType image_type);
+cl::Image2D create_image2d_from_buffer(const cl::Context &ctx,
+                                       const cl::Buffer  &buffer,
+                                       const TensorShape &shape2d,
+                                       DataType           data_type,
+                                       size_t             image_row_pitch,
+                                       CLImage2DType      image_type);
 
 /** Check for CL error code and throw exception accordingly.
  *

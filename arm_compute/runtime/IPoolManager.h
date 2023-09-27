@@ -69,5 +69,5 @@ public:
      */
     virtual size_t num_pools() const = 0;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IPOOLMANAGER_H */

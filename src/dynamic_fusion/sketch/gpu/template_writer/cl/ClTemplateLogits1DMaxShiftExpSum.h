@@ -46,7 +46,9 @@ public:
      * @param[in] tensors    Tensor arguments to the components
      * @param[in] attributes Component attributes
      */
-    ClTemplateLogits1DMaxShiftExpSum(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
+    ClTemplateLogits1DMaxShiftExpSum(ComponentId                      id,
+                                     const ArgumentPack<ITensorInfo> &tensors,
+                                     const Attributes                &attributes);
     /** Prevent instances of this class from being copy constructed */
     ClTemplateLogits1DMaxShiftExpSum(const ClTemplateLogits1DMaxShiftExpSum &) = delete;
     /** Prevent instances of this class from being copied */

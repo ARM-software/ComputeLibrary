@@ -23,7 +23,9 @@
  */
 
 #include "ckw/TileOperand.h"
+
 #include "ckw/Error.h"
+
 #include "src/ITile.h"
 
 namespace ckw
@@ -34,7 +36,8 @@ TileOperand::TileOperand(ITile &tile)
 {
 }
 
-TileOperand::TileOperand(const TileOperand &operand, int32_t row_start, int32_t row_end, int32_t col_start, int32_t col_end)
+TileOperand::TileOperand(
+    const TileOperand &operand, int32_t row_start, int32_t row_end, int32_t col_start, int32_t col_end)
     : _tile(operand._tile), _row_start(row_start), _row_end(row_end), _col_start(col_start), _col_end(col_end)
 {
     CKW_ASSERT(row_start >= 0 && row_start < _tile->info().height());
@@ -50,7 +53,8 @@ TileOperand TileOperand::tile(int32_t row_start, int32_t row_end, int32_t col_st
     CKW_ASSERT(col_start >= 0 && _col_start + col_start < _col_end);
     CKW_ASSERT(col_end > col_start && _col_start + col_end <= _col_end);
 
-    return TileOperand(*this, _row_start + row_start, _row_start + row_end, _col_start + col_start, _col_start + col_end);
+    return TileOperand(*this, _row_start + row_start, _row_start + row_end, _col_start + col_start,
+                       _col_start + col_end);
 }
 
 TileOperand TileOperand::row(int32_t row) const

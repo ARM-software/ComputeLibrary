@@ -34,7 +34,10 @@ AccessWindowStatic::AccessWindowStatic(ITensorInfo *info, int start_x, int start
 {
 }
 
-ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
+ValidRegion AccessWindowStatic::compute_valid_region(const Window &window,
+                                                     ValidRegion   input_valid_region,
+                                                     bool          border_undefined,
+                                                     BorderSize    border_size) const
 {
     ARM_COMPUTE_UNUSED(border_undefined);
     ARM_COMPUTE_UNUSED(border_size);
@@ -44,7 +47,7 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
 
 ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, ValidRegion input_valid_region) const
 {
-    if(_info == nullptr)
+    if (_info == nullptr)
     {
         return input_valid_region;
     }
@@ -57,7 +60,7 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
     // Start of the valid region is equal to the start of the static access but
     // never outside of the tensor.
     anchor.set(0, std::max<int>(0, _start_x));
-    if(_info->num_dimensions() > 1)
+    if (_info->num_dimensions() > 1)
     {
         anchor.set(1, std::max<int>(0, _start_y));
     }
@@ -65,7 +68,7 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
     // End of the valid region is equal to the end of the static access but
     // never outside of the tensor.
     shape.set(0, std::min<int>(_end_x, _info->tensor_shape()[0]));
-    if(_info->num_dimensions() > 1)
+    if (_info->num_dimensions() > 1)
     {
         shape.set(1, std::min<int>(_end_y, _info->tensor_shape()[1]));
     }
@@ -75,7 +78,7 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
 
 void AccessWindowStatic::set_valid_region(const Window &window, const ValidRegion &input_valid_region)
 {
-    if(_info != nullptr)
+    if (_info != nullptr)
     {
         _info->set_valid_region(compute_valid_region(window, input_valid_region));
     }
@@ -84,7 +87,7 @@ void AccessWindowStatic::set_valid_region(const Window &window, const ValidRegio
 bool AccessWindowStatic::update_window_if_needed(Window &window) const
 {
     // If the padding is not enough and the tensor is not resizable, shrink the window to size 0
-    if(_info == nullptr || _info->is_resizable())
+    if (_info == nullptr || _info->is_resizable())
     {
         return false;
     }
@@ -96,48 +99,50 @@ bool AccessWindowStatic::update_window_if_needed(Window &window) const
     bool window_modified = false;
 
     // Calculate if padding is enough
-    if(_start_y < 0)
+    if (_start_y < 0)
     {
         const int front_pad_y_available = -static_cast<int>(offset_first_element / strides[1]);
 
-        if(_start_y < front_pad_y_available)
+        if (_start_y < front_pad_y_available)
         {
             window_modified = true;
         }
     }
 
-    if(!window_modified)
+    if (!window_modified)
     {
-        if(_end_y > static_cast<int>(shape[1]))
+        if (_end_y > static_cast<int>(shape[1]))
         {
             const int stride_z             = _info->num_dimensions() > 2 ? strides[2] : _info->total_size();
             const int tail_pad_y_available = (stride_z / strides[1]) - shape[1];
 
-            if(static_cast<int>(shape[1]) + tail_pad_y_available < _end_y)
+            if (static_cast<int>(shape[1]) + tail_pad_y_available < _end_y)
             {
                 window_modified = true;
             }
         }
 
-        if(!window_modified)
+        if (!window_modified)
         {
             const int stride_y = _info->num_dimensions() > 1 ? strides[1] : _info->total_size();
 
-            if(_start_x < 0)
+            if (_start_x < 0)
             {
-                const int front_pad_x_available = -std::min<int>(static_cast<int>(offset_first_element), stride_y - shape[0] * strides[0]) / static_cast<int>(strides[0]);
+                const int front_pad_x_available =
+                    -std::min<int>(static_cast<int>(offset_first_element), stride_y - shape[0] * strides[0]) /
+                    static_cast<int>(strides[0]);
 
-                if(_start_x < front_pad_x_available)
+                if (_start_x < front_pad_x_available)
                 {
                     window_modified = true;
                 }
             }
 
-            if(!window_modified && _end_x > static_cast<int>(shape[0]))
+            if (!window_modified && _end_x > static_cast<int>(shape[0]))
             {
                 const int tail_pad_x_available = (stride_y / strides[0]) - shape[0];
 
-                if(static_cast<int>(shape[0]) + tail_pad_x_available < _end_x)
+                if (static_cast<int>(shape[0]) + tail_pad_x_available < _end_x)
                 {
                     window_modified = true;
                 }
@@ -146,9 +151,9 @@ bool AccessWindowStatic::update_window_if_needed(Window &window) const
     }
 
     // If padding is not enough
-    if(window_modified)
+    if (window_modified)
     {
-        for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
+        for (size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
         {
             window.set(i, Window::Dimension(0, 0, 1));
         }
@@ -162,7 +167,7 @@ bool AccessWindowStatic::update_padding_if_needed(const Window &window)
     ARM_COMPUTE_UNUSED(window);
 
     // Only update the padding if the tensor allows it
-    if(_info == nullptr || !_info->is_resizable())
+    if (_info == nullptr || !_info->is_resizable())
     {
         return false;
     }

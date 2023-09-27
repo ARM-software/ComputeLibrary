@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClMul.h"
 
@@ -34,38 +35,55 @@ namespace arm_compute
 {
 struct CLPixelWiseMultiplication::Impl
 {
-    const ICLTensor               *src_0{ nullptr };
-    const ICLTensor               *src_1{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClMul> op{ nullptr };
+    const ICLTensor               *src_0{nullptr};
+    const ICLTensor               *src_1{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClMul> op{nullptr};
 };
 
-CLPixelWiseMultiplication::CLPixelWiseMultiplication()
-    : _impl(std::make_unique<Impl>())
+CLPixelWiseMultiplication::CLPixelWiseMultiplication() : _impl(std::make_unique<Impl>())
 {
 }
-CLPixelWiseMultiplication::CLPixelWiseMultiplication(CLPixelWiseMultiplication &&) = default;
+CLPixelWiseMultiplication::CLPixelWiseMultiplication(CLPixelWiseMultiplication &&)            = default;
 CLPixelWiseMultiplication &CLPixelWiseMultiplication::operator=(CLPixelWiseMultiplication &&) = default;
 CLPixelWiseMultiplication::~CLPixelWiseMultiplication()                                       = default;
 
-void CLPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
-                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+void CLPixelWiseMultiplication::configure(ICLTensor                 *input1,
+                                          ICLTensor                 *input2,
+                                          ICLTensor                 *output,
+                                          float                      scale,
+                                          ConvertPolicy              overflow_policy,
+                                          RoundingPolicy             rounding_policy,
+                                          const ActivationLayerInfo &act_info)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy,
+              rounding_policy, act_info);
 }
 
-void CLPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
-                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+void CLPixelWiseMultiplication::configure(const CLCompileContext    &compile_context,
+                                          ICLTensor                 *input1,
+                                          ICLTensor                 *input2,
+                                          ICLTensor                 *output,
+                                          float                      scale,
+                                          ConvertPolicy              overflow_policy,
+                                          RoundingPolicy             rounding_policy,
+                                          const ActivationLayerInfo &act_info)
 {
     _impl->src_0 = input1;
     _impl->src_1 = input2;
     _impl->dst   = output;
     _impl->op    = std::make_unique<opencl::ClMul>();
-    _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy, act_info);
+    _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), scale, overflow_policy,
+                         rounding_policy, act_info);
 }
 
-Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+Status CLPixelWiseMultiplication::validate(const ITensorInfo         *input1,
+                                           const ITensorInfo         *input2,
+                                           const ITensorInfo         *output,
+                                           float                      scale,
+                                           ConvertPolicy              overflow_policy,
+                                           RoundingPolicy             rounding_policy,
+                                           const ActivationLayerInfo &act_info)
 {
     return opencl::ClMul::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
@@ -82,26 +100,33 @@ void CLPixelWiseMultiplication::run()
 
 struct CLComplexPixelWiseMultiplication::Impl
 {
-    const ICLTensor                      *src_0{ nullptr };
-    const ICLTensor                      *src_1{ nullptr };
-    ICLTensor                            *dst{ nullptr };
-    std::unique_ptr<opencl::ClComplexMul> op{ nullptr };
+    const ICLTensor                      *src_0{nullptr};
+    const ICLTensor                      *src_1{nullptr};
+    ICLTensor                            *dst{nullptr};
+    std::unique_ptr<opencl::ClComplexMul> op{nullptr};
 };
 
-CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication()
-    : _impl(std::make_unique<Impl>())
+CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication() : _impl(std::make_unique<Impl>())
 {
 }
 CLComplexPixelWiseMultiplication::CLComplexPixelWiseMultiplication(CLComplexPixelWiseMultiplication &&) = default;
-CLComplexPixelWiseMultiplication &CLComplexPixelWiseMultiplication::operator=(CLComplexPixelWiseMultiplication &&) = default;
-CLComplexPixelWiseMultiplication::~CLComplexPixelWiseMultiplication()                                              = default;
+CLComplexPixelWiseMultiplication &
+CLComplexPixelWiseMultiplication::operator=(CLComplexPixelWiseMultiplication &&) = default;
+CLComplexPixelWiseMultiplication::~CLComplexPixelWiseMultiplication()            = default;
 
-void CLComplexPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+void CLComplexPixelWiseMultiplication::configure(ICLTensor                 *input1,
+                                                 ICLTensor                 *input2,
+                                                 ICLTensor                 *output,
+                                                 const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
 }
 
-void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+void CLComplexPixelWiseMultiplication::configure(const CLCompileContext    &compile_context,
+                                                 ICLTensor                 *input1,
+                                                 ICLTensor                 *input2,
+                                                 ICLTensor                 *output,
+                                                 const ActivationLayerInfo &act_info)
 {
     _impl->src_0 = input1;
     _impl->src_1 = input2;
@@ -110,7 +135,10 @@ void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile
     _impl->op->configure(compile_context, input1->info(), input2->info(), output->info(), act_info);
 }
 
-Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo         *input1,
+                                                  const ITensorInfo         *input2,
+                                                  const ITensorInfo         *output,
+                                                  const ActivationLayerInfo &act_info)
 {
     return opencl::ClComplexMul::validate(input1, input2, output, act_info);
 }

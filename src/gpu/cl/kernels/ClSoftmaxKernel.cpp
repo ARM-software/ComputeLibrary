@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 #include "src/gpu/cl/kernels/ClSoftmaxKernel.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -60,15 +62,16 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
     // Number of integer bits used in temporary fixed-point representation of exponent accumulator
     static const int exp_accumulation_in_bits = 12;
 
-    const double beta_multiplier = std::min(
-                                       1.0 * beta * input_scale * (1 << (31 - scaled_diff_int_bits)),
-                                       (1LL << 31) - 1.0);
+    const double beta_multiplier =
+        std::min(1.0 * beta * input_scale * (1 << (31 - scaled_diff_int_bits)), (1LL << 31) - 1.0);
     int input_beta_multiplier;
     int input_beta_left_shift;
-    quantization::calculate_quantized_multiplier_greater_than_one(beta_multiplier, &input_beta_multiplier, &input_beta_left_shift);
+    quantization::calculate_quantized_multiplier_greater_than_one(beta_multiplier, &input_beta_multiplier,
+                                                                  &input_beta_left_shift);
 
-    const double max_input_rescaled = 1.0 * ((1 << scaled_diff_int_bits) - 1) * (1LL << (31 - scaled_diff_int_bits)) / (1LL << input_beta_left_shift);
-    const int    diff_min           = -1.f * std::floor(max_input_rescaled);
+    const double max_input_rescaled =
+        1.0 * ((1 << scaled_diff_int_bits) - 1) * (1LL << (31 - scaled_diff_int_bits)) / (1LL << input_beta_left_shift);
+    const int diff_min = -1.f * std::floor(max_input_rescaled);
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DSCALED_DIFF_INT_BITS=" + support::cpp11::to_string(scaled_diff_int_bits));
@@ -80,18 +83,22 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
     return build_opts;
 }
 
-Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum)
+Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo &src,
+                                           const ITensorInfo &max,
+                                           const ITensorInfo &dst,
+                                           const ITensorInfo &sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &max);
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(src.data_type());
 
     // Checks performed when output is configured
-    if(dst.total_size() != 0)
+    if (dst.total_size() != 0)
     {
-        if(is_quantized_asymmetric)
+        if (is_quantized_asymmetric)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::S32);
         }
@@ -103,9 +110,9 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo &src, const ITensor
     }
 
     // Checks performed when sum is configured
-    if(sum.total_size() != 0)
+    if (sum.total_size() != 0)
     {
-        if(is_quantized_asymmetric)
+        if (is_quantized_asymmetric)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&sum, 1, DataType::S32);
         }
@@ -119,7 +126,10 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo &src, const ITensor
     return Status{};
 }
 
-Status validate_arguments_1DNorm(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
+Status validate_arguments_1DNorm(const ITensorInfo       &src,
+                                 const ITensorInfo       &sum,
+                                 const ITensorInfo       &dst,
+                                 const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::S32, DataType::F16, DataType::F32);
@@ -127,14 +137,15 @@ Status validate_arguments_1DNorm(const ITensorInfo &src, const ITensorInfo &sum,
     ARM_COMPUTE_RETURN_ERROR_ON(info.is_log && !is_data_type_float(info.input_data_type));
 
     // Note: output should always have a scale of 1/256 and offset 0
-    const QuantizationInfo allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
-    const bool             is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
+    const QuantizationInfo allowed_quantization_info =
+        get_softmax_output_quantization_info(info.input_data_type, info.is_log);
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(info.input_data_type);
 
     // Checks performed when output is configured
-    if(dst.total_size() != 0)
+    if (dst.total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
-        if(!is_quantized_asymmetric)
+        if (!is_quantized_asymmetric)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
         }
@@ -161,9 +172,14 @@ ClLogits1DMaxShiftExpSumKernel::ClLogits1DMaxShiftExpSumKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &max, ITensorInfo &dst, ITensorInfo &sum, const SoftmaxKernelInfo &info)
+void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext  &compile_context,
+                                               const ITensorInfo       &src,
+                                               ITensorInfo             &max,
+                                               ITensorInfo             &dst,
+                                               ITensorInfo             &sum,
+                                               const SoftmaxKernelInfo &info)
 {
-    auto padding_info = get_padding_info({ &src, &max, &dst, &sum });
+    auto padding_info = get_padding_info({&src, &max, &dst, &sum});
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(sum, src.clone()->set_tensor_shape(max.tensor_shape()));
@@ -191,15 +207,21 @@ void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     build_opts.add_option("-DLOG_VECTOR_SIZE=" + support::cpp11::to_string(lround(log2(vector_size))));
     build_opts.add_option_if((reduction_dim_size % vector_size) != 0, "-DNON_MULTIPLE_OF_VECTOR_SIZE");
     build_opts.add_option_if(is_signed_qasymm8, "-DQASYMM8_SIGNED");
-    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
+    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f),
+                             "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_option_if(is_data_type_float(dt) && info.is_log, "-DLOG_SOFTMAX");
-    build_opts.add_option_if(is_data_type_float(dt), "-DMINVAL=" + ((dt == DataType::F16) ? std::string("-HALF_MAX") : std::string("-FLT_MAX")));
-    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
-    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DBETA=" + float_to_string_with_full_precision(beta));
-    build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
+    build_opts.add_option_if(is_data_type_float(dt), "-DMINVAL=" + ((dt == DataType::F16) ? std::string("-HALF_MAX")
+                                                                                          : std::string("-FLT_MAX")));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt),
+                             "-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric(dt),
+                             "-DBETA=" + float_to_string_with_full_precision(beta));
+    build_opts.add_options_if(is_data_type_quantized_asymmetric(dt),
+                              prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
 
     cl::NDRange lws_hint(cl::NullRange);
-    std::string kernel_name = std::string("softmax_layer_max_shift_exp_sum_") + (is_data_type_quantized_asymmetric(dt) ? "quantized_" : "") + "serial";
+    std::string kernel_name = std::string("softmax_layer_max_shift_exp_sum_") +
+                              (is_data_type_quantized_asymmetric(dt) ? "quantized_" : "") + "serial";
 
     // Create kernel.
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
@@ -211,7 +233,10 @@ void ClLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_c
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum)
+Status ClLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo &src,
+                                                const ITensorInfo &max,
+                                                const ITensorInfo &dst,
+                                                const ITensorInfo &sum)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(src, max, dst, sum));
     return Status{};
@@ -241,7 +266,7 @@ void ClLogits1DMaxShiftExpSumKernel::run_op(ITensorPack &tensors, const Window &
 
     // Reconfigure window in case of parallel reduction
     ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(src->info()->dimension(0));
-    if(std::get<0>(parallel_reduction_info))
+    if (std::get<0>(parallel_reduction_info))
     {
         // Launch grid_size parallel work items
         window_collapsed.set(Window::DimX, Window::Dimension(0, _grid_size, 1));
@@ -258,8 +283,7 @@ void ClLogits1DMaxShiftExpSumKernel::run_op(ITensorPack &tensors, const Window &
         add_3D_tensor_argument(idx, dst, slice);
         add_3D_tensor_argument(idx, sum, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    } while (window_collapsed.slide_window_slice_3D(slice));
 }
 
 ClLogits1DNormKernel::ClLogits1DNormKernel()
@@ -267,18 +291,24 @@ ClLogits1DNormKernel::ClLogits1DNormKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ITensorInfo &src, const ITensorInfo &sum, ITensorInfo &dst, const SoftmaxKernelInfo &info)
+void ClLogits1DNormKernel::configure(const CLCompileContext  &compile_context,
+                                     const ITensorInfo       &src,
+                                     const ITensorInfo       &sum,
+                                     ITensorInfo             &dst,
+                                     const SoftmaxKernelInfo &info)
 {
-    auto padding_info = get_padding_info({ &src, &dst, &sum });
+    auto padding_info = get_padding_info({&src, &dst, &sum});
 
     // Note: output should always have a scale of 1/256 and offset 0
-    const bool                    is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
-    const DataType                output_data_type          = info.input_data_type;
-    const QuantizationInfo        allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
-    const UniformQuantizationInfo qinfo                     = src.quantization_info().uniform();
+    const bool             is_quantized_asymmetric = is_data_type_quantized_asymmetric(info.input_data_type);
+    const DataType         output_data_type        = info.input_data_type;
+    const QuantizationInfo allowed_quantization_info =
+        get_softmax_output_quantization_info(info.input_data_type, info.is_log);
+    const UniformQuantizationInfo qinfo = src.quantization_info().uniform();
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(dst, src.clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
+    auto_init_if_empty(dst,
+                       src.clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(src, sum, dst, info));
@@ -311,7 +341,10 @@ void ClLogits1DNormKernel::configure(const CLCompileContext &compile_context, co
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClLogits1DNormKernel::validate(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
+Status ClLogits1DNormKernel::validate(const ITensorInfo       &src,
+                                      const ITensorInfo       &sum,
+                                      const ITensorInfo       &dst,
+                                      const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(src, sum, dst, info));
 
@@ -343,8 +376,7 @@ void ClLogits1DNormKernel::run_op(ITensorPack &tensors, const Window &window, ::
         add_3D_tensor_argument(idx, sum, sum_slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    } while (window_collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

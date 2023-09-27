@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/GPUTarget.h"
+
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <utility>
@@ -38,31 +39,34 @@ namespace kernels
 {
 namespace gemm
 {
-ClGemmDefaultConfigNativeBifrost::ClGemmDefaultConfigNativeBifrost(GPUTarget gpu)
-    : IClGemmKernelConfig(gpu)
+ClGemmDefaultConfigNativeBifrost::ClGemmDefaultConfigNativeBifrost(GPUTarget gpu) : IClGemmKernelConfig(gpu)
 {
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (ClGemmDefaultConfigNativeBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
-                                             unsigned int b);
+    using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (
+        ClGemmDefaultConfigNativeBifrost::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 
-    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(&ClGemmDefaultConfigNativeBifrost::configure_G71_f32,
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_G71_f32, // We use the F32 heuristic
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_G71_u8);
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(
+        &ClGemmDefaultConfigNativeBifrost::configure_G71_f32,
+        &ClGemmDefaultConfigNativeBifrost::configure_G71_f32, // We use the F32 heuristic
+        &ClGemmDefaultConfigNativeBifrost::configure_G71_u8);
 
-    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G76(&ClGemmDefaultConfigNativeBifrost::configure_G76_f32,
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_G76_f32, // We use the F32 heuristic
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_G76_u8);
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G76(
+        &ClGemmDefaultConfigNativeBifrost::configure_G76_f32,
+        &ClGemmDefaultConfigNativeBifrost::configure_G76_f32, // We use the F32 heuristic
+        &ClGemmDefaultConfigNativeBifrost::configure_G76_u8);
 
-    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G7x(&ClGemmDefaultConfigNativeBifrost::configure_default_f32,
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_default_f32, // We use the F32 heuristic
-                                                                    &ClGemmDefaultConfigNativeBifrost::configure_default_u8);
+    CLGEMMConfigArray<ConfigurationFunctionExecutorPtr> configs_G7x(
+        &ClGemmDefaultConfigNativeBifrost::configure_default_f32,
+        &ClGemmDefaultConfigNativeBifrost::configure_default_f32, // We use the F32 heuristic
+        &ClGemmDefaultConfigNativeBifrost::configure_default_u8);
 
     ConfigurationFunctionExecutorPtr func = nullptr;
 
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::G76:
             func = configs_G76.get_function(data_type);
@@ -79,18 +83,19 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     return (this->*func)(m, n, k, b);
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
-    if(m == 1)
+    if (m == 1)
     {
-        if(n < 2048)
+        if (n < 2048)
         {
             return configure_lhs_rhs_info(m, n, 1, 2, 4, 1, 1, false, false, false, false);
         }
-        else if(n >= 2048 && n < 8192)
+        else if (n >= 2048 && n < 8192)
         {
             return configure_lhs_rhs_info(m, n, 1, 4, 4, 1, 1, false, false, false, false);
         }
@@ -105,20 +110,21 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
-    if(dot8_supported(CLKernelLibrary::get().get_device()))
+    if (dot8_supported(CLKernelLibrary::get().get_device()))
     {
-        if(m == 1)
+        if (m == 1)
         {
-            if(n < 2048)
+            if (n < 2048)
             {
                 return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 1, false, false, false, false);
             }
-            else if(n >= 2048 && n < 16384)
+            else if (n >= 2048 && n < 16384)
             {
                 return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 1, false, false, false, false);
             }
@@ -129,7 +135,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
         }
         else
         {
-            if(m < 64)
+            if (m < 64)
             {
                 return configure_lhs_rhs_info(m, n, 2, 2, 16, 1, 1, false, false, false, false);
             }
@@ -141,9 +147,9 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
     else
     {
-        if(m == 1)
+        if (m == 1)
         {
-            if(n < 8192)
+            if (n < 8192)
             {
                 return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 1, false, false, false, false);
             }
@@ -159,24 +165,25 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
-    if(m == 1)
+    if (m == 1)
     {
-        if(n > 4196)
+        if (n > 4196)
         {
             return configure_lhs_rhs_info(m, n, 1, 4, 2, 1, 1, false, false, false, false);
         }
         else
         {
-            if(k < 2048)
+            if (k < 2048)
             {
                 return configure_lhs_rhs_info(m, n, 1, 2, 2, 1, 1, false, false, false, false);
             }
-            else if(k >= 2048 && k < 16384)
+            else if (k >= 2048 && k < 16384)
             {
                 return configure_lhs_rhs_info(m, n, 1, 2, 4, 1, 1, false, false, false, false);
             }
@@ -192,18 +199,19 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
 
-    if(m == 1)
+    if (m == 1)
     {
-        if(n < 2048)
+        if (n < 2048)
         {
             return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, 1, false, false, false, false);
         }
-        else if(n >= 2048 && n < 16384)
+        else if (n >= 2048 && n < 16384)
         {
             return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, 1, false, false, false, false);
         }
@@ -214,7 +222,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
     else
     {
-        if(m < 64)
+        if (m < 64)
         {
             return configure_lhs_rhs_info(m, n, 2, 2, 16, 1, 1, false, false, false, false);
         }
@@ -225,7 +233,8 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     }
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);
@@ -233,7 +242,8 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost
     return configure_lhs_rhs_info(m, n, 5, 4, 4, 1, 1, false, false, false, false);
 }
 
-std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> ClGemmDefaultConfigNativeBifrost::configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo>
+ClGemmDefaultConfigNativeBifrost::configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
 {
     ARM_COMPUTE_UNUSED(k);
     ARM_COMPUTE_UNUSED(b);

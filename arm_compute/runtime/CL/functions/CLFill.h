@@ -28,6 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -73,7 +74,10 @@ public:
      * @param[in]     constant_value  The value used to fill the planes of the tensor
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *tensor,
+                   const PixelValue       &constant_value,
+                   Window                 *window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFill
      *
      * @param[in] tensor         Source tensor info. Data types supported: All.

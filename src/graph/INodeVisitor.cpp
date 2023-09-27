@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph/INodeVisitor.h"
+
 #include "arm_compute/graph/nodes/Nodes.h"
 
 namespace arm_compute

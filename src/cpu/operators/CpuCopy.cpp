@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuCopy.h"
 
-#include "src/cpu/kernels/CpuCopyKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuCopyKernel.h"
 
 namespace arm_compute
 {

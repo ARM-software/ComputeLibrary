@@ -25,6 +25,7 @@
 #define ACL_ARM_COMPUTE_CORE_CORETYPES
 
 #include "arm_compute/core/Strides.h"
+
 #include "support/Half.h"
 
 /** CoreTypes.h groups together essential small types that are used across functions */
@@ -146,9 +147,11 @@ public:
      * @param[in] pad_y    (Optional) Padding, in elements, across y. Defaults to 0.
      * @param[in] round    (Optional) Dimensions rounding. Defaults to @ref DimensionRoundingType::FLOOR.
      */
-    PadStrideInfo(unsigned int stride_x = 1, unsigned int stride_y = 1,
-                  unsigned int pad_x = 0, unsigned int pad_y = 0,
-                  DimensionRoundingType round = DimensionRoundingType::FLOOR)
+    PadStrideInfo(unsigned int          stride_x = 1,
+                  unsigned int          stride_y = 1,
+                  unsigned int          pad_x    = 0,
+                  unsigned int          pad_y    = 0,
+                  DimensionRoundingType round    = DimensionRoundingType::FLOOR)
         : _stride(std::make_pair(stride_x, stride_y)),
           _pad_left(pad_x),
           _pad_top(pad_y),
@@ -167,9 +170,12 @@ public:
      * @param[in] pad_bottom Padding across y on the bottom, in elements.
      * @param[in] round      Dimensions rounding.
      */
-    PadStrideInfo(unsigned int stride_x, unsigned int stride_y,
-                  unsigned int pad_left, unsigned int pad_right,
-                  unsigned int pad_top, unsigned int pad_bottom,
+    PadStrideInfo(unsigned int          stride_x,
+                  unsigned int          stride_y,
+                  unsigned int          pad_left,
+                  unsigned int          pad_right,
+                  unsigned int          pad_top,
+                  unsigned int          pad_bottom,
                   DimensionRoundingType round)
         : _stride(std::make_pair(stride_x, stride_y)),
           _pad_left(pad_left),
@@ -243,10 +249,10 @@ public:
 
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    unsigned int _pad_left;
-    unsigned int _pad_top;
-    unsigned int _pad_right;
-    unsigned int _pad_bottom;
+    unsigned int                          _pad_left;
+    unsigned int                          _pad_top;
+    unsigned int                          _pad_right;
+    unsigned int                          _pad_bottom;
 
     DimensionRoundingType _round_type;
 };

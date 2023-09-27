@@ -29,8 +29,8 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "src/core/helpers/MemoryHelpers.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuGemmLowpMatrixMultiplyCore.h"
 
 using namespace arm_compute::experimental;
@@ -39,18 +39,19 @@ namespace arm_compute
 {
 struct NEGEMMLowpMatrixMultiplyCore::Impl
 {
-    const ITensor                                      *b{ nullptr };
-    std::unique_ptr<cpu::CpuGemmLowpMatrixMultiplyCore> op{ nullptr };
+    const ITensor                                      *b{nullptr};
+    std::unique_ptr<cpu::CpuGemmLowpMatrixMultiplyCore> op{nullptr};
     ITensorPack                                         run_pack{};
     ITensorPack                                         prep_pack{};
     MemoryGroup                                         memory_group{};
-    IWeightsManager                                    *weights_manager{ nullptr };
+    IWeightsManager                                    *weights_manager{nullptr};
     MemoryRequirements                                  aux_mem_req{};
     WorkspaceData<Tensor>                               workspace_tensors{};
-    bool                                                is_prepared{ false };
+    bool                                                is_prepared{false};
 };
 
-NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager,
+                                                           IWeightsManager                *weights_manager)
     : _impl(std::make_unique<Impl>())
 {
     _impl->weights_manager = weights_manager;
@@ -58,41 +59,41 @@ NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemo
 }
 NEGEMMLowpMatrixMultiplyCore::~NEGEMMLowpMatrixMultiplyCore() = default;
 
-void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info)
+void NEGEMMLowpMatrixMultiplyCore::configure(
+    const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->info()->clone();
-    if(!gemm_info.reshape_b_only_on_first_run())
+    if (!gemm_info.reshape_b_only_on_first_run())
     {
         b_info_to_use->set_are_values_constant(false);
     }
 
     _impl->b  = b;
     _impl->op = std::make_unique<cpu::CpuGemmLowpMatrixMultiplyCore>();
-    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr ? c->info() : nullptr), output->info(), gemm_info);
-    _impl->run_pack =
-    {
-        { TensorType::ACL_SRC_0, a },
-        { TensorType::ACL_SRC_1, b },
-        { TensorType::ACL_SRC_2, c },
-        { TensorType::ACL_DST, output }
-    };
-    _impl->prep_pack =
-    {
-        { TensorType::ACL_SRC_1, b },
-        { TensorType::ACL_SRC_2, c }
-    };
-    _impl->aux_mem_req       = _impl->op->workspace();
-    _impl->workspace_tensors = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->op->configure(a->info(), b_info_to_use.get(), (c != nullptr ? c->info() : nullptr), output->info(),
+                         gemm_info);
+    _impl->run_pack    = {{TensorType::ACL_SRC_0, a},
+                          {TensorType::ACL_SRC_1, b},
+                          {TensorType::ACL_SRC_2, c},
+                          {TensorType::ACL_DST, output}};
+    _impl->prep_pack   = {{TensorType::ACL_SRC_1, b}, {TensorType::ACL_SRC_2, c}};
+    _impl->aux_mem_req = _impl->op->workspace();
+    _impl->workspace_tensors =
+        manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
 }
 
-Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info)
+Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
+                                              const ITensorInfo *b,
+                                              const ITensorInfo *c,
+                                              const ITensorInfo *output,
+                                              const GEMMInfo    &gemm_info)
 {
     // Make the B matrix dynamic values.
     auto b_info_to_use = b->clone();
-    if(!gemm_info.reshape_b_only_on_first_run())
+    if (!gemm_info.reshape_b_only_on_first_run())
     {
         b_info_to_use->set_are_values_constant(false);
     }
@@ -109,15 +110,15 @@ void NEGEMMLowpMatrixMultiplyCore::run()
 
 void NEGEMMLowpMatrixMultiplyCore::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->prep_pack);
 
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+        auto has_reshape =
+            std::find_if(_impl->aux_mem_req.begin(), _impl->aux_mem_req.end(),
+                         [](const MemoryInfo &m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
 
-        if(has_reshape != std::end(_impl->aux_mem_req))
+        if (has_reshape != std::end(_impl->aux_mem_req))
         {
             _impl->b->mark_as_unused();
         }

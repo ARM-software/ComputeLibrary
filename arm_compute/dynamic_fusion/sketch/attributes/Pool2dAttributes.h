@@ -72,8 +72,8 @@ private:
     PoolingType _pool_type{};
     Padding2D   _pad{};
     Size2D      _pool_size{};
-    Size2D      _stride{ 1U, 1U };
-    bool        _exclude_padding{ true };
+    Size2D      _stride{1U, 1U};
+    bool        _exclude_padding{true};
 };
 
 } // namespace dynamic_fusion

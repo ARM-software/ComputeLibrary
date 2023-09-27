@@ -92,13 +92,26 @@ public:
      *                             if the reshape of matrix B should happen only for the first run. GEMMInfo also contains information about the reshaping
      *                             in case matrix A and matrix B have been already transformed.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *a,
+                   const ICLTensor        *b,
+                   const ICLTensor        *c,
+                   ICLTensor              *output,
+                   float                   alpha,
+                   float                   beta,
+                   const GEMMInfo         &gemm_info = GEMMInfo());
 
     /** Initialise the kernel's inputs and output
      *
      * Similar to @ref CLGEMM::configure()
      */
-    void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const ICLTensor *a,
+                   const ICLTensor *b,
+                   const ICLTensor *c,
+                   ICLTensor       *output,
+                   float            alpha,
+                   float            beta,
+                   const GEMMInfo  &gemm_info = GEMMInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
@@ -106,7 +119,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a,
+                           const ITensorInfo *b,
+                           const ITensorInfo *c,
+                           const ITensorInfo *output,
+                           float              alpha,
+                           float              beta,
+                           const GEMMInfo    &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

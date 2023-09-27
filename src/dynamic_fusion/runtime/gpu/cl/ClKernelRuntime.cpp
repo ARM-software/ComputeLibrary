@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "ClKernelRuntime.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/CLUtils.h"
 #ifdef ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/runtime/gpu/cl/ckw_driver/GpuCkwKernelArgumentsHelpers.h"
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
 #include "src/gpu/cl/ClKernelLibrary.h"
-
 #include "support/Cast.h"
 namespace arm_compute
 {
@@ -43,13 +44,12 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
 {
     // Create kernel from kernel source string
     opencl::ClKernelLibrary &klib = opencl::ClKernelLibrary::get();
-    _kernel                       = static_cast<cl::Kernel>(compile_ctx.create_kernel(code.name(),
-                                                                                      code.name(), // program name has to be provided to differentiate between different unfusable components' kernels.
-                                                                                      // Each program contains exactly one kernel
-                                                                                      code.code(),
-                                                                                      klib.kernel_path() /* Kernel path: Used in cases of embedded kernels */,
-                                                                                      code.build_options().options(),
-                                                                                      false /* Is source binary */));
+    _kernel                       = static_cast<cl::Kernel>(compile_ctx.create_kernel(
+                              code.name(),
+                              code.name(), // program name has to be provided to differentiate between different unfusable components' kernels.
+                              // Each program contains exactly one kernel
+                              code.code(), klib.kernel_path() /* Kernel path: Used in cases of embedded kernels */,
+                              code.build_options().options(), false /* Is source binary */));
 
     // Configure execution window
     IClKernel::configure_internal(code.window());
@@ -63,11 +63,15 @@ void ClKernelRuntime::configure(const ClCompileContext &compile_ctx, const GpuKe
 
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 
-inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKernelArgumentInfo &arg, const ICLTensor *tensor, const Window &arg_slice, std::vector<cl::Image2D> &cl_images)
+inline void ClKernelRuntime::add_tensor_argument(unsigned int                &idx,
+                                                 const GpuKernelArgumentInfo &arg,
+                                                 const ICLTensor             *tensor,
+                                                 const Window                &arg_slice,
+                                                 std::vector<cl::Image2D>    &cl_images)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
 
-    switch(arg.type)
+    switch (arg.type)
     {
         case GpuKernelArgumentInfo::Type::Scalar:
         {
@@ -95,9 +99,13 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
         }
         case GpuKernelArgumentInfo::Type::Image_Export_To_ClImage2D:
         {
-            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
+            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) *
+                                                                            tensor->info()->dimension(2) *
+                                                                            tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+            cl::Image2D       tensor_image2d =
+                create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d,
+                                           tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             break;
@@ -111,9 +119,13 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
         }
         case GpuKernelArgumentInfo::Type::Image_3D_Export_To_ClImage2D:
         {
-            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) * tensor->info()->dimension(2) * tensor->info()->dimension(3));
+            const TensorShape shape2d(tensor->info()->dimension(0) / 4, tensor->info()->dimension(1) *
+                                                                            tensor->info()->dimension(2) *
+                                                                            tensor->info()->dimension(3));
             const size_t      image_row_pitch = tensor->info()->strides_in_bytes()[1];
-            cl::Image2D       tensor_image2d  = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d, tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+            cl::Image2D       tensor_image2d =
+                create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(), shape2d,
+                                           tensor->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
             _kernel.setArg(idx++, tensor_image2d);
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(tensor->info()->strides_in_bytes()[2]));
@@ -142,8 +154,9 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
             const size_t image_h        = tensor->info()->tensor_shape().total_size_upper(1);
             const size_t image_stride_y = tensor->info()->strides_in_bytes()[1];
 
-            cl::Image2D tensor_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), tensor->cl_buffer(),
-                                                                    TensorShape(image_w, image_h), tensor->info()->data_type(), image_stride_y, CLImage2DType::ReadOnly);
+            cl::Image2D tensor_image2d = create_image2d_from_buffer(
+                CLKernelLibrary::get().context(), tensor->cl_buffer(), TensorShape(image_w, image_h),
+                tensor->info()->data_type(), image_stride_y, CLImage2DType::ReadOnly);
             cl_images.push_back(tensor_image2d);
 
             _kernel.setArg(idx++, tensor_image2d);
@@ -170,13 +183,16 @@ inline void ClKernelRuntime::add_tensor_argument(unsigned int &idx, const GpuKer
 }
 
 #else // ACL_INTERNAL_TEST_CKW_IN_DF
-inline void ClKernelRuntime::add_kernel_argument(unsigned int &idx, const GpuKernelArgumentBinding &arg, const ICLTensor *tensor, std::vector<cl::Image2D> &cl_images)
+inline void ClKernelRuntime::add_kernel_argument(unsigned int                   &idx,
+                                                 const GpuKernelArgumentBinding &arg,
+                                                 const ICLTensor                *tensor,
+                                                 std::vector<cl::Image2D>       &cl_images)
 {
-    switch(arg.type())
+    switch (arg.type())
     {
         case GpuKernelArgumentBinding::Type::TensorStorage:
         {
-            switch(arg.tensor_storage_type())
+            switch (arg.tensor_storage_type())
             {
                 case TensorStorageType::ClBufferUint8Ptr:
                 {
@@ -238,7 +254,7 @@ void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::Com
         // CLImages created from tensor arguments. Need to be retained until enqueue
         std::vector<cl::Image2D> cl_images;
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-        for(auto id_arg : _arguments)
+        for (auto id_arg : _arguments)
         {
             const auto arg    = id_arg.second;
             auto       tensor = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(id_arg.first));
@@ -248,7 +264,7 @@ void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::Com
         }
 
 #else  // ACL_INTERNAL_TEST_CKW_IN_DF
-        for(const auto &arg : _arguments)
+        for (const auto &arg : _arguments)
         {
             auto tensor = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(arg.id()));
             ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
@@ -259,8 +275,7 @@ void ClKernelRuntime::run_op(ITensorPack &tensors, const Window &window, cl::Com
 
         // Dispatch kernel
         enqueue(queue, *this, slice, lws_hint(), use_dummy_work_items);
-    }
-    while(skip_sliding_window && window.slide_window_slice_3D(slice));
+    } while (skip_sliding_window && window.slide_window_slice_3D(slice));
 }
 
 } // namespace dynamic_fusion

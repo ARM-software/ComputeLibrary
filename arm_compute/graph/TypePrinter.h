@@ -37,7 +37,7 @@ namespace graph
 /** Formatted output of the Target. */
 inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
 {
-    switch(target)
+    switch (target)
     {
         case Target::UNSPECIFIED:
             os << "UNSPECIFIED";
@@ -60,7 +60,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
 
 inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
 {
-    switch(node_type)
+    switch (node_type)
     {
         case NodeType::ActivationLayer:
             os << "ActivationLayer";
@@ -207,7 +207,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
 /** Formatted output of the EltwiseOperation type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const EltwiseOperation &eltwise_op)
 {
-    switch(eltwise_op)
+    switch (eltwise_op)
     {
         case EltwiseOperation::Add:
             os << "Add";
@@ -231,7 +231,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const EltwiseOperation &el
 /** Formatted output of the ConvolutionMethod type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &method)
 {
-    switch(method)
+    switch (method)
     {
         case ConvolutionMethod::Default:
             os << "Default";
@@ -255,7 +255,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &m
 /** Formatted output of the FastMathHint type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const FastMathHint &hint)
 {
-    switch(hint)
+    switch (hint)
     {
         case FastMathHint::Enabled:
             os << "Enabled";
@@ -273,7 +273,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FastMathHint &hint)
 /** Formatted output of the DepthwiseConvolutionMethod type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolutionMethod &method)
 {
-    switch(method)
+    switch (method)
     {
         case DepthwiseConvolutionMethod::Default:
             os << "DEFAULT";

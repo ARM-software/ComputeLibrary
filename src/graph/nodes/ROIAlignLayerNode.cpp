@@ -24,17 +24,15 @@
 
 #include "arm_compute/graph/nodes/ROIAlignLayerNode.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-ROIAlignLayerNode::ROIAlignLayerNode(ROIPoolingLayerInfo &pool_info)
-    : _pool_info(pool_info)
+ROIAlignLayerNode::ROIAlignLayerNode(ROIPoolingLayerInfo &pool_info) : _pool_info(pool_info)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -47,7 +45,7 @@ const ROIPoolingLayerInfo &ROIAlignLayerNode::pooling_info() const
 
 bool ROIAlignLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

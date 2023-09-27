@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
+
 #include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
 
@@ -53,16 +54,16 @@
 #endif /* defined(__APPLE__) && defined(__aarch64__)) */
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
 
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID (1 << 11)
-#define ARM_COMPUTE_GET_FEATURE_REG(var, freg) __asm __volatile("MRS %0, " #freg \
-                                                                : "=r"(var))
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID    (1 << 11)
+#define ARM_COMPUTE_GET_FEATURE_REG(var, freg) __asm __volatile("MRS %0, " #freg : "=r"(var))
 namespace arm_compute
 {
 namespace cpuinfo
 {
 namespace
 {
-#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    (defined(__arm__) || defined(__aarch64__))
 /** Extract MIDR using CPUID information that are exposed to user-space
  *
  * @param[in] max_num_cpus Maximum number of possible CPUs
@@ -72,15 +73,15 @@ namespace
 std::vector<uint32_t> midr_from_cpuid(uint32_t max_num_cpus)
 {
     std::vector<uint32_t> cpus;
-    for(unsigned int i = 0; i < max_num_cpus; ++i)
+    for (unsigned int i = 0; i < max_num_cpus; ++i)
     {
         std::stringstream str;
         str << "/sys/devices/system/cpu/cpu" << i << "/regs/identification/midr_el1";
         std::ifstream file(str.str(), std::ios::in);
-        if(file.is_open())
+        if (file.is_open())
         {
             std::string line;
-            if(bool(getline(file, line)))
+            if (bool(getline(file, line)))
             {
                 cpus.emplace_back(support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16));
             }
@@ -122,34 +123,35 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
     ARM_COMPUTE_ERROR_ON_MSG(ret_status != 0, "Regex compilation failed.");
 
     std::ifstream file("/proc/cpuinfo", std::ios::in);
-    if(file.is_open())
+    if (file.is_open())
     {
         std::string line;
         int         midr   = 0;
         int         curcpu = -1;
 
-        while(bool(getline(file, line)))
+        while (bool(getline(file, line)))
         {
             std::array<regmatch_t, 2> match;
             ret_status = regexec(&proc_regex, line.c_str(), 2, match.data(), 0);
-            if(ret_status == 0)
+            if (ret_status == 0)
             {
                 std::string id     = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         newcpu = support::cpp11::stoi(id, nullptr);
 
-                if(curcpu >= 0 && midr == 0)
+                if (curcpu >= 0 && midr == 0)
                 {
                     // Matched a new CPU ID without any description of the previous one - looks like old format.
                     return {};
                 }
 
-                if(curcpu >= 0 && curcpu < max_num_cpus)
+                if (curcpu >= 0 && curcpu < max_num_cpus)
                 {
                     cpus.emplace_back(midr);
                 }
                 else
                 {
-                    ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
+                    ARM_COMPUTE_LOG_INFO_MSG_CORE(
+                        "Trying to populate a core id with id greater than the expected number of cores!");
                 }
 
                 midr   = 0;
@@ -159,7 +161,7 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
             }
 
             ret_status = regexec(&imp_regex, line.c_str(), 2, match.data(), 0);
-            if(ret_status == 0)
+            if (ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         impv   = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
@@ -169,7 +171,7 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
             }
 
             ret_status = regexec(&var_regex, line.c_str(), 2, match.data(), 0);
-            if(ret_status == 0)
+            if (ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         varv   = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
@@ -179,7 +181,7 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
             }
 
             ret_status = regexec(&part_regex, line.c_str(), 2, match.data(), 0);
-            if(ret_status == 0)
+            if (ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         partv  = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
@@ -189,7 +191,7 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
             }
 
             ret_status = regexec(&rev_regex, line.c_str(), 2, match.data(), 0);
-            if(ret_status == 0)
+            if (ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         regv   = support::cpp11::stoi(subexp, nullptr);
@@ -200,13 +202,14 @@ std::vector<uint32_t> midr_from_proc_cpuinfo(int max_num_cpus)
             }
         }
 
-        if(curcpu >= 0 && curcpu < max_num_cpus)
+        if (curcpu >= 0 && curcpu < max_num_cpus)
         {
             cpus.emplace_back(midr);
         }
         else
         {
-            ARM_COMPUTE_LOG_INFO_MSG_CORE("Trying to populate a core id with id greater than the expected number of cores!");
+            ARM_COMPUTE_LOG_INFO_MSG_CORE(
+                "Trying to populate a core id with id greater than the expected number of cores!");
         }
     }
 
@@ -231,11 +234,11 @@ int get_max_cpus()
     CPUspresent.open("/sys/devices/system/cpu/present", std::ios::in);
     bool success = false;
 
-    if(CPUspresent.is_open())
+    if (CPUspresent.is_open())
     {
         std::string line;
 
-        if(bool(getline(CPUspresent, line)))
+        if (bool(getline(CPUspresent, line)))
         {
             /* The content of this file is a list of ranges or single values, e.g.
                  * 0-5, or 1-3,5,7 or similar.  As we are interested in the
@@ -244,9 +247,9 @@ int get_max_cpus()
                  */
             auto startfrom = line.begin();
 
-            for(auto i = line.begin(); i < line.end(); ++i)
+            for (auto i = line.begin(); i < line.end(); ++i)
             {
-                if(*i == '-' || *i == ',')
+                if (*i == '-' || *i == ',')
                 {
                     startfrom = i + 1;
                 }
@@ -260,13 +263,14 @@ int get_max_cpus()
     }
 
     // Return std::thread::hardware_concurrency() as a fallback.
-    if(!success)
+    if (!success)
     {
         max_cpus = std::thread::hardware_concurrency();
     }
     return max_cpus;
 }
-#elif defined(__aarch64__) && defined(__APPLE__) /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
+#elif defined(__aarch64__) && \
+    defined(__APPLE__) /* !defined(BARE_METAL) && !defined(__APPLE__) && (defined(__arm__) || defined(__aarch64__)) */
 /** Query features through sysctlbyname
   *
   * @return int value queried
@@ -278,46 +282,45 @@ int get_hw_capability(const std::string &cap)
     sysctlbyname(cap.c_str(), &result, &size, NULL, 0);
     return result;
 }
-#endif                                           /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
 
 #if defined(BARE_METAL) && defined(__aarch64__)
 uint64_t get_sve_feature_reg()
 {
     uint64_t svefr0 = 0;
-    __asm __volatile(
-        ".inst 0xd5380483 // mrs x3, ID_AA64ZFR0_EL1\n"
-        "MOV  %0, X3"
-        : "=r"(svefr0)
-        :
-        : "x3");
+    __asm __volatile(".inst 0xd5380483 // mrs x3, ID_AA64ZFR0_EL1\n"
+                     "MOV  %0, X3"
+                     : "=r"(svefr0)
+                     :
+                     : "x3");
     return svefr0;
 }
 #endif /* defined(BARE_METAL) && defined(__aarch64__) */
 } // namespace
 
-CpuInfo::CpuInfo(CpuIsaInfo isa, std::vector<CpuModel> cpus)
-    : _isa(std::move(isa)), _cpus(std::move(cpus))
+CpuInfo::CpuInfo(CpuIsaInfo isa, std::vector<CpuModel> cpus) : _isa(std::move(isa)), _cpus(std::move(cpus))
 {
 }
 
 CpuInfo CpuInfo::build()
 {
-#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    (defined(__arm__) || defined(__aarch64__))
     const uint32_t hwcaps   = getauxval(AT_HWCAP);
     const uint32_t hwcaps2  = getauxval(AT_HWCAP2);
     const uint32_t max_cpus = get_max_cpus();
 
     // Populate midr values
     std::vector<uint32_t> cpus_midr;
-    if(hwcaps & ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID)
+    if (hwcaps & ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID)
     {
         cpus_midr = midr_from_cpuid(max_cpus);
     }
-    if(cpus_midr.empty())
+    if (cpus_midr.empty())
     {
         cpus_midr = midr_from_proc_cpuinfo(max_cpus);
     }
-    if(cpus_midr.empty())
+    if (cpus_midr.empty())
     {
         cpus_midr.resize(max_cpus, 0);
     }
@@ -333,7 +336,9 @@ CpuInfo CpuInfo::build()
     CpuInfo info(isa, cpus_model);
     return info;
 
-#elif(BARE_METAL) && defined(__aarch64__)        /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
+#elif (BARE_METAL) && \
+    defined(          \
+        __aarch64__) /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
 
     // Assume single CPU in bare metal mode.  Just read the ID register and feature bits directly.
     uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, pfr1 = 0, svefr0 = 0, midr = 0;
@@ -342,7 +347,7 @@ CpuInfo CpuInfo::build()
     ARM_COMPUTE_GET_FEATURE_REG(pfr0, ID_AA64PFR0_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(pfr1, ID_AA64PFR1_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(midr, MIDR_EL1);
-    if((pfr0 >> 32) & 0xf)
+    if ((pfr0 >> 32) & 0xf)
     {
         svefr0 = get_sve_feature_reg();
     }
@@ -361,14 +366,14 @@ CpuInfo CpuInfo::build()
     CpuInfo info(isainfo, cpus_model);
     return info;
 #else                                            /* #elif defined(__aarch64__) && defined(__APPLE__) */
-    CpuInfo info(CpuIsaInfo(), { CpuModel::GENERIC });
+    CpuInfo info(CpuIsaInfo(), {CpuModel::GENERIC});
     return info;
-#endif                                           /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
 }
 
 CpuModel CpuInfo::cpu_model(uint32_t cpuid) const
 {
-    if(cpuid < _cpus.size())
+    if (cpuid < _cpus.size())
     {
         return _cpus[cpuid];
     }
@@ -377,9 +382,10 @@ CpuModel CpuInfo::cpu_model(uint32_t cpuid) const
 
 CpuModel CpuInfo::cpu_model() const
 {
-#if defined(_WIN64) || defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || (!defined(__arm__) && !defined(__aarch64__))
+#if defined(_WIN64) || defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || \
+    (!defined(__arm__) && !defined(__aarch64__))
     return cpu_model(0);
-#else  /* defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || (!defined(__arm__) && !defined(__aarch64__)) */
+#else /* defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || (!defined(__arm__) && !defined(__aarch64__)) */
     return cpu_model(sched_getcpu());
 #endif /* defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || (!defined(__arm__) && !defined(__aarch64__)) */
 }
@@ -406,13 +412,13 @@ uint32_t num_threads_hint()
 
     // Read cpuinfo and get occurrence of each core
     std::ifstream cpuinfo_file("/proc/cpuinfo", std::ios::in);
-    if(cpuinfo_file.is_open())
+    if (cpuinfo_file.is_open())
     {
         std::string line;
-        while(bool(getline(cpuinfo_file, line)))
+        while (bool(getline(cpuinfo_file, line)))
         {
             std::array<regmatch_t, 2> match;
-            if(regexec(&cpu_part_rgx, line.c_str(), 2, match.data(), 0) == 0)
+            if (regexec(&cpu_part_rgx, line.c_str(), 2, match.data(), 0) == 0)
             {
                 cpus.emplace_back(line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so)));
             }
@@ -425,13 +431,13 @@ uint32_t num_threads_hint()
     auto least_frequent_cpu_occurences = [](const std::vector<std::string> &cpus) -> uint32_t
     {
         std::unordered_map<std::string, uint32_t> cpus_freq;
-        for(const auto &cpu : cpus)
+        for (const auto &cpu : cpus)
         {
             cpus_freq[cpu]++;
         }
 
         uint32_t vmin = cpus.size() + 1;
-        for(const auto &cpu_freq : cpus_freq)
+        for (const auto &cpu_freq : cpus_freq)
         {
             vmin = std::min(vmin, cpu_freq.second);
         }

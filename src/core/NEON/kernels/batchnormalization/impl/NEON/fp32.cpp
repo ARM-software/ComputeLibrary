@@ -24,8 +24,9 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEMath.h"
+
 #include "src/core/NEON/kernels/detail/NEActivationFunctionDetail.h"
+#include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
@@ -36,12 +37,26 @@ namespace arm_compute
 {
 namespace
 {
-using BatchNomalizationPtr = void (*)(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
-                                      float epsilon, ActivationLayerInfo &act_info, const Window &window);
+using BatchNomalizationPtr = void (*)(ITensor             *src,
+                                      ITensor             *dst,
+                                      const ITensor       *mean,
+                                      const ITensor       *var,
+                                      const ITensor       *beta,
+                                      const ITensor       *gamma,
+                                      float                epsilon,
+                                      ActivationLayerInfo &act_info,
+                                      const Window        &window);
 
 template <typename T>
-void batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
-                         float epsilon, ActivationLayerInfo &act_info, const Window &window)
+void batch_normalization(ITensor             *src,
+                         ITensor             *dst,
+                         const ITensor       *mean,
+                         const ITensor       *var,
+                         const ITensor       *beta,
+                         const ITensor       *gamma,
+                         float                epsilon,
+                         ActivationLayerInfo &act_info,
+                         const Window        &window)
 {
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<float, wrapper::traits::BitWidth::W128>;
@@ -56,86 +71,99 @@ void batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const 
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
 
-    const auto input_mean  = reinterpret_cast<const float *>(mean->ptr_to_element(Coordinates(0, 0)));
-    const auto input_var   = reinterpret_cast<const float *>(var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma = (gamma != nullptr) ? reinterpret_cast<const float *>(gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
-    const auto input_beta  = (beta != nullptr) ? reinterpret_cast<const float *>(beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_mean = reinterpret_cast<const float *>(mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var  = reinterpret_cast<const float *>(var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma =
+        (gamma != nullptr) ? reinterpret_cast<const float *>(gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta =
+        (beta != nullptr) ? reinterpret_cast<const float *>(beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     T activation_functor(act_info);
 
     const auto epsilon_vec = wrapper::vdup_n(static_cast<float>(epsilon), ExactTagType{});
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
-
-        // Perform core calculations using vector operations
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
         {
-            // Conctruct vectors
-            const auto mean_vec  = wrapper::vloadq(input_mean + x);
-            const auto var_vec   = wrapper::vloadq(input_var + x);
-            const auto gamma_vec = (input_gamma != nullptr) ? wrapper::vloadq(input_gamma + x) : wrapper::vdup_n(static_cast<float>(1.f), ExactTagType{});
-            const auto beta_vec  = (input_beta != nullptr) ? wrapper::vloadq(input_beta + x) : wrapper::vdup_n(static_cast<float>(0.f), ExactTagType{});
+            const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-            // Calculate denominator
-            const auto denominator = wrapper::vinvsqrt(wrapper::vadd(var_vec, epsilon_vec));
-
-            // Calculate x bar
-            const auto numerator = wrapper::vsub(wrapper::vloadq(input_ptr + x), mean_vec);
-            const auto x_bar     = wrapper::vmul(numerator, denominator);
-            auto       res       = wrapper::vmla(beta_vec, x_bar, gamma_vec);
-
-            // Perform fused activation
-            if(act_info.enabled())
+            // Perform core calculations using vector operations
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                activation_functor(res);
+                // Conctruct vectors
+                const auto mean_vec  = wrapper::vloadq(input_mean + x);
+                const auto var_vec   = wrapper::vloadq(input_var + x);
+                const auto gamma_vec = (input_gamma != nullptr)
+                                           ? wrapper::vloadq(input_gamma + x)
+                                           : wrapper::vdup_n(static_cast<float>(1.f), ExactTagType{});
+                const auto beta_vec  = (input_beta != nullptr)
+                                           ? wrapper::vloadq(input_beta + x)
+                                           : wrapper::vdup_n(static_cast<float>(0.f), ExactTagType{});
+
+                // Calculate denominator
+                const auto denominator = wrapper::vinvsqrt(wrapper::vadd(var_vec, epsilon_vec));
+
+                // Calculate x bar
+                const auto numerator = wrapper::vsub(wrapper::vloadq(input_ptr + x), mean_vec);
+                const auto x_bar     = wrapper::vmul(numerator, denominator);
+                auto       res       = wrapper::vmla(beta_vec, x_bar, gamma_vec);
+
+                // Perform fused activation
+                if (act_info.enabled())
+                {
+                    activation_functor(res);
+                }
+
+                // Store results
+                wrapper::vstore(output_ptr + x, res);
             }
 
-            // Store results
-            wrapper::vstore(output_ptr + x, res);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            // Conctruct vectors
-            const float gamma = (input_gamma != nullptr) ? input_gamma[x] : 1.f;
-            const float beta  = (input_beta != nullptr) ? input_beta[x] : 0.f;
-
-            const float denominator = sqrt(input_var[x] + epsilon);
-            const float numerator   = input_ptr[x] - input_mean[x];
-            const float x_bar       = numerator / denominator;
-            float       res         = beta + x_bar * gamma;
-
-            // Perform fused activation
-            if(act_info.enabled())
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
             {
-                activation_functor(res);
-            }
+                // Conctruct vectors
+                const float gamma = (input_gamma != nullptr) ? input_gamma[x] : 1.f;
+                const float beta  = (input_beta != nullptr) ? input_beta[x] : 0.f;
 
-            // Store results
-            *reinterpret_cast<float *>(output_ptr + x) = res;
-        }
-    },
-    input, output);
+                const float denominator = sqrt(input_var[x] + epsilon);
+                const float numerator   = input_ptr[x] - input_mean[x];
+                const float x_bar       = numerator / denominator;
+                float       res         = beta + x_bar * gamma;
+
+                // Perform fused activation
+                if (act_info.enabled())
+                {
+                    activation_functor(res);
+                }
+
+                // Store results
+                *reinterpret_cast<float *>(output_ptr + x) = res;
+            }
+        },
+        input, output);
 }
 
 // Fused Batched Normalization with activation functions
-static std::map<ActivationLayerInfo::ActivationFunction, BatchNomalizationPtr> fused_map =
-{
-    { ActivationLayerInfo::ActivationFunction::RELU, &batch_normalization<detail::relu<float, 4>> },
-    { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, &batch_normalization<detail::brelu<float, 4>> },
-    { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, &batch_normalization<detail::lubrelu<float, 4>> }
-};
-}
+static std::map<ActivationLayerInfo::ActivationFunction, BatchNomalizationPtr> fused_map = {
+    {ActivationLayerInfo::ActivationFunction::RELU, &batch_normalization<detail::relu<float, 4>>},
+    {ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, &batch_normalization<detail::brelu<float, 4>>},
+    {ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, &batch_normalization<detail::lubrelu<float, 4>>}};
+} // namespace
 namespace cpu
 {
-void fp32_neon_batch_normalization(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma,
-                                   float epsilon, ActivationLayerInfo &act_info, const Window &window)
+void fp32_neon_batch_normalization(ITensor             *src,
+                                   ITensor             *dst,
+                                   const ITensor       *mean,
+                                   const ITensor       *var,
+                                   const ITensor       *beta,
+                                   const ITensor       *gamma,
+                                   float                epsilon,
+                                   ActivationLayerInfo &act_info,
+                                   const Window        &window)
 {
-    if(act_info.enabled())
+    if (act_info.enabled())
     {
         fused_map[act_info.activation()](src, dst, mean, var, beta, gamma, epsilon, act_info, window);
     }

@@ -32,8 +32,9 @@ namespace cpu
 {
 namespace kernels
 {
-#define DECLARE_DIRECT_CONV2D_KERNEL(func_name) \
-    void func_name(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, const PadStrideInfo &conv_info)
+#define DECLARE_DIRECT_CONV2D_KERNEL(func_name)                                                    \
+    void func_name(const Window &window, const ITensor *src, const ITensor *weights, ITensor *dst, \
+                   const PadStrideInfo &conv_info)
 
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp32_nhwc_directconv2d);
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp16_nchw_directconv2d);

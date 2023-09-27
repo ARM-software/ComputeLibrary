@@ -38,7 +38,7 @@ std::unique_ptr<CLCommandBuffer> CLCommandBuffer::create(cl_command_queue queue)
     const auto &cl_device            = CLKernelLibrary::get().get_device();
     const auto  has_mutable_dispatch = command_buffer_mutable_dispatch_supported(cl_device);
 
-    if(has_mutable_dispatch)
+    if (has_mutable_dispatch)
     {
         return std::make_unique<CLMutableCommandBuffer>(queue);
     }

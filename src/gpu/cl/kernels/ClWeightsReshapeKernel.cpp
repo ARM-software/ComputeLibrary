@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "src/gpu/cl/kernels/ClWeightsReshapeKernel.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -39,7 +41,10 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
+Status validate_arguments(const ITensorInfo *input,
+                          const ITensorInfo *biases,
+                          const ITensorInfo *output,
+                          unsigned int       num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
@@ -48,20 +53,24 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4 && num_groups > 1);
     ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(3) % num_groups) != 0);
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(!is_data_type_float(input->data_type()));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->num_dimensions() != 1));
         ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->num_dimensions() != 2));
-        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->dimension(0) != input->tensor_shape()[3]));
-        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->dimension(0) != input->tensor_shape()[3] || biases->dimension(1) != input->tensor_shape()[4]));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) &&
+                                    (biases->dimension(0) != input->tensor_shape()[3]));
+        ARM_COMPUTE_RETURN_ERROR_ON(
+            (input->num_dimensions() == 5) &&
+            (biases->dimension(0) != input->tensor_shape()[3] || biases->dimension(1) != input->tensor_shape()[4]));
     }
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr, num_groups));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
@@ -75,16 +84,21 @@ ClWeightsReshapeKernel::ClWeightsReshapeKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClWeightsReshapeKernel::configure(const ClCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *biases, ITensorInfo *dst, unsigned int num_groups)
+void ClWeightsReshapeKernel::configure(const ClCompileContext &compile_context,
+                                       const ITensorInfo      *src,
+                                       const ITensorInfo      *biases,
+                                       ITensorInfo            *dst,
+                                       unsigned int            num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_weights_reshaped_shape(*src, (biases != nullptr), num_groups)));
+    auto_init_if_empty(
+        *dst, src->clone()->set_tensor_shape(compute_weights_reshaped_shape(*src, (biases != nullptr), num_groups)));
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, biases, dst, num_groups));
-    auto padding_info = get_padding_info({ src, biases, dst });
+    auto padding_info = get_padding_info({src, biases, dst});
 
     const DataType data_type = src->data_type();
 
@@ -104,7 +118,10 @@ void ClWeightsReshapeKernel::configure(const ClCompileContext &compile_context, 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClWeightsReshapeKernel::validate(const ITensorInfo *src, const ITensorInfo *biases, const ITensorInfo *dst, unsigned int num_groups)
+Status ClWeightsReshapeKernel::validate(const ITensorInfo *src,
+                                        const ITensorInfo *biases,
+                                        const ITensorInfo *dst,
+                                        unsigned int       num_groups)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, biases, dst, num_groups));
     return Status{};
@@ -136,7 +153,7 @@ void ClWeightsReshapeKernel::run_op(ITensorPack &tensors, const Window &window, 
     _kernel.setArg<cl_uint>(idx++, src->info()->dimension(3));
     _kernel.setArg<cl_uint>(idx++, dst->info()->strides_in_bytes().z());
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         biases_window.use_tensor_dimensions(biases->info()->tensor_shape());
         biases_slice = biases_window.first_slice_window_1D();
@@ -148,7 +165,7 @@ void ClWeightsReshapeKernel::run_op(ITensorPack &tensors, const Window &window, 
         unsigned idx = 0;
         add_3D_tensor_argument(idx, src, in_slice);
         add_2D_tensor_argument(idx, dst, out_slice);
-        if(biases != nullptr)
+        if (biases != nullptr)
         {
             add_1D_tensor_argument(idx, biases, biases_slice);
             ARM_COMPUTE_UNUSED(biases_window.slide_window_slice_1D(biases_slice));
@@ -156,8 +173,7 @@ void ClWeightsReshapeKernel::run_op(ITensorPack &tensors, const Window &window, 
 
         // Run kernel
         enqueue(queue, *this, in_slice, lws_hint());
-    }
-    while(window.slide_window_slice_4D(in_slice) && out_window.slide_window_slice_2D(out_slice));
+    } while (window.slide_window_slice_4D(in_slice) && out_window.slide_window_slice_2D(out_slice));
 }
 } // namespace kernels
 } // namespace opencl

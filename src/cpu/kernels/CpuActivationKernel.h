@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_ACTIVATION_KERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -38,7 +39,8 @@ namespace kernels
 class CpuActivationKernel : public ICpuKernel<CpuActivationKernel>
 {
 private:
-    using ActivationKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
+    using ActivationKernelPtr =
+        std::add_pointer<void(const ITensor *, ITensor *, const ActivationLayerInfo &, const Window &)>::type;
 
 public:
     CpuActivationKernel() = default;
@@ -71,7 +73,7 @@ public:
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Get the preferred dimension in which the scheduler splits the work into multiple jobs.
@@ -94,8 +96,8 @@ public:
 
 private:
     ActivationLayerInfo _act_info{};
-    ActivationKernelPtr _run_method{ nullptr };
-    size_t              _split_dimension{ Window::DimY };
+    ActivationKernelPtr _run_method{nullptr};
+    size_t              _split_dimension{Window::DimY};
     std::string         _name{};
 };
 } // namespace kernels

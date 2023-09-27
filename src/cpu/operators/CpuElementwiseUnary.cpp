@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuElementwiseUnary.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/CpuElementwiseUnaryKernel.h"
@@ -47,7 +48,7 @@ Status CpuElementwiseUnary::validate(ElementWiseUnary op, const ITensorInfo &src
 
 void CpuElementwiseUnary::run(ITensorPack &tensors)
 {
-    if(_kernel->is_window_configured())
+    if (_kernel->is_window_configured())
     {
         ICpuOperator::run(tensors);
         return;

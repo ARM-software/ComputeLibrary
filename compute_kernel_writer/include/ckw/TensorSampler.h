@@ -25,8 +25,8 @@
 #ifndef CKW_INCLUDE_CKW_TENSORSAMPLER_H
 #define CKW_INCLUDE_CKW_TENSORSAMPLER_H
 
-#include "ckw/types/TensorStorageType.h"
 #include "ckw/types/TensorSamplerTypes.h"
+#include "ckw/types/TensorStorageType.h"
 
 namespace ckw
 {
@@ -53,12 +53,11 @@ public:
      * @param[in] address_mode_y The address mode of the y dimension.
      * @param[in] address_mode_z The address mode of the z dimension.
      */
-    TensorSampler(
-        TensorStorageType         storage,
-        TensorSamplerFormat       format,
-        TensorSamplerAddressModeX address_mode_x,
-        TensorSamplerAddressModeY address_mode_y,
-        TensorSamplerAddressModeZ address_mode_z);
+    TensorSampler(TensorStorageType         storage,
+                  TensorSamplerFormat       format,
+                  TensorSamplerAddressModeX address_mode_x,
+                  TensorSamplerAddressModeY address_mode_y,
+                  TensorSamplerAddressModeZ address_mode_z);
 
     /** Get the storage for the tensor */
     TensorStorageType storage() const;
@@ -91,11 +90,11 @@ public:
     TensorSampler &address_mode_z(TensorSamplerAddressModeZ address_mode_z);
 
 private:
-    TensorStorageType                _storage { TensorStorageType::BufferUint8Ptr };
-    TensorSamplerFormat              _format  { TensorSamplerFormat::Unknown };
-    TensorSamplerAddressModeX _address_mode_x { TensorSamplerAddressModeX::Unknown };
-    TensorSamplerAddressModeY _address_mode_y { TensorSamplerAddressModeY::Unknown };
-    TensorSamplerAddressModeZ _address_mode_z { TensorSamplerAddressModeZ::Unknown };
+    TensorStorageType         _storage{TensorStorageType::BufferUint8Ptr};
+    TensorSamplerFormat       _format{TensorSamplerFormat::Unknown};
+    TensorSamplerAddressModeX _address_mode_x{TensorSamplerAddressModeX::Unknown};
+    TensorSamplerAddressModeY _address_mode_y{TensorSamplerAddressModeY::Unknown};
+    TensorSamplerAddressModeZ _address_mode_z{TensorSamplerAddressModeZ::Unknown};
 };
 
 } // namespace ckw

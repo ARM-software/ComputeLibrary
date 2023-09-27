@@ -24,9 +24,9 @@
 #ifndef SRC_GPU_CLTENSOR_H
 #define SRC_GPU_CLTENSOR_H
 
-#include "src/common/ITensorV2.h"
-
 #include "arm_compute/runtime/CL/CLTensor.h"
+
+#include "src/common/ITensorV2.h"
 
 namespace arm_compute
 {
@@ -54,7 +54,7 @@ public:
     void                 *map() override;
     StatusCode            unmap() override;
     arm_compute::ITensor *tensor() const override;
-    StatusCode import(void *handle, ImportMemoryType type) override;
+    StatusCode            import(void *handle, ImportMemoryType type) override;
 
 private:
     std::unique_ptr<CLTensor> _legacy_tensor;

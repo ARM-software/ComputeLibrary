@@ -22,12 +22,16 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 
 namespace arm_compute
 {
-void NEBoundingBoxTransform::configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info)
+void NEBoundingBoxTransform::configure(const ITensor                  *boxes,
+                                       ITensor                        *pred_boxes,
+                                       const ITensor                  *deltas,
+                                       const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_LOG_PARAMS(boxes, pred_boxes, deltas, info);
     // Configure Bounding Box kernel
@@ -36,7 +40,10 @@ void NEBoundingBoxTransform::configure(const ITensor *boxes, ITensor *pred_boxes
     _kernel = std::move(k);
 }
 
-Status NEBoundingBoxTransform::validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
+Status NEBoundingBoxTransform::validate(const ITensorInfo              *boxes,
+                                        const ITensorInfo              *pred_boxes,
+                                        const ITensorInfo              *deltas,
+                                        const BoundingBoxTransformInfo &info)
 {
     return NEBoundingBoxTransformKernel::validate(boxes, pred_boxes, deltas, info);
 }

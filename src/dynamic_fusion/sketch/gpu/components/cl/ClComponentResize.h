@@ -26,6 +26,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTRESIZE
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/ResizeAttributes.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
@@ -43,7 +44,7 @@ class ArgumentPack;
 /** Forward declaration */
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 class ClTemplateResize;
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
 class GpuCkwResize;
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
@@ -82,10 +83,8 @@ public:
      * |U8             |U8             |
      * |S16            |S16            |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes);
+    static Status
+    validate(const Properties &properties, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
 
     /** Constructor
      *
@@ -114,7 +113,7 @@ public:
     /** Get writer for the component */
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuTemplateComponentWriter *template_writer() const override;
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     const IGpuCkwComponentDriver *ckw_component_driver() const override;
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 
@@ -127,7 +126,7 @@ public:
 private:
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<ClTemplateResize> _component_writer;
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
     std::unique_ptr<GpuCkwResize> _component_writer;
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 };

@@ -23,17 +23,20 @@
  */
 #include "src/gpu/cl/operators/ClAdd.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClElementwiseKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClAdd::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst,
-                      ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void ClAdd::configure(const ClCompileContext    &compile_context,
+                      ITensorInfo               *src1,
+                      ITensorInfo               *src2,
+                      ITensorInfo               *dst,
+                      ConvertPolicy              policy,
+                      const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, policy, act_info);
     auto k = std::make_unique<kernels::ClSaturatedArithmeticKernel>();
@@ -41,8 +44,11 @@ void ClAdd::configure(const ClCompileContext &compile_context, ITensorInfo *src1
     _kernel = std::move(k);
 }
 
-Status ClAdd::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst,
-                       ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status ClAdd::validate(const ITensorInfo         *src1,
+                       const ITensorInfo         *src2,
+                       const ITensorInfo         *dst,
+                       ConvertPolicy              policy,
+                       const ActivationLayerInfo &act_info)
 {
     return kernels::ClSaturatedArithmeticKernel::validate(ArithmeticOperation::ADD, src1, src2, dst, policy, act_info);
 }

@@ -24,9 +24,10 @@
 #ifndef ARM_COMPUTE_CPU_SCALE_H
 #define ARM_COMPUTE_CPU_SCALE_H
 
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/KernelDescriptors.h"
-#include "arm_compute/core/experimental/Types.h"
+
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -62,9 +63,9 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    ScaleKernelInfo _scale_info{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED };
-    DataLayout      _data_layout{ DataLayout::UNKNOWN };
-    bool            _is_prepared{ false };
+    ScaleKernelInfo _scale_info{InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED};
+    DataLayout      _data_layout{DataLayout::UNKNOWN};
+    bool            _is_prepared{false};
 };
 } // namespace cpu
 } // namespace arm_compute

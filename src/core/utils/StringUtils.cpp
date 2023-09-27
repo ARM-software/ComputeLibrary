@@ -55,7 +55,7 @@ std::string float_to_string_with_full_precision(float val)
     ss.precision(std::numeric_limits<float>::max_digits10);
     ss << val;
 
-    if(val != static_cast<int>(val))
+    if (val != static_cast<int>(val))
     {
         ss << "f";
     }
@@ -65,17 +65,11 @@ std::string float_to_string_with_full_precision(float val)
 
 std::string join(const std::vector<std::string> strings, const std::string &sep)
 {
-    if(strings.empty())
+    if (strings.empty())
     {
         return "";
     }
-    return std::accumulate(
-               std::next(strings.begin()),
-               strings.end(),
-               strings.at(0),
-               [&sep](const std::string & a, const std::string & b)
-    {
-        return a + sep + b;
-    });
+    return std::accumulate(std::next(strings.begin()), strings.end(), strings.at(0),
+                           [&sep](const std::string &a, const std::string &b) { return a + sep + b; });
 }
-}
+} // namespace arm_compute

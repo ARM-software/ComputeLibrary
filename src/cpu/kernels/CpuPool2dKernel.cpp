@@ -25,15 +25,17 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-#include "src/cpu/kernels/pool2d/neon/list.h"
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/pool2d/neon/list.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -46,99 +48,111 @@ namespace
 {
 using namespace misc::shape_calculator;
 
-static const std::vector<CpuPool2dKernel::PoolingKernel> available_kernels =
-{
-    {
-        "neon_qu8_nhwc_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8)); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_qasymm8_neon_nhwc)
-    },
-    {
-        "neon_qs8_nhwc_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8_SIGNED)); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_qasymm8_signed_neon_nhwc)
-    },
-    {
-        "neon_f16_nhwc_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F16)) && data.isa.fp16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nhwc)
-    },
-    {
-        "neon_fp32_nhwc_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F32)); },
-        REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nhwc)
-    },
+static const std::vector<CpuPool2dKernel::PoolingKernel> available_kernels = {
+    {"neon_qu8_nhwc_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8)); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_qasymm8_neon_nhwc)},
+    {"neon_qs8_nhwc_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::QASYMM8_SIGNED)); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_qasymm8_signed_neon_nhwc)},
+    {"neon_f16_nhwc_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F16)) && data.isa.fp16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nhwc)},
+    {"neon_fp32_nhwc_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NHWC) && (data.dt == DataType::F32)); },
+     REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nhwc)},
 #if defined(ENABLE_NCHW_KERNELS)
-    {
-        "neon_qu8_nchw_pool2",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3)); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<uint8_t>)
-    },
-    {
-        "neon_qu8_nchw_pool3",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3)); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<uint8_t>)
-    },
-    {
-        "neon_qu8_nchw_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8)); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<uint8_t>)
-    },
-    {
-        "neon_qs8_nchw_pool2",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3)); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<int8_t>)
-    },
-    {
-        "neon_qs8_nchw_pool3",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3)); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<int8_t>)
-    },
-    {
-        "neon_qs8_nchw_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED)); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<int8_t>)
-    },
-    {
-        "neon_fp16_nchw_pool2",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },
-        REGISTER_FP16_NEON(arm_compute::cpu::pooling2_fp16_neon_nchw)
-    },
-    {
-        "neon_fp16_nchw_pool3",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3)); },
-        REGISTER_FP16_NEON(arm_compute::cpu::pooling3_fp16_neon_nchw)
-    },
-    {
-        "neon_fp16_nchw_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16)); },
-        REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nchw)
-    },
-    {
-        "neon_fp32_nchw_pool2",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2)); },
-        REGISTER_FP32_NEON(arm_compute::cpu::pooling2_fp32_neon_nchw)
-    },
-    {
-        "neon_fp32_nchw_pool3",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3)); },
-        REGISTER_FP32_NEON(arm_compute::cpu::pooling3_fp32_neon_nchw)
-    },
-    {
-        "neon_fp32_nchw_pool7",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) && (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 7)); },
-        REGISTER_FP32_NEON(arm_compute::cpu::pooling7_fp32_neon_nchw)
-    },
-    {
-        "neon_fp32_nchw_poolMxN",
-        [](const PoolDataTypeISASelectorData & data) { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32)); },
-        REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nchw)
-    },
+    {"neon_qu8_nchw_pool2",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3));
+     },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<uint8_t>)},
+    {"neon_qu8_nchw_pool3",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3));
+     },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<uint8_t>)},
+    {"neon_qu8_nchw_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8)); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<uint8_t>)},
+    {"neon_qs8_nchw_pool2",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2) && (data.pool_stride_x < 3));
+     },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling2_quantized_neon_nchw<int8_t>)},
+    {"neon_qs8_nchw_pool3",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3) && (data.pool_stride_x < 3));
+     },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::pooling3_quantized_neon_nchw<int8_t>)},
+    {"neon_qs8_nchw_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::QASYMM8_SIGNED)); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::poolingMxN_quantized_neon_nchw<int8_t>)},
+    {"neon_fp16_nchw_pool2",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2));
+     },
+     REGISTER_FP16_NEON(arm_compute::cpu::pooling2_fp16_neon_nchw)},
+    {"neon_fp16_nchw_pool3",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3));
+     },
+     REGISTER_FP16_NEON(arm_compute::cpu::pooling3_fp16_neon_nchw)},
+    {"neon_fp16_nchw_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F16 && data.isa.fp16)); },
+     REGISTER_FP16_NEON(arm_compute::cpu::poolingMxN_fp16_neon_nchw)},
+    {"neon_fp32_nchw_pool2",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 2));
+     },
+     REGISTER_FP32_NEON(arm_compute::cpu::pooling2_fp32_neon_nchw)},
+    {"neon_fp32_nchw_pool3",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 3));
+     },
+     REGISTER_FP32_NEON(arm_compute::cpu::pooling3_fp32_neon_nchw)},
+    {"neon_fp32_nchw_pool7",
+     [](const PoolDataTypeISASelectorData &data)
+     {
+         return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32) &&
+                 (data.pool_size.x() == data.pool_size.y()) && (data.pool_size.x() == 7));
+     },
+     REGISTER_FP32_NEON(arm_compute::cpu::pooling7_fp32_neon_nchw)},
+    {"neon_fp32_nchw_poolMxN",
+     [](const PoolDataTypeISASelectorData &data)
+     { return ((data.dl == DataLayout::NCHW) && (data.dt == DataType::F32)); },
+     REGISTER_FP32_NEON(arm_compute::cpu::poolingMxN_fp32_neon_nchw)},
 #endif /* defined(ENABLE_NCHW_KERNELS) */
 };
 
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info,
-                          const ITensorInfo *indices, Size2D pool_size)
+Status validate_arguments(const ITensorInfo      *src,
+                          const ITensorInfo      *dst,
+                          const PoolingLayerInfo &pool_info,
+                          const ITensorInfo      *indices,
+                          Size2D                  pool_size)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_size.x() == 0);
@@ -150,65 +164,78 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     int                 output_height   = 0;
     PoolingType         pool_type       = pool_info.pool_type;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
-    const auto          data_layout     = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
-    const int           idx_width       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int           idx_height      = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
+    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type()))
-                                    && (is_pool_region_entirely_outside_input(pool_info)),
-                                    "Pooling region that is entirely outside input tensor is unsupported for non-float types");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        (!is_data_type_float(src->data_type())) && (is_pool_region_entirely_outside_input(pool_info)),
+        "Pooling region that is entirely outside input tensor is unsupported for non-float types");
 
-    std::tie(output_width, output_height) = scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
-                                                                     pool_size.x(), pool_size.y(), pool_info.pad_stride_info);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1), "Calculated output dimension size is invalid");
+    std::tie(output_width, output_height) =
+        scaled_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height], pool_size.x(),
+                                 pool_size.y(), pool_info.pad_stride_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1),
+                                    "Calculated output dimension size is invalid");
 
     TensorInfo out_info(TensorInfo(compute_pool_shape(*src, pool_info), 1, dst->data_type()));
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
-    if(indices)
+    if (indices)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F32, DataType::F16);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX,
+                                        "Pooling indices only supported for MAX pooling method");
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(src->data_type()));
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(src->data_type()) && !pool_info.exclude_padding && (pool_info.pool_type == PoolingType::AVG) && pool_info.pad_stride_info.has_padding()
-                                    && (src->data_layout() == DataLayout::NHWC),
-                                    "exclude_padding equal false is not supported for AVG Pooling with padding on quantized types");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        is_data_type_quantized(src->data_type()) && !pool_info.exclude_padding &&
+            (pool_info.pool_type == PoolingType::AVG) && pool_info.pad_stride_info.has_padding() &&
+            (src->data_layout() == DataLayout::NHWC),
+        "exclude_padding equal false is not supported for AVG Pooling with padding on quantized types");
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
-        if(indices)
+        if (indices)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(((pool_size != Size2D(2, 2)) && !pool_info.use_kernel_indices), "Pooling indices returning source tensor coordinates is only supported for pool size 2x2");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.use_kernel_indices && (src->data_layout() != DataLayout::NHWC), "Pooling kernel indices only supported for NHWC");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                ((pool_size != Size2D(2, 2)) && !pool_info.use_kernel_indices),
+                "Pooling indices returning source tensor coordinates is only supported for pool size 2x2");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.use_kernel_indices && (src->data_layout() != DataLayout::NHWC),
+                                            "Pooling kernel indices only supported for NHWC");
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(indices, &out_info);
         }
     }
 
-    const auto *uk = CpuPool2dKernel::get_implementation(PoolDataTypeISASelectorData{ src->data_type(), src->data_layout(), pool_stride_x, pool_size, CPUInfo::get().get_isa() });
+    const auto *uk = CpuPool2dKernel::get_implementation(PoolDataTypeISASelectorData{
+        src->data_type(), src->data_layout(), pool_stride_x, pool_size, CPUInfo::get().get_isa()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITensorInfo *dst, ITensorInfo *indices, const PoolingLayerInfo &pool_info,
-                                                        unsigned int &num_elems_processed_per_iteration,
-                                                        int pool_size_x, int pool_size_y)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo            *src,
+                                                        ITensorInfo            *dst,
+                                                        ITensorInfo            *indices,
+                                                        const PoolingLayerInfo &pool_info,
+                                                        unsigned int           &num_elems_processed_per_iteration,
+                                                        int                     pool_size_x,
+                                                        int                     pool_size_y)
 {
     // dst auto inizialitation if not yet initialized
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(compute_pool_shape(*src, pool_info)));
-    if(indices)
+    if (indices)
     {
         // Indices auto inizialitation if not yet initialized
-        auto_init_if_empty(*indices, (src->clone()->set_tensor_shape(compute_pool_shape(*src,
-                                                                                        pool_info)))
-                           .set_data_type(DataType::U32) /* we store the offset to the element */);
+        auto_init_if_empty(*indices, (src->clone()->set_tensor_shape(compute_pool_shape(*src, pool_info)))
+                                         .set_data_type(DataType::U32) /* we store the offset to the element */);
     }
     const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
 
@@ -219,20 +246,20 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
 
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    const bool         is_square = pool_size_x == pool_size_y;
-    const unsigned int pooled_w  = dst->dimension(idx_width);
-    const unsigned int pooled_h  = dst->dimension(idx_height);
+    const bool         is_square           = pool_size_x == pool_size_y;
+    const unsigned int pooled_w            = dst->dimension(idx_width);
+    const unsigned int pooled_h            = dst->dimension(idx_height);
 
     //If it's not squared and optimized will be executed the MxN
     num_elems_processed_per_iteration = 1;
 
-    if(is_square)
+    if (is_square)
     {
-        switch(src->data_type())
+        switch (src->data_type())
         {
             case DataType::QASYMM8:
             case DataType::QASYMM8_SIGNED:
-                switch(pool_size_x)
+                switch (pool_size_x)
                 {
                     case 2:
                         num_elems_processed_per_iteration = (pool_stride_x == 2) ? 8 : 15;
@@ -261,18 +288,22 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     bool   window_changed = false;
     Window win{};
     // Upper limit for the number of right/bottom border elements that are accessed
-    TensorShape dst_shape{ src->tensor_shape() };
+    TensorShape dst_shape{src->tensor_shape()};
     dst_shape.set(0, pooled_w);
     dst_shape.set(1, pooled_h);
     TensorInfo dst_info(src->clone()->set_tensor_shape(dst_shape));
     win = calculate_max_window(dst_info, Steps(num_elems_processed_per_iteration));
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    Status err =
+        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
 
-void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices)
+void CpuPool2dKernel::configure(ITensorInfo            *src,
+                                ITensorInfo            *dst,
+                                const PoolingLayerInfo &pool_info,
+                                ITensorInfo            *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info;
@@ -284,14 +315,15 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Update pool size in case of global pooling
-    const Size2D pool_size(
-        is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width,
-        is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height);
+    const Size2D pool_size(is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width,
+                           is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height);
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, pool_info, indices, pool_size));
 
-    const auto *uk = CpuPool2dKernel::get_implementation(PoolDataTypeISASelectorData{ src->data_type(), src->data_layout(), (int)pad_stride_info.stride().first, pool_size, CPUInfo::get().get_isa() });
+    const auto *uk = CpuPool2dKernel::get_implementation(
+        PoolDataTypeISASelectorData{src->data_type(), src->data_layout(), (int)pad_stride_info.stride().first,
+                                    pool_size, CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr);
 
     // Set instance variables
@@ -302,7 +334,7 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     _run_method    = uk->ukernel;
     _name          = std::string("CpuPool2dKernel").append("/").append(uk->name);
 
-    if(_data_layout == DataLayout::NHWC)
+    if (_data_layout == DataLayout::NHWC)
     {
         // Configure kernel window
         Window win = calculate_max_window(*dst, Steps());
@@ -311,14 +343,17 @@ void CpuPool2dKernel::configure(ITensorInfo *src, ITensorInfo *dst, const Poolin
     else
     {
         // Configure kernel window
-        auto win_config = validate_and_configure_window(src, dst, indices, pool_info, _num_elems_processed_per_iteration,
-                                                        pool_size.x(), pool_size.y());
+        auto win_config = validate_and_configure_window(
+            src, dst, indices, pool_info, _num_elems_processed_per_iteration, pool_size.x(), pool_size.y());
         ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
         ICpuKernel::configure(win_config.second);
     }
 }
 
-Status CpuPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CpuPool2dKernel::validate(const ITensorInfo      *src,
+                                 const ITensorInfo      *dst,
+                                 const PoolingLayerInfo &pool_info,
+                                 const ITensorInfo      *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
@@ -336,9 +371,10 @@ Status CpuPool2dKernel::validate(const ITensorInfo *src, const ITensorInfo *dst,
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, pool_info, indices, Size2D(pool_size_x, pool_size_y)));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get(),
-                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration,
-                                                              pool_size_x, pool_size_y)
-                                .first);
+                                                              (indices) ? indices->clone().get() : nullptr, pool_info,
+                                                              num_elems_processed_per_iteration, pool_size_x,
+                                                              pool_size_y)
+                                    .first);
 
     return Status{};
 }
@@ -359,19 +395,20 @@ void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const T
     const unsigned int pool_size     = _pool_info.pool_size.width;
 
     Window window_src(window);
-    if(_data_layout == DataLayout::NCHW)
+    if (_data_layout == DataLayout::NCHW)
     {
         // Set step for src in x and y direction for the src
         unsigned int window_x_inc = 0;
-        switch(src->info()->data_type())
+        switch (src->info()->data_type())
         {
             case DataType::QASYMM8:
             case DataType::QASYMM8_SIGNED:
             {
                 window_x_inc = pool_stride_x;
-                if((pool_size == 2 || pool_size == 3) && pool_stride_x < 3)
+                if ((pool_size == 2 || pool_size == 3) && pool_stride_x < 3)
                 {
-                    window_x_inc = (pool_stride_x == 2) ? _num_elems_processed_per_iteration * 2 : _num_elems_processed_per_iteration;
+                    window_x_inc = (pool_stride_x == 2) ? _num_elems_processed_per_iteration * 2
+                                                        : _num_elems_processed_per_iteration;
                 }
                 break;
             }
@@ -387,8 +424,10 @@ void CpuPool2dKernel::run_op(ITensorPack &tensors, const Window &window, const T
                 ARM_COMPUTE_ERROR("Not supported");
             }
         }
-        window_src.set(Window::DimX, Window::Dimension(window.x().start() * pool_stride_x, window.x().end() * pool_stride_x, window_x_inc));
-        window_src.set(Window::DimY, Window::Dimension(window.y().start() * pool_stride_y, window.y().end() * pool_stride_y, pool_stride_y));
+        window_src.set(Window::DimX, Window::Dimension(window.x().start() * pool_stride_x,
+                                                       window.x().end() * pool_stride_x, window_x_inc));
+        window_src.set(Window::DimY, Window::Dimension(window.y().start() * pool_stride_y,
+                                                       window.y().end() * pool_stride_y, pool_stride_y));
     }
     else
     {

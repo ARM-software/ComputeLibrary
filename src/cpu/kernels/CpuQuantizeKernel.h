@@ -59,7 +59,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
@@ -67,7 +67,9 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using QuantizeFunctionExecutorPtr = void (CpuQuantizeKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
+    using QuantizeFunctionExecutorPtr = void (CpuQuantizeKernel::*)(const ITensor *src,
+                                                                    ITensor       *dst,
+                                                                    const Window  &window);
     /** Function to apply QASYMM8 or QASYMM8_SIGNED quantization on a tensor.
      *
      * @param[in] window Region on which to execute the kernel.
@@ -84,7 +86,7 @@ private:
     template <typename TIn, typename TOut>
     void run_quantize_qsymm8(const ITensor *src, ITensor *dst, const Window &window);
 
-    QuantizeFunctionExecutorPtr _func{ nullptr };
+    QuantizeFunctionExecutorPtr _func{nullptr};
 };
 } // namespace kernels
 } // namespace cpu

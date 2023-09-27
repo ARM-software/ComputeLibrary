@@ -55,7 +55,9 @@ public:
      * @return  A pair with the descriptor of the split and the starting coordinates
      */
     std::pair<TensorDescriptor, Coordinates> compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                       unsigned int num_splits, int axis, unsigned int idx);
+                                                                       unsigned int            num_splits,
+                                                                       int                     axis,
+                                                                       unsigned int            idx);
     /** Number of splits accessor
      *
      * @return Number of splits
@@ -72,7 +74,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 private:
     unsigned int     _num_splits;

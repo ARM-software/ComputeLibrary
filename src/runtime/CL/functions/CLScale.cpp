@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClScale.h"
 
@@ -33,13 +34,12 @@ namespace arm_compute
 {
 struct CLScale::Impl
 {
-    const ICLTensor                 *src{ nullptr };
-    ICLTensor                       *dst{ nullptr };
-    std::unique_ptr<opencl::ClScale> op{ nullptr };
+    const ICLTensor                 *src{nullptr};
+    ICLTensor                       *dst{nullptr};
+    std::unique_ptr<opencl::ClScale> op{nullptr};
 };
 
-CLScale::CLScale()
-    : _impl(std::make_unique<Impl>())
+CLScale::CLScale() : _impl(std::make_unique<Impl>())
 {
 }
 CLScale::~CLScale() = default;
@@ -49,7 +49,10 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, const ScaleKernelIn
     configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
 }
 
-void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ScaleKernelInfo &info)
+void CLScale::configure(const CLCompileContext &compile_context,
+                        ICLTensor              *input,
+                        ICLTensor              *output,
+                        const ScaleKernelInfo  &info)
 {
     _impl->src = input;
     _impl->dst = output;

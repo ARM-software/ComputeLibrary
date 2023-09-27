@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_NEGEMMCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_NEGEMMCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -49,7 +47,8 @@ class NEGEMMConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
+    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager  = nullptr,
+                           IWeightsManager                       *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
     /** Prevent instances of this class from being moved (As this class contains non movable objects) */
@@ -95,8 +94,16 @@ public:
      *                              available which may introduce a drop of accuracy as well. Default is false
      * @param[in]  num_groups       (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false, unsigned int num_groups = 1);
+    void configure(const ITensor             *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const WeightsInfo         &weights_info     = WeightsInfo(),
+                   const Size2D              &dilation         = Size2D(1U, 1U),
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false,
+                   unsigned int               num_groups       = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
      * @param[in] input            Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
@@ -119,9 +126,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                           bool enable_fast_math = false, unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const WeightsInfo         &weights_info     = WeightsInfo(),
+                           const Size2D              &dilation         = Size2D(1U, 1U),
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false,
+                           unsigned int               num_groups       = 1);
 
     /** Static function to check if there is an optimized version of
      * GEMM available for the input parameters.
@@ -178,10 +192,16 @@ public:
      *
      * @return a Status
      */
-    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                               const PadStrideInfo &conv_info,
-                               const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                               bool enable_fast_math = false);
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                               const ITensorInfo         *src,
+                               const ITensorInfo         *weights,
+                               const ITensorInfo         *biases,
+                               const ITensorInfo         *dst,
+                               const PadStrideInfo       &conv_info,
+                               const WeightsInfo         &weights_info     = WeightsInfo(),
+                               const Size2D              &dilation         = Size2D(1U, 1U),
+                               const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                               bool                       enable_fast_math = false);
     // Inherited methods overridden:
     void run() override;
     void prepare() override;

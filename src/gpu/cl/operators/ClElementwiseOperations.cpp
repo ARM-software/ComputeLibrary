@@ -23,15 +23,18 @@
  */
 #include "src/gpu/cl/operators/ClElementwiseOperations.h"
 
-#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClElementwiseDivision::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClElementwiseDivision::configure(const ClCompileContext    &compile_context,
+                                      ITensorInfo               *src1,
+                                      ITensorInfo               *src2,
+                                      ITensorInfo               *dst,
+                                      const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
@@ -39,12 +42,19 @@ void ClElementwiseDivision::configure(const ClCompileContext &compile_context, I
     _kernel = std::move(k);
 }
 
-Status ClElementwiseDivision::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClElementwiseDivision::validate(const ITensorInfo         *src1,
+                                       const ITensorInfo         *src2,
+                                       const ITensorInfo         *dst,
+                                       const ActivationLayerInfo &act_info)
 {
     return kernels::ClArithmeticKernel::validate(ArithmeticOperation::DIV, src1, src2, dst, act_info);
 }
 
-void ClElementwiseMax::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClElementwiseMax::configure(const ClCompileContext    &compile_context,
+                                 ITensorInfo               *src1,
+                                 ITensorInfo               *src2,
+                                 ITensorInfo               *dst,
+                                 const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
@@ -52,12 +62,19 @@ void ClElementwiseMax::configure(const ClCompileContext &compile_context, ITenso
     _kernel = std::move(k);
 }
 
-Status ClElementwiseMax::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClElementwiseMax::validate(const ITensorInfo         *src1,
+                                  const ITensorInfo         *src2,
+                                  const ITensorInfo         *dst,
+                                  const ActivationLayerInfo &act_info)
 {
     return kernels::ClArithmeticKernel::validate(ArithmeticOperation::MAX, src1, src2, dst, act_info);
 }
 
-void ClElementwiseMin::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClElementwiseMin::configure(const ClCompileContext    &compile_context,
+                                 ITensorInfo               *src1,
+                                 ITensorInfo               *src2,
+                                 ITensorInfo               *dst,
+                                 const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
@@ -65,12 +82,19 @@ void ClElementwiseMin::configure(const ClCompileContext &compile_context, ITenso
     _kernel = std::move(k);
 }
 
-Status ClElementwiseMin::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClElementwiseMin::validate(const ITensorInfo         *src1,
+                                  const ITensorInfo         *src2,
+                                  const ITensorInfo         *dst,
+                                  const ActivationLayerInfo &act_info)
 {
     return kernels::ClArithmeticKernel::validate(ArithmeticOperation::MIN, src1, src2, dst, act_info);
 }
 
-void ClElementwiseSquaredDiff::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClElementwiseSquaredDiff::configure(const ClCompileContext    &compile_context,
+                                         ITensorInfo               *src1,
+                                         ITensorInfo               *src2,
+                                         ITensorInfo               *dst,
+                                         const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
@@ -78,12 +102,19 @@ void ClElementwiseSquaredDiff::configure(const ClCompileContext &compile_context
     _kernel = std::move(k);
 }
 
-Status ClElementwiseSquaredDiff::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClElementwiseSquaredDiff::validate(const ITensorInfo         *src1,
+                                          const ITensorInfo         *src2,
+                                          const ITensorInfo         *dst,
+                                          const ActivationLayerInfo &act_info)
 {
     return kernels::ClArithmeticKernel::validate(ArithmeticOperation::SQUARED_DIFF, src1, src2, dst, act_info);
 }
 
-void ClElementwisePower::configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void ClElementwisePower::configure(const ClCompileContext    &compile_context,
+                                   ITensorInfo               *src1,
+                                   ITensorInfo               *src2,
+                                   ITensorInfo               *dst,
+                                   const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);
     auto k = std::make_unique<kernels::ClArithmeticKernel>();
@@ -91,7 +122,10 @@ void ClElementwisePower::configure(const ClCompileContext &compile_context, ITen
     _kernel = std::move(k);
 }
 
-Status ClElementwisePower::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status ClElementwisePower::validate(const ITensorInfo         *src1,
+                                    const ITensorInfo         *src2,
+                                    const ITensorInfo         *dst,
+                                    const ActivationLayerInfo &act_info)
 {
     return kernels::ClArithmeticKernel::validate(ArithmeticOperation::POWER, src1, src2, dst, act_info);
 }

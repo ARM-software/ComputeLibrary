@@ -43,18 +43,17 @@ inline uint16_t float_to_bf16(const float v)
 #if defined(ARM_COMPUTE_ENABLE_BF16)
     uint16_t res;
 
-    __asm __volatile(
-        "ldr    s0, [%[fromptr]]\n"
-        ".inst    0x1e634000\n" // BFCVT h0, s0
-        "str    h0, [%[toptr]]\n"
-        :
-        : [fromptr] "r"(fromptr), [toptr] "r"(&res)
-        : "v0", "memory");
+    __asm __volatile("ldr    s0, [%[fromptr]]\n"
+                     ".inst    0x1e634000\n" // BFCVT h0, s0
+                     "str    h0, [%[toptr]]\n"
+                     :
+                     : [fromptr] "r"(fromptr), [toptr] "r"(&res)
+                     : "v0", "memory");
 #else  /* defined(ARM_COMPUTE_ENABLE_BF16) */
     uint16_t       res   = (*fromptr >> 16);
     const uint16_t error = (*fromptr & 0x0000ffff);
     uint16_t       bf_l  = res & 0x0001;
-    if((error > 0x8000) || ((error == 0x8000) && (bf_l != 0)))
+    if ((error > 0x8000) || ((error == 0x8000) && (bf_l != 0)))
     {
         res += 1;
     }
@@ -75,23 +74,21 @@ inline float bf16_to_float(const uint16_t &v)
     memcpy(&fp, &lv, sizeof(lv));
     return fp;
 }
-}
+} // namespace
 
 /** Brain floating point representation class */
 class bfloat16 final
 {
 public:
     /** Default Constructor */
-    bfloat16()
-        : value(0)
+    bfloat16() : value(0)
     {
     }
     /** Constructor
      *
      * @param[in] v Floating-point value
      */
-    bfloat16(float v)
-        : value(float_to_bf16(v))
+    bfloat16(float v) : value(float_to_bf16(v))
     {
     }
     /** Assignment operator

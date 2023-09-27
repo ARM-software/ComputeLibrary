@@ -23,11 +23,10 @@
  */
 #include "src/cpu/operators/CpuReshape.h"
 
-#include "src/cpu/kernels/CpuReshapeKernel.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
-
-#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/cpu/kernels/CpuReshapeKernel.h"
 
 namespace arm_compute
 {
@@ -49,7 +48,7 @@ Status CpuReshape::validate(const ITensorInfo *src, const ITensorInfo *dst)
 void CpuReshape::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No inputs provided");
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
         static_cast<kernels::CpuReshapeKernel *>(_kernel.get())->prepare(tensors);
         _is_prepared = true;

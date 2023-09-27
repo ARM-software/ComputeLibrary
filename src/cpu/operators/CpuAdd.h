@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_ADD_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute
@@ -55,14 +56,22 @@ public:
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      */
-    void configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ITensorInfo         *src0,
+                   const ITensorInfo         *src1,
+                   ITensorInfo               *dst,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuAdd::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src0,
+                           const ITensorInfo         *src1,
+                           const ITensorInfo         *dst,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;

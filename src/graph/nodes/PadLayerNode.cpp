@@ -23,17 +23,15 @@
  */
 #include "arm_compute/graph/nodes/PadLayerNode.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-PadLayerNode::PadLayerNode(const PaddingList &padding, PixelValue pad_value)
-    : _padding(padding), _pad_value(pad_value)
+PadLayerNode::PadLayerNode(const PaddingList &padding, PixelValue pad_value) : _padding(padding), _pad_value(pad_value)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -51,7 +49,7 @@ PixelValue PadLayerNode::pad_value() const
 
 bool PadLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -71,7 +69,7 @@ TensorDescriptor PadLayerNode::configure_output(size_t idx) const
 
     TensorDescriptor  output_desc = src->desc();
     const TensorShape input_shape = src->desc().shape;
-    for(size_t dim = 0; dim < _padding.size(); ++dim)
+    for (size_t dim = 0; dim < _padding.size(); ++dim)
     {
         output_desc.shape.set(dim, _padding[dim].first + input_shape[dim] + _padding[dim].second);
     }

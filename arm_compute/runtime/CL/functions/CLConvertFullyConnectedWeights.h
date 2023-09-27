@@ -69,7 +69,10 @@ public:
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in]  data_layout          The data layout the weights have been trained in.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
+    void configure(const ICLTensor   *input,
+                   ICLTensor         *output,
+                   const TensorShape &original_input_shape,
+                   DataLayout         data_layout);
     /** Initialize the function.
      *
      * @param[in]  compile_context      The compile context to be used.
@@ -78,7 +81,11 @@ public:
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in]  data_layout          The data layout the weights have been trained in.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const TensorShape      &original_input_shape,
+                   DataLayout              data_layout);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvertFullyConnectedWeights
      *
      * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
@@ -86,7 +93,10 @@ public:
      * @param[in] original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape, DataLayout data_layout);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const TensorShape &original_input_shape,
+                           DataLayout         data_layout);
 
     // Inherited methods overridden:
     void run() override;
@@ -144,7 +154,10 @@ public:
      * @param[in] original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const TensorShape &original_input_shape, DataLayout data_layout)
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const TensorShape      &original_input_shape,
+                   DataLayout              data_layout)
     {
         _func.configure(compile_context, input, &_output, original_input_shape, data_layout);
     }

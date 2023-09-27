@@ -67,7 +67,12 @@ public:
      * @param[in]  conv3d_info     Contains strides, padding, rounding, activation, dilation and fast math information. Activation and fast math are currently unused.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src0,
+                   const ITensorInfo      *src1,
+                   const ITensorInfo      *src2,
+                   ITensorInfo            *dst,
+                   const Conv3dInfo       &conv3d_info);
 
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -75,13 +80,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info);
+    static Status validate(const ITensorInfo *src0,
+                           const ITensorInfo *src1,
+                           const ITensorInfo *src2,
+                           const ITensorInfo *dst,
+                           const Conv3dInfo  &conv3d_info);
 
     // Inherited method overridden
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<IClKernel> _direct_conv3d_kernel{ nullptr };
+    std::unique_ptr<IClKernel> _direct_conv3d_kernel{nullptr};
 };
 } // namespace opencl
 } // namespace arm_compute

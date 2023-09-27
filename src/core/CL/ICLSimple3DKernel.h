@@ -39,5 +39,5 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLSIMPLE3DKERNEL_H */

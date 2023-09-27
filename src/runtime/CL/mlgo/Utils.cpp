@@ -43,40 +43,38 @@ inline std::string to_str(const T &val)
 std::ostream &operator<<(std::ostream &os, const GEMMConfigNative &config)
 {
     return os << "Native:{"
-           << "m0: " << config.m0 << ", "
-           << "n0: " << config.n0 << ", "
-           << "k0: " << config.k0 << ", "
-           << "}";
+              << "m0: " << config.m0 << ", "
+              << "n0: " << config.n0 << ", "
+              << "k0: " << config.k0 << ", "
+              << "}";
 }
 std::ostream &operator<<(std::ostream &os, const GEMMConfigReshapedOnlyRHS &config)
 {
     return os << "ReshapedOnlyRHS:{"
-           << "m0: " << config.m0 << ", "
-           << "n0: " << config.n0 << ", "
-           << "k0: " << config.k0 << ", "
-           << "h0: " << config.h0 << ", "
-           << "interleave_rhs: " << config.interleave_rhs << ", "
-           << "transpose_rhs: " << config.transpose_rhs << ", "
-           << "export_cl_image: " << config.export_cl_image
-           << "}";
+              << "m0: " << config.m0 << ", "
+              << "n0: " << config.n0 << ", "
+              << "k0: " << config.k0 << ", "
+              << "h0: " << config.h0 << ", "
+              << "interleave_rhs: " << config.interleave_rhs << ", "
+              << "transpose_rhs: " << config.transpose_rhs << ", "
+              << "export_cl_image: " << config.export_cl_image << "}";
 }
 std::ostream &operator<<(std::ostream &os, const GEMMConfigReshaped &config)
 {
     return os << "Reshaped:{"
-           << "m0: " << config.m0 << ", "
-           << "n0: " << config.n0 << ", "
-           << "k0: " << config.k0 << ", "
-           << "v0: " << config.v0 << ", "
-           << "h0: " << config.h0 << ", "
-           << "interleave_lhs: " << config.interleave_lhs << ", "
-           << "interleave_rhs: " << config.interleave_rhs << ", "
-           << "transpose_rhs: " << config.transpose_rhs << ", "
-           << "export_cl_image: " << config.export_cl_image
-           << "}";
+              << "m0: " << config.m0 << ", "
+              << "n0: " << config.n0 << ", "
+              << "k0: " << config.k0 << ", "
+              << "v0: " << config.v0 << ", "
+              << "h0: " << config.h0 << ", "
+              << "interleave_lhs: " << config.interleave_lhs << ", "
+              << "interleave_rhs: " << config.interleave_rhs << ", "
+              << "transpose_rhs: " << config.transpose_rhs << ", "
+              << "export_cl_image: " << config.export_cl_image << "}";
 }
 std::ostream &operator<<(std::ostream &os, HeuristicType ht)
 {
-    switch(ht)
+    switch (ht)
     {
         case HeuristicType::GEMM_Type:
         {
@@ -103,7 +101,7 @@ std::ostream &operator<<(std::ostream &os, HeuristicType ht)
 }
 std::ostream &operator<<(std::ostream &os, DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::F32:
         {

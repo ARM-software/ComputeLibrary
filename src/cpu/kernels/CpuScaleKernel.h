@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_SCALEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -39,9 +40,19 @@ class CpuScaleKernel : public ICpuKernel<CpuScaleKernel>
 {
 private:
     /** Scale function to use for the particular function to use */
-    using ScaleFunctionPtr = void (CpuScaleKernel::*)(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
-    using ScaleKernelPtr   = std::add_pointer<void(const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *,
-                                                   InterpolationPolicy, BorderMode, PixelValue, float, bool, const Window &)>::type;
+    using ScaleFunctionPtr = void (CpuScaleKernel::*)(
+        const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
+    using ScaleKernelPtr = std::add_pointer<void(const ITensor *,
+                                                 ITensor *,
+                                                 const ITensor *,
+                                                 const ITensor *,
+                                                 const ITensor *,
+                                                 InterpolationPolicy,
+                                                 BorderMode,
+                                                 PixelValue,
+                                                 float,
+                                                 bool,
+                                                 const Window &)>::type;
 
 public:
     CpuScaleKernel() = default;
@@ -59,7 +70,11 @@ public:
      * @param[out] dst     Destination tensor info. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  info    @ref ScaleKernelInfo to use for configuration
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *dst,
+    void configure(const ITensorInfo     *src,
+                   const ITensorInfo     *dx,
+                   const ITensorInfo     *dy,
+                   const ITensorInfo     *offsets,
+                   ITensorInfo           *dst,
                    const ScaleKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -67,11 +82,15 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *dst,
+    static Status validate(const ITensorInfo     *src,
+                           const ITensorInfo     *dx,
+                           const ITensorInfo     *dy,
+                           const ITensorInfo     *offsets,
+                           ITensorInfo           *dst,
                            const ScaleKernelInfo &info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct ScaleKernel
@@ -89,28 +108,48 @@ private:
      *
      *  @note Used only in case down-sampling.
      */
-    void scale_area_nchw_u8(const ITensor *src, ITensor *dst, const ITensor *dx, const ITensor *dy, const ITensor *offsets, const Window &window);
+    void scale_area_nchw_u8(const ITensor *src,
+                            ITensor       *dst,
+                            const ITensor *dx,
+                            const ITensor *dy,
+                            const ITensor *offsets,
+                            const Window  &window);
 
     /** function to perform scale using bilinear interpolation on the given window */
     template <typename T>
-    void scale_bilinear_nchw(const ITensor *src, ITensor *dst, const ITensor *dx, const ITensor *dy, const ITensor *offsets, const Window &window);
+    void scale_bilinear_nchw(const ITensor *src,
+                             ITensor       *dst,
+                             const ITensor *dx,
+                             const ITensor *dy,
+                             const ITensor *offsets,
+                             const Window  &window);
     /** function to perform scale using bilinear interpolation on the given window */
     template <typename T>
-    void scale_bilinear_qasymm(const ITensor *src, ITensor *dst, const ITensor *dx, const ITensor *dy, const ITensor *offsets, const Window &window);
+    void scale_bilinear_qasymm(const ITensor *src,
+                               ITensor       *dst,
+                               const ITensor *dx,
+                               const ITensor *dy,
+                               const ITensor *offsets,
+                               const Window  &window);
 
     /** function to perform scale using nearest neighbour on the given window */
     template <typename T>
-    void scale_nearest_nchw(const ITensor *src, ITensor *dst, const ITensor *dx, const ITensor *dy, const ITensor *offsets, const Window &window);
+    void scale_nearest_nchw(const ITensor *src,
+                            ITensor       *dst,
+                            const ITensor *dx,
+                            const ITensor *dy,
+                            const ITensor *offsets,
+                            const Window  &window);
 #endif // ENABLE_NCHW_KERNELS
 
-    ScaleFunctionPtr    _func{ nullptr };
+    ScaleFunctionPtr    _func{nullptr};
     InterpolationPolicy _policy{};
     BorderMode          _border_mode{};
     PixelValue          _constant_border_value{};
-    float               _sampling_offset{ 0 };
-    bool                _align_corners{ false };
-    DataLayout          _data_layout{ DataLayout::UNKNOWN };
-    ScaleKernelPtr      _run_method{ nullptr };
+    float               _sampling_offset{0};
+    bool                _align_corners{false};
+    DataLayout          _data_layout{DataLayout::UNKNOWN};
+    ScaleKernelPtr      _run_method{nullptr};
     std::string         _name{};
 };
 } // namespace kernels

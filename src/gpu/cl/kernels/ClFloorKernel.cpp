@@ -31,6 +31,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -52,7 +53,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
 
     // Validate in case of configured output
-    if(dst->total_size() > 0)
+    if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
@@ -76,9 +77,9 @@ void ClFloorKernel::configure(const ClCompileContext &compile_context, const ITe
 
     // Validate
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst));
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
-    const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(0));
+    const unsigned int vec_size_x = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(0));
     const int          vec_size_x_leftovers = src->dimension(0) % vec_size_x;
     CLBuildOptions     build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
@@ -105,8 +106,9 @@ void ClFloorKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comma
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(IClKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window collapsed = window.collapse_if_possible(IClKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
@@ -117,8 +119,7 @@ void ClFloorKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comma
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

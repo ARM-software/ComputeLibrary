@@ -68,45 +68,42 @@ public:
     virtual size_t get_working_size(unsigned int num_threads) const = 0;
 
     // Execute pooling over the specified area of memory.
-    virtual void execute(
-        const void *const input,
-        void *const       output,
-        void             *working_space,
-        unsigned int      thread_id,
-        unsigned int      num_threads) const = 0;
+    virtual void execute(const void *const input,
+                         void *const       output,
+                         void             *working_space,
+                         unsigned int      thread_id,
+                         unsigned int      num_threads) const = 0;
 
-    virtual void execute(
-        const void *const input,
-        size_t            ld_input_col,
-        size_t            ld_input_row,
-        size_t            ld_input_batch,
-        void *const       output,
-        size_t            ld_output_col,
-        size_t            ld_output_row,
-        size_t            ld_output_batch,
-        void             *working_space,
-        unsigned int      thread_id,
-        unsigned int      num_threads) const = 0;
+    virtual void execute(const void *const input,
+                         size_t            ld_input_col,
+                         size_t            ld_input_row,
+                         size_t            ld_input_batch,
+                         void *const       output,
+                         size_t            ld_output_col,
+                         size_t            ld_output_row,
+                         size_t            ld_output_batch,
+                         void             *working_space,
+                         unsigned int      thread_id,
+                         unsigned int      num_threads) const = 0;
 
-    virtual void execute(
-        unsigned int      batches,
-        unsigned int      height,
-        unsigned int      width,
-        unsigned int      channels,
-        const void *const input,
-        size_t            ld_input_col,
-        size_t            ld_input_row,
-        size_t            ld_input_batch,
-        const PaddingValues &,
-        unsigned int output_height,
-        unsigned int output_width,
-        void *const  output,
-        size_t       ld_output_col,
-        size_t       ld_output_row,
-        size_t       ld_output_batch,
-        void        *working_space,
-        unsigned int thread_id,
-        unsigned int num_threads) const = 0;
+    virtual void execute(unsigned int      batches,
+                         unsigned int      height,
+                         unsigned int      width,
+                         unsigned int      channels,
+                         const void *const input,
+                         size_t            ld_input_col,
+                         size_t            ld_input_row,
+                         size_t            ld_input_batch,
+                         const PaddingValues &,
+                         unsigned int output_height,
+                         unsigned int output_width,
+                         void *const  output,
+                         size_t       ld_output_col,
+                         size_t       ld_output_row,
+                         size_t       ld_output_batch,
+                         void        *working_space,
+                         unsigned int thread_id,
+                         unsigned int num_threads) const = 0;
 };
 
 } // namespace pooling

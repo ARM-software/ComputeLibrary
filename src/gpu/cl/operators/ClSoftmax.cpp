@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 #include "src/gpu/cl/operators/ClSoftmax.h"
+
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/helpers/SoftmaxHelpers.h"
 #include "src/gpu/cl/kernels/ClSoftmaxKernel.h"
 #include "src/gpu/cl/operators/ClPermute.h"
 #include "src/gpu/cl/utils/ClAuxTensorHandler.h"
 #include "support/Cast.h"
-
-#include "src/common/utils/Log.h"
 
 using namespace arm_compute::experimental;
 
@@ -52,7 +53,10 @@ ClSoftmax::ClSoftmax()
 {
 }
 
-void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &dst, const SoftmaxKernelInfo &info)
+void ClSoftmax::configure(const CLCompileContext  &compile_context,
+                          const ITensorInfo       &src,
+                          ITensorInfo             &dst,
+                          const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(src, dst, info));
     ARM_COMPUTE_LOG_PARAMS(src, dst, info);
@@ -64,14 +68,15 @@ void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensor
     const ITensorInfo &tmp_input_info  = _needs_permute ? _permuted_src_info : src;
     ITensorInfo       &tmp_output_info = _needs_permute ? _permuted_dst_info : dst;
 
-    if(_needs_permute)
+    if (_needs_permute)
     {
         const auto perm_info = softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
         _permute_input->configure(compile_context, &src, &_permuted_src_info, perm_info);
     }
 
-    DataType tmp_data_type = is_data_type_quantized_asymmetric(tmp_input_info.data_type()) ? DataType::S32 : tmp_input_info.data_type();
-    _tmp_info              = tmp_input_info.clone()->set_data_type(tmp_data_type);
+    DataType tmp_data_type =
+        is_data_type_quantized_asymmetric(tmp_input_info.data_type()) ? DataType::S32 : tmp_input_info.data_type();
+    _tmp_info = tmp_input_info.clone()->set_data_type(tmp_data_type);
 
     TensorShape max_sum_shape = tmp_input_info.tensor_shape();
     _max_info                 = tmp_input_info.clone()->set_tensor_shape(max_sum_shape);
@@ -83,33 +88,41 @@ void ClSoftmax::configure(const CLCompileContext &compile_context, const ITensor
     _max_shift_exp_sum_kernel->configure(compile_context, tmp_input_info, _max_info, _tmp_info, _sum_info, info);
     _norm_kernel->configure(compile_context, _tmp_info, _sum_info, tmp_output_info, info);
 
-    if(_needs_permute)
+    if (_needs_permute)
     {
         const auto perm_info = softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
         _permute_output->configure(compile_context, &_permuted_dst_info, &dst, perm_info);
     }
 
-    _aux_mem[InternalTensorIdx::SUM] = MemoryInfo(offset_int_vec(InternalTensorIdx::SUM), MemoryLifetime::Temporary, _sum_info.total_size());
-    _aux_mem[InternalTensorIdx::TMP] = MemoryInfo(offset_int_vec(InternalTensorIdx::TMP), MemoryLifetime::Temporary, _tmp_info.total_size());
-    _aux_mem[InternalTensorIdx::MAX] = MemoryInfo(offset_int_vec(InternalTensorIdx::MAX), MemoryLifetime::Temporary, _max_info.total_size());
+    _aux_mem[InternalTensorIdx::SUM] =
+        MemoryInfo(offset_int_vec(InternalTensorIdx::SUM), MemoryLifetime::Temporary, _sum_info.total_size());
+    _aux_mem[InternalTensorIdx::TMP] =
+        MemoryInfo(offset_int_vec(InternalTensorIdx::TMP), MemoryLifetime::Temporary, _tmp_info.total_size());
+    _aux_mem[InternalTensorIdx::MAX] =
+        MemoryInfo(offset_int_vec(InternalTensorIdx::MAX), MemoryLifetime::Temporary, _max_info.total_size());
 
-    _aux_mem[InternalTensorIdx::PERMUTED_SRC] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), MemoryLifetime::Temporary, _permuted_src_info.total_size());
-    _aux_mem[InternalTensorIdx::PERMUTED_DST] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_DST), MemoryLifetime::Temporary, _permuted_dst_info.total_size());
+    _aux_mem[InternalTensorIdx::PERMUTED_SRC] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_SRC),
+                                                           MemoryLifetime::Temporary, _permuted_src_info.total_size());
+    _aux_mem[InternalTensorIdx::PERMUTED_DST] = MemoryInfo(offset_int_vec(InternalTensorIdx::PERMUTED_DST),
+                                                           MemoryLifetime::Temporary, _permuted_dst_info.total_size());
 }
 
 Status ClSoftmax::validate(const ITensorInfo &src, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src.num_dimensions() > 4, "Only up to 4 dimensions are supported");
     ARM_COMPUTE_UNUSED(info.beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(info.axis < static_cast<int32_t>(-src.num_dimensions()) || static_cast<int32_t>(src.num_dimensions()) <= info.axis);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.axis < static_cast<int32_t>(-src.num_dimensions()) ||
+                                static_cast<int32_t>(src.num_dimensions()) <= info.axis);
 
-    const size_t actual_axis   = static_cast<size_t>(wrap_around(info.axis, static_cast<int32_t>(src.num_dimensions())));
+    const size_t actual_axis = static_cast<size_t>(wrap_around(info.axis, static_cast<int32_t>(src.num_dimensions())));
     const bool   needs_permute = actual_axis != 0;
-    if(needs_permute)
+    if (needs_permute)
     {
-        const PermutationVector permutation_vector = softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
-        const TensorShape       permuted_shape     = misc::shape_calculator::compute_permutation_output_shape(src, permutation_vector);
-        TensorInfo              input_permuted(src.clone()->set_tensor_shape(permuted_shape));
+        const PermutationVector permutation_vector =
+            softmax_helpers::get_permutation_vector_from_softmax_axis(actual_axis);
+        const TensorShape permuted_shape =
+            misc::shape_calculator::compute_permutation_output_shape(src, permutation_vector);
+        TensorInfo input_permuted(src.clone()->set_tensor_shape(permuted_shape));
         ARM_COMPUTE_RETURN_ON_ERROR(ClPermute::validate(&src, &input_permuted, permutation_vector));
         TensorInfo output_permuted(dst.clone()->set_tensor_shape(permuted_shape));
         ARM_COMPUTE_RETURN_ON_ERROR(ClPermute::validate(&output_permuted, &dst, permutation_vector));
@@ -122,9 +135,14 @@ Status ClSoftmax::validate(const ITensorInfo &src, const ITensorInfo &dst, const
     TensorShape max_sum_shape = src.tensor_shape();
     max_sum_shape.set(0, 1);
     TensorInfo tensor_info_max(src.clone()->set_tensor_shape(max_sum_shape).set_is_resizable(true));
-    TensorInfo tensor_info_sum(src.clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()).set_is_resizable(true));
+    TensorInfo tensor_info_sum(src.clone()
+                                   ->set_tensor_shape(max_sum_shape)
+                                   .set_data_type(tmp_data_type)
+                                   .set_quantization_info(QuantizationInfo())
+                                   .set_is_resizable(true));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClLogits1DMaxShiftExpSumKernel::validate(src, tensor_info_max, tensor_info_tmp, tensor_info_sum));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        kernels::ClLogits1DMaxShiftExpSumKernel::validate(src, tensor_info_max, tensor_info_tmp, tensor_info_sum));
     ARM_COMPUTE_RETURN_ON_ERROR(kernels::ClLogits1DNormKernel::validate(tensor_info_tmp, tensor_info_sum, dst, info));
 
     return Status{};
@@ -139,10 +157,12 @@ void ClSoftmax::run(ITensorPack &tensors)
     CLAuxTensorHandler tmp(offset_int_vec(InternalTensorIdx::TMP), _tmp_info, tensors, false);
     CLAuxTensorHandler max(offset_int_vec(InternalTensorIdx::MAX), _max_info, tensors, false);
 
-    CLAuxTensorHandler permuted_src(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _permuted_src_info, tensors, false);
-    CLAuxTensorHandler permuted_dst(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _permuted_dst_info, tensors, false);
+    CLAuxTensorHandler permuted_src(offset_int_vec(InternalTensorIdx::PERMUTED_SRC), _permuted_src_info, tensors,
+                                    false);
+    CLAuxTensorHandler permuted_dst(offset_int_vec(InternalTensorIdx::PERMUTED_DST), _permuted_dst_info, tensors,
+                                    false);
 
-    if(_needs_permute)
+    if (_needs_permute)
     {
         ITensorPack pack;
         pack.add_const_tensor(TensorType::ACL_SRC, src);
@@ -152,7 +172,7 @@ void ClSoftmax::run(ITensorPack &tensors)
 
     ITensorPack sum_pack;
     ITensorPack norm_pack;
-    if(_needs_permute)
+    if (_needs_permute)
     {
         sum_pack.add_const_tensor(TensorType::ACL_SRC, permuted_src.get());
         norm_pack.add_tensor(TensorType::ACL_DST, permuted_dst.get());
@@ -172,7 +192,7 @@ void ClSoftmax::run(ITensorPack &tensors)
     CLScheduler::get().enqueue_op(*_max_shift_exp_sum_kernel.get(), sum_pack, false);
     CLScheduler::get().enqueue_op(*_norm_kernel.get(), norm_pack, false);
 
-    if(_needs_permute)
+    if (_needs_permute)
     {
         ITensorPack pack;
         pack.add_const_tensor(TensorType::ACL_SRC, permuted_dst.get());

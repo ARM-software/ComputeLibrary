@@ -37,22 +37,22 @@ namespace cpuinfo
 struct CpuIsaInfo
 {
     /* SIMD extension support */
-    bool neon{ false };
-    bool sve{ false };
-    bool sve2{ false };
-    bool sme{ false };
-    bool sme2{ false };
+    bool neon{false};
+    bool sve{false};
+    bool sve2{false};
+    bool sme{false};
+    bool sme2{false};
 
     /* Data-type extensions support */
-    bool fp16{ false };
-    bool bf16{ false };
-    bool svebf16{ false };
+    bool fp16{false};
+    bool bf16{false};
+    bool svebf16{false};
 
     /* Instruction support */
-    bool dot{ false };
-    bool i8mm{ false };
-    bool svei8mm{ false };
-    bool svef32mm{ false };
+    bool dot{false};
+    bool i8mm{false};
+    bool svei8mm{false};
+    bool svef32mm{false};
 };
 
 /** Identify ISA related information through system information
@@ -76,7 +76,8 @@ CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t 
  *
  * @return CpuIsaInfo A populated ISA feature structure
  */
-CpuIsaInfo init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr);
+CpuIsaInfo
+init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr);
 } // namespace cpuinfo
 } // namespace arm_compute
 

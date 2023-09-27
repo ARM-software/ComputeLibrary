@@ -83,7 +83,12 @@ public:
      * @param[in]      epsilon             (Optional) Lower bound value for the normalization. Defaults to 1e-12
      * @param[in]      use_mixed_precision (Optional) Use mixed precision in case of FP16 execution
      */
-    void configure(ICLTensor *input, ICLTensor *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f, bool use_mixed_precision = true);
+    void configure(ICLTensor *input,
+                   ICLTensor *output,
+                   float      gamma               = 1.0f,
+                   float      beta                = 0.0f,
+                   float      epsilon             = 1e-12f,
+                   bool       use_mixed_precision = true);
     /** Set the input and output tensors.
      *
      * @param[in]      compile_context     The compile context to be used.
@@ -95,7 +100,13 @@ public:
      * @param[in]      epsilon             (Optional) Lower bound value for the normalization. Defaults to 1e-12
      * @param[in]      use_mixed_precision (Optional) Use mixed precision in case of FP16 execution
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f, bool use_mixed_precision = true);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   float                   gamma               = 1.0f,
+                   float                   beta                = 0.0f,
+                   float                   epsilon             = 1e-12f,
+                   bool                    use_mixed_precision = true);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *
@@ -108,8 +119,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f, bool use_mixed_precision = true);
-    void run() override;
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           float              gamma               = 1.0f,
+                           float              beta                = 0.0f,
+                           float              epsilon             = 1e-12f,
+                           bool               use_mixed_precision = true);
+    void          run() override;
 
 private:
     std::unique_ptr<ICLKernel> _inst_norm_kernel; /**< Kernel to run */

@@ -23,16 +23,18 @@
  */
 #include "arm_compute/graph/nodes/ArgMinMaxLayerNode.h"
 
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-ArgMinMaxLayerNode::ArgMinMaxLayerNode(ReductionOperation op, unsigned int axis, DataType out_data_type, QuantizationInfo out_quant_info)
+ArgMinMaxLayerNode::ArgMinMaxLayerNode(ReductionOperation op,
+                                       unsigned int       axis,
+                                       DataType           out_data_type,
+                                       QuantizationInfo   out_quant_info)
     : _op(op), _axis(axis), _out_data_type(out_data_type), _out_quant_info(std::move(out_quant_info))
 {
     _input_edges.resize(1, EmptyEdgeID);
@@ -56,7 +58,7 @@ DataType ArgMinMaxLayerNode::out_data_type() const
 
 bool ArgMinMaxLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -75,17 +77,18 @@ TensorDescriptor ArgMinMaxLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor output_info = src->desc();
-    if(!_out_quant_info.empty())
+    if (!_out_quant_info.empty())
     {
         output_info.quant_info = _out_quant_info;
     }
 
-    if(_out_data_type != DataType::UNKNOWN)
+    if (_out_data_type != DataType::UNKNOWN)
     {
         output_info.data_type = _out_data_type;
     }
 
-    TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(output_info.shape, _axis, false);
+    TensorShape output_shape =
+        arm_compute::misc::shape_calculator::compute_reduced_shape(output_info.shape, _axis, false);
     output_info.set_shape(output_shape);
 
     return output_info;

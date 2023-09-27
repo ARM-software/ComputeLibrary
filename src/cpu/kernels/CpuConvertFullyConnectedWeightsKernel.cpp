@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -34,8 +35,10 @@ namespace cpu
 {
 namespace kernels
 {
-void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_input_shape,
-                                                      DataLayout data_layout)
+void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src,
+                                                      ITensorInfo       *dst,
+                                                      const TensorShape &original_input_shape,
+                                                      DataLayout         data_layout)
 
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
@@ -43,7 +46,8 @@ void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src, IT
     // Output tensor auto initialisation if not yet initialized
     auto_init_if_empty(*dst, *src->clone());
 
-    ARM_COMPUTE_ERROR_THROW_ON(CpuConvertFullyConnectedWeightsKernel::validate(src, dst, original_input_shape, data_layout));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        CpuConvertFullyConnectedWeightsKernel::validate(src, dst, original_input_shape, data_layout));
 
     const DataLayout input_data_layout = (data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
 
@@ -62,8 +66,10 @@ void CpuConvertFullyConnectedWeightsKernel::configure(const ITensorInfo *src, IT
     ICpuKernel::configure(win);
 }
 
-Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_input_shape,
-                                                       DataLayout data_layout)
+Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
+                                                       const ITensorInfo *dst,
+                                                       const TensorShape &original_input_shape,
+                                                       DataLayout         data_layout)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
@@ -72,7 +78,7 @@ Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src, c
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
     // Checks performed when dst is configured
-    if((dst != nullptr) && (dst->total_size() != 0))
+    if ((dst != nullptr) && (dst->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
@@ -97,11 +103,15 @@ void CpuConvertFullyConnectedWeightsKernel::run_op(ITensorPack &tensors, const W
     Iterator input(src, window);
     Iterator output(dst, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        memcpy(output.ptr() + id.x() * dst_stride_x + (id.y() % _factor1 * _factor2 + id.y() / _factor1) * dst_stride_y, input.ptr(), element_size);
-    },
-    input);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            memcpy(output.ptr() + id.x() * dst_stride_x +
+                       (id.y() % _factor1 * _factor2 + id.y() / _factor1) * dst_stride_y,
+                   input.ptr(), element_size);
+        },
+        input);
 }
 
 const char *CpuConvertFullyConnectedWeightsKernel::name() const

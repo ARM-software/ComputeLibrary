@@ -23,6 +23,7 @@
  */
 
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/softmax/generic/sve/impl.h"
 
 namespace arm_compute
@@ -33,5 +34,5 @@ void sve_qasymm8_signed_logits(const ITensor *in, ITensor *out, const Window &wi
 {
     return sve_logits_1d_max<qasymm8_signed_t>(in, out, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

@@ -31,8 +31,7 @@
 namespace arm_compute
 {
 
-CLMutableCommandBuffer::CLMutableCommandBuffer(cl_command_queue queue)
-    : CLCommandBuffer()
+CLMutableCommandBuffer::CLMutableCommandBuffer(cl_command_queue queue) : CLCommandBuffer()
 {
     cl_int status = CL_SUCCESS;
 
@@ -52,7 +51,10 @@ CLMutableCommandBuffer::~CLMutableCommandBuffer()
     handle_cl_error("clReleaseCommandBufferKHR", status);
 }
 
-void CLMutableCommandBuffer::add_kernel(cl_kernel kernel, const cl::NDRange &offset, const cl::NDRange &global, const cl::NDRange &local)
+void CLMutableCommandBuffer::add_kernel(cl_kernel          kernel,
+                                        const cl::NDRange &offset,
+                                        const cl::NDRange &global,
+                                        const cl::NDRange &local)
 {
     ARM_COMPUTE_ERROR_ON(state() != State::Created);
 
@@ -65,18 +67,8 @@ void CLMutableCommandBuffer::add_kernel(cl_kernel kernel, const cl::NDRange &off
     };
 
     const auto error = clCommandNDRangeKernelKHR(
-        _cb,
-        nullptr,
-        properties,
-        kernel,
-        global.dimensions(),
-        offset.dimensions() != 0 ? offset.get() : nullptr,
-        global.get(),
-        local.dimensions() != 0 ? local.get() : nullptr,
-        0,
-        nullptr,
-        nullptr,
-        &mutable_handle);
+        _cb, nullptr, properties, kernel, global.dimensions(), offset.dimensions() != 0 ? offset.get() : nullptr,
+        global.get(), local.dimensions() != 0 ? local.get() : nullptr, 0, nullptr, nullptr, &mutable_handle);
 
     handle_cl_error("clCommandNDRangeKernelKHR", error);
 
@@ -114,7 +106,7 @@ void CLMutableCommandBuffer::finalize()
 
     size_t arg_no = 0;
 
-    for(auto &mut_dispatch_cfg : _mut_dispatch_cfgs)
+    for (auto &mut_dispatch_cfg : _mut_dispatch_cfgs)
     {
         ARM_COMPUTE_ERROR_ON(arg_no >= _mut_arg_cfgs.size());
         mut_dispatch_cfg.arg_list = &_mut_arg_cfgs[arg_no];
@@ -132,9 +124,7 @@ void CLMutableCommandBuffer::update()
 {
     ARM_COMPUTE_ERROR_ON(state() != State::Finalized);
 
-    const auto error = clUpdateMutableCommandsKHR(
-        _cb,
-        &_mut_cfg);
+    const auto error = clUpdateMutableCommandsKHR(_cb, &_mut_cfg);
 
     handle_cl_error("clUpdateMutableCommandsKHR", error);
 }
@@ -143,13 +133,7 @@ void CLMutableCommandBuffer::enqueue()
 {
     ARM_COMPUTE_ERROR_ON(state() != State::Finalized);
 
-    const auto error = clEnqueueCommandBufferKHR(
-        0,
-        nullptr,
-        _cb,
-        0,
-        nullptr,
-        nullptr);
+    const auto error = clEnqueueCommandBufferKHR(0, nullptr, _cb, 0, nullptr, nullptr);
 
     handle_cl_error("clEnqueueCommandBufferKHR", error);
 }

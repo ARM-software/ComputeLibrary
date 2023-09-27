@@ -46,7 +46,7 @@ public:
      */
     static std::unique_ptr<IClDirectConvKernelConfig> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
                 return std::make_unique<ClDirectConvDefaultConfigBifrost>(GPUTarget::G71);
@@ -59,6 +59,6 @@ public:
         }
     }
 };
-} // namespace opencl
+} // namespace cl_direct_conv
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_DIRECT_CONV_CLDIRECTCONVKERNELCONFIG */

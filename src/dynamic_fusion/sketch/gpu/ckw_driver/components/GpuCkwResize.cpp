@@ -28,14 +28,13 @@
 
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/WriterHelper.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
-
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -49,20 +48,17 @@ namespace
 constexpr unsigned int opencl_vector_size_in_bytes = 16;
 } // namespace
 
-GpuCkwResize::GpuCkwResize(ComponentId                      id,
-                           const ArgumentPack<ITensorInfo> &tensors,
-                           const Attributes                &attributes)
-    : IGpuCkwComponentDriver{ id, tensors },
-      _src{},
-      _dst{},
-      _attributes{ attributes }
+GpuCkwResize::GpuCkwResize(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes)
+    : IGpuCkwComponentDriver{id, tensors}, _src{}, _dst{}, _attributes{attributes}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_src, _dst);
 }
 
-void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
+void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup    &comp_group,
+                                              GpuCkwVariableTable     &vtable,
+                                              GpuCkwScopedKernelWriter writer) const
 {
     const size_t width_idx  = get_data_layout_dimension_index(_dst->data_layout(), DataLayoutDimension::WIDTH);
     const size_t height_idx = get_data_layout_dimension_index(_dst->data_layout(), DataLayoutDimension::HEIGHT);
@@ -72,12 +68,16 @@ void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, 
     const int32_t m0          = root_window.y().step();
     const int32_t partial_n0  = _dst->dimension(0) % n0;
 
-    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
+    GpuCkwComponentArgument *src =
+        vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
+    GpuCkwComponentArgument *dst =
+        vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     // Constants
-    const float scale_x      = scale_utils::calculate_resize_ratio(_src->dimension(width_idx), _dst->dimension(width_idx), _attributes.align_corners());
-    const float scale_y      = scale_utils::calculate_resize_ratio(_src->dimension(height_idx), _dst->dimension(height_idx), _attributes.align_corners());
+    const float scale_x = scale_utils::calculate_resize_ratio(_src->dimension(width_idx), _dst->dimension(width_idx),
+                                                              _attributes.align_corners());
+    const float scale_y = scale_utils::calculate_resize_ratio(_src->dimension(height_idx), _dst->dimension(height_idx),
+                                                              _attributes.align_corners());
     const auto &tile_scale_x = writer->declare_tile("scale_x", scale_x);
     const auto &tile_scale_y = writer->declare_tile("scale_y", scale_y);
     const auto &tile_0       = writer->declare_tile("0", 0);
@@ -112,7 +112,7 @@ void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, 
     const auto &tile_xi_f = writer->declare_tile("xi_f", ckw::DataType::Fp32);
     const auto &tile_yi_f = writer->declare_tile("yi_f", ckw::DataType::Fp32);
 
-    switch(_attributes.sampling_policy())
+    switch (_attributes.sampling_policy())
     {
         case SamplingPolicy::TOP_LEFT:
             // xi_f = (xo * scale_x)
@@ -138,7 +138,7 @@ void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, 
             ARM_COMPUTE_ERROR("Unsupported sampling policy");
     }
 
-    if(_attributes.align_corners())
+    if (_attributes.align_corners())
     {
         writer->op_unary_elementwise_function(tile_xi_f, UnaryFunction::Round, tile_xi_f);
         writer->op_unary_elementwise_function(tile_yi_f, UnaryFunction::Round, tile_yi_f);
@@ -161,8 +161,10 @@ void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, 
     auto &tile_xi0 = writer->declare_tile("xi0", ckw::DataType::Int32);
     auto &tile_yi0 = writer->declare_tile("yi0", ckw::DataType::Int32);
 
-    writer->op_ternary_elementwise_function(tile_xi0, TernaryFunction::Clamp, tile_xi_f_int, tile_0, tile_src_w_minus_1);
-    writer->op_ternary_elementwise_function(tile_yi0, TernaryFunction::Clamp, tile_yi_f_int, tile_0, tile_src_h_minus_1);
+    writer->op_ternary_elementwise_function(tile_xi0, TernaryFunction::Clamp, tile_xi_f_int, tile_0,
+                                            tile_src_w_minus_1);
+    writer->op_ternary_elementwise_function(tile_yi0, TernaryFunction::Clamp, tile_yi_f_int, tile_0,
+                                            tile_src_h_minus_1);
 
     TensorTileSampler src_sampler;
     src_sampler.x(tile_co);
@@ -199,7 +201,9 @@ void GpuCkwResize::do_nearest_neighbor_resize(const ComponentGroup &comp_group, 
     writer->op_assign(tile_dst, tile_src);
 }
 
-void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
+void GpuCkwResize::do_bilinear_resize(const ComponentGroup    &comp_group,
+                                      GpuCkwVariableTable     &vtable,
+                                      GpuCkwScopedKernelWriter writer) const
 {
     const size_t width_idx  = get_data_layout_dimension_index(_dst->data_layout(), DataLayoutDimension::WIDTH);
     const size_t height_idx = get_data_layout_dimension_index(_dst->data_layout(), DataLayoutDimension::HEIGHT);
@@ -209,12 +213,16 @@ void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVa
     const int32_t m0          = root_window.y().step();
     const int32_t partial_n0  = _dst->dimension(0) % n0;
 
-    GpuCkwComponentArgument *src = vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
-    GpuCkwComponentArgument *dst = vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
+    GpuCkwComponentArgument *src =
+        vtable.declare_variable(comp_group, writer, _src, TensorStorageType::ClBufferUint8Ptr, "src");
+    GpuCkwComponentArgument *dst =
+        vtable.declare_variable(comp_group, writer, _dst, TensorStorageType::ClBufferUint8Ptr, "dst");
 
     // Constants
-    const float scale_x      = scale_utils::calculate_resize_ratio(_src->dimension(width_idx), _dst->dimension(width_idx), _attributes.align_corners());
-    const float scale_y      = scale_utils::calculate_resize_ratio(_src->dimension(height_idx), _dst->dimension(height_idx), _attributes.align_corners());
+    const float scale_x = scale_utils::calculate_resize_ratio(_src->dimension(width_idx), _dst->dimension(width_idx),
+                                                              _attributes.align_corners());
+    const float scale_y = scale_utils::calculate_resize_ratio(_src->dimension(height_idx), _dst->dimension(height_idx),
+                                                              _attributes.align_corners());
     const auto &tile_scale_x = writer->declare_tile("scale_x", scale_x);
     const auto &tile_scale_y = writer->declare_tile("scale_y", scale_y);
     const auto &tile_0       = writer->declare_tile("0", 0);
@@ -251,7 +259,7 @@ void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVa
     const auto &tile_xi_f = writer->declare_tile("xi_f", ckw::DataType::Fp32);
     const auto &tile_yi_f = writer->declare_tile("yi_f", ckw::DataType::Fp32);
 
-    switch(_attributes.sampling_policy())
+    switch (_attributes.sampling_policy())
     {
         case SamplingPolicy::TOP_LEFT:
             // xi_f = (xo * scale_x)
@@ -312,8 +320,10 @@ void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVa
 
     writer->op_ternary_elementwise_function(tile_xi0, TernaryFunction::Clamp, tile_xi, tile_0, tile_src_w_minus_1);
     writer->op_ternary_elementwise_function(tile_yi0, TernaryFunction::Clamp, tile_yi, tile_0, tile_src_h_minus_1);
-    writer->op_ternary_elementwise_function(tile_xi1, TernaryFunction::Clamp, tile_xi_plus_1, tile_0, tile_src_w_minus_1);
-    writer->op_ternary_elementwise_function(tile_yi1, TernaryFunction::Clamp, tile_yi_plus_1, tile_0, tile_src_h_minus_1);
+    writer->op_ternary_elementwise_function(tile_xi1, TernaryFunction::Clamp, tile_xi_plus_1, tile_0,
+                                            tile_src_w_minus_1);
+    writer->op_ternary_elementwise_function(tile_yi1, TernaryFunction::Clamp, tile_yi_plus_1, tile_0,
+                                            tile_src_h_minus_1);
 
     TensorTileSampler in_sampler;
     in_sampler.x(tile_co);
@@ -388,7 +398,7 @@ void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVa
     writer->op_binary_expression(tile_a1, tile_yi_f, BinaryOp::Sub, tile_yi_float);
     writer->op_binary_expression(tile_b1, tile_1, BinaryOp::Sub, tile_a1);
 
-    if(is_data_type_float(_src->data_type()))
+    if (is_data_type_float(_src->data_type()))
     {
         // Cast weights to source type
         const auto &tile_a_src_type  = writer->declare_tile("a_src_t", to_ckw(_src->data_type()));
@@ -461,9 +471,11 @@ void GpuCkwResize::do_bilinear_resize(const ComponentGroup &comp_group, GpuCkwVa
     }
 }
 
-void GpuCkwResize::write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const
+void GpuCkwResize::write_component_code(const ComponentGroup    &comp_group,
+                                        GpuCkwVariableTable     &vtable,
+                                        GpuCkwScopedKernelWriter writer) const
 {
-    switch(_attributes.interpolation_policy())
+    switch (_attributes.interpolation_policy())
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
             do_nearest_neighbor_resize(comp_group, vtable, writer);

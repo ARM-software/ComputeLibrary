@@ -23,19 +23,19 @@
  */
 
 #include "ExampleComponentArgument.h"
+
 #include "ckw/Error.h"
 
 ExampleComponentArgument::ExampleComponentArgument()
 {
 }
 
-ExampleComponentArgument::ExampleComponentArgument(ckw::TensorOperand &tensor)
-    : _tensor(&tensor)
+ExampleComponentArgument::ExampleComponentArgument(ckw::TensorOperand &tensor) : _tensor(&tensor)
 {
 }
 
-ExampleComponentArgument &
-ExampleComponentArgument::init_virtual_tensor(ckw::TileOperand &tile, const ckw::TensorTileSampler &tile_sampler)
+ExampleComponentArgument &ExampleComponentArgument::init_virtual_tensor(ckw::TileOperand             &tile,
+                                                                        const ckw::TensorTileSampler &tile_sampler)
 {
     CKW_ASSERT(_tile == nullptr);
 

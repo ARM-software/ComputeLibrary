@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NECONCATENATELAYER_H
 #define ARM_COMPUTE_NECONCATENATELAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -87,7 +86,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
+    static Status
+    validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
     void run() override;

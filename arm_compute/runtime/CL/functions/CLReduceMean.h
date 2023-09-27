@@ -24,12 +24,12 @@
 #ifndef ARM_COMPUTE_CL_REDUCE_MEAN_H
 #define ARM_COMPUTE_CL_REDUCE_MEAN_H
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
 namespace arm_compute
@@ -74,7 +74,11 @@ public:
      * @param[in]  keep_dims       If positive, retains reduced dimensions with length 1.
      * @param[out] output          Destination tensor. Data type supported: Same as @p input
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   const Coordinates      &reduction_axis,
+                   bool                    keep_dims,
+                   ICLTensor              *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReduceMean
      *
@@ -85,7 +89,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output);
+    static Status
+    validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -30,6 +30,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/operators/ClGemm.h"
 
@@ -40,15 +41,15 @@ using OperatorType = opencl::ClGemm;
 
 struct CLGEMM::Impl
 {
-    const ICLTensor              *b{ nullptr };
-    std::unique_ptr<OperatorType> op{ nullptr };
+    const ICLTensor              *b{nullptr};
+    std::unique_ptr<OperatorType> op{nullptr};
     MemoryGroup                   memory_group{};
-    IWeightsManager              *weights_manager{ nullptr };
+    IWeightsManager              *weights_manager{nullptr};
     ITensorPack                   run_pack{};
     ITensorPack                   prep_pack{};
     MemoryRequirements            aux_mem_req{};
     WorkspaceData<CLTensor>       workspace_tensors{};
-    bool                          is_prepared{ false };
+    bool                          is_prepared{false};
 };
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
@@ -60,12 +61,25 @@ CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *
 
 CLGEMM::~CLGEMM() = default;
 
-void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info)
+void CLGEMM::configure(const ICLTensor *a,
+                       const ICLTensor *b,
+                       const ICLTensor *c,
+                       ICLTensor       *output,
+                       float            alpha,
+                       float            beta,
+                       const GEMMInfo  &gemm_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), a, b, c, output, alpha, beta, gemm_info);
 }
 
-void CLGEMM::configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info)
+void CLGEMM::configure(const CLCompileContext &compile_context,
+                       const ICLTensor        *a,
+                       const ICLTensor        *b,
+                       const ICLTensor        *c,
+                       ICLTensor              *output,
+                       float                   alpha,
+                       float                   beta,
+                       const GEMMInfo         &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
@@ -73,25 +87,33 @@ void CLGEMM::configure(const CLCompileContext &compile_context, const ICLTensor 
     _impl->op          = std::make_unique<OperatorType>();
     _impl->is_prepared = gemm_info.retain_internal_weights();
 
-    _impl->op->configure(compile_context, a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), alpha, beta, gemm_info);
+    _impl->op->configure(compile_context, a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(),
+                         alpha, beta, gemm_info);
     _impl->aux_mem_req = _impl->op->workspace();
 
     // Manage/allocate auxilairy tensors
-    if(_impl->is_prepared)
+    if (_impl->is_prepared)
     {
         _impl->run_pack.add_const_tensor(ACL_SRC_0, a);
         _impl->run_pack.add_tensor(ACL_DST, output);
     }
     else
     {
-        _impl->run_pack  = { { ACL_SRC_0, a }, { ACL_SRC_2, c }, { ACL_DST, output } };
-        _impl->prep_pack = { { ACL_SRC_1, _impl->b } };
+        _impl->run_pack  = {{ACL_SRC_0, a}, {ACL_SRC_2, c}, {ACL_DST, output}};
+        _impl->prep_pack = {{ACL_SRC_1, _impl->b}};
 
-        _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+        _impl->workspace_tensors =
+            manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
     }
 }
 
-Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
+Status CLGEMM::validate(const ITensorInfo *a,
+                        const ITensorInfo *b,
+                        const ITensorInfo *c,
+                        const ITensorInfo *output,
+                        float              alpha,
+                        float              beta,
+                        const GEMMInfo    &gemm_info)
 {
     return OperatorType::validate(a, b, c, output, alpha, beta, gemm_info);
 }
@@ -107,15 +129,15 @@ void CLGEMM::run()
 
 void CLGEMM::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->prep_pack);
 
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+        auto has_reshape =
+            std::find_if(_impl->aux_mem_req.begin(), _impl->aux_mem_req.end(),
+                         [](const MemoryInfo &m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
 
-        if(has_reshape != std::end(_impl->aux_mem_req))
+        if (has_reshape != std::end(_impl->aux_mem_req))
         {
             _impl->b->mark_as_unused();
         }

@@ -34,7 +34,6 @@
 
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -46,12 +45,20 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *dst,
-                          int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
+Status validate_arguments(const ITensorInfo             *mm_result,
+                          const ITensorInfo             *vector_sum_col,
+                          const ITensorInfo             *vector_sum_row,
+                          const ITensorInfo             *bias,
+                          const ITensorInfo             *dst,
+                          int32_t                        a_offset,
+                          int32_t                        b_offset,
+                          const GEMMLowpOutputStageInfo &output_stage,
+                          const ITensorInfo             *output_multipliers,
+                          const ITensorInfo             *output_shifts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
@@ -62,33 +69,35 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
     ARM_COMPUTE_RETURN_ERROR_ON(output_multipliers->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(output_shifts->num_dimensions() > 1);
-    if(output_stage.is_quantized_per_channel)
+    if (output_stage.is_quantized_per_channel)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) != output_shifts->dimension(0));
         ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) != output_multipliers->dimension(0));
     }
 
     // If a_offset == 0, vector_sum_col can be a nullptr
-    if(a_offset != 0)
+    if (a_offset != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != mm_result->dimension(0));
     }
 
     // If b_offset == 0, vector_sum_row can be a nullptr
-    if(b_offset != 0)
+    if (b_offset != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
 
         // Check if input is a 3D reinterpretation
-        const bool reinterpret_as_3d = mm_result->num_dimensions() > 1 && mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
+        const bool reinterpret_as_3d =
+            mm_result->num_dimensions() > 1 && mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
 
         // Validate input
-        ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) != (mm_result->dimension(1) * mm_result->dimension(2)));
+        ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) !=
+                                                             (mm_result->dimension(1) * mm_result->dimension(2)));
         ARM_COMPUTE_RETURN_ERROR_ON(!reinterpret_as_3d && vector_sum_row->dimension(0) != mm_result->dimension(1));
 
         TensorShape output_shape = mm_result->tensor_shape();
-        if(output_shape.num_dimensions() > 1)
+        if (output_shape.num_dimensions() > 1)
         {
             const unsigned int output_batch_idx = reinterpret_as_3d ? 3 : 2;
 
@@ -99,20 +108,22 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[output_batch_idx],
                                             "mm_result tensor must have the same number of batches of output tensor");
 
-            if(a_offset != 0)
+            if (a_offset != 0)
             {
                 TensorShape vector_sum_col_shape = vector_sum_col->tensor_shape();
                 vector_sum_col_shape.collapse_from(1);
 
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                                "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 &&
+                                                    vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                                "vector_sum_col tensor must have the same number of batches of "
+                                                "vector_sum_row_shape or the number of batches must be set to 1");
             }
         }
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type == GEMMLowpOutputStageType::NONE);
     // Checks performed when output is configured
-    if((dst != nullptr) && (dst->total_size() != 0))
+    if ((dst != nullptr) && (dst->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != dst->data_type());
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
@@ -120,7 +131,8 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(), "per channel quantization info is incorrect");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(),
+                                    "per channel quantization info is incorrect");
 
     return Status{};
 }
@@ -131,16 +143,26 @@ ClGemmLowpOffsetContributionOutputStageKernel::ClGemmLowpOffsetContributionOutpu
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileContext &compile_context,
-                                                              const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, ITensorInfo *dst,
-                                                              int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
-                                                              const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
+void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileContext        &compile_context,
+                                                              const ITensorInfo             *mm_result,
+                                                              const ITensorInfo             *vector_sum_col,
+                                                              const ITensorInfo             *vector_sum_row,
+                                                              const ITensorInfo             *bias,
+                                                              ITensorInfo                   *dst,
+                                                              int32_t                        k,
+                                                              int32_t                        a_offset,
+                                                              int32_t                        b_offset,
+                                                              const GEMMLowpOutputStageInfo &output_stage,
+                                                              const ITensorInfo             *output_multipliers,
+                                                              const ITensorInfo             *output_shifts)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, dst, output_multipliers, output_shifts);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset, b_offset, output_stage, output_multipliers, output_shifts));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset,
+                                                  b_offset, output_stage, output_multipliers, output_shifts));
 
-    auto padding_info = get_padding_info({ mm_result, vector_sum_col, vector_sum_row, bias, dst, output_multipliers, output_shifts });
+    auto padding_info =
+        get_padding_info({mm_result, vector_sum_col, vector_sum_row, bias, dst, output_multipliers, output_shifts});
 
     const int min = output_stage.gemmlowp_min_bound;
     const int max = output_stage.gemmlowp_max_bound;
@@ -148,9 +170,8 @@ void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileCon
     _is_quantized_per_channel = output_stage.is_quantized_per_channel;
 
     // Check if input is a 3D reinterpretation
-    const bool reinterpret_as_3d = vector_sum_row != nullptr
-                                   && mm_result->num_dimensions() > 1
-                                   && mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
+    const bool reinterpret_as_3d = vector_sum_row != nullptr && mm_result->num_dimensions() > 1 &&
+                                   mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
 
     // Auto initialize the output
     auto_init_if_empty(*dst, mm_result->clone()->set_data_type(output_stage.output_data_type));
@@ -160,10 +181,11 @@ void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileCon
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(mm_result->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(mm_result->dimension(0) % num_elems_processed_per_iteration));
 
     // If a_offset == 0, vector_sum_col can be a nullptr
-    if(a_offset != 0)
+    if (a_offset != 0)
     {
         build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
         build_opts.add_option_if(vector_sum_col->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");
@@ -171,8 +193,10 @@ void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileCon
     // If b_offset == 0, vector_sum_row can be a nullptr
     build_opts.add_option_if(b_offset != 0, "-DB_OFFSET=" + support::cpp11::to_string(b_offset));
     build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(a_offset * b_offset * k));
-    build_opts.add_option_if(reinterpret_as_3d, "-DHEIGHT_INPUT3D=" + support::cpp11::to_string(mm_result->dimension(1)));
-    build_opts.add_option_if(reinterpret_as_3d, "-DDEPTH_INPUT3D=" + support::cpp11::to_string(mm_result->dimension(2)));
+    build_opts.add_option_if(reinterpret_as_3d,
+                             "-DHEIGHT_INPUT3D=" + support::cpp11::to_string(mm_result->dimension(1)));
+    build_opts.add_option_if(reinterpret_as_3d,
+                             "-DDEPTH_INPUT3D=" + support::cpp11::to_string(mm_result->dimension(2)));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
     build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(output_stage.gemmlowp_offset));
     build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multipliers[0]));
@@ -210,26 +234,42 @@ void ClGemmLowpOffsetContributionOutputStageKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
-                                                               const ITensorInfo *dst, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
-                                                               const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
+Status ClGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo             *mm_result,
+                                                               const ITensorInfo             *vector_sum_col,
+                                                               const ITensorInfo             *vector_sum_row,
+                                                               const ITensorInfo             *bias,
+                                                               const ITensorInfo             *dst,
+                                                               int32_t                        a_offset,
+                                                               int32_t                        b_offset,
+                                                               const GEMMLowpOutputStageInfo &output_stage,
+                                                               const ITensorInfo             *output_multipliers,
+                                                               const ITensorInfo             *output_shifts)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset, b_offset, output_stage, output_multipliers, output_shifts));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset,
+                                                   b_offset, output_stage, output_multipliers, output_shifts));
     return Status{};
 }
 
-void ClGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack      &tensors,
+                                                           const Window     &window,
+                                                           cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto mm_result          = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    const auto bias               = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_BIAS));
-    const auto vector_sum_col     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_COL_SUM));
-    const auto vector_sum_row     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_ROW_SUM));
-    const auto output_shifts      = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SHIFTS));
-    const auto output_multipliers = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_MULTIPLIERS));
-    auto       dst                = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto mm_result =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    const auto bias =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_BIAS));
+    const auto vector_sum_col =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_COL_SUM));
+    const auto vector_sum_row =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_VEC_ROW_SUM));
+    const auto output_shifts =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SHIFTS));
+    const auto output_multipliers =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_MULTIPLIERS));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
@@ -260,8 +300,7 @@ void ClGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors,
         add_1D_tensor_argument_if(_is_quantized_per_channel, idx, output_multipliers, biases_slice);
         add_1D_tensor_argument_if(_is_quantized_per_channel, idx, output_shifts, biases_slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

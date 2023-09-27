@@ -85,7 +85,8 @@ public:
      * @param[out] output Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM16
      * @param[in]  info   GEMMLowp output stage metadata.
      */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);
+    void
+    configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);
     /** Initialise the kernel's inputs, output
      *
      * @param[in]  compile_context The compile context to be used.
@@ -95,7 +96,11 @@ public:
      * @param[out] output          Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  info            GEMMLowp output stage metadata.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info);
+    void configure(const CLCompileContext        &compile_context,
+                   const ICLTensor               *input,
+                   const ICLTensor               *bias,
+                   ICLTensor                     *output,
+                   const GEMMLowpOutputStageInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor. It is the output of @ref CLGEMMLowpMatrixMultiplyCore function. Data type supported: S32
@@ -106,7 +111,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info);
+    static Status validate(const ITensorInfo             *input,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *output,
+                           const GEMMLowpOutputStageInfo &info);
 
     // Inherited methods overridden:
     void run() override;

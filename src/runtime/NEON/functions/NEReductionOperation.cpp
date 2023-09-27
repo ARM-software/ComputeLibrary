@@ -26,9 +26,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
-#include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
+#include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
 namespace arm_compute
 {
@@ -42,7 +43,7 @@ namespace
  */
 size_t reduction_window_split_dimension(unsigned int axis)
 {
-    switch(axis)
+    switch (axis)
     {
         case 0:
             return Window::DimY;
@@ -59,13 +60,21 @@ size_t reduction_window_split_dimension(unsigned int axis)
 NEReductionOperation::~NEReductionOperation() = default;
 
 NEReductionOperation::NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _reduction_kernel(), _reshape(), _output_internal(), _window_split(0), _reduction_axis(), _is_reshape_required(false)
+    : _memory_group(memory_manager),
+      _reduction_kernel(),
+      _reshape(),
+      _output_internal(),
+      _window_split(0),
+      _reduction_axis(),
+      _is_reshape_required(false)
 {
 }
 
-Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims)
+Status NEReductionOperation::validate(
+    const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions,
+                                    "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
 
     const auto is_reshape_required = !keep_dims;
@@ -74,9 +83,10 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
     TensorInfo info_before_reshape;
 
-    if(is_reshape_required)
+    if (is_reshape_required)
     {
-        const TensorInfo expected_output_shape = output->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, keep_dims));
+        const TensorInfo expected_output_shape = output->clone()->set_tensor_shape(
+            arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, keep_dims));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output_shape, output);
 
         auto shape_before_reshape = input->tensor_shape();
@@ -84,17 +94,20 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
         const auto input_num_channles = input->num_channels();
         const auto input_qinfo        = input->quantization_info();
-        const auto is_arg_min_max     = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
-        const auto output_data_type   = is_arg_min_max ? DataType::S32 : output->data_type();
+        const auto is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
+        const auto output_data_type = is_arg_min_max ? DataType::S32 : output->data_type();
 
-        info_before_reshape.set_data_type(output_data_type).set_tensor_shape(shape_before_reshape).set_num_channels(input_num_channles).set_quantization_info(input_qinfo);
+        info_before_reshape.set_data_type(output_data_type)
+            .set_tensor_shape(shape_before_reshape)
+            .set_num_channels(input_num_channles)
+            .set_quantization_info(input_qinfo);
 
         output_internal = &info_before_reshape;
     }
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperationKernel::validate(input, output_internal, axis, op));
 
-    if(is_reshape_required)
+    if (is_reshape_required)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayer::validate(output_internal, output));
     }
@@ -102,7 +115,8 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
+void NEReductionOperation::configure(
+    ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, axis, op, keep_dims);
@@ -112,19 +126,32 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     auto      *output_internal = output;
     const auto is_arg_min_max  = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
 
-    if(_is_reshape_required)
+    if (_is_reshape_required)
     {
-        const auto output_internal_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis);
-        const auto output_external_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis, false);
-        const auto output_data_type      = is_arg_min_max ? DataType::S32 : input->info()->data_type();
-        const auto num_channels          = input->info()->num_channels();
-        const auto qinfo                 = input->info()->quantization_info();
+        const auto output_internal_shape =
+            arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis);
+        const auto output_external_shape =
+            arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis, false);
+        const auto output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
+        const auto num_channels     = input->info()->num_channels();
+        const auto qinfo            = input->info()->quantization_info();
 
-        _output_internal.allocator()->init(input->info()->clone()->set_data_type(output_data_type).set_tensor_shape(output_internal_shape).reset_padding().set_is_resizable(true).set_num_channels(
-                                               num_channels).set_quantization_info(qinfo));
+        _output_internal.allocator()->init(input->info()
+                                               ->clone()
+                                               ->set_data_type(output_data_type)
+                                               .set_tensor_shape(output_internal_shape)
+                                               .reset_padding()
+                                               .set_is_resizable(true)
+                                               .set_num_channels(num_channels)
+                                               .set_quantization_info(qinfo));
         _memory_group.manage(&_output_internal);
         output_internal = &_output_internal;
-        auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_data_type).set_tensor_shape(output_external_shape).reset_padding().set_is_resizable(true));
+        auto_init_if_empty(*output->info(), input->info()
+                                                ->clone()
+                                                ->set_data_type(output_data_type)
+                                                .set_tensor_shape(output_external_shape)
+                                                .reset_padding()
+                                                .set_is_resizable(true));
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(NEReductionOperation::validate(input->info(), output->info(), axis, op, keep_dims));
@@ -135,7 +162,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     _window_split   = reduction_window_split_dimension(axis);
     _reduction_axis = axis;
 
-    if(_is_reshape_required)
+    if (_is_reshape_required)
     {
         _reshape.configure(output_internal, output);
         _output_internal.allocator()->allocate();
@@ -146,7 +173,7 @@ void NEReductionOperation::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
     NEScheduler::get().schedule(_reduction_kernel.get(), _window_split);
-    if(_is_reshape_required)
+    if (_is_reshape_required)
     {
         _reshape.run();
     }

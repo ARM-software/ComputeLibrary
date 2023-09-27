@@ -37,7 +37,7 @@ namespace arm_compute
  */
 inline size_t data_size_from_type(DataType data_type)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::U8:
         case DataType::S8:
@@ -77,7 +77,7 @@ inline size_t data_size_from_type(DataType data_type)
  */
 inline size_t element_size_from_data_type(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::S8:
         case DataType::U8:
@@ -114,7 +114,7 @@ inline size_t element_size_from_data_type(DataType dt)
  */
 inline DataType data_type_from_format(Format format)
 {
-    switch(format)
+    switch (format)
     {
         case Format::U8:
         case Format::UV88:
@@ -158,7 +158,7 @@ inline DataType data_type_from_format(Format format)
  */
 inline DataType get_promoted_data_type(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
             return DataType::U16;
@@ -196,7 +196,7 @@ inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
 {
     PixelValue min{};
     PixelValue max{};
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -303,7 +303,7 @@ inline ::std::istream &operator>>(::std::istream &stream, DataType &data_type)
  */
 inline bool is_data_type_float(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::F16:
         case DataType::F32:
@@ -323,7 +323,7 @@ inline bool is_data_type_float(DataType dt)
  */
 inline bool is_data_type_quantized(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::QSYMM8:
         case DataType::QASYMM8:
@@ -345,7 +345,7 @@ inline bool is_data_type_quantized(DataType dt)
  */
 inline bool is_data_type_quantized_asymmetric(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::QASYMM8:
         case DataType::QASYMM8_SIGNED:
@@ -364,7 +364,7 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
  */
 inline bool is_data_type_quantized_asymmetric_signed(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::QASYMM8_SIGNED:
             return true;
@@ -381,7 +381,7 @@ inline bool is_data_type_quantized_asymmetric_signed(DataType dt)
  */
 inline bool is_data_type_quantized_symmetric(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
@@ -400,7 +400,7 @@ inline bool is_data_type_quantized_symmetric(DataType dt)
  */
 inline bool is_data_type_quantized_per_channel(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::QSYMM8_PER_CHANNEL:
             return true;
@@ -420,12 +420,13 @@ inline bool is_data_type_quantized_per_channel(DataType dt)
 template <typename T>
 bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = QuantizationInfo())
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         {
             const auto val_u8 = static_cast<uint8_t>(val);
-            return ((val_u8 == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
+            return ((val_u8 == val) && val >= std::numeric_limits<uint8_t>::lowest() &&
+                    val <= std::numeric_limits<uint8_t>::max());
         }
         case DataType::QASYMM8:
         {
@@ -436,29 +437,34 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
         case DataType::S8:
         {
             const auto val_s8 = static_cast<int8_t>(val);
-            return ((val_s8 == val) && val >= std::numeric_limits<int8_t>::lowest() && val <= std::numeric_limits<int8_t>::max());
+            return ((val_s8 == val) && val >= std::numeric_limits<int8_t>::lowest() &&
+                    val <= std::numeric_limits<int8_t>::max());
         }
         case DataType::U16:
         {
             const auto val_u16 = static_cast<uint16_t>(val);
-            return ((val_u16 == val) && val >= std::numeric_limits<uint16_t>::lowest() && val <= std::numeric_limits<uint16_t>::max());
+            return ((val_u16 == val) && val >= std::numeric_limits<uint16_t>::lowest() &&
+                    val <= std::numeric_limits<uint16_t>::max());
         }
         case DataType::S16:
         {
             const auto val_s16 = static_cast<int16_t>(val);
-            return ((val_s16 == val) && val >= std::numeric_limits<int16_t>::lowest() && val <= std::numeric_limits<int16_t>::max());
+            return ((val_s16 == val) && val >= std::numeric_limits<int16_t>::lowest() &&
+                    val <= std::numeric_limits<int16_t>::max());
         }
         case DataType::U32:
         {
             const auto val_d64 = static_cast<double>(val);
             const auto val_u32 = static_cast<uint32_t>(val);
-            return ((val_u32 == val_d64) && val_d64 >= std::numeric_limits<uint32_t>::lowest() && val_d64 <= std::numeric_limits<uint32_t>::max());
+            return ((val_u32 == val_d64) && val_d64 >= std::numeric_limits<uint32_t>::lowest() &&
+                    val_d64 <= std::numeric_limits<uint32_t>::max());
         }
         case DataType::S32:
         {
             const auto val_d64 = static_cast<double>(val);
             const auto val_s32 = static_cast<int32_t>(val);
-            return ((val_s32 == val_d64) && val_d64 >= std::numeric_limits<int32_t>::lowest() && val_d64 <= std::numeric_limits<int32_t>::max());
+            return ((val_s32 == val_d64) && val_d64 >= std::numeric_limits<int32_t>::lowest() &&
+                    val_d64 <= std::numeric_limits<int32_t>::max());
         }
         case DataType::BFLOAT16:
             return (val >= bfloat16::lowest() && val <= bfloat16::max());
@@ -482,7 +488,7 @@ inline std::string cpu_impl_dt(const DataType &data_type)
 {
     std::string ret = "";
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::F32:
             ret = "fp32";
@@ -521,5 +527,5 @@ inline std::string cpu_impl_dt(const DataType &data_type)
     return ret;
 }
 
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_DATATYPEUTILS_H */

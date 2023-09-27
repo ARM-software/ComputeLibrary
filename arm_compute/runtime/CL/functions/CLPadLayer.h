@@ -76,7 +76,11 @@ public:
      * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
+    void configure(ICLTensor         *input,
+                   ICLTensor         *output,
+                   const PaddingList &padding,
+                   PixelValue         constant_value = PixelValue(),
+                   PaddingMode        mode           = PaddingMode::CONSTANT);
     /** Initialize the function
      *
      * @param[in]  compile_context The compile context to be used.
@@ -88,8 +92,12 @@ public:
      * @param[in]  mode            (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(),
-                   PaddingMode mode = PaddingMode::CONSTANT);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   const PaddingList      &padding,
+                   PixelValue              constant_value = PixelValue(),
+                   PaddingMode             mode           = PaddingMode::CONSTANT);
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *
@@ -101,7 +109,11 @@ public:
      * @param[in] mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const PaddingList &padding,
+                           PixelValue         constant_value = PixelValue(),
+                           PaddingMode        mode           = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
     void run() override;

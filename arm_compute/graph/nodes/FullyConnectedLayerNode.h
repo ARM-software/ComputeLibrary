@@ -73,7 +73,7 @@ public:
      */
     static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor,
                                                        unsigned int            num_outputs,
-                                                       FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                                                       FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo(),
                                                        const QuantizationInfo &weights_quant_info = QuantizationInfo());
     /** Computes fully connected layer output descriptor
      *
@@ -98,7 +98,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
     static constexpr NodeType node_type = NodeType::FullyConnectedLayer;
 

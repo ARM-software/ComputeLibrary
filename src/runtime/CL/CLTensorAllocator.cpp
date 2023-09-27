@@ -46,17 +46,16 @@ static IAllocator *static_global_cl_allocator = nullptr;
 std::unique_ptr<ICLMemoryRegion> allocate_region(size_t size, cl_uint alignment)
 {
     // Try fine-grain SVM
-    std::unique_ptr<ICLMemoryRegion> region = std::make_unique<CLFineSVMMemoryRegion>(CL_MEM_READ_WRITE | CL_MEM_SVM_FINE_GRAIN_BUFFER,
-                                                                                      size,
-                                                                                      alignment);
+    std::unique_ptr<ICLMemoryRegion> region =
+        std::make_unique<CLFineSVMMemoryRegion>(CL_MEM_READ_WRITE | CL_MEM_SVM_FINE_GRAIN_BUFFER, size, alignment);
 
     // Try coarse-grain SVM in case of failure
-    if(region != nullptr && region->ptr() == nullptr)
+    if (region != nullptr && region->ptr() == nullptr)
     {
         region = std::make_unique<CLCoarseSVMMemoryRegion>(CL_MEM_READ_WRITE, size, alignment);
     }
     // Try legacy buffer memory in case of failure
-    if(region != nullptr && region->ptr() == nullptr)
+    if (region != nullptr && region->ptr() == nullptr)
     {
         region = std::make_unique<CLBufferMemoryRegion>(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
     }
@@ -80,7 +79,10 @@ void clear_quantization_arrays(CLFloatArray &scale, CLInt32Array &offset)
  * @param[in]      qinfo    Quantization info
  * @param[in]      pad_size Pad size to use in case array needs to be padded for computation purposes
  */
-void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const QuantizationInfo &qinfo, size_t pad_size)
+void populate_quantization_info(CLFloatArray           &scale,
+                                CLInt32Array           &offset,
+                                const QuantizationInfo &qinfo,
+                                size_t                  pad_size)
 {
     clear_quantization_arrays(scale, offset);
 
@@ -90,16 +92,18 @@ void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const
     const size_t              element_size = sizeof(std::remove_reference<decltype(qscale)>::type::value_type);
     scale                                  = CLFloatArray(num_elements + pad_size);
     scale.resize(num_elements);
-    CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size, qinfo.scale().data());
+    CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size,
+                                                  qinfo.scale().data());
 
-    if(!qinfo.offset().empty())
+    if (!qinfo.offset().empty())
     {
         // Create offset array
-        const std::vector<int32_t> &qoffset             = qinfo.offset();
-        const size_t                offset_element_size = sizeof(std::remove_reference<decltype(qoffset)>::type::value_type);
-        offset                                          = CLInt32Array(num_elements + pad_size);
+        const std::vector<int32_t> &qoffset = qinfo.offset();
+        const size_t offset_element_size    = sizeof(std::remove_reference<decltype(qoffset)>::type::value_type);
+        offset                              = CLInt32Array(num_elements + pad_size);
         offset.resize(num_elements);
-        CLScheduler::get().queue().enqueueWriteBuffer(offset.cl_buffer(), CL_TRUE, 0, num_elements * offset_element_size, qinfo.offset().data());
+        CLScheduler::get().queue().enqueueWriteBuffer(offset.cl_buffer(), CL_TRUE, 0,
+                                                      num_elements * offset_element_size, qinfo.offset().data());
     }
 }
 } // namespace
@@ -111,7 +115,7 @@ CLTensorAllocator::CLTensorAllocator(IMemoryManageable *owner, CLRuntimeContext 
 
 CLQuantization CLTensorAllocator::quantization() const
 {
-    return { &_scale, &_offset };
+    return {&_scale, &_offset};
 }
 
 uint8_t *CLTensorAllocator::data()
@@ -127,10 +131,10 @@ const cl::Buffer &CLTensorAllocator::cl_data() const
 void CLTensorAllocator::allocate()
 {
     // Allocate tensor backing memory
-    if(_associated_memory_group == nullptr)
+    if (_associated_memory_group == nullptr)
     {
         // Perform memory allocation
-        if(static_global_cl_allocator != nullptr)
+        if (static_global_cl_allocator != nullptr)
         {
             _memory.set_owned_region(static_global_cl_allocator->make_region(info().total_size(), 0));
         }
@@ -146,7 +150,7 @@ void CLTensorAllocator::allocate()
     }
 
     // Allocate and fill the quantization parameter arrays
-    if(is_data_type_quantized_per_channel(info().data_type()))
+    if (is_data_type_quantized_per_channel(info().data_type()))
     {
         const size_t pad_size = 0;
         populate_quantization_info(_scale, _offset, info().quantization_info(), pad_size);
@@ -193,7 +197,7 @@ void CLTensorAllocator::set_global_allocator(IAllocator *allocator)
 
 uint8_t *CLTensorAllocator::lock()
 {
-    if(_ctx)
+    if (_ctx)
     {
         return map(_ctx->gpu_scheduler()->queue(), true);
     }
@@ -206,7 +210,7 @@ uint8_t *CLTensorAllocator::lock()
 void CLTensorAllocator::unlock()
 {
     ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
-    if(_ctx)
+    if (_ctx)
     {
         unmap(_ctx->gpu_scheduler()->queue(), reinterpret_cast<uint8_t *>(_memory.region()->buffer()));
     }

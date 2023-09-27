@@ -44,7 +44,8 @@ namespace kernels
  *
  * @return true if the shapes and matmul kernel info matches
  */
-Status validate_matmul_input_shapes(const TensorShape &lhs_shape, const TensorShape &rhs_shape,
+Status validate_matmul_input_shapes(const TensorShape      &lhs_shape,
+                                    const TensorShape      &rhs_shape,
                                     const MatMulKernelInfo &matmul_kernel_info);
 
 /** Validate and configure window for Matmul MMUL kernels
@@ -58,9 +59,12 @@ Status validate_matmul_input_shapes(const TensorShape &lhs_shape, const TensorSh
  *
  * @return a pair of Status and Window object
  */
-std::pair<Status, Window> validate_and_configure_window_for_mmul_kernels(const ITensorInfo *lhs,
-                                                                         const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
-                                                                         int mmul_m0, int mmul_n0);
+std::pair<Status, Window> validate_and_configure_window_for_mmul_kernels(const ITensorInfo      *lhs,
+                                                                         const ITensorInfo      *rhs,
+                                                                         const ITensorInfo      *dst,
+                                                                         const MatMulKernelInfo &matmul_kernel_info,
+                                                                         int                     mmul_m0,
+                                                                         int                     mmul_n0);
 } // namespace kernels
 } // namespace opencl
 } // namespace arm_compute

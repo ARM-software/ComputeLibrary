@@ -51,7 +51,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_const_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID
+    add_const_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an input layer node to the graph
      *
      * @param[in] g        Graph to add the node to
@@ -61,7 +62,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID
+    add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an output layer node to the graph
      *
      * @param[in] g        Graph to add the node to
@@ -71,7 +73,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID
+    add_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an activation layer node to the graph
      *
      * @param[in] g              Graph to add the node to
@@ -82,7 +85,10 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
+    static NodeID add_activation_node(Graph                  &g,
+                                      NodeParams              params,
+                                      NodeIdxPair             input,
+                                      ActivationLayerInfo     act_info,
                                       const QuantizationInfo &out_quant_info = QuantizationInfo());
     /** Adds an activation layer node to the graph
      *
@@ -96,7 +102,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_arg_min_max_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, unsigned int axis,
+    static NodeID add_arg_min_max_node(Graph                  &g,
+                                       NodeParams              params,
+                                       NodeIdxPair             input,
+                                       ReductionOperation      op,
+                                       unsigned int            axis,
                                        DataType                out_data_type  = DataType::UNKNOWN,
                                        const QuantizationInfo &out_quant_info = QuantizationInfo());
     /** Adds a batch normalization layer node to the graph
@@ -112,9 +122,14 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
-                                               ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr var_accessor = nullptr,
-                                               ITensorAccessorUPtr beta_accessor = nullptr, ITensorAccessorUPtr gamma_accessor = nullptr);
+    static NodeID add_batch_normalization_node(Graph              &g,
+                                               NodeParams          params,
+                                               NodeIdxPair         input,
+                                               float               epsilon,
+                                               ITensorAccessorUPtr mean_accessor  = nullptr,
+                                               ITensorAccessorUPtr var_accessor   = nullptr,
+                                               ITensorAccessorUPtr beta_accessor  = nullptr,
+                                               ITensorAccessorUPtr gamma_accessor = nullptr);
     /** Adds a bounding box transform layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -125,7 +140,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_bounding_box_transform_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair deltas, BoundingBoxTransformInfo info);
+    static NodeID add_bounding_box_transform_node(
+        Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair deltas, BoundingBoxTransformInfo info);
     /** Adds an channel shuffle layer node to the graph
      *
      * @param[in] g          Graph to add the node to
@@ -154,10 +170,17 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                       Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info, unsigned int num_groups = 1,
-                                       ConvolutionMethod method = ConvolutionMethod::Default, FastMathHint fast_math_hint = FastMathHint::Disabled,
-                                       ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
+    static NodeID add_convolution_node(Graph                  &g,
+                                       NodeParams              params,
+                                       NodeIdxPair             input,
+                                       Size2D                  kernel_spatial_extend,
+                                       unsigned int            depth,
+                                       PadStrideInfo           conv_info,
+                                       unsigned int            num_groups         = 1,
+                                       ConvolutionMethod       method             = ConvolutionMethod::Default,
+                                       FastMathHint            fast_math_hint     = FastMathHint::Disabled,
+                                       ITensorAccessorUPtr     weights_accessor   = nullptr,
+                                       ITensorAccessorUPtr     bias_accessor      = nullptr,
                                        const QuantizationInfo &weights_quant_info = QuantizationInfo(),
                                        const QuantizationInfo &out_quant_info     = QuantizationInfo());
     /** Adds a deconvolution layer node to the graph
@@ -173,9 +196,14 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                         Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info,
-                                         ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
+    static NodeID add_deconvolution_node(Graph              &g,
+                                         NodeParams          params,
+                                         NodeIdxPair         input,
+                                         Size2D              kernel_spatial_extend,
+                                         unsigned int        depth,
+                                         PadStrideInfo       deconv_info,
+                                         ITensorAccessorUPtr weights_accessor = nullptr,
+                                         ITensorAccessorUPtr bias_accessor    = nullptr);
     /** Adds a depth concatenate node to the graph
      *
      * @param[in] g                 Graph to add the node to
@@ -185,7 +213,10 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, const descriptors::ConcatLayerDescriptor &concat_descriptor);
+    static NodeID add_concatenate_node(Graph                                    &g,
+                                       NodeParams                                params,
+                                       const std::vector<NodeIdxPair>           &inputs,
+                                       const descriptors::ConcatLayerDescriptor &concat_descriptor);
     /** Adds an depth to space layer node to the graph
      *
      * @param[in] g           Graph to add the node to
@@ -212,11 +243,18 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                                 Size2D kernel_spatial_extend, PadStrideInfo conv_info, int depth_multiplier = 1,
-                                                 DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::Default,
-                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo &quant_info = QuantizationInfo(),
-                                                 const QuantizationInfo &out_quant_info = QuantizationInfo());
+    static NodeID
+    add_depthwise_convolution_node(Graph                     &g,
+                                   NodeParams                 params,
+                                   NodeIdxPair                input,
+                                   Size2D                     kernel_spatial_extend,
+                                   PadStrideInfo              conv_info,
+                                   int                        depth_multiplier = 1,
+                                   DepthwiseConvolutionMethod method           = DepthwiseConvolutionMethod::Default,
+                                   ITensorAccessorUPtr        weights_accessor = nullptr,
+                                   ITensorAccessorUPtr        bias_accessor    = nullptr,
+                                   const QuantizationInfo    &quant_info       = QuantizationInfo(),
+                                   const QuantizationInfo    &out_quant_info   = QuantizationInfo());
     /** Adds an element-wise layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -227,7 +265,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
+    static NodeID add_elementwise_node(
+        Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
     /** Adds a dequantization node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -248,7 +287,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info);
+    static NodeID add_detection_output_node(Graph                          &g,
+                                            NodeParams                      params,
+                                            NodeIdxPair                     input_loc,
+                                            NodeIdxPair                     input_conf,
+                                            NodeIdxPair                     input_priorbox,
+                                            const DetectionOutputLayerInfo &detect_info);
     /** Adds a detection post process layer node to the graph
      *
      * @param[in] g                      Graph to add the node to
@@ -261,8 +305,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_detection_post_process_node(Graph &g, NodeParams params, NodeIdxPair input_box_encoding, NodeIdxPair input_class_prediction,
-                                                  const DetectionPostProcessLayerInfo &detect_info, ITensorAccessorUPtr anchors_accessor = nullptr,
+    static NodeID add_detection_post_process_node(Graph                               &g,
+                                                  NodeParams                           params,
+                                                  NodeIdxPair                          input_box_encoding,
+                                                  NodeIdxPair                          input_class_prediction,
+                                                  const DetectionPostProcessLayerInfo &detect_info,
+                                                  ITensorAccessorUPtr                  anchors_accessor = nullptr,
                                                   const QuantizationInfo &anchor_quant_info = QuantizationInfo());
     /** Adds a Dummy node to the graph
      *
@@ -299,8 +347,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
-                                            NodeID weights_nid, NodeID bias_nid = EmptyNodeID,
+    static NodeID add_fully_connected_layer(Graph                        &g,
+                                            NodeParams                    params,
+                                            NodeIdxPair                   input,
+                                            unsigned int                  num_outputs,
+                                            NodeID                        weights_nid,
+                                            NodeID                        bias_nid       = EmptyNodeID,
                                             const FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo(),
                                             const QuantizationInfo       &out_quant_info = QuantizationInfo(),
                                             FastMathHint                  fast_math_hint = FastMathHint::Disabled);
@@ -319,9 +371,13 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
-                                            ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
-                                            const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+    static NodeID add_fully_connected_layer(Graph                        &g,
+                                            NodeParams                    params,
+                                            NodeIdxPair                   input,
+                                            unsigned int                  num_outputs,
+                                            ITensorAccessorUPtr           weights_accessor = nullptr,
+                                            ITensorAccessorUPtr           bias_accessor    = nullptr,
+                                            const FullyConnectedLayerInfo fc_info          = FullyConnectedLayerInfo(),
                                             const QuantizationInfo       &weights_quant_info = QuantizationInfo(),
                                             const QuantizationInfo       &out_quant_info     = QuantizationInfo(),
                                             FastMathHint                  fast_math_hint     = FastMathHint::Disabled);
@@ -336,8 +392,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_generate_proposals_node(Graph &g, NodeParams params, NodeIdxPair scores, NodeIdxPair deltas,
-                                              NodeIdxPair anchors, GenerateProposalsInfo info);
+    static NodeID add_generate_proposals_node(Graph                &g,
+                                              NodeParams            params,
+                                              NodeIdxPair           scores,
+                                              NodeIdxPair           deltas,
+                                              NodeIdxPair           anchors,
+                                              GenerateProposalsInfo info);
     /** Adds a L2 Normalize layer node to the graph
      *
      * @param[in] g       Graph to add the node to
@@ -358,7 +418,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info);
+    static NodeID
+    add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info);
     /** Adds a normalize planar YUV layer node to the graph
      *
      * @param[in] g             Graph to add the node to
@@ -369,8 +430,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_normalize_planar_yuv_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                                ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr std_accessor = nullptr);
+    static NodeID add_normalize_planar_yuv_node(Graph              &g,
+                                                NodeParams          params,
+                                                NodeIdxPair         input,
+                                                ITensorAccessorUPtr mean_accessor = nullptr,
+                                                ITensorAccessorUPtr std_accessor  = nullptr);
     /** Adds a pad layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -382,7 +446,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, const PaddingList &paddings, PixelValue pad_value = PixelValue());
+    static NodeID add_pad_node(Graph             &g,
+                               NodeParams         params,
+                               NodeIdxPair        input,
+                               const PaddingList &paddings,
+                               PixelValue         pad_value = PixelValue());
     /** Adds a permute layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -394,7 +462,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout = DataLayout::UNKNOWN);
+    static NodeID add_permute_node(Graph            &g,
+                                   NodeParams        params,
+                                   NodeIdxPair       input,
+                                   PermutationVector perm,
+                                   DataLayout        layout = DataLayout::UNKNOWN);
     /** Adds a pooling layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -426,8 +498,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_print_node(Graph &g, NodeParams params, NodeIdxPair input, std::ostream &stream, const IOFormatInfo &format_info = IOFormatInfo(),
-                                 const std::function<ITensor *(ITensor *)> transform = nullptr);
+    static NodeID add_print_node(Graph                                    &g,
+                                 NodeParams                                params,
+                                 NodeIdxPair                               input,
+                                 std::ostream                             &stream,
+                                 const IOFormatInfo                       &format_info = IOFormatInfo(),
+                                 const std::function<ITensor *(ITensor *)> transform   = nullptr);
     /** Adds a priorbox layer node to the graph
      *
      * @param[in] g          Graph to add the node to
@@ -438,7 +514,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info);
+    static NodeID add_priorbox_node(
+        Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info);
     /** Adds a quantization layer node to the graph
      *
      * @param[in] g              Graph to add the node to
@@ -448,7 +525,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, const QuantizationInfo &out_quant_info);
+    static NodeID
+    add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, const QuantizationInfo &out_quant_info);
     /** Adds a reduction sum layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -460,7 +538,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_reduction_operation_node(Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, int axis, bool keep_dims = true);
+    static NodeID add_reduction_operation_node(
+        Graph &g, NodeParams params, NodeIdxPair input, ReductionOperation op, int axis, bool keep_dims = true);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -492,7 +571,12 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_resize_node(Graph &g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy, float width_scale, float height_scale);
+    static NodeID add_resize_node(Graph              &g,
+                                  NodeParams          params,
+                                  NodeIdxPair         input,
+                                  InterpolationPolicy policy,
+                                  float               width_scale,
+                                  float               height_scale);
     /** Adds a ROI align layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -503,7 +587,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_roi_align_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair rois, ROIPoolingLayerInfo pool_info);
+    static NodeID
+    add_roi_align_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair rois, ROIPoolingLayerInfo pool_info);
     /** Adds a scale layer node to the graph
      * This layer computes a product of the input with a scale (read from mul_accessor) and it applies an offset (read from add_accessor).
      * output = input * mul_w + add_w
@@ -516,8 +601,11 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input,
-                                  ITensorAccessorUPtr mul_accessor = nullptr, ITensorAccessorUPtr add_accessor = nullptr);
+    static NodeID add_scale_layer(Graph              &g,
+                                  const NodeParams   &params,
+                                  NodeIdxPair         input,
+                                  ITensorAccessorUPtr mul_accessor = nullptr,
+                                  ITensorAccessorUPtr add_accessor = nullptr);
     /** Adds a softmax node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -538,7 +626,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends);
+    static NodeID
+    add_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends);
     /** Adds a split node to the graph
      *
      * @param[in] g          Graph to add the node to
@@ -549,7 +638,8 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
+    static NodeID
+    add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
     /** Adds a stack layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -572,7 +662,13 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_strided_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends, BiStrides &strides, StridedSliceLayerInfo info);
+    static NodeID add_strided_slice_node(Graph                &g,
+                                         NodeParams            params,
+                                         NodeIdxPair           input,
+                                         Coordinates          &starts,
+                                         Coordinates          &ends,
+                                         BiStrides            &strides,
+                                         StridedSliceLayerInfo info);
     /** Adds a yolo layer to the graph
      *
      * @param[in] g        Graph to add the node to

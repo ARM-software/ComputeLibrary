@@ -88,7 +88,7 @@ public:
      * @param[in] args      Message arguments
      */
     template <typename... Ts>
-    void log(LogLevel log_level, const std::string &fmt, Ts &&... args);
+    void log(LogLevel log_level, const std::string &fmt, Ts &&...args);
     /** Sets log level of the logger
      *
      * @warning Not thread-safe
@@ -159,11 +159,11 @@ private:
 };
 
 template <typename... Ts>
-inline void Logger::log(LogLevel log_level, const std::string &fmt, Ts &&... args)
+inline void Logger::log(LogLevel log_level, const std::string &fmt, Ts &&...args)
 {
     // Return if message shouldn't be logged
     // i.e. if log level does not match the logger's
-    if(!is_loggable(log_level))
+    if (!is_loggable(log_level))
     {
         return;
     }

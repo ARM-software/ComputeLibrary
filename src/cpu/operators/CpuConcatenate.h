@@ -68,8 +68,8 @@ public:
 
 private:
     std::vector<std::unique_ptr<ICPPKernel>> _concat_kernels{};
-    unsigned int                             _num_srcs{ 0 };
-    unsigned int                             _axis{ 0 };
+    unsigned int                             _num_srcs{0};
+    unsigned int                             _axis{0};
 };
 } // namespace cpu
 } // namespace arm_compute

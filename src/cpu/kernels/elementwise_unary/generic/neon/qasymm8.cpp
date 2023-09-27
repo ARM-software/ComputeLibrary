@@ -23,6 +23,7 @@
  */
 
 #include "arm_compute/core/Window.h"
+
 #include "src/cpu/kernels/elementwise_unary/generic/neon/impl.h"
 
 namespace arm_compute
@@ -31,7 +32,8 @@ namespace cpu
 {
 #ifndef __aarch64__
 // Fallback function to be used for armv7a, for aarch64 LUT is used
-void neon_qasymm8_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+void neon_qasymm8_elementwise_unary(
+    const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
     ARM_COMPUTE_UNUSED(lut);
     return elementwise_op<uint8_t>(in, out, window, op);

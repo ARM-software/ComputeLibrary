@@ -23,10 +23,12 @@
  */
 
 #include "ckw/TensorOperand.h"
+
 #include "ckw/Error.h"
 #include "ckw/Kernel.h"
 #include "ckw/TensorInfo.h"
 #include "ckw/TileOperand.h"
+
 #include "src/Prototype.h"
 
 namespace ckw
@@ -35,9 +37,11 @@ namespace ckw
 namespace
 {
 
-TensorComponentOperand &get_or_create_component(TensorOperand &tensor, std::unique_ptr<TensorComponentOperand> &ptr, TensorComponentType component)
+TensorComponentOperand &get_or_create_component(TensorOperand                           &tensor,
+                                                std::unique_ptr<TensorComponentOperand> &ptr,
+                                                TensorComponentType                      component)
 {
-    if(ptr == nullptr)
+    if (ptr == nullptr)
     {
         ptr = std::make_unique<TensorComponentOperand>(tensor, component);
     }
@@ -59,7 +63,7 @@ TensorOperand::TensorOperand(const std::string &name, const TensorInfo &info, Te
 prototype::Operand TensorOperand::create_impl_operand(prototype::IGpuKernelWriter *writer) const
 {
     CKW_UNUSED(writer);
-    return { name() };
+    return {name()};
 }
 
 const TensorInfo &TensorOperand::info() const
@@ -206,9 +210,9 @@ TensorComponentType TensorComponentOperand::component_type() const
 prototype::Operand TensorComponentOperand::create_impl_operand(prototype::IGpuKernelWriter *writer) const
 {
     CKW_UNUSED(writer);
-    prototype::OperandType type{ prototype::OperandType::Unknown };
+    prototype::OperandType type{prototype::OperandType::Unknown};
 
-    switch(_component)
+    switch (_component)
     {
         case TensorComponentType::OffsetFirstElement:
             type = prototype::OperandType::TensorDataOffset;

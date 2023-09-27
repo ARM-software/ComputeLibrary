@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_LOGGING_HELPERS_H
 
 #include "arm_compute/core/utils/logging/Types.h"
+
 #include "support/ToolchainSupport.h"
 
 #include <cstddef>
@@ -45,7 +46,7 @@ namespace logging
  * @return The formatted string
  */
 template <typename... Ts>
-inline std::string string_with_format(const std::string &fmt, Ts &&... args)
+inline std::string string_with_format(const std::string &fmt, Ts &&...args)
 {
     size_t size     = support::cpp11::snprintf(nullptr, 0, fmt.c_str(), args...) + 1;
     auto   char_str = std::make_unique<char[]>(size);

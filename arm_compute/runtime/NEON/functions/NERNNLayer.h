@@ -72,7 +72,13 @@ public:
      * @param[in,out] hidden_state      Output tensor of shape [num_units, batch_size]. Data types supported: Same as @p input
      * @param[in]     info              Activation layer parameter.
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *recurrent_weights, const ITensor *bias, ITensor *hidden_state, ITensor *output, ActivationLayerInfo &info);
+    void configure(const ITensor       *input,
+                   const ITensor       *weights,
+                   const ITensor       *recurrent_weights,
+                   const ITensor       *bias,
+                   ITensor             *hidden_state,
+                   ITensor             *output,
+                   ActivationLayerInfo &info);
     /** Initialize the function
      *
      * @param[in] input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
@@ -85,7 +91,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state, const ITensorInfo *output,
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *recurrent_weights,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *hidden_state,
+                           const ITensorInfo         *output,
                            const ActivationLayerInfo &info);
 
     // Inherited methods overridden:

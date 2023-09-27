@@ -27,20 +27,20 @@ namespace arm_compute
 {
 namespace cl_tuner
 {
-constexpr unsigned int max_lws_supported_x{ 64u };
-constexpr unsigned int max_lws_supported_y{ 32u };
-constexpr unsigned int max_lws_supported_z{ 32u };
+constexpr unsigned int max_lws_supported_x{64u};
+constexpr unsigned int max_lws_supported_y{32u};
+constexpr unsigned int max_lws_supported_z{32u};
 
 /** Non instantiable base class for Tuning parameters combinations that use Index2Coord mapping */
 class CLTuningParametersList : public ICLTuningParametersList
 {
 protected:
     /* Shape of 4-D search space */
-    TensorShape               search_space_shape{ 0, 0, 0, 0 };
-    std::vector<unsigned int> _lws_x{ 0 };
-    std::vector<unsigned int> _lws_y{ 0 };
-    std::vector<unsigned int> _lws_z{ 0 };
-    std::vector<int>          _wbsm{ 0 }; /* Modify the batches size of workgroups distributed to compute units.
+    TensorShape               search_space_shape{0, 0, 0, 0};
+    std::vector<unsigned int> _lws_x{0};
+    std::vector<unsigned int> _lws_y{0};
+    std::vector<unsigned int> _lws_z{0};
+    std::vector<int>          _wbsm{0}; /* Modify the batches size of workgroups distributed to compute units.
                                              The value is in the range [-31,+31].
                                              When 0, the runtime-selected wbs used is unmodified. */
 
@@ -116,7 +116,8 @@ private:
      * @param[in]      lws_max     Max LWS value allowed to be tested
      * @param[in]      mod_let_one True if the results of the modulo operation between gws and the lws can be less than one.
      */
-    void initialize_lws_values(std::vector<unsigned int> &lws, unsigned int gws, unsigned int lws_max, bool mod_let_one);
+    void
+    initialize_lws_values(std::vector<unsigned int> &lws, unsigned int gws, unsigned int lws_max, bool mod_let_one);
 };
 
 /** A minimal subset of LWS values that only have 1,2 and 4/8 */
@@ -170,9 +171,9 @@ CLTuningParametersListExhaustive::CLTuningParametersListExhaustive(const cl::NDR
     search_space_shape[1] = lws_y_max;
     search_space_shape[2] = lws_z_max;
     search_space_shape[3] = 1;
-    if(tuning_info.tune_wbsm)
+    if (tuning_info.tune_wbsm)
     {
-        _wbsm                 = { -3, -2, -1, 0, 1, 2, 3 };
+        _wbsm                 = {-3, -2, -1, 0, 1, 2, 3};
         search_space_shape[3] = _wbsm.size();
     }
 }
@@ -194,26 +195,31 @@ CLTuningParametersListNormal::CLTuningParametersListNormal(const cl::NDRange &gw
     _lws_x = {};
     _lws_y = {};
     _lws_z = {};
-    initialize_lws_values(_lws_x, gws[0], lws_x_max, gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
-    initialize_lws_values(_lws_y, gws[1], lws_y_max, gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
+    initialize_lws_values(_lws_x, gws[0], lws_x_max,
+                          gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
+    initialize_lws_values(_lws_y, gws[1], lws_y_max,
+                          gws[2] > 16); // Explore lws that are not factors of gws only when gws[2] > 16
     initialize_lws_values(_lws_z, gws[2], lws_z_max, false);
 
     search_space_shape[0] = _lws_x.size();
     search_space_shape[1] = _lws_y.size();
     search_space_shape[2] = _lws_z.size();
     search_space_shape[3] = 1;
-    if(tuning_info.tune_wbsm)
+    if (tuning_info.tune_wbsm)
     {
-        _wbsm                 = { -2, -1, 0, 1, 2 };
+        _wbsm                 = {-2, -1, 0, 1, 2};
         search_space_shape[3] = _wbsm.size();
     }
 }
 
-void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned int> &lws, unsigned int gws, unsigned int lws_max, bool mod_let_one)
+void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned int> &lws,
+                                                         unsigned int               gws,
+                                                         unsigned int               lws_max,
+                                                         bool                       mod_let_one)
 {
     lws.push_back(1);
 
-    for(unsigned int i = 2; i <= lws_max; ++i)
+    for (unsigned int i = 2; i <= lws_max; ++i)
     {
         // Power of two condition
         const bool is_power_of_two = (i & (i - 1)) == 0;
@@ -221,7 +227,7 @@ void CLTuningParametersListNormal::initialize_lws_values(std::vector<unsigned in
         // Condition for the module accordingly with the mod_let_one flag
         const bool mod_cond = mod_let_one ? (gws % i) <= 1 : (gws % i) == 0;
 
-        if(mod_cond || is_power_of_two)
+        if (mod_cond || is_power_of_two)
         {
             lws.push_back(i);
         }
@@ -246,9 +252,9 @@ CLTuningParametersListRapid::CLTuningParametersListRapid(const cl::NDRange &gws,
     search_space_shape[1] = _lws_y.size();
     search_space_shape[2] = _lws_z.size();
     search_space_shape[3] = 1;
-    if(tuning_info.tune_wbsm)
+    if (tuning_info.tune_wbsm)
     {
-        _wbsm                 = { -1, 0, 1 };
+        _wbsm                 = {-1, 0, 1};
         search_space_shape[3] = _wbsm.size();
     }
 }
@@ -257,7 +263,7 @@ void CLTuningParametersListRapid::initialize_lws_values(std::vector<unsigned int
 {
     lws.push_back(1);
 
-    for(unsigned int i = 2; i <= lws_max; i *= 4)
+    for (unsigned int i = 2; i <= lws_max; i *= 4)
     {
         lws.push_back(i);
     }
@@ -265,7 +271,7 @@ void CLTuningParametersListRapid::initialize_lws_values(std::vector<unsigned int
 
 std::unique_ptr<ICLTuningParametersList> get_tuning_parameters_list(CLTuningInfo tuning_info, const cl::NDRange &gws)
 {
-    switch(tuning_info.tuner_mode)
+    switch (tuning_info.tuner_mode)
     {
         case CLTunerMode::EXHAUSTIVE:
             return std::make_unique<CLTuningParametersListExhaustive>(gws, tuning_info);

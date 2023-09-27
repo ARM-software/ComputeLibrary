@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuFloor.h"
 
-#include "src/cpu/kernels/CpuFloorKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuFloorKernel.h"
 
 namespace arm_compute
 {

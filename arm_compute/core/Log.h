@@ -34,11 +34,11 @@
 #define ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER()                                   \
     do                                                                             \
     {                                                                              \
-        if(arm_compute::logging::LoggerRegistry::get().logger("CORE") == nullptr)  \
+        if (arm_compute::logging::LoggerRegistry::get().logger("CORE") == nullptr) \
         {                                                                          \
             arm_compute::logging::LoggerRegistry::get().create_reserved_loggers(); \
         }                                                                          \
-    } while(false)
+    } while (false)
 #else /* ARM_COMPUTE_LOGGING_ENABLED */
 #define ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER()
 #endif /* ARM_COMPUTE_LOGGING_ENABLED */
@@ -53,7 +53,7 @@
     {                                                \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();    \
         ARM_COMPUTE_LOG_MSG("CORE", log_level, msg); \
-    } while(false)
+    } while (false)
 
 /** Log a message with format to the core system logger
  *
@@ -66,7 +66,7 @@
     {                                                                         \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                             \
         ARM_COMPUTE_LOG_MSG_WITH_FORMAT("CORE", log_level, fmt, __VA_ARGS__); \
-    } while(false)
+    } while (false)
 
 /** Log a stream to the core system logger
  *
@@ -78,7 +78,7 @@
     {                                                  \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();      \
         ARM_COMPUTE_LOG_STREAM("CORE", log_level, ss); \
-    } while(false)
+    } while (false)
 
 /** Log information level message to the core system logger
  *
@@ -89,7 +89,7 @@
     {                                                                        \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                            \
         ARM_COMPUTE_LOG_MSG_CORE(arm_compute::logging::LogLevel::INFO, msg); \
-    } while(false)
+    } while (false)
 
 /** Log information level formatted message to the core system logger
  *
@@ -101,7 +101,7 @@
     {                                                                                                  \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                                                      \
         ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(arm_compute::logging::LogLevel::INFO, #fmt, __VA_ARGS__); \
-    } while(false)
+    } while (false)
 
 /** Log information level stream to the core system logger
  *
@@ -112,6 +112,6 @@
     {                                                                          \
         ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                              \
         ARM_COMPUTE_LOG_STREAM_CORE(arm_compute::logging::LogLevel::INFO, ss); \
-    } while(false)
+    } while (false)
 
 #endif /* ARM_COMPUTE_LOGGING_MACROS_H */

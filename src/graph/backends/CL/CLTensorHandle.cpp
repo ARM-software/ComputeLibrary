@@ -31,8 +31,7 @@ namespace graph
 {
 namespace backends
 {
-CLTensorHandle::CLTensorHandle(const ITensorInfo &info)
-    : _tensor()
+CLTensorHandle::CLTensorHandle(const ITensorInfo &info) : _tensor()
 {
     _tensor.allocator()->init(info);
 }
@@ -49,7 +48,7 @@ void CLTensorHandle::free()
 
 void CLTensorHandle::manage(IMemoryGroup *mg)
 {
-    if(mg != nullptr)
+    if (mg != nullptr)
     {
         mg->manage(&_tensor);
     }
@@ -68,7 +67,7 @@ void CLTensorHandle::unmap()
 void CLTensorHandle::release_if_unused()
 {
     // TODO (geopin01): Release tensor only if all sub-tensors are marked as not used
-    if(!_tensor.is_used())
+    if (!_tensor.is_used())
     {
         _tensor.allocator()->free();
     }

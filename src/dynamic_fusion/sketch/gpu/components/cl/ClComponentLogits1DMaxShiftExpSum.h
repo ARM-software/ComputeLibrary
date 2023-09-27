@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTLOGITS1DMAXSHIFTEXPSUM
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/SoftmaxAttributes.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
@@ -89,10 +90,8 @@ public:
      * |F16        | F16       | F16       |
      * |F32        | F32       | F32       |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes);
+    static Status
+    validate(const Properties &properties, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
 
     /** Constructor
      *

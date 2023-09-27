@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuCast.h"
 
@@ -31,16 +32,15 @@ namespace arm_compute
 {
 struct NECast::Impl
 {
-    const ITensor                *src{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<cpu::CpuCast> op{ nullptr };
+    const ITensor                *src{nullptr};
+    ITensor                      *dst{nullptr};
+    std::unique_ptr<cpu::CpuCast> op{nullptr};
 };
 
-NECast::NECast()
-    : _impl(std::make_unique<Impl>())
+NECast::NECast() : _impl(std::make_unique<Impl>())
 {
 }
-NECast::NECast(NECast &&) = default;
+NECast::NECast(NECast &&)            = default;
 NECast &NECast::operator=(NECast &&) = default;
 NECast::~NECast()                    = default;
 
@@ -62,7 +62,7 @@ Status NECast::validate(const ITensorInfo *input, const ITensorInfo *output, Con
 
 void NECast::run()
 {
-    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }
 } // namespace arm_compute

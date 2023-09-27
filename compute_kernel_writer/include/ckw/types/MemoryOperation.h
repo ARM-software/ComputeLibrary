@@ -27,11 +27,11 @@
 
 namespace ckw
 {
-    enum class MemoryOperation
-    {
-        Load  = 1,
-        Store = 2
-    };
+enum class MemoryOperation
+{
+    Load  = 1,
+    Store = 2
+};
 } // namespace ckw
 
 #endif /* CKW_INCLUDE_CKW_TYPES_MEMORYOPERATION */

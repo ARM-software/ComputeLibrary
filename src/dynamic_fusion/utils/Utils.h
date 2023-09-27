@@ -63,17 +63,21 @@ inline bool is_invalid_tensor(const ITensorInfo *tensor_info)
 
 /** Inline function to convert @ref Pool2dAttributes to PoolingLayerInfo
 */
-inline PoolingLayerInfo convert_pool_attr_to_pool_info(const Pool2dAttributes &pool_attr, bool mixed_precision = false, DataLayout data_layout = DataLayout::NHWC)
+inline PoolingLayerInfo convert_pool_attr_to_pool_info(const Pool2dAttributes &pool_attr,
+                                                       bool                    mixed_precision = false,
+                                                       DataLayout              data_layout     = DataLayout::NHWC)
 {
     // Create PadStrideInfo
     const Size2D        stride  = pool_attr.stride();
     const Padding2D     padding = pool_attr.pad();
-    const PadStrideInfo pad_stride(stride.x(), stride.y(), padding.left, padding.top, arm_compute::DimensionRoundingType::FLOOR);
+    const PadStrideInfo pad_stride(stride.x(), stride.y(), padding.left, padding.top,
+                                   arm_compute::DimensionRoundingType::FLOOR);
 
-    return PoolingLayerInfo(pool_attr.pool_type(), pool_attr.pool_size(), data_layout, pad_stride, pool_attr.exclude_padding(), mixed_precision);
+    return PoolingLayerInfo(pool_attr.pool_type(), pool_attr.pool_size(), data_layout, pad_stride,
+                            pool_attr.exclude_padding(), mixed_precision);
 }
-}
-}
-}
+} // namespace dynamic_fusion
+} // namespace experimental
+} // namespace arm_compute
 
 #endif /* SRC_DYNAMIC_FUSION_UTILS_UTILS */

@@ -25,7 +25,6 @@
 
 #include "convolution_parameters.hpp"
 #include "ndrange.hpp"
-
 #include <cstddef>
 
 namespace arm_gemm
@@ -51,10 +50,19 @@ public:
      * appropriately typed pointers.  If B is pretransposed (see below) then
      * the settings for B here are ignored.
      */
-    virtual void set_arrays_generic(const void *A, const int lda, const int A_batch_stride, const int A_multi_stride,
-                                    const void *B, const int ldb, /* batches share B */ const int B_multi_stride,
-                                    void *C, const int ldc, const int C_batch_stride, const int C_multi_stride,
-                                    const void *bias, /* no row or batch stride needed */ const int bias_multi_stride) = 0;
+    virtual void set_arrays_generic(const void                                   *A,
+                                    const int                                     lda,
+                                    const int                                     A_batch_stride,
+                                    const int                                     A_multi_stride,
+                                    const void                                   *B,
+                                    const int                                     ldb,
+                                    /* batches share B */ const int               B_multi_stride,
+                                    void                                         *C,
+                                    const int                                     ldc,
+                                    const int                                     C_batch_stride,
+                                    const int                                     C_multi_stride,
+                                    const void                                   *bias,
+                                    /* no row or batch stride needed */ const int bias_multi_stride) = 0;
 
     /** @returns an ndrange containing ranges of the compute space which can be
      * broken up and parallelised over
@@ -73,7 +81,7 @@ public:
      * This has an empty default implementation, as GEMMs which don't care
      * about thread count can safely ignore this.
      */
-    virtual void set_nthreads(int) {};
+    virtual void set_nthreads(int){};
 
     /* Whether this GEMM can be dynamically scheduled or not. */
     virtual bool supports_dynamic_scheduling() const
@@ -95,7 +103,7 @@ public:
         return 0;
     }
     /* Provide working space buffer - the void * passed in must remain allocated for the duration of any execute calls. */
-    virtual void set_working_space(void *) {};
+    virtual void set_working_space(void *){};
 
     /*** "Pretransposed" interface (optional) ***/
     /* Is this object set up for pretranspose?  If so, pretranspose_array() needs to be called before execute(); */
@@ -122,7 +130,8 @@ public:
     /* The "real" version of this depends on the templated operand type (see below).  */
     virtual void pretranspose_B_array_generic(void *, const void *, const int, const int) = 0;
     /* Threaded version with window start/end parameters */
-    virtual void pretranspose_B_array_part_generic(void *, const void *, const int, const int, const size_t, const size_t) = 0;
+    virtual void
+    pretranspose_B_array_part_generic(void *, const void *, const int, const int, const size_t, const size_t) = 0;
 
     /* Set pretransposed data - the void * passed in must previously have been passed to pretranspose_B_array() for the same or a similar GEMM. */
     virtual void set_pretransposed_B_data(void *)
@@ -186,10 +195,19 @@ protected:
 public:
     /* Pass in the pointers to the arrays to be operated on and their
      * strides (templated version with appropriate types). */
-    virtual void set_arrays(const To *A, const int lda, const int A_batch_stride, const int A_multi_stride,
-                            const To *B, const int ldb, /* batches share B */ const int B_multi_stride,
-                            Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride,
-                            const Tr *bias, /* no row or batch stride needed */ const int bias_multi_stride)
+    virtual void set_arrays(const To                                     *A,
+                            const int                                     lda,
+                            const int                                     A_batch_stride,
+                            const int                                     A_multi_stride,
+                            const To                                     *B,
+                            const int                                     ldb,
+                            /* batches share B */ const int               B_multi_stride,
+                            Tr                                           *C,
+                            const int                                     ldc,
+                            const int                                     C_batch_stride,
+                            const int                                     C_multi_stride,
+                            const Tr                                     *bias,
+                            /* no row or batch stride needed */ const int bias_multi_stride)
     {
         _Aptr              = A;
         _lda               = lda;
@@ -207,25 +225,33 @@ public:
     }
 
     /* Implementation of the void * overload which casts its arguments to the appropriate type. */
-    void set_arrays_generic(const void *A, const int lda, const int A_batch_stride, const int A_multi_stride,
-                            const void *B, const int ldb, /* batches share B */ const int B_multi_stride,
-                            void *C, const int ldc, const int C_batch_stride, const int C_multi_stride,
-                            const void *bias, /* no row or batch stride needed */ const int bias_multi_stride) override
+    void set_arrays_generic(const void                                   *A,
+                            const int                                     lda,
+                            const int                                     A_batch_stride,
+                            const int                                     A_multi_stride,
+                            const void                                   *B,
+                            const int                                     ldb,
+                            /* batches share B */ const int               B_multi_stride,
+                            void                                         *C,
+                            const int                                     ldc,
+                            const int                                     C_batch_stride,
+                            const int                                     C_multi_stride,
+                            const void                                   *bias,
+                            /* no row or batch stride needed */ const int bias_multi_stride) override
     {
-        set_arrays(static_cast<const To *>(A), lda, A_batch_stride, A_multi_stride,
-                   static_cast<const To *>(B), ldb, B_multi_stride,
-                   static_cast<Tr *>(C), ldc, C_batch_stride, C_multi_stride,
+        set_arrays(static_cast<const To *>(A), lda, A_batch_stride, A_multi_stride, static_cast<const To *>(B), ldb,
+                   B_multi_stride, static_cast<Tr *>(C), ldc, C_batch_stride, C_multi_stride,
                    static_cast<const Tr *>(bias), bias_multi_stride);
     }
 
     /*** "Pretransposed" interface ***/
 
     /* Compute col sums over all columns */
-    virtual void requantize_bias(void *, const To *, const int, const int) {};
+    virtual void requantize_bias(void *, const To *, const int, const int){};
 
     /* Perform pretranspose - the void * passed in must remain allocated for the duration of any execute calls. */
     /* Arguments are: output buffer pointer, source pointer, source row stride, source multi stride */
-    virtual void pretranspose_B_array(void *, const To *, const int, const int) {};
+    virtual void pretranspose_B_array(void *, const To *, const int, const int){};
 
     /* Implementation of the void * overload which casts its arguments to the appropriate type. */
     void pretranspose_B_array_generic(void *out, const void *in, const int row_stride, const int multi_stride) override
@@ -237,12 +263,14 @@ public:
      * The fallback/backwards compatible version of the threaded interface exposes a window size of 1 and
      * just calls the non-threaded functions to do the work.  This is valid as with window size of 1 the only
      * legal values for start and end are 0 and 1 respectively. */
-    virtual void pretranspose_B_array_part(void *out, const To *in, const int row_stride, const int multi_stride, size_t, size_t)
+    virtual void
+    pretranspose_B_array_part(void *out, const To *in, const int row_stride, const int multi_stride, size_t, size_t)
     {
         pretranspose_B_array(out, in, row_stride, multi_stride);
     };
 
-    void pretranspose_B_array_part_generic(void *out, const void *in, const int row_stride, const int multi_stride, size_t start, size_t end) override
+    void pretranspose_B_array_part_generic(
+        void *out, const void *in, const int row_stride, const int multi_stride, size_t start, size_t end) override
     {
         pretranspose_B_array_part(out, static_cast<const To *>(in), row_stride, multi_stride, start, end);
     }

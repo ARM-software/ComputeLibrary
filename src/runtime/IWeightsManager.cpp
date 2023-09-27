@@ -25,14 +25,13 @@
 
 namespace arm_compute
 {
-IWeightsManager::IWeightsManager()
-    : _managed_weights(), _managed_counter(), _managed_weights_parents()
+IWeightsManager::IWeightsManager() : _managed_weights(), _managed_counter(), _managed_weights_parents()
 {
 }
 
 void IWeightsManager::manage(const ITensor *weights, ITransformWeights *parent)
 {
-    if(!are_weights_managed(weights))
+    if (!are_weights_managed(weights))
     {
         _managed_weights[weights];
         _managed_counter[weights];
@@ -44,9 +43,9 @@ void IWeightsManager::manage(const ITensor *weights, ITransformWeights *parent)
 
     // In case the weights are an output of a previous reshape function
     // store the parent's link
-    if(parent != nullptr)
+    if (parent != nullptr)
     {
-        if(_managed_weights_parents.find(weights) == _managed_weights_parents.end())
+        if (_managed_weights_parents.find(weights) == _managed_weights_parents.end())
         {
             _managed_weights_parents[weights] = parent;
         }
@@ -59,13 +58,13 @@ ITensor *IWeightsManager::run(const ITensor *weights, ITransformWeights *weights
 
     // Find if I have the same weights with weights transform. If I do, don't run the reshape
     auto     item = _managed_weights.find(weights);
-    bool     perform_run{ true };
-    ITensor *weights_tensor{ nullptr };
+    bool     perform_run{true};
+    ITensor *weights_tensor{nullptr};
 
     // Check if I already have the requested transform and I have run the reshape function
-    for(auto it : item->second)
+    for (auto it : item->second)
     {
-        if(it->is_reshape_run() && (it->uid() == weights_transform->uid()))
+        if (it->is_reshape_run() && (it->uid() == weights_transform->uid()))
         {
             weights_tensor = it->get_weights();
             perform_run    = false;
@@ -73,7 +72,7 @@ ITensor *IWeightsManager::run(const ITensor *weights, ITransformWeights *weights
         }
     }
 
-    if(perform_run)
+    if (perform_run)
     {
         weights_transform->run();
         weights_tensor = weights_transform->get_weights();
@@ -81,10 +80,10 @@ ITensor *IWeightsManager::run(const ITensor *weights, ITransformWeights *weights
 
     // Check if we can release memory from parent
     auto parent_item = _managed_weights_parents.find(weights);
-    if(parent_item != _managed_weights_parents.end())
+    if (parent_item != _managed_weights_parents.end())
     {
         int32_t refcount = parent_item->second->decrease_refcount();
-        if(refcount == 0)
+        if (refcount == 0)
         {
             parent_item->second->release();
         }
@@ -92,20 +91,20 @@ ITensor *IWeightsManager::run(const ITensor *weights, ITransformWeights *weights
 
     // Check top level weights. If all the transformations are done
     // mark the weights as unused
-    if(_managed_weights_parents.find(weights) == _managed_weights_parents.end())
+    if (_managed_weights_parents.find(weights) == _managed_weights_parents.end())
     {
         auto item           = _managed_weights.find(weights);
         bool mark_as_unused = true;
-        for(auto it : item->second)
+        for (auto it : item->second)
         {
-            if(!it->is_reshape_run())
+            if (!it->is_reshape_run())
             {
                 mark_as_unused = false;
                 break;
             }
         }
 
-        if(mark_as_unused)
+        if (mark_as_unused)
         {
             weights->mark_as_unused();
         }
@@ -123,15 +122,15 @@ ITensor *IWeightsManager::acquire(const ITensor *weights, ITransformWeights *wei
 {
     ARM_COMPUTE_ERROR_ON_MSG(!are_weights_managed(weights), "Cannot acquire weights. Weights are not managed");
 
-    ITensor *transformed_weights{ nullptr };
+    ITensor *transformed_weights{nullptr};
     auto     item = _managed_weights.find(weights);
 
     // Check if I already have the requested transform. If I do,
     // increase the refcount of the transformed weights object and
     // reuse the tensor
-    for(auto it : item->second)
+    for (auto it : item->second)
     {
-        if(it->uid() == weights_transform->uid())
+        if (it->uid() == weights_transform->uid())
         {
             transformed_weights = it->get_weights();
             it->increase_refcount();
@@ -139,7 +138,7 @@ ITensor *IWeightsManager::acquire(const ITensor *weights, ITransformWeights *wei
         }
     }
 
-    if(transformed_weights == nullptr)
+    if (transformed_weights == nullptr)
     {
         transformed_weights = weights_transform->get_weights();
         weights_transform->increase_refcount();
@@ -154,13 +153,13 @@ ITensor *IWeightsManager::acquire(const ITensor *weights, ITransformWeights *wei
 
 void IWeightsManager::release(const ITensor *weights)
 {
-    if(weights == nullptr || !are_weights_managed(weights))
+    if (weights == nullptr || !are_weights_managed(weights))
     {
         return;
     }
 
     _managed_counter[weights].counter--;
-    if(_managed_counter[weights].counter == 0 && _managed_counter[weights].is_unused)
+    if (_managed_counter[weights].counter == 0 && _managed_counter[weights].is_unused)
     {
         weights->mark_as_unused();
     }
@@ -168,7 +167,7 @@ void IWeightsManager::release(const ITensor *weights)
 
 void IWeightsManager::pre_mark_as_unused(const ITensor *weights)
 {
-    if(weights == nullptr || !are_weights_managed(weights))
+    if (weights == nullptr || !are_weights_managed(weights))
     {
         return;
     }

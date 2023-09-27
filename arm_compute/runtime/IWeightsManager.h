@@ -90,8 +90,8 @@ public:
 private:
     struct CounterElement
     {
-        bool             is_unused{ false };
-        std::atomic<int> counter{ 1 };
+        bool             is_unused{false};
+        std::atomic<int> counter{1};
     };
 
 private:
@@ -99,5 +99,5 @@ private:
     std::map<const ITensor *, CounterElement>                   _managed_counter;
     std::map<const ITensor *, ITransformWeights *>              _managed_weights_parents;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IWEIGHTSMANAGER_H */

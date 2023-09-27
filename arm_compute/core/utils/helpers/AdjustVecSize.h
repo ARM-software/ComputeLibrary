@@ -39,17 +39,17 @@ inline unsigned int adjust_vec_size(unsigned int vec_size, size_t dim0)
 {
     ARM_COMPUTE_ERROR_ON(vec_size > 16);
 
-    if((vec_size >= dim0) && (dim0 == 3))
+    if ((vec_size >= dim0) && (dim0 == 3))
     {
         return dim0;
     }
 
-    while(vec_size > dim0)
+    while (vec_size > dim0)
     {
         vec_size >>= 1;
     }
 
     return vec_size;
 }
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_UTILS_H */

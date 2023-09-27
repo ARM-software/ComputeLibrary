@@ -24,25 +24,29 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+
 #include "src/cpu/kernels/add/generic/sve/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void add_u8_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_u8_sve(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_sve<uint8_t>(src0, src1, dst, policy, window);
 }
 
-void add_s16_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_s16_sve(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_sve<int16_t>(src0, src1, dst, policy, window);
 }
 
-void add_s32_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_s32_sve(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_sve<int32_t>(src0, src1, dst, policy, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuConvertFullyConnectedWeights.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuConvertFullyConnectedWeightsKernel.h"
 
@@ -31,7 +32,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuConvertFullyConnectedWeights::configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout)
+void CpuConvertFullyConnectedWeights::configure(const ITensorInfo *src,
+                                                ITensorInfo       *dst,
+                                                const TensorShape &original_src_shape,
+                                                DataLayout         data_layout)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst, original_src_shape, data_layout);
     auto k = std::make_unique<kernels::CpuConvertFullyConnectedWeightsKernel>();
@@ -39,7 +43,10 @@ void CpuConvertFullyConnectedWeights::configure(const ITensorInfo *src, ITensorI
     _kernel = std::move(k);
 }
 
-Status CpuConvertFullyConnectedWeights::validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout)
+Status CpuConvertFullyConnectedWeights::validate(const ITensorInfo *src,
+                                                 const ITensorInfo *dst,
+                                                 const TensorShape &original_src_shape,
+                                                 DataLayout         data_layout)
 {
     return kernels::CpuConvertFullyConnectedWeightsKernel::validate(src, dst, original_src_shape, data_layout);
 }
@@ -48,5 +55,5 @@ void CpuConvertFullyConnectedWeights::run(ITensorPack &tensors)
 {
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimZ, _kernel->window(), tensors);
 }
-} // namesapce cpu
+} // namespace cpu
 } // namespace arm_compute

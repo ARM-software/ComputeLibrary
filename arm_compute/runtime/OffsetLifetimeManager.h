@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_OFFSETLIFETIMEMANAGER_H
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
-
 #include "arm_compute/runtime/Types.h"
 
 #include <map>
@@ -62,7 +61,7 @@ public:
 
     // Inherited methods overridden:
     std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) override;
-    MappingType mapping_type() const override;
+    MappingType                  mapping_type() const override;
 
 private:
     // Inherited methods overridden:

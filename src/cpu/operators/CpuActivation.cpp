@@ -24,6 +24,7 @@
 #include "src/cpu/operators/CpuActivation.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/IOperator.h"
 #include "src/common/utils/LegacySupport.h"
 #include "src/common/utils/Log.h"
@@ -42,7 +43,8 @@ void CpuActivation::configure(const ITensorInfo *input, ITensorInfo *output, con
     _kernel = std::move(k);
 }
 
-Status CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
+Status
+CpuActivation::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &activation_info)
 {
     return kernels::CpuActivationKernel::validate(input, output, activation_info);
 }
@@ -54,13 +56,17 @@ void CpuActivation::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
-std::tuple<IOperator *, StatusCode> CpuContext::create_activation(const AclTensorDescriptor &src, const AclTensorDescriptor &dst, const AclActivationDescriptor &act, bool is_validate)
+std::tuple<IOperator *, StatusCode> CpuContext::create_activation(const AclTensorDescriptor     &src,
+                                                                  const AclTensorDescriptor     &dst,
+                                                                  const AclActivationDescriptor &act,
+                                                                  bool                           is_validate)
 {
     TensorInfo src_info = detail::convert_to_legacy_tensor_info(src);
     TensorInfo dst_info = detail::convert_to_legacy_tensor_info(dst);
     auto       info     = detail::convert_to_activation_info(act);
 
-    if(is_validate && !bool(CpuActivation::validate(&src_info.set_is_resizable(false), &dst_info.set_is_resizable(false), info)))
+    if (is_validate &&
+        !bool(CpuActivation::validate(&src_info.set_is_resizable(false), &dst_info.set_is_resizable(false), info)))
     {
         return std::make_tuple(nullptr, StatusCode::UnsupportedConfig);
     }
@@ -69,7 +75,7 @@ std::tuple<IOperator *, StatusCode> CpuContext::create_activation(const AclTenso
     act_op->configure(&src_info, &dst_info, info);
 
     auto op = new arm_compute::IOperator(static_cast<IContext *>(this));
-    if(op == nullptr)
+    if (op == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources");
         return std::make_tuple(nullptr, StatusCode::OutOfMemory);

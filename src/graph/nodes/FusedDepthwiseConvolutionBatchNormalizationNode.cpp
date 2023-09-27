@@ -32,18 +32,24 @@ namespace arm_compute
 {
 namespace graph
 {
-FusedDepthwiseConvolutionBatchNormalizationNode::FusedDepthwiseConvolutionBatchNormalizationNode(float                      epsilon,
-                                                                                                 PadStrideInfo              info,
-                                                                                                 unsigned int               depth_multiplier,
-                                                                                                 DepthwiseConvolutionMethod method,
-                                                                                                 ActivationLayerInfo        fused_activation)
-    : _epsilon(epsilon), _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _fused_activation(fused_activation)
+FusedDepthwiseConvolutionBatchNormalizationNode::FusedDepthwiseConvolutionBatchNormalizationNode(
+    float                      epsilon,
+    PadStrideInfo              info,
+    unsigned int               depth_multiplier,
+    DepthwiseConvolutionMethod method,
+    ActivationLayerInfo        fused_activation)
+    : _epsilon(epsilon),
+      _info(std::move(info)),
+      _depth_multiplier(depth_multiplier),
+      _method(method),
+      _fused_activation(fused_activation)
 {
     _input_edges.resize(7, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
-void FusedDepthwiseConvolutionBatchNormalizationNode::set_depthwise_convolution_method(DepthwiseConvolutionMethod method)
+void FusedDepthwiseConvolutionBatchNormalizationNode::set_depthwise_convolution_method(
+    DepthwiseConvolutionMethod method)
 {
     _method = method;
 }
@@ -78,10 +84,11 @@ void FusedDepthwiseConvolutionBatchNormalizationNode::set_fused_activation(Activ
     _fused_activation = fused_activation;
 }
 
-TensorDescriptor FusedDepthwiseConvolutionBatchNormalizationNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                                            const TensorDescriptor &weights_descriptor,
-                                                                                            const PadStrideInfo    &info,
-                                                                                            int                     depth_multiplier)
+TensorDescriptor
+FusedDepthwiseConvolutionBatchNormalizationNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                                           const TensorDescriptor &weights_descriptor,
+                                                                           const PadStrideInfo    &info,
+                                                                           int                     depth_multiplier)
 {
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
@@ -92,19 +99,22 @@ TensorDescriptor FusedDepthwiseConvolutionBatchNormalizationNode::compute_output
     const unsigned int kernel_width   = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int kernel_height  = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
-    std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
+    std::tie(output_width, output_height) =
+        scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(output_descriptor.layout, DataLayoutDimension::WIDTH), output_width);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor.layout, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor.layout, DataLayoutDimension::CHANNEL), input_channels * depth_multiplier);
+    output_descriptor.shape.set(get_dimension_idx(output_descriptor.layout, DataLayoutDimension::HEIGHT),
+                                output_height);
+    output_descriptor.shape.set(get_dimension_idx(output_descriptor.layout, DataLayoutDimension::CHANNEL),
+                                input_channels * depth_multiplier);
 
     return output_descriptor;
 }
 
 bool FusedDepthwiseConvolutionBatchNormalizationNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

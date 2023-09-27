@@ -85,7 +85,10 @@ public:
      *                             Negative values wrap around
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      */
-    void configure(const CLCompileContext &compile_context, const std::vector<ICLTensor *> &input, int axis, ICLTensor *output);
+    void configure(const CLCompileContext         &compile_context,
+                   const std::vector<ICLTensor *> &input,
+                   int                             axis,
+                   ICLTensor                      *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4

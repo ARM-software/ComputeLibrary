@@ -22,14 +22,20 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/softmax/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void neon_qasymm8_signed_softmax(const ITensor *in, const ITensor *max, void *const tmp,
-                                 ITensor *out, const float beta, bool is_log, const Window &window)
+void neon_qasymm8_signed_softmax(const ITensor *in,
+                                 const ITensor *max,
+                                 void *const    tmp,
+                                 ITensor       *out,
+                                 const float    beta,
+                                 bool           is_log,
+                                 const Window  &window)
 {
     return neon_softmax_logits_1d_quantized<qasymm8_signed_t>(in, max, tmp, out, beta, is_log, window);
 }
@@ -38,5 +44,5 @@ void neon_qasymm8_singed_logits(const ITensor *in, ITensor *out, const Window &w
 {
     return neon_logits_1d_max<qasymm8_signed_t>(in, out, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

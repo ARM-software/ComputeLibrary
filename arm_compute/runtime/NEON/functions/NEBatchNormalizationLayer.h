@@ -81,7 +81,13 @@ public:
      * @param[in]      epsilon  (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta = nullptr, const ITensor *gamma = nullptr, float epsilon = 0.001f,
+    void configure(ITensor            *input,
+                   ITensor            *output,
+                   const ITensor      *mean,
+                   const ITensor      *var,
+                   const ITensor      *beta     = nullptr,
+                   const ITensor      *gamma    = nullptr,
+                   float               epsilon  = 0.001f,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEBatchNormalizationLayer
      *
@@ -98,10 +104,14 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
-                           const ITensorInfo *mean, const ITensorInfo *var,
-                           const ITensorInfo *beta = nullptr, const ITensorInfo *gamma = nullptr,
-                           float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo  *input,
+                           const ITensorInfo  *output,
+                           const ITensorInfo  *mean,
+                           const ITensorInfo  *var,
+                           const ITensorInfo  *beta     = nullptr,
+                           const ITensorInfo  *gamma    = nullptr,
+                           float               epsilon  = 0.001f,
+                           ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -109,5 +119,5 @@ public:
 private:
     std::unique_ptr<NEBatchNormalizationLayerKernel> _norm_kernel; /**< Batch normalization layer kernel */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEBATCHNORMALIZATIONLAYER_H */

@@ -36,7 +36,9 @@ namespace opencl
 {
 namespace kernels
 {
-Status validate_matmul_input_shapes(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const MatMulKernelInfo &matmul_kernel_info)
+Status validate_matmul_input_shapes(const TensorShape      &lhs_shape,
+                                    const TensorShape      &rhs_shape,
+                                    const MatMulKernelInfo &matmul_kernel_info)
 {
     const size_t lhs_k = matmul_kernel_info.adj_lhs ? lhs_shape.y() : lhs_shape.x();
     const size_t rhs_k = matmul_kernel_info.adj_rhs ? rhs_shape.x() : rhs_shape.y();
@@ -46,7 +48,7 @@ Status validate_matmul_input_shapes(const TensorShape &lhs_shape, const TensorSh
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_shape.total_size() == 0, "Rhs tensor can't be empty");
 
     constexpr size_t batch_dim_start = 2;
-    for(size_t i = batch_dim_start; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = batch_dim_start; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_shape[i] != rhs_shape[i], "Batch dimension broadcasting is not supported");
     }
@@ -54,9 +56,12 @@ Status validate_matmul_input_shapes(const TensorShape &lhs_shape, const TensorSh
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window_for_mmul_kernels(const ITensorInfo *lhs,
-                                                                         const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
-                                                                         int mmul_m0, int mmul_n0)
+std::pair<Status, Window> validate_and_configure_window_for_mmul_kernels(const ITensorInfo      *lhs,
+                                                                         const ITensorInfo      *rhs,
+                                                                         const ITensorInfo      *dst,
+                                                                         const MatMulKernelInfo &matmul_kernel_info,
+                                                                         int                     mmul_m0,
+                                                                         int                     mmul_n0)
 {
     ARM_COMPUTE_UNUSED(lhs, rhs);
 

@@ -27,6 +27,7 @@
 
 #include "ckw/types/DataType.h"
 #include "ckw/types/TensorDataLayout.h"
+
 #include <array>
 #include <cstdint>
 
@@ -85,10 +86,10 @@ public:
     int32_t id() const;
 
 private:
-    TensorShape      _shape{ { 0 } };
-    DataType         _dt{ DataType::Unknown };
-    TensorDataLayout _dl{ TensorDataLayout::Unknown };
-    int32_t          _id{ -1 };
+    TensorShape      _shape{{0}};
+    DataType         _dt{DataType::Unknown};
+    TensorDataLayout _dl{TensorDataLayout::Unknown};
+    int32_t          _id{-1};
 };
 } // namespace ckw
 

@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "src/cl/CLTile.h"
+
 #include "ckw/Error.h"
 #include "ckw/TileInfo.h"
 
-#include "src/Helpers.h"
 #include "src/cl/CLHelpers.h"
-#include "src/cl/CLTile.h"
+#include "src/Helpers.h"
 
 #include <algorithm>
 #include <vector>
 
 namespace ckw
 {
-CLTile::CLTile(const std::string &name, const TileInfo &info)
-    : _is_constant(false)
+CLTile::CLTile(const std::string &name, const TileInfo &info) : _is_constant(false)
 {
     validate_tile_info(info);
 
@@ -42,8 +42,7 @@ CLTile::CLTile(const std::string &name, const TileInfo &info)
     _info     = info;
 }
 
-CLTile::CLTile(const TileContainer &vals, DataType dt)
-    : _is_constant(true)
+CLTile::CLTile(const TileContainer &vals, DataType dt) : _is_constant(true)
 {
     const int32_t w = vals[0].size();
     const int32_t h = vals.size();
@@ -56,9 +55,9 @@ CLTile::CLTile(const TileContainer &vals, DataType dt)
 
     _vals = TileContainer(h, std::vector<std::string>(w));
 
-    for(int32_t y = 0; y < h; ++y)
+    for (int32_t y = 0; y < h; ++y)
     {
-        for(int32_t x = 0; x < w; ++x)
+        for (int32_t x = 0; x < w; ++x)
         {
             _vals[y][x] = vals[y][x];
         }
@@ -81,7 +80,7 @@ TileVariable CLTile::scalar(int32_t row, int32_t col) const
     col = clamp(col, static_cast<int32_t>(0), _info.width() - 1);
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
-    if(_is_constant)
+    if (_is_constant)
     {
         // We can use the vector method to retrieve the scalar variable stored in the constant tile
         return vector(row, col, 1);
@@ -94,7 +93,7 @@ TileVariable CLTile::scalar(int32_t row, int32_t col) const
         t.desc.len = 1;
 
         // This check is required because if the width has only one element, we cannot use .s0
-        if(_info.width() != 1)
+        if (_info.width() != 1)
         {
             // Automatic broadcasting
             t.str += ".s" + dec_to_hex_as_string(col);
@@ -109,7 +108,7 @@ TileVariable CLTile::vector(int32_t row) const
     // Clamp to nearest valid edge
     row = clamp(row, static_cast<int32_t>(0), _info.height() - 1);
 
-    if(_is_constant)
+    if (_is_constant)
     {
         return vector(row, 0, _info.width());
     }
@@ -138,14 +137,14 @@ TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
     t.desc.dt  = _info.data_type();
     t.desc.len = width;
 
-    if(_is_constant)
+    if (_is_constant)
     {
         // The vector has the following form: ((data_typeN)(val0, val1,..., ValN-1))
         t.str = "((" + cl_get_variable_datatype_as_string(t.desc.dt, width) + ")";
         t.str += "(";
 
         int32_t col = col_start;
-        for(; col < width - 1; ++col)
+        for (; col < width - 1; ++col)
         {
             t.str += _vals[row][col];
             t.str += ", ";
@@ -157,10 +156,10 @@ TileVariable CLTile::vector(int32_t row, int32_t col_start, int32_t width) const
     {
         t.str = create_var_name(row);
 
-        if(_info.width() != 1 && _info.width() != width)
+        if (_info.width() != 1 && _info.width() != width)
         {
             t.str += ".s";
-            for(int i = 0; i < width; ++i)
+            for (int i = 0; i < width; ++i)
             {
                 t.str += dec_to_hex_as_string(col_start + i);
             }
@@ -174,11 +173,11 @@ std::vector<TileVariable> CLTile::all() const
 {
     std::vector<TileVariable> vars;
 
-    if(_is_constant)
+    if (_is_constant)
     {
-        for(int32_t y = 0; y < _info.height(); ++y)
+        for (int32_t y = 0; y < _info.height(); ++y)
         {
-            for(int32_t x = 0; x < _info.width(); ++x)
+            for (int32_t x = 0; x < _info.width(); ++x)
             {
                 // We can use the vector method to retrieve all the scalar variables stored in the constant tile
                 TileVariable t = vector(y, x, 1);
@@ -188,7 +187,7 @@ std::vector<TileVariable> CLTile::all() const
     }
     else
     {
-        for(int32_t y = 0; y < _info.height(); ++y)
+        for (int32_t y = 0; y < _info.height(); ++y)
         {
             TileVariable t;
             t.str      = create_var_name(y);
@@ -211,7 +210,7 @@ std::string CLTile::create_var_name(int32_t row) const
     std::string var_name = _basename;
 
     // If a scalar variable, we do not append the row index
-    if(_info.height() > 1)
+    if (_info.height() > 1)
     {
         var_name += "__";
         var_name += std::to_string(row);
@@ -222,7 +221,7 @@ std::string CLTile::create_var_name(int32_t row) const
 
 std::vector<int32_t> CLTile::supported_vector_lengths() const
 {
-    return std::vector<int32_t>{ 1, 2, 3, 4, 8, 16 };
+    return std::vector<int32_t>{1, 2, 3, 4, 8, 16};
 }
 
 void CLTile::validate_tile_info(const TileInfo &info) const

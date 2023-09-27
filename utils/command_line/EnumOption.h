@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_UTILS_ENUMOPTION
 
 #include "SimpleOption.h"
-
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -55,7 +54,7 @@ public:
      */
     EnumOption(std::string name, std::set<T> allowed_values, T default_value);
 
-    bool parse(std::string value) override;
+    bool        parse(std::string value) override;
     std::string help() const override;
 
     /** Get the selected value.
@@ -70,13 +69,13 @@ private:
 
 template <typename T>
 inline EnumOption<T>::EnumOption(std::string name, std::set<T> allowed_values)
-    : SimpleOption<T>{ std::move(name) }, _allowed_values{ std::move(allowed_values) }
+    : SimpleOption<T>{std::move(name)}, _allowed_values{std::move(allowed_values)}
 {
 }
 
 template <typename T>
 inline EnumOption<T>::EnumOption(std::string name, std::set<T> allowed_values, T default_value)
-    : SimpleOption<T>{ std::move(name), std::move(default_value) }, _allowed_values{ std::move(allowed_values) }
+    : SimpleOption<T>{std::move(name), std::move(default_value)}, _allowed_values{std::move(allowed_values)}
 {
 }
 
@@ -85,14 +84,14 @@ bool EnumOption<T>::parse(std::string value)
 {
     try
     {
-        std::stringstream stream{ value };
+        std::stringstream stream{value};
         T                 typed_value{};
 
         stream >> typed_value;
 
-        if(!stream.fail())
+        if (!stream.fail())
         {
-            if(_allowed_values.count(typed_value) == 0)
+            if (_allowed_values.count(typed_value) == 0)
             {
                 return false;
             }
@@ -104,7 +103,7 @@ bool EnumOption<T>::parse(std::string value)
 
         return false;
     }
-    catch(const std::invalid_argument &)
+    catch (const std::invalid_argument &)
     {
         return false;
     }
@@ -116,7 +115,7 @@ std::string EnumOption<T>::help() const
     std::stringstream msg;
     msg << "--" + this->name() + "={";
 
-    for(const auto &value : _allowed_values)
+    for (const auto &value : _allowed_values)
     {
         msg << value << ",";
     }

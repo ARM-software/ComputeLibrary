@@ -27,20 +27,17 @@
 
 namespace arm_compute
 {
-Memory::Memory()
-    : _region(nullptr), _region_owned(nullptr)
+Memory::Memory() : _region(nullptr), _region_owned(nullptr)
 {
 }
 
-Memory::Memory(const std::shared_ptr<IMemoryRegion> &memory)
-    : _region(nullptr), _region_owned(memory)
+Memory::Memory(const std::shared_ptr<IMemoryRegion> &memory) : _region(nullptr), _region_owned(memory)
 {
     _region_owned = memory;
     _region       = _region_owned.get();
 }
 
-Memory::Memory(IMemoryRegion *memory)
-    : _region(memory), _region_owned(nullptr)
+Memory::Memory(IMemoryRegion *memory) : _region(memory), _region_owned(nullptr)
 {
     _region = memory;
 }

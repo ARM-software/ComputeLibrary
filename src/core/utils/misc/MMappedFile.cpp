@@ -27,12 +27,11 @@
 
 #include <cstdio>
 #include <cstring>
-#include <tuple>
-
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <tuple>
 #include <unistd.h>
 
 namespace arm_compute
@@ -53,7 +52,7 @@ std::pair<size_t, bool> get_file_size(const std::string &filename)
 {
     struct stat st; // NOLINT
     memset(&st, 0, sizeof(struct stat));
-    if(stat(filename.c_str(), &st) == 0)
+    if (stat(filename.c_str(), &st) == 0)
     {
         return std::make_pair(st.st_size, true);
     }
@@ -73,8 +72,7 @@ size_t get_page_size()
 }
 } // namespace
 
-MMappedFile::MMappedFile()
-    : _filename(), _file_size(0), _map_size(0), _map_offset(0), _fp(nullptr), _data(nullptr)
+MMappedFile::MMappedFile() : _filename(), _file_size(0), _map_size(0), _map_offset(0), _fp(nullptr), _data(nullptr)
 {
 }
 
@@ -92,14 +90,14 @@ MMappedFile::~MMappedFile()
 bool MMappedFile::map(const std::string &filename, size_t size, size_t offset)
 {
     // Check if file is mapped
-    if(is_mapped())
+    if (is_mapped())
     {
         return false;
     }
 
     // Open file
     _fp = fopen(filename.c_str(), "a+be");
-    if(_fp == nullptr)
+    if (_fp == nullptr)
     {
         return false;
     }
@@ -107,26 +105,26 @@ bool MMappedFile::map(const std::string &filename, size_t size, size_t offset)
     // Extract file descriptor
     int  fd     = fileno(_fp);
     bool status = fd >= 0;
-    if(status)
+    if (status)
     {
         // Get file size
         std::tie(_file_size, status) = get_file_size(_filename);
 
-        if(status)
+        if (status)
         {
             // Map all file from offset if map size is 0
             _map_size   = (size == 0) ? _file_size : size;
             _map_offset = offset;
 
             // Check offset mapping
-            if((_map_offset > _file_size) || (_map_offset % get_page_size() != 0))
+            if ((_map_offset > _file_size) || (_map_offset % get_page_size() != 0))
             {
                 status = false;
             }
             else
             {
                 // Truncate to file size
-                if(_map_offset + _map_size > _file_size)
+                if (_map_offset + _map_size > _file_size)
                 {
                     _map_size = _file_size - _map_offset;
                 }
@@ -137,7 +135,7 @@ bool MMappedFile::map(const std::string &filename, size_t size, size_t offset)
         }
     }
 
-    if(!status)
+    if (!status)
     {
         fclose(_fp);
     }
@@ -148,14 +146,14 @@ bool MMappedFile::map(const std::string &filename, size_t size, size_t offset)
 void MMappedFile::release()
 {
     // Unmap file
-    if(_data != nullptr)
+    if (_data != nullptr)
     {
         ::munmap(_data, _file_size);
         _data = nullptr;
     }
 
     // Close file
-    if(_fp != nullptr)
+    if (_fp != nullptr)
     {
         fclose(_fp);
         _fp = nullptr;

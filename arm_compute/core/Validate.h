@@ -24,13 +24,13 @@
 #ifndef ARM_COMPUTE_VALIDATE_H
 #define ARM_COMPUTE_VALIDATE_H
 
-#include "arm_compute/core/utils/DataLayoutUtils.h"
-#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/utils/FormatUtils.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/QuantizationInfo.h"
+#include "arm_compute/core/utils/DataLayoutUtils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
+#include "arm_compute/core/utils/FormatUtils.h"
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>
@@ -50,9 +50,9 @@ namespace detail
 template <typename T>
 inline bool have_different_dimensions(const Dimensions<T> &dim1, const Dimensions<T> &dim2, unsigned int upper_dim)
 {
-    for(unsigned int i = upper_dim; i < arm_compute::Dimensions<T>::num_max_dimensions; ++i)
+    for (unsigned int i = upper_dim; i < arm_compute::Dimensions<T>::num_max_dimensions; ++i)
     {
-        if(dim1[i] != dim2[i])
+        if (dim1[i] != dim2[i])
         {
             return true;
         }
@@ -80,7 +80,7 @@ public:
      * @param[in] line     Source code line. Used for error reporting.
      */
     compare_dimension(const Dimensions<T> &dim, const char *function, const char *file, int line)
-        : _dim{ dim }, _function{ function }, _file{ file }, _line{ line }
+        : _dim{dim}, _function{function}, _file{file}, _line{line}
     {
     }
 
@@ -111,7 +111,7 @@ inline arm_compute::Status for_each_error(F &&)
 }
 
 template <typename F, typename T, typename... Ts>
-inline arm_compute::Status for_each_error(F &&func, T &&arg, Ts &&... args)
+inline arm_compute::Status for_each_error(F &&func, T &&arg, Ts &&...args)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(func(arg));
     ARM_COMPUTE_RETURN_ON_ERROR(for_each_error(func, args...));
@@ -148,13 +148,11 @@ struct get_tensor_info_t<ITensorInfo *>
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_nullptr(const char *function, const char *file, const int line, Ts &&... pointers)
+inline arm_compute::Status error_on_nullptr(const char *function, const char *file, const int line, Ts &&...pointers)
 {
-    const std::array<const void *, sizeof...(Ts)> pointers_array{ { std::forward<Ts>(pointers)... } };
-    bool has_nullptr = std::any_of(pointers_array.begin(), pointers_array.end(), [&](const void *ptr)
-    {
-        return (ptr == nullptr);
-    });
+    const std::array<const void *, sizeof...(Ts)> pointers_array{{std::forward<Ts>(pointers)...}};
+    bool                                          has_nullptr =
+        std::any_of(pointers_array.begin(), pointers_array.end(), [&](const void *ptr) { return (ptr == nullptr); });
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(has_nullptr, function, file, line, "Nullptr object!");
     return arm_compute::Status{};
 }
@@ -178,8 +176,8 @@ inline arm_compute::Status error_on_nullptr(const char *function, const char *fi
  *
  * @return Status
  */
-arm_compute::Status error_on_mismatching_windows(const char *function, const char *file, const int line,
-                                                 const Window &full, const Window &win);
+arm_compute::Status error_on_mismatching_windows(
+    const char *function, const char *file, const int line, const Window &full, const Window &win);
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(f, w) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_windows(__func__, __FILE__, __LINE__, f, w))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_WINDOWS(f, w) \
@@ -200,8 +198,8 @@ arm_compute::Status error_on_mismatching_windows(const char *function, const cha
  *
  * @return Status
  */
-arm_compute::Status error_on_invalid_subwindow(const char *function, const char *file, const int line,
-                                               const Window &full, const Window &sub);
+arm_compute::Status error_on_invalid_subwindow(
+    const char *function, const char *file, const int line, const Window &full, const Window &sub);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(f, s) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBWINDOW(f, s) \
@@ -220,12 +218,14 @@ arm_compute::Status error_on_invalid_subwindow(const char *function, const char 
  *
  * @return Status
  */
-arm_compute::Status error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
-                                                                 const Window &full, const Window &window, const int dim);
+arm_compute::Status error_on_window_not_collapsable_at_dimension(
+    const char *function, const char *file, const int line, const Window &full, const Window &window, const int dim);
 #define ARM_COMPUTE_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
+    ARM_COMPUTE_ERROR_THROW_ON(                                           \
+        ::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
 #define ARM_COMPUTE_RETURN_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                                 \
+        ::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
 
 /** Return an error if the passed coordinates have too many dimensions.
  *
@@ -239,8 +239,8 @@ arm_compute::Status error_on_window_not_collapsable_at_dimension(const char *fun
  *
  * @return Status
  */
-arm_compute::Status error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
-                                                        const Coordinates &pos, unsigned int max_dim);
+arm_compute::Status error_on_coordinates_dimensions_gte(
+    const char *function, const char *file, const int line, const Coordinates &pos, unsigned int max_dim);
 #define ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(p, md) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_coordinates_dimensions_gte(__func__, __FILE__, __LINE__, p, md))
 #define ARM_COMPUTE_RETURN_ERROR_ON_COORDINATES_DIMENSIONS_GTE(p, md) \
@@ -258,8 +258,8 @@ arm_compute::Status error_on_coordinates_dimensions_gte(const char *function, co
  *
  * @return Status
  */
-arm_compute::Status error_on_window_dimensions_gte(const char *function, const char *file, const int line,
-                                                   const Window &win, unsigned int max_dim);
+arm_compute::Status error_on_window_dimensions_gte(
+    const char *function, const char *file, const int line, const Window &win, unsigned int max_dim);
 #define ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(w, md) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_window_dimensions_gte(__func__, __FILE__, __LINE__, w, md))
 #define ARM_COMPUTE_RETURN_ERROR_ON_WINDOW_DIMENSIONS_GTE(w, md) \
@@ -277,16 +277,23 @@ arm_compute::Status error_on_window_dimensions_gte(const char *function, const c
  * @return Status
  */
 template <typename T, typename... Ts>
-arm_compute::Status error_on_mismatching_dimensions(const char *function, const char *file, int line,
-                                                    const Dimensions<T> &dim1, const Dimensions<T> &dim2, Ts &&... dims)
+arm_compute::Status error_on_mismatching_dimensions(const char          *function,
+                                                    const char          *file,
+                                                    int                  line,
+                                                    const Dimensions<T> &dim1,
+                                                    const Dimensions<T> &dim2,
+                                                    Ts &&...dims)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(detail::for_each_error(detail::compare_dimension<T>(dim1, function, file, line), dim2, std::forward<Ts>(dims)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(detail::for_each_error(detail::compare_dimension<T>(dim1, function, file, line), dim2,
+                                                       std::forward<Ts>(dims)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                          \
+        ::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                \
+        ::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Return true if the given format has horizontal subsampling.
  *
@@ -296,7 +303,10 @@ arm_compute::Status error_on_mismatching_dimensions(const char *function, const 
  */
 inline bool has_format_horizontal_subsampling(Format format)
 {
-    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 ||
+            format == Format::NV21 || format == Format::IYUV || format == Format::UV88)
+               ? true
+               : false;
 }
 
 /** Return true if the given format has vertical subsampling.
@@ -307,7 +317,9 @@ inline bool has_format_horizontal_subsampling(Format format)
  */
 inline bool has_format_vertical_subsampling(Format format)
 {
-    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88)
+               ? true
+               : false;
 }
 
 /** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
@@ -325,16 +337,16 @@ inline bool has_format_vertical_subsampling(Format format)
  */
 inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
 {
-    TensorShape output{ shape };
+    TensorShape output{shape};
 
     // Force width to be even for formats which require subsampling of the U and V channels
-    if(has_format_horizontal_subsampling(format))
+    if (has_format_horizontal_subsampling(format))
     {
         output.set(0, (output.x() + 1) & ~1U);
     }
 
     // Force height to be even for formats which require subsampling of the U and V channels
-    if(has_format_vertical_subsampling(format))
+    if (has_format_vertical_subsampling(format))
     {
         output.set(1, (output.y() + 1) & ~1U);
     }
@@ -354,18 +366,20 @@ inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
  * @return Status
  */
 template <typename... Ts>
-arm_compute::Status error_on_tensors_not_even(const char *function, const char *file, int line,
-                                              const Format &format, const ITensor *tensor1, Ts... tensors)
+arm_compute::Status error_on_tensors_not_even(
+    const char *function, const char *file, int line, const Format &format, const ITensor *tensor1, Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
-    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_info_array{ { tensor1, std::forward<Ts>(tensors)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(), [&](const ITensor * tensor)
-    {
-        const TensorShape correct_shape = adjust_odd_shape(tensor->info()->tensor_shape(), format);
-        return detail::have_different_dimensions(tensor->info()->tensor_shape(), correct_shape, 2);
-    }),
-    function, file, line, "Tensor shape has odd dimensions");
+    const std::array<const ITensor *, 1 + sizeof...(Ts)> tensors_info_array{{tensor1, std::forward<Ts>(tensors)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
+        std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(),
+                    [&](const ITensor *tensor)
+                    {
+                        const TensorShape correct_shape = adjust_odd_shape(tensor->info()->tensor_shape(), format);
+                        return detail::have_different_dimensions(tensor->info()->tensor_shape(), correct_shape, 2);
+                    }),
+        function, file, line, "Tensor shape has odd dimensions");
     return arm_compute::Status{};
 }
 
@@ -382,21 +396,22 @@ arm_compute::Status error_on_tensors_not_even(const char *function, const char *
  *
  * @return The subsampled tensor shape.
  */
-inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
+inline TensorShape
+calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
 {
-    TensorShape output{ shape };
+    TensorShape output{shape};
 
     // Subsample shape only for U or V channel
-    if(Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
+    if (Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
     {
         // Subsample width for the tensor shape when channel is U or V
-        if(has_format_horizontal_subsampling(format))
+        if (has_format_horizontal_subsampling(format))
         {
             output.set(0, output.x() / 2U);
         }
 
         // Subsample height for the tensor shape when channel is U or V
-        if(has_format_vertical_subsampling(format))
+        if (has_format_vertical_subsampling(format))
         {
             output.set(1, output.y() / 2U);
         }
@@ -418,25 +433,32 @@ inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format f
  * @return Status
  */
 template <typename... Ts>
-arm_compute::Status error_on_tensors_not_subsampled(const char *function, const char *file, int line,
-                                                    const Format &format, const TensorShape &shape, const ITensor *tensor1, Ts... tensors)
+arm_compute::Status error_on_tensors_not_subsampled(const char        *function,
+                                                    const char        *file,
+                                                    int                line,
+                                                    const Format      &format,
+                                                    const TensorShape &shape,
+                                                    const ITensor     *tensor1,
+                                                    Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
-    const TensorShape sub2_shape = calculate_subsampled_shape(shape, format);
-    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_info_array{ { tensor1, std::forward<Ts>(tensors)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(), [&](const ITensor * tensor)
-    {
-        return detail::have_different_dimensions(tensor->info()->tensor_shape(), sub2_shape, 2);
-    }),
-    function, file, line, "Tensor shape has mismatch dimensions for sub-sampling");
+    const TensorShape                                    sub2_shape = calculate_subsampled_shape(shape, format);
+    const std::array<const ITensor *, 1 + sizeof...(Ts)> tensors_info_array{{tensor1, std::forward<Ts>(tensors)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
+        std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(),
+                    [&](const ITensor *tensor)
+                    { return detail::have_different_dimensions(tensor->info()->tensor_shape(), sub2_shape, 2); }),
+        function, file, line, "Tensor shape has mismatch dimensions for sub-sampling");
     return arm_compute::Status{};
 }
 
 #define ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                          \
+        ::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                \
+        ::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Return an error if the passed two tensor infos have different shapes from the given dimension
  *
@@ -450,10 +472,15 @@ arm_compute::Status error_on_tensors_not_subsampled(const char *function, const 
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_shapes(const char *function, const char *file, const int line,
-                                                       const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
+inline arm_compute::Status error_on_mismatching_shapes(const char        *function,
+                                                       const char        *file,
+                                                       const int          line,
+                                                       const ITensorInfo *tensor_info_1,
+                                                       const ITensorInfo *tensor_info_2,
+                                                       Ts... tensor_infos)
 {
-    return error_on_mismatching_shapes(function, file, line, 0U, tensor_info_1, tensor_info_2, std::forward<Ts>(tensor_infos)...);
+    return error_on_mismatching_shapes(function, file, line, 0U, tensor_info_1, tensor_info_2,
+                                       std::forward<Ts>(tensor_infos)...);
 }
 /** Return an error if the passed two tensors have different shapes from the given dimension
  *
@@ -467,8 +494,12 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_shapes(const char *function, const char *file, const int line,
-                                                       const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+inline arm_compute::Status error_on_mismatching_shapes(const char    *function,
+                                                       const char    *file,
+                                                       const int      line,
+                                                       const ITensor *tensor_1,
+                                                       const ITensor *tensor_2,
+                                                       Ts... tensors)
 {
     return error_on_mismatching_shapes(function, file, line, 0U, tensor_1, tensor_2, std::forward<Ts>(tensors)...);
 }
@@ -485,19 +516,28 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_shapes(const char *function, const char *file, const int line,
-                                                       unsigned int upper_dim, const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
+inline arm_compute::Status error_on_mismatching_shapes(const char        *function,
+                                                       const char        *file,
+                                                       const int          line,
+                                                       unsigned int       upper_dim,
+                                                       const ITensorInfo *tensor_info_1,
+                                                       const ITensorInfo *tensor_info_2,
+                                                       Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info_2 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
-    const std::array < const ITensorInfo *, 2 + sizeof...(Ts) > tensors_info_array{ { tensor_info_1, tensor_info_2, tensor_infos... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(std::next(tensors_info_array.cbegin()), tensors_info_array.cend(), [&](const ITensorInfo * tensor_info)
-    {
-        return detail::have_different_dimensions((*tensors_info_array.cbegin())->tensor_shape(), tensor_info->tensor_shape(), upper_dim);
-    }),
-    function, file, line, "Tensors have different shapes");
+    const std::array<const ITensorInfo *, 2 + sizeof...(Ts)> tensors_info_array{
+        {tensor_info_1, tensor_info_2, tensor_infos...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(std::next(tensors_info_array.cbegin()), tensors_info_array.cend(),
+                                                    [&](const ITensorInfo *tensor_info)
+                                                    {
+                                                        return detail::have_different_dimensions(
+                                                            (*tensors_info_array.cbegin())->tensor_shape(),
+                                                            tensor_info->tensor_shape(), upper_dim);
+                                                    }),
+                                        function, file, line, "Tensors have different shapes");
     return arm_compute::Status{};
 }
 /** Return an error if the passed two tensors have different shapes from the given dimension
@@ -513,14 +553,20 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_shapes(const char *function, const char *file, const int line,
-                                                       unsigned int upper_dim, const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+inline arm_compute::Status error_on_mismatching_shapes(const char    *function,
+                                                       const char    *file,
+                                                       const int      line,
+                                                       unsigned int   upper_dim,
+                                                       const ITensor *tensor_1,
+                                                       const ITensor *tensor_2,
+                                                       Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_1 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_2 == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_shapes(function, file, line, upper_dim, tensor_1->info(), tensor_2->info(),
-                                                                           detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        ::arm_compute::error_on_mismatching_shapes(function, file, line, upper_dim, tensor_1->info(), tensor_2->info(),
+                                                   detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(...) \
@@ -539,19 +585,18 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_data_layouts(const char *function, const char *file, const int line,
-                                                             const ITensorInfo *tensor_info, Ts... tensor_infos)
+inline arm_compute::Status error_on_mismatching_data_layouts(
+    const char *function, const char *file, const int line, const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
-    DataLayout &&tensor_data_layout = tensor_info->data_layout();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
-    {
-        return tensor_info_obj->data_layout() != tensor_data_layout;
-    }),
-    function, file, line, "Tensors have different data layouts");
+    DataLayout                                         &&tensor_data_layout = tensor_info->data_layout();
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{{tensor_infos...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(),
+                                                    [&](const ITensorInfo *tensor_info_obj)
+                                                    { return tensor_info_obj->data_layout() != tensor_data_layout; }),
+                                        function, file, line, "Tensors have different data layouts");
     return arm_compute::Status{};
 }
 /** Return an error if the passed tensors have different data layouts
@@ -565,19 +610,21 @@ inline arm_compute::Status error_on_mismatching_data_layouts(const char *functio
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_data_layouts(const char *function, const char *file, const int line,
-                                                             const ITensor *tensor, Ts... tensors)
+inline arm_compute::Status error_on_mismatching_data_layouts(
+    const char *function, const char *file, const int line, const ITensor *tensor, Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_layouts(function, file, line, tensor->info(),
-                                                                                 detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_layouts(
+        function, file, line, tensor->info(), detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                           \
+        ::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                 \
+        ::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Return an error if the passed two tensor infos have different data types
  *
@@ -590,19 +637,18 @@ inline arm_compute::Status error_on_mismatching_data_layouts(const char *functio
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_data_types(const char *function, const char *file, const int line,
-                                                           const ITensorInfo *tensor_info, Ts... tensor_infos)
+inline arm_compute::Status error_on_mismatching_data_types(
+    const char *function, const char *file, const int line, const ITensorInfo *tensor_info, Ts... tensor_infos)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensor_infos...));
 
-    DataType &&tensor_data_type = tensor_info->data_type();
-    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { tensor_infos... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
-    {
-        return tensor_info_obj->data_type() != tensor_data_type;
-    }),
-    function, file, line, "Tensors have different data types");
+    DataType                                           &&tensor_data_type = tensor_info->data_type();
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{{tensor_infos...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(),
+                                                    [&](const ITensorInfo *tensor_info_obj)
+                                                    { return tensor_info_obj->data_type() != tensor_data_type; }),
+                                        function, file, line, "Tensors have different data types");
     return arm_compute::Status{};
 }
 /** Return an error if the passed two tensors have different data types
@@ -616,19 +662,21 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_data_types(const char *function, const char *file, const int line,
-                                                           const ITensor *tensor, Ts... tensors)
+inline arm_compute::Status error_on_mismatching_data_types(
+    const char *function, const char *file, const int line, const ITensor *tensor, Ts... tensors)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, tensors...));
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(function, file, line, tensor->info(),
-                                                                               detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(
+        function, file, line, tensor->info(), detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                          \
+        ::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                \
+        ::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Return an error if the passed tensor infos have different asymmetric quantized data types or different quantization info
  *
@@ -644,28 +692,32 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_quantization_info(const char *function, const char *file, const int line,
-                                                                  const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
+inline arm_compute::Status error_on_mismatching_quantization_info(const char        *function,
+                                                                  const char        *file,
+                                                                  const int          line,
+                                                                  const ITensorInfo *tensor_info_1,
+                                                                  const ITensorInfo *tensor_info_2,
+                                                                  Ts... tensor_infos)
 {
     DataType             &&first_data_type         = tensor_info_1->data_type();
     const QuantizationInfo first_quantization_info = tensor_info_1->quantization_info();
 
-    if(!is_data_type_quantized(first_data_type))
+    if (!is_data_type_quantized(first_data_type))
     {
         return arm_compute::Status{};
     }
 
-    const std::array < const ITensorInfo *, 1 + sizeof...(Ts) > tensor_infos_array{ { tensor_info_2, std::forward<Ts>(tensor_infos)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->data_type() != first_data_type;
-    }),
-    function, file, line, "Tensors have different asymmetric quantized data types");
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->quantization_info() != first_quantization_info;
-    }),
-    function, file, line, "Tensors have different quantization information");
+    const std::array<const ITensorInfo *, 1 + sizeof...(Ts)> tensor_infos_array{
+        {tensor_info_2, std::forward<Ts>(tensor_infos)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(),
+                                                    [&](const ITensorInfo *tensor_info)
+                                                    { return tensor_info->data_type() != first_data_type; }),
+                                        function, file, line, "Tensors have different asymmetric quantized data types");
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
+        std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(),
+                    [&](const ITensorInfo *tensor_info)
+                    { return tensor_info->quantization_info() != first_quantization_info; }),
+        function, file, line, "Tensors have different quantization information");
 
     return arm_compute::Status{};
 }
@@ -683,17 +735,24 @@ inline arm_compute::Status error_on_mismatching_quantization_info(const char *fu
  * @return Status
  */
 template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_quantization_info(const char *function, const char *file, const int line,
-                                                                  const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+inline arm_compute::Status error_on_mismatching_quantization_info(const char    *function,
+                                                                  const char    *file,
+                                                                  const int      line,
+                                                                  const ITensor *tensor_1,
+                                                                  const ITensor *tensor_2,
+                                                                  Ts... tensors)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_quantization_info(function, file, line, tensor_1->info(), tensor_2->info(),
-                                                                                      detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        ::arm_compute::error_on_mismatching_quantization_info(function, file, line, tensor_1->info(), tensor_2->info(),
+                                                              detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_quantization_info(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                                 \
+        ::arm_compute::error_on_mismatching_quantization_info(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_quantization_info(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                       \
+        ::arm_compute::error_on_mismatching_quantization_info(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Throw an error if the format of the passed tensor/multi-image does not match any of the formats provided.
  *
@@ -705,8 +764,8 @@ inline arm_compute::Status error_on_mismatching_quantization_info(const char *fu
  * @param[in] formats  (Optional) Further allowed formats.
  */
 template <typename T, typename F, typename... Fs>
-void error_on_format_not_in(const char *function, const char *file, const int line,
-                            const T *object, F &&format, Fs &&... formats)
+void error_on_format_not_in(
+    const char *function, const char *file, const int line, const T *object, F &&format, Fs &&...formats)
 {
     ARM_COMPUTE_ERROR_ON_LOC(object == nullptr, function, file, line);
 
@@ -715,17 +774,17 @@ void error_on_format_not_in(const char *function, const char *file, const int li
 
     ARM_COMPUTE_ERROR_ON_LOC(object_format == Format::UNKNOWN, function, file, line);
 
-    const std::array<F, sizeof...(Fs)> formats_array{ { std::forward<Fs>(formats)... } };
+    const std::array<F, sizeof...(Fs)> formats_array{{std::forward<Fs>(formats)...}};
     ARM_COMPUTE_UNUSED(formats_array);
 
-    ARM_COMPUTE_ERROR_ON_LOC_MSG(object_format != format && std::none_of(formats_array.begin(), formats_array.end(), [&](const F & f)
-    {
-        return f == object_format;
-    }),
-    function, file, line, "Format %s not supported by this kernel", string_from_format(object_format).c_str());
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(
+        object_format != format &&
+            std::none_of(formats_array.begin(), formats_array.end(), [&](const F &f) { return f == object_format; }),
+        function, file, line, "Format %s not supported by this kernel", string_from_format(object_format).c_str());
     ARM_COMPUTE_UNUSED(function, format, file, line);
 }
-#define ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(t, ...) ::arm_compute::error_on_format_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__)
+#define ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(t, ...) \
+    ::arm_compute::error_on_format_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__)
 
 /** Return an error if the data type of the passed tensor info does not match any of the data types provided.
  *
@@ -739,20 +798,19 @@ void error_on_format_not_in(const char *function, const char *file, const int li
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_type_not_in(const char *function, const char *file, const int line,
-                                                     const ITensorInfo *tensor_info, T &&dt, Ts &&... dts)
+inline arm_compute::Status error_on_data_type_not_in(
+    const char *function, const char *file, const int line, const ITensorInfo *tensor_info, T &&dt, Ts &&...dts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
 
     const DataType &tensor_dt = tensor_info->data_type(); //NOLINT
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dt == DataType::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> dts_array{ { std::forward<Ts>(dts)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_dt != dt && std::none_of(dts_array.begin(), dts_array.end(), [&](const T & d)
-    {
-        return d == tensor_dt;
-    }),
-    function, file, line, "ITensor data type %s not supported by this kernel", string_from_data_type(tensor_dt).c_str());
+    const std::array<T, sizeof...(Ts)> dts_array{{std::forward<Ts>(dts)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(
+        tensor_dt != dt && std::none_of(dts_array.begin(), dts_array.end(), [&](const T &d) { return d == tensor_dt; }),
+        function, file, line, "ITensor data type %s not supported by this kernel",
+        string_from_data_type(tensor_dt).c_str());
     return arm_compute::Status{};
 }
 /** Return an error if the data type of the passed tensor does not match any of the data types provided.
@@ -767,11 +825,12 @@ inline arm_compute::Status error_on_data_type_not_in(const char *function, const
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_type_not_in(const char *function, const char *file, const int line,
-                                                     const ITensor *tensor, T &&dt, Ts &&... dts)
+inline arm_compute::Status error_on_data_type_not_in(
+    const char *function, const char *file, const int line, const ITensor *tensor, T &&dt, Ts &&...dts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(function, file, line, tensor->info(), std::forward<T>(dt), std::forward<Ts>(dts)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(
+        function, file, line, tensor->info(), std::forward<T>(dt), std::forward<Ts>(dts)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(t, ...) \
@@ -791,20 +850,19 @@ inline arm_compute::Status error_on_data_type_not_in(const char *function, const
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_layout_not_in(const char *function, const char *file, const int line,
-                                                       const ITensorInfo *tensor_info, T &&dl, Ts &&... dls)
+inline arm_compute::Status error_on_data_layout_not_in(
+    const char *function, const char *file, const int line, const ITensorInfo *tensor_info, T &&dl, Ts &&...dls)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
 
     const DataLayout &tensor_dl = tensor_info->data_layout(); //NOLINT
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dl == DataLayout::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> dls_array{ { std::forward<Ts>(dls)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_dl != dl && std::none_of(dls_array.begin(), dls_array.end(), [&](const T & l)
-    {
-        return l == tensor_dl;
-    }),
-    function, file, line, "ITensor data layout %s not supported by this kernel", string_from_data_layout(tensor_dl).c_str());
+    const std::array<T, sizeof...(Ts)> dls_array{{std::forward<Ts>(dls)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(
+        tensor_dl != dl && std::none_of(dls_array.begin(), dls_array.end(), [&](const T &l) { return l == tensor_dl; }),
+        function, file, line, "ITensor data layout %s not supported by this kernel",
+        string_from_data_layout(tensor_dl).c_str());
     return arm_compute::Status{};
 }
 /** Return an error if the data layout of the passed tensor does not match any of the data layout provided.
@@ -819,17 +877,19 @@ inline arm_compute::Status error_on_data_layout_not_in(const char *function, con
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_layout_not_in(const char *function, const char *file, const int line,
-                                                       const ITensor *tensor, T &&dl, Ts &&... dls)
+inline arm_compute::Status error_on_data_layout_not_in(
+    const char *function, const char *file, const int line, const ITensor *tensor, T &&dl, Ts &&...dls)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_layout_not_in(function, file, line, tensor->info(), std::forward<T>(dl), std::forward<Ts>(dls)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_layout_not_in(
+        function, file, line, tensor->info(), std::forward<T>(dl), std::forward<Ts>(dls)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_DATA_LAYOUT_NOT_IN(t, ...) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_data_layout_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(t, ...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_layout_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                               \
+        ::arm_compute::error_on_data_layout_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
 
 /** Return an error if the data type or the number of channels of the passed tensor info does not match any of the data types and number of channels provided.
  *
@@ -844,12 +904,20 @@ inline arm_compute::Status error_on_data_layout_not_in(const char *function, con
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_type_channel_not_in(const char *function, const char *file, const int line,
-                                                             const ITensorInfo *tensor_info, size_t num_channels, T &&dt, Ts &&... dts)
+inline arm_compute::Status error_on_data_type_channel_not_in(const char        *function,
+                                                             const char        *file,
+                                                             const int          line,
+                                                             const ITensorInfo *tensor_info,
+                                                             size_t             num_channels,
+                                                             T                &&dt,
+                                                             Ts &&...dts)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(function, file, line, tensor_info, std::forward<T>(dt), std::forward<Ts>(dts)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(
+        function, file, line, tensor_info, std::forward<T>(dt), std::forward<Ts>(dts)...));
     const size_t tensor_nc = tensor_info->num_channels();
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_nc != num_channels, function, file, line, "Number of channels %zu. Required number of channels %zu", tensor_nc, num_channels);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_nc != num_channels, function, file, line,
+                                            "Number of channels %zu. Required number of channels %zu", tensor_nc,
+                                            num_channels);
     return arm_compute::Status{};
 }
 /** Return an error if the data type or the number of channels of the passed tensor does not match any of the data types and number of channels provided.
@@ -865,17 +933,25 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_data_type_channel_not_in(const char *function, const char *file, const int line,
-                                                             const ITensor *tensor, size_t num_channels, T &&dt, Ts &&... dts)
+inline arm_compute::Status error_on_data_type_channel_not_in(const char    *function,
+                                                             const char    *file,
+                                                             const int      line,
+                                                             const ITensor *tensor,
+                                                             size_t         num_channels,
+                                                             T            &&dt,
+                                                             Ts &&...dts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(error_on_data_type_channel_not_in(function, file, line, tensor->info(), num_channels, std::forward<T>(dt), std::forward<Ts>(dts)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(error_on_data_type_channel_not_in(function, file, line, tensor->info(), num_channels,
+                                                                  std::forward<T>(dt), std::forward<Ts>(dts)...));
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(                                  \
+        ::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
+    ARM_COMPUTE_RETURN_ON_ERROR(                                        \
+        ::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 
 /** Return an error if the data type of the passed tensor info is FP16 and FP16 extension is not supported by the device.
  *
@@ -887,12 +963,12 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
  *
  * @return Status
  */
-inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
-                                                     const ITensorInfo *tensor_info, bool is_fp16_supported)
+inline arm_compute::Status error_on_unsupported_fp16(
+    const char *function, const char *file, const int line, const ITensorInfo *tensor_info, bool is_fp16_supported)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::F16 && !is_fp16_supported),
-                                        function, file, line, "FP16 not supported by the device");
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::F16 && !is_fp16_supported), function,
+                                        file, line, "FP16 not supported by the device");
     return arm_compute::Status{};
 }
 
@@ -906,11 +982,12 @@ inline arm_compute::Status error_on_unsupported_fp16(const char *function, const
  *
  * @return Status
  */
-inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
-                                                     const ITensor *tensor, bool is_fp16_supported)
+inline arm_compute::Status error_on_unsupported_fp16(
+    const char *function, const char *file, const int line, const ITensor *tensor, bool is_fp16_supported)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(function, file, line, tensor->info(), is_fp16_supported));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        ::arm_compute::error_on_unsupported_fp16(function, file, line, tensor->info(), is_fp16_supported));
     return arm_compute::Status{};
 }
 
@@ -923,8 +1000,8 @@ inline arm_compute::Status error_on_unsupported_fp16(const char *function, const
  *
  * @return Status
  */
-arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
-                                           const ITensor *tensor);
+arm_compute::Status
+error_on_tensor_not_2d(const char *function, const char *file, const int line, const ITensor *tensor);
 
 /** Return an error if the tensor info is not 2D.
  *
@@ -935,8 +1012,8 @@ arm_compute::Status error_on_tensor_not_2d(const char *function, const char *fil
  *
  * @return Status
  */
-arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
-                                           const ITensorInfo *tensor);
+arm_compute::Status
+error_on_tensor_not_2d(const char *function, const char *file, const int line, const ITensorInfo *tensor);
 
 #define ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(t) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
@@ -955,17 +1032,15 @@ arm_compute::Status error_on_tensor_not_2d(const char *function, const char *fil
  * @return Status
  */
 template <typename T, typename... Ts>
-inline arm_compute::Status error_on_channel_not_in(const char *function, const char *file, const int line,
-                                                   T cn, T &&channel, Ts &&... channels)
+inline arm_compute::Status
+error_on_channel_not_in(const char *function, const char *file, const int line, T cn, T &&channel, Ts &&...channels)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(cn == Channel::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> channels_array{ { std::forward<Ts>(channels)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(channel != cn && std::none_of(channels_array.begin(), channels_array.end(), [&](const T & f)
-    {
-        return f == cn;
-    }),
-    function, file, line);
+    const std::array<T, sizeof...(Ts)> channels_array{{std::forward<Ts>(channels)...}};
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(channel != cn && std::none_of(channels_array.begin(), channels_array.end(),
+                                                                  [&](const T &f) { return f == cn; }),
+                                    function, file, line);
     return arm_compute::Status{};
 }
 #define ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN(c, ...) \
@@ -983,8 +1058,8 @@ inline arm_compute::Status error_on_channel_not_in(const char *function, const c
  *
  * @return Status
  */
-arm_compute::Status error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
-                                                         Format fmt, Channel cn);
+arm_compute::Status
+error_on_channel_not_in_known_format(const char *function, const char *file, const int line, Format fmt, Channel cn);
 #define ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(f, c) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
 #define ARM_COMPUTE_RETURN_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(f, c) \
@@ -999,8 +1074,8 @@ arm_compute::Status error_on_channel_not_in_known_format(const char *function, c
  *
  * @return Status
  */
-arm_compute::Status error_on_unconfigured_kernel(const char *function, const char *file, const int line,
-                                                 const IKernel *kernel);
+arm_compute::Status
+error_on_unconfigured_kernel(const char *function, const char *file, const int line, const IKernel *kernel);
 #define ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(k) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_unconfigured_kernel(__func__, __FILE__, __LINE__, k))
 #define ARM_COMPUTE_RETURN_ERROR_ON_UNCONFIGURED_KERNEL(k) \
@@ -1017,8 +1092,12 @@ arm_compute::Status error_on_unconfigured_kernel(const char *function, const cha
  *
  * @return Status
  */
-arm_compute::Status error_on_invalid_subtensor(const char *function, const char *file, const int line,
-                                               const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape);
+arm_compute::Status error_on_invalid_subtensor(const char        *function,
+                                               const char        *file,
+                                               const int          line,
+                                               const TensorShape &parent_shape,
+                                               const Coordinates &coords,
+                                               const TensorShape &shape);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(p, c, s) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subtensor(__func__, __FILE__, __LINE__, p, c, s))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR(p, c, s) \
@@ -1034,11 +1113,16 @@ arm_compute::Status error_on_invalid_subtensor(const char *function, const char 
  *
  * @return Status
  */
-arm_compute::Status error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
-                                                            const ValidRegion &parent_valid_region, const ValidRegion &valid_region);
+arm_compute::Status error_on_invalid_subtensor_valid_region(const char        *function,
+                                                            const char        *file,
+                                                            const int          line,
+                                                            const ValidRegion &parent_valid_region,
+                                                            const ValidRegion &valid_region);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
+    ARM_COMPUTE_ERROR_THROW_ON(                                     \
+        ::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
-}
+    ARM_COMPUTE_RETURN_ON_ERROR(                                           \
+        ::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_VALIDATE_H*/

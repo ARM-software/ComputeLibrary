@@ -28,8 +28,9 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEFill.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 
@@ -37,17 +38,19 @@ namespace arm_compute
 {
 NESpaceToBatchLayer::~NESpaceToBatchLayer() = default;
 
-NESpaceToBatchLayer::NESpaceToBatchLayer()
-    : _space_to_batch_kernel(), _fill_f(), _has_padding(false)
+NESpaceToBatchLayer::NESpaceToBatchLayer() : _space_to_batch_kernel(), _fill_f(), _has_padding(false)
 {
 }
 
-void NESpaceToBatchLayer::configure(const ITensor *input, const ITensor *block_shape, const ITensor *paddings, ITensor *output)
+void NESpaceToBatchLayer::configure(const ITensor *input,
+                                    const ITensor *block_shape,
+                                    const ITensor *paddings,
+                                    ITensor       *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
     ARM_COMPUTE_LOG_PARAMS(input, block_shape, paddings, output);
 
-    if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
+    if (input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
         _fill_f      = std::make_unique<NEFill>();
@@ -57,11 +60,16 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const ITensor *block_s
     _space_to_batch_kernel->configure(input, block_shape, paddings, output);
 }
 
-void NESpaceToBatchLayer::configure(const ITensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ITensor *output)
+void NESpaceToBatchLayer::configure(const ITensor *input,
+                                    const int      block_shape_x,
+                                    const int      block_shape_y,
+                                    const Size2D  &padding_left,
+                                    const Size2D  &padding_right,
+                                    ITensor       *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
+    if (input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
         _fill_f      = std::make_unique<NEFill>();
@@ -71,17 +79,25 @@ void NESpaceToBatchLayer::configure(const ITensor *input, const int block_shape_
     _space_to_batch_kernel->configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
-Status NESpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)
+Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
+                                     const ITensorInfo *block_shape,
+                                     const ITensorInfo *paddings,
+                                     const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
 
     return Status{};
 }
 
-Status NESpaceToBatchLayer::validate(const ITensorInfo *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,
+Status NESpaceToBatchLayer::validate(const ITensorInfo *input,
+                                     const int          block_shape_x,
+                                     const int          block_shape_y,
+                                     const Size2D      &padding_left,
+                                     const Size2D      &padding_right,
                                      const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(NESpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        NESpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
 
     return Status{};
 }
@@ -89,7 +105,7 @@ Status NESpaceToBatchLayer::validate(const ITensorInfo *input, const int block_s
 void NESpaceToBatchLayer::run()
 {
     // Zero out output only if we have paddings
-    if(_has_padding)
+    if (_has_padding)
     {
         _fill_f->run();
     }

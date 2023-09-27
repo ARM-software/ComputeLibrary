@@ -60,7 +60,10 @@ public:
      * @param[out] output          Output tensor. Data type supported: Same as @p input
      * @param[in]  axis            Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const ICLTensor        *axis);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReverseKernel
      *

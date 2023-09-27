@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_OFFSETMEMORYPOOL_H
 
 #include "arm_compute/runtime/IMemoryPool.h"
-
 #include "arm_compute/runtime/IMemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
 
@@ -65,8 +64,8 @@ public:
     const BlobInfo &info() const;
 
     // Inherited methods overridden:
-    void acquire(MemoryMappings &handles) override;
-    void release(MemoryMappings &handles) override;
+    void                         acquire(MemoryMappings &handles) override;
+    void                         release(MemoryMappings &handles) override;
     MappingType                  mapping_type() const override;
     std::unique_ptr<IMemoryPool> duplicate() override;
 

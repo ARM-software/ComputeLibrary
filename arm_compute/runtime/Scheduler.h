@@ -74,8 +74,8 @@ public:
     static bool is_available(Type t);
 
 private:
-    static Type                        _scheduler_type;
-    static std::shared_ptr<IScheduler> _custom_scheduler;
+    static Type                                        _scheduler_type;
+    static std::shared_ptr<IScheduler>                 _custom_scheduler;
     static std::map<Type, std::unique_ptr<IScheduler>> _schedulers;
 
     Scheduler();

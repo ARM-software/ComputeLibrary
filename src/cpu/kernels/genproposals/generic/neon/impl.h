@@ -26,13 +26,17 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 namespace arm_compute
 {
 namespace cpu
 {
 template <typename T>
-void compute_all_anchors(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
+void compute_all_anchors(const ITensor     *anchors,
+                         ITensor           *all_anchors,
+                         ComputeAnchorsInfo anchors_info,
+                         const Window      &window)
 {
     Iterator all_anchors_it(all_anchors, window);
     Iterator anchors_it(all_anchors, window);
@@ -41,26 +45,31 @@ void compute_all_anchors(const ITensor *anchors, ITensor *all_anchors, ComputeAn
     const T      stride      = 1.f / anchors_info.spatial_scale();
     const size_t feat_width  = anchors_info.feat_width();
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const size_t anchor_offset = id.y() % num_anchors;
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const size_t anchor_offset = id.y() % num_anchors;
 
-        const auto out_anchor_ptr = reinterpret_cast<T *>(all_anchors_it.ptr());
-        const auto anchor_ptr     = reinterpret_cast<T *>(anchors->ptr_to_element(Coordinates(0, anchor_offset)));
+            const auto out_anchor_ptr = reinterpret_cast<T *>(all_anchors_it.ptr());
+            const auto anchor_ptr     = reinterpret_cast<T *>(anchors->ptr_to_element(Coordinates(0, anchor_offset)));
 
-        const size_t shift_idy = id.y() / num_anchors;
-        const T      shiftx    = (shift_idy % feat_width) * stride;
-        const T      shifty    = (shift_idy / feat_width) * stride;
+            const size_t shift_idy = id.y() / num_anchors;
+            const T      shiftx    = (shift_idy % feat_width) * stride;
+            const T      shifty    = (shift_idy / feat_width) * stride;
 
-        *out_anchor_ptr       = *anchor_ptr + shiftx;
-        *(out_anchor_ptr + 1) = *(1 + anchor_ptr) + shifty;
-        *(out_anchor_ptr + 2) = *(2 + anchor_ptr) + shiftx;
-        *(out_anchor_ptr + 3) = *(3 + anchor_ptr) + shifty;
-    },
-    all_anchors_it);
+            *out_anchor_ptr       = *anchor_ptr + shiftx;
+            *(out_anchor_ptr + 1) = *(1 + anchor_ptr) + shifty;
+            *(out_anchor_ptr + 2) = *(2 + anchor_ptr) + shiftx;
+            *(out_anchor_ptr + 3) = *(3 + anchor_ptr) + shifty;
+        },
+        all_anchors_it);
 }
 
-void compute_all_anchors_qasymm16(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window);
+void compute_all_anchors_qasymm16(const ITensor     *anchors,
+                                  ITensor           *all_anchors,
+                                  ComputeAnchorsInfo anchors_info,
+                                  const Window      &window);
 } // namespace cpu
 } // namespace arm_compute
 #endif //define SRC_CORE_SVE_KERNELS_NEGENERATEPROPOSALSLAYERKERNEL_IMPL_H

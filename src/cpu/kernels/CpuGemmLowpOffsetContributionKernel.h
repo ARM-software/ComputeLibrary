@@ -63,24 +63,33 @@ public:
      * @param[in]      a_offset       Offset to be added to each element of the matrix A.
      * @param[in]      b_offset       Offset to be added to each element of the matrix B.
      */
-    void configure(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset);
+    void configure(ITensorInfo *mm_result,
+                   ITensorInfo *vector_sum_col,
+                   ITensorInfo *vector_sum_row,
+                   int32_t      k,
+                   int32_t      a_offset,
+                   int32_t      b_offset);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuGemmLowpOffsetContributionKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
+    static Status validate(const ITensorInfo *mm_result,
+                           const ITensorInfo *vector_sum_col,
+                           const ITensorInfo *vector_sum_row,
+                           int32_t            a_offset,
+                           int32_t            b_offset);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
-    int32_t _a_offset{ 0 };
-    int32_t _b_offset{ 0 };
-    int32_t _k_offset{ 0 };
-    bool    _slide_vector_sum_col{ true };
+    int32_t _a_offset{0};
+    int32_t _b_offset{0};
+    int32_t _k_offset{0};
+    bool    _slide_vector_sum_col{true};
 };
 } // namespace kernels
 } // namespace cpu

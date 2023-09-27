@@ -23,17 +23,16 @@
  */
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwDriver.h"
 
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
-#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
-
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Window.h"
-#include "src/common/utils/Log.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
 
+#include "src/common/utils/Log.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/utils/type_converter/Common.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwVariableTable.h"
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/IGpuCkwComponentDriver.h"
+#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 using namespace ckw;
 namespace arm_compute
@@ -43,11 +42,11 @@ namespace experimental
 namespace dynamic_fusion
 {
 GpuCkwDriver::GpuCkwDriver(const GpuKernelComponentGroup &components)
-    : _components{ components }, _kernel{ GpuTargetLanguage::OpenCL }, _code{}
+    : _components{components}, _kernel{GpuTargetLanguage::OpenCL}, _code{}
 {
     // Generate kernel name
     std::string name = "";
-    for(auto &comp : _components)
+    for (auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
@@ -60,7 +59,7 @@ GpuCkwDriver::GpuCkwDriver(const GpuKernelComponentGroup &components)
     GpuCkwScopedKernelWriter writer(&root_writer);
     GpuCkwVariableTable      vtable{};
 
-    for(auto &comp : _components)
+    for (auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
@@ -82,7 +81,7 @@ std::string GpuCkwDriver::get_code()
 std::string GpuCkwDriver::get_config_id()
 {
     std::string id = "";
-    for(auto &comp : _components)
+    for (auto &comp : _components)
     {
         auto ckw_driver = comp->ckw_component_driver();
         ARM_COMPUTE_ERROR_ON(ckw_driver == nullptr);
@@ -101,9 +100,9 @@ Window GpuCkwDriver::get_window() const
 GpuKernelArgumentList GpuCkwDriver::get_kernel_arguments()
 {
     GpuKernelArgumentList args{};
-    for(const auto &arg : _kernel.arguments())
+    for (const auto &arg : _kernel.arguments())
     {
-        switch(arg.type())
+        switch (arg.type())
         {
             case KernelArgument::Type::TensorStorage:
             {

@@ -45,16 +45,23 @@ public:
      * Similar to @ref ClTransposedConvolution::configure()
      *
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, const ITensorInfo *weights,
-                   const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &deconv_info);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *input,
+                   const ITensorInfo      *weights,
+                   const ITensorInfo      *biases,
+                   ITensorInfo            *output,
+                   const PadStrideInfo    &deconv_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClTransposedConvolution::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases,
-                           const ITensorInfo *output, const PadStrideInfo &deconv_info);
+    static Status validate(const ITensorInfo   *input,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *biases,
+                           const ITensorInfo   *output,
+                           const PadStrideInfo &deconv_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

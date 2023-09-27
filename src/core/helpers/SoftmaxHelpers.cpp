@@ -29,7 +29,7 @@ namespace softmax_helpers
 {
 PermutationVector get_permutation_vector_from_softmax_axis(size_t axis)
 {
-    switch(axis)
+    switch (axis)
     {
         case 1:
             return PermutationVector(1U, 0U, 2U, 3U);

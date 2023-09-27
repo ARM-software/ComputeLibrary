@@ -24,14 +24,14 @@
 #ifndef ARM_COMPUTE_NEPADLAYER_H
 #define ARM_COMPUTE_NEPADLAYER_H
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 #include "arm_compute/runtime/SubTensor.h"
-
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -82,7 +82,11 @@ public:
      * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
-    void configure(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
+    void configure(ITensor           *input,
+                   ITensor           *output,
+                   const PaddingList &padding,
+                   const PixelValue   constant_value = PixelValue(),
+                   const PaddingMode  mode           = PaddingMode::CONSTANT);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEPadLayer.
      *
      * @param[in] input          Source tensor info. Data types supported: All.
@@ -95,7 +99,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, const PixelValue constant_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const PaddingList &padding,
+                           const PixelValue   constant_value = PixelValue(),
+                           const PaddingMode  mode           = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
     void run() override;
@@ -109,7 +117,10 @@ private:
      *                            specifies the front and the end padding in the i-th dimension.
      * @param[in]  constant_value Constant value to be used for the padding
      */
-    void configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value);
+    void configure_constant_mode(ITensor           *input,
+                                 ITensor           *output,
+                                 const PaddingList &padding,
+                                 const PixelValue   constant_value);
     /** Configure functions for when reflect or symmetric padding is used.
      *
      * @param[in]  input  Source tensor. Data types supported: All.

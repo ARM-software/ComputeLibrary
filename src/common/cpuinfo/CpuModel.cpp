@@ -29,12 +29,12 @@ namespace cpuinfo
 {
 std::string cpu_model_to_string(CpuModel model)
 {
-    switch(model)
+    switch (model)
     {
 #define X(MODEL)          \
-case CpuModel::MODEL: \
-    return #MODEL;
-            ARM_COMPUTE_CPU_MODEL_LIST
+    case CpuModel::MODEL: \
+        return #MODEL;
+        ARM_COMPUTE_CPU_MODEL_LIST
 #undef X
         default:
         {
@@ -45,7 +45,7 @@ case CpuModel::MODEL: \
 
 bool model_supports_fp16(CpuModel model)
 {
-    switch(model)
+    switch (model)
     {
         case CpuModel::GENERIC_FP16:
         case CpuModel::GENERIC_FP16_DOT:
@@ -63,7 +63,7 @@ bool model_supports_fp16(CpuModel model)
 
 bool model_supports_dot(CpuModel model)
 {
-    switch(model)
+    switch (model)
     {
         case CpuModel::GENERIC_FP16_DOT:
         case CpuModel::A55r1:
@@ -87,16 +87,16 @@ CpuModel midr_to_model(uint32_t midr)
     const int cpunum      = (midr >> 4) & 0xFFF;
 
     // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
-    if(implementer == 0x41) // Arm CPUs
+    if (implementer == 0x41) // Arm CPUs
     {
-        switch(cpunum)
+        switch (cpunum)
         {
             case 0xd03: // A53
             case 0xd04: // A35
                 model = CpuModel::A53;
                 break;
             case 0xd05: // A55
-                if(variant != 0)
+                if (variant != 0)
                 {
                     model = CpuModel::A55r1;
                 }
@@ -109,7 +109,7 @@ CpuModel midr_to_model(uint32_t midr)
                 model = CpuModel::A73;
                 break;
             case 0xd0a: // A75
-                if(variant != 0)
+                if (variant != 0)
                 {
                     model = CpuModel::GENERIC_FP16_DOT;
                 }
@@ -144,9 +144,9 @@ CpuModel midr_to_model(uint32_t midr)
                 break;
         }
     }
-    else if(implementer == 0x46)
+    else if (implementer == 0x46)
     {
-        switch(cpunum)
+        switch (cpunum)
         {
             case 0x001: // A64FX
                 model = CpuModel::A64FX;
@@ -156,9 +156,9 @@ CpuModel midr_to_model(uint32_t midr)
                 break;
         }
     }
-    else if(implementer == 0x48)
+    else if (implementer == 0x48)
     {
-        switch(cpunum)
+        switch (cpunum)
         {
             case 0xd40: // A76
                 model = CpuModel::GENERIC_FP16_DOT;
@@ -168,9 +168,9 @@ CpuModel midr_to_model(uint32_t midr)
                 break;
         }
     }
-    else if(implementer == 0x51)
+    else if (implementer == 0x51)
     {
-        switch(cpunum)
+        switch (cpunum)
         {
             case 0x800: // A73
                 model = CpuModel::A73;

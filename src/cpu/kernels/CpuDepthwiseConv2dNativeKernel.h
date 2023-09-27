@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/function_info/ConvolutionInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 #include "support/AclRequires.h"
@@ -44,8 +45,9 @@ namespace kernels
 class CpuDepthwiseConv2dNativeKernel : public ICpuKernel<CpuDepthwiseConv2dNativeKernel>
 {
 private:
-    using DepthwiseConv2dNativeKernelPtr =
-        std::add_pointer<void(const ITensor *, const ITensor *, const ITensor *, ITensor *, const Window &, bool, const ConvolutionInfo &)>::type;
+    using DepthwiseConv2dNativeKernelPtr = std::add_pointer<void(
+        const ITensor *, const ITensor *, const ITensor *, ITensor *, const Window &, bool, const ConvolutionInfo &)>::
+        type;
 
 public:
     CpuDepthwiseConv2dNativeKernel() = default;
@@ -64,17 +66,25 @@ public:
      * @param[in]  info    Depthwise convolution meta-data.
      *
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
+    void configure(const ITensorInfo     *src,
+                   const ITensorInfo     *weights,
+                   const ITensorInfo     *biases,
+                   ITensorInfo           *dst,
+                   const ConvolutionInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDepthwiseConv2dNativeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
+    static Status validate(const ITensorInfo     *src,
+                           const ITensorInfo     *weights,
+                           const ITensorInfo     *biases,
+                           const ITensorInfo     *dst,
+                           const ConvolutionInfo &info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
     struct DepthwiseConv2dNativeKernel
     {
@@ -89,9 +99,9 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    DepthwiseConv2dNativeKernelPtr _func{ nullptr };
+    DepthwiseConv2dNativeKernelPtr _func{nullptr};
     ConvolutionInfo                _conv_info{};
-    bool                           _has_biases{ false };
+    bool                           _has_biases{false};
 };
 } // namespace kernels
 } // namespace cpu

@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CLPOOLING3DLAYER_H
 #define ARM_COMPUTE_CLPOOLING3DLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -82,7 +81,10 @@ public:
      * @param[out]    output          Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info       Contains 3d pooling operation information described in @ref Pooling3dLayerInfo.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Pooling3dLayerInfo &pool_info);
+    void configure(const CLCompileContext   &compile_context,
+                   const ICLTensor          *input,
+                   ICLTensor                *output,
+                   const Pooling3dLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPooling3dLayer
      *
      * @param[in] input     Source tensor info. Data types supported: F16/F32/QASYMM8/QASYMM8_SIGNED.

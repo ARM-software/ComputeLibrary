@@ -26,15 +26,14 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 using namespace arm_compute;
 
 ICLSimpleFunction::ICLSimpleFunction(CLRuntimeContext *ctx) // NOLINT
-    : _kernel(),
-      _border_handler(std::make_unique<CLFillBorderKernel>()),
-      _ctx(ctx)
+    : _kernel(), _border_handler(std::make_unique<CLFillBorderKernel>()), _ctx(ctx)
 {
 }
 

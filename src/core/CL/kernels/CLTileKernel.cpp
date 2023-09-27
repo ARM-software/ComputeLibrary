@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "src/core/CL/kernels/CLTileKernel.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -39,15 +41,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(multiples.size() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(multiples.empty());
-    ARM_COMPUTE_RETURN_ERROR_ON(std::any_of(multiples.begin(), multiples.end(), [](uint32_t e)
-    {
-        return e == 0;
-    }));
+    ARM_COMPUTE_RETURN_ERROR_ON(std::any_of(multiples.begin(), multiples.end(), [](uint32_t e) { return e == 0; }));
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(misc::shape_calculator::compute_tiled_shape(input->tensor_shape(), multiples), output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            misc::shape_calculator::compute_tiled_shape(input->tensor_shape(), multiples), output->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
@@ -55,8 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 } // namespace
 
-CLTileKernel::CLTileKernel()
-    : _input(nullptr), _output(nullptr)
+CLTileKernel::CLTileKernel() : _input(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
@@ -66,7 +65,10 @@ void CLTileKernel::configure(const ICLTensor *input, ICLTensor *output, const Mu
     configure(CLKernelLibrary::get().get_compile_context(), input, output, multiples);
 }
 
-void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
+void CLTileKernel::configure(const CLCompileContext &compile_context,
+                             const ICLTensor        *input,
+                             ICLTensor              *output,
+                             const Multiples        &multiples)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -104,15 +106,14 @@ void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLT
     // Configure window without padding
     Window win = calculate_max_window(*output->info());
 
-    if(multi_access_x)
+    if (multi_access_x)
     {
         // If multi-access is enabled, no thread should cross the tile boundaries. This means we need
         // as many threads as those to cover a single tile times multiples[0]. Note that if threads
         // do not cross the boundaries of the tiles, they won't cross the boundaries of the last tile, and
         // we don't need to pad the output
         const unsigned int size_win_x = ceil_to_multiple(input->info()->dimension(0), vec_size_x) * multiples[0];
-        win.set(Window::DimX,
-                Window::Dimension(win.x().start(), size_win_x, vec_size_x));
+        win.set(Window::DimX, Window::Dimension(win.x().start(), size_win_x, vec_size_x));
     }
 
     ICLKernel::configure_internal(win);
@@ -121,7 +122,7 @@ void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLT
     _config_id = "tile";
     _config_id += "_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
-    for(unsigned int i = 0; i < multiples.size(); ++i)
+    for (unsigned int i = 0; i < multiples.size(); ++i)
     {
         _config_id += "_";
         _config_id += support::cpp11::to_string(input->info()->dimension(i));
@@ -150,7 +151,6 @@ void CLTileKernel::run(const Window &window, cl::CommandQueue &queue)
         add_4D_tensor_argument(idx, _input, slice);
         add_4D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_4D(slice));
+    } while (collapsed.slide_window_slice_4D(slice));
 }
 } // namespace arm_compute

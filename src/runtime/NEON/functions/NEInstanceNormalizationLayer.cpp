@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 
@@ -34,7 +35,13 @@ namespace arm_compute
 NEInstanceNormalizationLayer::~NEInstanceNormalizationLayer() = default;
 
 NEInstanceNormalizationLayer::NEInstanceNormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _normalization_kernel(), _is_nchw(false), _permute_input(), _permute_output(), _permuted_input(), _permuted_output()
+    : _memory_group(std::move(memory_manager)),
+      _normalization_kernel(),
+      _is_nchw(false),
+      _permute_input(),
+      _permute_output(),
+      _permuted_input(),
+      _permuted_output()
 {
 }
 
@@ -43,14 +50,14 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     ARM_COMPUTE_LOG_PARAMS(input, output, gamma, beta, epsilon);
 
     const DataLayout data_layout       = input->info()->data_layout();
-    const auto       kernel_descriptor = InstanceNormalizationLayerKernelInfo{ gamma, beta, epsilon, true };
+    const auto       kernel_descriptor = InstanceNormalizationLayerKernelInfo{gamma, beta, epsilon, true};
 
     // Configure Kernels
     _is_nchw = data_layout == DataLayout::NCHW;
 
     _normalization_kernel = std::make_unique<NEInstanceNormalizationLayerKernel>();
 
-    if(!_is_nchw)
+    if (!_is_nchw)
     {
         _memory_group.manage(&_permuted_input);
         _memory_group.manage(&_permuted_output);
@@ -72,11 +79,12 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
     }
 }
 
-Status NEInstanceNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
+Status NEInstanceNormalizationLayer::validate(
+    const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
-    return NEInstanceNormalizationLayerKernel::validate(&input->clone()->set_data_layout(DataLayout::NCHW),
-                                                        &output->clone()->set_data_layout(DataLayout::NCHW),
-                                                        InstanceNormalizationLayerKernelInfo{ gamma, beta, epsilon, true });
+    return NEInstanceNormalizationLayerKernel::validate(
+        &input->clone()->set_data_layout(DataLayout::NCHW), &output->clone()->set_data_layout(DataLayout::NCHW),
+        InstanceNormalizationLayerKernelInfo{gamma, beta, epsilon, true});
 }
 
 void NEInstanceNormalizationLayer::run()
@@ -84,7 +92,7 @@ void NEInstanceNormalizationLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Permute input
-    if(!_is_nchw)
+    if (!_is_nchw)
     {
         _permute_input.run();
     }
@@ -92,7 +100,7 @@ void NEInstanceNormalizationLayer::run()
     NEScheduler::get().schedule(_normalization_kernel.get(), Window::DimZ);
 
     // Permute output
-    if(!_is_nchw)
+    if (!_is_nchw)
     {
         _permute_output.run();
     }

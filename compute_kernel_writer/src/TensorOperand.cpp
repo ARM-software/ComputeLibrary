@@ -23,13 +23,13 @@
  */
 
 #include "ckw/TensorOperand.h"
+
 #include "src/ITensor.h"
 
 namespace ckw
 {
 
-TensorOperand::TensorOperand(ITensor &tensor)
-    : _tensor(tensor)
+TensorOperand::TensorOperand(ITensor &tensor) : _tensor(tensor)
 {
 }
 

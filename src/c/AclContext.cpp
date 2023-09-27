@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/AclEntrypoints.h"
-
 #include "arm_compute/core/Error.h"
 
 #include "src/common/IContext.h"
@@ -42,25 +41,25 @@ namespace
 template <typename ContextType>
 arm_compute::IContext *create_backend_ctx(const AclContextOptions *options)
 {
-    return new(std::nothrow) ContextType(options);
+    return new (std::nothrow) ContextType(options);
 }
 
 bool is_target_valid(AclTarget target)
 {
-    return arm_compute::utils::is_in(target, { AclCpu, AclGpuOcl });
+    return arm_compute::utils::is_in(target, {AclCpu, AclGpuOcl});
 }
 
 bool are_context_options_valid(const AclContextOptions *options)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(options);
-    return arm_compute::utils::is_in(options->mode, { AclPreferFastRerun, AclPreferFastStart });
+    return arm_compute::utils::is_in(options->mode, {AclPreferFastRerun, AclPreferFastStart});
 }
 
 arm_compute::IContext *create_context(AclTarget target, const AclContextOptions *options)
 {
     ARM_COMPUTE_UNUSED(options);
 
-    switch(target)
+    switch (target)
     {
 #ifdef ARM_COMPUTE_CPU_ENABLED
         case AclCpu:
@@ -77,24 +76,22 @@ arm_compute::IContext *create_context(AclTarget target, const AclContextOptions 
 }
 } // namespace
 
-extern "C" AclStatus AclCreateContext(AclContext              *external_ctx,
-                                      AclTarget                target,
-                                      const AclContextOptions *options)
+extern "C" AclStatus AclCreateContext(AclContext *external_ctx, AclTarget target, const AclContextOptions *options)
 {
-    if(!is_target_valid(target))
+    if (!is_target_valid(target))
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Target is invalid!");
         return AclUnsupportedTarget;
     }
 
-    if(options != nullptr && !are_context_options_valid(options))
+    if (options != nullptr && !are_context_options_valid(options))
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Context options are invalid!");
         return AclInvalidArgument;
     }
 
     auto ctx = create_context(target, options);
-    if(ctx == nullptr)
+    if (ctx == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Couldn't allocate internal resources for context creation!");
         return AclOutOfMemory;
@@ -113,7 +110,7 @@ extern "C" AclStatus AclDestroyContext(AclContext external_ctx)
     StatusCode status = detail::validate_internal_context(ctx);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
-    if(ctx->refcount() != 0)
+    if (ctx->refcount() != 0)
     {
         ARM_COMPUTE_LOG_ERROR_WITH_FUNCNAME_ACL("Context has references on it that haven't been released!");
         // TODO: Fix the refcount with callback when reaches 0

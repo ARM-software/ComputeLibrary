@@ -24,10 +24,10 @@
 #ifndef ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_IGPUKERNELCOMPONENT
 
-#include "Types.h"
-
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSourceCode.h"
+
+#include "Types.h"
 
 namespace arm_compute
 {
@@ -76,13 +76,8 @@ public:
      * @param[in] properties Kernel component properties
      * @param[in] tensors    Tensor arguments to the components
      */
-    IGpuKernelComponent(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors)
-        : _id{ id },
-          _properties{ properties },
-          _tensors{ tensors }
+    IGpuKernelComponent(ComponentId id, const Properties &properties, const ArgumentPack<ITensorInfo> &tensors)
+        : _id{id}, _properties{properties}, _tensors{tensors}
     {
     }
     /** Destructor */
@@ -117,7 +112,7 @@ public:
     virtual GpuComponentType type() const = 0;
 
 private:
-    ComponentId               _id{ -1 };
+    ComponentId               _id{-1};
     Properties                _properties{};
     ArgumentPack<ITensorInfo> _tensors{};
 };

@@ -37,16 +37,14 @@ class Array : public IArray<T>
 {
 public:
     /** Default constructor: empty array */
-    Array()
-        : IArray<T>(0), _values(nullptr)
+    Array() : IArray<T>(0), _values(nullptr)
     {
     }
     /** Constructor: initializes an array which can contain up to max_num_points values
      *
      * @param[in] max_num_values Maximum number of values the array will be able to stored
      */
-    Array(size_t max_num_values)
-        : IArray<T>(max_num_values), _values(std::make_unique<T[]>(max_num_values))
+    Array(size_t max_num_values) : IArray<T>(max_num_values), _values(std::make_unique<T[]>(max_num_values))
     {
     }
 
@@ -72,5 +70,5 @@ using Int16Array = Array<int16_t>;
 using Int32Array = Array<int32_t>;
 /** Array of floats. */
 using FloatArray = Array<float>;
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_ARRAY_H */

@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_MEMORYGROUP_H
 #define ARM_COMPUTE_MEMORYGROUP_H
 
-#include "arm_compute/runtime/IMemoryGroup.h"
-
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Macros.h"
+#include "arm_compute/runtime/IMemoryGroup.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 
@@ -59,8 +58,8 @@ public:
     // Inherited methods overridden:
     void manage(IMemoryManageable *obj) override;
     void finalize_memory(IMemoryManageable *obj, IMemory &obj_memory, size_t size, size_t alignment) override;
-    void            acquire() override;
-    void            release() override;
+    void acquire() override;
+    void release() override;
     MemoryMappings &mappings() override;
 
 private:
@@ -70,15 +69,13 @@ private:
 };
 
 inline MemoryGroup::MemoryGroup(std::shared_ptr<IMemoryManager> memory_manager) noexcept
-    : _memory_manager(memory_manager),
-      _pool(nullptr),
-      _mappings()
+    : _memory_manager(memory_manager), _pool(nullptr), _mappings()
 {
 }
 
 inline void MemoryGroup::manage(IMemoryManageable *obj)
 {
-    if(_memory_manager && (obj != nullptr))
+    if (_memory_manager && (obj != nullptr))
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
 
@@ -95,7 +92,7 @@ inline void MemoryGroup::manage(IMemoryManageable *obj)
 
 inline void MemoryGroup::finalize_memory(IMemoryManageable *obj, IMemory &obj_memory, size_t size, size_t alignment)
 {
-    if(_memory_manager)
+    if (_memory_manager)
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
         _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size, alignment);
@@ -104,7 +101,7 @@ inline void MemoryGroup::finalize_memory(IMemoryManageable *obj, IMemory &obj_me
 
 inline void MemoryGroup::acquire()
 {
-    if(!_mappings.empty())
+    if (!_mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->pool_manager());
         _pool = _memory_manager->pool_manager()->lock_pool();
@@ -114,7 +111,7 @@ inline void MemoryGroup::acquire()
 
 inline void MemoryGroup::release()
 {
-    if(_pool != nullptr)
+    if (_pool != nullptr)
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->pool_manager());
         ARM_COMPUTE_ERROR_ON(_mappings.empty());
@@ -128,5 +125,5 @@ inline MemoryMappings &MemoryGroup::mappings()
 {
     return _mappings;
 }
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_MEMORYGROUP_H */

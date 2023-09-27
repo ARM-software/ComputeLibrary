@@ -30,10 +30,11 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEAsymm.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
@@ -50,13 +51,14 @@ void batch_concat(const ITensor *src, ITensor *dst, unsigned int batch_offset, c
     uint8_t *src_ptr = src->buffer() + src->info()->offset_first_element_in_bytes();
 
     // Offset dst
-    uint8_t *dst_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() + batch_offset * dst->info()->strides_in_bytes()[3];
+    uint8_t *dst_ptr = dst->buffer() + dst->info()->offset_first_element_in_bytes() +
+                       batch_offset * dst->info()->strides_in_bytes()[3];
 
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
     const int  window_step_x  = 16 / dst->info()->element_size();
 
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     win.set(3, Window::Dimension(0, src->info()->tensor_shape()[3], 1));
 
@@ -66,66 +68,74 @@ void batch_concat(const ITensor *src, ITensor *dst, unsigned int batch_offset, c
     const DataType                dt        = src->info()->data_type();
     const UniformQuantizationInfo src_qinfo = src->info()->quantization_info().uniform();
     const UniformQuantizationInfo dst_qinfo = dst->info()->quantization_info().uniform();
-    if(dt == DataType::QASYMM8 && src_qinfo != dst_qinfo)
+    if (dt == DataType::QASYMM8 && src_qinfo != dst_qinfo)
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto in_ptr  = reinterpret_cast<const uint8_t *>(src_ptr + src_it.offset());
-            const auto out_ptr = reinterpret_cast<uint8_t *>(dst_ptr + dst_it.offset());
-
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                wrapper::vstore(out_ptr, vquantize(vdequantize(wrapper::vloadq(in_ptr), src_qinfo), dst_qinfo));
-            }
+                const auto in_ptr  = reinterpret_cast<const uint8_t *>(src_ptr + src_it.offset());
+                const auto out_ptr = reinterpret_cast<uint8_t *>(dst_ptr + dst_it.offset());
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(out_ptr + x) = quantize_qasymm8(dequantize_qasymm8(*(in_ptr + x), src_qinfo), dst_qinfo);
-            }
-        },
-        src_it, dst_it);
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    wrapper::vstore(out_ptr, vquantize(vdequantize(wrapper::vloadq(in_ptr), src_qinfo), dst_qinfo));
+                }
+
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(out_ptr + x) = quantize_qasymm8(dequantize_qasymm8(*(in_ptr + x), src_qinfo), dst_qinfo);
+                }
+            },
+            src_it, dst_it);
     }
-    else if(dt == DataType::QASYMM8_SIGNED && src_qinfo != dst_qinfo)
+    else if (dt == DataType::QASYMM8_SIGNED && src_qinfo != dst_qinfo)
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto in_ptr  = reinterpret_cast<const int8_t *>(src_ptr + src_it.offset());
-            const auto out_ptr = reinterpret_cast<int8_t *>(dst_ptr + dst_it.offset());
-            int        x       = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                wrapper::vstore(out_ptr, vquantize_signed(vdequantize(wrapper::vloadq(in_ptr), src_qinfo), dst_qinfo));
-            }
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(out_ptr + x) = quantize_qasymm8_signed(dequantize_qasymm8_signed(*(in_ptr + x), src_qinfo), dst_qinfo);
-            }
-        },
-        src_it, dst_it);
+                const auto in_ptr  = reinterpret_cast<const int8_t *>(src_ptr + src_it.offset());
+                const auto out_ptr = reinterpret_cast<int8_t *>(dst_ptr + dst_it.offset());
+                int        x       = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    wrapper::vstore(out_ptr,
+                                    vquantize_signed(vdequantize(wrapper::vloadq(in_ptr), src_qinfo), dst_qinfo));
+                }
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(out_ptr + x) =
+                        quantize_qasymm8_signed(dequantize_qasymm8_signed(*(in_ptr + x), src_qinfo), dst_qinfo);
+                }
+            },
+            src_it, dst_it);
     }
     else
     {
-        execute_window_loop(win, [&](const Coordinates &)
-        {
-            const auto in_ptr  = reinterpret_cast<const T *>(src_ptr + src_it.offset());
-            const auto out_ptr = reinterpret_cast<T *>(dst_ptr + dst_it.offset());
-
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        execute_window_loop(
+            win,
+            [&](const Coordinates &)
             {
-                wrapper::vstore(out_ptr + x, wrapper::vloadq(in_ptr + x));
-            }
+                const auto in_ptr  = reinterpret_cast<const T *>(src_ptr + src_it.offset());
+                const auto out_ptr = reinterpret_cast<T *>(dst_ptr + dst_it.offset());
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                *(out_ptr + x) = *(in_ptr + x);
-            }
-        },
-        src_it, dst_it);
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    wrapper::vstore(out_ptr + x, wrapper::vloadq(in_ptr + x));
+                }
+
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    *(out_ptr + x) = *(in_ptr + x);
+                }
+            },
+            src_it, dst_it);
     }
 }
 
@@ -154,7 +164,7 @@ void CpuConcatenateBatchKernel::configure(const ITensorInfo *src, unsigned int b
     _func         = nullptr;
     _batch_offset = batch_offset;
 
-    switch(src->data_type())
+    switch (src->data_type())
     {
         case DataType::S8:
         case DataType::U8:
@@ -196,9 +206,7 @@ void CpuConcatenateBatchKernel::run_op(ITensorPack &tensors, const Window &windo
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC),
-             tensors.get_tensor(TensorType::ACL_DST),
-             _batch_offset,
+    (*_func)(tensors.get_const_tensor(TensorType::ACL_SRC), tensors.get_tensor(TensorType::ACL_DST), _batch_offset,
              window);
 }
 

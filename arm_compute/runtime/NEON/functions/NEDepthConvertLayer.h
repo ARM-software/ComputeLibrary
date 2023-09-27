@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEDEPTHCONVERT_H
 #define ARM_COMPUTE_NEDEPTHCONVERT_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -84,7 +83,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift = 0);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift = 0);
 
     // Inherited methods overridden
     void run() override;

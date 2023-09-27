@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H
 #define ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H
 
-#include "arm_compute/runtime/IMemory.h"
-
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
+#include "arm_compute/runtime/IMemory.h"
 
 #include <cstddef>
 #include <memory>
@@ -75,8 +74,8 @@ public:
     // Inherited methods overridden:
     IMemoryRegion *region() final;
     IMemoryRegion *region() const final;
-    void set_region(IMemoryRegion *region) final;
-    void set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
+    void           set_region(IMemoryRegion *region) final;
+    void           set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
 
 private:
     ICLMemoryRegion                 *_region;

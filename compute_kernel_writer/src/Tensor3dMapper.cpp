@@ -26,19 +26,19 @@
 
 #include "ckw/Error.h"
 #include "ckw/types/TensorSamplerTypes.h"
+
 #include "src/ITensor.h"
 #include "src/ITile.h"
 
 namespace ckw
 {
-Tensor3dMapper::Tensor3dMapper(ITensor *tensor, TensorSamplerFormat format)
-        : _tensor(tensor), _format(format)
+Tensor3dMapper::Tensor3dMapper(ITensor *tensor, TensorSamplerFormat format) : _tensor(tensor), _format(format)
 {
 }
 
 TileVariable Tensor3dMapper::dim_x() const
 {
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -51,7 +51,7 @@ TileVariable Tensor3dMapper::dim_x() const
 
 TileVariable Tensor3dMapper::dim_y() const
 {
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
             return _tensor->component(TensorComponentType::Dim1xDim2).scalar(0, 0);
@@ -67,10 +67,10 @@ TileVariable Tensor3dMapper::dim_z() const
 {
     TileVariable dim_one;
 
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
-            dim_one = _tensor->component(TensorComponentType::Dim3).scalar(0, 0);
+            dim_one     = _tensor->component(TensorComponentType::Dim3).scalar(0, 0);
             dim_one.str = "1";
             return dim_one;
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -85,7 +85,7 @@ TileVariable Tensor3dMapper::dim_batch() const
 {
     TileVariable dim_one;
 
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -98,7 +98,7 @@ TileVariable Tensor3dMapper::dim_batch() const
 
 TileVariable Tensor3dMapper::stride_x() const
 {
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -111,7 +111,7 @@ TileVariable Tensor3dMapper::stride_x() const
 
 TileVariable Tensor3dMapper::stride_y() const
 {
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -126,10 +126,10 @@ TileVariable Tensor3dMapper::stride_z() const
 {
     TileVariable stride_zero;
 
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
-            stride_zero = _tensor->component(TensorComponentType::Stride3).scalar(0, 0);
+            stride_zero     = _tensor->component(TensorComponentType::Stride3).scalar(0, 0);
             stride_zero.str = "0";
             return stride_zero;
         case TensorSamplerFormat::Dim0_Dim1_Dim2:
@@ -142,7 +142,7 @@ TileVariable Tensor3dMapper::stride_z() const
 
 TileVariable Tensor3dMapper::stride_batch() const
 {
-    switch(_format)
+    switch (_format)
     {
         case TensorSamplerFormat::Dim0_Dim1xDim2_1:
         case TensorSamplerFormat::Dim0_Dim1_Dim2:

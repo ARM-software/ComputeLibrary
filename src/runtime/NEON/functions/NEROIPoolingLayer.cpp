@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 
@@ -31,17 +33,22 @@ namespace arm_compute
 {
 NEROIPoolingLayer::~NEROIPoolingLayer() = default;
 
-NEROIPoolingLayer::NEROIPoolingLayer()
-    : _roi_kernel()
+NEROIPoolingLayer::NEROIPoolingLayer() : _roi_kernel()
 {
 }
 
-Status NEROIPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status NEROIPoolingLayer::validate(const ITensorInfo         *input,
+                                   const ITensorInfo         *rois,
+                                   const ITensorInfo         *output,
+                                   const ROIPoolingLayerInfo &pool_info)
 {
     return NEROIPoolingLayerKernel::validate(input, rois, output, pool_info);
 }
 
-void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info)
+void NEROIPoolingLayer::configure(const ITensor             *input,
+                                  const ITensor             *rois,
+                                  const ITensor             *output,
+                                  const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(input, rois, output, pool_info);
 

@@ -74,10 +74,7 @@ constexpr SE as_enum(const E val) noexcept
 template <typename E>
 bool is_in(E check, std::initializer_list<E> list)
 {
-    return std::any_of(list.begin(), list.end(), [&check](E e)
-    {
-        return check == e;
-    });
+    return std::any_of(list.begin(), list.end(), [&check](E e) { return check == e; });
 }
 } // namespace utils
 } // namespace arm_compute

@@ -23,16 +23,14 @@
  */
 #include "src/cpu/operators/CpuFlatten.h"
 
-#include "src/cpu/operators/CpuReshape.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/operators/CpuReshape.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-CpuFlatten::CpuFlatten()
-    : _reshape(nullptr)
+CpuFlatten::CpuFlatten() : _reshape(nullptr)
 {
 }
 

@@ -31,7 +31,7 @@ namespace cpu
 {
 namespace
 {
-constexpr ActFpImplParams Fp16Params = { static_cast<float16_t>(1e-7), 8 };
+constexpr ActFpImplParams Fp16Params = {static_cast<float16_t>(1e-7), 8};
 } // namespace
 
 void neon_fp16_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)

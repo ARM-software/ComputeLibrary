@@ -29,8 +29,16 @@ namespace arm_compute
 namespace cpu
 {
 template <typename T>
-void fused_batch_normalization_dwc_nchw(const ITensor *dwc_weights, const ITensor *dwc_bias, ITensor *fused_weights, ITensor *fused_bias,
-                                        const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+void fused_batch_normalization_dwc_nchw(const ITensor *dwc_weights,
+                                        const ITensor *dwc_bias,
+                                        ITensor       *fused_weights,
+                                        ITensor       *fused_bias,
+                                        const ITensor *bn_mean,
+                                        const ITensor *bn_var,
+                                        const ITensor *bn_beta,
+                                        const ITensor *bn_gamma,
+                                        float          epsilon,
+                                        const Window  &window)
 {
     using ScalarType   = T;
     const int size     = 16 / dwc_weights->info()->element_size();
@@ -50,13 +58,20 @@ void fused_batch_normalization_dwc_nchw(const ITensor *dwc_weights, const ITenso
     Iterator dwc_w_in(dwc_weights, win);
     Iterator dwc_w_out(run_in_place_weights ? dwc_weights : fused_weights, win);
 
-    const auto dwc_bias_in  = (dwc_bias != nullptr ? reinterpret_cast<ScalarType *>(dwc_bias->ptr_to_element(Coordinates(0, 0))) : nullptr);
-    auto       dwc_bias_out = (run_in_place_bias ? dwc_bias_in : reinterpret_cast<ScalarType *>(fused_bias->ptr_to_element(Coordinates(0, 0))));
+    const auto dwc_bias_in =
+        (dwc_bias != nullptr ? reinterpret_cast<ScalarType *>(dwc_bias->ptr_to_element(Coordinates(0, 0))) : nullptr);
+    auto dwc_bias_out =
+        (run_in_place_bias ? dwc_bias_in
+                           : reinterpret_cast<ScalarType *>(fused_bias->ptr_to_element(Coordinates(0, 0))));
 
     const auto input_mean  = reinterpret_cast<const ScalarType *>(bn_mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var   = reinterpret_cast<const ScalarType *>(bn_var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma = (bn_gamma != nullptr) ? reinterpret_cast<const ScalarType *>(bn_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
-    const auto input_beta  = (bn_beta != nullptr) ? reinterpret_cast<const ScalarType *>(bn_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_gamma = (bn_gamma != nullptr)
+                                 ? reinterpret_cast<const ScalarType *>(bn_gamma->ptr_to_element(Coordinates(0, 0)))
+                                 : nullptr;
+    const auto input_beta  = (bn_beta != nullptr)
+                                 ? reinterpret_cast<const ScalarType *>(bn_beta->ptr_to_element(Coordinates(0, 0)))
+                                 : nullptr;
 
     auto       mean_vec    = wrapper::vdup_n(ScalarType(0), ExactTagType{});
     auto       var_vec     = wrapper::vdup_n(ScalarType(0), ExactTagType{});
@@ -70,74 +85,92 @@ void fused_batch_normalization_dwc_nchw(const ITensor *dwc_weights, const ITenso
     auto gamma              = ScalarType(1.0);
     auto beta               = ScalarType(0.0);
     auto dwc_bias_in_scalar = ScalarType(0.0);
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        var = input_var[id[2]];
-        if(input_gamma != nullptr)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            gamma = input_gamma[id[2]];
-        }
-
-        if(id[1] == 0)
-        {
-            mean = input_mean[id[2]];
-
-            // Construct vectors
-            mean_vec = wrapper::vdup_n(mean, ExactTagType{});
-            if(input_beta != nullptr)
+            var = input_var[id[2]];
+            if (input_gamma != nullptr)
             {
-                beta     = input_beta[id[2]];
-                beta_vec = wrapper::vdup_n(beta, ExactTagType{});
+                gamma = input_gamma[id[2]];
             }
 
-            if(dwc_bias_in != nullptr)
+            if (id[1] == 0)
             {
-                dwc_bias_in_scalar = dwc_bias_in[id[2]];
+                mean = input_mean[id[2]];
+
+                // Construct vectors
+                mean_vec = wrapper::vdup_n(mean, ExactTagType{});
+                if (input_beta != nullptr)
+                {
+                    beta     = input_beta[id[2]];
+                    beta_vec = wrapper::vdup_n(beta, ExactTagType{});
+                }
+
+                if (dwc_bias_in != nullptr)
+                {
+                    dwc_bias_in_scalar = dwc_bias_in[id[2]];
+                }
+
+                auto dwc_bias_tmp_scalar = (dwc_bias_in_scalar - mean) / std::sqrt(var + ScalarType(epsilon));
+                dwc_bias_out[id[2]]      = (dwc_bias_tmp_scalar * gamma) + beta;
             }
 
-            auto dwc_bias_tmp_scalar = (dwc_bias_in_scalar - mean) / std::sqrt(var + ScalarType(epsilon));
-            dwc_bias_out[id[2]]      = (dwc_bias_tmp_scalar * gamma) + beta;
-        }
+            int  x             = window_start_x;
+            auto dwc_w_in_ptr  = reinterpret_cast<const ScalarType *>(dwc_w_in.ptr());
+            auto dwc_w_out_ptr = reinterpret_cast<ScalarType *>(dwc_w_out.ptr());
+            var_vec            = wrapper::vdup_n(var, ExactTagType{});
+            gamma_vec          = wrapper::vdup_n(gamma, ExactTagType{});
+            rvar_vec           = wrapper::vinvsqrt(wrapper::vadd(var_vec, epsilon_vec));
 
-        int  x             = window_start_x;
-        auto dwc_w_in_ptr  = reinterpret_cast<const ScalarType *>(dwc_w_in.ptr());
-        auto dwc_w_out_ptr = reinterpret_cast<ScalarType *>(dwc_w_out.ptr());
-        var_vec            = wrapper::vdup_n(var, ExactTagType{});
-        gamma_vec          = wrapper::vdup_n(gamma, ExactTagType{});
-        rvar_vec           = wrapper::vinvsqrt(wrapper::vadd(var_vec, epsilon_vec));
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                auto wn = wrapper::vloadq(dwc_w_in_ptr + x);
+                wn      = wrapper::vmul(wn, rvar_vec);
+                wn      = wrapper::vmul(wn, gamma_vec);
 
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
-        {
-            auto wn = wrapper::vloadq(dwc_w_in_ptr + x);
-            wn      = wrapper::vmul(wn, rvar_vec);
-            wn      = wrapper::vmul(wn, gamma_vec);
+                // Store results
+                wrapper::vstore(dwc_w_out_ptr + x, wn);
+            }
 
-            // Store results
-            wrapper::vstore(dwc_w_out_ptr + x, wn);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            *(dwc_w_out_ptr + x) = *(dwc_w_in_ptr + x) / std::sqrt(var + ScalarType(epsilon)) * gamma;
-        }
-    },
-    dwc_w_in, dwc_w_out);
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                *(dwc_w_out_ptr + x) = *(dwc_w_in_ptr + x) / std::sqrt(var + ScalarType(epsilon)) * gamma;
+            }
+        },
+        dwc_w_in, dwc_w_out);
 }
 
-void fused_batch_normalization_dwc_nchw_f32(const ITensor *dwc_weights, const ITensor *dwc_bias, ITensor *fused_weights, ITensor *fused_bias,
-                                            const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+void fused_batch_normalization_dwc_nchw_f32(const ITensor *dwc_weights,
+                                            const ITensor *dwc_bias,
+                                            ITensor       *fused_weights,
+                                            ITensor       *fused_bias,
+                                            const ITensor *bn_mean,
+                                            const ITensor *bn_var,
+                                            const ITensor *bn_beta,
+                                            const ITensor *bn_gamma,
+                                            float          epsilon,
+                                            const Window  &window)
 {
-    return fused_batch_normalization_dwc_nchw<float32_t>(dwc_weights, dwc_bias, fused_weights, fused_bias,
-                                                         bn_mean, bn_var, bn_beta, bn_gamma, epsilon, window);
+    return fused_batch_normalization_dwc_nchw<float32_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean,
+                                                         bn_var, bn_beta, bn_gamma, epsilon, window);
 }
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
-void fused_batch_normalization_dwc_nchw_f16(const ITensor *dwc_weights, const ITensor *dwc_bias, ITensor *fused_weights, ITensor *fused_bias,
-                                            const ITensor *bn_mean, const ITensor *bn_var, const ITensor *bn_beta, const ITensor *bn_gamma, float epsilon, const Window &window)
+void fused_batch_normalization_dwc_nchw_f16(const ITensor *dwc_weights,
+                                            const ITensor *dwc_bias,
+                                            ITensor       *fused_weights,
+                                            ITensor       *fused_bias,
+                                            const ITensor *bn_mean,
+                                            const ITensor *bn_var,
+                                            const ITensor *bn_beta,
+                                            const ITensor *bn_gamma,
+                                            float          epsilon,
+                                            const Window  &window)
 {
-    return fused_batch_normalization_dwc_nchw<float16_t>(dwc_weights, dwc_bias, fused_weights, fused_bias,
-                                                         bn_mean, bn_var, bn_beta, bn_gamma, epsilon, window);
+    return fused_batch_normalization_dwc_nchw<float16_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean,
+                                                         bn_var, bn_beta, bn_gamma, epsilon, window);
 }
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
 

@@ -23,16 +23,18 @@
  */
 #include "src/gpu/cl/operators/ClPRelu.h"
 
-#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
 using KernelType = kernels::ClArithmeticKernel;
-void ClPRelu::configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output)
+void ClPRelu::configure(const CLCompileContext &compile_context,
+                        ITensorInfo            *input,
+                        ITensorInfo            *alpha,
+                        ITensorInfo            *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input, alpha, output);
     auto k = std::make_unique<KernelType>();
@@ -49,7 +51,7 @@ void ClPRelu::run(ITensorPack &tensors)
 {
     // Output tensor can be given as nullptr for in-place computation.
     // In this case, get the input tensor and use it as the output tensor.
-    if(tensors.get_tensor(TensorType::ACL_DST) == nullptr)
+    if (tensors.get_tensor(TensorType::ACL_DST) == nullptr)
     {
         auto src_tensor = const_cast<ITensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
         ARM_COMPUTE_ERROR_ON_MSG(src_tensor == nullptr, "invalid source tensor is given for in-place computation");

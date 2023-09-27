@@ -25,21 +25,6 @@
 #ifndef CKW_PROTOTYPE_SRC_PROTOTYPE_H
 #define CKW_PROTOTYPE_SRC_PROTOTYPE_H
 
-#include <algorithm>
-#include <array>
-#include <cassert> // assert (to be removed)
-#include <chrono>
-#include <cmath>
-#include <cstdint>  // int32_t
-#include <functional>
-#include <iostream> // cout (to be removed)
-#include <map>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "ckw/Error.h"
 #include "ckw/TensorInfo.h"
 #include "ckw/types/ConvertPolicy.h"
@@ -48,6 +33,21 @@
 #include "ckw/types/GpuTargetLanguage.h"
 #include "ckw/types/Operators.h"
 #include "ckw/types/TensorSamplerTypes.h"
+
+#include <algorithm>
+#include <array>
+#include <cassert> // assert (to be removed)
+#include <chrono>
+#include <cmath>
+#include <cstdint> // int32_t
+#include <functional>
+#include <iostream> // cout (to be removed)
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ckw
 {
@@ -83,21 +83,21 @@ enum class GpuExtensions
 
 struct TensorInfo
 {
-    TensorShape      shape{ { 0 } };
-    DataType         data_type{ DataType::Unknown };
-    TensorDataLayout data_layout{ TensorDataLayout::Nhwc };
-    int32_t          id{ -1 };
+    TensorShape      shape{{0}};
+    DataType         data_type{DataType::Unknown};
+    TensorDataLayout data_layout{TensorDataLayout::Nhwc};
+    int32_t          id{-1};
 };
 
 struct ComponentAttribute
 {
-    GpuCompilationSpeed compilation_speed{ GpuCompilationSpeed::Fast };
-    bool                overwrite_tile{ true };
+    GpuCompilationSpeed compilation_speed{GpuCompilationSpeed::Fast};
+    bool                overwrite_tile{true};
 };
 
 inline std::string data_type_to_cl_type(DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::Fp32:
             return "float";
@@ -125,7 +125,7 @@ inline std::string data_type_to_cl_type(DataType dt)
 
 inline int32_t width_to_cl_vector_size(int32_t width)
 {
-    switch(width)
+    switch (width)
     {
         case 1:
             return 1;
@@ -160,7 +160,7 @@ inline std::string get_cl_data_type(DataType dt, int32_t width)
     std::string data_type;
     int32_t     w = width_to_cl_vector_size(width);
     data_type += data_type_to_cl_type(dt);
-    if(w != 1)
+    if (w != 1)
     {
         data_type += std::to_string(w);
     }
@@ -169,7 +169,7 @@ inline std::string get_cl_data_type(DataType dt, int32_t width)
 
 inline std::string to_opencl_store(int32_t vector_length)
 {
-    if(vector_length != 1)
+    if (vector_length != 1)
     {
         return "vstore" + std::to_string(vector_length) + "(";
     }
@@ -185,24 +185,21 @@ struct TileInfo
     {
     }
 
-    TileInfo(DataType dt)
-        : dt(dt), w(1), h(1)
+    TileInfo(DataType dt) : dt(dt), w(1), h(1)
     {
     }
 
-    TileInfo(DataType dt, int32_t width)
-        : dt(dt), w(width), h(1)
+    TileInfo(DataType dt, int32_t width) : dt(dt), w(width), h(1)
     {
     }
 
-    TileInfo(DataType dt, int32_t width, int32_t height)
-        : dt(dt), w(width), h(height)
+    TileInfo(DataType dt, int32_t width, int32_t height) : dt(dt), w(width), h(height)
     {
     }
 
-    DataType dt{ DataType::Unknown }; // Data type of the tile
-    int32_t  w{ 0 };                  // Width (i.e. c0 - portion of the channels)
-    int32_t  h{ 0 };                  // Height (i.e. s0 - portion of the spatial dimensions)
+    DataType dt{DataType::Unknown}; // Data type of the tile
+    int32_t  w{0};                  // Width (i.e. c0 - portion of the channels)
+    int32_t  h{0};                  // Height (i.e. s0 - portion of the spatial dimensions)
 };
 
 inline std::ostream &operator<<(std::ostream &o, const TileInfo &a)
@@ -213,14 +210,14 @@ inline std::ostream &operator<<(std::ostream &o, const TileInfo &a)
 
 struct DataTypeAsString
 {
-    std::string str{ "" };
-    DataType    dt{ DataType::Unknown };
-    int32_t     size{ 1 };
+    std::string str{""};
+    DataType    dt{DataType::Unknown};
+    int32_t     size{1};
 };
 
 struct ValueAsString
 {
-    std::string      str{ "" };
+    std::string      str{""};
     DataTypeAsString type{};
 };
 
@@ -276,8 +273,8 @@ public:
     virtual bool need_declaration() const = 0;
 
 protected:
-    TileInfo    _format{};       // Tile format
-    std::string _basename{ "" }; // Tile name
+    TileInfo    _format{};     // Tile format
+    std::string _basename{""}; // Tile name
 };
 
 // A tile is a collection of variables used to express a 2D data. The variables are vectors in the GPU context.
@@ -329,7 +326,7 @@ public:
         t.type.size = 1;
 
         // Check required because if the width has only one element, we cannot use .s0
-        if(_format.w != 1)
+        if (_format.w != 1)
         {
             // Automatic broadcasting
             t.str += ".s" + std::to_string(x);
@@ -360,10 +357,10 @@ public:
         t.type.dt   = _format.dt;
         t.type.size = width;
 
-        if(_format.w != 1)
+        if (_format.w != 1)
         {
             t.str += ".s";
-            for(int i = 0; i < width; ++i)
+            for (int i = 0; i < width; ++i)
             {
                 t.str += to_scalar_hex(x_start + i);
             }
@@ -374,7 +371,7 @@ public:
     std::vector<ValueAsString> underlying_source_variables() const override
     {
         std::vector<ValueAsString> vars;
-        for(int32_t y = 0; y < _format.h; ++y)
+        for (int32_t y = 0; y < _format.h; ++y)
         {
             ValueAsString t;
             t.str       = build_variable_name(y);
@@ -401,7 +398,7 @@ private:
     {
         std::string var_name = _basename;
 
-        if(_format.h == 1)
+        if (_format.h == 1)
         {
             return var_name;
         }
@@ -416,7 +413,7 @@ private:
 
     std::string to_scalar_hex(int32_t x) const
     {
-        switch(x)
+        switch (x)
         {
             case 0:
             case 1:
@@ -461,9 +458,9 @@ public:
 
         _data = std::vector<std::vector<std::string>>(_format.h, std::vector<std::string>(_format.w));
 
-        for(int32_t y = 0; y < _format.h; ++y)
+        for (int32_t y = 0; y < _format.h; ++y)
         {
-            for(int32_t x = 0; x < _format.w; ++x)
+            for (int32_t x = 0; x < _format.w; ++x)
             {
                 _data[y][x] = in[y][x];
             }
@@ -501,20 +498,20 @@ public:
         t.type.dt   = _format.dt;
         t.type.size = width;
 
-        if(width > 1)
+        if (width > 1)
         {
             t.str += "((" + get_cl_data_type(_format.dt, width) + ")(";
         }
 
         int32_t x = x_start;
-        for(; x < width - 1; ++x)
+        for (; x < width - 1; ++x)
         {
             t.str += scalar(x, y).str;
             t.str += ", ";
         }
         t.str += scalar(x, y).str;
 
-        if(width > 1)
+        if (width > 1)
         {
             t.str += "))";
         }
@@ -526,9 +523,9 @@ public:
     {
         std::vector<ValueAsString> vars;
 
-        for(int32_t y = 0; y < _format.h; ++y)
+        for (int32_t y = 0; y < _format.h; ++y)
         {
-            for(int32_t x = 0; x < _format.w; ++x)
+            for (int32_t x = 0; x < _format.w; ++x)
             {
                 ValueAsString t;
                 t.str       = _data[y][x];
@@ -572,7 +569,7 @@ enum class TensorComponentGroup : int32_t
 
 inline std::string to_string(TensorComponentType x)
 {
-    switch(x)
+    switch (x)
     {
         case TensorComponentType::Unknown:
             return "Unknown";
@@ -672,7 +669,7 @@ enum class GpuTensorStorage : int32_t
 
 inline GpuTensorStorage to_gpu_tensor_storage(TensorStorageType s)
 {
-    switch(s)
+    switch (s)
     {
         case TensorStorageType::Unknown:
             return GpuTensorStorage::Unknown;
@@ -694,7 +691,7 @@ inline GpuTensorStorage to_gpu_tensor_storage(TensorStorageType s)
 
 inline TensorStorageType to_tensor_storage(GpuTensorStorage s)
 {
-    switch(s)
+    switch (s)
     {
         case GpuTensorStorage::Unknown:
             return TensorStorageType::Unknown;
@@ -755,23 +752,23 @@ public:
     // Methods to override
     std::string component(TensorComponentType x) override
     {
-        if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Constant)))
+        if ((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Constant)))
         {
             int32_t idx = static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentIndex::IndexMask);
             return std::to_string(idx - 1);
         }
 
-        if(_return_by_value_when_possible)
+        if (_return_by_value_when_possible)
         {
-            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Dimension)))
+            if ((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::Dimension)))
             {
                 int32_t idx = static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentIndex::IndexMask);
                 return std::to_string(_format.shape[idx]);
             }
 
-            if((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::FoldedDimension)))
+            if ((static_cast<int32_t>(x) & static_cast<int32_t>(TensorComponentGroup::FoldedDimension)))
             {
-                switch(x)
+                switch (x)
                 {
                     case TensorComponentType::Dim1xDim2:
                         return std::to_string(_format.shape[1] * _format.shape[2]);
@@ -784,7 +781,7 @@ public:
             }
         }
 
-        if(std::find(_components_required.begin(), _components_required.end(), x) == _components_required.end())
+        if (std::find(_components_required.begin(), _components_required.end(), x) == _components_required.end())
         {
             _components_required.push_back(x);
         }
@@ -804,7 +801,7 @@ public:
 
     std::string storage(GpuTensorStorage x) override
     {
-        if(std::find(_storage_required.begin(), _storage_required.end(), x) == _storage_required.end())
+        if (std::find(_storage_required.begin(), _storage_required.end(), x) == _storage_required.end())
         {
             _storage_required.push_back(x);
         }
@@ -814,7 +811,7 @@ public:
 
     std::string storage_type_declaration(GpuTensorStorage x) const override
     {
-        switch(x)
+        switch (x)
         {
             case GpuTensorStorage::BufferUint8Ptr:
                 return "__global uchar*";
@@ -848,7 +845,7 @@ private:
     {
         std::string var_name = _basename;
 
-        switch(x)
+        switch (x)
         {
             case GpuTensorStorage::BufferUint8Ptr:
                 return var_name + "_ptr";
@@ -870,7 +867,7 @@ private:
     {
         std::string var_name = _basename;
 
-        switch(x)
+        switch (x)
         {
             case TensorComponentType::OffsetFirstElement:
                 return var_name + "_offset_first_element";
@@ -900,9 +897,9 @@ private:
         return var_name;
     }
 
-    bool                          _return_by_value_when_possible{ false };
-    std::vector<GpuTensorStorage> _storage_required{};
-    std::vector<TensorComponentType>  _components_required{};
+    bool                             _return_by_value_when_possible{false};
+    std::vector<GpuTensorStorage>    _storage_required{};
+    std::vector<TensorComponentType> _components_required{};
 };
 
 /**
@@ -930,16 +927,16 @@ public:
 
     struct RegistryTileTableEntry
     {
-        RegistryLevel                registry_level{ 0 };
-        std::unique_ptr<IVectorTile> tile_object{ nullptr };
+        RegistryLevel                registry_level{0};
+        std::unique_ptr<IVectorTile> tile_object{nullptr};
     };
 
     struct RegistryTileTypeTableEntry
     {
-        RegistryTileType tile_type{ RegistryTileType::Tile };
+        RegistryTileType tile_type{RegistryTileType::Tile};
         RegistryTileName tile_name{};
-        RegistryIdSpace  registry_idspace{ 0 };
-        RegistryLevel    registry_level{ 0 };
+        RegistryIdSpace  registry_idspace{0};
+        RegistryLevel    registry_level{0};
     };
 
     using RegistryTileTable     = std::map<RegistryIdSpace, std::map<RegistryTileName, RegistryTileTableEntry>>;
@@ -1002,7 +999,7 @@ public:
 
         auto it = _frags.begin();
 
-        while(it != _frags.end())
+        while (it != _frags.end())
         {
             x.push_back(it->first);
 
@@ -1026,7 +1023,7 @@ public:
         // First check whether a tile with the same name exists
         IVectorTile *result = (*this)[key_var_name];
         assert(result == nullptr);
-        if(result == nullptr)
+        if (result == nullptr)
         {
             std::unique_ptr<ClTile> tile = std::make_unique<ClTile>(var_name, format);
 
@@ -1058,7 +1055,7 @@ public:
         // First check whether a tile with the same name exists
         IVectorTile *result = (*this)[key_var_name];
         assert(result == nullptr);
-        if(result == nullptr)
+        if (result == nullptr)
         {
             std::unique_ptr<ClTile> tile                     = std::make_unique<ClTile>(var_name, format);
             _frags[key_IdSpace][key_var_name].tile_object    = std::move(tile);
@@ -1090,7 +1087,7 @@ public:
         // First check whether a tile with the same name exists
         IVectorTile *result = (*this)[key_var_name];
         assert(result == nullptr);
-        if(result == nullptr)
+        if (result == nullptr)
         {
             std::unique_ptr<ClConstantTile> tile             = std::make_unique<ClConstantTile>(in, dt);
             _frags[key_IdSpace][key_var_name].tile_object    = std::move(tile);
@@ -1123,7 +1120,7 @@ public:
         // First check whether a tile with the same name exists
         IVectorTile *result = (*this)[key_var_name];
         assert(result == nullptr);
-        if(result == nullptr)
+        if (result == nullptr)
         {
             std::unique_ptr<ClConstantTile> tile             = std::make_unique<ClConstantTile>(in, dt);
             _frags[key_IdSpace][key_var_name].tile_object    = std::move(tile);
@@ -1153,10 +1150,10 @@ public:
 
         IVectorTile *result         = nullptr;
         auto         search_IdSpace = _frags.find(key_IdSpace);
-        if(search_IdSpace != _frags.end())
+        if (search_IdSpace != _frags.end())
         {
             auto search_tile = _frags[key_IdSpace].find(key_var_name);
-            if(search_tile != _frags[key_IdSpace].end())
+            if (search_tile != _frags[key_IdSpace].end())
             {
                 result = search_tile->second.tile_object.get();
                 assert(result != nullptr);
@@ -1224,7 +1221,7 @@ public:
 
         std::map<RegistryTileName, RegistryTileTypeTableEntry>::iterator it = _frag_types[IdSpace].begin();
 
-        while(it != _frag_types[IdSpace].end())
+        while (it != _frag_types[IdSpace].end())
         {
             // The following line should be enabled. However, we cannot at this stage
             // because it used to retrieve the output tile produced by each component.
@@ -1259,9 +1256,9 @@ public:
         // Remove all variables in the local scope
         std::map<RegistryTileName, RegistryTileTableEntry>::iterator it = _frags[_IdSpace].begin();
 
-        while(it != _frags[_IdSpace].end())
+        while (it != _frags[_IdSpace].end())
         {
-            if(it->second.registry_level == _registry_level)
+            if (it->second.registry_level == _registry_level)
             {
                 it = _frags[_IdSpace].erase(it);
             }
@@ -1273,9 +1270,9 @@ public:
 
         std::map<RegistryTileName, RegistryTileTypeTableEntry>::iterator it_type = _frag_types[_IdSpace].begin();
 
-        while(it_type != _frag_types[_IdSpace].end())
+        while (it_type != _frag_types[_IdSpace].end())
         {
-            if(it_type->second.registry_level == _registry_level)
+            if (it_type->second.registry_level == _registry_level)
             {
                 it_type = _frag_types[_IdSpace].erase(it_type);
             }
@@ -1302,7 +1299,7 @@ private:
     std::string generate_tile_name(const std::string &name)
     {
         assert(_IdSpace >= 0);
-        if(_registry_level == 0)
+        if (_registry_level == 0)
         {
             return "_G" + std::to_string(_IdSpace) + "_" + name;
         }
@@ -1314,10 +1311,10 @@ private:
 
     RegistryTileTable     _frags{};
     RegistryTileTypeTable _frag_types{};
-    RegistryLevel         _registry_level{ 0 };
-    RegistryIdSpace       _IdSpace{ -1 };
-    int32_t               _anonymous_frag_count{ 0 };              // Counter used to create the anonymous tiles
-    GpuTargetLanguage     _language{ GpuTargetLanguage::Unknown }; // Gpu programming language
+    RegistryLevel         _registry_level{0};
+    RegistryIdSpace       _IdSpace{-1};
+    int32_t               _anonymous_frag_count{0};              // Counter used to create the anonymous tiles
+    GpuTargetLanguage     _language{GpuTargetLanguage::Unknown}; // Gpu programming language
 };
 
 using TensorEntry = std::unique_ptr<IGpuTensorArgument>;
@@ -1388,7 +1385,7 @@ public:
 
         auto it = _refs.begin();
 
-        while(it != _refs.end())
+        while (it != _refs.end())
         {
             x.push_back(it->first);
 
@@ -1420,12 +1417,12 @@ public:
 
         // Check whether a tensor with that tensorID exists
         auto result = _tensor_arguments.find(tensor_id);
-        if(result == _tensor_arguments.end())
+        if (result == _tensor_arguments.end())
         {
             // It means that we haven't added a tensor with that tensor_id yet. Create a IGpuTensorArgument before creating the reference
-            std::unique_ptr<ClTensorArgument> arg = std::make_unique<ClTensorArgument>(var_name, x,
-                                                                                       return_by_value_when_possible);
-            _tensor_arguments[tensor_id]          = std::move(arg);
+            std::unique_ptr<ClTensorArgument> arg =
+                std::make_unique<ClTensorArgument>(var_name, x, return_by_value_when_possible);
+            _tensor_arguments[tensor_id] = std::move(arg);
         }
 
         _refs[key_IdSpace][key_var_name] = tensor_id;
@@ -1445,15 +1442,15 @@ public:
 
         IGpuTensorArgument *result         = nullptr;
         auto                search_IdSpace = _refs.find(key_IdSpace);
-        if(search_IdSpace != _refs.end())
+        if (search_IdSpace != _refs.end())
         {
             auto search_tensor_id = _refs[key_IdSpace].find(key_var_name);
 
-            if(search_tensor_id != _refs[key_IdSpace].end())
+            if (search_tensor_id != _refs[key_IdSpace].end())
             {
                 const int32_t tensor_id              = search_tensor_id->second;
                 auto          search_tensor_argument = _tensor_arguments.find(tensor_id);
-                if(search_tensor_argument != _tensor_arguments.end())
+                if (search_tensor_argument != _tensor_arguments.end())
                 {
                     result = search_tensor_argument->second.get();
                 }
@@ -1475,7 +1472,7 @@ public:
 
         auto it = _tensor_arguments.begin();
 
-        while(it != _tensor_arguments.end())
+        while (it != _tensor_arguments.end())
         {
             args.push_back(it->second.get());
             it++;
@@ -1499,7 +1496,7 @@ public:
 
         auto search_IdSpace = _refs.find(key_IdSpace);
 
-        if(search_IdSpace != _refs.end())
+        if (search_IdSpace != _refs.end())
         {
             auto search_tensor_id = _refs[key_IdSpace].find(key_var_name);
 
@@ -1527,7 +1524,7 @@ public:
 
         auto search_IdSpace = _refs.find(key_IdSpace);
 
-        if(search_IdSpace != _refs.end())
+        if (search_IdSpace != _refs.end())
         {
             auto search_tensor_id = _refs[key_IdSpace].find(key_var_name);
 
@@ -1550,8 +1547,8 @@ private:
 
     std::map<int32_t, TensorEntry>                    _tensor_arguments{};
     std::map<int32_t, std::map<std::string, int32_t>> _refs{};
-    int32_t                                           _IdSpace{ -1 };
-    GpuTargetLanguage                                 _language{ GpuTargetLanguage::Unknown }; // Gpu programming language
+    int32_t                                           _IdSpace{-1};
+    GpuTargetLanguage                                 _language{GpuTargetLanguage::Unknown}; // Gpu programming language
 };
 
 enum class OpType : int32_t
@@ -1563,7 +1560,7 @@ enum class OpType : int32_t
 
 inline std::string to_string(AssignmentOp op)
 {
-    switch(op)
+    switch (op)
     {
         case AssignmentOp::Decrement:
             return "-=";
@@ -1577,7 +1574,7 @@ inline std::string to_string(AssignmentOp op)
 
 inline std::string to_string(UnaryOp op)
 {
-    switch(op)
+    switch (op)
     {
         case UnaryOp::LogicalNot:
             return "!";
@@ -1593,7 +1590,7 @@ inline std::string to_string(UnaryOp op)
 
 inline std::string to_string(BinaryOp op)
 {
-    switch(op)
+    switch (op)
     {
         case BinaryOp::Add:
             return "+";
@@ -1629,7 +1626,7 @@ inline std::string to_string(BinaryOp op)
 
 inline std::string binary_op_string(BinaryOp op)
 {
-    switch(op)
+    switch (op)
     {
         case BinaryOp::Add:
             return "add";
@@ -1698,13 +1695,12 @@ struct ScalarTileCoord
     {
     }
 
-    ScalarTileCoord(int32_t x0, int32_t y0)
-        : x(x0), y(y0)
+    ScalarTileCoord(int32_t x0, int32_t y0) : x(x0), y(y0)
     {
     }
 
-    int32_t x{ -1 };
-    int32_t y{ -1 };
+    int32_t x{-1};
+    int32_t y{-1};
 };
 
 /**
@@ -1768,7 +1764,7 @@ public:
 
 private:
     std::string     _str{};
-    OperandType     _type{ OperandType::Unknown };
+    OperandType     _type{OperandType::Unknown};
     ScalarTileCoord _coord{};
 };
 
@@ -1778,16 +1774,15 @@ struct GpuSampler
 {
     GpuSampler() = default;
 
-    TensorSamplerFormat       format{ TensorSamplerFormat::Unknown };
-    GpuSamplerTensorStorage   storage{ GpuSamplerTensorStorage::Unknown };
-    TensorSamplerAddressModeX address_mode_x{ TensorSamplerAddressModeX::Unknown };
-    TensorSamplerAddressModeY address_mode_y{ TensorSamplerAddressModeY::Unknown };
-    TensorSamplerAddressModeZ address_mode_z{ TensorSamplerAddressModeZ::Unknown };
+    TensorSamplerFormat       format{TensorSamplerFormat::Unknown};
+    GpuSamplerTensorStorage   storage{GpuSamplerTensorStorage::Unknown};
+    TensorSamplerAddressModeX address_mode_x{TensorSamplerAddressModeX::Unknown};
+    TensorSamplerAddressModeY address_mode_y{TensorSamplerAddressModeY::Unknown};
+    TensorSamplerAddressModeZ address_mode_z{TensorSamplerAddressModeZ::Unknown};
 };
 
-inline GpuSampler
-create_simple_sampler(const TensorInfo *tensor_info_id, GpuSampler sampler, int32_t step_x, int32_t step_y,
-                      int32_t step_z)
+inline GpuSampler create_simple_sampler(
+    const TensorInfo *tensor_info_id, GpuSampler sampler, int32_t step_x, int32_t step_y, int32_t step_z)
 {
     CKW_UNUSED(step_x, step_y, step_z);
 
@@ -1804,7 +1799,7 @@ create_simple_sampler(const TensorInfo *tensor_info_id, GpuSampler sampler, int3
     int32_t dim_y = 0;
     int32_t dim_z = 0;
 
-    switch(sampler.format)
+    switch (sampler.format)
     {
         case TensorSamplerFormat::C_W_H:
             dim_x = tensor[0];
@@ -1822,19 +1817,19 @@ create_simple_sampler(const TensorInfo *tensor_info_id, GpuSampler sampler, int3
             break;
     }
 
-    if(dim_x == 1)
+    if (dim_x == 1)
     {
         assert(step_x == 1);
         dst_sampler.address_mode_x = TensorSamplerAddressModeX::None;
     }
 
-    if(dim_y == 1)
+    if (dim_y == 1)
     {
         assert(step_y == 1);
         dst_sampler.address_mode_y = TensorSamplerAddressModeY::None;
     }
 
-    if(dim_z == 1)
+    if (dim_z == 1)
     {
         assert(step_z == 1);
         dst_sampler.address_mode_z = TensorSamplerAddressModeZ::None;
@@ -1858,8 +1853,12 @@ public:
      * @param[in] step_y  Increment step in the Y direction. Not necessarily it is the same of m0 of tile!
      * @param[in] step_z  Increment step in the Z direction. Not necessarily it is the same of d0 of tile!
      */
-    void initialize(const TensorInfo *tensor_info_id, GpuSamplerTensorStorage tensor_storage,
-                    TensorSamplerFormat tensor_format, int32_t step_x, int32_t step_y, int32_t step_z)
+    void initialize(const TensorInfo       *tensor_info_id,
+                    GpuSamplerTensorStorage tensor_storage,
+                    TensorSamplerFormat     tensor_format,
+                    int32_t                 step_x,
+                    int32_t                 step_y,
+                    int32_t                 step_z)
     {
         assert(_is_initialized == false);
 
@@ -1908,13 +1907,13 @@ private:
         sampler.address_mode_z = TensorSamplerAddressModeZ::None;
 
         // In the case of texture, we do not need any special checks at the border
-        if(tensor_storage == GpuSamplerTensorStorage::BufferUint8Ptr)
+        if (tensor_storage == GpuSamplerTensorStorage::BufferUint8Ptr)
         {
             int32_t dim_x = 0;
             int32_t dim_y = 0;
             int32_t dim_z = 0;
 
-            switch(tensor_format)
+            switch (tensor_format)
             {
                 case TensorSamplerFormat::C_W_H:
                     dim_x = tensor[0];
@@ -1932,17 +1931,17 @@ private:
                     break;
             }
 
-            if((dim_x % _step_x) != 0 && dim_x != 1)
+            if ((dim_x % _step_x) != 0 && dim_x != 1)
             {
                 sampler.address_mode_x = TensorSamplerAddressModeX::OverlappingMin;
             }
 
-            if((dim_y % _step_y) != 0 && dim_y != 1)
+            if ((dim_y % _step_y) != 0 && dim_y != 1)
             {
                 sampler.address_mode_y = TensorSamplerAddressModeY::ClampToMaxEdgeOnly;
             }
 
-            if((dim_z % _step_z) != 0 && dim_z != 1)
+            if ((dim_z % _step_z) != 0 && dim_z != 1)
             {
                 sampler.address_mode_z = TensorSamplerAddressModeZ::ClampToMaxEdgeOnly;
             }
@@ -1952,11 +1951,11 @@ private:
     }
 
     GpuSampler        _sampler{}; // GpuSampler
-    int32_t           _step_x{ 1 };
-    int32_t           _step_y{ 1 };
-    int32_t           _step_z{ 1 };
-    const TensorInfo *_tensor_info_id{ nullptr };
-    bool              _is_initialized{ false };
+    int32_t           _step_x{1};
+    int32_t           _step_y{1};
+    int32_t           _step_z{1};
+    const TensorInfo *_tensor_info_id{nullptr};
+    bool              _is_initialized{false};
 };
 
 /**
@@ -1965,8 +1964,7 @@ private:
 class TensorOperand
 {
 public:
-    TensorOperand(const std::string &val, GpuSampler sampler)
-        : _str(val), _sampler(sampler)
+    TensorOperand(const std::string &val, GpuSampler sampler) : _str(val), _sampler(sampler)
     {
     }
 
@@ -2050,9 +2048,9 @@ private:
 
 struct LWS
 {
-    int32_t x{ 1 };
-    int32_t y{ 1 };
-    int32_t z{ 1 };
+    int32_t x{1};
+    int32_t y{1};
+    int32_t z{1};
 };
 
 /**
@@ -2062,8 +2060,7 @@ struct LWS
 class OperandUnpacker
 {
 public:
-    OperandUnpacker(GpuTileRegistry &tiles, GpuTensorArgumentRegistry &arguments)
-        : _tiles(tiles), _arguments(arguments)
+    OperandUnpacker(GpuTileRegistry &tiles, GpuTensorArgumentRegistry &arguments) : _tiles(tiles), _arguments(arguments)
     {
         // Increase the level of the stack to allocate possible temporary tiles
         _tiles.increment_registry_level();
@@ -2078,26 +2075,26 @@ public:
     IVectorTile *unpack(const Operand &src)
     {
         // Get the tile
-        if(src.type() == OperandType::Tile)
+        if (src.type() == OperandType::Tile)
         {
             assert(_tiles.has_tile(src.value()));
             return _tiles[src.value()];
         }
         // Create an anonymous tile with a constant
-        else if(static_cast<int32_t>(src.type()) & 0x00001000)
+        else if (static_cast<int32_t>(src.type()) & 0x00001000)
         {
-            if(src.type() == OperandType::ScalarTile)
+            if (src.type() == OperandType::ScalarTile)
             {
                 ScalarTileCoord coord = src.scalar_tile_coordinate();
                 assert(_tiles.has_tile(src.value()));
                 assert(coord.x >= 0);
                 assert(coord.y >= 0);
                 auto val = _tiles[src.value()]->scalar(coord.x, coord.y);
-                return _tiles.insert({ { { val.str } } }, val.type.dt);
+                return _tiles.insert({{{val.str}}}, val.type.dt);
             }
             else
             {
-                return _tiles.insert({ { { src.value() } } }, to_tile_data_type(src.type()));
+                return _tiles.insert({{{src.value()}}}, to_tile_data_type(src.type()));
             }
         }
         // Create an anonymous tile with the tensor component
@@ -2107,7 +2104,7 @@ public:
             auto              x   = _arguments[src.value()];
             const std::string val = x->component(to_tensor_component(src.type()));
             const DataType    dt  = x->component_data_type();
-            return _tiles.insert({ { { val } } }, dt);
+            return _tiles.insert({{{val}}}, dt);
         }
     }
 
@@ -2119,7 +2116,7 @@ private:
 
     TensorComponentType to_tensor_component(OperandType x)
     {
-        switch(x)
+        switch (x)
         {
             case OperandType::TensorDim0:
                 return TensorComponentType::Dim0;
@@ -2163,8 +2160,7 @@ private:
 class TensorOperandUnpacker
 {
 public:
-    TensorOperandUnpacker(GpuTensorArgumentRegistry &arguments)
-        : _arguments(arguments){};
+    TensorOperandUnpacker(GpuTensorArgumentRegistry &arguments) : _arguments(arguments){};
 
     IGpuTensorArgument *unpack(const TensorOperand &src)
     {
@@ -2191,9 +2187,11 @@ struct GpuKernel
     std::string      config_id{}; // Unique id, required for the tuning stage
     std::vector<LWS> list_lws{};  // LWS to test, required for the tuning stage
     // Dispatch stage
-    GpuOutputSampler                                  output_sampler{};       // GpuOutputSampler, required for the dispatch stage
-    std::vector<std::pair<int32_t, GpuTensorStorage>> list_tensor_storages;   // List of tensor storages, required for the dispatch stage
-    std::vector<std::pair<int32_t, TensorComponentType>>  list_tensor_components; // List of tensor components (width, stride,..), required for the dispatch stage)
+    GpuOutputSampler output_sampler{}; // GpuOutputSampler, required for the dispatch stage
+    std::vector<std::pair<int32_t, GpuTensorStorage>>
+        list_tensor_storages; // List of tensor storages, required for the dispatch stage
+    std::vector<std::pair<int32_t, TensorComponentType>>
+        list_tensor_components; // List of tensor components (width, stride,..), required for the dispatch stage)
 };
 
 // Generate all extension pragmas (hardcoded for now)
@@ -2234,13 +2232,13 @@ inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::strin
 
     auto tensor_args = in.arguments.tensor_argument_declarations();
 
-    for(auto &i : tensor_args)
+    for (auto &i : tensor_args)
     {
         // For each tensor used, get the storage and tensor components
         auto storages   = i->storage_declarations();
         auto components = i->component_declarations();
 
-        for(auto &y : storages)
+        for (auto &y : storages)
         {
             std::string str;
             str += i->storage_type_declaration(y);
@@ -2249,7 +2247,7 @@ inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::strin
             arg_str.push_back(str);
         }
 
-        for(auto &y : components)
+        for (auto &y : components)
         {
             std::string str;
             str += i->component_type_declaration();
@@ -2259,10 +2257,10 @@ inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::strin
         }
     }
 
-    for(size_t i = 0; i < arg_str.size(); ++i)
+    for (size_t i = 0; i < arg_str.size(); ++i)
     {
         code += arg_str[i];
-        if(i + 1 < arg_str.size())
+        if (i + 1 < arg_str.size())
         {
             code += ",\n";
         }
@@ -2284,13 +2282,12 @@ inline std::string generate_code(GpuKernelWriterDataHolder &in, const std::strin
 class GpuTensor3dMapper
 {
 public:
-    GpuTensor3dMapper(IGpuTensorArgument *tensor, GpuSampler sampler)
-        : _sampler(sampler), _tensor(tensor){};
+    GpuTensor3dMapper(IGpuTensorArgument *tensor, GpuSampler sampler) : _sampler(sampler), _tensor(tensor){};
 
     std::string tensor_component_x() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
@@ -2305,7 +2302,7 @@ public:
     std::string tensor_component_y() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
                 return _tensor->component(TensorComponentType::Dim1xDim2);
@@ -2321,7 +2318,7 @@ public:
     std::string tensor_component_z() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
                 return "1";
@@ -2337,7 +2334,7 @@ public:
     std::string tensor_component_stride_y() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
@@ -2352,7 +2349,7 @@ public:
     std::string tensor_component_stride_z() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
                 return "0";
@@ -2368,7 +2365,7 @@ public:
     std::string tensor_component_stride_batch() const
     {
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
@@ -2384,7 +2381,7 @@ public:
     {
         auto       t      = _tensor->format();
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
@@ -2400,7 +2397,7 @@ public:
     {
         auto       t      = _tensor->format();
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
                 return (t.shape[1] * t.shape[2]) == 1;
@@ -2417,7 +2414,7 @@ public:
     {
         auto       t      = _tensor->format();
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
                 return true;
@@ -2434,7 +2431,7 @@ public:
     {
         auto       t      = _tensor->format();
         const auto format = _sampler.format;
-        switch(format)
+        switch (format)
         {
             case TensorSamplerFormat::C_WH_1:
             case TensorSamplerFormat::C_W_H:
@@ -2463,7 +2460,7 @@ private:
 
 struct GpuKernelWriterAttribute
 {
-    bool return_tensor_component_by_value{ false };
+    bool return_tensor_component_by_value{false};
 };
 
 enum class RoundingMode
@@ -2489,7 +2486,8 @@ public:
 
     virtual void declare_tile(const std::string &name, const TileInfo &info) = 0;
 
-    virtual void declare_const_tile(const std::string &name, const std::vector<std::vector<std::string>> &in, DataType dt) = 0;
+    virtual void
+    declare_const_tile(const std::string &name, const std::vector<std::vector<std::string>> &in, DataType dt) = 0;
 
     virtual void write_text(const std::string &x) = 0;
 
@@ -2498,48 +2496,82 @@ public:
     virtual void compound_statement_end() = 0;
 
     // Operations
-    virtual void op_get_global_id(const Operand &dst_var, int32_t dim)                                                                                                                                                                                                   = 0;
+    virtual void op_get_global_id(const Operand &dst_var, int32_t dim) = 0;
 
-    virtual void op_get_global_coord(const Operand &dst, const Operand &step, const TensorOperand &tensor, int32_t dim)                                                                                                                                                  = 0;
+    virtual void
+    op_get_global_coord(const Operand &dst, const Operand &step, const TensorOperand &tensor, int32_t dim) = 0;
 
-    virtual void op_get_global_batch(const Operand &dst, const TensorOperand &tensor)                                                                                                                                                                                    = 0;
+    virtual void op_get_global_batch(const Operand &dst, const TensorOperand &tensor) = 0;
 
-    virtual void op_get_global_size(const Operand &dst_var, int32_t dim)                                                                                                                                                                                                 = 0;
+    virtual void op_get_global_size(const Operand &dst_var, int32_t dim) = 0;
 
-    virtual void op_unary_expression(const Operand &dst, UnaryOp op, const Operand &src)                                                                                                                                                                                 = 0;
+    virtual void op_unary_expression(const Operand &dst, UnaryOp op, const Operand &src) = 0;
 
-    virtual void op_binary_expression(const Operand &dst, const Operand &lhs, BinaryOp op, const Operand &rhs)                                                                                                                                                           = 0;
+    virtual void op_binary_expression(const Operand &dst, const Operand &lhs, BinaryOp op, const Operand &rhs) = 0;
 
-    virtual void op_assign(const Operand &dst_name, const Operand &src_name)                                                                                                                                                                                             = 0;
+    virtual void op_assign(const Operand &dst_name, const Operand &src_name) = 0;
 
-    virtual void op_unary_elementwise_function(const Operand &dst_name, UnaryFunction func, const Operand &src_name)                                                                                                                                                     = 0;
+    virtual void
+    op_unary_elementwise_function(const Operand &dst_name, UnaryFunction func, const Operand &src_name) = 0;
 
-    virtual void op_binary_elementwise_function(const Operand &dst_name, BinaryFunction func, const Operand &first_name, const Operand &second_name)                                                                                                                     = 0;
+    virtual void op_binary_elementwise_function(const Operand &dst_name,
+                                                BinaryFunction func,
+                                                const Operand &first_name,
+                                                const Operand &second_name) = 0;
 
-    virtual void op_ternary_elementwise_function(const Operand &dst_name, TernaryFunction func, const Operand &first_name, const Operand &second_name, const Operand &third_name)                                                                                        = 0;
+    virtual void op_ternary_elementwise_function(const Operand  &dst_name,
+                                                 TernaryFunction func,
+                                                 const Operand  &first_name,
+                                                 const Operand  &second_name,
+                                                 const Operand  &third_name) = 0;
 
-    virtual void op_if_header(const Operand &lhs, BinaryOp op, const Operand &rhs)                                                                                                                                                                                       = 0;
+    virtual void op_if_header(const Operand &lhs, BinaryOp op, const Operand &rhs) = 0;
 
-    virtual void op_else_if_header(const Operand &lhs, BinaryOp op, const Operand &rhs)                                                                                                                                                                                  = 0;
+    virtual void op_else_if_header(const Operand &lhs, BinaryOp op, const Operand &rhs) = 0;
 
-    virtual void op_else_header()                                                                                                                                                                                                                                        = 0;
+    virtual void op_else_header() = 0;
 
-    virtual void op_for_loop_header(const Operand &var_name, BinaryOp cond_op, const Operand &cond_value, const Operand &update_var, AssignmentOp update_op, const Operand &update_value)                                                                                                           = 0;
+    virtual void op_for_loop_header(const Operand &var_name,
+                                    BinaryOp       cond_op,
+                                    const Operand &cond_value,
+                                    const Operand &update_var,
+                                    AssignmentOp   update_op,
+                                    const Operand &update_value) = 0;
 
-    virtual void op_load_indirect(const TensorOperand &tensor, const Operand &dst, const Operand &x, const Operand &y_indirect, const Operand &z, const Operand &b = Operand("0", OperandType::ScalarInt32))                                                             = 0;
+    virtual void op_load_indirect(const TensorOperand &tensor,
+                                  const Operand       &dst,
+                                  const Operand       &x,
+                                  const Operand       &y_indirect,
+                                  const Operand       &z,
+                                  const Operand       &b = Operand("0", OperandType::ScalarInt32)) = 0;
 
-    virtual void op_load_immediate(const TensorOperand &tensor, const Operand &dst, const Operand &x, const Operand &y, const Operand &z, const Operand &b = Operand("0", OperandType::ScalarInt32), const Operand &dilation_y = Operand("1", OperandType::ScalarInt32)) = 0;
+    virtual void op_load_immediate(const TensorOperand &tensor,
+                                   const Operand       &dst,
+                                   const Operand       &x,
+                                   const Operand       &y,
+                                   const Operand       &z,
+                                   const Operand       &b          = Operand("0", OperandType::ScalarInt32),
+                                   const Operand       &dilation_y = Operand("1", OperandType::ScalarInt32)) = 0;
 
-    virtual void op_store_immediate(const TensorOperand &tensor, const Operand &src, const Operand &x, const Operand &y, const Operand &z, const Operand &b = Operand("0", OperandType::ScalarInt32))                                                                    = 0;
+    virtual void op_store_immediate(const TensorOperand &tensor,
+                                    const Operand       &src,
+                                    const Operand       &x,
+                                    const Operand       &y,
+                                    const Operand       &z,
+                                    const Operand       &b = Operand("0", OperandType::ScalarInt32)) = 0;
 
-    virtual void op_cast_expression(const Operand &dst, const Operand &src, ConvertPolicy policy)                                                                                                                                                                        = 0;
+    virtual void op_cast_expression(const Operand &dst, const Operand &src, ConvertPolicy policy) = 0;
 
-    virtual void op_return()                                                                                                                                                                                                                                             = 0;
+    virtual void op_return() = 0;
 
     // Utils
     // It is the process of converting
-    virtual void util_get_indirect_buffer(const Operand &dst, const TensorOperand &tensor, const Operand &x,
-                                          const Operand &y, const Operand &x_off, const Operand &y_off) = 0;
+    virtual void util_get_indirect_buffer(const Operand       &dst,
+                                          const TensorOperand &tensor,
+                                          const Operand       &x,
+                                          const Operand       &y,
+                                          const Operand       &x_off,
+                                          const Operand       &y_off) = 0;
 };
 
 enum class GpuLoadStoreType
@@ -2586,12 +2618,11 @@ public:
 
     ClLoadStoreBufferHelperWriter &operator=(const ClLoadStoreBufferHelperWriter &) = default;
 
-    static bool
-    validate(IGpuKernelWriter *x, GpuTensor3dMapper mapper, GpuLoadStoreType type, IVectorTile *dst)
+    static bool validate(IGpuKernelWriter *x, GpuTensor3dMapper mapper, GpuLoadStoreType type, IVectorTile *dst)
     {
         CKW_UNUSED(x, type, dst);
 
-        if(mapper.gpu_sampler().storage != GpuSamplerTensorStorage::BufferUint8Ptr)
+        if (mapper.gpu_sampler().storage != GpuSamplerTensorStorage::BufferUint8Ptr)
         {
             return false;
         }
@@ -2675,10 +2706,10 @@ public:
         out_of_bound_finalize_y(dst);
 
         // The left over load/store will be written in the finalize stage
-        if(_ls_width_part.size() != 0)
+        if (_ls_width_part.size() != 0)
         {
             int32_t w = 0;
-            for(auto &p : _ls_width_part)
+            for (auto &p : _ls_width_part)
             {
                 const std::string dst0    = _dst->vector(w, p, idx_y).str;
                 const std::string coord_x = _coord_x + " + " + std::to_string(w);
@@ -2698,8 +2729,8 @@ public:
     }
 
 private:
-    IVectorTile                                                             *_dst{ nullptr };
-    int32_t                                                                  _ls_width_full{ 0 };
+    IVectorTile                                                             *_dst{nullptr};
+    int32_t                                                                  _ls_width_full{0};
     std::vector<int32_t>                                                     _ls_width_part{};
     std::vector<std::pair<std::pair<std::string, std::string>, std::string>> _leftovers_x{};
     std::string                                                              _coord_x{};
@@ -2709,13 +2740,13 @@ private:
 
     void out_of_bound_initialize_x(std::string &coord)
     {
-        if(_mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
+        if (_mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
         {
             auto tensor_format = _mapper.tensor_argument()->format();
             auto shape         = tensor_format.shape;
 
             _ls_width_part = decompose_leftover_ls_vector_width(shape[0] % _ls_width_full);
-            if(_ls_width_part.size() != 0)
+            if (_ls_width_part.size() != 0)
             {
                 _writer->write_text("if(" + coord + " > 0)\n");
                 _writer->compound_statement_begin();
@@ -2725,16 +2756,16 @@ private:
 
     void out_of_bound_finalize_x()
     {
-        if(_mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
+        if (_mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
         {
-            if(_ls_width_part.size() != 0)
+            if (_ls_width_part.size() != 0)
             {
                 _writer->compound_statement_end();
                 _writer->write_text("else\n");
                 _writer->compound_statement_begin();
 
                 out_of_bound_initialize_z(_coord_orig_z);
-                for(auto &i : _leftovers_x)
+                for (auto &i : _leftovers_x)
                 {
                     out_of_bound_initialize_y(i.first.second);
                     _writer->write_text(i.second);
@@ -2753,7 +2784,7 @@ private:
 
         const auto address_mode_y = _mapper.gpu_sampler().address_mode_y;
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::Skip:
             case TensorSamplerAddressModeY::ClampToBorder:
@@ -2799,7 +2830,7 @@ private:
     {
         const auto address_mode_y = _mapper.gpu_sampler().address_mode_y;
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::ClampToBorder:
             case TensorSamplerAddressModeY::ClampToBorderMaxEdgeOnly:
@@ -2816,7 +2847,7 @@ private:
                 assert(false);
         }
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::ClampToBorder:
             case TensorSamplerAddressModeY::ClampToBorderMinEdgeOnly:
@@ -2841,7 +2872,7 @@ private:
 
         const auto address_mode_z = _mapper.gpu_sampler().address_mode_z;
 
-        switch(address_mode_z)
+        switch (address_mode_z)
         {
             case TensorSamplerAddressModeZ::Skip:
                 max = _mapper.tensor_component_z();
@@ -2880,7 +2911,7 @@ private:
     {
         const auto address_mode_z = _mapper.gpu_sampler().address_mode_z;
 
-        switch(address_mode_z)
+        switch (address_mode_z)
         {
             case TensorSamplerAddressModeZ::Skip:
             case TensorSamplerAddressModeZ::SkipMinEdgeOnly:
@@ -2899,7 +2930,7 @@ private:
     {
         std::vector<int32_t> x;
 
-        switch(ls_leftover_vector_width)
+        switch (ls_leftover_vector_width)
         {
             case 0:
                 break;
@@ -2961,13 +2992,13 @@ private:
         return x;
     }
 
-    std::string to_ls_buffer(GpuLoadStoreType type, int32_t vector_width, const std::string &data,
-                             const std::string &address)
+    std::string
+    to_ls_buffer(GpuLoadStoreType type, int32_t vector_width, const std::string &data, const std::string &address)
     {
-        switch(type)
+        switch (type)
         {
             case GpuLoadStoreType::Load:
-                if(vector_width != 1)
+                if (vector_width != 1)
                 {
                     return data + " = vload" + std::to_string(vector_width) + "(0, " + address + ")";
                 }
@@ -2977,7 +3008,7 @@ private:
                 }
                 break;
             case GpuLoadStoreType::Store:
-                if(vector_width != 1)
+                if (vector_width != 1)
                 {
                     return "vstore" + std::to_string(vector_width) + "(" + data + ", 0, " + address + ")";
                 }
@@ -2993,25 +3024,25 @@ private:
         }
     }
 
-    std::string to_ls_buffer_address(const std::string &x, const std::string &y, const std::string &z,
-                                     const std::string &b) const
+    std::string
+    to_ls_buffer_address(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const
     {
-        auto tensor_storage            = static_cast<GpuTensorStorage>(_mapper.gpu_sampler().storage);
+        auto tensor_storage = static_cast<GpuTensorStorage>(_mapper.gpu_sampler().storage);
         assert(tensor_storage == GpuTensorStorage::BufferUint8Ptr);
-        const std::string ptr_buf      = _mapper.tensor_argument()->storage(tensor_storage);
-        const std::string dst_type     = get_cl_data_type(_dst->format().dt, 1);
+        const std::string ptr_buf  = _mapper.tensor_argument()->storage(tensor_storage);
+        const std::string dst_type = get_cl_data_type(_dst->format().dt, 1);
 
         std::string address;
         address += "(__global ";
         address += dst_type;
         address += "*)(";
         address += ptr_buf;
-        if(x != "0" && (_mapper.is_one_component_x() != true))
+        if (x != "0" && (_mapper.is_one_component_x() != true))
         {
             address += " + (";
             address += x + ") * sizeof(" + dst_type + ")";
         }
-        if(y != "0")
+        if (y != "0")
         {
             const std::string stride_y = _mapper.tensor_component_stride_y();
             address += " + (";
@@ -3019,7 +3050,7 @@ private:
             address += " * ";
             address += stride_y;
         }
-        if(z != "0" && (_mapper.is_one_component_z() != true))
+        if (z != "0" && (_mapper.is_one_component_z() != true))
         {
             const std::string stride_z = _mapper.tensor_component_stride_z();
             address += " + (";
@@ -3027,7 +3058,7 @@ private:
             address += " * ";
             address += stride_z;
         }
-        if(b != "0" && (_mapper.is_one_component_batch() != true))
+        if (b != "0" && (_mapper.is_one_component_batch() != true))
         {
             const std::string stride_b = _mapper.tensor_component_stride_batch();
             address += " + (";
@@ -3043,32 +3074,32 @@ private:
 class ClLoadStoreImage2dHelperWriter : public IGpuLoadStoreHelperWriter
 {
 public:
-    static bool
-    validate(IGpuKernelWriter *x, const GpuTensor3dMapper &mapper, GpuLoadStoreType type, IVectorTile *dst)
+    static bool validate(IGpuKernelWriter *x, const GpuTensor3dMapper &mapper, GpuLoadStoreType type, IVectorTile *dst)
     {
         CKW_UNUSED(x);
 
-        if(dst->format().w != 4)
+        if (dst->format().w != 4)
         {
             return false;
         }
-        if(mapper.gpu_sampler().address_mode_x != TensorSamplerAddressModeX::None)
+        if (mapper.gpu_sampler().address_mode_x != TensorSamplerAddressModeX::None)
         {
             return false;
         }
-        if(mapper.gpu_sampler().address_mode_z != TensorSamplerAddressModeZ::None)
+        if (mapper.gpu_sampler().address_mode_z != TensorSamplerAddressModeZ::None)
         {
             return false;
         }
-        if(mapper.gpu_sampler().storage != GpuSamplerTensorStorage::Image2dReadOnly && type == GpuLoadStoreType::Load)
+        if (mapper.gpu_sampler().storage != GpuSamplerTensorStorage::Image2dReadOnly && type == GpuLoadStoreType::Load)
         {
             return false;
         }
-        if(mapper.gpu_sampler().storage != GpuSamplerTensorStorage::Image2dWriteOnly && type == GpuLoadStoreType::Store)
+        if (mapper.gpu_sampler().storage != GpuSamplerTensorStorage::Image2dWriteOnly &&
+            type == GpuLoadStoreType::Store)
         {
             return false;
         }
-        if((dst->format().dt != DataType::Fp32) && (dst->format().dt != DataType::Fp16))
+        if ((dst->format().dt != DataType::Fp32) && (dst->format().dt != DataType::Fp16))
         {
             return false;
         }
@@ -3134,8 +3165,8 @@ public:
     }
 
 private:
-    IVectorTile *_dst{ nullptr };
-    int32_t      _ls_width_full{ 0 };
+    IVectorTile *_dst{nullptr};
+    int32_t      _ls_width_full{0};
     std::string  _coord_x{};
     std::string  _coord_z{};
     std::string  _coord_b{};
@@ -3146,7 +3177,7 @@ private:
 
         const auto address_mode_y = _mapper.gpu_sampler().address_mode_y;
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::Skip:
                 max = _mapper.tensor_component_y();
@@ -3182,7 +3213,7 @@ private:
 
         const auto address_mode_y = _mapper.gpu_sampler().address_mode_y;
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::Skip:
             case TensorSamplerAddressModeY::SkipMinEdgeOnly:
@@ -3195,16 +3226,19 @@ private:
         }
     };
 
-    std::string to_ls_image2d(GpuLoadStoreType type, int32_t vector_width, const std::string &data,
-                              const std::string &sampler, const std::string &coord)
+    std::string to_ls_image2d(GpuLoadStoreType   type,
+                              int32_t            vector_width,
+                              const std::string &data,
+                              const std::string &sampler,
+                              const std::string &coord)
     {
         CKW_UNUSED(vector_width);
 
         auto              tensor_storage = static_cast<GpuTensorStorage>(_mapper.gpu_sampler().storage);
         const std::string image2d_obj    = _mapper.tensor_argument()->storage(tensor_storage);
-        const std::string post_fix = _dst->format().dt == DataType::Fp32 ? "f" : "h";
+        const std::string post_fix       = _dst->format().dt == DataType::Fp32 ? "f" : "h";
 
-        switch(type)
+        switch (type)
         {
             case GpuLoadStoreType::Load:
                 return data + " = read_image" + post_fix + "(" + image2d_obj + ", " + sampler + ", " + coord + ")";
@@ -3223,7 +3257,7 @@ private:
     {
         const auto address_mode_y = _mapper.gpu_sampler().address_mode_y;
 
-        switch(address_mode_y)
+        switch (address_mode_y)
         {
             case TensorSamplerAddressModeY::None:
                 return "CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST";
@@ -3245,17 +3279,17 @@ private:
         }
     }
 
-    std::string to_ls_image2d_coord(const std::string &x, const std::string &y, const std::string &z,
-                                    const std::string &b) const
+    std::string
+    to_ls_image2d_coord(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const
     {
         std::string coord_x = "(" + x + ") >> 2";
         std::string coord_y = "(";
 
-        if(y != "0")
+        if (y != "0")
         {
             coord_y += y;
         }
-        if(z != "0" && (_mapper.is_one_component_z() != true))
+        if (z != "0" && (_mapper.is_one_component_z() != true))
         {
             const std::string dim = _mapper.tensor_component_y();
             coord_y += " + (";
@@ -3263,7 +3297,7 @@ private:
             coord_y += " * ";
             coord_y += dim;
         }
-        if(b != "0" && (_mapper.is_one_component_batch() != true))
+        if (b != "0" && (_mapper.is_one_component_batch() != true))
         {
             const std::string dim0 = _mapper.tensor_component_y();
             const std::string dim1 = _mapper.tensor_component_z();
@@ -3292,7 +3326,7 @@ public:
     create(IGpuKernelWriter *x, const GpuTensor3dMapper &mapper, GpuLoadStoreType type)
     {
         const auto tensor_storage = mapper.gpu_sampler().storage;
-        switch(tensor_storage)
+        switch (tensor_storage)
         {
             case GpuSamplerTensorStorage::BufferUint8Ptr:
                 return std::make_unique<ClLoadStoreBufferHelperWriter>(x, mapper, type);
@@ -3352,14 +3386,14 @@ public:
 
         IVectorTile *x = _data->tiles[name];
 
-        for(auto &t : x->underlying_source_variables())
+        for (auto &t : x->underlying_source_variables())
         {
             _data->code += t.type.str + " " + t.str + ";\n";
         }
     }
 
-    void declare_const_tile(const std::string &name, const std::vector<std::vector<std::string>> &in,
-                            DataType dt) override
+    void
+    declare_const_tile(const std::string &name, const std::vector<std::vector<std::string>> &in, DataType dt) override
     {
         assert(_data->tiles[name] == nullptr);
         _data->tiles.insert(name, in, dt);
@@ -3387,7 +3421,8 @@ public:
     {
         assert(dst_var.type() == OperandType::Tile);
         assert(_data->tiles.has_tile(dst_var.value()));
-        assert(_data->tiles[dst_var.value()]->format().w == 1 && _data->tiles[dst_var.value()]->format().h == 1); // It must be a scalar variable
+        assert(_data->tiles[dst_var.value()]->format().w == 1 &&
+               _data->tiles[dst_var.value()]->format().h == 1); // It must be a scalar variable
 
         auto var = _data->tiles[dst_var.value()];
 
@@ -3397,8 +3432,10 @@ public:
         _data->code += ");\n";
     };
 
-    void op_get_global_coord(const Operand &o_dst, const Operand &o_step, const TensorOperand &o_tensor,
-                             int32_t dim) override
+    void op_get_global_coord(const Operand       &o_dst,
+                             const Operand       &o_step,
+                             const TensorOperand &o_tensor,
+                             int32_t              dim) override
     {
         OperandUnpacker operands(_data->tiles, _data->arguments);
         auto            dst  = operands.unpack(o_dst);
@@ -3412,17 +3449,17 @@ public:
 
         GpuTensor3dMapper mapper(tensor, gpu_sampler);
 
-        switch(dim)
+        switch (dim)
         {
             case 0:
-                if(mapper.is_one_component_x())
+                if (mapper.is_one_component_x())
                 {
                     _data->code += dst->scalar(0, 0).str;
                     _data->code += " = 0;\n";
                 }
                 else
                 {
-                    if(mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
+                    if (mapper.gpu_sampler().address_mode_x == TensorSamplerAddressModeX::OverlappingMin)
                     {
                         // Validation: Check: fixed tensor shape
                         // TO BE CHANGED
@@ -3441,14 +3478,14 @@ public:
                 }
                 break;
             case 1:
-                if(mapper.is_one_component_y())
+                if (mapper.is_one_component_y())
                 {
                     _data->code += dst->scalar(0, 0).str;
                     _data->code += " = 0;\n";
                 }
                 else
                 {
-                    if(mapper.gpu_sampler().address_mode_y == TensorSamplerAddressModeY::OverlappingMin)
+                    if (mapper.gpu_sampler().address_mode_y == TensorSamplerAddressModeY::OverlappingMin)
                     {
                     }
                     else
@@ -3461,7 +3498,7 @@ public:
                 }
                 break;
             case 2:
-                if(mapper.is_one_component_z())
+                if (mapper.is_one_component_z())
                 {
                     _data->code += dst->scalar(0, 0).str;
                     _data->code += " = 0;\n";
@@ -3490,7 +3527,7 @@ public:
 
         GpuTensor3dMapper mapper(tensor, gpu_sampler);
 
-        if(mapper.is_one_component_batch())
+        if (mapper.is_one_component_batch())
         {
             _data->code += dst->scalar(0, 0).str;
             _data->code += " = 0;\n";
@@ -3506,7 +3543,8 @@ public:
     {
         assert(dst_var.type() == OperandType::Tile);
         assert(_data->tiles.has_tile(dst_var.value()));
-        assert(_data->tiles[dst_var.value()]->format().w == 1 && _data->tiles[dst_var.value()]->format().h == 1); // It must be a scalar variable
+        assert(_data->tiles[dst_var.value()]->format().w == 1 &&
+               _data->tiles[dst_var.value()]->format().h == 1); // It must be a scalar variable
 
         auto var = _data->tiles[dst_var.value()];
 
@@ -3532,7 +3570,7 @@ public:
         const std::string src_prefix = broadcast_src_x ? "(" + dt + ")" : "";
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
@@ -3542,7 +3580,9 @@ public:
         }
     }
 
-    void op_binary_expression(const Operand &dst_name, const Operand &lhs_name, BinaryOp op,
+    void op_binary_expression(const Operand &dst_name,
+                              const Operand &lhs_name,
+                              BinaryOp       op,
                               const Operand &rhs_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
@@ -3556,14 +3596,14 @@ public:
         const int32_t lhs_w = lhs->format().w;
         const int32_t rhs_w = rhs->format().w;
 
-        if(op == BinaryOp::MatMul_Nt_T)
+        if (op == BinaryOp::MatMul_Nt_T)
         {
             assert((dst->format().dt == DataType::Fp32) || (dst->format().dt == DataType::Fp16));
-            for(int32_t y = 0; y < dst_h; ++y)
+            for (int32_t y = 0; y < dst_h; ++y)
             {
-                for(int32_t x = 0; x < dst_w; ++x)
+                for (int32_t x = 0; x < dst_w; ++x)
                 {
-                    for(int32_t k = 0; k < lhs_w; ++k)
+                    for (int32_t k = 0; k < lhs_w; ++k)
                     {
                         _data->code += dst->scalar(x, y).str;
                         _data->code += " = fma(";
@@ -3583,12 +3623,14 @@ public:
         const bool broadcast_lhs_x = dst_w != 1 && lhs_w == 1;
         const bool broadcast_rhs_x = dst_w != 1 && rhs_w == 1;
 
-        const std::string lhs_prefix = broadcast_lhs_x ? "(" + dst->underlying_source_variables()[0].type.str + ")" : "";
-        const std::string rhs_prefix = broadcast_rhs_x ? "(" + dst->underlying_source_variables()[0].type.str + ")" : "";
-        const std::string op_str     = to_string(op);
+        const std::string lhs_prefix =
+            broadcast_lhs_x ? "(" + dst->underlying_source_variables()[0].type.str + ")" : "";
+        const std::string rhs_prefix =
+            broadcast_rhs_x ? "(" + dst->underlying_source_variables()[0].type.str + ")" : "";
+        const std::string op_str = to_string(op);
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
@@ -3607,13 +3649,13 @@ public:
         const IVectorTile *src = operands.unpack(o_src);
         const IVectorTile *dst = operands.unpack(o_dst);
         // const int32_t dst_w  = dst->format().w;
-        const int32_t     dst_h = dst->format().h;
-        const std::string dt    = dst->underlying_source_variables()[0].type.str;
-        const bool is_float     = (dst->format().dt == DataType::Fp32) || (dst->format().dt == DataType::Fp16);
-        const std::string sat   = ((policy == ConvertPolicy::Saturate && !is_float) ? "_sat" : "");
+        const int32_t     dst_h    = dst->format().h;
+        const std::string dt       = dst->underlying_source_variables()[0].type.str;
+        const bool        is_float = (dst->format().dt == DataType::Fp32) || (dst->format().dt == DataType::Fp16);
+        const std::string sat      = ((policy == ConvertPolicy::Saturate && !is_float) ? "_sat" : "");
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = convert_" + dt + sat + "(";
@@ -3638,7 +3680,7 @@ public:
         const std::string src_prefix = broadcast_src_x ? "(" + dt + ")" : "";
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
@@ -3647,8 +3689,7 @@ public:
         }
     }
 
-    void
-    op_unary_elementwise_function(const Operand &dst_name, UnaryFunction func, const Operand &src_name) override
+    void op_unary_elementwise_function(const Operand &dst_name, UnaryFunction func, const Operand &src_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *src = operands.unpack(src_name);
@@ -3665,12 +3706,12 @@ public:
         const std::string src_prefix = "(" + dt + ")";
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
 
-            switch(func)
+            switch (func)
             {
                 case UnaryFunction::Exp:
                     _data->code += "exp(";
@@ -3708,7 +3749,10 @@ public:
         }
     }
 
-    void op_binary_elementwise_function(const Operand &dst_name, BinaryFunction func, const Operand &first_name, const Operand &second_name) override
+    void op_binary_elementwise_function(const Operand &dst_name,
+                                        BinaryFunction func,
+                                        const Operand &first_name,
+                                        const Operand &second_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *first  = operands.unpack(first_name);
@@ -3726,12 +3770,12 @@ public:
         const bool is_float = (datatype.dt == DataType::Fp32 || datatype.dt == DataType::Fp16);
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
 
-            switch(func)
+            switch (func)
             {
                 case BinaryFunction::Min:
                     _data->code += is_float ? "fmin(" : "min(";
@@ -3750,7 +3794,11 @@ public:
         }
     }
 
-    void op_ternary_elementwise_function(const Operand &dst_name, TernaryFunction func, const Operand &first_name, const Operand &second_name, const Operand &third_name) override
+    void op_ternary_elementwise_function(const Operand  &dst_name,
+                                         TernaryFunction func,
+                                         const Operand  &first_name,
+                                         const Operand  &second_name,
+                                         const Operand  &third_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *first  = operands.unpack(first_name);
@@ -3758,8 +3806,8 @@ public:
         const IVectorTile *third  = operands.unpack(third_name);
         const IVectorTile *dst    = operands.unpack(dst_name);
 
-        const int32_t     dst_h    = dst->format().h;
-        const std::string dt       = dst->underlying_source_variables()[0].type.str;
+        const int32_t     dst_h = dst->format().h;
+        const std::string dt    = dst->underlying_source_variables()[0].type.str;
 
         // Always perform an explicit cast. See similar comments in op_unary_elementwise_function
         const std::string first_prefix  = "(" + dt + ")";
@@ -3767,12 +3815,12 @@ public:
         const std::string third_prefix  = "(" + dt + ")";
 
         // Broadcasting on Y is automatic
-        for(int32_t y = 0; y < dst_h; ++y)
+        for (int32_t y = 0; y < dst_h; ++y)
         {
             _data->code += dst->vector(y).str;
             _data->code += " = ";
 
-            switch(func)
+            switch (func)
             {
                 case TernaryFunction::Select:
                     _data->code += "select(";
@@ -3822,7 +3870,12 @@ public:
         _data->code += "else\n";
     }
 
-    void op_for_loop_header(const Operand& var_name, BinaryOp cond_op, const Operand& cond_value_name, const Operand &update_var_name, AssignmentOp update_op, const Operand& update_value_name) override
+    void op_for_loop_header(const Operand &var_name,
+                            BinaryOp       cond_op,
+                            const Operand &cond_value_name,
+                            const Operand &update_var_name,
+                            AssignmentOp   update_op,
+                            const Operand &update_value_name) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *var          = operands.unpack(var_name);
@@ -3850,9 +3903,13 @@ public:
         _data->code += "\n";
     }
 
-    void op_load_immediate(const TensorOperand &o_tensor, const Operand &o_dst, const Operand &o_x,
-                           const Operand &o_y, const Operand &o_z, const Operand &o_batch_idx,
-                           const Operand &dilation_y) override
+    void op_load_immediate(const TensorOperand &o_tensor,
+                           const Operand       &o_dst,
+                           const Operand       &o_x,
+                           const Operand       &o_y,
+                           const Operand       &o_z,
+                           const Operand       &o_batch_idx,
+                           const Operand       &dilation_y) override
     {
         OperandUnpacker operands(_data->tiles, _data->arguments);
 
@@ -3875,10 +3932,10 @@ public:
         // Initialize the constant part
         load_writer->initialize(dst, x, z, b);
 
-        for(int i = 0; i < dst->format().h; ++i)
+        for (int i = 0; i < dst->format().h; ++i)
         {
             std::string coord_y = y->scalar(0, 0).str + " + " + std::to_string(i);
-            if(dil_y->scalar(0, 0).str != "1")
+            if (dil_y->scalar(0, 0).str != "1")
             {
                 coord_y += " * " + dil_y->scalar(0, 0).str;
             }
@@ -3888,9 +3945,12 @@ public:
         load_writer->finalize();
     }
 
-    void op_load_indirect(const TensorOperand &o_tensor, const Operand &o_dst, const Operand &o_x,
-                          const Operand &o_indirect_h, const Operand &o_z,
-                          const Operand &o_batch_idx) override
+    void op_load_indirect(const TensorOperand &o_tensor,
+                          const Operand       &o_dst,
+                          const Operand       &o_x,
+                          const Operand       &o_indirect_h,
+                          const Operand       &o_z,
+                          const Operand       &o_batch_idx) override
     {
         OperandUnpacker operands(_data->tiles, _data->arguments);
 
@@ -3912,7 +3972,7 @@ public:
         // Initialize the constant part
         load_writer->initialize(dst, x, z, b);
 
-        for(int i = 0; i < dst->format().h; ++i)
+        for (int i = 0; i < dst->format().h; ++i)
         {
             load_writer->write(std::make_pair(i, y_ind->scalar(0, i).str));
         }
@@ -3920,9 +3980,12 @@ public:
         load_writer->finalize();
     }
 
-    void op_store_immediate(const TensorOperand &tensor_name, const Operand &src_name, const Operand &x_name,
-                            const Operand &y_name, const Operand &z_name,
-                            const Operand &batch_index_name) override
+    void op_store_immediate(const TensorOperand &tensor_name,
+                            const Operand       &src_name,
+                            const Operand       &x_name,
+                            const Operand       &y_name,
+                            const Operand       &z_name,
+                            const Operand       &batch_index_name) override
     {
         OperandUnpacker operands(_data->tiles, _data->arguments);
 
@@ -3946,7 +4009,7 @@ public:
 
         int32_t tile_h = src->format().h;
 
-        for(int m0 = tile_h - 1; m0 >= 0; m0--)
+        for (int m0 = tile_h - 1; m0 >= 0; m0--)
         {
             store_writer->write(std::make_pair(m0, y->scalar(0, 0).str + " + " + std::to_string(m0)));
         }
@@ -3959,8 +4022,12 @@ public:
         _data->code += "return;\n";
     }
 
-    void util_get_indirect_buffer(const Operand &o_dst, const TensorOperand &o_tensor, const Operand &o_x,
-                                  const Operand &o_y, const Operand &o_x_off, const Operand &o_y_off) override
+    void util_get_indirect_buffer(const Operand       &o_dst,
+                                  const TensorOperand &o_tensor,
+                                  const Operand       &o_x,
+                                  const Operand       &o_y,
+                                  const Operand       &o_x_off,
+                                  const Operand       &o_y_off) override
     {
         OperandUnpacker    operands(_data->tiles, _data->arguments);
         const IVectorTile *dst   = operands.unpack(o_dst);
@@ -4002,7 +4069,7 @@ public:
         declare_tile("_y_s", TileInfo(DataType::Int32));
         auto x_s = operands.unpack(Operand("_x_s"));
         auto y_s = operands.unpack(Operand("_y_s"));
-        for(int i = 0; i < dst->format().h; ++i)
+        for (int i = 0; i < dst->format().h; ++i)
         {
             // x_s = (xi_0 + x_k);
             // y_s = (yi_0 + y_k);
@@ -4060,8 +4127,8 @@ public:
     }
 
 private:
-    GpuKernelWriterDataHolder *_data{ nullptr };
-    GpuKernelWriterAttribute  *_attr{ nullptr };
+    GpuKernelWriterDataHolder *_data{nullptr};
+    GpuKernelWriterAttribute  *_attr{nullptr};
 };
 
 /** IGpuKernelWriter factory class */
@@ -4074,10 +4141,9 @@ public:
      *
      * @return IGpuKernelWriter
      */
-    static std::unique_ptr<IGpuKernelWriter>
-    create(GpuKernelWriterAttribute *attr, GpuKernelWriterDataHolder *x)
+    static std::unique_ptr<IGpuKernelWriter> create(GpuKernelWriterAttribute *attr, GpuKernelWriterDataHolder *x)
     {
-        switch(x->programming_language())
+        switch (x->programming_language())
         {
             case GpuTargetLanguage::OpenCL:
                 return std::make_unique<ClKernelWriter>(attr, x);
@@ -4094,9 +4160,9 @@ adjust_step(TensorSamplerFormat tensor_format, int32_t step, const TensorInfo *t
 {
     auto tensor = tensor_info_id->shape;
 
-    int32_t dim[3] = { 0 };
+    int32_t dim[3] = {0};
 
-    switch(tensor_format)
+    switch (tensor_format)
     {
         case TensorSamplerFormat::C_W_H:
             dim[0] = tensor[0];

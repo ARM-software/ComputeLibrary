@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuDequantizeKernel.h"
 

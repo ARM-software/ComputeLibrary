@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_NEON_CROP_KERNEL_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -67,7 +67,12 @@ public:
      * @param[in]  crop_box_ind        Index of the crop box to be used from @p crop_boxes. Default is 0.
      * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
      */
-    void configure(const ITensor *input, const ITensor *crop_boxes, const ITensor *box_ind, ITensor *output, uint32_t crop_box_ind = 0, float extrapolation_value = 0);
+    void configure(const ITensor *input,
+                   const ITensor *crop_boxes,
+                   const ITensor *box_ind,
+                   ITensor       *output,
+                   uint32_t       crop_box_ind        = 0,
+                   float          extrapolation_value = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
      *
@@ -82,7 +87,12 @@ public:
      * @param[in] crop_box_ind        Index of the crop box to be used from @p crop_boxes. Default is 0.
      * @param[in] extrapolation_value Value to be used for values outside of the image. Default is 0.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *crop_boxes, const ITensorInfo *box_ind, const ITensorInfo *output, uint32_t crop_box_ind = 0, float extrapolation_value = 0);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *crop_boxes,
+                           const ITensorInfo *box_ind,
+                           const ITensorInfo *output,
+                           uint32_t           crop_box_ind        = 0,
+                           float              extrapolation_value = 0);
 
     /** Configure output tensor's shape as this can only be determined at runtime. */
     void configure_output_shape();
@@ -91,7 +101,8 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
     /** Function to use for in bounds crop for the particular tensor types passed to configure() */
-    using InBoundsCropFunction = void(const ITensor *, const ITensor *, float *, Coordinates, int32_t, int32_t, int32_t, bool, bool);
+    using InBoundsCropFunction =
+        void(const ITensor *, const ITensor *, float *, Coordinates, int32_t, int32_t, int32_t, bool, bool);
 
 private:
     const ITensor *_input;

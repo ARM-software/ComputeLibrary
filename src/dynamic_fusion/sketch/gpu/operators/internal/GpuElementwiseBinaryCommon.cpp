@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 
 namespace arm_compute
 {
@@ -38,9 +39,10 @@ namespace
 {
 void calculate_and_init_dst_if_empty(ITensorInfo *dst, const ITensorInfo *lhs, const ITensorInfo *rhs)
 {
-    if(dst->total_size() == 0U)
+    if (dst->total_size() == 0U)
     {
-        const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*lhs, *rhs);
+        const std::pair<TensorShape, ValidRegion> broadcast_pair =
+            ITensorInfo::broadcast_shape_and_valid_region(*lhs, *rhs);
         auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(broadcast_pair.first));
     }
 }
@@ -56,7 +58,7 @@ Status is_supported_op_helper(const GpuWorkloadContext                &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -64,7 +66,7 @@ Status is_supported_op_helper(const GpuWorkloadContext                &context,
     calculate_and_init_dst_if_empty(&dst_info_to_validate, lhs, rhs);
 
     // Check components
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
@@ -90,7 +92,8 @@ Status is_supported_op_helper(const GpuWorkloadContext                &context,
 GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
-ElementwiseBinaryCommonAttributes &ElementwiseBinaryCommonAttributes::operation(const ElementwiseBinaryCommonAttributes::ElementwiseOp &operation)
+ElementwiseBinaryCommonAttributes &
+ElementwiseBinaryCommonAttributes::operation(const ElementwiseBinaryCommonAttributes::ElementwiseOp &operation)
 {
     _operation = operation;
     return *this;
@@ -157,14 +160,14 @@ ITensorInfo *GpuElementwiseBinaryCommon::create_op(GpuWorkloadSketch            
 
     const auto sketch_ctx = sketch.implementation().context();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(sketch_ctx->cl_compile_context());
 
         // Add ElementwiseBinary Component
         {
             auto properties = IGpuKernelComponent::Properties();
-            properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+            properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, lhs);

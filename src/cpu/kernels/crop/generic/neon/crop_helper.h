@@ -80,7 +80,7 @@ inline float32x4_t load_as_f32(uint8_t *ptr)
 {
     return vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8(wrapper::vload(ptr)))));
 }
-}
+} // namespace cpu
 } // namespace arm_compute
 
 #endif //SRC_CORE_NEON_KERNELS_CROP_CROP_HELPER_H

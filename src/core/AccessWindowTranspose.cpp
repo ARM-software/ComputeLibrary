@@ -29,9 +29,12 @@
 
 using namespace arm_compute;
 
-ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
+ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window,
+                                                        ValidRegion   input_valid_region,
+                                                        bool          border_undefined,
+                                                        BorderSize    border_size) const
 {
-    if(_info == nullptr)
+    if (_info == nullptr)
     {
         return input_valid_region;
     }
@@ -41,7 +44,7 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     Coordinates  old_anchor(anchor);
     TensorShape  old_shape(shape);
 
-    if(!border_undefined)
+    if (!border_undefined)
     {
         border_size = BorderSize(0);
     }
@@ -53,7 +56,7 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     // the kernel to write back output values.
     // As the relation between input and output is transposed window.y() is
     // used for x anchor and window.x() for y anchor.
-    if(_info->dimension(0) > 1)
+    if (_info->dimension(0) > 1)
     {
         anchor.set(0, std::max<int>(window.y().start() * _scale_x, anchor[1] + border_size.top) + _x);
     }
@@ -69,15 +72,19 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     // a size of the region.
     // As the relation between input and output is transposed window.y() is
     // used for x shape and window.x() for y shape.
-    if(_info->dimension(0) > 1)
+    if (_info->dimension(0) > 1)
     {
-        shape.set(0, std::min<int>((old_anchor[1] + old_shape[0]) * _scale_x - border_size.right, (window.y().end() - window.y().step()) * _scale_x + _width) - anchor[0]);
+        shape.set(0, std::min<int>((old_anchor[1] + old_shape[0]) * _scale_x - border_size.right,
+                                   (window.y().end() - window.y().step()) * _scale_x + _width) -
+                         anchor[0]);
     }
-    shape.set(1, std::min<int>((old_anchor[0] + old_shape[1]) * _scale_y - border_size.bottom, (window.x().end() - window.x().step()) * _scale_y + _height) - anchor[1]);
+    shape.set(1, std::min<int>((old_anchor[0] + old_shape[1]) * _scale_y - border_size.bottom,
+                               (window.x().end() - window.x().step()) * _scale_y + _height) -
+                     anchor[1]);
 
     // For higher dimensions use the intersection of the window size and the
     // valid region of the input
-    for(size_t d = 2; d < _info->num_dimensions(); ++d)
+    for (size_t d = 2; d < _info->num_dimensions(); ++d)
     {
         anchor.set(d, std::max(window[d].start(), input_valid_region.anchor[d]));
         shape.set(d, std::min<int>(window[d].end(), input_valid_region.shape[d]) - anchor[d]);
@@ -89,7 +96,7 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
 bool AccessWindowTranspose::update_window_if_needed(Window &window) const
 {
     // Only update the window size if we can't use padding
-    if(_info == nullptr || _info->is_resizable())
+    if (_info == nullptr || _info->is_resizable())
     {
         return false;
     }
@@ -107,12 +114,12 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
     const int max_y = window.x().end() * _scale_y + _y;
 
     // Adjust window start for output's Y dimension (so X in (input) window)
-    if(min_y < 0)
+    if (min_y < 0)
     {
         // Calculate rows available above the tensor
         const int front_pad_y_available = -offset_first_element / strides[1];
 
-        if(min_y < front_pad_y_available)
+        if (min_y < front_pad_y_available)
         {
             // Not enough padding available, need to shrink the window
             const int start = adjust_up(min_y, front_pad_y_available, window.x().step() * _scale_y) - _y;
@@ -126,17 +133,18 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
     }
 
     // Adjust window end for Y dimension
-    if(max_y > static_cast<int>(shape[1]))
+    if (max_y > static_cast<int>(shape[1]))
     {
         const int stride_z = _info->num_dimensions() > 2 ? strides[2] : _info->total_size();
 
         // Calculate rows available below the tensor
         const int tail_pad_y_available = (stride_z / strides[1]) - shape[1] - front_pad_y;
 
-        if(static_cast<int>(shape[1]) + tail_pad_y_available < max_y)
+        if (static_cast<int>(shape[1]) + tail_pad_y_available < max_y)
         {
             // Not enough padding available, need to shrink the window
-            const int end = adjust_down(max_y, shape[1] + tail_pad_y_available, window.x().step() * _scale_y) + window.x().step() * _scale_y - _y - _height;
+            const int end = adjust_down(max_y, shape[1] + tail_pad_y_available, window.x().step() * _scale_y) +
+                            window.x().step() * _scale_y - _y - _height;
             window.set(0, Window::Dimension(window.x().start(), end / _scale_y, window.x().step()));
             window_modified = true;
         }
@@ -151,11 +159,14 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
     const int stride_y = _info->num_dimensions() > 1 ? strides[1] : _info->total_size();
 
     // Adjust window start for X dimension
-    if(min_x < 0)
+    if (min_x < 0)
     {
-        const int front_pad_x_available = -std::min<int>(static_cast<int>(offset_first_element) - front_pad_y * strides[1], stride_y - shape[0] * strides[0]) / static_cast<int>(strides[0]);
+        const int front_pad_x_available =
+            -std::min<int>(static_cast<int>(offset_first_element) - front_pad_y * strides[1],
+                           stride_y - shape[0] * strides[0]) /
+            static_cast<int>(strides[0]);
 
-        if(min_x < front_pad_x_available)
+        if (min_x < front_pad_x_available)
         {
             // Not enough padding available, need to shrink the window
             const int start = adjust_up(min_x, front_pad_x_available, window.y().step() * _scale_x) - _x;
@@ -168,14 +179,15 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
     }
 
     // Adjust window end for X dimension
-    if(max_x > static_cast<int>(shape[0]))
+    if (max_x > static_cast<int>(shape[0]))
     {
         const int tail_pad_x_available = (stride_y / strides[0]) - shape[0] - front_pad_x;
 
-        if(static_cast<int>(shape[0]) + tail_pad_x_available < max_x)
+        if (static_cast<int>(shape[0]) + tail_pad_x_available < max_x)
         {
             // Not enough padding available, need to shrink the window
-            const int end = adjust_down(max_x, shape[0] + tail_pad_x_available, window.y().step() * _scale_x) + window.y().step() * _scale_x - _x - _width;
+            const int end = adjust_down(max_x, shape[0] + tail_pad_x_available, window.y().step() * _scale_x) +
+                            window.y().step() * _scale_x - _x - _width;
             window.set(1, Window::Dimension(window.y().start(), end / _scale_x, window.y().step()));
             window_modified = true;
         }
@@ -189,7 +201,7 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
 bool AccessWindowTranspose::update_padding_if_needed(const Window &window)
 {
     // Only update the padding if the tensor allows it
-    if(_info == nullptr || !_info->is_resizable())
+    if (_info == nullptr || !_info->is_resizable())
     {
         return false;
     }

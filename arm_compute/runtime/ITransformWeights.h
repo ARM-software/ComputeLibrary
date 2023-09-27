@@ -72,7 +72,7 @@ public:
     /** Allow instances of this class to be moved */
     ITransformWeights &operator=(ITransformWeights &&other)
     {
-        if(this != &other)
+        if (this != &other)
         {
             _num_refcount = other._num_refcount.load();
             _reshape_run  = other._reshape_run;
@@ -119,9 +119,9 @@ public:
     }
 
 protected:
-    std::atomic<int32_t> _num_refcount{ 0 };
-    bool                 _reshape_run{ false };
+    std::atomic<int32_t> _num_refcount{0};
+    bool                 _reshape_run{false};
 };
-} // arm_compute
+} // namespace arm_compute
 
 #endif /*ARM_COMPUTE_ITRANSFORMWEIGHTS_H */

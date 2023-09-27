@@ -30,10 +30,10 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
@@ -42,7 +42,11 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input,
+                          unsigned int       axis,
+                          unsigned int       idx_input,
+                          unsigned int       num_tensors,
+                          const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -51,9 +55,10 @@ Status validate_arguments(const ITensorInfo *input, unsigned int axis, unsigned 
     ARM_COMPUTE_RETURN_ERROR_ON(axis > input->num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_stack_shape(*input, axis, num_tensors));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
+                                                           compute_stack_shape(*input, axis, num_tensors));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
@@ -61,7 +66,8 @@ Status validate_arguments(const ITensorInfo *input, unsigned int axis, unsigned 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int axis, unsigned int num_tensors, ITensorInfo *output)
+std::pair<Status, Window>
+validate_and_configure_window(ITensorInfo *input, unsigned int axis, unsigned int num_tensors, ITensorInfo *output)
 {
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_stack_shape(*input, axis, num_tensors)));
@@ -73,18 +79,23 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
 }
 } // namespace
 
-CLStackLayerKernel::CLStackLayerKernel()
-    : _input(nullptr), _output(nullptr)
+CLStackLayerKernel::CLStackLayerKernel() : _input(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLStackLayerKernel::configure(const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output)
+void CLStackLayerKernel::configure(
+    const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, axis, idx_input, num_tensors, output);
 }
 
-void CLStackLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output)
+void CLStackLayerKernel::configure(const CLCompileContext &compile_context,
+                                   const ICLTensor        *input,
+                                   unsigned int            axis,
+                                   unsigned int            idx_input,
+                                   unsigned int            num_tensors,
+                                   ICLTensor              *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), axis, idx_input, num_tensors, output->info()));
@@ -112,10 +123,15 @@ void CLStackLayerKernel::configure(const CLCompileContext &compile_context, cons
     _kernel.setArg<cl_uint>(idx, idx_input);
 }
 
-Status CLStackLayerKernel::validate(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output)
+Status CLStackLayerKernel::validate(const ITensorInfo *input,
+                                    unsigned int       axis,
+                                    unsigned int       idx_input,
+                                    unsigned int       num_tensors,
+                                    const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, axis, idx_input, num_tensors, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), axis, num_tensors, output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_and_configure_window(input->clone().get(), axis, num_tensors, output->clone().get()).first);
     return Status{};
 }
 

@@ -31,10 +31,11 @@
 #define ARM_COMPUTE_VALIDATE_OPERATOR_SUPPORT ((AclOperator *)(size_t)-1)
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /** __cplusplus */
 
-/** Create an activation operator
+    /** Create an activation operator
  *
  * Applies an activation function to a given tensor .
  * Compute Library supports a wide list of activation functions @ref AclActivationType.
@@ -75,11 +76,11 @@ extern "C" {
  *  - @ref AclUnsupportedTarget if operator for the requested target is unsupported
  *  - @ref AclInvalidArgument if a given argument is invalid
  */
-AclStatus AclActivation(AclOperator                  *op,
-                        AclContext                    ctx,
-                        const AclTensorDescriptor    *src,
-                        const AclTensorDescriptor    *dst,
-                        const AclActivationDescriptor info);
+    AclStatus AclActivation(AclOperator                  *op,
+                            AclContext                    ctx,
+                            const AclTensorDescriptor    *src,
+                            const AclTensorDescriptor    *dst,
+                            const AclActivationDescriptor info);
 #ifdef __cplusplus
 }
 #endif /** __cplusplus */

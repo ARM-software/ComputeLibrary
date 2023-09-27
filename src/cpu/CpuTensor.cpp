@@ -29,8 +29,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuTensor::CpuTensor(IContext *ctx, const AclTensorDescriptor &desc)
-    : ITensorV2(ctx), _legacy_tensor()
+CpuTensor::CpuTensor(IContext *ctx, const AclTensorDescriptor &desc) : ITensorV2(ctx), _legacy_tensor()
 {
     ARM_COMPUTE_ASSERT((ctx != nullptr) && (ctx->type() == Target::Cpu));
     _legacy_tensor = std::make_unique<Tensor>();
@@ -41,7 +40,7 @@ void *CpuTensor::map()
 {
     ARM_COMPUTE_ASSERT(_legacy_tensor.get() != nullptr);
 
-    if(_legacy_tensor == nullptr)
+    if (_legacy_tensor == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[CpuTensor:map]: Backing tensor does not exist!");
         return nullptr;

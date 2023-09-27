@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReverse.h"
 
-#include "src/core/NEON/kernels/NEReverseKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEReverseKernel.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,10 @@ void NEReverse::configure(const ITensor *input, ITensor *output, const ITensor *
     _kernel = std::move(k);
 }
 
-Status NEReverse::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
+Status NEReverse::validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const ITensorInfo *axis,
+                           bool               use_inverted_axis)
 {
     return NEReverseKernel::validate(input, output, axis, use_inverted_axis);
 }

@@ -32,13 +32,15 @@ namespace arm_compute
 namespace cpu
 {
 template <typename T, typename AccType = T>
-void instance_normalization_nchw(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
+void instance_normalization_nchw(
+    ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
 
 template <typename InputType, typename AccType = InputType>
 void vector_float_sum(AccType &result, AccType &result_square, const InputType &inputs);
 
 template <typename InputType, typename AccType = InputType>
-InputType vector_float_norm(const InputType &inputs, const AccType &vec_mean, const AccType &vec_multip, const AccType &vec_beta);
+InputType
+vector_float_norm(const InputType &inputs, const AccType &vec_mean, const AccType &vec_multip, const AccType &vec_beta);
 } // namespace cpu
 } // namespace arm_compute
 #endif //define SRC_CORE_SVE_KERNELS_INSTANCENORM_IMPL_H

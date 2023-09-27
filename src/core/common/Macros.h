@@ -25,9 +25,9 @@
 #define ARM_COMPUTE_COMMON_MACROS_H
 
 #define ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(TypeName) \
-    TypeName(const TypeName &) = delete;               \
+    TypeName(const TypeName &)            = delete;    \
     TypeName &operator=(const TypeName &) = delete;    \
     TypeName(TypeName &&)                 = default;   \
-    TypeName &operator=(TypeName &&) = default
+    TypeName &operator=(TypeName &&)      = default
 
 #endif /* ARM_COMPUTE_COMMON_MACROS_H */

@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-#include "src/cpu/kernels/range/generic/neon/impl.h"
-
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/range/generic/neon/impl.h"
 
 namespace arm_compute
 {

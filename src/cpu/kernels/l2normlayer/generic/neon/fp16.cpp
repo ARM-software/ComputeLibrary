@@ -32,13 +32,15 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp16_l2_normalize_x(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t unused_axis)
+void neon_fp16_l2_normalize_x(
+    const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t unused_axis)
 {
     ARM_COMPUTE_UNUSED(unused_axis);
     return l2_normalize_x<float16_t, 8>(in, sum, out, epsilon, window);
 }
 
-void neon_fp16_l2_normalize_yz(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)
+void neon_fp16_l2_normalize_yz(
+    const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window, size_t axis)
 {
     return l2_normalize_yz<float16_t, 8>(in, sum, out, epsilon, window, axis);
 }

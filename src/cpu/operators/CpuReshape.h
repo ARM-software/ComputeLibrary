@@ -24,8 +24,9 @@
 #ifndef ARM_COMPUTE_CPU_RESHAPE_H
 #define ARM_COMPUTE_CPU_RESHAPE_H
 
-#include "src/cpu/ICpuOperator.h"
 #include "arm_compute/core/Window.h"
+
+#include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute
 {
@@ -53,7 +54,7 @@ public:
     void run(ITensorPack &tensors) override;
 
 private:
-    bool    _is_prepared{ false } ;
+    bool _is_prepared{false};
 };
 } // namespace cpu
 } // namespace arm_compute

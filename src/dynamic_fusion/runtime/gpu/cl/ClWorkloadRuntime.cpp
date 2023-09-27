@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+
 #include "src/dynamic_fusion/runtime/gpu/cl/ClKernelRuntime.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSourceCode.h"
@@ -55,14 +56,14 @@ public:
     {
         DataView() = default;
         DataView(CLTensor *tensor, const TensorInfo &tensor_info, const AuxMemoryInfo &memory_info)
-            : tensor{ tensor }, tensor_info{ tensor_info }, memory_info{ memory_info }
+            : tensor{tensor}, tensor_info{tensor_info}, memory_info{memory_info}
         {
         }
-        ~DataView()                     = default;
-        DataView(const DataView &other) = default;
+        ~DataView()                                = default;
+        DataView(const DataView &other)            = default;
         DataView &operator=(const DataView &other) = default;
         DataView(DataView &&other)                 = default;
-        DataView &operator=(DataView &&other) = default;
+        DataView     &operator=(DataView &&other)  = default;
         CLTensor     *tensor{};      /**< Pointer to the auxiliary tensor */
         TensorInfo    tensor_info{}; /**< Associated tensor info */
         AuxMemoryInfo memory_info{}; /**< Memory requirement */
@@ -92,7 +93,7 @@ private:
     {
         const auto t_id             = tensor_info.id();
         auto       find_tensor_pair = _owned_tensors.find(t_id);
-        if(find_tensor_pair != _owned_tensors.end())
+        if (find_tensor_pair != _owned_tensors.end())
         {
             return find_tensor_pair->second.get();
         }
@@ -107,7 +108,7 @@ private:
     }
 
     std::map<ITensorInfo::Id, std::unique_ptr<CLTensor>> _owned_tensors{};
-    std::vector<DataView> _tensors{};
+    std::vector<DataView>                                _tensors{};
 };
 /** Construct auxiliary tensors required by @ref GpuWorkloadSourceCode
  *
@@ -120,12 +121,12 @@ private:
  */
 Status create_aux_tensors(ClAuxTensors *aux_tensors, const GpuWorkloadSourceCode &code)
 {
-    for(auto t_id : code.tensors())
+    for (auto t_id : code.tensors())
     {
         // Get tensor object
         const auto workload_arg  = code.query_tensor(t_id);
         ICLTensor *tensor_object = nullptr;
-        if(workload_arg->memory_descriptor()->memory_type == MemoryType::Auxiliary)
+        if (workload_arg->memory_descriptor()->memory_type == MemoryType::Auxiliary)
         {
             // Create aux tensor CLTensor object
             const TensorInfo tensor_info = *workload_arg->tensor_info();
@@ -133,7 +134,7 @@ Status create_aux_tensors(ClAuxTensors *aux_tensors, const GpuWorkloadSourceCode
             const auto aux_memory_info = workload_arg->memory_descriptor()->aux_memory_info;
             tensor_object              = aux_tensors->add_aux_tensor(tensor_info, aux_memory_info);
 
-            if(tensor_object == nullptr)
+            if (tensor_object == nullptr)
             {
                 return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Failed to construct an auxiliary tensor");
             }
@@ -156,7 +157,7 @@ public:
     ITensorPack *find_tensor_pack(UnitWorkloadId uwk_id)
     {
         auto tensor_pack = _tensor_packs.find(uwk_id);
-        if(tensor_pack != _tensor_packs.end())
+        if (tensor_pack != _tensor_packs.end())
         {
             return &(tensor_pack->second);
         }
@@ -173,7 +174,10 @@ public:
         return _tensor_packs.at(uwk_id);
     }
 
-    friend Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &code, const std::vector<CLTensor *> &user_tensors, const ClAuxTensors &aux_tensors);
+    friend Status create_tensor_lut(ClTensorLUT                   *tensor_lut,
+                                    const GpuWorkloadSourceCode   &code,
+                                    const std::vector<CLTensor *> &user_tensors,
+                                    const ClAuxTensors            &aux_tensors);
 
 private:
     /** Add a tensor pack and associate it with @ref UnitWorkloadId @p uwk_id
@@ -197,19 +201,22 @@ private:
  *
  * @return Status
  */
-Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &code, const std::vector<CLTensor *> &user_tensors, const ClAuxTensors &aux_tensors)
+Status create_tensor_lut(ClTensorLUT                   *tensor_lut,
+                         const GpuWorkloadSourceCode   &code,
+                         const std::vector<CLTensor *> &user_tensors,
+                         const ClAuxTensors            &aux_tensors)
 {
     // Combine user tensors and aux tensors
     std::map<ITensorInfo::Id, CLTensor *> tensor_map;
-    for(auto tensor : user_tensors)
+    for (auto tensor : user_tensors)
     {
         const auto t_id = tensor->info()->id();
 
-        if(tensor_map.find(t_id) != tensor_map.end())
+        if (tensor_map.find(t_id) != tensor_map.end())
         {
             // In case of elementwise in-place: give another Id to the In/Out tensor when passed again
             std::vector<ITensorInfo::Id> ids;
-            for(auto &t : tensor_map)
+            for (auto &t : tensor_map)
             {
                 ids.push_back(t.first);
             }
@@ -221,11 +228,11 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
             tensor_map[t_id] = tensor;
         }
     }
-    for(const auto &data : aux_tensors.get_tensors())
+    for (const auto &data : aux_tensors.get_tensors())
     {
         const auto t_id   = data.tensor_info.id();
         const auto tensor = data.tensor;
-        if(tensor_map.find(t_id) != tensor_map.end())
+        if (tensor_map.find(t_id) != tensor_map.end())
         {
             return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Clashing tensor ids");
         }
@@ -233,25 +240,25 @@ Status create_tensor_lut(ClTensorLUT *tensor_lut, const GpuWorkloadSourceCode &c
     }
 
     // Add tensor objects into corresponding tensor packs
-    for(auto id_tensor : tensor_map)
+    for (auto id_tensor : tensor_map)
     {
         const auto t_id          = id_tensor.first;
         const auto tensor_object = id_tensor.second;
-        if(tensor_object == nullptr)
+        if (tensor_object == nullptr)
         {
             return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Trying to add a nullptr into the tensor packs");
         }
-        if(tensor_object->allocator()->info().total_size() == 0U)
+        if (tensor_object->allocator()->info().total_size() == 0U)
         {
             return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "No allocated memory found in tensor");
         }
 
-        for(auto uwk_id : code.get_unit_workloads_from_tensor(t_id))
+        for (auto uwk_id : code.get_unit_workloads_from_tensor(t_id))
         {
             ITensorPack *tensor_pack = tensor_lut->find_tensor_pack(uwk_id);
-            if(tensor_pack == nullptr)
+            if (tensor_pack == nullptr)
             {
-                tensor_lut->add_tensor_pack(uwk_id, ITensorPack{ { t_id, tensor_object } });
+                tensor_lut->add_tensor_pack(uwk_id, ITensorPack{{t_id, tensor_object}});
             }
             else
             {
@@ -269,15 +276,14 @@ struct ClWorkloadRuntime::Implementation
 {
     std::map<UnitWorkloadId, std::unique_ptr<ClKernelRuntime>> _kernels{};
     std::map<UnitWorkloadId, std::unique_ptr<ClKernelRuntime>> _kernels_prep{};
-    bool                  _is_configured{ false };
-    bool                  _is_prepared{ false };
-    ClTensorLUT           _tensor_lut{};
-    ClAuxTensors          _aux_tensors{};
-    GpuWorkloadSourceCode _source_code{};
+    bool                                                       _is_configured{false};
+    bool                                                       _is_prepared{false};
+    ClTensorLUT                                                _tensor_lut{};
+    ClAuxTensors                                               _aux_tensors{};
+    GpuWorkloadSourceCode                                      _source_code{};
 };
 
-ClWorkloadRuntime::ClWorkloadRuntime()
-    : _impl{ std::make_unique<Implementation>() }
+ClWorkloadRuntime::ClWorkloadRuntime() : _impl{std::make_unique<Implementation>()}
 {
 }
 
@@ -286,18 +292,19 @@ ClWorkloadRuntime::~ClWorkloadRuntime() = default;
 Status ClWorkloadRuntime::configure(const GpuWorkloadSketch &sketch)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(_impl->_is_configured, "ClWorkloadRuntime cannot be re-configured");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(sketch.gpu_context()->gpu_language() != GpuLanguage::OpenCL, "ClWorkloadRuntime cannot be configured with non-OpenCL workload sketch");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(sketch.gpu_context()->gpu_language() != GpuLanguage::OpenCL,
+                                    "ClWorkloadRuntime cannot be configured with non-OpenCL workload sketch");
     // Generate source code
     _impl->_source_code = sketch.implementation().generate_source_code();
     // Configure unit workload from source code
-    for(auto uwk_id : _impl->_source_code.unit_workloads())
+    for (auto uwk_id : _impl->_source_code.unit_workloads())
     {
         const auto work  = _impl->_source_code.query_unit_workload(uwk_id);
         const auto stage = work.stage().stage;
         auto       k     = std::make_unique<ClKernelRuntime>();
         k->configure(*sketch.gpu_context()->cl_compile_context(), work.code());
 
-        switch(stage)
+        switch (stage)
         {
             case UnitWorkloadStage::Stage::Run:
             {
@@ -323,9 +330,9 @@ Status ClWorkloadRuntime::configure(const GpuWorkloadSketch &sketch)
 
 void ClWorkloadRuntime::prepare()
 {
-    if(!_impl->_is_prepared)
+    if (!_impl->_is_prepared)
     {
-        for(auto &id_kernel_pair : _impl->_kernels_prep)
+        for (auto &id_kernel_pair : _impl->_kernels_prep)
         {
             const bool flush_queue = false;
             const auto uwk_id      = id_kernel_pair.first;
@@ -344,7 +351,7 @@ Status ClWorkloadRuntime::run(const std::vector<CLTensor *> &tensors)
     const auto st = create_tensor_lut(&_impl->_tensor_lut, _impl->_source_code, tensors, _impl->_aux_tensors);
     ARM_COMPUTE_RETURN_ON_ERROR(st);
     prepare();
-    for(auto &id_kernel_pair : _impl->_kernels)
+    for (auto &id_kernel_pair : _impl->_kernels)
     {
         // Flush the command queue on the last kernel
         const bool flush_queue = false;
@@ -358,7 +365,7 @@ Status ClWorkloadRuntime::run(const std::vector<CLTensor *> &tensors)
 std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> ClWorkloadRuntime::get_auxiliary_tensors()
 {
     std::vector<std::tuple<CLTensor *, TensorInfo, AuxMemoryInfo>> aux_tensors;
-    for(const auto &data : _impl->_aux_tensors.get_tensors())
+    for (const auto &data : _impl->_aux_tensors.get_tensors())
     {
         aux_tensors.emplace_back(data.tensor, data.tensor_info, data.memory_info);
     }

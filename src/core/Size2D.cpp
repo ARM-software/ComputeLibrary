@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Size2D.h"
+
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -30,4 +31,4 @@ std::string Size2D::to_string() const
 {
     return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height);
 }
-}
+} // namespace arm_compute

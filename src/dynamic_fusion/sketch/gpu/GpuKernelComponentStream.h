@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTSTREAM
 
 #include "arm_compute/dynamic_fusion/sketch/MemoryDescriptor.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSourceCode.h"
 
@@ -53,7 +54,9 @@ public:
      * @param[in] services @ref GpuComponentServices to be used throughout the stream
      * @param[in] mem_map  @ref MemoryDescriptor map used to assemble the @ref GpuWorkloadSourceCode
      */
-    GpuKernelComponentStream(GpuWorkloadContext *context, GpuComponentServices *services, const MemoryDescriptorMap &mem_map);
+    GpuKernelComponentStream(GpuWorkloadContext        *context,
+                             GpuComponentServices      *services,
+                             const MemoryDescriptorMap &mem_map);
     /** Allow instances of this class to be copy constructed */
     GpuKernelComponentStream(const GpuKernelComponentStream &stream) = default;
     /** Allow instances of this class to be copied */

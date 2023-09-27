@@ -70,21 +70,21 @@ public:
      * @param[in] args Component arguments except for component id, which is auto-allocated
      */
     template <typename T, typename... Args>
-    void add_new_component(Args &&... args)
+    void add_new_component(Args &&...args)
     {
-        auto                      comp           = _services->component_factory().create<T>(std::forward<Args>(args)...);
-        ArgumentPack<ITensorInfo> tensors        = comp->tensors();
+        auto                      comp    = _services->component_factory().create<T>(std::forward<Args>(args)...);
+        ArgumentPack<ITensorInfo> tensors = comp->tensors();
         const auto                src_tensor_ids = get_tensor_ids(tensors.get_const_src_tensors());
         const auto                dst_tensor_ids = get_tensor_ids(tensors.get_const_dst_tensors());
-        bool                      success        = _dependency_graph.add_operator(comp->id(), src_tensor_ids, dst_tensor_ids);
+        bool                      success = _dependency_graph.add_operator(comp->id(), src_tensor_ids, dst_tensor_ids);
         ARM_COMPUTE_UNUSED(success);
         ARM_COMPUTE_ERROR_ON(!success);
         _components[comp->id()] = std::move(comp);
-        for(auto t : tensors.get_const_src_tensors())
+        for (auto t : tensors.get_const_src_tensors())
         {
             _tensors[t->id()] = t;
         }
-        for(auto t : tensors.get_const_dst_tensors())
+        for (auto t : tensors.get_const_dst_tensors())
         {
             _tensors[t->id()] = t;
         }
@@ -99,11 +99,11 @@ public:
 
 private:
     static std::vector<DependencyGraph::TensorId> get_tensor_ids(const std::vector<const ITensorInfo *> tensors);
-    GpuWorkloadContext   *_context;
-    GpuComponentServices *_services;
+    GpuWorkloadContext                           *_context;
+    GpuComponentServices                         *_services;
     std::map<ComponentId, std::unique_ptr<IGpuKernelComponent>> _components;
     std::map<ITensorInfo::Id, const ITensorInfo *>              _tensors;
-    DependencyGraph _dependency_graph{};
+    DependencyGraph                                             _dependency_graph{};
 };
 } // namespace dynamic_fusion
 } // namespace experimental

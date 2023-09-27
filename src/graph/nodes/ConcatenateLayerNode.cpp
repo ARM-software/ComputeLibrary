@@ -24,17 +24,17 @@
 #include "arm_compute/graph/nodes/ConcatenateLayerNode.h"
 
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
 #include "arm_compute/graph/Utils.h"
-
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-ConcatenateLayerNode::ConcatenateLayerNode(unsigned int total_nodes, descriptors::ConcatLayerDescriptor concat_descriptor)
+ConcatenateLayerNode::ConcatenateLayerNode(unsigned int                       total_nodes,
+                                           descriptors::ConcatLayerDescriptor concat_descriptor)
     : _total_nodes(total_nodes), _concat_descriptor(std::move(concat_descriptor)), _is_enabled(true)
 {
     _input_edges.resize(_total_nodes, EmptyEdgeID);
@@ -73,7 +73,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
     // Extract shapes
     std::vector<const TensorShape *> shapes;
     shapes.reserve(input_descriptors.size());
-    for(auto &input_descriptor : input_descriptors)
+    for (auto &input_descriptor : input_descriptors)
     {
         shapes.emplace_back(&input_descriptor.shape);
     }
@@ -85,7 +85,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
 
 bool ConcatenateLayerNode::forward_descriptors()
 {
-    if(_outputs[0] != NullTensorID)
+    if (_outputs[0] != NullTensorID)
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -101,24 +101,22 @@ TensorDescriptor ConcatenateLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
     // Check if all input tensors are set
-    bool are_all_inputs_set = std::all_of(std::begin(_input_edges), std::end(_input_edges), [](const EdgeID & eid)
-    {
-        return eid != EmptyEdgeID;
-    });
+    bool are_all_inputs_set = std::all_of(std::begin(_input_edges), std::end(_input_edges),
+                                          [](const EdgeID &eid) { return eid != EmptyEdgeID; });
 
     TensorDescriptor output_info = {};
 
-    if(are_all_inputs_set)
+    if (are_all_inputs_set)
     {
         std::vector<TensorDescriptor> inputs_descriptors;
-        for(unsigned int i = 0; i < _input_edges.size(); ++i)
+        for (unsigned int i = 0; i < _input_edges.size(); ++i)
         {
             const Tensor *t = _graph->tensor(input_id(i));
             ARM_COMPUTE_ERROR_ON(t == nullptr);
             inputs_descriptors.push_back(t->desc());
         }
         output_info = compute_output_descriptor(inputs_descriptors, _concat_descriptor.axis);
-        if(!_concat_descriptor.output_qinfo.empty())
+        if (!_concat_descriptor.output_qinfo.empty())
         {
             output_info.quant_info = _concat_descriptor.output_qinfo;
         }

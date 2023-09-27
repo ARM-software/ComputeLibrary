@@ -23,8 +23,8 @@
  */
 #include "ClComponentDirectConv2d.h"
 
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Conv2dAttributes.h"
 
 #include "src/core/CL/CLValidate.h"
@@ -57,7 +57,8 @@ bool ClComponentDirectConv2dSettings::fast_relaxed_math() const
     return _fast_relaxed_math;
 }
 
-ClComponentDirectConv2dSettings &ClComponentDirectConv2dSettings::direct_conv_descriptor(const DirectConvComputeKernelInfo &desc)
+ClComponentDirectConv2dSettings &
+ClComponentDirectConv2dSettings::direct_conv_descriptor(const DirectConvComputeKernelInfo &desc)
 {
     _desc = desc;
     return *this;
@@ -68,11 +69,10 @@ DirectConvComputeKernelInfo ClComponentDirectConv2dSettings::direct_conv_descrip
     return _desc;
 }
 
-Status ClComponentDirectConv2d::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
+Status ClComponentDirectConv2d::validate(const Properties                &properties,
+                                         const ArgumentPack<ITensorInfo> &tensors,
+                                         const Attributes                &attributes,
+                                         const Settings                  &settings)
 {
     ARM_COMPUTE_UNUSED(properties);
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
@@ -86,7 +86,7 @@ Status ClComponentDirectConv2d::validate(
     // Matching data type
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, wei);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bia);
     }
@@ -94,7 +94,7 @@ Status ClComponentDirectConv2d::validate(
     // Matching data layout
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, wei);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, bia);
     }
@@ -103,7 +103,7 @@ Status ClComponentDirectConv2d::validate(
     ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(wei->tensor_shape().total_size() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(bia->tensor_shape().total_size() == 0);
     }
@@ -112,22 +112,23 @@ Status ClComponentDirectConv2d::validate(
     // wei shape is correct
     const DataLayout data_layout = src->data_layout();
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(wei->dimension(channel_idx) != src->dimension(channel_idx), "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(wei->dimension(channel_idx) != src->dimension(channel_idx),
+                                    "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(wei->num_dimensions() > 4, "Weights can be at most 4 dimensional");
 
     // dst shape is correct
-    PadStrideInfo legacy_pad_stride(attributes.stride().x(), attributes.stride().y(), attributes.pad().left, attributes.pad().right, attributes.pad().top,
-                                    attributes.pad().bottom, DimensionRoundingType{});
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
-                                                       misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, legacy_pad_stride));
+    PadStrideInfo legacy_pad_stride(attributes.stride().x(), attributes.stride().y(), attributes.pad().left,
+                                    attributes.pad().right, attributes.pad().top, attributes.pad().bottom,
+                                    DimensionRoundingType{});
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+        dst->tensor_shape(), misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, legacy_pad_stride));
 
     // bia shape is correct
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(bia->dimension(0) != wei->dimension(3),
                                         "Biases size and number of dst feature maps should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bia->num_dimensions() > 1,
-                                        "Biases should be one dimensional");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bia->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
     // 2. Check support level
@@ -137,24 +138,25 @@ Status ClComponentDirectConv2d::validate(
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
 
     const auto desc = settings.direct_conv_descriptor();
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 &&
+                                        desc.n0 != 16,
                                     "N0 can only be: 1, 2, 3, 4, 8, and 16");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 &&
+                                        desc.k0 != 16,
                                     "K0 can only be: 1, 2, 3, 4, 8, and 16");
     return Status{};
 }
 
-ClComponentDirectConv2d::ClComponentDirectConv2d(
-    ComponentId                      id,
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
-    : IGpuKernelComponent{ id, properties, tensors },
+ClComponentDirectConv2d::ClComponentDirectConv2d(ComponentId                      id,
+                                                 const Properties                &properties,
+                                                 const ArgumentPack<ITensorInfo> &tensors,
+                                                 const Attributes                &attributes,
+                                                 const Settings                  &settings)
+    : IGpuKernelComponent{id, properties, tensors},
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer{ std::make_unique<ClTemplateDirectConv2d>(id, tensors, attributes, settings) }
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer{ std::make_unique<GpuCkwDirectConv2d>(id, tensors, attributes, settings) }
+      _component_writer{std::make_unique<ClTemplateDirectConv2d>(id, tensors, attributes, settings)}
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
+      _component_writer{std::make_unique<GpuCkwDirectConv2d>(id, tensors, attributes, settings)}
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }
@@ -165,7 +167,7 @@ ClComponentDirectConv2d::~ClComponentDirectConv2d()
 
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuTemplateComponentWriter *ClComponentDirectConv2d::template_writer() const
-#else // ACL_INTERNAL_TEST_CKW_IN_DF
+#else  // ACL_INTERNAL_TEST_CKW_IN_DF
 const IGpuCkwComponentDriver *ClComponentDirectConv2d::ckw_component_driver() const
 #endif // ACL_INTERNAL_TEST_CKW_IN_DF
 {

@@ -23,6 +23,7 @@
  */
 
 #include "ckw/Kernel.h"
+
 #include "ckw/types/TargetLanguage.h"
 
 namespace ckw

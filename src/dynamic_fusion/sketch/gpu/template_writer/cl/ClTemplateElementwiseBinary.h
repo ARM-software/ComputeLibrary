@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEELEMENTWISEBINARY
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/GpuKernelVariableTable.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
@@ -48,9 +49,7 @@ public:
      * @param[in] tensors    Tensor arguments to the components
      * @param[in] attributes Component attributes
      */
-    ClTemplateElementwiseBinary(ComponentId                      id,
-                                const ArgumentPack<ITensorInfo> &tensors,
-                                const Attributes                &attributes);
+    ClTemplateElementwiseBinary(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
     /** Prevent instances of this class from being copy constructed */
     ClTemplateElementwiseBinary(const ClTemplateElementwiseBinary &elementwise) = delete;
     /** Prevent instances of this class from being copied */

@@ -36,9 +36,9 @@ bool update_padding_for_cl_image(arm_compute::ITensorInfo *tensor)
     constexpr unsigned int num_floats_per_pixel = 4;
 
     const unsigned int stride_y_in_elements = tensor->strides_in_bytes()[1] / tensor->element_size();
-    const unsigned int pixel_aligment       = arm_compute::get_cl_image_pitch_alignment(
-                                                  arm_compute::CLKernelLibrary::get().get_device());
-    if(pixel_aligment == 0)
+    const unsigned int pixel_aligment =
+        arm_compute::get_cl_image_pitch_alignment(arm_compute::CLKernelLibrary::get().get_device());
+    if (pixel_aligment == 0)
     {
         return false;
     }

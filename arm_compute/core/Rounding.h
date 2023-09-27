@@ -42,5 +42,5 @@ enum class RoundingPolicy
  * @return Rounded value of the argument x.
  */
 int round(float x, RoundingPolicy rounding_policy);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ROUNDING_H */

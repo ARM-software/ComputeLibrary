@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -74,7 +75,10 @@ public:
      * @param[in]  dst_window      (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      *
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, Window *dst_window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   Window                 *dst_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCopy
      *
      * @param[in] input      Source tensor. Data types supported: All.

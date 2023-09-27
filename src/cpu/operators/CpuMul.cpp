@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuMulKernel.h"
 
@@ -33,14 +34,24 @@ namespace arm_compute
 {
 namespace cpu
 {
-Status CpuMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+Status CpuMul::validate(const ITensorInfo         *src1,
+                        const ITensorInfo         *src2,
+                        const ITensorInfo         *dst,
+                        float                      scale,
+                        ConvertPolicy              overflow_policy,
+                        RoundingPolicy             rounding_policy,
                         const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuMulKernel::validate(src1, src2, dst, scale, overflow_policy, rounding_policy);
 }
 
-void CpuMul::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+void CpuMul::configure(ITensorInfo               *src1,
+                       ITensorInfo               *src2,
+                       ITensorInfo               *dst,
+                       float                      scale,
+                       ConvertPolicy              overflow_policy,
+                       RoundingPolicy             rounding_policy,
                        const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
@@ -58,13 +69,19 @@ void CpuMul::run(ITensorPack &tensors)
     NEScheduler::get().schedule_op(_kernel.get(), split_dimension, _kernel->window(), tensors);
 }
 
-Status CpuComplexMul::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info)
+Status CpuComplexMul::validate(const ITensorInfo         *src1,
+                               const ITensorInfo         *src2,
+                               const ITensorInfo         *dst,
+                               const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuComplexMulKernel::validate(src1, src2, dst);
 }
 
-void CpuComplexMul::configure(ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info)
+void CpuComplexMul::configure(ITensorInfo               *src1,
+                              ITensorInfo               *src2,
+                              ITensorInfo               *dst,
+                              const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src1, src2, dst, act_info);

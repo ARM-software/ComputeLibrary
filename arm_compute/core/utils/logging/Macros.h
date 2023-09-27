@@ -48,48 +48,48 @@ inline std::string signature_name(const std::string &pretty_func)
     do                                                                                   \
     {                                                                                    \
         auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(__logger != nullptr)                                                          \
+        if (__logger != nullptr)                                                         \
         {                                                                                \
             __logger->log(log_level, msg);                                               \
         }                                                                                \
-    } while(false)
+    } while (false)
 
 #define ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME(logger_name, log_level, msg)                   \
     do                                                                                   \
     {                                                                                    \
         auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(__logger != nullptr)                                                          \
+        if (__logger != nullptr)                                                         \
         {                                                                                \
             std::ostringstream s;                                                        \
             s << ARM_COMPUTE_SIGNATURE_NAME << " : " << msg;                             \
             __logger->log(log_level, s.str());                                           \
         }                                                                                \
-    } while(false)
+    } while (false)
 
 #define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)                     \
     do                                                                                        \
     {                                                                                         \
         auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name);      \
-        if(__logger != nullptr)                                                               \
+        if (__logger != nullptr)                                                              \
         {                                                                                     \
             size_t size     = ::snprintf(nullptr, 0, fmt, __VA_ARGS__) + 1;                   \
             auto   char_str = std::make_unique<char[]>(size);                                 \
             ::snprintf(char_str.get(), size, fmt, __VA_ARGS__);                               \
             __logger->log(log_level, std::string(char_str.get(), char_str.get() + size - 1)); \
         }                                                                                     \
-    } while(false)
+    } while (false)
 
 #define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                           \
     do                                                                                   \
     {                                                                                    \
         auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(__logger != nullptr)                                                          \
+        if (__logger != nullptr)                                                         \
         {                                                                                \
             std::ostringstream s;                                                        \
             s << stream;                                                                 \
             __logger->log(log_level, s.str());                                           \
         }                                                                                \
-    } while(false)
+    } while (false)
 
 #else /* ARM_COMPUTE_LOGGING_ENABLED */
 

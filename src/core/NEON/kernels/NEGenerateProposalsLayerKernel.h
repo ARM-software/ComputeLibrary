@@ -78,5 +78,5 @@ private:
     ITensor           *_all_anchors;
     ComputeAnchorsInfo _anchors_info;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif // ARM_COMPUTE_NEGENERATEPROPOSALSLAYERKERNEL_H

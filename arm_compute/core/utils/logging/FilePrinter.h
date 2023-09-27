@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_LOGGING_FILE_PRINTER_H
 #define ARM_COMPUTE_LOGGING_FILE_PRINTER_H
 
-#include "arm_compute/core/utils/logging/IPrinter.h"
-
 #include "arm_compute/core/utils/io/FileHandler.h"
+#include "arm_compute/core/utils/logging/IPrinter.h"
 
 namespace arm_compute
 {

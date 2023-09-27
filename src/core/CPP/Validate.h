@@ -38,8 +38,8 @@ namespace arm_compute
  *
  * @return Status
  */
-inline Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
-                                            const ITensorInfo *tensor_info)
+inline Status
+error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line, const ITensorInfo *tensor_info)
 {
     bool fp16_kernels_enabled = false;
 #if defined(ARM_COMPUTE_ENABLE_FP16) && defined(ENABLE_FP16_KERNELS)
@@ -47,8 +47,9 @@ inline Status error_on_unsupported_cpu_fp16(const char *function, const char *fi
 #endif /* defined(ARM_COMPUTE_ENABLE_FP16) && defined(ENABLE_FP16_KERNELS) */
 
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::F16) && (!CPUInfo::get().has_fp16() || !fp16_kernels_enabled),
-                                        function, file, line, "This CPU architecture does not support F16 data type, you need v8.2 or above");
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
+        (tensor_info->data_type() == DataType::F16) && (!CPUInfo::get().has_fp16() || !fp16_kernels_enabled), function,
+        file, line, "This CPU architecture does not support F16 data type, you need v8.2 or above");
     return Status{};
 }
 
@@ -61,8 +62,8 @@ inline Status error_on_unsupported_cpu_fp16(const char *function, const char *fi
  *
  * @return Status
  */
-inline Status error_on_unsupported_cpu_bf16(const char *function, const char *file, const int line,
-                                            const ITensorInfo *tensor_info)
+inline Status
+error_on_unsupported_cpu_bf16(const char *function, const char *file, const int line, const ITensorInfo *tensor_info)
 {
     bool bf16_kernels_enabled = false;
 #if defined(ARM_COMPUTE_ENABLE_BF16)
@@ -70,8 +71,9 @@ inline Status error_on_unsupported_cpu_bf16(const char *function, const char *fi
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::BFLOAT16) && (!CPUInfo::get().has_bf16() || !bf16_kernels_enabled),
-                                        function, file, line, "This CPU architecture does not support BFloat16 data type, you need v8.6 or above");
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
+        (tensor_info->data_type() == DataType::BFLOAT16) && (!CPUInfo::get().has_bf16() || !bf16_kernels_enabled),
+        function, file, line, "This CPU architecture does not support BFloat16 data type, you need v8.6 or above");
     return Status{};
 }
 
@@ -84,8 +86,8 @@ inline Status error_on_unsupported_cpu_bf16(const char *function, const char *fi
  *
  * @return Status
  */
-inline Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
-                                            const ITensor *tensor)
+inline Status
+error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line, const ITensor *tensor)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_cpu_fp16(function, file, line, tensor->info()));
@@ -101,8 +103,8 @@ inline Status error_on_unsupported_cpu_fp16(const char *function, const char *fi
  *
  * @return Status
  */
-inline Status error_on_unsupported_cpu_bf16(const char *function, const char *file, const int line,
-                                            const ITensor *tensor)
+inline Status
+error_on_unsupported_cpu_bf16(const char *function, const char *file, const int line, const ITensor *tensor)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_cpu_bf16(function, file, line, tensor->info()));

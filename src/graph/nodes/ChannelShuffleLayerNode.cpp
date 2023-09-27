@@ -30,8 +30,7 @@ namespace arm_compute
 {
 namespace graph
 {
-ChannelShuffleLayerNode::ChannelShuffleLayerNode(unsigned int num_groups)
-    : _num_groups(num_groups)
+ChannelShuffleLayerNode::ChannelShuffleLayerNode(unsigned int num_groups) : _num_groups(num_groups)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -44,7 +43,7 @@ unsigned int ChannelShuffleLayerNode::num_groups() const
 
 bool ChannelShuffleLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/GPUTarget.h"
+
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 
 #include <map>
@@ -35,8 +36,7 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMDefaultTypeMidgard::CLGEMMDefaultTypeMidgard(GPUTarget gpu)
-    : ICLGEMMKernelSelection(gpu)
+CLGEMMDefaultTypeMidgard::CLGEMMDefaultTypeMidgard(GPUTarget gpu) : ICLGEMMKernelSelection(gpu)
 {
 }
 
@@ -45,22 +45,21 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::select_kernel(const CLGEMMKernelSelec
     // _target could be used in the future to have a dedicated heuristic for each GPU IP
     ARM_COMPUTE_UNUSED(_target);
 
-    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeMidgard::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
+    using FunctionExecutorPtr = CLGEMMKernelType (CLGEMMDefaultTypeMidgard::*)(
+        unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant);
 
     // Configurations for Midgard architectures
-    static std::map<DataType, FunctionExecutorPtr> gemm_configs =
-    {
-        { DataType::F32, &CLGEMMDefaultTypeMidgard::default_f32 },
-        { DataType::F16, &CLGEMMDefaultTypeMidgard::default_f16 },
-        { DataType::QASYMM8, &CLGEMMDefaultTypeMidgard::default_q8 },
-        { DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeMidgard::default_q8 },
-        { DataType::QSYMM8, &CLGEMMDefaultTypeMidgard::default_q8 },
-        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeMidgard::default_q8 }
-    };
+    static std::map<DataType, FunctionExecutorPtr> gemm_configs = {
+        {DataType::F32, &CLGEMMDefaultTypeMidgard::default_f32},
+        {DataType::F16, &CLGEMMDefaultTypeMidgard::default_f16},
+        {DataType::QASYMM8, &CLGEMMDefaultTypeMidgard::default_q8},
+        {DataType::QASYMM8_SIGNED, &CLGEMMDefaultTypeMidgard::default_q8},
+        {DataType::QSYMM8, &CLGEMMDefaultTypeMidgard::default_q8},
+        {DataType::QSYMM8_PER_CHANNEL, &CLGEMMDefaultTypeMidgard::default_q8}};
 
     const DataType data_type = params.data_type;
 
-    if(gemm_configs.find(data_type) != gemm_configs.end())
+    if (gemm_configs.find(data_type) != gemm_configs.end())
     {
         return (this->*gemm_configs[data_type])(params.m, params.n, params.k, params.b, params.is_rhs_constant);
     }
@@ -68,7 +67,8 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::select_kernel(const CLGEMMKernelSelec
     ARM_COMPUTE_ERROR("Not supported data type");
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f32(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(n, k, b);
 
@@ -76,7 +76,8 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f32(unsigned int m, unsigned 
     return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f16(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(n, k, b);
 
@@ -84,7 +85,8 @@ CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_f16(unsigned int m, unsigned 
     return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED : CLGEMMKernelType::NATIVE;
 }
 
-CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
+CLGEMMKernelType CLGEMMDefaultTypeMidgard::default_q8(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool is_rhs_constant)
 {
     ARM_COMPUTE_UNUSED(m, n, k, b, is_rhs_constant);
 

@@ -25,6 +25,7 @@
 #define SRC_RUNTIME_CL_MLGO_HEURISTIC_TREE_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/runtime/CL/mlgo/Common.h"
 
 #include <map>
@@ -84,7 +85,7 @@ public:
     struct BranchNode : public Node
     {
         BranchNode(NodeID id, Condition cond, NodeID t_node, NodeID f_node)
-            : id{ id }, condition{ cond }, true_node{ t_node }, false_node{ f_node }
+            : id{id}, condition{cond}, true_node{t_node}, false_node{f_node}
         {
         }
         NodeType type() const override
@@ -100,8 +101,7 @@ public:
     template <typename T>
     struct LeafNode : public Node
     {
-        LeafNode(NodeID id, T val)
-            : id{ id }, value{ val }
+        LeafNode(NodeID id, T val) : id{id}, value{val}
         {
         }
         NodeType type() const override
@@ -177,19 +177,19 @@ public:
     bool check();
 
 private:
-    static constexpr size_t _max_query_depth{ 1000 }; // Maximum depth of query
-    static constexpr size_t _max_num_nodes{ 100000 }; // Maximum number of nodes contained by the tree
-    static constexpr NodeID _root{ 0 };               // Root tree ID
+    static constexpr size_t _max_query_depth{1000}; // Maximum depth of query
+    static constexpr size_t _max_num_nodes{100000}; // Maximum number of nodes contained by the tree
+    static constexpr NodeID _root{0};               // Root tree ID
 
 private:
     bool check_if_structurally_correct() const;
 
 private:
-    TreeID        _id;                             /**< Heuristic tree ID */
-    HeuristicType _heuristic_type;                 /**< Heuristic type */
-    std::string   _ip_target;                      /**< IP target associated with the tree */
-    DataType      _data_type;                      /**< Data type associated with the tree */
-    std::map<NodeID, std::unique_ptr<Node>> _tree; /**< Tree representation */
+    TreeID                                  _id;             /**< Heuristic tree ID */
+    HeuristicType                           _heuristic_type; /**< Heuristic type */
+    std::string                             _ip_target;      /**< IP target associated with the tree */
+    DataType                                _data_type;      /**< Data type associated with the tree */
+    std::map<NodeID, std::unique_ptr<Node>> _tree;           /**< Tree representation */
 };
 } // namespace mlgo
 

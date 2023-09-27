@@ -60,7 +60,10 @@ inline bool is_align_corners_allowed_sampling_policy(SamplingPolicy sampling_pol
  *
  * @return True if precomputation is required
  */
-bool is_precomputation_required(DataLayout data_layout, DataType data_type, InterpolationPolicy policy, BorderMode border_mode);
+bool is_precomputation_required(DataLayout          data_layout,
+                                DataType            data_type,
+                                InterpolationPolicy policy,
+                                BorderMode          border_mode);
 
 } // namespace scale_utils
 } // namespace arm_compute

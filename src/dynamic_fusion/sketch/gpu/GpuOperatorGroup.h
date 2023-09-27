@@ -25,9 +25,11 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUOPERATORGROUP
 
 #include "arm_compute/core/ITensorInfo.h"
+
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuOperatorProperties.h"
 #include "src/dynamic_fusion/sketch/utils/DependencyGraph.h"
+
 #include <map>
 
 namespace arm_compute
@@ -104,7 +106,7 @@ public:
     const Operator *get_root_operator() const;
 
 private:
-    DependencyGraph _graph{};
+    DependencyGraph                _graph{};
     std::map<OperatorId, Operator> _operators{};
 };
 } // namespace dynamic_fusion

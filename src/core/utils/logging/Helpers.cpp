@@ -30,12 +30,11 @@ using namespace arm_compute::logging;
 
 const std::string &arm_compute::logging::string_from_log_level(LogLevel log_level)
 {
-    static std::map<LogLevel, const std::string> log_level_map =
-    {
-        { LogLevel::VERBOSE, "VERBOSE" },
-        { LogLevel::INFO, "INFO" },
-        { LogLevel::WARN, "WARN" },
-        { LogLevel::OFF, "OFF" },
+    static std::map<LogLevel, const std::string> log_level_map = {
+        {LogLevel::VERBOSE, "VERBOSE"},
+        {LogLevel::INFO, "INFO"},
+        {LogLevel::WARN, "WARN"},
+        {LogLevel::OFF, "OFF"},
     };
 
     return log_level_map[log_level];

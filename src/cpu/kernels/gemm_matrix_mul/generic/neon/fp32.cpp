@@ -28,9 +28,16 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp32_gemm_matrix_mul(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha, const bool is_dst_vector)
+void neon_fp32_gemm_matrix_mul(const ITensor    *lhs,
+                               const ITensor    *rhs,
+                               ITensor          *dst,
+                               const Window     &window,
+                               const ThreadInfo &info,
+                               float             alpha,
+                               const bool        is_dst_vector)
 {
-    return (is_dst_vector) ? vector_matrix_multiply_f32(lhs, rhs, dst, window, info, alpha) : matrix_matrix_multiply_f32(lhs, rhs, dst, window, info, alpha);
+    return (is_dst_vector) ? vector_matrix_multiply_f32(lhs, rhs, dst, window, info, alpha)
+                           : matrix_matrix_multiply_f32(lhs, rhs, dst, window, info, alpha);
 }
-} // namespce cpu
+} // namespace cpu
 } // namespace arm_compute

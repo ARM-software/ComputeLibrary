@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+
 #include "support/StringSupport.h"
 
 #include <ostream>
@@ -36,8 +37,7 @@ namespace arm_compute
 class CLTuningParams
 {
 public:
-    CLTuningParams(const CLTuningParams &tuning_params)
-        : _lws(tuning_params._lws), _wbsm(tuning_params._wbsm)
+    CLTuningParams(const CLTuningParams &tuning_params) : _lws(tuning_params._lws), _wbsm(tuning_params._wbsm)
     {
     }
 
@@ -45,18 +45,16 @@ public:
         : _lws(lws_x, lws_y, lws_z), _wbsm(wbsm)
     {
     }
-    CLTuningParams(cl::NDRange lws, cl_int wbsm = 0)
-        : _lws(lws), _wbsm(wbsm)
+    CLTuningParams(cl::NDRange lws, cl_int wbsm = 0) : _lws(lws), _wbsm(wbsm)
     {
     }
 
-    CLTuningParams(cl_int wbsm)
-        : CLTuningParams(cl::NullRange, wbsm)
+    CLTuningParams(cl_int wbsm) : CLTuningParams(cl::NullRange, wbsm)
     {
     }
-    CLTuningParams& operator=(const CLTuningParams &other)
+    CLTuningParams &operator=(const CLTuningParams &other)
     {
-        _lws = other._lws;
+        _lws  = other._lws;
         _wbsm = other._wbsm;
         return *this;
     }
@@ -84,8 +82,9 @@ public:
     std::string to_string(CLTuningInfo tuning_info)
     {
         std::string tuning_params_string = "";
-        tuning_params_string += ";" + support::cpp11::to_string(_lws[0]) + ";" + support::cpp11::to_string(_lws[1]) + ";" + support::cpp11::to_string(_lws[2]);
-        if(tuning_info.tune_wbsm)
+        tuning_params_string += ";" + support::cpp11::to_string(_lws[0]) + ";" + support::cpp11::to_string(_lws[1]) +
+                                ";" + support::cpp11::to_string(_lws[2]);
+        if (tuning_info.tune_wbsm)
         {
             tuning_params_string += ";" + support::cpp11::to_string(_wbsm);
         }
@@ -98,19 +97,19 @@ public:
         std::vector<std::string> array;
         std::stringstream        ss(tuning_params_string);
         std::string              temp;
-        while(ss >> temp)
+        while (ss >> temp)
         {
             array.push_back(temp);
         }
         // Read 3 values for lws
-        if(array.size() < 3)
+        if (array.size() < 3)
         {
             return false;
         }
         const unsigned int lws_0 = support::cpp11::stoi(array[0]);
         const unsigned int lws_1 = support::cpp11::stoi(array[1]);
         const unsigned int lws_2 = support::cpp11::stoi(array[2]);
-        if(lws_0 == 0 && lws_1 == 0 && lws_2 == 0)
+        if (lws_0 == 0 && lws_1 == 0 && lws_2 == 0)
         {
             // If lws values are 0, cl::NullRange has to be used
             // otherwise the lws object will be badly created
@@ -121,9 +120,9 @@ public:
             _lws = cl::NDRange(lws_0, lws_1, lws_2);
         }
         array.erase(array.begin(), array.begin() + 3);
-        if(tuning_info.tune_wbsm)
+        if (tuning_info.tune_wbsm)
         {
-            if(array.size() < 1)
+            if (array.size() < 1)
             {
                 return false;
             }

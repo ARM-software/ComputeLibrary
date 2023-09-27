@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/WindowIterator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/WindowIterator.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "support/ToolchainSupport.h"
 #include "utils/Utils.h"
 
@@ -38,7 +39,7 @@ using namespace utils;
 void find_min_max(int size, const float *data, float *min, float *max)
 {
     *min = *max = data[0];
-    for(int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         const float val = data[i];
         *min            = std::min(*min, val);
@@ -66,11 +67,11 @@ QuantizationInfo choose_quantization_params(float min, float max)
 
     // But we need to nudge the zero_point to an integer (exact quantized value)
     std::uint8_t zero_point_nudged = 0;
-    if(zero_point_real < qmin)
+    if (zero_point_real < qmin)
     {
         zero_point_nudged = qmin;
     }
-    else if(zero_point_real > qmax)
+    else if (zero_point_real > qmax)
     {
         zero_point_nudged = qmax;
     }
@@ -85,7 +86,7 @@ QuantizationInfo choose_quantization_params(float min, float max)
 
 void quantize_values(int size, qasymm8_t *output, float *input, const QuantizationInfo qinfo)
 {
-    for(int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         output[i] = quantize_qasymm8(input[i], qinfo);
     }
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
     bool   default_input = true;
 
     // Parse args
-    if(argc < 3) /* case default matrix sizes */
+    if (argc < 3) /* case default matrix sizes */
     {
         // Print help
         std::cout << "Usage: ./build/neon_gemm_qasymm8 M N K\n";
@@ -144,23 +145,23 @@ int main(int argc, char **argv)
 
     // Fill in: one is the identity matrix, other is sequential values
     // src1: Identity matrix
-    for(size_t i = 0; i < M * K; i++)
+    for (size_t i = 0; i < M * K; i++)
     {
         src1_ptr[i] = 0;
     }
-    for(size_t i = 0; i < M; i++)
+    for (size_t i = 0; i < M; i++)
     {
         src1_ptr[i * K + i] = 1.0f;
     }
 
     // src2: Sequential values matrix
-    for(size_t i = 0; i < K * N; i++)
+    for (size_t i = 0; i < K * N; i++)
     {
         src2_ptr[i] = i * 1.123f;
     }
 
     // Otherwise if M, N, K is given, fill in with random values
-    if(!default_input)
+    if (!default_input)
     {
         fill_random_tensor(src1, 0.f, 1.f);
         fill_random_tensor(src2, 0.f, 1.f);
@@ -223,7 +224,7 @@ int main(int argc, char **argv)
     NEGEMMLowpOutputStage gemmlowp_output_stage;
     int                   output_multiplier;
     int                   output_shift;
-    float                 multiplier = (src1_qinfo.uniform().scale * src2_qinfo.uniform().scale) / dst0_qinfo.uniform().scale;
+    float multiplier = (src1_qinfo.uniform().scale * src2_qinfo.uniform().scale) / dst0_qinfo.uniform().scale;
     quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
     std::cout << "(q_multiplier, q_shift) = (" << output_multiplier << ", " << output_shift << ")\n\n";
 

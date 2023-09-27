@@ -28,8 +28,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/elementwise_unary/list.h"
@@ -59,12 +60,13 @@ std::unique_ptr<uint8_t[]> q8_prepare_lut(ElementWiseUnary op, const ITensorInfo
     const auto dst_min_fp = (((is_signed) ? -128 : 0) - dst_qi.offset) * dst_qi.scale;
     const auto dst_max_fp = (((is_signed) ? 127 : 255) - dst_qi.offset) * dst_qi.scale;
 
-    for(int i = 0; i < 256; ++i)
+    for (int i = 0; i < 256; ++i)
     {
-        const auto in     = (is_signed) ? dequantize_qasymm8_signed(static_cast<int8_t>(i), src_qi) : dequantize_qasymm8(i, src_qi);
-        float      result = 0;
+        const auto in =
+            (is_signed) ? dequantize_qasymm8_signed(static_cast<int8_t>(i), src_qi) : dequantize_qasymm8(i, src_qi);
+        float result = 0;
 
-        switch(op)
+        switch (op)
         {
             case ElementWiseUnary::RSQRT:
                 result = 1 / sqrt(in);
@@ -100,7 +102,8 @@ std::unique_ptr<uint8_t[]> q8_prepare_lut(ElementWiseUnary op, const ITensorInfo
 
         result = utility::clamp(result, dst_min_fp, dst_max_fp);
 
-        const auto out = (is_signed) ? static_cast<uint8_t>(quantize_qasymm8_signed(result, dst_qi)) : quantize_qasymm8(result, dst_qi);
+        const auto out = (is_signed) ? static_cast<uint8_t>(quantize_qasymm8_signed(result, dst_qi))
+                                     : quantize_qasymm8(result, dst_qi);
         lut[i]         = out;
     }
 
@@ -109,97 +112,68 @@ std::unique_ptr<uint8_t[]> q8_prepare_lut(ElementWiseUnary op, const ITensorInfo
 
 #endif // __aarch64__
 
-static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> available_kernels =
-{
+static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> available_kernels = {
     {
         "sve_fp32_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::F32 && data.isa.sve);
-        },
+        [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F32 && data.isa.sve); },
         REGISTER_FP32_SVE(sve_fp32_elementwise_unary),
         nullptr,
     },
     {
         "sve_fp16_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::F16 && data.isa.sve && data.isa.fp16);
-        },
+        [](const DataTypeISASelectorData &data) { return (data.dt == DataType::F16 && data.isa.sve && data.isa.fp16); },
         REGISTER_FP16_SVE(sve_fp16_elementwise_unary),
         nullptr,
     },
     {
         "sve_s32_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::S32 && data.isa.sve);
-        },
+        [](const DataTypeISASelectorData &data) { return (data.dt == DataType::S32 && data.isa.sve); },
         REGISTER_INTEGER_SVE(sve_s32_elementwise_unary),
         nullptr,
     },
     {
         "neon_fp32_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::F32;
-        },
+        [](const DataTypeISASelectorData &data) { return data.dt == DataType::F32; },
         REGISTER_FP32_NEON(neon_fp32_elementwise_unary),
         nullptr,
     },
     {
         "neon_fp16_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::F16 && data.isa.fp16;
-        },
+        [](const DataTypeISASelectorData &data) { return data.dt == DataType::F16 && data.isa.fp16; },
         REGISTER_FP16_NEON(neon_fp16_elementwise_unary),
         nullptr,
     },
     {
         "neon_s32_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::S32;
-        },
+        [](const DataTypeISASelectorData &data) { return data.dt == DataType::S32; },
         REGISTER_INTEGER_NEON(neon_s32_elementwise_unary),
         nullptr,
     },
 #ifdef __aarch64__
     {
         "sve2_q8_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve2;
-        },
+        [](const DataTypeISASelectorData &data)
+        { return (data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve2; },
         REGISTER_QASYMM8_SVE2(sve2_q8_elementwise_unary),
         &q8_prepare_lut,
     },
     {
         "neon_q8_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED;
-        },
+        [](const DataTypeISASelectorData &data)
+        { return data.dt == DataType::QASYMM8 || data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_NEON(neon_q8_elementwise_unary),
         &q8_prepare_lut,
     },
 #else  // __aarch64__
     {
         "neon_qasymm8_signed_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::QASYMM8_SIGNED;
-        },
+        [](const DataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8_SIGNED; },
         REGISTER_QASYMM8_SIGNED_NEON(neon_qasymm8_signed_elementwise_unary),
         nullptr,
     },
     {
         "neon_qasymm8_elementwise_unary",
-        [](const DataTypeISASelectorData & data)
-        {
-            return data.dt == DataType::QASYMM8;
-        },
+        [](const DataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8; },
         REGISTER_QASYMM8_NEON(neon_qasymm8_elementwise_unary),
         nullptr,
     },
@@ -211,7 +185,8 @@ static const std::vector<CpuElementwiseUnaryKernel::ElementwiseUnaryKernel> avai
 void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo &src, ITensorInfo &dst)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(op, src, dst));
-    const auto uk = CpuElementwiseUnaryKernel::get_implementation(DataTypeISASelectorData{ src.data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuElementwiseUnaryKernel::get_implementation(
+        DataTypeISASelectorData{src.data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     _op         = op;
@@ -219,12 +194,12 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
     _name       = std::string("CpuElementwiseUnaryKernel").append("/").append(uk->name);
 
     // If input shape is dynamic, expect a configured window and dst at run-time.
-    if(src.is_dynamic())
+    if (src.is_dynamic())
     {
         return;
     }
 
-    if(uk->prepare_func != nullptr)
+    if (uk->prepare_func != nullptr)
     {
         _lut = uk->prepare_func(op, &src, &dst);
     }
@@ -238,28 +213,31 @@ Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInf
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
 
-    const auto *uk = CpuElementwiseUnaryKernel::get_implementation(DataTypeISASelectorData{ src.data_type(), CPUInfo::get().get_isa() });
+    const auto *uk = CpuElementwiseUnaryKernel::get_implementation(
+        DataTypeISASelectorData{src.data_type(), CPUInfo::get().get_isa()});
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
-    switch(op)
+    switch (op)
     {
         case ElementWiseUnary::EXP:
         case ElementWiseUnary::RSQRT:
         case ElementWiseUnary::LOG:
         case ElementWiseUnary::ROUND:
         case ElementWiseUnary::SIN:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32,
+                                                                 DataType::QASYMM8, DataType::QASYMM8_SIGNED);
             break;
         case ElementWiseUnary::NEG:
         case ElementWiseUnary::ABS:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::S32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::S32,
+                                                                 DataType::QASYMM8, DataType::QASYMM8_SIGNED);
             break;
         default:
             ARM_COMPUTE_ERROR("ElementWiseUnary operation not supported");
     }
     // Validate in case of configured dst
-    if(dst.total_size() > 0)
+    if (dst.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
     }

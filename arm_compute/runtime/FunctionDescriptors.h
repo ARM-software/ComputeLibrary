@@ -41,16 +41,16 @@ enum class FFTDirection
 /** Descriptor used by the FFT1D function */
 struct FFT1DInfo
 {
-    unsigned int axis{ 0 };                          /**< Axis to run the FFT on. */
-    FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
+    unsigned int axis{0};                          /**< Axis to run the FFT on. */
+    FFTDirection direction{FFTDirection::Forward}; /**< Direction of the FFT. */
 };
 
 /** Descriptor used by the FFT2D function */
 struct FFT2DInfo
 {
-    unsigned int axis0{ 0 };                         /**< Axis to run first pass on. If same, multiple transforms are performed on single axis*/
-    unsigned int axis1{ 1 };                         /**< Axis to run second pass on. If same, multiple transforms are performed on single axis*/
-    FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
+    unsigned int axis0{0}; /**< Axis to run first pass on. If same, multiple transforms are performed on single axis*/
+    unsigned int axis1{1}; /**< Axis to run second pass on. If same, multiple transforms are performed on single axis*/
+    FFTDirection direction{FFTDirection::Forward}; /**< Direction of the FFT. */
 };
 
 /** Descriptor used by the 2d Convolution function */
@@ -64,15 +64,20 @@ struct Conv2dInfo
                bool                       enable_fast_math,
                unsigned int               num_groups,
                const WeightsInfo         &weights_info = WeightsInfo())
-        : conv_info(conv_info), dilation(dilation), act_info(act_info), enable_fast_math(enable_fast_math), num_groups(num_groups), weights_info(weights_info)
+        : conv_info(conv_info),
+          dilation(dilation),
+          act_info(act_info),
+          enable_fast_math(enable_fast_math),
+          num_groups(num_groups),
+          weights_info(weights_info)
     {
     }
 
     PadStrideInfo       conv_info{};
-    Size2D              dilation{ 1U, 1U };
+    Size2D              dilation{1U, 1U};
     ActivationLayerInfo act_info{};
-    bool                enable_fast_math{ false };
-    unsigned int        num_groups{ 1 };
+    bool                enable_fast_math{false};
+    unsigned int        num_groups{1};
     WeightsInfo         weights_info{};
 };
 
@@ -87,16 +92,21 @@ struct Conv3dInfo
                const Size3D                &dilation,
                const DimensionRoundingType &round_type,
                bool                         enable_fast_math)
-        : stride(stride), padding(padding), act_info(act_info), dilation(dilation), round_type(round_type), enable_fast_math(enable_fast_math)
+        : stride(stride),
+          padding(padding),
+          act_info(act_info),
+          dilation(dilation),
+          round_type(round_type),
+          enable_fast_math(enable_fast_math)
     {
     }
 
-    Size3D                stride{ 1U, 1U, 1U };
+    Size3D                stride{1U, 1U, 1U};
     Padding3D             padding{};
     ActivationLayerInfo   act_info{};
-    Size3D                dilation{ 1U, 1U, 1U };
+    Size3D                dilation{1U, 1U, 1U};
     DimensionRoundingType round_type{};
-    bool                  enable_fast_math{ false };
+    bool                  enable_fast_math{false};
 };
 
 } // namespace arm_compute

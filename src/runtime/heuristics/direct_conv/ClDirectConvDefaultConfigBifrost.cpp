@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -37,25 +38,27 @@ namespace cl_direct_conv
 {
 using namespace arm_compute::misc::shape_calculator;
 
-ClDirectConvDefaultConfigBifrost::ClDirectConvDefaultConfigBifrost(GPUTarget gpu)
-    : IClDirectConvKernelConfig(gpu)
+ClDirectConvDefaultConfigBifrost::ClDirectConvDefaultConfigBifrost(GPUTarget gpu) : IClDirectConvKernelConfig(gpu)
 {
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info)
 {
-    using ConfigurationFunctionExecutorPtr = DirectConvComputeKernelInfo (ClDirectConvDefaultConfigBifrost::*)(const ITensorInfo * src, const ITensorInfo * wei, const PadStrideInfo & conv_info);
+    using ConfigurationFunctionExecutorPtr = DirectConvComputeKernelInfo (ClDirectConvDefaultConfigBifrost::*)(
+        const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
 
-    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(&ClDirectConvDefaultConfigBifrost::configure_G71_f32,
-                                                                          &ClDirectConvDefaultConfigBifrost::configure_G71_f16,
-                                                                          &ClDirectConvDefaultConfigBifrost::configure_G71_u8);
+    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G71(
+        &ClDirectConvDefaultConfigBifrost::configure_G71_f32, &ClDirectConvDefaultConfigBifrost::configure_G71_f16,
+        &ClDirectConvDefaultConfigBifrost::configure_G71_u8);
 
-    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_default(&ClDirectConvDefaultConfigBifrost::configure_default_f32,
-                                                                              &ClDirectConvDefaultConfigBifrost::configure_default_f16,
-                                                                              &ClDirectConvDefaultConfigBifrost::configure_G71_u8);
+    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_default(
+        &ClDirectConvDefaultConfigBifrost::configure_default_f32,
+        &ClDirectConvDefaultConfigBifrost::configure_default_f16, &ClDirectConvDefaultConfigBifrost::configure_G71_u8);
 
     ConfigurationFunctionExecutorPtr func = nullptr;
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::G71:
             func = configs_G71.get_function(src->data_type());
@@ -69,18 +72,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure(const IT
     return (this->*func)(src, wei, conv_info);
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f32(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 2;
         }
@@ -93,18 +98,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f32(
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f16(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 4;
         }
@@ -117,18 +124,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_f16(
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_u8(const ITensorInfo   *src,
+                                                                               const ITensorInfo   *wei,
+                                                                               const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 4;
         }
@@ -141,18 +150,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_G71_u8(c
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_f32(const ITensorInfo   *src,
+                                                                                    const ITensorInfo   *wei,
+                                                                                    const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 2;
         }
@@ -165,18 +176,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_f16(const ITensorInfo   *src,
+                                                                                    const ITensorInfo   *wei,
+                                                                                    const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 4;
         }
@@ -188,5 +201,5 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigBifrost::configure_default_
 
     return desc;
 }
-} // namespace opencl
+} // namespace cl_direct_conv
 } // namespace arm_compute

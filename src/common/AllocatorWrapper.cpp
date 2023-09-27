@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/common/AllocatorWrapper.h"
+
 #include "arm_compute/core/Error.h"
 
 namespace arm_compute
@@ -57,7 +58,7 @@ void AllocatorWrapper::aligned_free(void *ptr)
 
 void AllocatorWrapper::set_user_data(void *user_data)
 {
-    if(user_data != nullptr)
+    if (user_data != nullptr)
     {
         _backing_allocator.user_data = user_data;
     }

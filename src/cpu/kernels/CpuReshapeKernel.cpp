@@ -29,9 +29,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/NEON/INEKernel.h"
+
 #include "src/core/helpers/Utils.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/INEKernel.h"
+
 #include <cstdint>
 
 /** [NEReshapeLayerKernel Kernel] **/
@@ -49,7 +51,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
 
-    if(dst->tensor_shape().total_size() != 0)
+    if (dst->tensor_shape().total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
@@ -59,29 +61,30 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     return Status{};
 }
 
-
 template <typename T>
 void reshape_tensor_per_element(const Window &window, const ITensor *src, ITensor *dst)
 {
     const TensorShape &src_shape = src->info()->tensor_shape();
     const TensorShape &dst_shape = dst->info()->tensor_shape();
 
-    Iterator    dst_it(dst, window);
+    Iterator dst_it(dst, window);
 
-    execute_window_loop(window, [&](const Coordinates & dst_coord)
-    {
-        Coordinates src_coord = index2coords(src_shape, coords2index(dst_shape, dst_coord));
-        const auto output_ptr = dst->ptr_to_element(dst_coord);
-        const auto input_ptr  = src->ptr_to_element(src_coord);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &dst_coord)
+        {
+            Coordinates src_coord  = index2coords(src_shape, coords2index(dst_shape, dst_coord));
+            const auto  output_ptr = dst->ptr_to_element(dst_coord);
+            const auto  input_ptr  = src->ptr_to_element(src_coord);
 
-        *reinterpret_cast<T *>(output_ptr) = *reinterpret_cast<T *>(input_ptr);
-    },
-    dst_it);
+            *reinterpret_cast<T *>(output_ptr) = *reinterpret_cast<T *>(input_ptr);
+        },
+        dst_it);
 }
 
-void reshape_tensor_per_element_selector(const Window &window, const ITensor *src, ITensor *dst )
+void reshape_tensor_per_element_selector(const Window &window, const ITensor *src, ITensor *dst)
 {
-    switch(src->info()->data_type())
+    switch (src->info()->data_type())
     {
         case DataType::U8:
         case DataType::S8:
@@ -131,22 +134,24 @@ void reshape_tensor_per_row(const Window &window, const ITensor *src, ITensor *d
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator dst_it(dst, win);
-    execute_window_loop(win, [&]( Coordinates & id)
-    {
-        dst_coord = id;
-
-        for(int x = window_start_x; x < window_end_x; x += src_row_size)
+    execute_window_loop(
+        win,
+        [&](Coordinates &id)
         {
-            src_coord  = index2coords(src_shape, coords2index(dst_shape, dst_coord));
-            output_ptr = dst->ptr_to_element(dst_coord);
-            input_ptr  = src->ptr_to_element(src_coord);
+            dst_coord = id;
 
-            std::memcpy(output_ptr, input_ptr, row_size_in_bytes);
+            for (int x = window_start_x; x < window_end_x; x += src_row_size)
+            {
+                src_coord  = index2coords(src_shape, coords2index(dst_shape, dst_coord));
+                output_ptr = dst->ptr_to_element(dst_coord);
+                input_ptr  = src->ptr_to_element(src_coord);
 
-            dst_coord.increment(Window::DimX, src_row_size);
-        }
-    },
-    dst_it);
+                std::memcpy(output_ptr, input_ptr, row_size_in_bytes);
+
+                dst_coord.increment(Window::DimX, src_row_size);
+            }
+        },
+        dst_it);
 }
 
 void reshape_tensor_per_window(const Window &window, const ITensor *src, ITensor *dst)
@@ -213,8 +218,8 @@ void CpuReshapeKernel::prepare(ITensorPack &tensors)
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto       dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    const ITensorInfo* src_info = src->info();
-    const ITensorInfo* dst_info = dst->info();
+    const ITensorInfo *src_info = src->info();
+    const ITensorInfo *dst_info = dst->info();
 
     // Calculate kernel window based on the padding info
     Window win;
@@ -226,7 +231,7 @@ void CpuReshapeKernel::prepare(ITensorPack &tensors)
     const auto src_row_size       = static_cast<int>(src_info->tensor_shape()[0]);
     const auto dst_row_size       = static_cast<int>(dst_info->tensor_shape()[0]);
 
-    if(!src_has_holes && !dst_has_holes)
+    if (!src_has_holes && !dst_has_holes)
     {
         std::tie(win, _split_dimension) = calculate_squashed_or_max_window(*dst_info);
         /*

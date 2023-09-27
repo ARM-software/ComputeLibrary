@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -102,17 +103,32 @@ public:
      *                              available which may introduce a drop of accuracy as well. Default is false
      * @param[in]  num_groups       (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
-    void configure(ITensorInfo *src, ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false, unsigned int num_groups = 1);
+    void configure(ITensorInfo               *src,
+                   ITensorInfo               *weights,
+                   const ITensorInfo         *biases,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
+                   const WeightsInfo         &weights_info     = WeightsInfo(),
+                   const Size2D              &dilation         = Size2D(1U, 1U),
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false,
+                   unsigned int               num_groups       = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CpuConv2d
      *
      * Similar to CpuConv2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false,
-                           unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const WeightsInfo         &weights_info     = WeightsInfo(),
+                           const Size2D              &dilation         = Size2D(1U, 1U),
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false,
+                           unsigned int               num_groups       = 1);
     /** Static function to check if given info will return the convolution called by @ref CpuConv2d
      *
      * @param[in] src              Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
@@ -132,11 +148,17 @@ public:
      *
      * @return the Convolution Method Hint
      */
-    static ConvolutionMethod get_convolution_method(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info,
-                                                    const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static ConvolutionMethod get_convolution_method(const ITensorInfo         *src,
+                                                    const ITensorInfo         *weights,
+                                                    const ITensorInfo         *dst,
+                                                    const PadStrideInfo       &conv_info,
+                                                    const WeightsInfo         &weights_info     = WeightsInfo(),
+                                                    const Size2D              &dilation         = Size2D(1U, 1U),
+                                                    const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                                                    bool                       enable_fast_math = false);
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

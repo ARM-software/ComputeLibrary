@@ -25,9 +25,9 @@
 #define ARM_COMPUTE_ICPPKERNEL_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/experimental/Types.h"
 
 namespace arm_compute
 {
@@ -38,7 +38,7 @@ class ITensor;
 class ICPPKernel : public IKernel
 {
 public:
-    static constexpr size_t default_mws       = 1; /* Default minimum workload size value  - no impact */
+    static constexpr size_t default_mws = 1; /* Default minimum workload size value  - no impact */
 
     /** Default destructor */
     virtual ~ICPPKernel() = default;

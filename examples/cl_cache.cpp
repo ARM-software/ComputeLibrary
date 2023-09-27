@@ -25,8 +25,9 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/Utils.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
+#include "arm_compute/runtime/CL/Utils.h"
+
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -43,14 +44,15 @@ public:
 
     bool do_setup(int argc, char **argv) override
     {
-        std::cout << "Once the program has run and created the file cache.bin, rerun with --restore_cache." << std::endl;
+        std::cout << "Once the program has run and created the file cache.bin, rerun with --restore_cache."
+                  << std::endl;
         CLScheduler::get().default_init();
 
-        if(argc > 1)
+        if (argc > 1)
         {
             std::string argv1 = argv[1];
             std::transform(argv1.begin(), argv1.end(), argv1.begin(), ::tolower);
-            if(argv1 == "--restore_cache")
+            if (argv1 == "--restore_cache")
             {
                 // Load the precompiled kernels from a file into the kernel library, in this way the next time they are needed
                 // compilation won't be required.
@@ -110,11 +112,13 @@ private:
         window.use_tensor_dimensions(reference.info()->tensor_shape());
         Iterator it_ref(&reference, window);
         Iterator it_res(&result, window);
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            assert(*reinterpret_cast<unsigned char *>(it_ref.ptr()) == *reinterpret_cast<unsigned char *>(it_res.ptr()));
-        },
-        it_ref, it_res);
+        execute_window_loop(
+            window,
+            [&](const Coordinates &) {
+                assert(*reinterpret_cast<unsigned char *>(it_ref.ptr()) ==
+                       *reinterpret_cast<unsigned char *>(it_res.ptr()));
+            },
+            it_ref, it_res);
         reference.unmap();
         result.unmap();
     }
@@ -126,11 +130,9 @@ private:
         window.use_tensor_dimensions(tensor.info()->tensor_shape());
         Iterator      it_tensor(&tensor, window);
         unsigned char val(0);
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            *reinterpret_cast<unsigned char *>(it_tensor.ptr()) = val++;
-        },
-        it_tensor);
+        execute_window_loop(
+            window, [&](const Coordinates &) { *reinterpret_cast<unsigned char *>(it_tensor.ptr()) = val++; },
+            it_tensor);
         tensor.unmap();
     }
     void init_tensor(const TensorShape shape, CLTensor &tensor, DataType type, DataLayout layout)

@@ -23,18 +23,17 @@
  */
 #include "arm_compute/graph/backends/CL/CLDeviceBackend.h"
 
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/Logger.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/graph/backends/BackendRegistrar.h"
 #include "arm_compute/graph/backends/CL/CLFunctionFactory.h"
 #include "arm_compute/graph/backends/CL/CLNodeValidator.h"
 #include "arm_compute/graph/backends/CL/CLSubTensorHandle.h"
 #include "arm_compute/graph/backends/CL/CLTensorHandle.h"
-
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/Logger.h"
+#include "arm_compute/graph/Tensor.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -64,7 +63,12 @@ bool file_exists(const std::string &filename)
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
 CLDeviceBackend::CLDeviceBackend()
-    : _context_count(0), _tuner(), _gemm_heuristics(), _allocator(nullptr), _tuner_file(), _backend_type(CLBackendType::Native)
+    : _context_count(0),
+      _tuner(),
+      _gemm_heuristics(),
+      _allocator(nullptr),
+      _tuner_file(),
+      _backend_type(CLBackendType::Native)
 {
 }
 
@@ -95,7 +99,7 @@ void CLDeviceBackend::release_backend_context(GraphContext &ctx)
 {
     ARM_COMPUTE_UNUSED(ctx);
     _context_count--;
-    if(_context_count == 0) // No more context using the backend: free resources
+    if (_context_count == 0) // No more context using the backend: free resources
     {
         _allocator = nullptr;
     }
@@ -105,7 +109,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
     // Force backend initialization
     _context_count++;
-    if(_context_count == 1)
+    if (_context_count == 1)
     {
         _backend_type = ctx.config().backend_type;
         initialize_backend();
@@ -115,7 +119,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     _tuner_file = ctx.config().tuner_file;
 
     // Load tuner data if available
-    if(file_exists(_tuner_file))
+    if (file_exists(_tuner_file))
     {
         _tuner.load_from_file(_tuner_file);
     }
@@ -128,7 +132,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     CLScheduler::get().gemm_heuristics()->reload_from_file(ctx.config().mlgo_file);
 
     // Setup a management backend
-    if(ctx.memory_management_ctx(Target::CL) == nullptr)
+    if (ctx.memory_management_ctx(Target::CL) == nullptr)
     {
         MemoryManagerContext mm_ctx;
         mm_ctx.target      = Target::CL;
@@ -141,7 +145,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     }
 
     // Create function level weights manager
-    if(ctx.weights_management_ctx(Target::CL) == nullptr)
+    if (ctx.weights_management_ctx(Target::CL) == nullptr)
     {
         WeightsManagerContext wm_ctx;
         wm_ctx.target = Target::CL;
@@ -174,9 +178,10 @@ std::unique_ptr<ITensorHandle> CLDeviceBackend::create_tensor(const Tensor &tens
     return std::make_unique<CLTensorHandle>(info);
 }
 
-std::unique_ptr<ITensorHandle> CLDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)
+std::unique_ptr<ITensorHandle>
+CLDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)
 {
-    if(parent == nullptr)
+    if (parent == nullptr)
     {
         return nullptr;
     }
@@ -203,7 +208,7 @@ arm_compute::Status CLDeviceBackend::validate_node(INode &node)
 
 std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_manager(MemoryManagerAffinity affinity)
 {
-    if(affinity == MemoryManagerAffinity::Offset)
+    if (affinity == MemoryManagerAffinity::Offset)
     {
         ARM_COMPUTE_LOG_GRAPH_WARNING("CL Backend does not support offset affinity memory management!");
         return nullptr;

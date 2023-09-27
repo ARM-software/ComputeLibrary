@@ -39,10 +39,10 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     const Window &max_window = kernel->window();
 
-    if(hints.split_dimension() != IScheduler::split_dimensions_all)
+    if (hints.split_dimension() != IScheduler::split_dimensions_all)
     {
         const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
-        if(num_iterations < 1)
+        if (num_iterations < 1)
         {
             return;
         }
@@ -53,7 +53,10 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     kernel->run(kernel->window(), info);
 }
 
-void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Window &window, ITensorPack &tensors)
+void SingleThreadScheduler::schedule_op(ICPPKernel   *kernel,
+                                        const Hints  &hints,
+                                        const Window &window,
+                                        ITensorPack  &tensors)
 {
     ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;
@@ -65,7 +68,7 @@ void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
 {
     ThreadInfo info;
     info.cpu_info = &cpu_info();
-    for(auto &wl : workloads)
+    for (auto &wl : workloads)
     {
         wl(info);
     }

@@ -24,6 +24,9 @@
 #ifndef ARM_COMPUTE_SUPPORT_TOOLCHAINSUPPORT
 #define ARM_COMPUTE_SUPPORT_TOOLCHAINSUPPORT
 
+#include "support/Bfloat16.h"
+#include "support/Half.h"
+
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -32,9 +35,6 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
-
-#include "support/Bfloat16.h"
-#include "support/Half.h"
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -50,7 +50,7 @@ namespace support
 {
 namespace cpp11
 {
-#if(__ANDROID__ || BARE_METAL)
+#if (__ANDROID__ || BARE_METAL)
 template <typename T>
 inline T nearbyint(T value)
 {
@@ -129,11 +129,12 @@ inline T copysign(T x, T y)
  *
  * @return Result floating point value equal to (x*y) + z.c
  */
-template < typename T, typename = typename std::enable_if < std::is_floating_point<T>::value
+template <typename T,
+          typename = typename std::enable_if<std::is_floating_point<T>::value
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                            || std::is_same<T, float16_t>::value
+                                             || std::is_same<T, float16_t>::value
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                            >::type >
+                                             >::type>
 inline T fma(T x, T y, T z)
 {
     return ::fma(x, y, z);
@@ -151,7 +152,7 @@ inline T fma(T x, T y, T z)
  *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
-inline int snprintf(char *s, size_t n, const char *fmt, Ts &&... args)
+inline int snprintf(char *s, size_t n, const char *fmt, Ts &&...args)
 {
     return ::snprintf(s, n, fmt, std::forward<Ts>(args)...);
 }
@@ -244,11 +245,12 @@ inline T copysign(T x, T y)
  *
  * @return Result floating point value equal to (x*y) + z.
  */
-template < typename T, typename = typename std::enable_if < std::is_floating_point<T>::value
+template <typename T,
+          typename = typename std::enable_if<std::is_floating_point<T>::value
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                            || std::is_same<T, float16_t>::value
+                                             || std::is_same<T, float16_t>::value
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                            >::type >
+                                             >::type>
 inline T fma(T x, T y, T z)
 {
     return std::fma(x, y, z);
@@ -266,7 +268,7 @@ inline T fma(T x, T y, T z)
  *          if successful (not including the ending null character), or a negative value if an error occurred.
  */
 template <typename... Ts>
-inline int snprintf(char *s, std::size_t n, const char *fmt, Ts &&... args)
+inline int snprintf(char *s, std::size_t n, const char *fmt, Ts &&...args)
 {
     return std::snprintf(s, n, fmt, std::forward<Ts>(args)...);
 }

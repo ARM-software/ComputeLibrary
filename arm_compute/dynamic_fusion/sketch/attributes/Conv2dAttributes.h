@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
+
 #include <cstdint>
 
 namespace arm_compute
@@ -55,9 +56,9 @@ public:
     Size2D dilation() const;
 
 private:
-    Padding2D _pad{};              /**< Padding */
-    Size2D    _stride{ 1U, 1U };   /**< Stride */
-    Size2D    _dilation{ 1U, 1U }; /**< Dilation */
+    Padding2D _pad{};            /**< Padding */
+    Size2D    _stride{1U, 1U};   /**< Stride */
+    Size2D    _dilation{1U, 1U}; /**< Dilation */
 };
 } // namespace dynamic_fusion
 } // namespace experimental

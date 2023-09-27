@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_UTILS_MATH_SAFE_OPS
 
 #include "arm_compute/core/Error.h"
+
 #include "support/AclRequires.h"
 
 #include <limits>
@@ -51,11 +52,11 @@ T safe_integer_add(T val_a, T val_b)
 {
     T result = 0;
 
-    if((val_b > 0) && (val_a > std::numeric_limits<T>::max() - val_b))
+    if ((val_b > 0) && (val_a > std::numeric_limits<T>::max() - val_b))
     {
         result = std::numeric_limits<T>::max();
     }
-    else if((val_b < 0) && (val_a < std::numeric_limits<T>::min() - val_b))
+    else if ((val_b < 0) && (val_a < std::numeric_limits<T>::min() - val_b))
     {
         result = std::numeric_limits<T>::min();
     }
@@ -83,11 +84,11 @@ T safe_integer_sub(T val_a, T val_b)
 {
     T result = 0;
 
-    if((val_b < 0) && (val_a > std::numeric_limits<T>::max() + val_b))
+    if ((val_b < 0) && (val_a > std::numeric_limits<T>::max() + val_b))
     {
         result = std::numeric_limits<T>::max();
     }
-    else if((val_b > 0) && (val_a < std::numeric_limits<T>::min() + val_b))
+    else if ((val_b > 0) && (val_a < std::numeric_limits<T>::min() + val_b))
     {
         result = std::numeric_limits<T>::min();
     }
@@ -115,13 +116,13 @@ T safe_integer_mul(T val_a, T val_b)
 {
     T result = 0;
 
-    if(val_a > 0)
+    if (val_a > 0)
     {
-        if((val_b > 0) && (val_a > (std::numeric_limits<T>::max() / val_b)))
+        if ((val_b > 0) && (val_a > (std::numeric_limits<T>::max() / val_b)))
         {
             result = std::numeric_limits<T>::max();
         }
-        else if(val_b < (std::numeric_limits<T>::min() / val_a))
+        else if (val_b < (std::numeric_limits<T>::min() / val_a))
         {
             result = std::numeric_limits<T>::min();
         }
@@ -132,11 +133,11 @@ T safe_integer_mul(T val_a, T val_b)
     }
     else
     {
-        if((val_b > 0) && (val_a < (std::numeric_limits<T>::min() / val_b)))
+        if ((val_b > 0) && (val_a < (std::numeric_limits<T>::min() / val_b)))
         {
             result = std::numeric_limits<T>::max();
         }
-        else if((val_a != 0) && (val_b < (std::numeric_limits<T>::max() / val_a)))
+        else if ((val_a != 0) && (val_b < (std::numeric_limits<T>::max() / val_a)))
         {
             result = std::numeric_limits<T>::min();
         }
@@ -165,7 +166,7 @@ T safe_integer_div(T val_a, T val_b)
 {
     T result = 0;
 
-    if((val_b == 0) || ((val_a == std::numeric_limits<T>::min()) && (val_b == -1)))
+    if ((val_b == 0) || ((val_a == std::numeric_limits<T>::min()) && (val_b == -1)))
     {
         result = std::numeric_limits<T>::min();
     }
@@ -176,7 +177,7 @@ T safe_integer_div(T val_a, T val_b)
 
     return result;
 }
-} // namespace cast
+} // namespace math
 } // namespace utils
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_UTILS_MATH_SAFE_OPS */

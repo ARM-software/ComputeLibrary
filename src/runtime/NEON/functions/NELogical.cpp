@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NELogicalKernel.h"
 
@@ -32,15 +33,14 @@ namespace arm_compute
 {
 struct LogicalArgs
 {
-    std::unique_ptr<kernels::NELogicalKernel> kernel{ nullptr };
+    std::unique_ptr<kernels::NELogicalKernel> kernel{nullptr};
     ITensorPack                               pack{};
 };
 
 struct NELogicalAnd::Impl : public LogicalArgs
 {
 };
-NELogicalAnd::NELogicalAnd()
-    : _impl(std::make_unique<Impl>())
+NELogicalAnd::NELogicalAnd() : _impl(std::make_unique<Impl>())
 {
 }
 NELogicalAnd::~NELogicalAnd() = default;
@@ -72,8 +72,7 @@ void NELogicalAnd::run()
 struct NELogicalOr::Impl : public LogicalArgs
 {
 };
-NELogicalOr::NELogicalOr()
-    : _impl(std::make_unique<Impl>())
+NELogicalOr::NELogicalOr() : _impl(std::make_unique<Impl>())
 {
 }
 NELogicalOr::~NELogicalOr() = default;
@@ -105,8 +104,7 @@ void NELogicalOr::run()
 struct NELogicalNot::Impl : public LogicalArgs
 {
 };
-NELogicalNot::NELogicalNot()
-    : _impl(std::make_unique<Impl>())
+NELogicalNot::NELogicalNot() : _impl(std::make_unique<Impl>())
 {
 }
 NELogicalNot::~NELogicalNot() = default;

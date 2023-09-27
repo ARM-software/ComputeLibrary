@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLBATCHNORMALIZATIONLAYERKERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -64,7 +65,13 @@ public:
      * @param[in]      epsilon  (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr, const ICLTensor *gamma = nullptr, float epsilon = 0.001f,
+    void configure(ICLTensor          *input,
+                   ICLTensor          *output,
+                   const ICLTensor    *mean,
+                   const ICLTensor    *var,
+                   const ICLTensor    *beta     = nullptr,
+                   const ICLTensor    *gamma    = nullptr,
+                   float               epsilon  = 0.001f,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Set the input and output tensors.
      *
@@ -82,8 +89,15 @@ public:
      * @param[in]      epsilon         (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr,
-                   const ICLTensor *gamma = nullptr, float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   const ICLTensor        *mean,
+                   const ICLTensor        *var,
+                   const ICLTensor        *beta     = nullptr,
+                   const ICLTensor        *gamma    = nullptr,
+                   float                   epsilon  = 0.001f,
+                   ActivationLayerInfo     act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchNormalizationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.
@@ -99,10 +113,14 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
-                           const ITensorInfo *mean, const ITensorInfo *var,
-                           const ITensorInfo *beta = nullptr, const ITensorInfo *gamma = nullptr,
-                           float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo  *input,
+                           const ITensorInfo  *output,
+                           const ITensorInfo  *mean,
+                           const ITensorInfo  *var,
+                           const ITensorInfo  *beta     = nullptr,
+                           const ITensorInfo  *gamma    = nullptr,
+                           float               epsilon  = 0.001f,
+                           ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -25,6 +25,7 @@
 #include "arm_compute/core/Rounding.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "support/ToolchainSupport.h"
 
 #include <cmath>
@@ -36,7 +37,7 @@ int arm_compute::round(float x, RoundingPolicy rounding_policy)
 {
     using namespace std;
     int rounded = 0;
-    switch(rounding_policy)
+    switch (rounding_policy)
     {
         case RoundingPolicy::TO_ZERO:
         {
@@ -51,9 +52,7 @@ int arm_compute::round(float x, RoundingPolicy rounding_policy)
         case RoundingPolicy::TO_NEAREST_EVEN:
         {
 #ifdef __aarch64__
-            asm("fcvtns %x[res], %s[value]"
-                : [res] "=r"(rounded)
-                : [value] "w"(x));
+            asm("fcvtns %x[res], %s[value]" : [res] "=r"(rounded) : [value] "w"(x));
 #else  // __aarch64__
             ARM_COMPUTE_ERROR("TO_NEAREST_EVEN rounding policy is not supported.");
 #endif // __aarch64__

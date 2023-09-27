@@ -39,11 +39,11 @@ namespace ckw
 #define CKW_ASSERT_MSG(cond, msg)            \
     do                                       \
     {                                        \
-        if(!(cond))                          \
+        if (!(cond))                         \
         {                                    \
             throw ::std::runtime_error(msg); \
         }                                    \
-    } while(false)
+    } while (false)
 
 /** If the condition is not met, throw an std::runtime_error.
  *
@@ -56,8 +56,7 @@ namespace ckw
  * @param[in] precond The condition if is met requires the consequence must also be met.
  * @param[in] cond    The condition that is expected to be true if the precondition is true.
  */
-#define CKW_ASSERT_IF(precond, cond) \
-    CKW_ASSERT_MSG(!(precond) || ((precond) && (cond)), #precond " |-> " #cond)
+#define CKW_ASSERT_IF(precond, cond) CKW_ASSERT_MSG(!(precond) || ((precond) && (cond)), #precond " |-> " #cond)
 
 /** Mark the variables as unused.
  *

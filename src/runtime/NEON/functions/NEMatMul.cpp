@@ -26,6 +26,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuMatMul.h"
 
@@ -33,23 +34,27 @@ namespace arm_compute
 {
 struct NEMatMul::Impl
 {
-    const ITensor                  *lhs{ nullptr };
-    const ITensor                  *rhs{ nullptr };
-    ITensor                        *output{ nullptr };
-    std::unique_ptr<cpu::CpuMatMul> op{ nullptr };
+    const ITensor                  *lhs{nullptr};
+    const ITensor                  *rhs{nullptr};
+    ITensor                        *output{nullptr};
+    std::unique_ptr<cpu::CpuMatMul> op{nullptr};
     MemoryGroup                     memory_group{};
     WorkspaceData<Tensor>           workspace_tensors{};
     ITensorPack                     run_pack{};
 };
 
-NEMatMul::NEMatMul()
-    : _impl(std::make_unique<Impl>())
+NEMatMul::NEMatMul() : _impl(std::make_unique<Impl>())
 {
 }
 
 NEMatMul::~NEMatMul() = default;
 
-void NEMatMul::configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
+void NEMatMul::configure(ITensor                   *lhs,
+                         ITensor                   *rhs,
+                         ITensor                   *output,
+                         const MatMulInfo          &info,
+                         const CpuMatMulSettings   &settings,
+                         const ActivationLayerInfo &act_info)
 {
     _impl->lhs    = lhs;
     _impl->rhs    = rhs;
@@ -58,11 +63,16 @@ void NEMatMul::configure(ITensor *lhs, ITensor *rhs, ITensor *output, const MatM
     ARM_COMPUTE_ERROR_ON_NULLPTR(_impl->lhs, _impl->rhs, _impl->output);
     _impl->op = std::make_unique<cpu::CpuMatMul>();
     _impl->op->configure(lhs->info(), rhs->info(), output->info(), info, settings, act_info);
-    _impl->run_pack          = { { ACL_SRC_0, lhs }, { ACL_SRC_1, rhs }, { ACL_DST, output } };
+    _impl->run_pack          = {{ACL_SRC_0, lhs}, {ACL_SRC_1, rhs}, {ACL_DST, output}};
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
-Status NEMatMul::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *output, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info)
+Status NEMatMul::validate(const ITensorInfo         *lhs,
+                          const ITensorInfo         *rhs,
+                          const ITensorInfo         *output,
+                          const MatMulInfo          &info,
+                          const CpuMatMulSettings   &settings,
+                          const ActivationLayerInfo &act_info)
 {
     return cpu::CpuMatMul::validate(lhs, rhs, output, info, settings, act_info);
 }

@@ -39,7 +39,8 @@ using namespace utils;
     return os;
 }
 
-CommonGemmExampleOptions::CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser, arm_compute::DataType default_data_type)
+CommonGemmExampleOptions::CommonGemmExampleOptions(arm_compute::utils::CommandLineParser &parser,
+                                                   arm_compute::DataType                  default_data_type)
     : help(parser.add_option<ToggleOption>("help")),
       M(parser.add_positional_option<SimpleOption<size_t>>("M", 100)),
       N(parser.add_positional_option<SimpleOption<size_t>>("N", 100)),
@@ -48,21 +49,16 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(arm_compute::utils::CommandLi
       data_type(),
       tuner_mode()
 {
-    const std::set<DataType> supported_data_types
-    {
+    const std::set<DataType> supported_data_types{
         DataType::F16,
         DataType::F32,
         DataType::QASYMM8,
     };
 
-    const std::set<CLTunerMode> supported_tuner_modes
-    {
-        CLTunerMode::EXHAUSTIVE,
-        CLTunerMode::NORMAL,
-        CLTunerMode::RAPID
-    };
+    const std::set<CLTunerMode> supported_tuner_modes{CLTunerMode::EXHAUSTIVE, CLTunerMode::NORMAL, CLTunerMode::RAPID};
 
-    ARM_COMPUTE_ERROR_ON_MSG(supported_data_types.find(default_data_type) == supported_data_types.end(), "Default data type unsupported");
+    ARM_COMPUTE_ERROR_ON_MSG(supported_data_types.find(default_data_type) == supported_data_types.end(),
+                             "Default data type unsupported");
 
     data_type  = parser.add_option<EnumOption<DataType>>("type", supported_data_types, default_data_type);
     tuner_mode = parser.add_option<EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::RAPID);

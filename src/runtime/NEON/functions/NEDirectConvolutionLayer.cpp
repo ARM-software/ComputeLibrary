@@ -27,17 +27,18 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/cpu/operators/CpuDirectConv2d.h"
 
 namespace arm_compute
 {
 struct NEDirectConvolutionLayer::Impl
 {
-    ITensor                              *src{ nullptr };
-    const ITensor                        *weights{ nullptr };
-    const ITensor                        *bias{ nullptr };
-    ITensor                              *dst{ nullptr };
-    std::unique_ptr<cpu::CpuDirectConv2d> op{ nullptr };
+    ITensor                              *src{nullptr};
+    const ITensor                        *weights{nullptr};
+    const ITensor                        *bias{nullptr};
+    ITensor                              *dst{nullptr};
+    std::unique_ptr<cpu::CpuDirectConv2d> op{nullptr};
 };
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -46,17 +47,27 @@ NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManage
 }
 NEDirectConvolutionLayer::~NEDirectConvolutionLayer() = default;
 
-void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void NEDirectConvolutionLayer::configure(ITensor                   *input,
+                                         const ITensor             *weights,
+                                         const ITensor             *bias,
+                                         ITensor                   *output,
+                                         const PadStrideInfo       &conv_info,
+                                         const ActivationLayerInfo &act_info)
 {
     _impl->src     = input;
     _impl->weights = weights;
     _impl->bias    = bias;
     _impl->dst     = output;
     _impl->op      = std::make_unique<cpu::CpuDirectConv2d>(_memory_manager);
-    _impl->op->configure(input->info(), weights->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), conv_info, act_info);
+    _impl->op->configure(input->info(), weights->info(), (bias != nullptr ? bias->info() : nullptr), output->info(),
+                         conv_info, act_info);
 }
 
-Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info,
+Status NEDirectConvolutionLayer::validate(const ITensorInfo         *input,
+                                          const ITensorInfo         *weights,
+                                          const ITensorInfo         *bias,
+                                          const ITensorInfo         *output,
+                                          const PadStrideInfo       &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
     return cpu::CpuDirectConv2d::validate(input, weights, bias, output, conv_info, act_info);

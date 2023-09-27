@@ -58,7 +58,7 @@ public:
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 };
-} // namespace opencl
 } // namespace kernels
+} // namespace opencl
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_RESHAPE_KERNEL_H */

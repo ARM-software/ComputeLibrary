@@ -65,5 +65,5 @@ public:
      */
     virtual void clear() = 0;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_IMEMORYMANAGER_H */

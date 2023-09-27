@@ -26,14 +26,16 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SUB_KERNEL(func_name) \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+#define DECLARE_SUB_KERNEL(func_name)                                                                   \
+    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, \
+                   const Window &window)
 
 DECLARE_SUB_KERNEL(sub_qasymm8_neon_fixedpoint);
 DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon_fixedpoint);
@@ -44,7 +46,8 @@ DECLARE_SUB_KERNEL(sub_qsymm16_neon);
 #undef DECLARE_SUB_KERNEL
 
 template <typename T>
-void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void sub_same_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     /** SIMD vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
@@ -68,7 +71,7 @@ void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
     Iterator input2(src1, window.broadcast_if_dimension_le_one(src1->info()->tensor_shape()));
     Iterator output(dst, window);
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
@@ -84,41 +87,44 @@ void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
         Iterator output(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
-            const auto output_ptr              = reinterpret_cast<T *>(output.ptr());
-
-            const T    broadcast_value     = *reinterpret_cast<const T *>(broadcast_input.ptr());
-            const auto broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
-                auto       res             = is_sat ? wrapper::vqsub(broadcast_value_vec, non_broadcast_v) : wrapper::vsub(broadcast_value_vec, non_broadcast_v);
-                if(is_broadcast_input_2)
-                {
-                    res = wrapper::vmul(res, wrapper::vdup_n(static_cast<T>(-1), ExactTagType{}));
-                }
-                wrapper::vstore(output_ptr + x, res);
-            }
+                const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
+                const auto output_ptr              = reinterpret_cast<T *>(output.ptr());
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
-                auto       res             = is_sat ? wrapper::sub_sat(broadcast_value, non_broadcast_v) : broadcast_value - non_broadcast_v;
-                if(is_broadcast_input_2)
+                const T    broadcast_value     = *reinterpret_cast<const T *>(broadcast_input.ptr());
+                const auto broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
+
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
                 {
-                    res = static_cast<T>(-1) * res;
+                    const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
+                    auto       res             = is_sat ? wrapper::vqsub(broadcast_value_vec, non_broadcast_v)
+                                                        : wrapper::vsub(broadcast_value_vec, non_broadcast_v);
+                    if (is_broadcast_input_2)
+                    {
+                        res = wrapper::vmul(res, wrapper::vdup_n(static_cast<T>(-1), ExactTagType{}));
+                    }
+                    wrapper::vstore(output_ptr + x, res);
                 }
 
-                *(output_ptr + x) = res;
-            }
-        },
-        broadcast_input, non_broadcast_input, output);
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
+                    auto       res =
+                        is_sat ? wrapper::sub_sat(broadcast_value, non_broadcast_v) : broadcast_value - non_broadcast_v;
+                    if (is_broadcast_input_2)
+                    {
+                        res = static_cast<T>(-1) * res;
+                    }
+
+                    *(output_ptr + x) = res;
+                }
+            },
+            broadcast_input, non_broadcast_input, output);
     }
     else
     {
@@ -131,31 +137,32 @@ void sub_same_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const
         Iterator output(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
-            const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
-            const auto output_ptr = reinterpret_cast<T *>(output.ptr());
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const auto val1 = wrapper::vloadq(input1_ptr + x);
-                const auto val2 = wrapper::vloadq(input2_ptr + x);
-                const auto res  = is_sat ? wrapper::vqsub(val1, val2) : wrapper::vsub(val1, val2);
-                wrapper::vstore(output_ptr + x, res);
-            }
+                const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
+                const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
+                const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto val1   = *(input1_ptr + x);
-                const auto val2   = *(input2_ptr + x);
-                *(output_ptr + x) = is_sat ? wrapper::sub_sat(val1, val2) : val1 - val2;
-            }
-        },
-        input1, input2, output);
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    const auto val1 = wrapper::vloadq(input1_ptr + x);
+                    const auto val2 = wrapper::vloadq(input2_ptr + x);
+                    const auto res  = is_sat ? wrapper::vqsub(val1, val2) : wrapper::vsub(val1, val2);
+                    wrapper::vstore(output_ptr + x, res);
+                }
+
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto val1   = *(input1_ptr + x);
+                    const auto val2   = *(input2_ptr + x);
+                    *(output_ptr + x) = is_sat ? wrapper::sub_sat(val1, val2) : val1 - val2;
+                }
+            },
+            input1, input2, output);
     }
 }
 } // namespace cpu

@@ -31,8 +31,8 @@
 #ifndef ARM_COMPUTE_NO_EXCEPTIONS
 #define CL_HPP_ENABLE_EXCEPTIONS
 #endif // ARM_COMPUTE_NO_EXCEPTIONS
-#define CL_TARGET_OPENCL_VERSION 300
-#define CL_HPP_TARGET_OPENCL_VERSION 110
+#define CL_TARGET_OPENCL_VERSION      300
+#define CL_HPP_TARGET_OPENCL_VERSION  110
 #define CL_HPP_MINIMUM_OPENCL_VERSION 110
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
@@ -40,7 +40,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #if defined(__GNUG__) && __GNUG__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
-#endif // defined(__GNUG__) && __GNUG__ >= 8
+#endif                   // defined(__GNUG__) && __GNUG__ >= 8
 #include <CL/opencl.hpp> // include new hpp header instead of cl2.hpp
 #pragma GCC diagnostic pop
 
@@ -88,8 +88,7 @@ public:
      */
     bool load_default();
 
-#define DECLARE_FUNCTION_PTR(func_name) \
-    std::function<decltype(func_name)> func_name##_ptr = nullptr
+#define DECLARE_FUNCTION_PTR(func_name) std::function<decltype(func_name)> func_name##_ptr = nullptr
 
     DECLARE_FUNCTION_PTR(clCreateContext);
     DECLARE_FUNCTION_PTR(clCreateContextFromType);

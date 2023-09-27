@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuPool2dKernel.h"
 #include "src/cpu/kernels/internal/CpuPool2dAssemblyWrapperKernel.h"
@@ -53,7 +54,8 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
     ARM_COMPUTE_LOG_PARAMS(src, dst, pool_info, indices);
 
     // Check if we can run assembly kernels. Currently, indices are not supported by those kernels
-    const bool run_optimised = bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
+    const bool run_optimised =
+        bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
     // Get data layout
     _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? src->data_layout() : pool_info.data_layout;
@@ -61,10 +63,11 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
     // Check if we have Global Pooling Layer
     const unsigned int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const unsigned int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-    _is_global_pooling_layer      = (src->dimension(idx_width) == pool_info.pool_size.width) && (src->dimension(idx_height) == pool_info.pool_size.height);
-    _use_kernel_indices           = pool_info.use_kernel_indices;
+    _is_global_pooling_layer      = (src->dimension(idx_width) == pool_info.pool_size.width) &&
+                               (src->dimension(idx_height) == pool_info.pool_size.height);
+    _use_kernel_indices = pool_info.use_kernel_indices;
 
-    if(run_optimised)
+    if (run_optimised)
     {
         const CPUInfo     &ci          = NEScheduler::get().cpu_info();
         const unsigned int num_threads = NEScheduler::get().num_threads();
@@ -76,7 +79,7 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
         // Get kernel's memory requirements
         constexpr size_t alignment      = 4096;
         const size_t     workspace_size = pooling_wrapper->get_working_size(num_threads);
-        _aux_mem[0]                     = MemoryInfo(TensorType::ACL_INT_0, MemoryLifetime::Temporary, workspace_size, alignment);
+        _aux_mem[0] = MemoryInfo(TensorType::ACL_INT_0, MemoryLifetime::Temporary, workspace_size, alignment);
 
         _asm_glue = std::move(pooling_wrapper);
     }
@@ -89,11 +92,15 @@ void CpuPool2d::configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayer
     }
 }
 
-Status CpuPool2d::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CpuPool2d::validate(const ITensorInfo      *src,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices)
 {
-    const bool run_optimised = bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
+    const bool run_optimised =
+        bool(kernels::CpuPool2dAssemblyWrapperKernel::validate(src, dst, pool_info)) && (indices == nullptr);
 
-    if(run_optimised)
+    if (run_optimised)
     {
         return Status{};
     }
@@ -105,20 +112,24 @@ void CpuPool2d::run(ITensorPack &tensors)
 {
     ARM_COMPUTE_ERROR_ON_MSG(tensors.empty(), "No tensors provided");
 
-    if(_asm_glue)
+    if (_asm_glue)
     {
         const auto hints = (_is_global_pooling_layer) ? Window::DimX : Window::DimY;
         NEScheduler::get().schedule_op(_asm_glue.get(), hints, _asm_glue->window(), tensors);
     }
     else
     {
-        switch(_data_layout)
+        switch (_data_layout)
         {
             case DataLayout::NCHW:
-                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), _is_global_pooling_layer ? Window::DimZ : Window::DimY, _pooling_layer_kernel->window(), tensors);
+                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(),
+                                               _is_global_pooling_layer ? Window::DimZ : Window::DimY,
+                                               _pooling_layer_kernel->window(), tensors);
                 break;
             case DataLayout::NHWC:
-                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(), (_use_kernel_indices ? Window::DimY : Window::DimX), _pooling_layer_kernel->window(), tensors);
+                NEScheduler::get().schedule_op(_pooling_layer_kernel.get(),
+                                               (_use_kernel_indices ? Window::DimY : Window::DimX),
+                                               _pooling_layer_kernel->window(), tensors);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data layout not supported");

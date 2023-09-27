@@ -29,8 +29,7 @@ namespace arm_compute
 {
 namespace graph
 {
-PassManager::PassManager()
-    : _passes()
+PassManager::PassManager() : _passes()
 {
 }
 
@@ -46,7 +45,7 @@ IGraphMutator *PassManager::pass(size_t index)
 
 void PassManager::append(std::unique_ptr<IGraphMutator> pass, bool conditional)
 {
-    if(pass && conditional)
+    if (pass && conditional)
     {
         ARM_COMPUTE_LOG_GRAPH_VERBOSE("Appending mutating pass : " << pass->name() << std::endl);
         _passes.push_back(std::move(pass));
@@ -60,9 +59,9 @@ void PassManager::clear()
 
 void PassManager::run_all(Graph &g)
 {
-    for(auto &pass : _passes)
+    for (auto &pass : _passes)
     {
-        if(pass)
+        if (pass)
         {
             ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
             pass->mutate(g);
@@ -72,9 +71,9 @@ void PassManager::run_all(Graph &g)
 
 void PassManager::run_type(Graph &g, IGraphMutator::MutationType type)
 {
-    for(auto &pass : _passes)
+    for (auto &pass : _passes)
     {
-        if(pass && (pass->type() == type))
+        if (pass && (pass->type() == type))
         {
             ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
             pass->mutate(g);
@@ -84,13 +83,13 @@ void PassManager::run_type(Graph &g, IGraphMutator::MutationType type)
 
 void PassManager::run_index(Graph &g, size_t index)
 {
-    if(index >= _passes.size())
+    if (index >= _passes.size())
     {
         return;
     }
 
     auto &pass = _passes.at(index);
-    if(pass != nullptr)
+    if (pass != nullptr)
     {
         ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
         pass->mutate(g);

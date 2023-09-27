@@ -28,6 +28,7 @@
 #include "src/core/NEON/wrapper/intrinsics/svcvt.h"
 #include "src/core/NEON/wrapper/intrinsics/svdup_n.h"
 #include "src/core/NEON/wrapper/intrinsics/svreinterpret.h"
+
 #include <arm_sve.h>
 #include <array>
 
@@ -181,7 +182,10 @@ svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b);
  * @return The converted integer vector
  */
 template <typename int_vec_type>
-int_vec_type convert_float_to_int(const svfloat32_t &in_0, const svfloat32_t &in_1, const svfloat32_t &in_2, const svfloat32_t &in_3);
+int_vec_type convert_float_to_int(const svfloat32_t &in_0,
+                                  const svfloat32_t &in_1,
+                                  const svfloat32_t &in_2,
+                                  const svfloat32_t &in_3);
 
 } // namespace arm_compute
 #include "src/core/NEON/SVEMath.inl"

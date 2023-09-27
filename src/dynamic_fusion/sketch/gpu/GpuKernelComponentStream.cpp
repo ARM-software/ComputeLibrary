@@ -23,9 +23,9 @@
  */
 #include "GpuKernelComponentStream.h"
 
+#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuLogicalKernel.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSourceCode.h"
-#include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
 {
@@ -33,8 +33,10 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-GpuKernelComponentStream::GpuKernelComponentStream(GpuWorkloadContext *context, GpuComponentServices *services, const MemoryDescriptorMap &mem_map)
-    : _context{ context }, _services{ services }, _component_groups{}, _mem_map{ mem_map }
+GpuKernelComponentStream::GpuKernelComponentStream(GpuWorkloadContext        *context,
+                                                   GpuComponentServices      *services,
+                                                   const MemoryDescriptorMap &mem_map)
+    : _context{context}, _services{services}, _component_groups{}, _mem_map{mem_map}
 {
 }
 
@@ -42,7 +44,7 @@ GpuWorkloadSourceCode GpuKernelComponentStream::write_workload_code()
 {
     GpuWorkloadSourceCode source_code;
     // Traverse through component groups and assemble workload together
-    for(auto && group : _component_groups)
+    for (auto &&group : _component_groups)
     {
         group.finalize();
 

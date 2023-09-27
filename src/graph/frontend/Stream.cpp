@@ -23,8 +23,8 @@
  */
 #include "arm_compute/graph/frontend/Stream.h"
 
-#include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/frontend/ILayer.h"
+#include "arm_compute/graph/Utils.h"
 
 namespace arm_compute
 {
@@ -32,8 +32,7 @@ namespace graph
 {
 namespace frontend
 {
-Stream::Stream(size_t id, std::string name)
-    : _ctx(), _manager(), _g(id, std::move(name))
+Stream::Stream(size_t id, std::string name) : _ctx(), _manager(), _g(id, std::move(name))
 {
 }
 

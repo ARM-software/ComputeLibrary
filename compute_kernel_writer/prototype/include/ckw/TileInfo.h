@@ -83,7 +83,7 @@ public:
     DataType data_type() const;
 
 private:
-    DataType  _dt{ DataType::Unknown };
+    DataType  _dt{DataType::Unknown};
     TileShape _shape{};
 };
 

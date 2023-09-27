@@ -29,9 +29,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -58,12 +59,12 @@ void ClTransposeKernel::configure(const CLCompileContext &compile_context, const
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(ClTransposeKernel::validate(src, dst));
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Create kernel
-    const unsigned int vec_size_x           = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(0));
+    const unsigned int vec_size_x = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(0));
     const int          vec_size_x_leftovers = src->dimension(0) % vec_size_x;
-    const unsigned int vec_size_y           = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(1));
+    const unsigned int vec_size_y = adjust_vec_size(max_cl_vector_width / src->element_size(), src->dimension(1));
     const int          vec_size_y_leftovers = src->dimension(1) % vec_size_y;
 
     CLBuildOptions build_opts;
@@ -89,9 +90,10 @@ Status ClTransposeKernel::validate(const ITensorInfo *src, const ITensorInfo *ds
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->num_dimensions() > 2, "Transpose up to 2-D src tensor is supported");
 
     // Validate configured dst
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        const TensorInfo dst_info = src->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*src));
+        const TensorInfo dst_info =
+            src->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*src));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &dst_info);
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
@@ -106,8 +108,9 @@ void ClTransposeKernel::run_op(ITensorPack &tensors, const Window &window, cl::C
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     Window slice = window.first_slice_window_2D();
 
@@ -117,8 +120,7 @@ void ClTransposeKernel::run_op(ITensorPack &tensors, const Window &window, cl::C
         add_2D_tensor_argument(idx, src, slice);
         add_2D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_2D(slice));
+    } while (window.slide_window_slice_2D(slice));
 }
 } // namespace kernels
 } // namespace opencl

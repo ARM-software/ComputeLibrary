@@ -25,6 +25,7 @@
 #define ACL_SRC_GPU_CL_KERNELS_CLMATMULNATIVEKERNEL
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -52,7 +53,12 @@ public:
      * @param[in]  matmul_kernel_info Attributes for Batch MatMul Kernel
      * @param[in]  act_info           (Optional) Specifies activation function to use after Matrix multiplication. Default is Identity function.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *lhs,
+                   ITensorInfo               *rhs,
+                   ITensorInfo               *bias,
+                   ITensorInfo               *dst,
+                   const MatMulKernelInfo    &matmul_kernel_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -60,14 +66,18 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *bias,
+                           const ITensorInfo         *dst,
+                           const MatMulKernelInfo    &matmul_kernel_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool _export_rhs_to_cl_image{ false };
+    bool _export_rhs_to_cl_image{false};
 };
 } // namespace kernels
 } // namespace opencl

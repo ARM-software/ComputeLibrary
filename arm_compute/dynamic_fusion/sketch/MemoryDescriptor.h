@@ -53,10 +53,12 @@ namespace dynamic_fusion
 enum class MemoryType
 {
     /** Both User and Auxiliary types are of Alloc type. Since they require memory allocation */
-    User      = 0, /**< Memory coming directly from users, e.g. for argument tensors */
-    Auxiliary = 1, /**< Additional memory required by the workload tensor, e.g. for tensors holding temporary results between kernels */
+    User = 0, /**< Memory coming directly from users, e.g. for argument tensors */
+    Auxiliary =
+        1, /**< Additional memory required by the workload tensor, e.g. for tensors holding temporary results between kernels */
     /** Virtual type is of No-Alloc type. Since it doesn't require memory allocation */
-    Virtual = 2, /**< Temporary tile which is not allocated as a whole tensor in the memory. It is mainly used at sketch time to link operators; there should be no Virtual tensors at runtime */
+    Virtual =
+        2, /**< Temporary tile which is not allocated as a whole tensor in the memory. It is mainly used at sketch time to link operators; there should be no Virtual tensors at runtime */
 };
 
 /** Memory information for tensors with @ref MemoryType::Auxiliary.
@@ -66,9 +68,7 @@ struct AuxMemoryInfo
 {
     AuxMemoryInfo() = default;
 
-    AuxMemoryInfo(size_t size, size_t alignment = 0) noexcept
-        : size(size),
-          alignment(alignment)
+    AuxMemoryInfo(size_t size, size_t alignment = 0) noexcept : size(size), alignment(alignment)
     {
     }
 
@@ -76,8 +76,8 @@ struct AuxMemoryInfo
     {
         return info0.size == info1.size && info0.alignment == info1.alignment;
     }
-    size_t size{ 0 };      /**< Total memory size in bytes */
-    size_t alignment{ 0 }; /**< Memory alignment in bytes */
+    size_t size{0};      /**< Total memory size in bytes */
+    size_t alignment{0}; /**< Memory alignment in bytes */
 };
 
 /** Descriptor of a workload tensor memory */

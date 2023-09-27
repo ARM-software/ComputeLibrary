@@ -24,11 +24,13 @@
 #ifndef ARM_COMPUTE_CPU_SOFTMAX_H
 #define ARM_COMPUTE_CPU_SOFTMAX_H
 
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/TensorInfo.h"
+
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/operators/CpuPermute.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -77,7 +79,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, float beta = 1.0f, int32_t axis = 0);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

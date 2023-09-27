@@ -27,8 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_INSTANCENORM_KERNEL(func_name) \
-    void func_name(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision, const Window &window)
+#define DECLARE_INSTANCENORM_KERNEL(func_name)                                                                        \
+    void func_name(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision, \
+                   const Window &window)
 DECLARE_INSTANCENORM_KERNEL(neon_fp32_instancenorm);
 DECLARE_INSTANCENORM_KERNEL(neon_fp16_instancenorm);
 #undef DECLARE_INSTANCENORM_KERNEL

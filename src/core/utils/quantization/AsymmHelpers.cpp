@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/utils/quantization/AsymmHelpers.h"
 #include "support/ToolchainSupport.h"
 
@@ -40,7 +42,7 @@ constexpr float   epsilon            = 0.00001f;
 
 Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift, bool ignore_epsilon)
 {
-    if(multiplier >= 1.f)
+    if (multiplier >= 1.f)
     {
         Status status = calculate_quantized_multiplier_greater_than_one(multiplier, quant_multiplier, shift);
         *shift *= -1;
@@ -69,13 +71,13 @@ Status calculate_quantized_multiplier_less_than_one(float    multiplier,
     *right_shift           = -1 * shift_exp;
     auto q_fixed           = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
-    if(q_fixed == fixed_point_one_Q0)
+    if (q_fixed == fixed_point_one_Q0)
     {
         q_fixed /= 2;
         --*right_shift;
     }
 
-    if(ignore_epsilon && *right_shift > 31)
+    if (ignore_epsilon && *right_shift > 31)
     {
         *right_shift = 0;
         q_fixed      = 0;
@@ -88,9 +90,8 @@ Status calculate_quantized_multiplier_less_than_one(float    multiplier,
     return Status{};
 }
 
-Status calculate_quantized_multiplier_greater_than_one(float    multiplier,
-                                                       int32_t *quantized_multiplier,
-                                                       int32_t *left_shift)
+Status
+calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t *quantized_multiplier, int32_t *left_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);
@@ -101,7 +102,7 @@ Status calculate_quantized_multiplier_greater_than_one(float    multiplier,
     *left_shift            = shift_exp;
     auto q_fixed           = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
-    if(q_fixed == fixed_point_one_Q0)
+    if (q_fixed == fixed_point_one_Q0)
     {
         q_fixed /= 2;
         ++*left_shift;
@@ -113,9 +114,9 @@ Status calculate_quantized_multiplier_greater_than_one(float    multiplier,
     return Status{};
 }
 
-arm_compute::Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
-                                                    const QuantizationInfo &wq_info,
-                                                    const QuantizationInfo &oq_info,
+arm_compute::Status calculate_quantized_multipliers(const QuantizationInfo  &iq_info,
+                                                    const QuantizationInfo  &wq_info,
+                                                    const QuantizationInfo  &oq_info,
                                                     GEMMLowpOutputStageInfo &stage_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(iq_info.scale().empty());
@@ -133,7 +134,7 @@ arm_compute::Status calculate_quantized_multipliers(const QuantizationInfo &iq_i
     const float i_scale  = iq_info.scale().at(0);
     const float o_scale  = oq_info.scale().at(0);
 
-    for(unsigned int i = 0; i < size; ++i)
+    for (unsigned int i = 0; i < size; ++i)
     {
         const float multiplier       = i_scale * w_scales[i] / o_scale;
         int32_t     quant_multiplier = 0;
@@ -154,7 +155,7 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
 {
     int min_quant_val = 0;
     int max_quant_val = 0;
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::QASYMM8:
             min_quant_val = std::numeric_limits<uint8_t>::min();
@@ -179,7 +180,9 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
     return std::make_pair(min_quant_val, max_quant_val);
 }
 
-std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const QuantizationInfo &q_info, const ActivationLayerInfo &act_info, DataType data_type)
+std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const QuantizationInfo    &q_info,
+                                                                     const ActivationLayerInfo &act_info,
+                                                                     DataType                   data_type)
 {
     ARM_COMPUTE_ERROR_ON(data_type != DataType::QASYMM8 && data_type != DataType::QASYMM8_SIGNED);
 
@@ -190,20 +193,23 @@ std::tuple<int32_t, int32_t> get_quantized_asymmetric_output_min_max(const Quant
 
     const UniformQuantizationInfo q_unif = q_info.uniform();
 
-    if(act_info.enabled())
+    if (act_info.enabled())
     {
-        switch(act_info.activation())
+        switch (act_info.activation())
         {
             case ActivationLayerInfo::ActivationFunction::RELU:
                 type_min = q_unif.offset;
                 break;
             case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
                 type_min = q_unif.offset;
-                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info) : quantize_qasymm8_signed(act_info.a(), q_info);
+                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info)
+                                                            : quantize_qasymm8_signed(act_info.a(), q_info);
                 break;
             case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                type_min = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.b(), q_info) : quantize_qasymm8_signed(act_info.b(), q_info);
-                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info) : quantize_qasymm8_signed(act_info.a(), q_info);
+                type_min = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.b(), q_info)
+                                                            : quantize_qasymm8_signed(act_info.b(), q_info);
+                type_max = (data_type == DataType::QASYMM8) ? quantize_qasymm8(act_info.a(), q_info)
+                                                            : quantize_qasymm8_signed(act_info.a(), q_info);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Activation function not supported.");
@@ -226,7 +232,7 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
 
     const unsigned int num_filters = wq_info.scale().size();
 
-    for(unsigned int i = 0; i < num_filters; ++i)
+    for (unsigned int i = 0; i < num_filters; ++i)
     {
         int32_t     output_multiplier = 0;
         int32_t     output_shift      = 0;
@@ -267,11 +273,11 @@ int32_t multiply_by_quantized_multiplier(int32_t input, int32_t qmul, int32_t sh
 
 int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v)
 {
-    if(exponent == 0)
+    if (exponent == 0)
     {
         return v;
     }
-    else if(exponent < 0)
+    else if (exponent < 0)
     {
         return rounding_divide_by_pow2(v, -exponent);
     }
@@ -291,11 +297,14 @@ int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v)
     }
 }
 
-void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, int32_t &output_inv_sqrt, int32_t &output_shift)
+void get_invsqrt_quantized_multiplier_exp(int32_t  input,
+                                          int32_t  reverse_shift,
+                                          int32_t &output_inv_sqrt,
+                                          int32_t &output_shift)
 {
     ARM_COMPUTE_ERROR_ON(input < 0);
 
-    if(input <= 1)
+    if (input <= 1)
     {
         // dealing the inputs (0 and 1) separately to avoid overflow
         output_inv_sqrt = std::numeric_limits<std::int32_t>::max();
@@ -305,7 +314,7 @@ void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, 
 
     // prepare input for fixed point operation and compute shift value
     output_shift = 11;
-    while(input >= (1 << 29))
+    while (input >= (1 << 29))
     {
         input /= 4;
         ++output_shift;
@@ -334,9 +343,7 @@ void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, 
 
     // multiplication of two fixed point numbers, defined for readability
     auto fixed_point_mul = [](FixedPointRawType a, FixedPointRawType b) -> FixedPointRawType
-    {
-        return saturating_rounding_doubling_highmul(a, b);
-    };
+    { return saturating_rounding_doubling_highmul(a, b); };
 
     // rescaling of fixed point to have dst_bit integer bits, defined for readability
     auto fixed_point_rescale = [](FixedPointRawType a, uint32_t src_bit, uint32_t dst_bit) -> FixedPointRawType
@@ -347,17 +354,18 @@ void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, 
 
     // 5 iterations of Newton-Raphson method for inverse square root - 1.5 * x_n = input/2 * (x_n)^3
     constexpr int32_t num_iteration = 5;
-    for(int32_t i = 0; i < num_iteration; ++i)
+    for (int32_t i = 0; i < num_iteration; ++i)
     {
         const auto x3 = fixed_point_rescale(fixed_point_mul(fixed_point_mul(x, x), x), 9, fixedpoint_position);
-        x             = fixed_point_rescale(fixed_point_mul(fixedpoint_half_three, x) - fixed_point_mul(fixedpoint_half_input, x3), 6, fixedpoint_position);
+        x = fixed_point_rescale(fixed_point_mul(fixedpoint_half_three, x) - fixed_point_mul(fixedpoint_half_input, x3),
+                                6, fixedpoint_position);
     }
 
     // fixed point representation of sqrt(1/2)
     const FixedPoint0 fixedpoint_half_sqrt_2 = 1518500250;
     x                                        = fixed_point_mul(fixedpoint_half_sqrt_2, x);
     output_inv_sqrt                          = x;
-    if(output_shift < 0)
+    if (output_shift < 0)
     {
         output_inv_sqrt <<= -output_shift;
         output_shift = 0;
@@ -365,5 +373,5 @@ void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, 
     // convert right shift to left shift
     output_shift *= reverse_shift;
 }
-} // quantization
-} // arm_compute
+} // namespace quantization
+} // namespace arm_compute

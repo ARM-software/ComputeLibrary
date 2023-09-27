@@ -23,6 +23,7 @@
  */
 
 #include "ckw/TensorTileSampler.h"
+
 #include "ckw/TileOperand.h"
 #include "ckw/types/TensorSamplerTypes.h"
 
@@ -33,24 +34,47 @@ TensorTileSampler::TensorTileSampler()
 {
 }
 
-TensorTileSampler::TensorTileSampler(
-    TileOperand &x, TileOperand &y, TileOperand &z, TileOperand &b,
-    TensorSamplerFormat       format,
-    TensorSamplerAddressModeX address_mode_x,
-    TensorSamplerAddressModeY address_mode_y,
-    TensorSamplerAddressModeZ address_mode_z)
-    : _x(&x), _y(&y), _z(&z), _b(&b), _height(0), _width(0), _format(format), _address_mode_x(address_mode_x), _address_mode_y(address_mode_y), _address_mode_z(address_mode_z)
+TensorTileSampler::TensorTileSampler(TileOperand              &x,
+                                     TileOperand              &y,
+                                     TileOperand              &z,
+                                     TileOperand              &b,
+                                     TensorSamplerFormat       format,
+                                     TensorSamplerAddressModeX address_mode_x,
+                                     TensorSamplerAddressModeY address_mode_y,
+                                     TensorSamplerAddressModeZ address_mode_z)
+    : _x(&x),
+      _y(&y),
+      _z(&z),
+      _b(&b),
+      _height(0),
+      _width(0),
+      _format(format),
+      _address_mode_x(address_mode_x),
+      _address_mode_y(address_mode_y),
+      _address_mode_z(address_mode_z)
 {
 }
 
-TensorTileSampler::TensorTileSampler(
-    TileOperand &x, TileOperand &y, TileOperand &z, TileOperand &b,
-    int32_t height, int32_t width,
-    TensorSamplerFormat       format,
-    TensorSamplerAddressModeX address_mode_x,
-    TensorSamplerAddressModeY address_mode_y,
-    TensorSamplerAddressModeZ address_mode_z)
-    : _x(&x), _y(&y), _z(&z), _b(&b), _height(height), _width(width), _format(format), _address_mode_x(address_mode_x), _address_mode_y(address_mode_y), _address_mode_z(address_mode_z)
+TensorTileSampler::TensorTileSampler(TileOperand              &x,
+                                     TileOperand              &y,
+                                     TileOperand              &z,
+                                     TileOperand              &b,
+                                     int32_t                   height,
+                                     int32_t                   width,
+                                     TensorSamplerFormat       format,
+                                     TensorSamplerAddressModeX address_mode_x,
+                                     TensorSamplerAddressModeY address_mode_y,
+                                     TensorSamplerAddressModeZ address_mode_z)
+    : _x(&x),
+      _y(&y),
+      _z(&z),
+      _b(&b),
+      _height(height),
+      _width(width),
+      _format(format),
+      _address_mode_x(address_mode_x),
+      _address_mode_y(address_mode_y),
+      _address_mode_z(address_mode_z)
 {
 }
 

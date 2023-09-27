@@ -27,9 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_DEPTHWISECONV2D_KERNEL(func_name)                                   \
-    void func_name(const ITensor *src, const ITensor *weights, const ITensor *bias, \
-                   ITensor *dst, const Window &window, bool has_biases, const ConvolutionInfo &info)
+#define DECLARE_DEPTHWISECONV2D_KERNEL(func_name)                                                 \
+    void func_name(const ITensor *src, const ITensor *weights, const ITensor *bias, ITensor *dst, \
+                   const Window &window, bool has_biases, const ConvolutionInfo &info)
 DECLARE_DEPTHWISECONV2D_KERNEL(neon_qu8_deptwiseconv2dnative);
 DECLARE_DEPTHWISECONV2D_KERNEL(neon_qs8_deptwiseconv2dnative);
 DECLARE_DEPTHWISECONV2D_KERNEL(neon_fp16_deptwiseconv2dnative);

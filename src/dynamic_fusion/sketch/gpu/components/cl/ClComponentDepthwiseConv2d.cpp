@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateDepthwiseConv2d.h"
 
@@ -103,11 +104,10 @@ unsigned int Settings::m0() const
     return _m0;
 }
 
-Status ClComponentDepthwiseConv2d::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
+Status ClComponentDepthwiseConv2d::validate(const Properties                &properties,
+                                            const ArgumentPack<ITensorInfo> &tensors,
+                                            const Attributes                &attributes,
+                                            const Settings                  &settings)
 {
     ARM_COMPUTE_UNUSED(properties, settings);
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
@@ -121,7 +121,7 @@ Status ClComponentDepthwiseConv2d::validate(
     // Matching data type
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, wei);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bia);
     }
@@ -129,7 +129,7 @@ Status ClComponentDepthwiseConv2d::validate(
     // Matching data layout
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, wei);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, bia);
     }
@@ -138,7 +138,7 @@ Status ClComponentDepthwiseConv2d::validate(
     ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().total_size() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(wei->tensor_shape().total_size() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(dst->tensor_shape().total_size() == 0);
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(bia->tensor_shape().total_size() == 0);
     }
@@ -148,16 +148,17 @@ Status ClComponentDepthwiseConv2d::validate(
     const DataLayout data_layout = src->data_layout();
     const size_t     channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(wei->dimension(channel_idx) != (src->dimension(channel_idx) * attributes.depth_multiplier()));
+    ARM_COMPUTE_RETURN_ERROR_ON(wei->dimension(channel_idx) !=
+                                (src->dimension(channel_idx) * attributes.depth_multiplier()));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(wei->num_dimensions() > 3, "Weights can be at most 3 dimensional");
 
     // dst shape is correct
-    const PadStrideInfo pad_stride_info = PadStrideInfo(attributes.stride().x(), attributes.stride().y(),
-                                                        attributes.pad().left, attributes.pad().right,
-                                                        attributes.pad().top, attributes.pad().bottom,
-                                                        attributes.dimension_rounding_type());
-    const ConvolutionInfo conv_info{ pad_stride_info, attributes.depth_multiplier(), ActivationLayerInfo(), attributes.dilation() };
-    const TensorShape     output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *wei, conv_info);
+    const PadStrideInfo pad_stride_info =
+        PadStrideInfo(attributes.stride().x(), attributes.stride().y(), attributes.pad().left, attributes.pad().right,
+                      attributes.pad().top, attributes.pad().bottom, attributes.dimension_rounding_type());
+    const ConvolutionInfo conv_info{pad_stride_info, attributes.depth_multiplier(), ActivationLayerInfo(),
+                                    attributes.dilation()};
+    const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *wei, conv_info);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
 
@@ -168,19 +169,22 @@ Status ClComponentDepthwiseConv2d::validate(
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_stride_info.stride().first > 1 && settings.m0() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.dilation.x() > 1 && settings.m0() != 1);
 
-    if(conv_info.depth_multiplier > 1 && settings.n0() > 1)
+    if (conv_info.depth_multiplier > 1 && settings.n0() > 1)
     {
         ARM_COMPUTE_RETURN_ERROR_ON((conv_info.depth_multiplier % settings.n0()) != 0);
     }
 
     // Check export weights to cl image
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((settings.export_weights_to_cl_image() == true) && (export_to_cl_image(wei) == false), "Weights cannot be exported to cl_image!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((settings.export_weights_to_cl_image() == true) &&
+                                        (export_to_cl_image(wei) == false),
+                                    "Weights cannot be exported to cl_image!");
     ARM_COMPUTE_RETURN_ERROR_ON((settings.export_weights_to_cl_image() == true) && ((settings.n0() % 4) != 0));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(wei->dimension(channel_idx) != (src->dimension(channel_idx) * conv_info.depth_multiplier));
+    ARM_COMPUTE_RETURN_ERROR_ON(wei->dimension(channel_idx) !=
+                                (src->dimension(channel_idx) * conv_info.depth_multiplier));
 
     // bia shape is correct
-    if(bia != nullptr)
+    if (bia != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(bia->dimension(0) != output_shape[channel_idx],
                                         "Biases size and number of dst feature maps should match");
@@ -198,14 +202,13 @@ Status ClComponentDepthwiseConv2d::validate(
     return Status{};
 }
 
-ClComponentDepthwiseConv2d::ClComponentDepthwiseConv2d(
-    ComponentId                      id,
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
-    : IGpuKernelComponent{ id, properties, tensors },
-      _component_writer{ std::make_unique<ClTemplateDepthwiseConv2d>(id, tensors, attributes, settings) }
+ClComponentDepthwiseConv2d::ClComponentDepthwiseConv2d(ComponentId                      id,
+                                                       const Properties                &properties,
+                                                       const ArgumentPack<ITensorInfo> &tensors,
+                                                       const Attributes                &attributes,
+                                                       const Settings                  &settings)
+    : IGpuKernelComponent{id, properties, tensors},
+      _component_writer{std::make_unique<ClTemplateDepthwiseConv2d>(id, tensors, attributes, settings)}
 {
 }
 ClComponentDepthwiseConv2d::~ClComponentDepthwiseConv2d()

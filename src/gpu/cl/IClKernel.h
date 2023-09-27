@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_ICL_KERNEL_H
 
 #include "arm_compute/core/ITensorInfo.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute

@@ -29,12 +29,19 @@ namespace arm_compute
 {
 namespace cpu
 {
-void fp16_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                                int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void fp16_in_bounds_crop_window(const ITensor *input,
+                                const ITensor *output,
+                                float         *output_ptr,
+                                Coordinates    input_offset,
+                                int32_t        window_step_x,
+                                int32_t        output_width_start,
+                                int32_t        output_width_limit,
+                                bool           input_has_single_channel,
+                                bool           is_width_flipped)
 {
-    return in_bounds_crop_window<float16_t>(input, output, output_ptr, input_offset,
-                                            window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<float16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                            output_width_limit, input_has_single_channel, is_width_flipped);
 }
-}
+} // namespace cpu
 } // namespace arm_compute
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

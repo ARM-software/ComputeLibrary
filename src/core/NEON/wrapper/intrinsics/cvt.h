@@ -30,12 +30,11 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VCVT_TO_F32_IMPL(ptype, vtype, prefix, postfix1, postfix2)                   \
-    template <typename T>                                                            \
-    inline typename std::enable_if<std::is_same<T, float>::value, float32x4_t>::type \
-    vcvt(const vtype &a)                                                             \
-    {                                                                                \
-        return prefix##_##postfix1##_##postfix2(a);                                  \
+#define VCVT_TO_F32_IMPL(ptype, vtype, prefix, postfix1, postfix2)                                        \
+    template <typename T>                                                                                 \
+    inline typename std::enable_if<std::is_same<T, float>::value, float32x4_t>::type vcvt(const vtype &a) \
+    {                                                                                                     \
+        return prefix##_##postfix1##_##postfix2(a);                                                       \
     }
 
 VCVT_TO_F32_IMPL(float32x4_t, uint32x4_t, vcvtq, f32, u32)
@@ -46,12 +45,11 @@ VCVT_TO_F32_IMPL(float32x4_t, float16x4_t, vcvt, f32, f16)
 #undef VCVT_TO_F32_IMPL
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#define VCVT_TO_F16_IMPL(ptype, vtype, prefix, postfix1, postfix2)                       \
-    template <typename T>                                                                \
-    inline typename std::enable_if<std::is_same<T, float16_t>::value, float16x4_t>::type \
-    vcvt(const vtype &a)                                                                 \
-    {                                                                                    \
-        return prefix##_##postfix1##_##postfix2(a);                                      \
+#define VCVT_TO_F16_IMPL(ptype, vtype, prefix, postfix1, postfix2)                                            \
+    template <typename T>                                                                                     \
+    inline typename std::enable_if<std::is_same<T, float16_t>::value, float16x4_t>::type vcvt(const vtype &a) \
+    {                                                                                                         \
+        return prefix##_##postfix1##_##postfix2(a);                                                           \
     }
 
 VCVT_TO_F16_IMPL(float16x4_t, float32x4_t, vcvt, f16, f32)
@@ -59,14 +57,14 @@ VCVT_TO_F16_IMPL(float16x4_t, float32x4_t, vcvt, f16, f32)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 template <typename T>
-inline typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, uint32_t>::value, uint32x4_t >::type
+inline typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, uint32_t>::value, uint32x4_t>::type
 vcvt(const float32x4_t &a)
 {
     return vcvtq_u32_f32(a);
 }
 
 template <typename T>
-inline typename std::enable_if < std::is_same<T, int8_t>::value || std::is_same<T, int32_t>::value, int32x4_t >::type
+inline typename std::enable_if<std::is_same<T, int8_t>::value || std::is_same<T, int32_t>::value, int32x4_t>::type
 vcvt(const float32x4_t &a)
 {
     return vcvtq_s32_f32(a);
@@ -74,15 +72,13 @@ vcvt(const float32x4_t &a)
 
 #ifdef __aarch64__
 template <typename T>
-inline typename std::enable_if<std::is_same<T, uint32_t>::value, uint32x4_t>::type
-vcvta(const float32x4_t &a)
+inline typename std::enable_if<std::is_same<T, uint32_t>::value, uint32x4_t>::type vcvta(const float32x4_t &a)
 {
     return vcvtaq_u32_f32(a);
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_same<T, int32_t>::value, int32x4_t>::type
-vcvta(const float32x4_t &a)
+inline typename std::enable_if<std::is_same<T, int32_t>::value, int32x4_t>::type vcvta(const float32x4_t &a)
 {
     return vcvtaq_s32_f32(a);
 }
@@ -96,14 +92,13 @@ vcvta(const float32x4_t &a)
  */
 inline void vcvt_bf16_f32(const float *inptr, uint16_t *outptr)
 {
-    __asm __volatile(
-        "ldp    q0, q1, [%[inptr]]\n"
-        ".inst  0xea16800\n"  // BFCVTN v0, v0
-        ".inst  0x4ea16820\n" // BFCVTN2 v0, v1
-        "str    q0, [%[outptr]]\n"
-        : [inptr] "+r"(inptr)
-        : [outptr] "r"(outptr)
-        : "v0", "v1", "memory");
+    __asm __volatile("ldp    q0, q1, [%[inptr]]\n"
+                     ".inst  0xea16800\n"  // BFCVTN v0, v0
+                     ".inst  0x4ea16820\n" // BFCVTN2 v0, v1
+                     "str    q0, [%[outptr]]\n"
+                     : [inptr] "+r"(inptr)
+                     : [outptr] "r"(outptr)
+                     : "v0", "v1", "memory");
 }
 #endif /* defined(ARM_COMPUTE_ENABLE_BF16) */
 

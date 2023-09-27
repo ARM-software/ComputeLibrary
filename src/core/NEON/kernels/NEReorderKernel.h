@@ -26,8 +26,9 @@
 #ifndef ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
 #define ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL
 
-#include "src/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
+
+#include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
@@ -36,7 +37,6 @@ namespace arm_compute
 class NEReorderKernel : public INEKernel
 {
 public:
-
     const char *name() const override
     {
         return "NEReorderKernel";
@@ -62,7 +62,10 @@ public:
      * @param[in]  input_wf  WeightFormat of input.
      * @param[in]  output_wf WeightFormat of output.
      */
-    void configure(const ITensor *input, ITensor *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf);
+    void configure(const ITensor            *input,
+                   ITensor                  *output,
+                   arm_compute::WeightFormat input_wf,
+                   arm_compute::WeightFormat output_wf);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorderKernel
      *
@@ -73,25 +76,27 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf);
+    static Status validate(const ITensorInfo        *input,
+                           const ITensorInfo        *output,
+                           arm_compute::WeightFormat input_wf,
+                           arm_compute::WeightFormat output_wf);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
-
-/*****************************************************************************/
+    /*****************************************************************************/
 
 private:
-    const ITensor *_input{nullptr}; // Input tensor
-    ITensor *_output{nullptr}; // Output tensor
-    int32_t  _ksize{0}; // Blocking parameter, how many rows kernel reorders on each call
-    int32_t  _kmax{0}; // Rows in input tensor
-    int32_t  _xmax{0}; // Columns in input tensor
-    WeightFormat _input_wf{WeightFormat::UNSPECIFIED}; // WeightFormat of input tensor
-    WeightFormat _output_wf{WeightFormat::UNSPECIFIED}; // WeightFormat of output tensor
+    const ITensor *_input{nullptr};  // Input tensor
+    ITensor       *_output{nullptr}; // Output tensor
+    int32_t        _ksize{0};        // Blocking parameter, how many rows kernel reorders on each call
+    int32_t        _kmax{0};         // Rows in input tensor
+    int32_t        _xmax{0};         // Columns in input tensor
+    WeightFormat   _input_wf{WeightFormat::UNSPECIFIED};  // WeightFormat of input tensor
+    WeightFormat   _output_wf{WeightFormat::UNSPECIFIED}; // WeightFormat of output tensor
 };
 
 } // namespace arm_compute
 #endif /* ACL_SRC_CORE_NEON_KERNELS_NEREORDERKERNEL */
 
-#endif  // defined(__aarch64__)
+#endif // defined(__aarch64__)

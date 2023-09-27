@@ -32,9 +32,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ADD_MUL_ADD_KERNEL(func_name)                                                                          \
+#define DECLARE_ADD_MUL_ADD_KERNEL(func_name)                                                                  \
     void func_name(const ITensor *input1, const ITensor *input2, const ITensor *bn_mul, const ITensor *bn_add, \
-                   ITensor *add_output, ITensor *final_output, ConvertPolicy policy, const ActivationLayerInfo &act_info, const Window &window)
+                   ITensor *add_output, ITensor *final_output, ConvertPolicy policy,                           \
+                   const ActivationLayerInfo &act_info, const Window &window)
 
 DECLARE_ADD_MUL_ADD_KERNEL(add_mul_add_fp32_neon);
 DECLARE_ADD_MUL_ADD_KERNEL(add_mul_add_fp16_neon);

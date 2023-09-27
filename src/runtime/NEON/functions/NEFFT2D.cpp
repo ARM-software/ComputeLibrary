@@ -26,6 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Scheduler.h"
+
 #include "src/common/utils/Log.h"
 
 namespace arm_compute
@@ -33,7 +34,10 @@ namespace arm_compute
 NEFFT2D::~NEFFT2D() = default;
 
 NEFFT2D::NEFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _first_pass_func(memory_manager), _second_pass_func(memory_manager), _first_pass_tensor()
+    : _memory_group(memory_manager),
+      _first_pass_func(memory_manager),
+      _second_pass_func(memory_manager),
+      _first_pass_tensor()
 {
 }
 
@@ -78,7 +82,7 @@ Status NEFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_RETURN_ON_ERROR(NEFFT1D::validate(&first_pass_tensor, output, second_pass_config));
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if ((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

@@ -25,8 +25,8 @@
 #define ARM_COMPUTE_ISCHEDULER_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/Types.h"
 
 #include <functional>
 #include <limits>
@@ -226,7 +226,11 @@ protected:
      *
      * @return Adjusted number of windows
      */
-    std::size_t adjust_num_of_windows(const Window &window, std::size_t split_dimension, std::size_t init_num_windows, const ICPPKernel &kernel, const CPUInfo &cpu_info);
+    std::size_t adjust_num_of_windows(const Window     &window,
+                                      std::size_t       split_dimension,
+                                      std::size_t       init_num_windows,
+                                      const ICPPKernel &kernel,
+                                      const CPUInfo    &cpu_info);
 
 private:
     unsigned int _num_threads_hint = {};

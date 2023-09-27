@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "src/cpu/kernels/CpuDirectConv2dKernel.h"
-#include "src/cpu/kernels/directconv2d/list.h"
 
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/cpu/kernels/directconv2d/list.h"
 
 using namespace arm_compute::detail;
 
@@ -38,26 +39,25 @@ namespace cpu
 {
 namespace kernels
 {
-static const std::vector<CpuDirectConv2dKernel::DirectConv2dKernel> available_kernels =
-{
-    {
-        "neon_fp32_nhwc_directconv2d",
-        [](const DataTypeDataLayoutISASelectorData & data) { return data.dt == DataType::F32 && data.dl == DataLayout::NHWC; },
-        REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nhwc_directconv2d)
-    },
-    {
-        "neon_fp32_nchw_directconv2d",
-        [](const DataTypeDataLayoutISASelectorData & data) { return data.dt == DataType::F32 && data.dl == DataLayout::NCHW; },
-        REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nchw_directconv2d)
-    },
-    {
-        "neon_fp16_nchw_directconv2d",
-        [](const DataTypeDataLayoutISASelectorData & data) { return data.dt == DataType::F16 && data.dl == DataLayout::NCHW && data.isa.fp16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nchw_directconv2d)
-    },
+static const std::vector<CpuDirectConv2dKernel::DirectConv2dKernel> available_kernels = {
+    {"neon_fp32_nhwc_directconv2d",
+     [](const DataTypeDataLayoutISASelectorData &data)
+     { return data.dt == DataType::F32 && data.dl == DataLayout::NHWC; },
+     REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nhwc_directconv2d)},
+    {"neon_fp32_nchw_directconv2d",
+     [](const DataTypeDataLayoutISASelectorData &data)
+     { return data.dt == DataType::F32 && data.dl == DataLayout::NCHW; },
+     REGISTER_FP32_NEON(arm_compute::cpu::kernels::neon_fp32_nchw_directconv2d)},
+    {"neon_fp16_nchw_directconv2d",
+     [](const DataTypeDataLayoutISASelectorData &data)
+     { return data.dt == DataType::F16 && data.dl == DataLayout::NCHW && data.isa.fp16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::kernels::neon_fp16_nchw_directconv2d)},
 };
 
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
+Status validate_arguments(const ITensorInfo   *src,
+                          const ITensorInfo   *weights,
+                          const ITensorInfo   *dst,
+                          const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() == DataLayout::UNKNOWN);
@@ -76,7 +76,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::NHWC && src->data_type() != DataType::F32);
     ARM_COMPUTE_UNUSED(width_idx);
     // Checks performed when output is configured
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
 
@@ -100,11 +100,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src, ITenso
     // Configure window without any padding
     win = calculate_max_window(*dst, Steps());
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    Status err =
+        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-void CpuDirectConv2dKernel::configure(ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst, const PadStrideInfo &conv_info)
+void CpuDirectConv2dKernel::configure(ITensorInfo         *src,
+                                      ITensorInfo         *weights,
+                                      ITensorInfo         *dst,
+                                      const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
 
@@ -129,12 +133,13 @@ void CpuDirectConv2dKernel::configure(ITensorInfo *src, ITensorInfo *weights, IT
     ICpuKernel::configure(win_config.second);
 }
 
-Status CpuDirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info)
+Status CpuDirectConv2dKernel::validate(const ITensorInfo   *src,
+                                       const ITensorInfo   *weights,
+                                       const ITensorInfo   *dst,
+                                       const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, dst, conv_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(),
-                                                              dst->clone().get())
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get()).first);
 
     return Status{};
 }
@@ -149,7 +154,8 @@ void CpuDirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, c
     auto weights = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto dst     = tensors.get_tensor(TensorType::ACL_DST);
 
-    const auto *uk = CpuDirectConv2dKernel::get_implementation(DataTypeDataLayoutISASelectorData{ src->info()->data_type(), _data_layout, CPUInfo::get().get_isa() });
+    const auto *uk = CpuDirectConv2dKernel::get_implementation(
+        DataTypeDataLayoutISASelectorData{src->info()->data_type(), _data_layout, CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr);
 
     uk->ukernel(window, src, weights, dst, _conv_info);

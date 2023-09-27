@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTCAST
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/CastAttributes.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
@@ -93,11 +94,10 @@ public:
      * |F16            | U8, S8, U16, S16, U32, S32, F32       |
      * |F32            | U8, S8, U16, S16, U32, S32, F16       |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    static Status validate(const Properties                &properties,
+                           const ArgumentPack<ITensorInfo> &tensors,
+                           const Attributes                &attributes,
+                           const Settings                  &settings);
 
     /** Constructor
      *

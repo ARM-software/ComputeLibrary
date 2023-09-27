@@ -45,7 +45,7 @@ public:
      */
     static std::unique_ptr<IClMatMulNativeKernelConfig> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
@@ -56,6 +56,6 @@ public:
         }
     }
 };
-} // namespace opencl
+} // namespace cl_matmul
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_MATMUL_NATIVE_CLMATMULNATIVEKERNELCONFIG */

@@ -57,7 +57,10 @@ public:
      * @param[out]    dst             Destination tensor info. Data types supported: same as @p src_vector.
      * @param[in]     axis            Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
-    void configure(const ClCompileContext &compile_context, const std::vector<ITensorInfo *> &src_vector, ITensorInfo *dst, size_t axis);
+    void configure(const ClCompileContext           &compile_context,
+                   const std::vector<ITensorInfo *> &src_vector,
+                   ITensorInfo                      *dst,
+                   size_t                            axis);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClConcatenate::configure()
@@ -71,8 +74,8 @@ public:
 
 private:
     std::vector<std::unique_ptr<IClKernel>> _concat_kernels{};
-    unsigned int                            _num_inputs{ 0 };
-    unsigned int                            _axis{ 0 };
+    unsigned int                            _num_inputs{0};
+    unsigned int                            _axis{0};
 };
 } // namespace opencl
 } // namespace arm_compute

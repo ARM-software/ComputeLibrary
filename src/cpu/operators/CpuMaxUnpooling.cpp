@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/cpu/operators/CpuMaxUnpooling.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 
@@ -29,7 +30,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-void CpuMaxUnpooling::configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+void CpuMaxUnpooling::configure(const ITensorInfo      *src,
+                                const ITensorInfo      *indices,
+                                ITensorInfo            *dst,
+                                const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src, indices, dst, pool_info);
     auto k = std::make_unique<kernels::CpuMaxUnpoolingLayerKernel>();
@@ -37,9 +41,12 @@ void CpuMaxUnpooling::configure(const ITensorInfo *src, const ITensorInfo *indic
     _kernel = std::move(k);
 }
 
-Status CpuMaxUnpooling::validate(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+Status CpuMaxUnpooling::validate(const ITensorInfo      *src,
+                                 const ITensorInfo      *indices,
+                                 const ITensorInfo      *dst,
+                                 const PoolingLayerInfo &pool_info)
 {
     return kernels::CpuMaxUnpoolingLayerKernel::validate(src, indices, dst, pool_info);
 }
-} // namesapce cpu
+} // namespace cpu
 } // namespace arm_compute

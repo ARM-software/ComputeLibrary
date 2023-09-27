@@ -25,16 +25,18 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClPool3dKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClPool3d::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &info)
+void ClPool3d::configure(const ClCompileContext   &compile_context,
+                         const ITensorInfo        *src,
+                         ITensorInfo              *dst,
+                         const Pooling3dLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, dst, info);

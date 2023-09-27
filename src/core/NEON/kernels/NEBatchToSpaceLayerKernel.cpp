@@ -27,8 +27,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -46,7 +47,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_inf
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -54,7 +55,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_inf
 
     return Status{};
 }
-Status validate_arguments_static(const ITensorInfo *input, int block_shape_x, int block_shape_y, const ITensorInfo *output, const CropInfo &crop_info)
+Status validate_arguments_static(const ITensorInfo *input,
+                                 int                block_shape_x,
+                                 int                block_shape_y,
+                                 const ITensorInfo *output,
+                                 const CropInfo    &crop_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
@@ -65,13 +70,14 @@ Status validate_arguments_static(const ITensorInfo *input, int block_shape_x, in
     const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-        const TensorShape expected_output_shape = compute_batch_to_space_shape(input->data_layout(), input->tensor_shape(), block_shape_x, block_shape_y, crop_info);
-        const TensorInfo  expected_output       = output->clone()->set_tensor_shape(expected_output_shape);
+        const TensorShape expected_output_shape = compute_batch_to_space_shape(
+            input->data_layout(), input->tensor_shape(), block_shape_x, block_shape_y, crop_info);
+        const TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &expected_output);
     }
 
@@ -80,7 +86,13 @@ Status validate_arguments_static(const ITensorInfo *input, int block_shape_x, in
 } // namespace
 
 NEBatchToSpaceLayerKernel::NEBatchToSpaceLayerKernel()
-    : _input(nullptr), _block_shape(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _block_shape_x(), _block_shape_y(), _crop_info()
+    : _input(nullptr),
+      _block_shape(nullptr),
+      _output(nullptr),
+      _data_layout(DataLayout::UNKNOWN),
+      _block_shape_x(),
+      _block_shape_y(),
+      _crop_info()
 {
 }
 
@@ -99,15 +111,18 @@ void NEBatchToSpaceLayerKernel::configure(const ITensor *input, const ITensor *b
     ICPPKernel::configure(win);
 }
 
-void NEBatchToSpaceLayerKernel::configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
+void NEBatchToSpaceLayerKernel::configure(
+    const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    const TensorShape output_shape = compute_batch_to_space_shape(input->info()->data_layout(), input->info()->tensor_shape(), block_shape_x, block_shape_y);
+    const TensorShape output_shape = compute_batch_to_space_shape(
+        input->info()->data_layout(), input->info()->tensor_shape(), block_shape_x, block_shape_y);
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_static(input->info(), block_shape_x, block_shape_y, output->info(), crop_info));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments_static(input->info(), block_shape_x, block_shape_y, output->info(), crop_info));
 
     _input         = input;
     _output        = output;
@@ -121,14 +136,19 @@ void NEBatchToSpaceLayerKernel::configure(const ITensor *input, int32_t block_sh
     ICPPKernel::configure(win);
 }
 
-Status NEBatchToSpaceLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
+Status
+NEBatchToSpaceLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, block_shape, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, block_shape, output));
     return Status{};
 }
 
-Status NEBatchToSpaceLayerKernel::validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info)
+Status NEBatchToSpaceLayerKernel::validate(const ITensorInfo *input,
+                                           int32_t            block_shape_x,
+                                           int32_t            block_shape_y,
+                                           const ITensorInfo *output,
+                                           const CropInfo    &crop_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_static(input, block_shape_x, block_shape_y, output, crop_info));
@@ -141,7 +161,7 @@ void NEBatchToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
-    if(_block_shape != nullptr)
+    if (_block_shape != nullptr)
     {
         // Retrieve the block shapes dynamically
         _block_shape_x = *(reinterpret_cast<const int *>(_block_shape->ptr_to_element(0)));
@@ -155,31 +175,32 @@ void NEBatchToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
 
     int batch_id = 0;
     // Main loop for NCHW and NHWC
-    if(_data_layout == DataLayout::NCHW)
+    if (_data_layout == DataLayout::NCHW)
     {
         do
         {
             Iterator out(_output, slice_out);
-            execute_window_loop(slice_out, [&](const Coordinates & id)
-            {
+            execute_window_loop(
+                slice_out,
+                [&](const Coordinates &id)
+                {
+                    const int x = id.x();
+                    const int y = id.y();
+                    const int z = id.z();
+                    // Translate x, y to uncropped version
+                    const int x_c = x + _crop_info.left;
+                    const int y_c = y + _crop_info.top;
 
-                const int x = id.x();
-                const int y = id.y();
-                const int z = id.z();
-                // Translate x, y to uncropped version
-                const int x_c = x + _crop_info.left;
-                const int y_c = y + _crop_info.top;
-
-                const int   in_batch = batch_id + ((x_c % _block_shape_x) + (y_c % _block_shape_y) * _block_shape_x) * batch_size;
-                const int   in_x     = x_c / _block_shape_x;
-                const int   in_y     = y_c / _block_shape_y;
-                Coordinates input_coords{ in_x, in_y, z, in_batch };
-                memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
-            },
-            out);
+                    const int in_batch =
+                        batch_id + ((x_c % _block_shape_x) + (y_c % _block_shape_y) * _block_shape_x) * batch_size;
+                    const int   in_x = x_c / _block_shape_x;
+                    const int   in_y = y_c / _block_shape_y;
+                    Coordinates input_coords{in_x, in_y, z, in_batch};
+                    memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size);
+                },
+                out);
             ++batch_id;
-        }
-        while(window.slide_window_slice_3D(slice_out));
+        } while (window.slide_window_slice_3D(slice_out));
     }
     else
     {
@@ -188,26 +209,28 @@ void NEBatchToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
         do
         {
             Iterator out(_output, slice_out);
-            execute_window_loop(slice_out, [&](const Coordinates & id)
-            {
+            execute_window_loop(
+                slice_out,
+                [&](const Coordinates &id)
+                {
+                    const int x = id.y();
+                    const int y = id.z();
 
-                const int x = id.y();
-                const int y = id.z();
+                    // Translate x, y to uncropped version
+                    const int x_c = x + _crop_info.left;
+                    const int y_c = y + _crop_info.top;
 
-                // Translate x, y to uncropped version
-                const int x_c = x + _crop_info.left;
-                const int y_c = y + _crop_info.top;
-
-                const int   in_batch = batch_id + ((x_c % _block_shape_x) + (y_c % _block_shape_y) * _block_shape_x) * batch_size;
-                const int   in_x     = x_c / _block_shape_x;
-                const int   in_y     = y_c / _block_shape_y;
-                Coordinates input_coords{ 0, in_x, in_y, in_batch };
-                memcpy(out.ptr(), _input->ptr_to_element(input_coords), element_size * _input->info()->dimension(0));
-            },
-            out);
+                    const int in_batch =
+                        batch_id + ((x_c % _block_shape_x) + (y_c % _block_shape_y) * _block_shape_x) * batch_size;
+                    const int   in_x = x_c / _block_shape_x;
+                    const int   in_y = y_c / _block_shape_y;
+                    Coordinates input_coords{0, in_x, in_y, in_batch};
+                    memcpy(out.ptr(), _input->ptr_to_element(input_coords),
+                           element_size * _input->info()->dimension(0));
+                },
+                out);
             ++batch_id;
-        }
-        while(window.slide_window_slice_3D(slice_out));
+        } while (window.slide_window_slice_3D(slice_out));
     }
 }
 } // namespace arm_compute

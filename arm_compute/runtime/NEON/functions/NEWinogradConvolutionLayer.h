@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -87,8 +86,13 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
-                   bool enable_fast_math = false);
+    void configure(const ITensor             *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;
@@ -100,8 +104,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false);
 
 private:
     struct Impl;

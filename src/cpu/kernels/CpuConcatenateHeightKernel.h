@@ -58,11 +58,11 @@ public:
     static Status validate(const ITensorInfo *src, unsigned int height_offset, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
-    unsigned int _height_offset{ 0 };
+    unsigned int _height_offset{0};
 };
 } // namespace kernels
 } // namespace cpu

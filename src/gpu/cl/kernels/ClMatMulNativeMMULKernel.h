@@ -72,22 +72,31 @@ public:
      * @param[out] dst             Output tensor info.
      * @param[in]  matmul_info     Attributes for Batch MatMul Kernel
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *lhs,
+                   ITensorInfo            *rhs,
+                   ITensorInfo            *bias,
+                   ITensorInfo            *dst,
+                   const MatMulKernelInfo &matmul_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClMatMulNativeMMULKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_info);
+    static Status validate(const ITensorInfo      *lhs,
+                           const ITensorInfo      *rhs,
+                           const ITensorInfo      *bias,
+                           const ITensorInfo      *dst,
+                           const MatMulKernelInfo &matmul_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    int _m{ 1 };
-    int _n{ 1 };
-    int _k{ 1 };
+    int _m{1};
+    int _n{1};
+    int _k{1};
 };
 } // namespace kernels
 } // namespace opencl

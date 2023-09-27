@@ -26,19 +26,19 @@
 
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/cpu/operators/CpuQuantize.h"
 
 namespace arm_compute
 {
 struct NEQuantizationLayer::Impl
 {
-    const ITensor                    *src{ nullptr };
-    ITensor                          *dst{ nullptr };
-    std::unique_ptr<cpu::CpuQuantize> op{ nullptr };
+    const ITensor                    *src{nullptr};
+    ITensor                          *dst{nullptr};
+    std::unique_ptr<cpu::CpuQuantize> op{nullptr};
 };
 
-NEQuantizationLayer::NEQuantizationLayer()
-    : _impl(std::make_unique<Impl>())
+NEQuantizationLayer::NEQuantizationLayer() : _impl(std::make_unique<Impl>())
 {
 }
 NEQuantizationLayer::~NEQuantizationLayer() = default;

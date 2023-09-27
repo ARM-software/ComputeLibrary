@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "src/core/NEON/kernels/NEROIPoolingLayerKernel.h"
+
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -36,7 +38,10 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo         *input,
+                          const ITensorInfo         *rois,
+                          const ITensorInfo         *output,
+                          const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, rois);
 
@@ -47,10 +52,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, con
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) || (output->dimension(1) != pool_info.pooled_height()));
+        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) ||
+                                    (output->dimension(1) != pool_info.pooled_height()));
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
         ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
     }
@@ -73,19 +79,28 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, con
  * @param[in]  roi_indx       Index of image of coordinate in output Tensor to store value
  */
 template <typename T>
-void template_eval(const ITensor *input, const ITensor *output, int region_start_x, int region_start_y,
-                   int region_end_x, int region_end_y, int fm, int px, int py, int roi_batch, int roi_indx)
+void template_eval(const ITensor *input,
+                   const ITensor *output,
+                   int            region_start_x,
+                   int            region_start_y,
+                   int            region_end_x,
+                   int            region_end_y,
+                   int            fm,
+                   int            px,
+                   int            py,
+                   int            roi_batch,
+                   int            roi_indx)
 {
-    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+    if ((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
     {
         *reinterpret_cast<T *>(output->ptr_to_element(Coordinates(px, py, fm, roi_indx))) = 0;
     }
     else
     {
         T curr_max = std::numeric_limits<T>::lowest(); // Min value of typename T
-        for(int j = region_start_y; j < region_end_y; ++j)
+        for (int j = region_start_y; j < region_end_y; ++j)
         {
-            for(int i = region_start_x; i < region_end_x; ++i)
+            for (int i = region_start_x; i < region_end_x; ++i)
             {
                 const auto val = *reinterpret_cast<const T *>(input->ptr_to_element(Coordinates(i, j, fm, roi_batch)));
                 curr_max       = std::max(val, curr_max);
@@ -93,11 +108,13 @@ void template_eval(const ITensor *input, const ITensor *output, int region_start
         }
 
         // if quantized datatype, requantize then store in output tensor
-        if(is_data_type_quantized(input->info()->data_type()))
+        if (is_data_type_quantized(input->info()->data_type()))
         {
             // covert qasymm to new output quantization scale and offset
-            UniformQuantizationInfo uqinfo = compute_requantization_scale_offset(input->info()->quantization_info().uniform(), output->info()->quantization_info().uniform());
-            *reinterpret_cast<T *>(output->ptr_to_element(Coordinates(px, py, fm, roi_indx))) = quantize_qasymm8(curr_max, uqinfo);
+            UniformQuantizationInfo uqinfo = compute_requantization_scale_offset(
+                input->info()->quantization_info().uniform(), output->info()->quantization_info().uniform());
+            *reinterpret_cast<T *>(output->ptr_to_element(Coordinates(px, py, fm, roi_indx))) =
+                quantize_qasymm8(curr_max, uqinfo);
         }
         else
         {
@@ -112,13 +129,19 @@ NEROIPoolingLayerKernel::NEROIPoolingLayerKernel()
 {
 }
 
-Status NEROIPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status NEROIPoolingLayerKernel::validate(const ITensorInfo         *input,
+                                         const ITensorInfo         *rois,
+                                         const ITensorInfo         *output,
+                                         const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, rois, output, pool_info));
     return Status{};
 }
 
-void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info)
+void NEROIPoolingLayerKernel::configure(const ITensor             *input,
+                                        const ITensor             *rois,
+                                        const ITensor             *output,
+                                        const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
 
@@ -126,12 +149,15 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
 
     // Output auto initialization if not yet initialized
-    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2), rois->info()->dimension(1));
+    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2),
+                             rois->info()->dimension(1));
 
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), output->info()->quantization_info());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(),
+                       output->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pool_info.pooled_width()) || (output->info()->dimension(1) != pool_info.pooled_height()));
+    ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pool_info.pooled_width()) ||
+                         (output->info()->dimension(1) != pool_info.pooled_height()));
 
     // Set instance variables
     _input     = input;
@@ -167,7 +193,7 @@ void NEROIPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     const auto *rois_ptr  = reinterpret_cast<const uint16_t *>(_rois->buffer());
     const auto  data_type = _input->info()->data_type();
 
-    for(int roi_indx = roi_list_start; roi_indx < roi_list_end; ++roi_indx)
+    for (int roi_indx = roi_list_start; roi_indx < roi_list_end; ++roi_indx)
     {
         const unsigned int roi_batch = rois_ptr[values_per_roi * roi_indx];
         const auto         x1        = rois_ptr[values_per_roi * roi_indx + 1];
@@ -182,30 +208,35 @@ void NEROIPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
         const int roi_height   = std::max(support::cpp11::round((y2 - y1) * spatial_scale), 1.f);
 
         // Iterate through all feature maps
-        for(int fm = 0; fm < fms; ++fm)
+        for (int fm = 0; fm < fms; ++fm)
         {
             // Iterate through all output pixels
-            for(int py = 0; py < pooled_h; ++py)
+            for (int py = 0; py < pooled_h; ++py)
             {
-                for(int px = 0; px < pooled_w; ++px)
+                for (int px = 0; px < pooled_w; ++px)
                 {
                     auto region_start_x = static_cast<int>(std::floor((static_cast<float>(px) / pooled_w) * roi_width));
-                    auto region_end_x   = static_cast<int>(std::floor((static_cast<float>(px + 1) / pooled_w) * roi_width));
-                    auto region_start_y = static_cast<int>(std::floor((static_cast<float>(py) / pooled_h) * roi_height));
-                    auto region_end_y   = static_cast<int>(std::floor((static_cast<float>(py + 1) / pooled_h) * roi_height));
+                    auto region_end_x =
+                        static_cast<int>(std::floor((static_cast<float>(px + 1) / pooled_w) * roi_width));
+                    auto region_start_y =
+                        static_cast<int>(std::floor((static_cast<float>(py) / pooled_h) * roi_height));
+                    auto region_end_y =
+                        static_cast<int>(std::floor((static_cast<float>(py + 1) / pooled_h) * roi_height));
 
                     region_start_x = std::min(std::max(region_start_x + roi_anchor_x, 0), width);
                     region_end_x   = std::min(std::max(region_end_x + roi_anchor_x, 0), width);
                     region_start_y = std::min(std::max(region_start_y + roi_anchor_y, 0), height);
                     region_end_y   = std::min(std::max(region_end_y + roi_anchor_y, 0), height);
 
-                    switch(data_type)
+                    switch (data_type)
                     {
                         case DataType::F32:
-                            template_eval<float>(_input, _output, region_start_x, region_start_y, region_end_x, region_end_y, fm, px, py, roi_batch, roi_indx);
+                            template_eval<float>(_input, _output, region_start_x, region_start_y, region_end_x,
+                                                 region_end_y, fm, px, py, roi_batch, roi_indx);
                             break;
                         case DataType::QASYMM8:
-                            template_eval<qasymm8_t>(_input, _output, region_start_x, region_start_y, region_end_x, region_end_y, fm, px, py, roi_batch, roi_indx);
+                            template_eval<qasymm8_t>(_input, _output, region_start_x, region_start_y, region_end_x,
+                                                     region_end_y, fm, px, py, roi_batch, roi_indx);
                             break;
                         default:
                             ARM_COMPUTE_ERROR("DataType not Supported");

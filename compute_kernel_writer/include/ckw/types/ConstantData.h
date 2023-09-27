@@ -45,12 +45,12 @@ class KernelWriter;
 
 class ConstantData
 {
-    using String = std::string;
+    using String       = std::string;
     using StringVector = std::vector<String>;
 
 public:
     /** Templated constructor */
-    template<typename T>
+    template <typename T>
     ConstantData(std::initializer_list<std::initializer_list<T>> values, DataType data_type);
 
 private:
@@ -60,14 +60,14 @@ private:
      *
      * @return true if user provided data type and the template type are conformant
      */
-    template<typename T>
+    template <typename T>
     bool validate(DataType data_type);
 
     /** Get the constant data as a 2d vector of string values
      *
      * @return a 2d vector of strings that has the string-converted values
      */
-    const std::vector<StringVector>& values() const;
+    const std::vector<StringVector> &values() const;
 
     /** Get the underlying data type of the constant values
      *
@@ -81,7 +81,7 @@ private:
 private:
     // Data members
     std::vector<StringVector> _values{};
-    DataType _data_type{};
+    DataType                  _data_type{};
 };
 
 } // namespace ckw

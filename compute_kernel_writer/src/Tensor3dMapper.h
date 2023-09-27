@@ -74,8 +74,8 @@ public:
     TileVariable stride_batch() const;
 
 private:
-    ITensor             *_tensor;
-    TensorSamplerFormat  _format;
+    ITensor            *_tensor;
+    TensorSamplerFormat _format;
 };
 } // namespace ckw
 

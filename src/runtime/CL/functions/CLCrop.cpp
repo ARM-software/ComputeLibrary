@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClCrop.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClCrop.h"
 
 #include <utility>
 
@@ -38,27 +38,38 @@ namespace arm_compute
 {
 struct CLCrop::Impl
 {
-    const ICLTensor                *src{ nullptr };
-    ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClCrop> op{ nullptr };
+    const ICLTensor                *src{nullptr};
+    ICLTensor                      *dst{nullptr};
+    std::unique_ptr<opencl::ClCrop> op{nullptr};
 };
 
-CLCrop::CLCrop()
-    : _impl(std::make_unique<Impl>())
+CLCrop::CLCrop() : _impl(std::make_unique<Impl>())
 {
 }
-CLCrop::CLCrop(CLCrop &&) = default;
+CLCrop::CLCrop(CLCrop &&)            = default;
 CLCrop &CLCrop::operator=(CLCrop &&) = default;
 CLCrop::~CLCrop()                    = default;
 
-void CLCrop::configure(const ICLTensor *src, ICLTensor *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value,
-                       Window *dst_window)
+void CLCrop::configure(const ICLTensor *src,
+                       ICLTensor       *dst,
+                       Coordinates2D    start,
+                       Coordinates2D    end,
+                       uint32_t         batch_index,
+                       float            extrapolation_value,
+                       Window          *dst_window)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), src, dst, start, end, batch_index, extrapolation_value, dst_window);
+    configure(CLKernelLibrary::get().get_compile_context(), src, dst, start, end, batch_index, extrapolation_value,
+              dst_window);
 }
 
-void CLCrop::configure(const CLCompileContext &compile_context, const ICLTensor *src, ICLTensor *dst, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value,
-                       Window *dst_window)
+void CLCrop::configure(const CLCompileContext &compile_context,
+                       const ICLTensor        *src,
+                       ICLTensor              *dst,
+                       Coordinates2D           start,
+                       Coordinates2D           end,
+                       uint32_t                batch_index,
+                       float                   extrapolation_value,
+                       Window                 *dst_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_LOG_PARAMS(src, dst, start, end, batch_index, extrapolation_value, dst_window);
@@ -67,10 +78,17 @@ void CLCrop::configure(const CLCompileContext &compile_context, const ICLTensor 
     _impl->dst = dst;
 
     _impl->op = std::make_unique<opencl::ClCrop>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), start, end, batch_index, extrapolation_value, dst_window);
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), start, end, batch_index,
+                         extrapolation_value, dst_window);
 }
 
-Status CLCrop::validate(const ITensorInfo *input, const ITensorInfo *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value, Window *dst_window)
+Status CLCrop::validate(const ITensorInfo *input,
+                        const ITensorInfo *output,
+                        Coordinates2D      start,
+                        Coordinates2D      end,
+                        uint32_t           batch_index,
+                        float              extrapolation_value,
+                        Window            *dst_window)
 {
     return opencl::ClCrop::validate(input, output, start, end, batch_index, extrapolation_value, dst_window);
 }

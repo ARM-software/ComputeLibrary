@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_GEMM_DIRECT_CONV_2D_H
 
 #include "arm_compute/core/TensorInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/operators/CpuActivation.h"
@@ -69,18 +70,26 @@ public:
      *                    Data types supported: Same as @p input.
      * @param[in] info    Contains padding and stride information described in @ref PadStrideInfo.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const Conv2dInfo &info);
+    void configure(const ITensorInfo *src,
+                   const ITensorInfo *weights,
+                   const ITensorInfo *biases,
+                   ITensorInfo       *dst,
+                   const Conv2dInfo  &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CpuGemmDirectConv2d
      *
      * Similar to CpuGemmDirectConv2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const Conv2dInfo &info);
+    static Status validate(const ITensorInfo *src,
+                           const ITensorInfo *weights,
+                           const ITensorInfo *biases,
+                           const ITensorInfo *dst,
+                           const Conv2dInfo  &info);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

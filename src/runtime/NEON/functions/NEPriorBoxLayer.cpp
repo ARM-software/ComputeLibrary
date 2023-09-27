@@ -27,15 +27,19 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 
 namespace arm_compute
 {
-void NEPriorBoxLayer::configure(const ITensor *input1, const ITensor *input2, ITensor *output, const PriorBoxLayerInfo &info)
+void NEPriorBoxLayer::configure(const ITensor           *input1,
+                                const ITensor           *input2,
+                                ITensor                 *output,
+                                const PriorBoxLayerInfo &info)
 {
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output, info);
 
@@ -44,7 +48,10 @@ void NEPriorBoxLayer::configure(const ITensor *input1, const ITensor *input2, IT
     _kernel = std::move(k);
 }
 
-Status NEPriorBoxLayer::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info)
+Status NEPriorBoxLayer::validate(const ITensorInfo       *input1,
+                                 const ITensorInfo       *input2,
+                                 const ITensorInfo       *output,
+                                 const PriorBoxLayerInfo &info)
 {
     return NEPriorBoxLayerKernel::validate(input1, input2, output, info);
 }

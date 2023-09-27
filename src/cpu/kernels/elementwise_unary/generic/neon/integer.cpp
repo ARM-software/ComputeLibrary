@@ -22,16 +22,18 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/kernels/elementwise_unary/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void neon_s32_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+void neon_s32_elementwise_unary(
+    const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
     ARM_COMPUTE_UNUSED(lut);
     return elementwise_op<int32_t>(in, out, window, op);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

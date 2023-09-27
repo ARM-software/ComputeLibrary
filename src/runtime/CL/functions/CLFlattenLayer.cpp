@@ -26,8 +26,9 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/gpu/cl/operators/ClFlatten.h"
@@ -36,16 +37,15 @@ namespace arm_compute
 {
 struct CLFlattenLayer::Impl
 {
-    const ICLTensor                   *src{ nullptr };
-    ICLTensor                         *dst{ nullptr };
-    std::unique_ptr<opencl::ClFlatten> op{ nullptr };
+    const ICLTensor                   *src{nullptr};
+    ICLTensor                         *dst{nullptr};
+    std::unique_ptr<opencl::ClFlatten> op{nullptr};
 };
 
-CLFlattenLayer::CLFlattenLayer()
-    : _impl(std::make_unique<Impl>())
+CLFlattenLayer::CLFlattenLayer() : _impl(std::make_unique<Impl>())
 {
 }
-CLFlattenLayer::CLFlattenLayer(CLFlattenLayer &&) = default;
+CLFlattenLayer::CLFlattenLayer(CLFlattenLayer &&)            = default;
 CLFlattenLayer &CLFlattenLayer::operator=(CLFlattenLayer &&) = default;
 CLFlattenLayer::~CLFlattenLayer()                            = default;
 
@@ -59,7 +59,8 @@ void CLFlattenLayer::configure(const CLCompileContext &compile_context, const IC
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     _impl->src = input;
     _impl->dst = output;
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input->info())));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(
+                                            misc::shape_calculator::compute_flatten_shape(input->info())));
 
     _impl->op = std::make_unique<opencl::ClFlatten>();
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info());
@@ -68,9 +69,10 @@ void CLFlattenLayer::configure(const CLCompileContext &compile_context, const IC
 Status CLFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input));
+        const TensorInfo tensor_info_output =
+            input->clone()->set_tensor_shape(misc::shape_calculator::compute_flatten_shape(input));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
     }
     return opencl::ClFlatten::validate(input, output);

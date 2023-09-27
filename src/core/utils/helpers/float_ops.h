@@ -39,8 +39,7 @@ union RawFloat
      *
      * @param[in] val Floating-point value
      */
-    explicit RawFloat(float val)
-        : f32(val)
+    explicit RawFloat(float val) : f32(val)
     {
     }
     /** Extract sign of floating point number

@@ -28,24 +28,37 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLFillBorderKernel.h"
 
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
 
 CLRNNLayer::CLRNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected_kernel(), _copy(), _fully_connected_out(), _gemm_output(), _add_output(),
+    : _memory_group(std::move(memory_manager)),
+      _gemm_state_f(),
+      _add_kernel(),
+      _activation(),
+      _fully_connected_kernel(),
+      _copy(),
+      _fully_connected_out(),
+      _gemm_output(),
+      _add_output(),
       _is_prepared(false)
 {
 }
 
 CLRNNLayer::~CLRNNLayer() = default;
 
-Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state,
-                            const ITensorInfo *output, const ActivationLayerInfo &info)
+Status CLRNNLayer::validate(const ITensorInfo         *input,
+                            const ITensorInfo         *weights,
+                            const ITensorInfo         *recurrent_weights,
+                            const ITensorInfo         *bias,
+                            const ITensorInfo         *hidden_state,
+                            const ITensorInfo         *output,
+                            const ActivationLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
@@ -63,28 +76,42 @@ Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
     ARM_COMPUTE_RETURN_ERROR_ON(hidden_state->dimension(idx_height) != input->dimension(idx_height));
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), hidden_state->tensor_shape());
 
-    auto shape_info = TensorInfo(compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1, input->data_type());
+    auto shape_info =
+        TensorInfo(compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1, input->data_type());
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(hidden_state, recurrent_weights, nullptr, &shape_info, 1.f, 0.f));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAddition::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        CLArithmeticAddition::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
     ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(&shape_info, &shape_info, info));
 
     return Status{};
 }
 
-void CLRNNLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state, ICLTensor *output,
+void CLRNNLayer::configure(const ICLTensor     *input,
+                           const ICLTensor     *weights,
+                           const ICLTensor     *recurrent_weights,
+                           const ICLTensor     *bias,
+                           ICLTensor           *hidden_state,
+                           ICLTensor           *output,
                            ActivationLayerInfo &info)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, weights, recurrent_weights, bias, hidden_state, output, info);
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, recurrent_weights, bias, hidden_state,
+              output, info);
 }
 
-void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias,
-                           ICLTensor *hidden_state,
-                           ICLTensor *output, ActivationLayerInfo &info)
+void CLRNNLayer::configure(const CLCompileContext &compile_context,
+                           const ICLTensor        *input,
+                           const ICLTensor        *weights,
+                           const ICLTensor        *recurrent_weights,
+                           const ICLTensor        *bias,
+                           ICLTensor              *hidden_state,
+                           ICLTensor              *output,
+                           ActivationLayerInfo    &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLRNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(), bias->info(), hidden_state->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLRNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(),
+                                                    bias->info(), hidden_state->info(), output->info(), info));
     ARM_COMPUTE_LOG_PARAMS(input, weights, recurrent_weights, bias, hidden_state, output, info);
 
     const int   idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
@@ -133,7 +160,7 @@ void CLRNNLayer::run()
 
 void CLRNNLayer::prepare()
 {
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
         _fully_connected_kernel.prepare();
         _gemm_state_f.prepare();

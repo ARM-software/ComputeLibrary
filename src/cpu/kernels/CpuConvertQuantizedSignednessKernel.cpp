@@ -29,9 +29,10 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
@@ -47,7 +48,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
 
     // Validate output if initialized
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
@@ -60,11 +61,11 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
 {
     // Output auto inizialitation if not yet initialized
     {
-        const bool                    is_input_signed   = src->data_type() == DataType::QASYMM8_SIGNED;
-        const DataType                dt                = is_input_signed ? DataType::QASYMM8 : DataType::QASYMM8_SIGNED;
-        const UniformQuantizationInfo qinfo             = src->quantization_info().uniform();
+        const bool                    is_input_signed = src->data_type() == DataType::QASYMM8_SIGNED;
+        const DataType                dt              = is_input_signed ? DataType::QASYMM8 : DataType::QASYMM8_SIGNED;
+        const UniformQuantizationInfo qinfo           = src->quantization_info().uniform();
         const int                     offset_correction = is_input_signed ? -128 : 128;
-        const QuantizationInfo        corrected_qinfo   = QuantizationInfo(qinfo.scale, qinfo.offset + offset_correction);
+        const QuantizationInfo        corrected_qinfo = QuantizationInfo(qinfo.scale, qinfo.offset + offset_correction);
 
         auto_init_if_empty(*dst, src->clone()->set_data_type(dt).set_quantization_info(corrected_qinfo));
     }
@@ -110,27 +111,29 @@ void CpuConvertQuantizedSignednessKernel::run_op(ITensorPack &tensors, const Win
     const uint8_t mask  = 128;
     const auto    vmask = wrapper::vdup_n(mask, wrapper::traits::vector_128_tag{});
 
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
         {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            wrapper::vstore(output_ptr + x, wrapper::veor(vin, vmask));
-        }
+            const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const uint8_t in  = *(reinterpret_cast<const uint8_t *>(input_ptr + x));
-            *(output_ptr + x) = in ^ mask;
-        }
-    },
-    input, output);
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const auto vin = wrapper::vloadq(input_ptr + x);
+                wrapper::vstore(output_ptr + x, wrapper::veor(vin, vmask));
+            }
+
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                const uint8_t in  = *(reinterpret_cast<const uint8_t *>(input_ptr + x));
+                *(output_ptr + x) = in ^ mask;
+            }
+        },
+        input, output);
 }
 
 const char *CpuConvertQuantizedSignednessKernel::name() const

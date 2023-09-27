@@ -68,7 +68,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

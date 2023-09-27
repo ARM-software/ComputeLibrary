@@ -24,8 +24,9 @@
 #ifndef SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_GPUKERNELCOMPONENTFACTORY
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_GPUKERNELCOMPONENTFACTORY
 
-#include "Types.h"
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+
+#include "Types.h"
 #include <memory>
 
 namespace arm_compute
@@ -49,13 +50,13 @@ public:
      * @return std::unique_ptr<IGpuKernelComponent>
      */
     template <typename T, typename... Args>
-    std::unique_ptr<IGpuKernelComponent> create(Args &&... args)
+    std::unique_ptr<IGpuKernelComponent> create(Args &&...args)
     {
         return std::make_unique<T>(_count++, std::forward<Args>(args)...);
     }
 
 private:
-    ComponentId _count{ 0 };
+    ComponentId _count{0};
 };
 
 } // namespace dynamic_fusion

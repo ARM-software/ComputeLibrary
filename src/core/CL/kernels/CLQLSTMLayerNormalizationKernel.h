@@ -63,7 +63,11 @@ public:
      * @param[in]  weight          Weight tensor. Data types supported: Same as @p input.
      * @param[in]  bias            Bias tensor. Data types supported: S32.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const ICLTensor        *weight,
+                   const ICLTensor        *bias);
     /** Static function to check if given info will lead to a valid configuration of @ref CLQLSTMLayerNormalizationKernel
      *
      * @param[in] input  Source tensor info with 2 dimensions. Data types supported: QSYMM16.
@@ -73,7 +77,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -59,9 +59,9 @@ public:
 
         _size = sizeof(T);
 
-        if(::std::is_integral<T>::value)
+        if (::std::is_integral<T>::value)
         {
-            if(::std::is_signed<T>::value)
+            if (::std::is_signed<T>::value)
             {
                 _type      = Type::INT;
                 _value.i64 = value;
@@ -90,9 +90,9 @@ public:
         CKW_ASSERT(::std::is_integral<T>::value || ::std::is_floating_point<T>::value);
         CKW_ASSERT(sizeof(T) >= _size);
 
-        if(::std::is_integral<T>::value)
+        if (::std::is_integral<T>::value)
         {
-            if(::std::is_signed<T>::value)
+            if (::std::is_signed<T>::value)
             {
                 CKW_ASSERT(_type == Type::INT || _type == Type::UINT);
                 CKW_ASSERT_IF(_type == Type::UINT, sizeof(T) > _size);

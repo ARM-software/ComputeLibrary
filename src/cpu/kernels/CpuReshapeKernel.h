@@ -55,7 +55,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Prepare the reshape kernel for execution (Only executed once) by calculating max or squashed window and selecting the _reshape_tensor_fn based on the presence of holes
@@ -84,10 +84,9 @@ public:
     }
 
 private:
-    size_t               _split_dimension{ Window::DimY };
+    size_t _split_dimension{Window::DimY};
 
-    std::function<void(const Window &window, const ITensor *src, ITensor *dst )>  _reshape_tensor_fn{};
-
+    std::function<void(const Window &window, const ITensor *src, ITensor *dst)> _reshape_tensor_fn{};
 };
 } // namespace kernels
 } // namespace cpu

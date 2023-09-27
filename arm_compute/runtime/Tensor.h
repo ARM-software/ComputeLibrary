@@ -59,7 +59,7 @@ public:
     ITensorInfo *info() const override;
     ITensorInfo *info() override;
     uint8_t     *buffer() const override;
-    void associate_memory_group(IMemoryGroup *memory_group) override;
+    void         associate_memory_group(IMemoryGroup *memory_group) override;
 
 private:
     mutable TensorAllocator _allocator; /**< Instance of the basic CPU allocator.*/

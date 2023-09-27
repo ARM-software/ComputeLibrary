@@ -25,6 +25,7 @@
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTPOOL2D_H
 
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuPool2d.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 
 namespace arm_compute
@@ -82,11 +83,10 @@ public:
      * |F16            |F16            |
      * |F32            |F32            |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    static Status validate(const Properties                &properties,
+                           const ArgumentPack<ITensorInfo> &tensors,
+                           const Attributes                &attributes,
+                           const Settings                  &settings);
 
     /** Constructor
      *
@@ -96,12 +96,11 @@ public:
      * @param[in]     attributes Component attributes
      * @param[in]     settings   Component settings
      */
-    ClComponentPool2d(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    ClComponentPool2d(ComponentId                      id,
+                      const Properties                &properties,
+                      const ArgumentPack<ITensorInfo> &tensors,
+                      const Attributes                &attributes,
+                      const Settings                  &settings);
 
     /** Destructor */
     ~ClComponentPool2d() override;

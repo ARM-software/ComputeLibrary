@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 
-#include "src/core/NEON/kernels/NETileKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NETileKernel.h"
 
 namespace arm_compute
 {

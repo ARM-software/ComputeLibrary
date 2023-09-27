@@ -46,7 +46,7 @@ public:
      */
     static std::unique_ptr<IClDWCNativeKernelConfig> create(GPUTarget gpu)
     {
-        switch(get_arch_from_target(gpu))
+        switch (get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
                 // The heuristic for Midgard is the same as the one used for Arm Mali-G71

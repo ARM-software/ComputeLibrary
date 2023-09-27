@@ -23,9 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGather.h"
 
-#include "src/core/NEON/kernels/NEGatherKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/NEON/kernels/NEGatherKernel.h"
 
 #include <utility>
 

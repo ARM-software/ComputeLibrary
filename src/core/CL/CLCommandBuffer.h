@@ -87,7 +87,8 @@ public:
      * @param[in] global The global work size.
      * @param[in] local  The local work size.
      */
-    virtual void add_kernel(cl_kernel kernel, const cl::NDRange &offset, const cl::NDRange &global, const cl::NDRange &local) = 0;
+    virtual void
+    add_kernel(cl_kernel kernel, const cl::NDRange &offset, const cl::NDRange &global, const cl::NDRange &local) = 0;
 
     /** Add the mutable argument to the current kernel enqueue command.
      *
@@ -154,7 +155,7 @@ protected:
     CLCommandBuffer &state(State state);
 
 private:
-    State _state{ State::Created };
+    State _state{State::Created};
 };
 
 } // namespace arm_compute

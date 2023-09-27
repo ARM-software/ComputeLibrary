@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 
 namespace arm_compute
@@ -36,11 +37,17 @@ namespace cpu
 CpuDirectConv3d::~CpuDirectConv3d() = default;
 
 CpuDirectConv3d::CpuDirectConv3d(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _conv_kernel(), _activationlayer_function(), _accumulator(), _is_activationlayer_enabled(false), _dim_split(Window::DimZ)
+    : _memory_group(std::move(memory_manager)),
+      _conv_kernel(),
+      _activationlayer_function(),
+      _accumulator(),
+      _is_activationlayer_enabled(false),
+      _dim_split(Window::DimZ)
 {
 }
 
-void CpuDirectConv3d::configure(ITensorInfo *src0, ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo conv_info)
+void CpuDirectConv3d::configure(
+    ITensorInfo *src0, ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst, const Conv3dInfo conv_info)
 {
     ARM_COMPUTE_LOG_PARAMS(src0, src1, src2, dst, conv_info);
     ARM_COMPUTE_ERROR_ON(src0->data_layout() != DataLayout::NDHWC);
@@ -48,7 +55,7 @@ void CpuDirectConv3d::configure(ITensorInfo *src0, ITensorInfo *src1, const ITen
     _conv_kernel = std::make_unique<kernels::CpuDirectConv3dKernel>();
 
     // Free accumulator
-    if(_accumulator.buffer() != nullptr)
+    if (_accumulator.buffer() != nullptr)
     {
         _accumulator.allocator()->free();
     }
@@ -59,21 +66,25 @@ void CpuDirectConv3d::configure(ITensorInfo *src0, ITensorInfo *src1, const ITen
 
     //Configure Activation Layer
     _is_activationlayer_enabled = conv_info.act_info.enabled();
-    if(_is_activationlayer_enabled)
+    if (_is_activationlayer_enabled)
     {
         _activationlayer_function = std::make_unique<CpuActivation>();
         _activationlayer_function->configure(dst, dst, conv_info.act_info);
     }
 }
 
-Status CpuDirectConv3d::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo conv_info)
+Status CpuDirectConv3d::validate(const ITensorInfo *src0,
+                                 const ITensorInfo *src1,
+                                 const ITensorInfo *src2,
+                                 const ITensorInfo *dst,
+                                 const Conv3dInfo   conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
 
     // Validate Convolution kernel
     ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuDirectConv3dKernel::validate(src0, src1, src2, dst, conv_info));
 
-    if(conv_info.act_info.enabled())
+    if (conv_info.act_info.enabled())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, conv_info.act_info));
     }
@@ -89,7 +100,7 @@ void CpuDirectConv3d::run(ITensorPack &tensors)
 
     NEScheduler::get().schedule_op(_conv_kernel.get(), _dim_split, _conv_kernel->window(), tensors);
 
-    if(_is_activationlayer_enabled)
+    if (_is_activationlayer_enabled)
     {
         ITensorPack pack;
         pack.add_tensor(TensorType::ACL_SRC, dst);

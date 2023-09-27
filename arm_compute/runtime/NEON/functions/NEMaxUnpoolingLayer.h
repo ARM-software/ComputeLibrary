@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -86,7 +87,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo      *input,
+                           const ITensorInfo      *indices,
+                           const ITensorInfo      *output,
+                           const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run() override;
@@ -96,5 +100,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEMAXUNPOOLINGLAYER_H */

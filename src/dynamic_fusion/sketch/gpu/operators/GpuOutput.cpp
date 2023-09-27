@@ -26,10 +26,9 @@
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
-
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentStore.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/utils/Utils.h"
 
 namespace arm_compute
@@ -43,9 +42,7 @@ namespace
 constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
-Status GpuOutput::is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *src,
-                                  const ITensorInfo        *dst)
+Status GpuOutput::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
@@ -60,9 +57,7 @@ Status GpuOutput::is_supported_op(const GpuWorkloadContext &context,
     return Status{};
 }
 
-Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
-                              const ITensorInfo       *src,
-                              const ITensorInfo       *dst)
+Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
@@ -90,9 +85,7 @@ Status GpuOutput::validate_op(const GpuWorkloadSketch &sketch,
     return status;
 }
 
-void GpuOutput::create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *dst)
+void GpuOutput::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorInfo *dst)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(GpuOutput::validate_op(sketch, src, dst));
@@ -104,14 +97,14 @@ void GpuOutput::create_op(GpuWorkloadSketch &sketch,
     auto      &comp_graph = sketch.implementation().component_graph();
     const auto sketch_ctx = sketch.implementation().context();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         ARM_COMPUTE_ERROR_ON(sketch_ctx->cl_compile_context() == nullptr);
 
         // Add store component
         {
             IGpuKernelComponent::Properties properties;
-            properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+            properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEQLSTMLAYERNORMALIZATIONKERNEL_H
 
 #include "src/core/NEON/INEKernel.h"
+
 #include <functional>
 
 namespace arm_compute
@@ -69,34 +70,26 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     // constants
-    static constexpr uint32_t max_input_dimension{ 2 };  /**< The maximum input dimension supported */
-    static constexpr uint32_t max_weight_dimension{ 1 }; /**< The maximum weight dimension supported */
-    static constexpr uint32_t max_bias_dimension{ 1 };   /**< The maximum bias dimension supported */
-    static constexpr uint32_t vector_size_byte{ 16 };    /**< Computation vector size in byte */
+    static constexpr uint32_t max_input_dimension{2};  /**< The maximum input dimension supported */
+    static constexpr uint32_t max_weight_dimension{1}; /**< The maximum weight dimension supported */
+    static constexpr uint32_t max_bias_dimension{1};   /**< The maximum bias dimension supported */
+    static constexpr uint32_t vector_size_byte{16};    /**< Computation vector size in byte */
 
     using ComputeFuncType = std::function<void(NEQLSTMLayerNormalizationKernel &)>;
 
     ComputeFuncType _fn{}; /**< Function pointer to computation function */
 
-    const ITensor *_input
-    {
-        nullptr
-    }; /**< Input tensor */
-    const ITensor *_weight
-    {
-        nullptr
-    }; /**< Weight tensor */
-    const ITensor *_bias
-    {
-        nullptr
-    };                           /**< Bias tensor */
-    ITensor *_output{ nullptr }; /**< Output tensor */
+    const ITensor *_input{nullptr};  /**< Input tensor */
+    const ITensor *_weight{nullptr}; /**< Weight tensor */
+    const ITensor *_bias{nullptr};   /**< Bias tensor */
+    ITensor       *_output{nullptr}; /**< Output tensor */
 
     int32_t _output_multiplier{}; /**< Multiplier for output values */
     int32_t _output_shift{};      /**< Shift value for output values */
@@ -138,7 +131,9 @@ private:
                             int16_t       *output_ptr,
                             const int16_t *weight_ptr,
                             const int32_t *bias_ptr,
-                            int32_t mean, int32_t inv_std_mul, int32_t inv_std_shift);
+                            int32_t        mean,
+                            int32_t        inv_std_mul,
+                            int32_t        inv_std_shift);
     /** Function to compute output quantization information */
     QuantizationInfo compute_output_qinfo();
 };

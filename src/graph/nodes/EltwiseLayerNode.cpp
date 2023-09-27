@@ -31,8 +31,7 @@ namespace arm_compute
 {
 namespace graph
 {
-EltwiseLayerNode::EltwiseLayerNode(const descriptors::EltwiseLayerDescriptor &descriptor)
-    : descriptor(descriptor)
+EltwiseLayerNode::EltwiseLayerNode(const descriptors::EltwiseLayerDescriptor &descriptor) : descriptor(descriptor)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -70,7 +69,7 @@ void EltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation
 
 bool EltwiseLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -97,7 +96,7 @@ TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
 
     output_info.set_shape(out_shape);
 
-    if(!descriptor.out_quant_info.empty())
+    if (!descriptor.out_quant_info.empty())
     {
         output_info.set_quantization_info(descriptor.out_quant_info);
     }
@@ -134,7 +133,7 @@ void UnaryEltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activ
 
 bool UnaryEltwiseLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);
@@ -153,7 +152,7 @@ TensorDescriptor UnaryEltwiseLayerNode::configure_output(size_t idx) const
 
     auto output_info = src->desc();
 
-    if(!descriptor.out_quant_info.empty())
+    if (!descriptor.out_quant_info.empty())
     {
         output_info.set_quantization_info(descriptor.out_quant_info);
     }

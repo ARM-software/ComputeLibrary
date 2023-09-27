@@ -27,8 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_CAST_KERNEL(func_name) \
-    void func_name(const ITensor *_src, ITensor *_dst, const ThreadInfo &tensor, ConvertPolicy _policy, const Window &window)
+#define DECLARE_CAST_KERNEL(func_name)                                                                  \
+    void func_name(const ITensor *_src, ITensor *_dst, const ThreadInfo &tensor, ConvertPolicy _policy, \
+                   const Window &window)
 
 DECLARE_CAST_KERNEL(neon_fp32_to_fp16_cast);
 DECLARE_CAST_KERNEL(neon_u8_to_fp16_cast);

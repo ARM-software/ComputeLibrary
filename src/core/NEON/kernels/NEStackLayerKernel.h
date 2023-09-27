@@ -26,6 +26,7 @@
 #define ARM_COMPUTE_NESTACKLAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -64,7 +65,8 @@ public:
      * @param[out] output      Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const ITensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ITensor *output);
+    void configure(
+        const ITensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
@@ -78,7 +80,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           unsigned int       axis,
+                           unsigned int       idx_input,
+                           unsigned int       num_tensors,
+                           const ITensorInfo *output);
 
     // Inherited methods overridden
     void run(const Window &window, const ThreadInfo &info) override;

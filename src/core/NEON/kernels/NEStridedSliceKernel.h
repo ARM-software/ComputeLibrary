@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 #include <cstdint>
@@ -68,9 +69,14 @@ public:
      * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const ITensorInfo *input, ITensorInfo *output,
-                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                   int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+    void configure(const ITensorInfo *input,
+                   ITensorInfo       *output,
+                   const Coordinates &starts,
+                   const Coordinates &ends,
+                   const BiStrides   &strides,
+                   int32_t            begin_mask,
+                   int32_t            end_mask,
+                   int32_t            shrink_axis_mask);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEStridedSliceKernel
      *
@@ -86,9 +92,14 @@ public:
      * @param[in] shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                             A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
-                           const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                           int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const Coordinates &starts,
+                           const Coordinates &ends,
+                           const BiStrides   &strides,
+                           int32_t            begin_mask,
+                           int32_t            end_mask,
+                           int32_t            shrink_axis_mask);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;

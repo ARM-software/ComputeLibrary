@@ -40,7 +40,8 @@ namespace kernels
 class CpuCastKernel : public ICpuKernel<CpuCastKernel>
 {
 private:
-    using CastKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const ThreadInfo &, ConvertPolicy, const Window &)>::type;
+    using CastKernelPtr =
+        std::add_pointer<void(const ITensor *, ITensor *, const ThreadInfo &, ConvertPolicy, const Window &)>::type;
 
 public:
     CpuCastKernel() = default;
@@ -76,7 +77,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct CastKernel
@@ -89,7 +90,7 @@ public:
     static const std::vector<CastKernel> &get_available_kernels();
 
 private:
-    ConvertPolicy _policy{ ConvertPolicy::SATURATE };
+    ConvertPolicy _policy{ConvertPolicy::SATURATE};
 };
 } // namespace kernels
 } // namespace cpu

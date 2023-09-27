@@ -26,7 +26,12 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp32_roialign(const ITensor *input, ITensor *output, const ITensor *rois, ROIPoolingLayerInfo pool_info, const Window &window, const ThreadInfo &info)
+void neon_fp32_roialign(const ITensor      *input,
+                        ITensor            *output,
+                        const ITensor      *rois,
+                        ROIPoolingLayerInfo pool_info,
+                        const Window       &window,
+                        const ThreadInfo   &info)
 {
     return roi_align<float, float>(input, output, rois, pool_info, window, info);
 }

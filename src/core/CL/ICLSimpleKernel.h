@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -55,12 +56,16 @@ public:
      * @param[in]  border_undefined                  (Optional) True if the border mode is undefined. False if it's replicate or constant.
      * @param[in]  border_size                       (Optional) Size of the border.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, unsigned int num_elems_processed_per_iteration, bool border_undefined = false, const BorderSize &border_size = BorderSize());
+    void configure(const ICLTensor  *input,
+                   ICLTensor        *output,
+                   unsigned int      num_elems_processed_per_iteration,
+                   bool              border_undefined = false,
+                   const BorderSize &border_size      = BorderSize());
 
 protected:
     const ICLTensor *_input;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 
 #endif /*ARM_COMPUTE_ICLSIMPLEKERNEL_H */

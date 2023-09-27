@@ -75,14 +75,19 @@ public:
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *                             Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.
      */
-    void configure(const ClCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *biases, ITensorInfo *dst, unsigned int num_groups = 1);
+    void configure(const ClCompileContext &compile_context,
+                   const ITensorInfo      *src,
+                   const ITensorInfo      *biases,
+                   ITensorInfo            *dst,
+                   unsigned int            num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClWeightsReshapeKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *biases, const ITensorInfo *dst, unsigned int num_groups = 1);
+    static Status
+    validate(const ITensorInfo *src, const ITensorInfo *biases, const ITensorInfo *dst, unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

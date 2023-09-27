@@ -23,17 +23,15 @@
  */
 #include "arm_compute/graph/nodes/BoundingBoxTransformLayerNode.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
-
-#include "arm_compute/core/Helpers.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-BoundingBoxTransformLayerNode::BoundingBoxTransformLayerNode(BoundingBoxTransformInfo &info)
-    : _bbox_info(info)
+BoundingBoxTransformLayerNode::BoundingBoxTransformLayerNode(BoundingBoxTransformInfo &info) : _bbox_info(info)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -46,7 +44,7 @@ const BoundingBoxTransformInfo &BoundingBoxTransformLayerNode::info() const
 
 bool BoundingBoxTransformLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (input_id(1) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

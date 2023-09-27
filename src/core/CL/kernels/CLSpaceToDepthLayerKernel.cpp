@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -45,7 +46,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape < 1);
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         const DataLayout data_layout = input->data_layout();
         const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -64,8 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 }
 } // namespace
 
-CLSpaceToDepthLayerKernel::CLSpaceToDepthLayerKernel()
-    : _input(nullptr), _output(nullptr), _block_shape()
+CLSpaceToDepthLayerKernel::CLSpaceToDepthLayerKernel() : _input(nullptr), _output(nullptr), _block_shape()
 {
     _type = CLKernelType::ELEMENTWISE;
 }
@@ -75,10 +75,13 @@ void CLSpaceToDepthLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
 }
 
-void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_context,
+                                          const ICLTensor        *input,
+                                          ICLTensor              *output,
+                                          int32_t                 block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     TensorShape output_shape = compute_space_to_depth_shape(input->info(), block_shape);
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
@@ -94,11 +97,14 @@ void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_contex
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(output->info()->data_type())));
+    build_opts.add_option("-DDATA_TYPE=" +
+                          get_cl_unsigned_type_from_element_size(data_size_from_type(output->info()->data_type())));
     build_opts.add_option("-DCHANNEL_SIZE=" + support::cpp11::to_string(output->info()->dimension(idx_channel)));
     build_opts.add_option("-DBLOCK_SHAPE=" + support::cpp11::to_string(block_shape));
     build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(output->info()->dimension(idx_width)));
-    _kernel = create_kernel(compile_context, "space_to_depth_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
+    _kernel = create_kernel(compile_context,
+                            "space_to_depth_" + lower_string(string_from_data_layout(input->info()->data_layout())),
+                            build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());
@@ -136,7 +142,6 @@ void CLSpaceToDepthLayerKernel::run(const Window &window, cl::CommandQueue &queu
         enqueue(queue, *this, slice_out, lws_hint());
 
         ++batch_id;
-    }
-    while(window.slide_window_slice_3D(slice_out));
+    } while (window.slide_window_slice_3D(slice_out));
 }
 } // namespace arm_compute

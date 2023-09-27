@@ -32,8 +32,6 @@
 #include <iostream>
 #include <type_traits>
 
-#include <iostream>
-
 /*
  * By including this header file you will be able to supplement the default
  * Compute Kernel Writer API with additional syntax to help ease the use of CKW.
@@ -154,7 +152,9 @@ struct can_be_assigned<TileOperand &> : ::std::true_type
  * @tparam TLeft The type of the destination of the assignment.
  * @tparam TRight The type of the source assigned to the destination.
  */
-template <typename TLeft, typename TRight, typename = ::std::enable_if<can_be_operand<TRight>::value && can_be_assigned<TLeft>::value>>
+template <typename TLeft,
+          typename TRight,
+          typename = ::std::enable_if<can_be_operand<TRight>::value && can_be_assigned<TLeft>::value>>
 struct Assignment
 {
     TLeft        lhs;
@@ -173,7 +173,7 @@ struct Assignment
 template <typename TLeft, typename TRight>
 inline Assignment<TLeft, TRight> operator+=(TLeft &&lhs, TRight &&rhs)
 {
-    return Assignment<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), AssignmentOp::Increment };
+    return Assignment<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), AssignmentOp::Increment};
 }
 
 /** Represents the expression: `\p lhs -= \p rhs`.
@@ -187,7 +187,7 @@ inline Assignment<TLeft, TRight> operator+=(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline Assignment<TLeft, TRight> operator-=(TLeft &&lhs, TRight &&rhs)
 {
-    return Assignment<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), AssignmentOp::Decrement };
+    return Assignment<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), AssignmentOp::Decrement};
 }
 
 // ==================================================
@@ -221,7 +221,7 @@ struct can_be_operand<UnaryExpression<TLeft>> : ::std::true_type
 template <typename TSrc>
 inline UnaryExpression<TSrc> operator!(TSrc &&src)
 {
-    return UnaryExpression<TSrc>{ std::forward<TSrc>(src), UnaryOp::LogicalNot };
+    return UnaryExpression<TSrc>{std::forward<TSrc>(src), UnaryOp::LogicalNot};
 }
 
 /** Represents the expression: `~\p src`.
@@ -233,7 +233,7 @@ inline UnaryExpression<TSrc> operator!(TSrc &&src)
 template <typename TSrc>
 inline UnaryExpression<TSrc> operator~(TSrc &&src)
 {
-    return UnaryExpression<TSrc>{ std::forward<TSrc>(src), UnaryOp::BitwiseNot };
+    return UnaryExpression<TSrc>{std::forward<TSrc>(src), UnaryOp::BitwiseNot};
 }
 
 // ==================================================
@@ -247,7 +247,9 @@ inline UnaryExpression<TSrc> operator~(TSrc &&src)
  * @tparam TLeft  The type of the left argument of the expression.
  * @tparam TRight The type of the right argument of the expression.
  */
-template <typename TLeft, typename TRight, typename = ::std::enable_if_t<can_be_operand<TLeft>::value && can_be_operand<TRight>::value>>
+template <typename TLeft,
+          typename TRight,
+          typename = ::std::enable_if_t<can_be_operand<TLeft>::value && can_be_operand<TRight>::value>>
 struct BinaryExpression
 {
     TLeft    lhs;
@@ -271,7 +273,7 @@ struct can_be_operand<BinaryExpression<TLeft, TRight>> : ::std::true_type
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator+(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Add };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Add};
 }
 
 /** Represents the expression: `\p lhs - \p rhs`.
@@ -285,7 +287,7 @@ inline BinaryExpression<TLeft, TRight> operator+(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator-(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Sub };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Sub};
 }
 
 /** Represents the expression: `\p lhs * \p rhs`.
@@ -299,7 +301,7 @@ inline BinaryExpression<TLeft, TRight> operator-(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator*(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Mul };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Mul};
 }
 
 /** Represents the expression: `\p lhs / \p rhs`.
@@ -313,7 +315,7 @@ inline BinaryExpression<TLeft, TRight> operator*(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator/(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Div };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Div};
 }
 
 /** Represents the expression: `\p lhs % \p rhs`.
@@ -327,7 +329,7 @@ inline BinaryExpression<TLeft, TRight> operator/(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator%(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Mod };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Mod};
 }
 
 /** Represents the expression: `\p lhs == \p rhs`.
@@ -341,7 +343,7 @@ inline BinaryExpression<TLeft, TRight> operator%(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator==(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Equal };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Equal};
 }
 
 /** Represents the expression: `\p lhs < \p rhs`.
@@ -355,7 +357,7 @@ inline BinaryExpression<TLeft, TRight> operator==(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator<(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Less };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Less};
 }
 
 /** Represents the expression: `\p lhs <= \p rhs`.
@@ -369,7 +371,7 @@ inline BinaryExpression<TLeft, TRight> operator<(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator<=(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LessEqual };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LessEqual};
 }
 
 /** Represents the expression: `\p lhs > \p rhs`.
@@ -383,7 +385,7 @@ inline BinaryExpression<TLeft, TRight> operator<=(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator>(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Greater };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::Greater};
 }
 
 /** Represents the expression: `\p lhs >= \p rhs`.
@@ -397,7 +399,7 @@ inline BinaryExpression<TLeft, TRight> operator>(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator>=(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::GreaterEqual };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::GreaterEqual};
 }
 
 /** Represents the expression: `\p lhs ^ \p rhs`.
@@ -411,7 +413,7 @@ inline BinaryExpression<TLeft, TRight> operator>=(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> operator^(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::BitwiseXOR };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::BitwiseXOR};
 }
 
 /** Represents the expression: `\p lhs && \p rhs`.
@@ -425,7 +427,7 @@ inline BinaryExpression<TLeft, TRight> operator^(TLeft &&lhs, TRight &&rhs)
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> logical_and(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalAnd };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalAnd};
 }
 
 /** Represents the expression: `\p lhs && \p rhs`.
@@ -440,7 +442,7 @@ template <typename TLeft, typename TRight, typename... TOps>
 inline BinaryExpression<BinaryExpression<TLeft, TRight>, TOps...> logical_and(TLeft &&lhs, TRight &&rhs, TOps &&...ops)
 {
     return logical_and(
-        BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalAnd },
+        BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalAnd},
         std::forward<TOps>(ops)...);
 }
 
@@ -455,7 +457,7 @@ inline BinaryExpression<BinaryExpression<TLeft, TRight>, TOps...> logical_and(TL
 template <typename TLeft, typename TRight>
 inline BinaryExpression<TLeft, TRight> logical_or(TLeft &&lhs, TRight &&rhs)
 {
-    return BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalOr };
+    return BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalOr};
 }
 
 /** Represents the expression: `\p lhs || \p rhs`.
@@ -470,7 +472,7 @@ template <typename TLeft, typename TRight, typename... TOps>
 inline BinaryExpression<BinaryExpression<TLeft, TRight>, TOps...> logical_or(TLeft &&lhs, TRight &&rhs, TOps &&...ops)
 {
     return logical_or(
-        BinaryExpression<TLeft, TRight>{ std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalOr },
+        BinaryExpression<TLeft, TRight>{std::forward<TLeft>(lhs), std::forward<TRight>(rhs), BinaryOp::LogicalOr},
         std::forward<TOps>(ops)...);
 }
 
@@ -505,7 +507,7 @@ struct can_be_operand<UnaryElementwiseFunction<TLeft>> : ::std::true_type
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> exp(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Exp };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Exp};
 }
 
 /** Represents the expression: `tanh(\p src)`.
@@ -517,7 +519,7 @@ UnaryElementwiseFunction<TSrc> exp(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> tanh(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Tanh };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Tanh};
 }
 
 /** Represents the expression: `sqrt(\p src)`.
@@ -529,7 +531,7 @@ UnaryElementwiseFunction<TSrc> tanh(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> sqrt(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Sqrt };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Sqrt};
 }
 
 /** Represents the expression: `erf(\p src)`.
@@ -541,7 +543,7 @@ UnaryElementwiseFunction<TSrc> sqrt(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> erf(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Erf };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Erf};
 }
 
 /** Represents the expression: `fabs(\p src)`.
@@ -553,7 +555,7 @@ UnaryElementwiseFunction<TSrc> erf(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> fabs(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Fabs };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Fabs};
 }
 
 /** Represents the expression: `log(\p src)`.
@@ -565,7 +567,7 @@ UnaryElementwiseFunction<TSrc> fabs(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> log(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Log };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Log};
 }
 
 /** Represents the expression: `round(\p src)`.
@@ -577,7 +579,7 @@ UnaryElementwiseFunction<TSrc> log(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> round(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::Round };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::Round};
 }
 
 /** Represents the expression: `sizeof(\p src)`.
@@ -589,7 +591,7 @@ UnaryElementwiseFunction<TSrc> round(TSrc &&src)
 template <typename TSrc>
 UnaryElementwiseFunction<TSrc> sizeOf(TSrc &&src)
 {
-    return UnaryElementwiseFunction<TSrc>{ std::forward<TSrc>(src), UnaryFunction::SizeOf };
+    return UnaryElementwiseFunction<TSrc>{std::forward<TSrc>(src), UnaryFunction::SizeOf};
 }
 
 // ==================================================
@@ -603,7 +605,9 @@ UnaryElementwiseFunction<TSrc> sizeOf(TSrc &&src)
  * @tparam TFirst  The type of the left argument of the function.
  * @tparam TSecond The type of the right argument of the function.
  */
-template <typename TFirst, typename TSecond, typename = ::std::enable_if<can_be_operand<TFirst>::value && can_be_operand<TSecond>::value>>
+template <typename TFirst,
+          typename TSecond,
+          typename = ::std::enable_if<can_be_operand<TFirst>::value && can_be_operand<TSecond>::value>>
 struct BinaryElementwiseFunction
 {
     TFirst         first;
@@ -627,7 +631,8 @@ struct can_be_operand<BinaryElementwiseFunction<TFirst, TSecond>> : ::std::true_
 template <typename TFirst, typename TSecond>
 BinaryElementwiseFunction<TFirst, TSecond> max(TFirst &&first, TSecond &&second)
 {
-    return BinaryElementwiseFunction<TFirst, TSecond>{ std::forward<TFirst>(first), std::forward<TSecond>(second), BinaryFunction::Max };
+    return BinaryElementwiseFunction<TFirst, TSecond>{std::forward<TFirst>(first), std::forward<TSecond>(second),
+                                                      BinaryFunction::Max};
 }
 
 /** Represents the function call: `min(\p first, \p second)`.
@@ -641,7 +646,8 @@ BinaryElementwiseFunction<TFirst, TSecond> max(TFirst &&first, TSecond &&second)
 template <typename TFirst, typename TSecond>
 BinaryElementwiseFunction<TFirst, TSecond> min(TFirst &&first, TSecond &&second)
 {
-    return BinaryElementwiseFunction<TFirst, TSecond>{ std::forward<TFirst>(first), std::forward<TSecond>(second), BinaryFunction::Min };
+    return BinaryElementwiseFunction<TFirst, TSecond>{std::forward<TFirst>(first), std::forward<TSecond>(second),
+                                                      BinaryFunction::Min};
 }
 
 // ==================================================
@@ -656,7 +662,11 @@ BinaryElementwiseFunction<TFirst, TSecond> min(TFirst &&first, TSecond &&second)
  * @tparam TSecond The type of the second argument to the function.
  * @tparam TThird The type of the third argument to the function.
  */
-template <typename TFirst, typename TSecond, typename TThird, typename = ::std::enable_if<can_be_operand<TFirst>::value && can_be_operand<TSecond>::value && can_be_operand<TThird>::value>>
+template <typename TFirst,
+          typename TSecond,
+          typename TThird,
+          typename = ::std::enable_if<can_be_operand<TFirst>::value && can_be_operand<TSecond>::value &&
+                                      can_be_operand<TThird>::value>>
 struct TernaryElementwiseFunction
 {
     TFirst          first;
@@ -683,7 +693,9 @@ struct can_be_operand<TernaryElementwiseFunction<TFirst, TSecond, TThird>> : ::s
 template <typename TFirst, typename TSecond, typename TThird>
 TernaryElementwiseFunction<TFirst, TSecond, TThird> select(TFirst &&first, TSecond &&second, TThird &&third)
 {
-    return TernaryElementwiseFunction<TFirst, TSecond, TThird>{ std::forward<TFirst>(first), std::forward<TSecond>(second), std::forward<TThird>(third), TernaryFunction::Select };
+    return TernaryElementwiseFunction<TFirst, TSecond, TThird>{std::forward<TFirst>(first),
+                                                               std::forward<TSecond>(second),
+                                                               std::forward<TThird>(third), TernaryFunction::Select};
 }
 
 /** Helper class used to extend a KernelWriter with additional functionality
@@ -715,7 +727,8 @@ public:
      * @param[in] cond The BinaryExpression representing the condition.
      * @param[in] body The body of the if-statement.
      */
-    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TileOperand &, TileOperand &> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TileOperand &, TileOperand &> &cond,
+                                       const std::function<void()>                          &body)
     {
         TWriter::op_if(cond.lhs, cond.opcode, cond.rhs, body);
         return *this;
@@ -730,7 +743,8 @@ public:
      * @param[in] body The body of the if-statement.
      */
     template <typename TRight>
-    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TileOperand &, TRight> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TileOperand &, TRight> &cond,
+                                       const std::function<void()>                   &body)
     {
         auto &tmp1 = declare_temp_tile(cond.lhs.tile_info());
         op_assign(tmp1, cond.rhs);
@@ -747,7 +761,8 @@ public:
      * @param[in] body The body of the if-statement.
      */
     template <typename TLeft>
-    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TLeft, TileOperand &> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_if(const BinaryExpression<TLeft, TileOperand &> &cond,
+                                       const std::function<void()>                  &body)
     {
         auto &tmp1 = declare_temp_tile(cond.rhs.tile_info());
         op_assign(tmp1, cond.lhs);
@@ -766,7 +781,8 @@ public:
      * @param[in] cond The BinaryExpression representing the condition.
      * @param[in] body The body of the else-if-statement.
      */
-    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TileOperand &, TileOperand &> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TileOperand &, TileOperand &> &cond,
+                                            const std::function<void()>                          &body)
     {
         TWriter::op_else_if(cond.lhs, cond.opcode, cond.rhs, body);
         return *this;
@@ -781,7 +797,8 @@ public:
      * @param[in] body The body of the else-if-statement.
      */
     template <typename TRight>
-    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TileOperand &, TRight> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TileOperand &, TRight> &cond,
+                                            const std::function<void()>                   &body)
     {
         auto &tmp1 = declare_temp_tile(cond.lhs.tile_info());
         op_assign(tmp1, cond.rhs);
@@ -798,7 +815,8 @@ public:
      * @param[in] body The body of the else-if-statement.
      */
     template <typename TLeft>
-    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TLeft, TileOperand &> &cond, const std::function<void()> &body)
+    KernelWriterHelper<TWriter> &op_else_if(const BinaryExpression<TLeft, TileOperand &> &cond,
+                                            const std::function<void()>                  &body)
     {
         auto &tmp1 = declare_temp_tile(cond.rhs.tile_info());
         op_assign(tmp1, cond.lhs);
@@ -823,7 +841,9 @@ public:
      * @param[in] updater The Assignment representing the updater.
      * @param[in] body    The body of the for-loop.
      */
-    void op_for_loop(const BinaryExpression<TileOperand &, TileOperand &> &cond, const Assignment<TileOperand &, TileOperand &> &updater, const std::function<void()> &body)
+    void op_for_loop(const BinaryExpression<TileOperand &, TileOperand &> &cond,
+                     const Assignment<TileOperand &, TileOperand &>       &updater,
+                     const std::function<void()>                          &body)
     {
         TWriter::op_for_loop(cond.lhs, cond.opcode, cond.rhs, updater.lhs, updater.opcode, updater.rhs, body);
     }
@@ -1029,7 +1049,8 @@ public:
      * @param[in] dst The tile which is assigned to.
      * @param[in] exp The TernaryElementwiseFunction representing the expression to be evaluated and assigned.
      */
-    void op_assign(const TileOperand &dst, const TernaryElementwiseFunction<TileOperand &, TileOperand &, TileOperand &> &exp)
+    void op_assign(const TileOperand                                                             &dst,
+                   const TernaryElementwiseFunction<TileOperand &, TileOperand &, TileOperand &> &exp)
     {
         TWriter::op_ternary_elementwise_function(dst, exp.opcode, exp.first, exp.second, exp.third);
     }
@@ -1169,11 +1190,11 @@ public:
      */
     void op_assign(const Assignment<TileOperand &, TileOperand &> &exp)
     {
-        if(exp.opcode == AssignmentOp::Increment)
+        if (exp.opcode == AssignmentOp::Increment)
         {
             TWriter::op_binary_expression(exp.lhs, exp.lhs, BinaryOp::Add, exp.rhs);
         }
-        else if(exp.opcode == AssignmentOp::Decrement)
+        else if (exp.opcode == AssignmentOp::Decrement)
         {
             TWriter::op_binary_expression(exp.lhs, exp.lhs, BinaryOp::Sub, exp.rhs);
         }
@@ -1192,7 +1213,7 @@ public:
     {
         auto &tmp1 = declare_temp_tile(exp.lhs.tile_info());
         op_assign(tmp1, exp.rhs);
-        op_assign(Assignment<TileOperand &, TileOperand &>{ exp.lhs, tmp1, exp.opcode });
+        op_assign(Assignment<TileOperand &, TileOperand &>{exp.lhs, tmp1, exp.opcode});
     }
 
 private:
@@ -1241,11 +1262,8 @@ private:
     template <typename... TOps, typename = ::std::enable_if_t<std::is_same<TOps..., TileInfo>::value>>
     TileInfo get_largest_size(const TileInfo &first, const TileInfo &second, const TOps &...ops)
     {
-        TileInfo largest = {
-            first.data_type(),
-            std::max(first.width(), second.width()),
-            std::max(first.height(), second.height())
-        };
+        TileInfo largest = {first.data_type(), std::max(first.width(), second.width()),
+                            std::max(first.height(), second.height())};
         return get_largest_size(largest, ops...);
     }
 

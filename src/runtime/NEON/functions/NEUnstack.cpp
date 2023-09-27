@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/common/utils/Log.h"
 
 namespace arm_compute
@@ -39,13 +40,15 @@ inline unsigned int wrap_axis(int axis, const ITensorInfo *const tensor)
     return wrap_around(axis, static_cast<int>(tensor->num_dimensions()));
 }
 
-inline void setup_slice_coordinates_and_mask(Coordinates &slice_start, int32_t &slice_end_mask, const unsigned int input_num_dimensions)
+inline void setup_slice_coordinates_and_mask(Coordinates       &slice_start,
+                                             int32_t           &slice_end_mask,
+                                             const unsigned int input_num_dimensions)
 {
     // Setups up coordinates to slice the input tensor: start coordinates to all 0s and the unstacking axis of both Start/End to slice just one 2d tensor at a time.
     Coordinates slice_end;
     slice_start.set_num_dimensions(input_num_dimensions);
     slice_end.set_num_dimensions(input_num_dimensions);
-    for(size_t k = 0; k < input_num_dimensions; ++k)
+    for (size_t k = 0; k < input_num_dimensions; ++k)
     {
         slice_start.set(k, 0);
         slice_end.set(k, -1);
@@ -55,19 +58,19 @@ inline void setup_slice_coordinates_and_mask(Coordinates &slice_start, int32_t &
 } // namespace
 
 NEUnstack::NEUnstack() // NOLINT
-    : _num_slices(0),
-      _strided_slice_vector()
+    : _num_slices(0), _strided_slice_vector()
 {
 }
 
 void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &output_vector, int axis)
 {
     std::vector<ITensorInfo *> outputs_vector_info(output_vector.size());
-    std::transform(output_vector.begin(), output_vector.end(), outputs_vector_info.begin(), [](ITensor * t)
-    {
-        ARM_COMPUTE_ERROR_ON_NULLPTR(t);
-        return t->info();
-    });
+    std::transform(output_vector.begin(), output_vector.end(), outputs_vector_info.begin(),
+                   [](ITensor *t)
+                   {
+                       ARM_COMPUTE_ERROR_ON_NULLPTR(t);
+                       return t->info();
+                   });
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(NEUnstack::validate(input->info(), outputs_vector_info, axis));
@@ -81,11 +84,12 @@ void NEUnstack::configure(const ITensor *input, const std::vector<ITensor *> &ou
     Coordinates slice_start;
     int32_t     slice_end_mask;
     setup_slice_coordinates_and_mask(slice_start, slice_end_mask, input->info()->tensor_shape().num_dimensions());
-    for(unsigned int slice = 0; slice < _num_slices; ++slice)
+    for (unsigned int slice = 0; slice < _num_slices; ++slice)
     {
         // Adjusts start and end coordinates to take a 2D slice at a time
         slice_start.set(axis_u, slice);
-        _strided_slice_vector[slice].configure(input, output_vector[slice], slice_start, Coordinates(), BiStrides(), 0, slice_end_mask, (1 << axis_u));
+        _strided_slice_vector[slice].configure(input, output_vector[slice], slice_start, Coordinates(), BiStrides(), 0,
+                                               slice_end_mask, (1 << axis_u));
     }
 }
 
@@ -102,18 +106,20 @@ Status NEUnstack::validate(const ITensorInfo *input, const std::vector<ITensorIn
 
     Coordinates slice_start;
     int32_t     slice_end_mask;
-    for(size_t k = 0; k < num_slices; ++k)
+    for (size_t k = 0; k < num_slices; ++k)
     {
         slice_start.set(wrap_axis(axis, input), k);
         setup_slice_coordinates_and_mask(slice_start, slice_end_mask, input->tensor_shape().num_dimensions());
-        ARM_COMPUTE_RETURN_ON_ERROR(NEStridedSlice::validate(input, output_vector[k], slice_start, Coordinates(), BiStrides(), 0, slice_end_mask, (1 << wrap_axis(axis, input))));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEStridedSlice::validate(input, output_vector[k], slice_start, Coordinates(),
+                                                             BiStrides(), 0, slice_end_mask,
+                                                             (1 << wrap_axis(axis, input))));
     }
     return Status{};
 }
 
 void NEUnstack::run()
 {
-    for(unsigned i = 0; i < _num_slices; ++i)
+    for (unsigned i = 0; i < _num_slices; ++i)
     {
         _strided_slice_vector[i].run();
     }

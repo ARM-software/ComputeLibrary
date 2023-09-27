@@ -75,17 +75,17 @@ void INode::set_assigned_target(Target target)
 
 void INode::set_output_tensor(TensorID tid, size_t idx)
 {
-    if(tid != NullTensorID && (idx < _outputs.size()) && (_graph->tensor(tid) != nullptr))
+    if (tid != NullTensorID && (idx < _outputs.size()) && (_graph->tensor(tid) != nullptr))
     {
         ARM_COMPUTE_ERROR_ON(_graph == nullptr);
         Tensor *updated_tensor = _graph->tensor(tid);
         _outputs[idx]          = tid;
 
         // Set tensor to all output edges of the node
-        for(auto &output_edge_id : _output_edges)
+        for (auto &output_edge_id : _output_edges)
         {
             auto output_edge = _graph->edge(output_edge_id);
-            if(output_edge != nullptr)
+            if (output_edge != nullptr)
             {
                 // Unbind edge from current tensor
                 auto current_output_tensor = output_edge->tensor();

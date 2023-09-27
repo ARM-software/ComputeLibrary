@@ -32,7 +32,8 @@ namespace arm_compute
 {
 namespace cpu
 {
-void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
+void vector_matrix_multiply_f16(
+    const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
     const auto width_matrix_b  = static_cast<int>(dst->info()->dimension(0));
     const auto in_b_stride     = static_cast<int>(rhs->info()->strides_in_bytes()[1] / rhs->info()->element_size());
@@ -42,7 +43,8 @@ void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
     const int window_start_x = 32 * info.thread_id;
     const int window_step_x  = 32 * info.num_threads;
     const int window_end_x   = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
-    ARM_COMPUTE_ERROR_ON_MSG((window_end_x - window_start_x) % window_step_x, " (window_end_x - window_start_x) must be multiple of window_step_x");
+    ARM_COMPUTE_ERROR_ON_MSG((window_end_x - window_start_x) % window_step_x,
+                             " (window_end_x - window_start_x) must be multiple of window_step_x");
 
     Window win_out(window);
     win_out.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -55,7 +57,7 @@ void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(rhs->info()->num_dimensions() >= 3)
+    if (rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
@@ -70,169 +72,172 @@ void vector_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
 
     const float16x8_t alpha_f16 = vdupq_n_f16(alpha);
 
-    execute_window_loop(win_out, [&](const Coordinates &)
-    {
-        int x = window_start_x;
-        // Here we don't check for x lower equal than (window_end_x - window_step_x) because of
-        // window_end_x is computed above which may cause out-of-bound writes to the dst.
-        for(; x < (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win_out,
+        [&](const Coordinates &)
         {
-            if(x > width_matrix_b)
+            int x = window_start_x;
+            // Here we don't check for x lower equal than (window_end_x - window_step_x) because of
+            // window_end_x is computed above which may cause out-of-bound writes to the dst.
+            for (; x < (window_end_x - window_step_x); x += window_step_x)
             {
-                return;
-            }
-
-            auto matrix_b = reinterpret_cast<const float16_t *>(inb.ptr()) + x;
-
-            float16x8_t acc0 = vdupq_n_f16(0.f);
-            float16x8_t acc1 = vdupq_n_f16(0.f);
-            float16x8_t acc2 = vdupq_n_f16(0.f);
-            float16x8_t acc3 = vdupq_n_f16(0.f);
-
-            auto             vec_a          = reinterpret_cast<const float16_t *>(ina.ptr());
-            const float16_t *vec_a_end_addr = vec_a + num_elems_vec_a;
-            for(; vec_a <= (vec_a_end_addr - 4);)
-            {
-                const float16x4_t a0l = vld1_f16(vec_a);
-
-                float16x8_t b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
-                float16x8_t b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
-                float16x8_t b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
-                float16x8_t b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
-                float16x8_t b10 = vld1q_f16(matrix_b + 0 + 1 * in_b_stride);
-                float16x8_t b11 = vld1q_f16(matrix_b + 8 + 1 * in_b_stride);
-                float16x8_t b12 = vld1q_f16(matrix_b + 16 + 1 * in_b_stride);
-                float16x8_t b13 = vld1q_f16(matrix_b + 24 + 1 * in_b_stride);
-
-                acc0 = vaddq_f16(acc0, vmulq_lane_f16(b00, a0l, 0));
-                acc1 = vaddq_f16(acc1, vmulq_lane_f16(b01, a0l, 0));
-                acc2 = vaddq_f16(acc2, vmulq_lane_f16(b02, a0l, 0));
-                acc3 = vaddq_f16(acc3, vmulq_lane_f16(b03, a0l, 0));
-                acc0 = vaddq_f16(acc0, vmulq_lane_f16(b10, a0l, 1));
-                acc1 = vaddq_f16(acc1, vmulq_lane_f16(b11, a0l, 1));
-                acc2 = vaddq_f16(acc2, vmulq_lane_f16(b12, a0l, 1));
-                acc3 = vaddq_f16(acc3, vmulq_lane_f16(b13, a0l, 1));
-
-                matrix_b += 2 * in_b_stride;
-
-                b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
-                b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
-                b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
-                b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
-                b10 = vld1q_f16(matrix_b + 0 + 1 * in_b_stride);
-                b11 = vld1q_f16(matrix_b + 8 + 1 * in_b_stride);
-                b12 = vld1q_f16(matrix_b + 16 + 1 * in_b_stride);
-                b13 = vld1q_f16(matrix_b + 24 + 1 * in_b_stride);
-
-                acc0 = vaddq_f16(acc0, vmulq_lane_f16(b00, a0l, 2));
-                acc1 = vaddq_f16(acc1, vmulq_lane_f16(b01, a0l, 2));
-                acc2 = vaddq_f16(acc2, vmulq_lane_f16(b02, a0l, 2));
-                acc3 = vaddq_f16(acc3, vmulq_lane_f16(b03, a0l, 2));
-                acc0 = vaddq_f16(acc0, vmulq_lane_f16(b10, a0l, 3));
-                acc1 = vaddq_f16(acc1, vmulq_lane_f16(b11, a0l, 3));
-                acc2 = vaddq_f16(acc2, vmulq_lane_f16(b12, a0l, 3));
-                acc3 = vaddq_f16(acc3, vmulq_lane_f16(b13, a0l, 3));
-
-                vec_a += 4;
-                matrix_b += 2 * in_b_stride;
-            }
-
-            for(; vec_a < vec_a_end_addr; ++vec_a)
-            {
-                const float16_t   a0  = *vec_a;
-                const float16x8_t b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
-                const float16x8_t b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
-                const float16x8_t b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
-                const float16x8_t b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
-
-                acc0 = vaddq_f16(acc0, vmulq_n_f16(b00, a0));
-                acc1 = vaddq_f16(acc1, vmulq_n_f16(b01, a0));
-                acc2 = vaddq_f16(acc2, vmulq_n_f16(b02, a0));
-                acc3 = vaddq_f16(acc3, vmulq_n_f16(b03, a0));
-
-                matrix_b += in_b_stride;
-            }
-
-            // Multiply by the weight of matrix product (alpha)
-            if(multiply_alpha)
-            {
-                acc0 = vmulq_f16(acc0, alpha_f16);
-                acc1 = vmulq_f16(acc1, alpha_f16);
-                acc2 = vmulq_f16(acc2, alpha_f16);
-                acc3 = vmulq_f16(acc3, alpha_f16);
-            }
-
-            auto vec_out = reinterpret_cast<float16_t *>(out.ptr()) + x;
-
-            vst1q_f16(vec_out + 0, acc0);
-            vst1q_f16(vec_out + 8, acc1);
-            vst1q_f16(vec_out + 16, acc2);
-            vst1q_f16(vec_out + 24, acc3);
-        }
-
-        for(; x < window_end_x; ++x)
-        {
-            if(x > width_matrix_b)
-            {
-                return;
-            }
-
-            auto matrix_b = reinterpret_cast<const float16_t *>(inb.ptr()) + x;
-
-            float16x4_t vacc = vdup_n_f16(0.f);
-
-            auto             vec_a          = reinterpret_cast<const float16_t *>(ina.ptr());
-            const float16_t *vec_a_end_addr = vec_a + num_elems_vec_a;
-            for(; vec_a <= (vec_a_end_addr - 4); vec_a += 4)
-            {
-                const float16x4_t a0l = vld1_f16(vec_a);
-
-                const float16x4_t b_col =
+                if (x > width_matrix_b)
                 {
-                    *(matrix_b + 0 * in_b_stride),
-                    *(matrix_b + 1 * in_b_stride),
-                    *(matrix_b + 2 * in_b_stride),
-                    *(matrix_b + 3 * in_b_stride),
-                };
+                    return;
+                }
 
-                vacc = vadd_f16(vacc, vmul_f16(a0l, b_col));
+                auto matrix_b = reinterpret_cast<const float16_t *>(inb.ptr()) + x;
 
-                matrix_b += 4 * in_b_stride;
+                float16x8_t acc0 = vdupq_n_f16(0.f);
+                float16x8_t acc1 = vdupq_n_f16(0.f);
+                float16x8_t acc2 = vdupq_n_f16(0.f);
+                float16x8_t acc3 = vdupq_n_f16(0.f);
+
+                auto             vec_a          = reinterpret_cast<const float16_t *>(ina.ptr());
+                const float16_t *vec_a_end_addr = vec_a + num_elems_vec_a;
+                for (; vec_a <= (vec_a_end_addr - 4);)
+                {
+                    const float16x4_t a0l = vld1_f16(vec_a);
+
+                    float16x8_t b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
+                    float16x8_t b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
+                    float16x8_t b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
+                    float16x8_t b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
+                    float16x8_t b10 = vld1q_f16(matrix_b + 0 + 1 * in_b_stride);
+                    float16x8_t b11 = vld1q_f16(matrix_b + 8 + 1 * in_b_stride);
+                    float16x8_t b12 = vld1q_f16(matrix_b + 16 + 1 * in_b_stride);
+                    float16x8_t b13 = vld1q_f16(matrix_b + 24 + 1 * in_b_stride);
+
+                    acc0 = vaddq_f16(acc0, vmulq_lane_f16(b00, a0l, 0));
+                    acc1 = vaddq_f16(acc1, vmulq_lane_f16(b01, a0l, 0));
+                    acc2 = vaddq_f16(acc2, vmulq_lane_f16(b02, a0l, 0));
+                    acc3 = vaddq_f16(acc3, vmulq_lane_f16(b03, a0l, 0));
+                    acc0 = vaddq_f16(acc0, vmulq_lane_f16(b10, a0l, 1));
+                    acc1 = vaddq_f16(acc1, vmulq_lane_f16(b11, a0l, 1));
+                    acc2 = vaddq_f16(acc2, vmulq_lane_f16(b12, a0l, 1));
+                    acc3 = vaddq_f16(acc3, vmulq_lane_f16(b13, a0l, 1));
+
+                    matrix_b += 2 * in_b_stride;
+
+                    b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
+                    b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
+                    b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
+                    b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
+                    b10 = vld1q_f16(matrix_b + 0 + 1 * in_b_stride);
+                    b11 = vld1q_f16(matrix_b + 8 + 1 * in_b_stride);
+                    b12 = vld1q_f16(matrix_b + 16 + 1 * in_b_stride);
+                    b13 = vld1q_f16(matrix_b + 24 + 1 * in_b_stride);
+
+                    acc0 = vaddq_f16(acc0, vmulq_lane_f16(b00, a0l, 2));
+                    acc1 = vaddq_f16(acc1, vmulq_lane_f16(b01, a0l, 2));
+                    acc2 = vaddq_f16(acc2, vmulq_lane_f16(b02, a0l, 2));
+                    acc3 = vaddq_f16(acc3, vmulq_lane_f16(b03, a0l, 2));
+                    acc0 = vaddq_f16(acc0, vmulq_lane_f16(b10, a0l, 3));
+                    acc1 = vaddq_f16(acc1, vmulq_lane_f16(b11, a0l, 3));
+                    acc2 = vaddq_f16(acc2, vmulq_lane_f16(b12, a0l, 3));
+                    acc3 = vaddq_f16(acc3, vmulq_lane_f16(b13, a0l, 3));
+
+                    vec_a += 4;
+                    matrix_b += 2 * in_b_stride;
+                }
+
+                for (; vec_a < vec_a_end_addr; ++vec_a)
+                {
+                    const float16_t   a0  = *vec_a;
+                    const float16x8_t b00 = vld1q_f16(matrix_b + 0 + 0 * in_b_stride);
+                    const float16x8_t b01 = vld1q_f16(matrix_b + 8 + 0 * in_b_stride);
+                    const float16x8_t b02 = vld1q_f16(matrix_b + 16 + 0 * in_b_stride);
+                    const float16x8_t b03 = vld1q_f16(matrix_b + 24 + 0 * in_b_stride);
+
+                    acc0 = vaddq_f16(acc0, vmulq_n_f16(b00, a0));
+                    acc1 = vaddq_f16(acc1, vmulq_n_f16(b01, a0));
+                    acc2 = vaddq_f16(acc2, vmulq_n_f16(b02, a0));
+                    acc3 = vaddq_f16(acc3, vmulq_n_f16(b03, a0));
+
+                    matrix_b += in_b_stride;
+                }
+
+                // Multiply by the weight of matrix product (alpha)
+                if (multiply_alpha)
+                {
+                    acc0 = vmulq_f16(acc0, alpha_f16);
+                    acc1 = vmulq_f16(acc1, alpha_f16);
+                    acc2 = vmulq_f16(acc2, alpha_f16);
+                    acc3 = vmulq_f16(acc3, alpha_f16);
+                }
+
+                auto vec_out = reinterpret_cast<float16_t *>(out.ptr()) + x;
+
+                vst1q_f16(vec_out + 0, acc0);
+                vst1q_f16(vec_out + 8, acc1);
+                vst1q_f16(vec_out + 16, acc2);
+                vst1q_f16(vec_out + 24, acc3);
             }
 
-            float16_t acc = vget_lane_f16(vacc, 0) + vget_lane_f16(vacc, 1) + vget_lane_f16(vacc, 2) + vget_lane_f16(vacc, 3);
-
-            for(; vec_a < vec_a_end_addr; ++vec_a)
+            for (; x < window_end_x; ++x)
             {
-                const float16_t a0  = *vec_a;
-                const float16_t b00 = *matrix_b;
+                if (x > width_matrix_b)
+                {
+                    return;
+                }
 
-                acc += b00 * a0;
+                auto matrix_b = reinterpret_cast<const float16_t *>(inb.ptr()) + x;
 
-                matrix_b += in_b_stride;
+                float16x4_t vacc = vdup_n_f16(0.f);
+
+                auto             vec_a          = reinterpret_cast<const float16_t *>(ina.ptr());
+                const float16_t *vec_a_end_addr = vec_a + num_elems_vec_a;
+                for (; vec_a <= (vec_a_end_addr - 4); vec_a += 4)
+                {
+                    const float16x4_t a0l = vld1_f16(vec_a);
+
+                    const float16x4_t b_col = {
+                        *(matrix_b + 0 * in_b_stride),
+                        *(matrix_b + 1 * in_b_stride),
+                        *(matrix_b + 2 * in_b_stride),
+                        *(matrix_b + 3 * in_b_stride),
+                    };
+
+                    vacc = vadd_f16(vacc, vmul_f16(a0l, b_col));
+
+                    matrix_b += 4 * in_b_stride;
+                }
+
+                float16_t acc =
+                    vget_lane_f16(vacc, 0) + vget_lane_f16(vacc, 1) + vget_lane_f16(vacc, 2) + vget_lane_f16(vacc, 3);
+
+                for (; vec_a < vec_a_end_addr; ++vec_a)
+                {
+                    const float16_t a0  = *vec_a;
+                    const float16_t b00 = *matrix_b;
+
+                    acc += b00 * a0;
+
+                    matrix_b += in_b_stride;
+                }
+
+                // Multiply by the weight of matrix product (alpha)
+                if (multiply_alpha)
+                {
+                    acc *= static_cast<float16_t>(alpha);
+                }
+
+                auto vec_out = reinterpret_cast<float16_t *>(out.ptr()) + x;
+
+                *(vec_out) = acc;
             }
-
-            // Multiply by the weight of matrix product (alpha)
-            if(multiply_alpha)
-            {
-                acc *= static_cast<float16_t>(alpha);
-            }
-
-            auto vec_out = reinterpret_cast<float16_t *>(out.ptr()) + x;
-
-            *(vec_out) = acc;
-        }
-    },
-    ina, inb, out);
+        },
+        ina, inb, out);
 }
 
-void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
+void matrix_matrix_multiply_f16(
+    const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha)
 {
     ARM_COMPUTE_UNUSED(info);
-    const int    out_width            = static_cast<int>(dst->info()->dimension(0));
-    const int    out_height           = static_cast<int>(dst->info()->dimension(1));
-    const size_t in_b_stride          = rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type());
-    const size_t out_stride           = dst->info()->strides_in_bytes()[1] / data_size_from_type(dst->info()->data_type());
+    const int    out_width   = static_cast<int>(dst->info()->dimension(0));
+    const int    out_height  = static_cast<int>(dst->info()->dimension(1));
+    const size_t in_b_stride = rhs->info()->strides_in_bytes()[1] / data_size_from_type(rhs->info()->data_type());
+    const size_t out_stride  = dst->info()->strides_in_bytes()[1] / data_size_from_type(dst->info()->data_type());
     const int    num_elems_matrix_b_x = rhs->info()->dimension(0);
 
     // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the dst matrix
@@ -243,7 +248,7 @@ void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
     Window win_b;
     // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
     // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    if(rhs->info()->num_dimensions() >= 3)
+    if (rhs->info()->num_dimensions() >= 3)
     {
         win_b = window;
     }
@@ -259,22 +264,16 @@ void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
 
     const float16x8_t alpha_f16 = vdupq_n_f16(alpha);
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto   *mtx_a0  = reinterpret_cast<const float16_t *>(ina.ptr());
-        const auto   *mtx_b0  = reinterpret_cast<const float16_t *>(inb.ptr());
-        auto         *mtx_out = reinterpret_cast<float16_t *>(out.ptr());
-        float16x8x4_t c =
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
         {
-            {
-                vdupq_n_f16(0.f),
-                vdupq_n_f16(0.f),
-                vdupq_n_f16(0.f),
-                vdupq_n_f16(0.f)
-            }
-        };
+            const auto   *mtx_a0  = reinterpret_cast<const float16_t *>(ina.ptr());
+            const auto   *mtx_b0  = reinterpret_cast<const float16_t *>(inb.ptr());
+            auto         *mtx_out = reinterpret_cast<float16_t *>(out.ptr());
+            float16x8x4_t c       = {{vdupq_n_f16(0.f), vdupq_n_f16(0.f), vdupq_n_f16(0.f), vdupq_n_f16(0.f)}};
 
-        /*
+            /*
         This kernel puts the values in a 4x4 block of Matrix A on the same row (Interleaved values)
              |a00 a01 a02 a03 | a04 a05 a06 a07|
              |a10 a11 a12 a13 | a14 a15 a16 a17|
@@ -302,111 +301,118 @@ void matrix_matrix_multiply_f16(const ITensor *lhs, const ITensor *rhs, ITensor 
 
         The size of the dst tensor's XY-plane must be the following shape [ width * 8, height / 8 ]. All other dimensions must have the same size.
         */
-        const float16_t *mtx_b0_end_addr = mtx_b0 + num_elems_matrix_b_x;
+            const float16_t *mtx_b0_end_addr = mtx_b0 + num_elems_matrix_b_x;
 
-        for(; mtx_b0 <= (mtx_b0_end_addr - 32);)
+            for (; mtx_b0 <= (mtx_b0_end_addr - 32);)
 
-        {
-            const float16x8_t p00 = vld1q_f16(mtx_a0);
-            const float16x8_t p02 = vld1q_f16(mtx_a0 + 8);
-
-            const float16x8_t q00 = vld1q_f16(mtx_b0);
-            const float16x8_t q02 = vld1q_f16(mtx_b0 + 8);
-            const float16x8_t q04 = vld1q_f16(mtx_b0 + 16);
-            const float16x8_t q06 = vld1q_f16(mtx_b0 + 24);
-
-            c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q00, vgetq_lane_f16(p00, 0)));
-            c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q00, vgetq_lane_f16(p00, 1)));
-            c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q00, vgetq_lane_f16(p00, 2)));
-            c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q00, vgetq_lane_f16(p00, 3)));
-
-            c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q02, vgetq_lane_f16(p00, 4)));
-            c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q02, vgetq_lane_f16(p00, 5)));
-            c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q02, vgetq_lane_f16(p00, 6)));
-            c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q02, vgetq_lane_f16(p00, 7)));
-
-            c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q04, vgetq_lane_f16(p02, 0)));
-            c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q04, vgetq_lane_f16(p02, 1)));
-            c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q04, vgetq_lane_f16(p02, 2)));
-            c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q04, vgetq_lane_f16(p02, 3)));
-
-            c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q06, vgetq_lane_f16(p02, 4)));
-            c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q06, vgetq_lane_f16(p02, 5)));
-            c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q06, vgetq_lane_f16(p02, 6)));
-            c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q06, vgetq_lane_f16(p02, 7)));
-
-            mtx_a0 += 16;
-            mtx_b0 += 32;
-        }
-
-        for(; mtx_b0 < mtx_b0_end_addr;)
-
-        {
-            const float16x4_t p00 = vld1_f16(mtx_a0);
-            const float16x8_t q00 = vld1q_f16(mtx_b0);
-
-            c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q00, vget_lane_f16(p00, 0)));
-            c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q00, vget_lane_f16(p00, 1)));
-            c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q00, vget_lane_f16(p00, 2)));
-            c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q00, vget_lane_f16(p00, 3)));
-
-            mtx_a0 += 4;
-            mtx_b0 += 8;
-        }
-
-        if(multiply_alpha)
-        {
-            c.val[0] = vmulq_f16(c.val[0], alpha_f16);
-            c.val[1] = vmulq_f16(c.val[1], alpha_f16);
-            c.val[2] = vmulq_f16(c.val[2], alpha_f16);
-            c.val[3] = vmulq_f16(c.val[3], alpha_f16);
-        }
-
-        if(id.x() < (out_width - 8))
-        {
-            vst1q_f16(mtx_out, c.val[0]);
-            if(id.y() + 1 < out_height)
             {
-                vst1q_f16(mtx_out + 1 * out_stride, c.val[1]);
-                if(id.y() + 2 < out_height)
-                {
-                    vst1q_f16(mtx_out + 2 * out_stride, c.val[2]);
-                    if(id.y() + 3 < out_height)
-                    {
-                        vst1q_f16(mtx_out + 3 * out_stride, c.val[3]);
-                    }
-                }
+                const float16x8_t p00 = vld1q_f16(mtx_a0);
+                const float16x8_t p02 = vld1q_f16(mtx_a0 + 8);
+
+                const float16x8_t q00 = vld1q_f16(mtx_b0);
+                const float16x8_t q02 = vld1q_f16(mtx_b0 + 8);
+                const float16x8_t q04 = vld1q_f16(mtx_b0 + 16);
+                const float16x8_t q06 = vld1q_f16(mtx_b0 + 24);
+
+                c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q00, vgetq_lane_f16(p00, 0)));
+                c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q00, vgetq_lane_f16(p00, 1)));
+                c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q00, vgetq_lane_f16(p00, 2)));
+                c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q00, vgetq_lane_f16(p00, 3)));
+
+                c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q02, vgetq_lane_f16(p00, 4)));
+                c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q02, vgetq_lane_f16(p00, 5)));
+                c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q02, vgetq_lane_f16(p00, 6)));
+                c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q02, vgetq_lane_f16(p00, 7)));
+
+                c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q04, vgetq_lane_f16(p02, 0)));
+                c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q04, vgetq_lane_f16(p02, 1)));
+                c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q04, vgetq_lane_f16(p02, 2)));
+                c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q04, vgetq_lane_f16(p02, 3)));
+
+                c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q06, vgetq_lane_f16(p02, 4)));
+                c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q06, vgetq_lane_f16(p02, 5)));
+                c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q06, vgetq_lane_f16(p02, 6)));
+                c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q06, vgetq_lane_f16(p02, 7)));
+
+                mtx_a0 += 16;
+                mtx_b0 += 32;
             }
-        }
-        else
-        {
-            // Left-over columns
-            const int columns_left = out_width - id.x();
-            for(int x = 0; x < columns_left; ++x)
+
+            for (; mtx_b0 < mtx_b0_end_addr;)
+
             {
-                *(mtx_out + x) = c.val[0][x];
-                if(id.y() + 1 < out_height)
+                const float16x4_t p00 = vld1_f16(mtx_a0);
+                const float16x8_t q00 = vld1q_f16(mtx_b0);
+
+                c.val[0] = vaddq_f16(c.val[0], vmulq_n_f16(q00, vget_lane_f16(p00, 0)));
+                c.val[1] = vaddq_f16(c.val[1], vmulq_n_f16(q00, vget_lane_f16(p00, 1)));
+                c.val[2] = vaddq_f16(c.val[2], vmulq_n_f16(q00, vget_lane_f16(p00, 2)));
+                c.val[3] = vaddq_f16(c.val[3], vmulq_n_f16(q00, vget_lane_f16(p00, 3)));
+
+                mtx_a0 += 4;
+                mtx_b0 += 8;
+            }
+
+            if (multiply_alpha)
+            {
+                c.val[0] = vmulq_f16(c.val[0], alpha_f16);
+                c.val[1] = vmulq_f16(c.val[1], alpha_f16);
+                c.val[2] = vmulq_f16(c.val[2], alpha_f16);
+                c.val[3] = vmulq_f16(c.val[3], alpha_f16);
+            }
+
+            if (id.x() < (out_width - 8))
+            {
+                vst1q_f16(mtx_out, c.val[0]);
+                if (id.y() + 1 < out_height)
                 {
-                    *(mtx_out + x + 1 * out_stride) = c.val[1][x];
-                    if(id.y() + 2 < out_height)
+                    vst1q_f16(mtx_out + 1 * out_stride, c.val[1]);
+                    if (id.y() + 2 < out_height)
                     {
-                        *(mtx_out + x + 2 * out_stride) = c.val[2][x];
-                        if(id.y() + 3 < out_height)
+                        vst1q_f16(mtx_out + 2 * out_stride, c.val[2]);
+                        if (id.y() + 3 < out_height)
                         {
-                            *(mtx_out + x + 3 * out_stride) = c.val[3][x];
+                            vst1q_f16(mtx_out + 3 * out_stride, c.val[3]);
                         }
                     }
                 }
             }
-        }
-    },
-    ina, inb, out);
+            else
+            {
+                // Left-over columns
+                const int columns_left = out_width - id.x();
+                for (int x = 0; x < columns_left; ++x)
+                {
+                    *(mtx_out + x) = c.val[0][x];
+                    if (id.y() + 1 < out_height)
+                    {
+                        *(mtx_out + x + 1 * out_stride) = c.val[1][x];
+                        if (id.y() + 2 < out_height)
+                        {
+                            *(mtx_out + x + 2 * out_stride) = c.val[2][x];
+                            if (id.y() + 3 < out_height)
+                            {
+                                *(mtx_out + x + 3 * out_stride) = c.val[3][x];
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        ina, inb, out);
 }
 
-void neon_fp16_gemm_matrix_mul(const ITensor *lhs, const ITensor *rhs, ITensor *dst, const Window &window, const ThreadInfo &info, float alpha, const bool is_dst_vector)
+void neon_fp16_gemm_matrix_mul(const ITensor    *lhs,
+                               const ITensor    *rhs,
+                               ITensor          *dst,
+                               const Window     &window,
+                               const ThreadInfo &info,
+                               float             alpha,
+                               const bool        is_dst_vector)
 {
-    return (is_dst_vector) ? vector_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha) : matrix_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha);
+    return (is_dst_vector) ? vector_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha)
+                           : matrix_matrix_multiply_f16(lhs, rhs, dst, window, info, alpha);
 }
-} // namespce cpu
+} // namespace cpu
 } // namespace arm_compute
 #endif //__ARM_FEATURE_FP16_VECTOR_ARITHMETIC

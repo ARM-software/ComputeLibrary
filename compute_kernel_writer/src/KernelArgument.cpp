@@ -23,6 +23,7 @@
  */
 
 #include "ckw/KernelArgument.h"
+
 #include "ckw/Error.h"
 
 namespace ckw

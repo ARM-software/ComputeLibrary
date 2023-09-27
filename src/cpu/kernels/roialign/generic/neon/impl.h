@@ -46,7 +46,7 @@ inline input_data_type roi_align_1x1(const ITensor *input,
                                      float          region_end_y,
                                      int            pz)
 {
-    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+    if ((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
     {
         return input_data_type(0);
     }
@@ -55,9 +55,9 @@ inline input_data_type roi_align_1x1(const ITensor *input,
         const DataLayout data_layout = input->info()->data_layout();
         float            avg         = 0;
         // Iterate through the aligned pooling region
-        for(int iy = 0; iy < grid_size_y; ++iy)
+        for (int iy = 0; iy < grid_size_y; ++iy)
         {
-            for(int ix = 0; ix < grid_size_x; ++ix)
+            for (int ix = 0; ix < grid_size_x; ++ix)
             {
                 // Align the window in the middle of every bin
                 float y = region_start_y + (iy + 0.5) * bin_size_y / float(grid_size_y);
@@ -78,20 +78,28 @@ inline input_data_type roi_align_1x1(const ITensor *input,
                 const float w2 = hy * lx;
                 const float w3 = ly * hx;
                 const float w4 = ly * lx;
-                if(data_layout == DataLayout::NCHW)
+                if (data_layout == DataLayout::NCHW)
                 {
-                    const auto data1 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_low, pz, roi_batch)));
-                    const auto data2 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_low, pz, roi_batch)));
-                    const auto data3 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_high, pz, roi_batch)));
-                    const auto data4 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_high, pz, roi_batch)));
+                    const auto data1 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(x_low, y_low, pz, roi_batch)));
+                    const auto data2 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(x_high, y_low, pz, roi_batch)));
+                    const auto data3 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(x_low, y_high, pz, roi_batch)));
+                    const auto data4 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(x_high, y_high, pz, roi_batch)));
                     avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                 }
                 else
                 {
-                    const auto data1 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_low, roi_batch)));
-                    const auto data2 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_low, roi_batch)));
-                    const auto data3 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_high, roi_batch)));
-                    const auto data4 = *reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_high, roi_batch)));
+                    const auto data1 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(pz, x_low, y_low, roi_batch)));
+                    const auto data2 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(pz, x_high, y_low, roi_batch)));
+                    const auto data3 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(pz, x_low, y_high, roi_batch)));
+                    const auto data4 = *reinterpret_cast<const input_data_type *>(
+                        input->ptr_to_element(Coordinates(pz, x_high, y_high, roi_batch)));
                     avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                 }
             }
@@ -117,21 +125,21 @@ inline input_data_type roi_align_1x1_qasymm8(const ITensor          *input,
                                              int                     pz,
                                              const QuantizationInfo &out_qinfo)
 {
-    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+    if ((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
     {
         return input_data_type(out_qinfo.uniform().offset);
     }
     else
     {
-        float                         avg              = 0;
-        const UniformQuantizationInfo input_qinfo      = input->info()->quantization_info().uniform();
-        const bool                    is_qasymm_signed = is_data_type_quantized_asymmetric_signed(input->info()->data_type());
-        const DataLayout              data_layout      = input->info()->data_layout();
+        float                         avg         = 0;
+        const UniformQuantizationInfo input_qinfo = input->info()->quantization_info().uniform();
+        const bool       is_qasymm_signed = is_data_type_quantized_asymmetric_signed(input->info()->data_type());
+        const DataLayout data_layout      = input->info()->data_layout();
 
         // Iterate through the aligned pooling region
-        for(int iy = 0; iy < grid_size_y; ++iy)
+        for (int iy = 0; iy < grid_size_y; ++iy)
         {
-            for(int ix = 0; ix < grid_size_x; ++ix)
+            for (int ix = 0; ix < grid_size_x; ++ix)
             {
                 // Align the window in the middle of every bin
                 float y = region_start_y + (iy + 0.5) * bin_size_y / float(grid_size_y);
@@ -153,41 +161,89 @@ inline input_data_type roi_align_1x1_qasymm8(const ITensor          *input,
                 const float w3 = ly * hx;
                 const float w4 = ly * lx;
 
-                if(data_layout == DataLayout::NCHW)
+                if (data_layout == DataLayout::NCHW)
                 {
-                    if(is_qasymm_signed)
+                    if (is_qasymm_signed)
                     {
-                        float data1 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_low, pz, roi_batch))), input_qinfo);
-                        float data2 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_low, pz, roi_batch))), input_qinfo);
-                        float data3 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_high, pz, roi_batch))), input_qinfo);
-                        float data4 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_high, pz, roi_batch))), input_qinfo);
+                        float data1 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(x_low, y_low, pz, roi_batch))),
+                                                      input_qinfo);
+                        float data2 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(x_high, y_low, pz, roi_batch))),
+                                                      input_qinfo);
+                        float data3 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(x_low, y_high, pz, roi_batch))),
+                                                      input_qinfo);
+                        float data4 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(x_high, y_high, pz, roi_batch))),
+                                                      input_qinfo);
                         avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                     }
                     else
                     {
-                        float data1 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_low, pz, roi_batch))), input_qinfo);
-                        float data2 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_low, pz, roi_batch))), input_qinfo);
-                        float data3 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_low, y_high, pz, roi_batch))), input_qinfo);
-                        float data4 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(x_high, y_high, pz, roi_batch))), input_qinfo);
+                        float data1 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(x_low, y_low, pz, roi_batch))),
+                                               input_qinfo);
+                        float data2 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(x_high, y_low, pz, roi_batch))),
+                                               input_qinfo);
+                        float data3 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(x_low, y_high, pz, roi_batch))),
+                                               input_qinfo);
+                        float data4 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(x_high, y_high, pz, roi_batch))),
+                                               input_qinfo);
                         avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                     }
                 }
                 else
                 {
-                    if(is_qasymm_signed)
+                    if (is_qasymm_signed)
                     {
-                        const auto data1 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_low, roi_batch))), input_qinfo);
-                        const auto data2 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_low, roi_batch))), input_qinfo);
-                        const auto data3 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_high, roi_batch))), input_qinfo);
-                        const auto data4 = dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_high, roi_batch))), input_qinfo);
+                        const auto data1 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(pz, x_low, y_low, roi_batch))),
+                                                      input_qinfo);
+                        const auto data2 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(pz, x_high, y_low, roi_batch))),
+                                                      input_qinfo);
+                        const auto data3 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(pz, x_low, y_high, roi_batch))),
+                                                      input_qinfo);
+                        const auto data4 =
+                            dequantize_qasymm8_signed(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(
+                                                          Coordinates(pz, x_high, y_high, roi_batch))),
+                                                      input_qinfo);
                         avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                     }
                     else
                     {
-                        const auto data1 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_low, roi_batch))), input_qinfo);
-                        const auto data2 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_low, roi_batch))), input_qinfo);
-                        const auto data3 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_low, y_high, roi_batch))), input_qinfo);
-                        const auto data4 = dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(input->ptr_to_element(Coordinates(pz, x_high, y_high, roi_batch))), input_qinfo);
+                        const auto data1 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(pz, x_low, y_low, roi_batch))),
+                                               input_qinfo);
+                        const auto data2 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(pz, x_high, y_low, roi_batch))),
+                                               input_qinfo);
+                        const auto data3 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(pz, x_low, y_high, roi_batch))),
+                                               input_qinfo);
+                        const auto data4 =
+                            dequantize_qasymm8(*reinterpret_cast<const input_data_type *>(
+                                                   input->ptr_to_element(Coordinates(pz, x_high, y_high, roi_batch))),
+                                               input_qinfo);
                         avg += w1 * data1 + w2 * data2 + w3 * data3 + w4 * data4;
                     }
                 }
@@ -197,7 +253,7 @@ inline input_data_type roi_align_1x1_qasymm8(const ITensor          *input,
         avg /= grid_size_x * grid_size_y;
 
         input_data_type res = 0;
-        if(is_qasymm_signed)
+        if (is_qasymm_signed)
         {
             res = quantize_qasymm8_signed(avg, out_qinfo);
         }
@@ -215,7 +271,12 @@ inline float compute_region_coordinate(int p, float bin_size, float roi_anchor, 
 }
 
 template <typename input_data_type, typename roi_data_type>
-void roi_align(const ITensor *input, ITensor *output, const ITensor *rois, ROIPoolingLayerInfo pool_info, const Window &window, const ThreadInfo &info)
+void roi_align(const ITensor      *input,
+               ITensor            *output,
+               const ITensor      *rois,
+               ROIPoolingLayerInfo pool_info,
+               const Window       &window,
+               const ThreadInfo   &info)
 {
     ARM_COMPUTE_UNUSED(info);
 
@@ -240,7 +301,7 @@ void roi_align(const ITensor *input, ITensor *output, const ITensor *rois, ROIPo
 
     const auto             *rois_ptr   = reinterpret_cast<const roi_data_type *>(rois->buffer());
     const QuantizationInfo &rois_qinfo = rois->info()->quantization_info();
-    for(int roi_indx = roi_list_start; roi_indx < roi_list_end; ++roi_indx)
+    for (int roi_indx = roi_list_start; roi_indx < roi_list_end; ++roi_indx)
     {
         const unsigned int roi_batch = rois_ptr[values_per_roi * roi_indx];
 
@@ -252,7 +313,7 @@ void roi_align(const ITensor *input, ITensor *output, const ITensor *rois, ROIPo
         float         x2(qx2);
         float         y1(qy1);
         float         y2(qy2);
-        if(is_qasymm)
+        if (is_qasymm)
         {
             x1 = dequantize_qasymm16(qx1, rois_qinfo);
             x2 = dequantize_qasymm16(qx2, rois_qinfo);
@@ -267,44 +328,47 @@ void roi_align(const ITensor *input, ITensor *output, const ITensor *rois, ROIPo
         float       bin_size_y   = roi_dims_y / pool_info.pooled_height();
 
         // Iterate through all feature maps
-        for(int ch = 0; ch < input_chanels; ++ch)
+        for (int ch = 0; ch < input_chanels; ++ch)
         {
             // Iterate through all output pixels
-            for(int py = 0; py < pooled_h; ++py)
+            for (int py = 0; py < pooled_h; ++py)
             {
-                for(int px = 0; px < pooled_w; ++px)
+                for (int px = 0; px < pooled_w; ++px)
                 {
-                    const float     region_start_x = compute_region_coordinate(px, bin_size_x, roi_anchor_x, input_width);
-                    const float     region_start_y = compute_region_coordinate(py, bin_size_y, roi_anchor_y, input_height);
-                    const float     region_end_x   = compute_region_coordinate(px + 1, bin_size_x, roi_anchor_x, input_width);
-                    const float     region_end_y   = compute_region_coordinate(py + 1, bin_size_y, roi_anchor_y, input_height);
-                    const int       roi_bin_grid_x = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_x));
-                    const int       roi_bin_grid_y = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_y));
+                    const float region_start_x = compute_region_coordinate(px, bin_size_x, roi_anchor_x, input_width);
+                    const float region_start_y = compute_region_coordinate(py, bin_size_y, roi_anchor_y, input_height);
+                    const float region_end_x = compute_region_coordinate(px + 1, bin_size_x, roi_anchor_x, input_width);
+                    const float region_end_y =
+                        compute_region_coordinate(py + 1, bin_size_y, roi_anchor_y, input_height);
+                    const int roi_bin_grid_x =
+                        (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_x));
+                    const int roi_bin_grid_y =
+                        (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_y));
                     input_data_type out_val(0);
-                    if(is_qasymm)
+                    if (is_qasymm)
                     {
                         out_val = roi_align_1x1_qasymm8<input_data_type>(
-                                      input, roi_batch, region_start_x, bin_size_x,
-                                      roi_bin_grid_x, region_end_x, region_start_y, bin_size_y,
-                                      roi_bin_grid_y, region_end_y, ch, output->info()->quantization_info());
+                            input, roi_batch, region_start_x, bin_size_x, roi_bin_grid_x, region_end_x, region_start_y,
+                            bin_size_y, roi_bin_grid_y, region_end_y, ch, output->info()->quantization_info());
                     }
                     else
                     {
-                        out_val = roi_align_1x1<input_data_type>(
-                                      input, roi_batch, region_start_x, bin_size_x,
-                                      roi_bin_grid_x, region_end_x, region_start_y, bin_size_y,
-                                      roi_bin_grid_y, region_end_y, ch);
+                        out_val = roi_align_1x1<input_data_type>(input, roi_batch, region_start_x, bin_size_x,
+                                                                 roi_bin_grid_x, region_end_x, region_start_y,
+                                                                 bin_size_y, roi_bin_grid_y, region_end_y, ch);
                     }
 
-                    if(data_layout == DataLayout::NCHW)
+                    if (data_layout == DataLayout::NCHW)
                     {
-                        auto out_ptr = reinterpret_cast<input_data_type *>(output->ptr_to_element(Coordinates(px, py, ch, roi_indx)));
-                        *out_ptr     = out_val;
+                        auto out_ptr = reinterpret_cast<input_data_type *>(
+                            output->ptr_to_element(Coordinates(px, py, ch, roi_indx)));
+                        *out_ptr = out_val;
                     }
                     else
                     {
-                        auto out_ptr = reinterpret_cast<input_data_type *>(output->ptr_to_element(Coordinates(ch, px, py, roi_indx)));
-                        *out_ptr     = out_val;
+                        auto out_ptr = reinterpret_cast<input_data_type *>(
+                            output->ptr_to_element(Coordinates(ch, px, py, roi_indx)));
+                        *out_ptr = out_val;
                     }
                 }
             }

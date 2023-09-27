@@ -23,23 +23,26 @@
  */
 
 #include "ckw/Kernel.h"
+
 #include "ckw/TensorOperand.h"
 #include "ckw/types/GpuTargetLanguage.h"
+
 #include "src/Prototype.h"
 
 namespace ckw
 {
 
-Kernel::Kernel(GpuTargetLanguage language)
-    : Kernel{"unnamed", language}
+Kernel::Kernel(GpuTargetLanguage language) : Kernel{"unnamed", language}
 {
 }
 
 Kernel::Kernel(const char *name, GpuTargetLanguage language)
-    : _name(name), _kernel(std::make_unique<prototype::GpuKernelWriterDataHolder>(language)), _operands{}, _tensor_id_operands{}
+    : _name(name),
+      _kernel(std::make_unique<prototype::GpuKernelWriterDataHolder>(language)),
+      _operands{},
+      _tensor_id_operands{}
 {
 }
-
 
 Kernel::~Kernel()
 {
@@ -50,7 +53,7 @@ const std::string &Kernel::name() const
     return _name;
 }
 
-void Kernel::name(const std::string& name)
+void Kernel::name(const std::string &name)
 {
     _name = name;
 }
@@ -60,14 +63,14 @@ std::vector<KernelArgument> Kernel::arguments() const
 
     const auto impl_args = _kernel->arguments.tensor_argument_declarations();
 
-    for(auto tensor_arg : impl_args)
+    for (auto tensor_arg : impl_args)
     {
         auto tensor = _tensor_id_operands.at(tensor_arg->format().id);
         arguments.push_back(*tensor);
 
-        for(auto component_arg : tensor_arg->component_declarations())
+        for (auto component_arg : tensor_arg->component_declarations())
         {
-            switch(component_arg)
+            switch (component_arg)
             {
                 case TensorComponentType::OffsetFirstElement:
                     arguments.push_back(tensor->offset_first_element_in_bytes());

@@ -37,15 +37,15 @@ using TileContainer = std::vector<std::vector<std::string>>;
 /** Tile descriptor which reports the underlying datatype and vector length */
 struct TileVariableDescriptor
 {
-    DataType dt{ DataType::Unknown }; /** Data type  */
-    int32_t  len{ 1 };                /** Number of elements in a single variable. For example, 1 for scalar  */
+    DataType dt{DataType::Unknown}; /** Data type  */
+    int32_t  len{1};                /** Number of elements in a single variable. For example, 1 for scalar  */
 };
 
 /** Tile variable */
 struct TileVariable
 {
-    std::string            str{ "" }; /** Tile variable as a string */
-    TileVariableDescriptor desc{};    /** Tile value descriptor which reports the datatype and vector length */
+    std::string            str{""}; /** Tile variable as a string */
+    TileVariableDescriptor desc{};  /** Tile value descriptor which reports the datatype and vector length */
 };
 
 /** Interface to provide support for scalar access for a Tile.

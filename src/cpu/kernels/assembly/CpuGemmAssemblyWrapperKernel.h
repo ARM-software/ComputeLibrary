@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/NEON/INEKernel.h"
 #include "src/cpu/kernels/assembly/arm_gemm_compute_iface.hpp"
 
@@ -57,13 +58,12 @@ class CpuGemmAssemblyWrapperKernel final : public INEKernel
 public:
     /** Constructor
      */
-    CpuGemmAssemblyWrapperKernel()
-        : _kernel(nullptr), _name("CpuGemmAssemblyWrapperKernel")
+    CpuGemmAssemblyWrapperKernel() : _kernel(nullptr), _name("CpuGemmAssemblyWrapperKernel")
     {
     }
 
-    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &)  = delete;
-    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &&) = default;
+    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &)            = delete;
+    CpuGemmAssemblyWrapperKernel(CpuGemmAssemblyWrapperKernel &&)           = default;
     CpuGemmAssemblyWrapperKernel &operator=(CpuGemmAssemblyWrapperKernel &) = delete;
 
     const char *name() const override
@@ -110,7 +110,7 @@ public:
 
         INEKernel::configure(win);
 
-        if(!kernel_name_tag.empty())
+        if (!kernel_name_tag.empty())
         {
             _name += "/" + kernel_name_tag;
         }
@@ -132,7 +132,7 @@ public:
 
 private:
     arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;
-    std::string _name;
+    std::string                                  _name;
 };
 } // namespace kernel
 } // namespace cpu

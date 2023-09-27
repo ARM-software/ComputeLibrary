@@ -78,14 +78,26 @@ public:
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should happen only for the first run
      */
-    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const ITensor  *a,
+                   const ITensor  *b,
+                   const ITensor  *c,
+                   ITensor        *d,
+                   float           alpha,
+                   float           beta,
+                   const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMM.
      *
      * Similar to @ref NEGEMM::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a,
+                           const ITensorInfo *b,
+                           const ITensorInfo *c,
+                           const ITensorInfo *output,
+                           float              alpha,
+                           float              beta,
+                           const GEMMInfo    &gemm_info = GEMMInfo());
 
     /** Static function that queries whether there exists fixed-format kernel and if it exists it will return in the first argument in what format
      * weights are expected to be reshaped as defined by WeightFormat class. Apart from the first argument the rest of the arguments are the same
@@ -93,8 +105,14 @@ public:
      *
      * @return a status
      */
-    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output,
-                               float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                               const ITensorInfo         *a,
+                               const ITensorInfo         *b,
+                               const ITensorInfo         *c,
+                               const ITensorInfo         *output,
+                               float                      alpha,
+                               float                      beta,
+                               const GEMMInfo            &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

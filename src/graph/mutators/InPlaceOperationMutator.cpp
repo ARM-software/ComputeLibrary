@@ -29,6 +29,7 @@
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/nodes/DepthwiseConvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/FusedDepthwiseConvolutionBatchNormalizationNode.h"
+
 #include "support/Cast.h"
 
 using namespace arm_compute::utils::cast;
@@ -48,7 +49,7 @@ bool output_edges_are_separate_tensors(Graph &g, const Edge *input_edge)
     const auto input_tensor  = input_edge->tensor();
     const auto input_edge_id = input_edge->id();
 
-    if(parent_node == nullptr)
+    if (parent_node == nullptr)
     {
         return false;
     }
@@ -57,24 +58,23 @@ bool output_edges_are_separate_tensors(Graph &g, const Edge *input_edge)
 
     // If the output is connected to only one edge, then computations can
     // be done in-place.
-    if(output_edges.size() == 1)
+    if (output_edges.size() == 1)
     {
         return true;
     }
 
-    return std::all_of(output_edges.begin(),
-                       output_edges.end(),
-                       [&](const EdgeID & edge_id)
-    {
-        // Skip check on current input edge
-        if(edge_id == input_edge_id)
-        {
-            return true;
-        }
+    return std::all_of(output_edges.begin(), output_edges.end(),
+                       [&](const EdgeID &edge_id)
+                       {
+                           // Skip check on current input edge
+                           if (edge_id == input_edge_id)
+                           {
+                               return true;
+                           }
 
-        auto edge = g.edge(edge_id);
-        return edge->tensor() != input_tensor;
-    });
+                           auto edge = g.edge(edge_id);
+                           return edge->tensor() != input_tensor;
+                       });
 }
 
 // If do in-place calculation, then need to use the new output and inherit original output's accessor
@@ -109,12 +109,14 @@ void try_in_place_depthwiseconv(std::unique_ptr<INode> &node)
     // Extract PadStrideInfo and depth multiplier
     PadStrideInfo conv_info{};
     unsigned int  depth_multiplier{};
-    if(node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer)
+    if (node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer)
     {
-        conv_info        = polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->convolution_info();
-        depth_multiplier = polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->depth_multiplier();
+        conv_info =
+            polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->convolution_info();
+        depth_multiplier =
+            polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node.get())->depth_multiplier();
     }
-    else if(node->type() == NodeType::DepthwiseConvolutionLayer)
+    else if (node->type() == NodeType::DepthwiseConvolutionLayer)
     {
         conv_info        = polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node.get())->convolution_info();
         depth_multiplier = polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node.get())->depth_multiplier();
@@ -126,7 +128,8 @@ void try_in_place_depthwiseconv(std::unique_ptr<INode> &node)
     const auto out_shape = current_output_tensor->desc().shape;
     const auto qinfo_out = current_output_tensor->desc().quant_info;
 
-    bool input_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, input_shape, 0) && (qinfo_input == qinfo_out) && (input_tensor->accessor() == nullptr);
+    bool input_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, input_shape, 0) &&
+                              (qinfo_input == qinfo_out) && (input_tensor->accessor() == nullptr);
 
     // Specify conditions with which input can be in-placed
     input_can_in_place &= weight_layout == input_tensor->desc().layout && weight_layout == DataLayout::NHWC;
@@ -141,13 +144,14 @@ void try_in_place_depthwiseconv(std::unique_ptr<INode> &node)
     input_can_in_place &= !conv_info.has_padding();
     // NOTE: Dilation should also be (1, 1). However currently dilation is not supported in the depthwise conv node
 
-    if(input_can_in_place)
+    if (input_can_in_place)
     {
         set_new_output_and_inherit_accessor(node, current_output_tensor, input_tensor);
     }
     else
     {
-        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor or the quantization info are different.\n");
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor "
+                                      "or the quantization info are different.\n");
     }
 }
 
@@ -170,7 +174,7 @@ void try_in_place_elementwise(std::unique_ptr<INode> &node)
 
     const TensorShape out_shape = TensorShape::broadcast_shape(shape0, shape1);
     // Inputs are not broadcast compatible
-    if(out_shape.total_size() == 0)
+    if (out_shape.total_size() == 0)
     {
         return;
     }
@@ -181,22 +185,27 @@ void try_in_place_elementwise(std::unique_ptr<INode> &node)
     const auto qinfo_out = current_output_tensor->desc().quant_info;
 
     // Can do in place, if the input has same shape as output, has same quntisation info as output, has same data type as output and input doesn't have accessor.
-    bool input0_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape0, 0) && (qinfo0 == qinfo_out)
-                               && (input0_tensor->desc().data_type == current_output_tensor->desc().data_type) && (input0_tensor->accessor() == nullptr);
-    bool input1_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape1, 0) && (qinfo1 == qinfo_out)
-                               && (input1_tensor->desc().data_type == current_output_tensor->desc().data_type) && (input1_tensor->accessor() == nullptr);
+    bool input0_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape0, 0) &&
+                               (qinfo0 == qinfo_out) &&
+                               (input0_tensor->desc().data_type == current_output_tensor->desc().data_type) &&
+                               (input0_tensor->accessor() == nullptr);
+    bool input1_can_in_place = !arm_compute::detail::have_different_dimensions(out_shape, shape1, 0) &&
+                               (qinfo1 == qinfo_out) &&
+                               (input1_tensor->desc().data_type == current_output_tensor->desc().data_type) &&
+                               (input1_tensor->accessor() == nullptr);
 
-    if(input0_can_in_place)
+    if (input0_can_in_place)
     {
         set_new_output_and_inherit_accessor(node, current_output_tensor, input0_tensor);
     }
-    else if(input1_can_in_place)
+    else if (input1_can_in_place)
     {
         set_new_output_and_inherit_accessor(node, current_output_tensor, input1_tensor);
     }
     else
     {
-        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor or the quantization info are different.\n");
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor "
+                                      "or the quantization info are different.\n");
     }
 }
 } // namespace
@@ -213,33 +222,31 @@ IGraphMutator::MutationType InPlaceOperationMutator::type() const
 
 void InPlaceOperationMutator::mutate(Graph &g)
 {
-    std::set<NodeType> in_place_nodes =
-    {
-        NodeType::ActivationLayer,
-        NodeType::BatchNormalizationLayer,
-        NodeType::EltwiseLayer,
-        NodeType::UnaryEltwiseLayer,
-        NodeType::DepthwiseConvolutionLayer,
-        NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer,
-        NodeType::PrintLayer
-    };
+    std::set<NodeType> in_place_nodes = {NodeType::ActivationLayer,
+                                         NodeType::BatchNormalizationLayer,
+                                         NodeType::EltwiseLayer,
+                                         NodeType::UnaryEltwiseLayer,
+                                         NodeType::DepthwiseConvolutionLayer,
+                                         NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer,
+                                         NodeType::PrintLayer};
 
     // Not interested in the order of nodes
-    for(auto &node : g.nodes())
+    for (auto &node : g.nodes())
     {
-        if(node && in_place_nodes.find(node->type()) != std::end(in_place_nodes))
+        if (node && in_place_nodes.find(node->type()) != std::end(in_place_nodes))
         {
             // Get input edge
             Edge *input_edge = node->input_edge(0);
 
             // Check if parent has a single output if yes then force in place calculation else not
-            if((input_edge != nullptr) && output_edges_are_separate_tensors(g, input_edge))
+            if ((input_edge != nullptr) && output_edges_are_separate_tensors(g, input_edge))
             {
-                if(node->type() == NodeType::EltwiseLayer)
+                if (node->type() == NodeType::EltwiseLayer)
                 {
                     try_in_place_elementwise(node);
                 }
-                else if(node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer || node->type() == NodeType::DepthwiseConvolutionLayer)
+                else if (node->type() == NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer ||
+                         node->type() == NodeType::DepthwiseConvolutionLayer)
                 {
                     try_in_place_depthwiseconv(node);
                 }
@@ -252,9 +259,11 @@ void InPlaceOperationMutator::mutate(Graph &g)
                     ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr || new_output_tensor == nullptr);
 
                     // Prevent in-place operation if there is an accessor bound to the in-place tensor or quantization info are different
-                    if(new_output_tensor->accessor() != nullptr || current_output_tensor->desc().quant_info != new_output_tensor->desc().quant_info)
+                    if (new_output_tensor->accessor() != nullptr ||
+                        current_output_tensor->desc().quant_info != new_output_tensor->desc().quant_info)
                     {
-                        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor or the quantization info are different.\n");
+                        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to "
+                                                      "the input tensor or the quantization info are different.\n");
                     }
                     else
                     {

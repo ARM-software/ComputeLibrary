@@ -27,6 +27,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLGEMMKernelSelection.h"
+
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
 #include "src/gpu/cl/kernels/gemm/IClGemmKernelConfig.h"
 #include "src/gpu/cl/kernels/gemm/native/ClGemmNativeKernelConfig.h"
@@ -51,13 +52,15 @@ GEMMTypeResult select_mlgo_gemm_kernel(const CommonQuery &query, bool reshape_b_
     bool             valid = false;
     CLGEMMKernelType gemm_type{};
     const auto       mlgo_heuristics = CLScheduler::get().gemm_heuristics();
-    if(mlgo_heuristics != nullptr)
+    if (mlgo_heuristics != nullptr)
     {
-        std::tie(valid, gemm_type) = mlgo_heuristics->get()->query_gemm_type(mlgo::Query{ string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b });
+        std::tie(valid, gemm_type) = mlgo_heuristics->get()->query_gemm_type(
+            mlgo::Query{string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b});
     }
-    if(valid)
+    if (valid)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm type: %s.", to_string(gemm_type).c_str());
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm type: %s.",
+                                                  to_string(gemm_type).c_str());
     }
     else
     {
@@ -87,10 +90,11 @@ GEMMConfigResult select_default_gemm_config_reshaped_only_rhs(const CommonQuery 
 {
     GEMMLHSMatrixInfo                    lhs_info;
     GEMMRHSMatrixInfo                    rhs_info;
-    std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmReshapedOnlyRhsKernelConfigurationFactory::create(query.gpu_target);
+    std::unique_ptr<IClGemmKernelConfig> gemm_config =
+        ClGemmReshapedOnlyRhsKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
-    return GEMMConfigResult{ true, lhs_info, rhs_info };
+    return GEMMConfigResult{true, lhs_info, rhs_info};
 }
 
 GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &query)
@@ -100,32 +104,36 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped_only_rhs(const CommonQuery &qu
     GEMMRHSMatrixInfo               rhs_info;
     mlgo::GEMMConfigReshapedOnlyRHS config{};
     const auto                      mlgo_heuristics = CLScheduler::get().gemm_heuristics();
-    if(mlgo_heuristics != nullptr)
+    if (mlgo_heuristics != nullptr)
     {
-        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_reshaped_only_rhs(mlgo::Query{ string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b });
+        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_reshaped_only_rhs(
+            mlgo::Query{string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b});
     }
-    if(valid)
+    if (valid)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.",
+                                                  to_string(config).c_str());
         // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
-        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, config.h0, false, config.interleave_rhs, !config.transpose_rhs, config.transpose_rhs,
-                                                              config.export_cl_image);
+        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(
+            query.m, query.n, config.m0, config.n0, config.k0, 1, config.h0, false, config.interleave_rhs,
+            !config.transpose_rhs, config.transpose_rhs, config.export_cl_image);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    return GEMMConfigResult{ valid, lhs_info, rhs_info };
+    return GEMMConfigResult{valid, lhs_info, rhs_info};
 }
 
 GEMMConfigResult select_default_gemm_config_reshaped(const CommonQuery &query)
 {
     GEMMLHSMatrixInfo                    lhs_info;
     GEMMRHSMatrixInfo                    rhs_info;
-    std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmReshapedKernelConfigurationFactory::create(query.gpu_target);
+    std::unique_ptr<IClGemmKernelConfig> gemm_config =
+        ClGemmReshapedKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
-    return GEMMConfigResult{ true, lhs_info, rhs_info };
+    return GEMMConfigResult{true, lhs_info, rhs_info};
 }
 
 GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query)
@@ -135,21 +143,24 @@ GEMMConfigResult select_mlgo_gemm_config_reshaped(const CommonQuery &query)
     GEMMRHSMatrixInfo        rhs_info;
     mlgo::GEMMConfigReshaped config{};
     const auto               mlgo_heuristics = CLScheduler::get().gemm_heuristics();
-    if(mlgo_heuristics != nullptr)
+    if (mlgo_heuristics != nullptr)
     {
-        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_reshaped(mlgo::Query{ string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b });
+        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_reshaped(
+            mlgo::Query{string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b});
     }
-    if(valid)
+    if (valid)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
-        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, config.v0, config.h0, config.interleave_lhs, config.interleave_rhs, !config.transpose_rhs,
-                                                              config.transpose_rhs, config.export_cl_image);
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.",
+                                                  to_string(config).c_str());
+        std::tie(lhs_info, rhs_info) = configure_lhs_rhs_info(
+            query.m, query.n, config.m0, config.n0, config.k0, config.v0, config.h0, config.interleave_lhs,
+            config.interleave_rhs, !config.transpose_rhs, config.transpose_rhs, config.export_cl_image);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    return GEMMConfigResult{ valid, lhs_info, rhs_info };
+    return GEMMConfigResult{valid, lhs_info, rhs_info};
 }
 
 GEMMConfigResult select_default_gemm_config_native(const CommonQuery &query)
@@ -159,7 +170,7 @@ GEMMConfigResult select_default_gemm_config_native(const CommonQuery &query)
     std::unique_ptr<IClGemmKernelConfig> gemm_config = ClGemmNativeKernelConfigurationFactory::create(query.gpu_target);
     ARM_COMPUTE_ERROR_ON_NULLPTR(gemm_config.get());
     std::tie(lhs_info, rhs_info) = gemm_config->configure(query.m, query.n, query.k, query.b, query.data_type);
-    return GEMMConfigResult{ true, lhs_info, rhs_info };
+    return GEMMConfigResult{true, lhs_info, rhs_info};
 }
 
 GEMMConfigResult select_mlgo_gemm_config_native(const CommonQuery &query)
@@ -169,21 +180,24 @@ GEMMConfigResult select_mlgo_gemm_config_native(const CommonQuery &query)
     GEMMRHSMatrixInfo      rhs_info;
     mlgo::GEMMConfigNative config{};
     const auto             mlgo_heuristics = CLScheduler::get().gemm_heuristics();
-    if(mlgo_heuristics != nullptr)
+    if (mlgo_heuristics != nullptr)
     {
-        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_native(mlgo::Query{ string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b });
+        std::tie(valid, config) = mlgo_heuristics->get()->query_gemm_config_native(
+            mlgo::Query{string_from_target(query.gpu_target), query.data_type, query.m, query.n, query.k, query.b});
     }
-    if(valid)
+    if (valid)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.", to_string(config).c_str());
+        ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE("MLGOHeuristics query returns gemm config: %s.",
+                                                  to_string(config).c_str());
         // Setting irrelevant unsigned int parameters to 1 and bool parameters to false as they do no matter
-        std::tie(lhs_info, rhs_info) = opencl::kernels::gemm::configure_lhs_rhs_info(query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
+        std::tie(lhs_info, rhs_info) = opencl::kernels::gemm::configure_lhs_rhs_info(
+            query.m, query.n, config.m0, config.n0, config.k0, 1, 1, false, false, false, false, false);
     }
     else
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("MLGOHeuristics query failed");
     }
-    return GEMMConfigResult{ valid, lhs_info, rhs_info };
+    return GEMMConfigResult{valid, lhs_info, rhs_info};
 }
 } // namespace auto_heuristics
 

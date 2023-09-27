@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 #include "src/common/TensorPack.h"
+
 #include "src/common/ITensorV2.h"
 #include "src/common/utils/Validate.h"
 
 namespace arm_compute
 {
-TensorPack::TensorPack(IContext *ctx)
-    : AclTensorPack_(), _pack()
+TensorPack::TensorPack(IContext *ctx) : AclTensorPack_(), _pack()
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(ctx);
     this->header.ctx = ctx;

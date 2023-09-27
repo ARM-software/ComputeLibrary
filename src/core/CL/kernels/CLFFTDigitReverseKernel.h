@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CLFFTDIGITREVERSEKERNEL_H
 #define ARM_COMPUTE_CLFFTDIGITREVERSEKERNEL_H
 
-#include "src/core/CL/ICLKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
+
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
@@ -56,7 +56,8 @@ public:
      * @param[in]  idx    Digit reverse index tensor. Data type supported: U32
      * @param[in]  config Kernel configuration.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
+    void
+    configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -65,7 +66,11 @@ public:
      * @param[in]  idx             Digit reverse index tensor. Data type supported: U32
      * @param[in]  config          Kernel configuration.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
+    void configure(const CLCompileContext          &compile_context,
+                   const ICLTensor                 *input,
+                   ICLTensor                       *output,
+                   const ICLTensor                 *idx,
+                   const FFTDigitReverseKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTDigitReverseKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F16/F32.
@@ -75,7 +80,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config);
+    static Status validate(const ITensorInfo               *input,
+                           const ITensorInfo               *output,
+                           const ITensorInfo               *idx,
+                           const FFTDigitReverseKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

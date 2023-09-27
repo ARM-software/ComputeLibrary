@@ -23,10 +23,10 @@
  */
 #include "src/gpu/cl/ClContext.h"
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
+
 #include "src/gpu/cl/ClQueue.h"
 #include "src/gpu/cl/ClTensor.h"
-
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 
 namespace arm_compute
 {
@@ -41,7 +41,7 @@ mlgo::MLGOHeuristics populate_mlgo(const char *filename)
     bool                 status = false;
     mlgo::MLGOHeuristics heuristics;
 
-    if(filename != nullptr)
+    if (filename != nullptr)
     {
         status = heuristics.reload_from_file(filename);
     }
@@ -50,12 +50,9 @@ mlgo::MLGOHeuristics populate_mlgo(const char *filename)
 } // namespace
 
 ClContext::ClContext(const AclContextOptions *options)
-    : IContext(Target::GpuOcl),
-      _mlgo_heuristics(),
-      _cl_ctx(),
-      _cl_dev()
+    : IContext(Target::GpuOcl), _mlgo_heuristics(), _cl_ctx(), _cl_dev()
 {
-    if(options != nullptr)
+    if (options != nullptr)
     {
         _mlgo_heuristics = populate_mlgo(options->kernel_config_file);
     }
@@ -80,7 +77,7 @@ const mlgo::MLGOHeuristics &ClContext::mlgo() const
 
 bool ClContext::set_cl_ctx(::cl::Context ctx)
 {
-    if(this->refcount() == 0)
+    if (this->refcount() == 0)
     {
         _cl_ctx = ctx;
         CLScheduler::get().set_context(ctx);
@@ -92,7 +89,7 @@ bool ClContext::set_cl_ctx(::cl::Context ctx)
 ITensorV2 *ClContext::create_tensor(const AclTensorDescriptor &desc, bool allocate)
 {
     ClTensor *tensor = new ClTensor(this, desc);
-    if(tensor != nullptr && allocate)
+    if (tensor != nullptr && allocate)
     {
         tensor->allocate();
     }

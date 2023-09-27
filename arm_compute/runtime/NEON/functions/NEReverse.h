@@ -24,9 +24,8 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREVERSE_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREVERSE_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -68,7 +67,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, const bool use_inverted_axis = false);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           const ITensorInfo *axis,
+                           const bool         use_inverted_axis = false);
 };
 } // namespace arm_compute
 #endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREVERSE_H

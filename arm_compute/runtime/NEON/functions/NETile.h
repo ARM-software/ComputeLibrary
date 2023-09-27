@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NETILE_H
 #define ARM_COMPUTE_NETILE_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {

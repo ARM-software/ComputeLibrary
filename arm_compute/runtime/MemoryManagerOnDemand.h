@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
 #define ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
 
-#include "arm_compute/runtime/IMemoryManager.h"
-
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IPoolManager.h"
 
 #include <memory>
@@ -39,7 +38,8 @@ class MemoryManagerOnDemand : public IMemoryManager
 {
 public:
     /** Default Constructor */
-    MemoryManagerOnDemand(std::shared_ptr<ILifetimeManager> lifetime_manager, std::shared_ptr<IPoolManager> pool_manager);
+    MemoryManagerOnDemand(std::shared_ptr<ILifetimeManager> lifetime_manager,
+                          std::shared_ptr<IPoolManager>     pool_manager);
     /** Prevent instances of this class to be copy constructed */
     MemoryManagerOnDemand(const MemoryManagerOnDemand &) = delete;
     /** Prevent instances of this class to be copied */
@@ -52,12 +52,12 @@ public:
     // Inherited methods overridden:
     ILifetimeManager *lifetime_manager() override;
     IPoolManager     *pool_manager() override;
-    void populate(IAllocator &allocator, size_t num_pools) override;
-    void clear() override;
+    void              populate(IAllocator &allocator, size_t num_pools) override;
+    void              clear() override;
 
 private:
     std::shared_ptr<ILifetimeManager> _lifetime_mgr; /**< Lifetime manager */
     std::shared_ptr<IPoolManager>     _pool_mgr;     /**< Memory pool manager */
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H */

@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_NECOL2IMKERNEL_H
 #define ARM_COMPUTE_NECOL2IMKERNEL_H
 
-#include "src/core/NEON/INEKernel.h"
-
 #include "arm_compute/core/Size2D.h"
+
+#include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {

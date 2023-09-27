@@ -30,6 +30,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -39,17 +40,20 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info)
+Status validate_arguments(const ITensorInfo                          *input,
+                          const ITensorInfo                          *output,
+                          const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.epsilon == 0.f, "Epsilon must be different than 0");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
 
-    if(output != nullptr && output->total_size() != 0)
+    if (output != nullptr && output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(), "Input and output have different number of channels");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(),
+                                        "Input and output have different number of channels");
     }
 
     return Status{};
@@ -59,27 +63,30 @@ Status validate_arguments_meanvar(const ITensorInfo *input, const ITensorInfo *o
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
 
-    if(output != nullptr && output->total_size() != 0)
+    if (output != nullptr && output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(), "Input and output have different number of channels");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(),
+                                        "Input and output have different number of channels");
     }
 
     return Status{};
 }
 } // namespace
 
-CLComputeMeanVariance::CLComputeMeanVariance()
-    : _input(nullptr), _output(nullptr)
+CLComputeMeanVariance::CLComputeMeanVariance() : _input(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, bool use_mixed_precision)
+void CLComputeMeanVariance::configure(const CLCompileContext &compile_context,
+                                      ICLTensor              *input,
+                                      ICLTensor              *output,
+                                      bool                    use_mixed_precision)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input  = input;
     _output = output == nullptr ? input : output;
@@ -88,7 +95,8 @@ void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, I
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
     CLBuildOptions build_opts;
-    build_opts.add_option("-DINTERNAL_DATA_TYPE=" + (use_mixed_precision ? "float" : get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option("-DINTERNAL_DATA_TYPE=" +
+                          (use_mixed_precision ? "float" : get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DDIM_X=" + support::cpp11::to_string(input->info()->dimension(0)));
@@ -108,7 +116,7 @@ void CLComputeMeanVariance::configure(const CLCompileContext &compile_context, I
     const TensorShape  out_shape(input_channel, 2u, input_batches);
 
     // Output auto initialization if not yet initialized
-    if(use_mixed_precision)
+    if (use_mixed_precision)
     {
         auto_init_if_empty(*_output->info(), out_shape, 1, DataType::F32);
     }
@@ -134,7 +142,7 @@ void CLComputeMeanVariance::run(const Window &window, cl::CommandQueue &queue)
     Window collapsed_window = window.collapse(window, Window::DimZ);
 
     // We will process the planes together
-    if(_input->info()->data_layout() == DataLayout::NCHW)
+    if (_input->info()->data_layout() == DataLayout::NCHW)
     {
         collapsed_window.set(Window::DimX, Window::Dimension(0, 1, 1));
         collapsed_window.set(Window::DimY, Window::Dimension(0, 1, 1));
@@ -157,10 +165,14 @@ CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *mean_var, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
+void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext                     &compile_context,
+                                                   ICLTensor                                  *input,
+                                                   ICLTensor                                  *mean_var,
+                                                   ICLTensor                                  *output,
+                                                   const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input  = input;
     _output = output == nullptr ? input : output;
@@ -172,7 +184,9 @@ void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compi
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DINTERNAL_DATA_TYPE=" + (info.use_mixed_precision ? "float" : get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option("-DINTERNAL_DATA_TYPE=" + (info.use_mixed_precision
+                                                         ? "float"
+                                                         : get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DDIM_X=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DDIM_Y=" + support::cpp11::to_string(input->info()->dimension(1)));
@@ -188,7 +202,7 @@ void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compi
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(1));
-    if(output != nullptr)
+    if (output != nullptr)
     {
         auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
     }
@@ -197,7 +211,9 @@ void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compi
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLInstanceNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info)
+Status CLInstanceNormalizationLayerKernel::validate(const ITensorInfo                          *input,
+                                                    const ITensorInfo                          *output,
+                                                    const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, info));
     return Status{};
@@ -211,7 +227,7 @@ void CLInstanceNormalizationLayerKernel::run(const Window &window, cl::CommandQu
     Window collapsed_window = window.collapse(window, Window::DimZ);
 
     // We will process the planes together
-    if(_input->info()->data_layout() == DataLayout::NCHW)
+    if (_input->info()->data_layout() == DataLayout::NCHW)
     {
         collapsed_window.set(Window::DimX, Window::Dimension(0, 1, 1));
         collapsed_window.set(Window::DimY, Window::Dimension(0, 1, 1));
@@ -226,7 +242,7 @@ void CLInstanceNormalizationLayerKernel::run(const Window &window, cl::CommandQu
     add_4D_tensor_argument(idx, _input, collapsed_window);
     add_3D_tensor_argument(idx, _mean, collapsed_window);
 
-    if(!_run_in_place)
+    if (!_run_in_place)
     {
         add_4D_tensor_argument(idx, _output, collapsed_window);
     }

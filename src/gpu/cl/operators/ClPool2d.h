@@ -50,14 +50,21 @@ public:
      * @param[in]  info            Pooling layer parameters.
      * @param[out] indices         (optional) The indices info of the maximal values. Data type supported: U32.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices = nullptr);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const PoolingLayerInfo &info,
+                   ITensorInfo            *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClPool2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &info,
+                           const ITensorInfo      *indices = nullptr);
 };
 } // namespace opencl
 } // namespace arm_compute

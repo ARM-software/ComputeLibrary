@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuCast.h"
 
 #include <utility>
@@ -32,16 +33,15 @@ namespace arm_compute
 {
 struct NEDepthConvertLayer::Impl
 {
-    const ITensor                *src{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<cpu::CpuCast> op{ nullptr };
+    const ITensor                *src{nullptr};
+    ITensor                      *dst{nullptr};
+    std::unique_ptr<cpu::CpuCast> op{nullptr};
 };
 
-NEDepthConvertLayer::NEDepthConvertLayer()
-    : _impl(std::make_unique<Impl>())
+NEDepthConvertLayer::NEDepthConvertLayer() : _impl(std::make_unique<Impl>())
 {
 }
-NEDepthConvertLayer::NEDepthConvertLayer(NEDepthConvertLayer &&) = default;
+NEDepthConvertLayer::NEDepthConvertLayer(NEDepthConvertLayer &&)            = default;
 NEDepthConvertLayer &NEDepthConvertLayer::operator=(NEDepthConvertLayer &&) = default;
 NEDepthConvertLayer::~NEDepthConvertLayer()                                 = default;
 
@@ -59,7 +59,8 @@ void NEDepthConvertLayer::configure(const ITensor *input, ITensor *output, Conve
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), policy);
 }
 
-Status NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+Status
+NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(shift != 0);
     return cpu::CpuCast::validate(input, output, policy);
@@ -67,7 +68,7 @@ Status NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo
 
 void NEDepthConvertLayer::run()
 {
-    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }
 } // namespace arm_compute

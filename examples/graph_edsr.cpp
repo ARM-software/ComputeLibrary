@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
+#include "graph_edsr.h"
+
 #include "arm_compute/graph/Utils.h"
 
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/Utils.h"
-
-#include "graph_edsr.h"
 
 using namespace arm_compute::graph;
 using namespace arm_compute::utils;
@@ -36,14 +36,14 @@ using namespace arm_compute::utils;
 class GraphEdsrExample : public Example
 {
 public:
-    GraphEdsrExample()
-        : cmd_parser(), common_opts(cmd_parser), common_params()
+    GraphEdsrExample() : cmd_parser(), common_opts(cmd_parser), common_params()
     {
         expected_output_filename = cmd_parser.add_option<SimpleOption<std::string>>("expected-output-filename", "");
-        expected_output_filename->set_help("Name of npy file containing the expected output to validate the graph output.");
+        expected_output_filename->set_help(
+            "Name of npy file containing the expected output to validate the graph output.");
     }
 
-    GraphEdsrExample(const GraphEdsrExample &) = delete;
+    GraphEdsrExample(const GraphEdsrExample &)            = delete;
     GraphEdsrExample &operator=(const GraphEdsrExample &) = delete;
     ~GraphEdsrExample() override                          = default;
 
@@ -57,13 +57,14 @@ public:
         common_params = consume_common_graph_parameters(common_opts);
 
         // Return when help menu is requested
-        if(common_params.help)
+        if (common_params.help)
         {
             cmd_parser.print_help(argv[0]);
             return false;
         }
 
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type != DataType::QASYMM8, "Only QASYMM8 is supported for this graph example");
+        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type != DataType::QASYMM8,
+                                "Only QASYMM8 is supported for this graph example");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -98,7 +99,7 @@ private:
     GraphContext context{};
     GraphManager manager{};
 
-    SimpleOption<std::string> *expected_output_filename{ nullptr };
+    SimpleOption<std::string> *expected_output_filename{nullptr};
 
     GraphEdsr model{};
 };

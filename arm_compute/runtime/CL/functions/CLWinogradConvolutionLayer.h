@@ -84,8 +84,13 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    void configure(ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
     /** Set the input and output tensors.
      *
      * @note: This function only works with 3x3,3x1,1x3,5x5,5x1,1x5,7x1 and 1x7 kernels along with unit strides for both NCHW and NHWC data layout
@@ -104,8 +109,14 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradConvolutionLayer
      *
      * @note: This function only works with 3x3,3x1,1x3,5x5,5x1 and 1x5 kernels along with unit strides for both NCHW and NHWC data layout
@@ -125,8 +136,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;

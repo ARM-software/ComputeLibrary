@@ -42,10 +42,10 @@ namespace
 TensorShape extend_parent_shape(TensorShape parent_shape, TensorShape shape, Coordinates coords)
 {
     // Extend shape
-    for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
+    for (unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
     {
         int dimension_extend = coords[i] + static_cast<int>(shape[i]);
-        if((dimension_extend > static_cast<int>(parent_shape[i])) && (dimension_extend > 0))
+        if ((dimension_extend > static_cast<int>(parent_shape[i])) && (dimension_extend > 0))
         {
             parent_shape.set(i, static_cast<size_t>(dimension_extend));
         }
@@ -56,23 +56,35 @@ TensorShape extend_parent_shape(TensorShape parent_shape, TensorShape shape, Coo
 } // namespace
 
 SubTensorInfo::SubTensorInfo()
-    : _parent(nullptr), _tensor_shape(), _dims_state(), _coords(), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(false), _lock_paddings(false)
+    : _parent(nullptr),
+      _tensor_shape(),
+      _dims_state(),
+      _coords(),
+      _valid_region{Coordinates(), _tensor_shape},
+      _extend_parent(false),
+      _lock_paddings(false)
 {
 }
 
 SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent)
-    : _parent(parent), _tensor_shape(tensor_shape), _dims_state(), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }, _extend_parent(extend_parent), _lock_paddings(false)
+    : _parent(parent),
+      _tensor_shape(tensor_shape),
+      _dims_state(),
+      _coords(coords),
+      _valid_region{Coordinates(), _tensor_shape},
+      _extend_parent(extend_parent),
+      _lock_paddings(false)
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
 
     // Check if subtensor is valid if parent is configured
-    if(parent->tensor_shape().total_size() != 0 && !_extend_parent)
+    if (parent->tensor_shape().total_size() != 0 && !_extend_parent)
     {
         ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(parent->tensor_shape(), coords, tensor_shape);
     }
 
     // Initialize valid region
-    _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
+    _valid_region = ValidRegion{Coordinates(), _tensor_shape};
 }
 
 std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
@@ -91,17 +103,17 @@ ITensorInfo &SubTensorInfo::set_tensor_shape(const TensorShape &shape)
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
 
     // Check if subtensor is valid if parent is configured
-    if(_parent->tensor_shape().total_size() != 0 && !_extend_parent)
+    if (_parent->tensor_shape().total_size() != 0 && !_extend_parent)
     {
         ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
-        _valid_region = ValidRegion{ _coords, shape };
+        _valid_region = ValidRegion{_coords, shape};
     }
-    else if(_extend_parent) // Extend parent shape, configure if specified
+    else if (_extend_parent) // Extend parent shape, configure if specified
     {
         ARM_COMPUTE_ERROR_ON((_parent->data_type() == DataType::UNKNOWN) && (_parent->format() == Format::UNKNOWN));
         TensorShape parent_extended_shape = extend_parent_shape(_parent->tensor_shape(), shape, _coords);
         _parent->set_tensor_shape(parent_extended_shape);
-        _parent->set_valid_region(ValidRegion{ Coordinates(), parent_extended_shape });
+        _parent->set_valid_region(ValidRegion{Coordinates(), parent_extended_shape});
     }
     _tensor_shape = shape;
     return *this;
@@ -133,11 +145,11 @@ bool SubTensorInfo::extend_padding(const PaddingSize &padding)
     ARM_COMPUTE_ERROR_ON(_parent->total_size() == 0);
 
     // Check that you do not extend padding on sub-tensors unless XY shape matches parent tensor
-    if(!_extend_parent && (padding.left || padding.right))
+    if (!_extend_parent && (padding.left || padding.right))
     {
         ARM_COMPUTE_ERROR_ON(_parent->tensor_shape().x() != tensor_shape().x());
     }
-    if(!_extend_parent && (padding.top || padding.bottom))
+    if (!_extend_parent && (padding.top || padding.bottom))
     {
         ARM_COMPUTE_ERROR_ON(_parent->tensor_shape().y() != tensor_shape().y());
     }
@@ -153,7 +165,7 @@ int32_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
     int32_t        offset  = offset_first_element_in_bytes();
     const Strides &strides = strides_in_bytes();
 
-    for(size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)
+    for (size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)
     {
         offset += pos[i] * strides[i];
     }

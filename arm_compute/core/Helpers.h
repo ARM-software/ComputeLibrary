@@ -96,7 +96,6 @@ public:
     void reset(size_t dimension);
 
 private:
-
     /** Initialize a container iterator for the tensor with the specified number of dimensions, stride, buffer pointer and window.
      *
      * @param[in] num_dims The number of dimensions.
@@ -112,8 +111,7 @@ private:
     class Dimension
     {
     public:
-        constexpr Dimension()
-            : _dim_start(0), _stride(0)
+        constexpr Dimension() : _dim_start(0), _stride(0)
         {
         }
 
@@ -133,7 +131,7 @@ private:
  * @param[in,out] iterators       Tensor iterators which will be updated by this function before calling lambda_function.
  */
 template <typename L, typename... Ts>
-inline void execute_window_loop(const Window &w, L &&lambda_function, Ts &&... iterators);
+inline void execute_window_loop(const Window &w, L &&lambda_function, Ts &&...iterators);
 
 /** Permutes given Dimensions according to a permutation vector
  *
@@ -146,7 +144,7 @@ template <typename T>
 inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
 {
     auto dimensions_copy = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
-    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    for (unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         T dimension_val = (perm[i] < dimensions.num_dimensions()) ? dimensions_copy[perm[i]] : 0;
         dimensions.set(i, dimension_val);
@@ -163,7 +161,7 @@ inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
 inline void permute(TensorShape &shape, const PermutationVector &perm)
 {
     TensorShape shape_copy = shape;
-    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    for (unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         size_t dimension_val = (perm[i] < shape.num_dimensions()) ? shape_copy[perm[i]] : 1;
         shape.set(i, dimension_val, false, false); // Avoid changes in _num_dimension
@@ -180,8 +178,11 @@ inline void permute(TensorShape &shape, const PermutationVector &perm)
  *
  * @return The corresponding valid region
  */
-ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
-                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined);
+ValidRegion calculate_valid_region_scale(const ITensorInfo  &src_info,
+                                         const TensorShape  &dst_shape,
+                                         InterpolationPolicy interpolate_policy,
+                                         SamplingPolicy      sampling_policy,
+                                         bool                border_undefined);
 
 /** Convert a linear index into n-dimensional coordinates.
  *
@@ -224,7 +225,8 @@ const std::map<DataLayout, std::vector<DataLayoutDimension>> &get_layout_map();
  *
  * @return The int conversion of the requested data layout index.
  */
-inline size_t get_data_layout_dimension_index(const DataLayout &data_layout, const DataLayoutDimension &data_layout_dimension);
+inline size_t get_data_layout_dimension_index(const DataLayout          &data_layout,
+                                              const DataLayoutDimension &data_layout_dimension);
 
 /** Get the DataLayoutDimension of a given index and layout.
  *
@@ -245,10 +247,17 @@ inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout &dat
  *
  * @return the number of output tiles along the x and y directions of size "output_tile_size"
  */
-inline Size2D compute_winograd_convolution_tiles(const Size2D &in_dims, const Size2D &kernel_size, const Size2D &output_tile_size, const PadStrideInfo &conv_info)
+inline Size2D compute_winograd_convolution_tiles(const Size2D        &in_dims,
+                                                 const Size2D        &kernel_size,
+                                                 const Size2D        &output_tile_size,
+                                                 const PadStrideInfo &conv_info)
 {
-    int num_tiles_x = std::ceil((in_dims.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
-    int num_tiles_y = std::ceil((in_dims.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+    int num_tiles_x =
+        std::ceil((in_dims.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) /
+                  static_cast<float>(output_tile_size.width));
+    int num_tiles_y =
+        std::ceil((in_dims.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) /
+                  static_cast<float>(output_tile_size.height));
 
     // Clamp in case we provide paddings but we have 1D convolution
     num_tiles_x = std::min(num_tiles_x, static_cast<int>(in_dims.width));
@@ -277,7 +286,7 @@ inline T wrap_around(T x, T m)
  */
 inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
 {
-    for(unsigned int i = 0; i < coords.num_dimensions(); ++i)
+    for (unsigned int i = 0; i < coords.num_dimensions(); ++i)
     {
         coords[i] = wrap_around(coords[i], max_value);
     }

@@ -139,21 +139,21 @@ private:
     TensorInfo        _info;
     TensorStorageType _storage_type;
 
-    TileOperand      *_tile{ nullptr };
+    TileOperand      *_tile{nullptr};
     TensorTileSampler _tile_sampler{};
 
-    ::std::unique_ptr<TensorComponentOperand> _stride1{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _stride2{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _stride3{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _stride4{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim0{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim1{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim2{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim3{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim4{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim1_dim2{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _dim1_dim2_dim3{ nullptr };
-    ::std::unique_ptr<TensorComponentOperand> _offset_first_element_in_bytes{ nullptr };
+    ::std::unique_ptr<TensorComponentOperand> _stride1{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _stride2{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _stride3{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _stride4{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim0{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim1{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim2{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim3{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim4{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim1_dim2{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _dim1_dim2_dim3{nullptr};
+    ::std::unique_ptr<TensorComponentOperand> _offset_first_element_in_bytes{nullptr};
 };
 
 // =================================================================================================

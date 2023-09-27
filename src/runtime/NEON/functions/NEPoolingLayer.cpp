@@ -26,6 +26,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuPool2d.h"
 
@@ -33,10 +34,10 @@ namespace arm_compute
 {
 struct NEPoolingLayer::Impl
 {
-    ITensor                        *src{ nullptr };
-    ITensor                        *dst{ nullptr };
-    ITensor                        *indices{ nullptr };
-    std::unique_ptr<cpu::CpuPool2d> op{ nullptr };
+    ITensor                        *src{nullptr};
+    ITensor                        *dst{nullptr};
+    ITensor                        *indices{nullptr};
+    std::unique_ptr<cpu::CpuPool2d> op{nullptr};
     MemoryGroup                     memory_group{};
     ITensorPack                     run_pack{};
     WorkspaceData<Tensor>           workspace_tensors{};
@@ -44,8 +45,7 @@ struct NEPoolingLayer::Impl
 
 NEPoolingLayer::~NEPoolingLayer() = default;
 
-NEPoolingLayer::NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _impl(std::make_unique<Impl>())
+NEPoolingLayer::NEPoolingLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
 {
     _impl->memory_group = MemoryGroup(std::move(memory_manager));
 }
@@ -58,11 +58,16 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _impl->op      = std::make_unique<cpu::CpuPool2d>();
     _impl->op->configure(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
 
-    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST_0, _impl->dst }, { TensorType::ACL_DST_1, _impl->indices } };
+    _impl->run_pack          = {{TensorType::ACL_SRC, _impl->src},
+                                {TensorType::ACL_DST_0, _impl->dst},
+                                {TensorType::ACL_DST_1, _impl->indices}};
     _impl->workspace_tensors = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
-Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status NEPoolingLayer::validate(const ITensorInfo      *input,
+                                const ITensorInfo      *output,
+                                const PoolingLayerInfo &pool_info,
+                                const ITensorInfo      *indices)
 {
     return cpu::CpuPool2d::validate(input, output, pool_info, indices);
 }

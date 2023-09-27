@@ -28,8 +28,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuWinogradConv2dTransformInputKernel::CpuWinogradConv2dTransformInputKernel(arm_conv::winograd::WinogradImpl &w_impl, arm_conv::ConvolutionArgs &_c_args, uint32_t nthreads)
-    : _winograd_impl{ w_impl }, _conv_args{ _c_args }, _nthreads{ nthreads }
+CpuWinogradConv2dTransformInputKernel::CpuWinogradConv2dTransformInputKernel(arm_conv::winograd::WinogradImpl &w_impl,
+                                                                             arm_conv::ConvolutionArgs        &_c_args,
+                                                                             uint32_t                          nthreads)
+    : _winograd_impl{w_impl}, _conv_args{_c_args}, _nthreads{nthreads}
 {
 }
 
@@ -49,24 +51,20 @@ void CpuWinogradConv2dTransformInputKernel::run_op(ITensorPack &tensors, const W
     const size_t input_row_stride   = src_strides[height_idx] / element_size_in_bytes;
     const size_t input_col_stride   = src_strides[width_idx] / element_size_in_bytes;
     const size_t input_batch_stride = src_strides[batch_idx] / element_size_in_bytes;
-    const auto   input_nhwc_ptr     = reinterpret_cast<const void *>(input_nhwc->buffer() + input_nhwc->info()->offset_first_element_in_bytes());
-    auto         win_transf_ptr     = reinterpret_cast<void *>(winograd_input_transform->buffer() + winograd_input_transform->info()->offset_first_element_in_bytes());
+    const auto   input_nhwc_ptr =
+        reinterpret_cast<const void *>(input_nhwc->buffer() + input_nhwc->info()->offset_first_element_in_bytes());
+    auto win_transf_ptr = reinterpret_cast<void *>(winograd_input_transform->buffer() +
+                                                   winograd_input_transform->info()->offset_first_element_in_bytes());
 
-    _winograd_impl.input_transform->execute(
-        _conv_args,
-        input_nhwc_ptr,
-        input_batch_stride,
-        input_row_stride,
-        input_col_stride,
-        win_transf_ptr,
-        _winograd_impl.winograd_spec,
-        workspace->buffer(),
-        info.thread_id,
-        _nthreads);
+    _winograd_impl.input_transform->execute(_conv_args, input_nhwc_ptr, input_batch_stride, input_row_stride,
+                                            input_col_stride, win_transf_ptr, _winograd_impl.winograd_spec,
+                                            workspace->buffer(), info.thread_id, _nthreads);
 }
 
-CpuWinogradConv2dTransformOutputKernel::CpuWinogradConv2dTransformOutputKernel(arm_conv::winograd::WinogradImpl &w_impl, arm_conv::ConvolutionArgs &_c_args, uint32_t nthreads)
-    : _winograd_impl{ w_impl }, _conv_args{ _c_args }, _nthreads{ nthreads }
+CpuWinogradConv2dTransformOutputKernel::CpuWinogradConv2dTransformOutputKernel(arm_conv::winograd::WinogradImpl &w_impl,
+                                                                               arm_conv::ConvolutionArgs &_c_args,
+                                                                               uint32_t                   nthreads)
+    : _winograd_impl{w_impl}, _conv_args{_c_args}, _nthreads{nthreads}
 {
 }
 
@@ -88,27 +86,20 @@ void CpuWinogradConv2dTransformOutputKernel::run_op(ITensorPack &tensors, const 
     const size_t out_row_stride   = dst_strides[height_idx] / element_size_in_bytes;
     const size_t out_col_stride   = dst_strides[width_idx] / element_size_in_bytes;
     const size_t out_batch_stride = dst_strides[batch_idx] / element_size_in_bytes;
-    const auto   wout_transf_ptr  = reinterpret_cast<const void *>(winograd_output_transform->buffer() + winograd_output_transform->info()->offset_first_element_in_bytes());
-    auto         dst_nhwc_ptr     = reinterpret_cast<void *>(dst_nhwc->buffer() + dst_nhwc->info()->offset_first_element_in_bytes());
-    void        *biases_data_ptr  = nullptr;
-    if(biases != nullptr)
+    const auto   wout_transf_ptr  = reinterpret_cast<const void *>(
+        winograd_output_transform->buffer() + winograd_output_transform->info()->offset_first_element_in_bytes());
+    auto dst_nhwc_ptr =
+        reinterpret_cast<void *>(dst_nhwc->buffer() + dst_nhwc->info()->offset_first_element_in_bytes());
+    void *biases_data_ptr = nullptr;
+    if (biases != nullptr)
     {
         biases_data_ptr = reinterpret_cast<void *>(biases->buffer() + biases->info()->offset_first_element_in_bytes());
     }
 
     // Output transform
-    _winograd_impl.output_transform->execute(
-        _conv_args,
-        wout_transf_ptr,
-        _winograd_impl.winograd_spec,
-        biases_data_ptr,
-        dst_nhwc_ptr,
-        out_batch_stride,
-        out_row_stride,
-        out_col_stride,
-        workspace->buffer(),
-        info.thread_id,
-        _nthreads);
+    _winograd_impl.output_transform->execute(_conv_args, wout_transf_ptr, _winograd_impl.winograd_spec, biases_data_ptr,
+                                             dst_nhwc_ptr, out_batch_stride, out_row_stride, out_col_stride,
+                                             workspace->buffer(), info.thread_id, _nthreads);
 }
 
 } // namespace cpu

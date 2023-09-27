@@ -53,7 +53,7 @@ create_error_msg(const std::string &file, const std::string &func, const std::st
         const std::string arg2(std::to_string(__LINE__));             \
         const std::string arg3(msg);                                  \
         std::runtime_error(create_error_msg(arg0, arg1, arg2, arg3)); \
-    } while(false)
+    } while (false)
 
 /** Mark the variables as unused.
  *
@@ -74,16 +74,16 @@ inline void ignore_unused(T &&...)
  *
  * @param[in] msg The error message.
  */
-#define CKW_THROW_MSG(msg)                                                              \
-    do                                                                                  \
-    {                                                                                   \
-        const std::string file(__FILE__);                                               \
-        const std::string func(__func__);                                               \
-        const std::string line(std::to_string(__LINE__));                               \
-        const std::string message(msg);                                                 \
-                                                                                        \
+#define CKW_THROW_MSG(msg)                                                          \
+    do                                                                              \
+    {                                                                               \
+        const std::string file(__FILE__);                                           \
+        const std::string func(__func__);                                           \
+        const std::string line(std::to_string(__LINE__));                           \
+        const std::string message(msg);                                             \
+                                                                                    \
         throw std::runtime_error(ckw::create_error_msg(file, func, line, message)); \
-    } while(false)
+    } while (false)
 
 #ifdef COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
 
@@ -95,11 +95,11 @@ inline void ignore_unused(T &&...)
 #define CKW_ASSERT_MSG(cond, msg) \
     do                            \
     {                             \
-        if(!(cond))               \
+        if (!(cond))              \
         {                         \
             CKW_THROW_MSG(msg);   \
         }                         \
-    } while(false)
+    } while (false)
 
 #else // COMPUTE_KERNEL_WRITER_ASSERTS_ENABLED
 

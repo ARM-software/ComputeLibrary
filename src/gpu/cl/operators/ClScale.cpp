@@ -25,17 +25,20 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClScaleKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClScale::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const ScaleKernelInfo &info)
+void ClScale::configure(const CLCompileContext &compile_context,
+                        ITensorInfo            *src,
+                        ITensorInfo            *dst,
+                        const ScaleKernelInfo  &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, dst, info);

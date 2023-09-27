@@ -23,9 +23,8 @@
  */
 #include "src/cpu/operators/CpuTranspose.h"
 
-#include "src/cpu/kernels/CpuTransposeKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/cpu/kernels/CpuTransposeKernel.h"
 
 namespace arm_compute
 {
@@ -43,5 +42,5 @@ Status CpuTranspose::validate(const ITensorInfo *src, const ITensorInfo *dst)
 {
     return kernels::CpuTransposeKernel::validate(src, dst);
 }
-} // namesapce cpu
+} // namespace cpu
 } // namespace arm_compute

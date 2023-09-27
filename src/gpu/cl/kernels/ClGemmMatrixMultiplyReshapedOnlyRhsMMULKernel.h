@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_GEMM_MATRIXMULTIPLY_RESHAPED_ONLY_RHS_MMUL_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -59,7 +60,13 @@ public:
      *                             rhs_info.transpose: false
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha, float beta,
+    void configure(const ClCompileContext  &compile_context,
+                   ITensorInfo             *src0,
+                   ITensorInfo             *src1,
+                   ITensorInfo             *src2,
+                   ITensorInfo             *dst,
+                   float                    alpha,
+                   float                    beta,
                    const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMKernelInfo    &gemm_info);
@@ -69,7 +76,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+    static Status validate(const ITensorInfo       *src0,
+                           const ITensorInfo       *src1,
+                           const ITensorInfo       *src2,
+                           const ITensorInfo       *dst,
+                           float                    alpha,
+                           float                    beta,
+                           const GEMMLHSMatrixInfo &lhs_info,
                            const GEMMRHSMatrixInfo &rhs_info,
                            const GEMMKernelInfo    &gemm_info);
 
@@ -77,11 +90,11 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool       _add_bias{ false };
-    bool       _export_to_cl_image{ false };
-    signed int _m{ 1 };
-    signed int _n{ 1 };
-    signed int _k{ 1 };
+    bool       _add_bias{false};
+    bool       _export_to_cl_image{false};
+    signed int _m{1};
+    signed int _n{1};
+    signed int _k{1};
 };
 } // namespace kernels
 } // namespace opencl

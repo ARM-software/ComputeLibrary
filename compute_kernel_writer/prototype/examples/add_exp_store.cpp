@@ -32,7 +32,6 @@
 #include "common/ExampleComponentArgument.h"
 #include "common/ExampleKernelWriter.h"
 #include "common/ExampleScopedKernelWriter.h"
-
 #include <iostream>
 #include <vector>
 
@@ -78,14 +77,14 @@ void op_binary_elementwise(ExampleScopedKernelWriter writer, std::vector<Example
     auto dst = operands.at(2);
 
     // Load the LHS and RHS tile and prepare the tensor sampler.
-    if(!lhs->has_tile() && !rhs->has_tile())
+    if (!lhs->has_tile() && !rhs->has_tile())
     {
         const auto sampler = create_simple_sampler(writer);
 
         writer->op_load_once(lhs, sampler);
         writer->op_load_once(rhs, sampler);
     }
-    else if(lhs->has_tile())
+    else if (lhs->has_tile())
     {
         const auto &sampler = lhs->tile_sampler();
         writer->op_load_once(rhs, sampler);
@@ -101,7 +100,7 @@ void op_binary_elementwise(ExampleScopedKernelWriter writer, std::vector<Example
     const auto &sampler  = lhs->tile_sampler();
 
     // Prepare the output tile.
-    if(!dst->has_tile())
+    if (!dst->has_tile())
     {
         auto &tile = writer->declare_tile("dst_tile", lhs_tile.tile_info());
         dst->init_virtual_tensor(tile, sampler);
@@ -119,7 +118,7 @@ void op_exp(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgume
     auto dst = operands.at(1);
 
     // Load the source tile and prepare the sampler.
-    if(!src->has_tile())
+    if (!src->has_tile())
     {
         const auto sampler = create_simple_sampler(writer);
         writer->op_load_once(src, sampler);
@@ -129,7 +128,7 @@ void op_exp(ExampleScopedKernelWriter writer, std::vector<ExampleComponentArgume
     const auto &sampler  = src->tile_sampler();
 
     // Prepare the output tile.
-    if(!dst->has_tile())
+    if (!dst->has_tile())
     {
         auto &tile = writer->declare_tile("dst_tile", src_tile.tile_info());
         dst->init_virtual_tensor(tile, sampler);
@@ -160,34 +159,38 @@ int main()
 
     ExampleScopedKernelWriter writer(&root_writer);
 
-    const TensorInfo src0_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 0);
-    const TensorInfo src1_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 1);
-    const TensorInfo dst_info(DataType::Fp32, TensorShape({ 3, 10, 20, 1, 1 }), TensorDataLayout::Nhwc, 2);
+    const TensorInfo src0_info(DataType::Fp32, TensorShape({3, 10, 20, 1, 1}), TensorDataLayout::Nhwc, 0);
+    const TensorInfo src1_info(DataType::Fp32, TensorShape({3, 10, 20, 1, 1}), TensorDataLayout::Nhwc, 1);
+    const TensorInfo dst_info(DataType::Fp32, TensorShape({3, 10, 20, 1, 1}), TensorDataLayout::Nhwc, 2);
 
-    ExampleComponentArgument src0(writer->declare_tensor_argument("src0", src0_info, TensorStorageType::BufferUint8Ptr));
-    ExampleComponentArgument src1(writer->declare_tensor_argument("src1", src1_info, TensorStorageType::BufferUint8Ptr));
+    ExampleComponentArgument src0(
+        writer->declare_tensor_argument("src0", src0_info, TensorStorageType::BufferUint8Ptr));
+    ExampleComponentArgument src1(
+        writer->declare_tensor_argument("src1", src1_info, TensorStorageType::BufferUint8Ptr));
     ExampleComponentArgument dst(writer->declare_tensor_argument("dst", dst_info, TensorStorageType::BufferUint8Ptr));
 
     ExampleComponentArgument ans;
 
-    op_binary_elementwise(writer, { &src0, &src1, &ans });
-    op_exp(writer, { &ans, &ans });
-    op_store(writer, { &ans, &dst });
+    op_binary_elementwise(writer, {&src0, &src1, &ans});
+    op_exp(writer, {&ans, &ans});
+    op_store(writer, {&ans, &dst});
 
     const auto arguments = kernel.arguments();
 
     std::cout << "\n====================\nArguments:\n====================\n";
 
-    for(auto &arg : arguments)
+    for (auto &arg : arguments)
     {
-        switch(arg.type())
+        switch (arg.type())
         {
             case ckw::KernelArgument::Type::TensorStorage:
-                std::cout << "* Tensor storage:   ID = " << arg.id() << ", type = " << std::hex << "0x" << static_cast<uint32_t>(arg.tensor_storage_type()) << std::dec << "\n";
+                std::cout << "* Tensor storage:   ID = " << arg.id() << ", type = " << std::hex << "0x"
+                          << static_cast<uint32_t>(arg.tensor_storage_type()) << std::dec << "\n";
                 break;
 
             case ckw::KernelArgument::Type::TensorComponent:
-                std::cout << "* Tensor component: ID = " << arg.id() << ", type = " << std::hex << "0x" << static_cast<uint32_t>(arg.tensor_component_type()) << std::dec << "\n";
+                std::cout << "* Tensor component: ID = " << arg.id() << ", type = " << std::hex << "0x"
+                          << static_cast<uint32_t>(arg.tensor_component_type()) << std::dec << "\n";
                 break;
 
             default:

@@ -37,15 +37,15 @@ namespace
 {
 std::pair<unsigned int, unsigned int> parse_validation_range(const std::string &validation_range)
 {
-    std::pair<unsigned int /* start */, unsigned int /* end */> range = { 0, std::numeric_limits<unsigned int>::max() };
-    if(!validation_range.empty())
+    std::pair<unsigned int /* start */, unsigned int /* end */> range = {0, std::numeric_limits<unsigned int>::max()};
+    if (!validation_range.empty())
     {
         std::string       str;
         std::stringstream stream(validation_range);
 
         // Get first value
         std::getline(stream, str, ',');
-        if(stream.fail())
+        if (stream.fail())
         {
             return range;
         }
@@ -56,7 +56,7 @@ std::pair<unsigned int, unsigned int> parse_validation_range(const std::string &
 
         // Get second value
         std::getline(stream, str);
-        if(stream.fail())
+        if (stream.fail())
         {
             range.second = range.first;
             return range;
@@ -88,24 +88,26 @@ namespace utils
     os << "Tuner mode : " << common_params.tuner_mode << std::endl;
     os << "Tuner file : " << common_params.tuner_file << std::endl;
     os << "MLGO file : " << common_params.mlgo_file << std::endl;
-    os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::Enabled ? true_str : false_str) << std::endl;
-    if(!common_params.data_path.empty())
+    os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::Enabled ? true_str : false_str)
+       << std::endl;
+    if (!common_params.data_path.empty())
     {
         os << "Data path : " << common_params.data_path << std::endl;
     }
-    if(!common_params.image.empty())
+    if (!common_params.image.empty())
     {
         os << "Image file : " << common_params.image << std::endl;
     }
-    if(!common_params.labels.empty())
+    if (!common_params.labels.empty())
     {
         os << "Labels file : " << common_params.labels << std::endl;
     }
-    if(!common_params.validation_file.empty())
+    if (!common_params.validation_file.empty())
     {
-        os << "Validation range : " << common_params.validation_range_start << "-" << common_params.validation_range_end << std::endl;
+        os << "Validation range : " << common_params.validation_range_start << "-" << common_params.validation_range_end
+           << std::endl;
         os << "Validation file : " << common_params.validation_file << std::endl;
-        if(!common_params.validation_path.empty())
+        if (!common_params.validation_path.empty())
         {
             os << "Validation path : " << common_params.validation_path << std::endl;
         }
@@ -134,33 +136,25 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       tuner_file(parser.add_option<SimpleOption<std::string>>("tuner-file")),
       mlgo_file(parser.add_option<SimpleOption<std::string>>("mlgo-file"))
 {
-    std::set<arm_compute::graph::Target> supported_targets
-    {
+    std::set<arm_compute::graph::Target> supported_targets{
         Target::NEON,
         Target::CL,
         Target::CLVK,
     };
 
-    std::set<arm_compute::DataType> supported_data_types
-    {
+    std::set<arm_compute::DataType> supported_data_types{
         DataType::F16,
         DataType::F32,
         DataType::QASYMM8,
         DataType::QASYMM8_SIGNED,
     };
 
-    std::set<DataLayout> supported_data_layouts
-    {
+    std::set<DataLayout> supported_data_layouts{
         DataLayout::NHWC,
         DataLayout::NCHW,
     };
 
-    const std::set<CLTunerMode> supported_tuner_modes
-    {
-        CLTunerMode::EXHAUSTIVE,
-        CLTunerMode::NORMAL,
-        CLTunerMode::RAPID
-    };
+    const std::set<CLTunerMode> supported_tuner_modes{CLTunerMode::EXHAUSTIVE, CLTunerMode::NORMAL, CLTunerMode::RAPID};
 
     target      = parser.add_option<EnumOption<Target>>("target", supported_targets, Target::NEON);
     data_type   = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
@@ -175,11 +169,10 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     data_layout->set_help("Data layout to use");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
     enable_cl_cache->set_help("Enable OpenCL program caches");
-    tuner_mode->set_help(
-        "Configures the time taken by the tuner to tune. "
-        "Exhaustive: slowest but produces the most performant LWS configuration. "
-        "Normal: slow but produces the LWS configurations on par with Exhaustive most of the time. "
-        "Rapid: fast but produces less performant LWS configurations");
+    tuner_mode->set_help("Configures the time taken by the tuner to tune. "
+                         "Exhaustive: slowest but produces the most performant LWS configuration. "
+                         "Normal: slow but produces the LWS configurations on par with Exhaustive most of the time. "
+                         "Rapid: fast but produces less performant LWS configurations");
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");
@@ -193,8 +186,9 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 
 CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
 {
-    FastMathHint fast_math_hint_value = options.fast_math_hint->value() ? FastMathHint::Enabled : FastMathHint::Disabled;
-    auto         validation_range     = parse_validation_range(options.validation_range->value());
+    FastMathHint fast_math_hint_value =
+        options.fast_math_hint->value() ? FastMathHint::Enabled : FastMathHint::Disabled;
+    auto validation_range = parse_validation_range(options.validation_range->value());
 
     CommonGraphParams common_params;
     common_params.help      = options.help->is_set() ? options.help->value() : false;
@@ -202,19 +196,21 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.batches   = options.batches->value();
     common_params.target    = options.target->value();
     common_params.data_type = options.data_type->value();
-    if(options.data_layout->is_set())
+    if (options.data_layout->is_set())
     {
         common_params.data_layout = options.data_layout->value();
     }
-    common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
-    common_params.enable_cl_cache        = common_params.target == arm_compute::graph::Target::NEON ? false : (options.enable_cl_cache->is_set() ? options.enable_cl_cache->value() : true);
-    common_params.tuner_mode             = options.tuner_mode->value();
-    common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
-    common_params.data_path              = options.data_path->value();
-    common_params.image                  = options.image->value();
-    common_params.labels                 = options.labels->value();
-    common_params.validation_file        = options.validation_file->value();
-    common_params.validation_path        = options.validation_path->value();
+    common_params.enable_tuner    = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
+    common_params.enable_cl_cache = common_params.target == arm_compute::graph::Target::NEON
+                                        ? false
+                                        : (options.enable_cl_cache->is_set() ? options.enable_cl_cache->value() : true);
+    common_params.tuner_mode      = options.tuner_mode->value();
+    common_params.fast_math_hint  = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
+    common_params.data_path       = options.data_path->value();
+    common_params.image           = options.image->value();
+    common_params.labels          = options.labels->value();
+    common_params.validation_file = options.validation_file->value();
+    common_params.validation_path = options.validation_path->value();
     common_params.validation_range_start = validation_range.first;
     common_params.validation_range_end   = validation_range.second;
     common_params.tuner_file             = options.tuner_file->value();

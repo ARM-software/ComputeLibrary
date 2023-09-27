@@ -97,18 +97,17 @@ public:
 
 protected:
     std::string _name;
-    bool        _is_required{ false };
-    bool        _is_set{ false };
+    bool        _is_required{false};
+    bool        _is_set{false};
     std::string _help{};
 };
 
-inline Option::Option(std::string name)
-    : _name{ std::move(name) }
+inline Option::Option(std::string name) : _name{std::move(name)}
 {
 }
 
 inline Option::Option(std::string name, bool is_required, bool is_set)
-    : _name{ std::move(name) }, _is_required{ is_required }, _is_set{ is_set }
+    : _name{std::move(name)}, _is_required{is_required}, _is_set{is_set}
 {
 }
 

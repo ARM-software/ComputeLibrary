@@ -29,11 +29,11 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/tensor_info.h"
 #include "support/Cast.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -52,7 +52,7 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(0) + src2->dimension(0) > dst->dimension(0));
 
-    for(size_t i = 1; i < Coordinates::num_max_dimensions; ++i)
+    for (size_t i = 1; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(i) != dst->dimension(i));
         ARM_COMPUTE_RETURN_ERROR_ON(src2->dimension(i) != dst->dimension(i));
@@ -63,7 +63,8 @@ Status validate_arguments(const ITensorInfo *src1, const ITensorInfo *src2, cons
 }
 } // namespace
 
-Status ClWidthConcatenate2TensorsKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
+Status
+ClWidthConcatenate2TensorsKernel::validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src1, src2, dst));
     return Status{};
@@ -74,12 +75,15 @@ ClWidthConcatenate2TensorsKernel::ClWidthConcatenate2TensorsKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst)
+void ClWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context,
+                                                 ITensorInfo            *src1,
+                                                 ITensorInfo            *src2,
+                                                 ITensorInfo            *dst)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src1, src2, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src1, src2, dst));
 
-    auto padding_info = get_padding_info({ src1, src2, dst });
+    auto padding_info = get_padding_info({src1, src2, dst});
 
     const unsigned int min_dimension                     = std::min(src1->dimension(0), src2->dimension(0));
     const unsigned int num_elems_processed_per_iteration = adjust_vec_size(8, min_dimension);
@@ -91,11 +95,12 @@ void ClWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(vec_size_leftover));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(src1->element_size()));
-    build_opts.add_option("-DINPUT1_ROTATE_N=" + support::cpp11::to_string((src1->dimension(0) - vec_size_leftover) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DINPUT1_ROTATE_N=" + support::cpp11::to_string((src1->dimension(0) - vec_size_leftover) %
+                                                                           num_elems_processed_per_iteration));
 
     // If input have different quantization info set quantization parameters needed for the re-quantization process
     const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(dst, src1, src2);
-    if(is_data_type_quantized_asymmetric(src1->data_type()) && have_different_qinfo)
+    if (is_data_type_quantized_asymmetric(src1->data_type()) && have_different_qinfo)
     {
         const UniformQuantizationInfo iq1_info = src1->quantization_info().uniform();
         const UniformQuantizationInfo iq2_info = src2->quantization_info().uniform();
@@ -146,9 +151,11 @@ void ClWidthConcatenate2TensorsKernel::run_op(ITensorPack &tensors, const Window
 
     Window slice = window.first_slice_window_4D();
 
-    const auto src0 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_VEC));
-    const auto src1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_VEC + 1));
-    auto       dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src0 =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_VEC));
+    const auto src1 =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_VEC + 1));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     do
     {
@@ -159,8 +166,7 @@ void ClWidthConcatenate2TensorsKernel::run_op(ITensorPack &tensors, const Window
         _kernel.setArg<cl_int>(idx++, _depth);
         _kernel.setArg<cl_int>(idx++, _input1_width);
         enqueue(queue, *this, window, lws_hint());
-    }
-    while(window.slide_window_slice_4D(slice));
+    } while (window.slide_window_slice_4D(slice));
 }
 } // namespace kernels
 } // namespace opencl

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/OperatorTensor.h"
+
 #include "arm_compute/runtime/MemoryRegion.h"
 
 #include "support/Cast.h"
@@ -47,7 +48,7 @@ ITensorInfo *OperatorTensor::info()
 
 uint8_t *OperatorTensor::buffer() const
 {
-    switch(_mem_type)
+    switch (_mem_type)
     {
         case MemoryType::CPU:
             return (uint8_t *)utils::cast::polymorphic_downcast<MemoryRegion *>(_memory->region())->buffer();

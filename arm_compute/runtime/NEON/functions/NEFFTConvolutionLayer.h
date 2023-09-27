@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEFFTCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_NEFFTCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
@@ -94,8 +93,13 @@ public:
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. Unused for CPU backend.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    void configure(ITensor                   *input,
+                   const ITensor             *weights,
+                   const ITensor             *biases,
+                   ITensor                   *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEFFTConvolutionLayer
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout
@@ -113,8 +117,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;

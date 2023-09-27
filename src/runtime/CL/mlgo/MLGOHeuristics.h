@@ -135,14 +135,14 @@ public:
     bool check_all() const;
 
 private:
-    static constexpr size_t _max_num_trees{ 100 }; /**< Max number of trees that can be added*/
+    static constexpr size_t _max_num_trees{100}; /**< Max number of trees that can be added*/
 
 private:
     // There exists a one-to-one mappipng between TreeID and Index, either can be used to identify a @ref HeuristicTree
     std::map<HeuristicTree::TreeID, HeuristicTree::Index> _indices;    /**< A mapping from TreeID to Index */
     std::map<HeuristicTree::Index, HeuristicTree>         _trees;      /**< A mapping from Index to HeuristicTree */
     std::map<HeuristicTree::TreeID, bool>                 _tree_valid; /**< Result cache of the tree validity checks */
-    bool _valid;                                                       /**< Overall validity */
+    bool                                                  _valid;      /**< Overall validity */
 };
 
 } // namespace mlgo

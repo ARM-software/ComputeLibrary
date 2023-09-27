@@ -31,10 +31,11 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/NEAsymm.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/NEAsymm.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 
@@ -48,80 +49,38 @@ namespace
 {
 inline int32x4x4_t load_results_input(const Iterator &mm_result_it, int32_t x)
 {
-    return
-    {
-        {
-            vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 0),
-            vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 4),
-            vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 8),
-            vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 12)
-        }
-    };
+    return {{vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 0),
+             vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 4),
+             vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 8),
+             vld1q_s32(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x + 12)}};
 }
 
 inline int32x4x4_t load(const int32_t *ptr, int32_t x)
 {
-    return
-    {
-        {
-            vld1q_s32(ptr + x + 0),
-            vld1q_s32(ptr + x + 4),
-            vld1q_s32(ptr + x + 8),
-            vld1q_s32(ptr + x + 12)
-        }
-    };
+    return {{vld1q_s32(ptr + x + 0), vld1q_s32(ptr + x + 4), vld1q_s32(ptr + x + 8), vld1q_s32(ptr + x + 12)}};
 }
 
 inline int32x4x4_t add_s32(int32x4x4_t a, int32x4_t b)
 {
-    return
-    {
-        {
-            vaddq_s32(a.val[0], b),
-            vaddq_s32(a.val[1], b),
-            vaddq_s32(a.val[2], b),
-            vaddq_s32(a.val[3], b)
-        }
-    };
+    return {{vaddq_s32(a.val[0], b), vaddq_s32(a.val[1], b), vaddq_s32(a.val[2], b), vaddq_s32(a.val[3], b)}};
 }
 
 inline int32x4x4_t add_s32(int32x4x4_t a, int32x4x4_t b)
 {
-    return
-    {
-        {
-            vaddq_s32(a.val[0], b.val[0]),
-            vaddq_s32(a.val[1], b.val[1]),
-            vaddq_s32(a.val[2], b.val[2]),
-            vaddq_s32(a.val[3], b.val[3])
-        }
-    };
+    return {{vaddq_s32(a.val[0], b.val[0]), vaddq_s32(a.val[1], b.val[1]), vaddq_s32(a.val[2], b.val[2]),
+             vaddq_s32(a.val[3], b.val[3])}};
 }
 
 inline int32x4x4_t mul_s32(int32x4x4_t &a, int32_t mul_scalar)
 {
-    return
-    {
-        {
-            vmulq_n_s32(a.val[0], mul_scalar),
-            vmulq_n_s32(a.val[1], mul_scalar),
-            vmulq_n_s32(a.val[2], mul_scalar),
-            vmulq_n_s32(a.val[3], mul_scalar)
-        }
-    };
+    return {{vmulq_n_s32(a.val[0], mul_scalar), vmulq_n_s32(a.val[1], mul_scalar), vmulq_n_s32(a.val[2], mul_scalar),
+             vmulq_n_s32(a.val[3], mul_scalar)}};
 }
 
 inline int32x4x4_t mul_s32(int32x4x4_t &a, const int32_t *multilpier)
 {
-    return
-    {
-        {
-            vmulq_s32(a.val[0], vld1q_s32(multilpier)),
-            vmulq_s32(a.val[1], vld1q_s32(multilpier + 4)),
-            vmulq_s32(a.val[2], vld1q_s32(multilpier + 8)),
-            vmulq_s32(a.val[3], vld1q_s32(multilpier + 12))
-        }
-    };
+    return {{vmulq_s32(a.val[0], vld1q_s32(multilpier)), vmulq_s32(a.val[1], vld1q_s32(multilpier + 4)),
+             vmulq_s32(a.val[2], vld1q_s32(multilpier + 8)), vmulq_s32(a.val[3], vld1q_s32(multilpier + 12))}};
 }
 
 inline int32x4x4_t get_a_offset(const int32_t *vector_sum_col_ptr, int32_t a_offset, int32_t x)
@@ -144,18 +103,11 @@ inline int32x4_t get_b_offset(const int32_t *vector_sum_row_ptr, int32_t b_offse
 
 inline int32x4x4_t get_k_offset(int32_t k_offset)
 {
-    return
-    {
-        {
-            vdupq_n_s32(k_offset),
-            vdupq_n_s32(k_offset),
-            vdupq_n_s32(k_offset),
-            vdupq_n_s32(k_offset)
-        }
-    };
+    return {{vdupq_n_s32(k_offset), vdupq_n_s32(k_offset), vdupq_n_s32(k_offset), vdupq_n_s32(k_offset)}};
 }
 
-inline uint8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32x4_t result_shift_s32, uint8x16_t min_u8, uint8x16_t max_u8, bool is_bounded_relu)
+inline uint8x16_t finalize_quantization_floating_point(
+    int32x4x4_t &in_s32, int32x4_t result_shift_s32, uint8x16_t min_u8, uint8x16_t max_u8, bool is_bounded_relu)
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
@@ -172,18 +124,13 @@ inline uint8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int3
     in_s32.val[3] = vmaxq_s32(in_s32.val[3], zero_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to U8
     uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_s16.val[0]), vqmovun_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_u8 = vmaxq_u8(out_u8, min_u8);
         out_u8 = vminq_u8(out_u8, max_u8);
@@ -192,7 +139,8 @@ inline uint8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int3
     return out_u8;
 }
 
-inline int8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32x4_t result_shift_s32, int8x16_t min_s8, int8x16_t max_s8, bool is_bounded_relu)
+inline int8x16_t finalize_quantization_floating_point(
+    int32x4x4_t &in_s32, int32x4_t result_shift_s32, int8x16_t min_s8, int8x16_t max_s8, bool is_bounded_relu)
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
@@ -209,18 +157,13 @@ inline int8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32
     in_s32.val[3] = vmaxq_s32(in_s32.val[3], zero_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to S8
     int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s8 = vmaxq_s8(out_s8, min_s8);
         out_s8 = vminq_s8(out_s8, max_s8);
@@ -229,7 +172,8 @@ inline int8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32
     return out_s8;
 }
 
-inline int8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32x4x4_t result_shift_s32, int8x16_t min_s8, int8x16_t max_s8, bool is_bounded_relu)
+inline int8x16_t finalize_quantization_floating_point(
+    int32x4x4_t &in_s32, int32x4x4_t result_shift_s32, int8x16_t min_s8, int8x16_t max_s8, bool is_bounded_relu)
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
@@ -246,18 +190,13 @@ inline int8x16_t finalize_quantization_floating_point(int32x4x4_t &in_s32, int32
     in_s32.val[3] = vmaxq_s32(in_s32.val[3], zero_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to S8
     int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s8 = vmaxq_s8(out_s8, min_s8);
         out_s8 = vminq_s8(out_s8, max_s8);
@@ -305,81 +244,103 @@ inline Iterator get_bias_it(const Window &window, const ITensor *bias)
 }
 
 template <typename VT>
-inline void run_offset_contribution_output_stage_window(const int32_t *vector_sum_col_ptr, const int32_t *vector_sum_row_ptr, const int32_t *bias_ptr, Iterator mm_result_it, Iterator out_it,
-                                                        const int32x4_t result_offset_s32, const int32x4_t result_shift_s32,
-                                                        typename VT::vtype min_vec, typename VT::vtype max_vec,
-                                                        int32_t a_offset, int32_t b_offset, int32_t k_offset,
-                                                        int32_t multiplier, int32_t shift, int32_t offset, int32_t min_bound, int32_t max_bound,
-                                                        int window_step_x, int window_start_x, int window_end_x, bool has_a_offset, bool has_b_offset, bool has_bias, bool is_bounded_relu, bool is_fixed_point)
+inline void run_offset_contribution_output_stage_window(const int32_t     *vector_sum_col_ptr,
+                                                        const int32_t     *vector_sum_row_ptr,
+                                                        const int32_t     *bias_ptr,
+                                                        Iterator           mm_result_it,
+                                                        Iterator           out_it,
+                                                        const int32x4_t    result_offset_s32,
+                                                        const int32x4_t    result_shift_s32,
+                                                        typename VT::vtype min_vec,
+                                                        typename VT::vtype max_vec,
+                                                        int32_t            a_offset,
+                                                        int32_t            b_offset,
+                                                        int32_t            k_offset,
+                                                        int32_t            multiplier,
+                                                        int32_t            shift,
+                                                        int32_t            offset,
+                                                        int32_t            min_bound,
+                                                        int32_t            max_bound,
+                                                        int                window_step_x,
+                                                        int                window_start_x,
+                                                        int                window_end_x,
+                                                        bool               has_a_offset,
+                                                        bool               has_b_offset,
+                                                        bool               has_bias,
+                                                        bool               is_bounded_relu,
+                                                        bool               is_fixed_point)
 {
-    int32x4x4_t offset_term_s32 = { 0, 0, 0, 0 };
-    if(!is_fixed_point)
+    int32x4x4_t offset_term_s32 = {0, 0, 0, 0};
+    if (!is_fixed_point)
     {
         // Combine quantization offset with other offsets.
         offset_term_s32 = add_s32(offset_term_s32, result_offset_s32);
     }
-    if(has_a_offset && has_b_offset)
+    if (has_a_offset && has_b_offset)
     {
         offset_term_s32 = add_s32(offset_term_s32, get_k_offset(k_offset));
     }
-    if(has_b_offset)
+    if (has_b_offset)
     {
         offset_term_s32 = add_s32(offset_term_s32, get_b_offset(vector_sum_row_ptr, b_offset));
     }
 
     int x = window_start_x;
-    for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    for (; x <= (window_end_x - window_step_x); x += window_step_x)
     {
         int32x4x4_t in_s32 = load_results_input(mm_result_it, x);
 
-        if(has_a_offset)
+        if (has_a_offset)
         {
             in_s32 = add_s32(in_s32, get_a_offset(vector_sum_col_ptr, a_offset, x));
         }
-        if(has_bias)
+        if (has_bias)
         {
             in_s32 = add_s32(in_s32, load(bias_ptr, x));
         }
-        if(!is_fixed_point || has_b_offset)
+        if (!is_fixed_point || has_b_offset)
         {
             in_s32 = add_s32(in_s32, offset_term_s32);
         }
-        if(!is_fixed_point)
+        if (!is_fixed_point)
         {
             in_s32 = mul_s32(in_s32, multiplier);
         }
 
-        if(is_fixed_point)
+        if (is_fixed_point)
         {
-            wrapper::vstore(reinterpret_cast<typename VT::stype *>(out_it.ptr() + x),
-                            finalize_quantization(in_s32, multiplier, shift, result_offset_s32, min_vec, max_vec, is_bounded_relu));
+            wrapper::vstore(
+                reinterpret_cast<typename VT::stype *>(out_it.ptr() + x),
+                finalize_quantization(in_s32, multiplier, shift, result_offset_s32, min_vec, max_vec, is_bounded_relu));
         }
         else
         {
-            wrapper::vstore(reinterpret_cast<typename VT::stype *>(out_it.ptr() + x),
-                            finalize_quantization_floating_point(in_s32, result_shift_s32, min_vec, max_vec, is_bounded_relu));
+            wrapper::vstore(
+                reinterpret_cast<typename VT::stype *>(out_it.ptr() + x),
+                finalize_quantization_floating_point(in_s32, result_shift_s32, min_vec, max_vec, is_bounded_relu));
         }
     }
     // Compute left-over elements
-    for(; x < window_end_x; ++x)
+    for (; x < window_end_x; ++x)
     {
-        int32_t in_value = *(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x) + wrapper::vgetlane(offset_term_s32.val[0], 0);
+        int32_t in_value =
+            *(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x) + wrapper::vgetlane(offset_term_s32.val[0], 0);
 
-        if(has_a_offset)
+        if (has_a_offset)
         {
             in_value += (*(vector_sum_col_ptr + x) * a_offset);
         }
-        if(has_bias)
+        if (has_bias)
         {
             in_value += *(bias_ptr + x);
         }
 
-        if(is_fixed_point)
+        if (is_fixed_point)
         {
             // Finalize and store the result
-            *reinterpret_cast<typename VT::stype *>(out_it.ptr() + x) = finalize_quantization(in_value, multiplier, shift, offset,
-                                                                                              static_cast<typename VT::stype>(min_bound),
-                                                                                              static_cast<typename VT::stype>(max_bound), is_bounded_relu);
+            *reinterpret_cast<typename VT::stype *>(out_it.ptr() + x) =
+                finalize_quantization(in_value, multiplier, shift, offset, static_cast<typename VT::stype>(min_bound),
+                                      static_cast<typename VT::stype>(max_bound), is_bounded_relu);
         }
         else
         {
@@ -387,75 +348,100 @@ inline void run_offset_contribution_output_stage_window(const int32_t *vector_su
             in_value = (in_value * multiplier) >> shift;
 
             // Bound and store the result
-            if(is_bounded_relu)
+            if (is_bounded_relu)
             {
-                in_value = static_cast<typename VT::stype>(std::max<int32_t>(min_bound, std::min<int32_t>(max_bound, in_value)));
+                in_value = static_cast<typename VT::stype>(
+                    std::max<int32_t>(min_bound, std::min<int32_t>(max_bound, in_value)));
             }
-            *reinterpret_cast<typename VT::stype *>(out_it.ptr() + x) = static_cast<typename VT::stype>(std::max<int32_t>(static_cast<int32_t>(std::numeric_limits<typename VT::stype>::lowest()),
-                                                                                                                          std::min<int32_t>(static_cast<int32_t>(std::numeric_limits<typename VT::stype>::max()), in_value)));
+            *reinterpret_cast<typename VT::stype *>(out_it.ptr() + x) =
+                static_cast<typename VT::stype>(std::max<int32_t>(
+                    static_cast<int32_t>(std::numeric_limits<typename VT::stype>::lowest()),
+                    std::min<int32_t>(static_cast<int32_t>(std::numeric_limits<typename VT::stype>::max()), in_value)));
         }
     }
 }
 
-inline void run_offset_contribution_output_stage_window_symm(const int32_t *vector_sum_col_ptr, const int32_t *bias_ptr, Iterator mm_result_it, Iterator out_it,
-                                                             const int32_t *result_multipliers, const int32_t *result_shifts,
-                                                             const int32x4_t result_offset, int8x16_t min_s8, int8x16_t max_s8,
-                                                             int32_t a_offset, int32_t offset, int32_t min_bound, int32_t max_bound,
-                                                             int window_step_x, int window_start_x, int window_end_x, bool has_a_offset, bool has_bias, bool is_bounded_relu, bool is_fixed_point)
+inline void run_offset_contribution_output_stage_window_symm(const int32_t  *vector_sum_col_ptr,
+                                                             const int32_t  *bias_ptr,
+                                                             Iterator        mm_result_it,
+                                                             Iterator        out_it,
+                                                             const int32_t  *result_multipliers,
+                                                             const int32_t  *result_shifts,
+                                                             const int32x4_t result_offset,
+                                                             int8x16_t       min_s8,
+                                                             int8x16_t       max_s8,
+                                                             int32_t         a_offset,
+                                                             int32_t         offset,
+                                                             int32_t         min_bound,
+                                                             int32_t         max_bound,
+                                                             int             window_step_x,
+                                                             int             window_start_x,
+                                                             int             window_end_x,
+                                                             bool            has_a_offset,
+                                                             bool            has_bias,
+                                                             bool            is_bounded_relu,
+                                                             bool            is_fixed_point)
 {
-    int32x4x4_t offset_term_s32 = { 0, 0, 0, 0 };
-    if(!is_fixed_point)
+    int32x4x4_t offset_term_s32 = {0, 0, 0, 0};
+    if (!is_fixed_point)
     {
         // Combine quantization offset with other offsets.
         offset_term_s32 = add_s32(offset_term_s32, result_offset);
     }
 
     int x = window_start_x;
-    for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    for (; x <= (window_end_x - window_step_x); x += window_step_x)
     {
         int32x4x4_t in_s32 = load_results_input(mm_result_it, x);
 
-        if(has_a_offset)
+        if (has_a_offset)
         {
             in_s32 = add_s32(in_s32, get_a_offset(vector_sum_col_ptr, a_offset, x));
         }
-        if(has_bias)
+        if (has_bias)
         {
             in_s32 = add_s32(in_s32, load(bias_ptr, x));
         }
-        if(!is_fixed_point)
+        if (!is_fixed_point)
         {
             in_s32 = add_s32(in_s32, offset_term_s32);
             in_s32 = mul_s32(in_s32, result_multipliers + x);
         }
 
-        if(is_fixed_point)
+        if (is_fixed_point)
         {
-            vst1q_s8(reinterpret_cast<int8_t *>(out_it.ptr() + x), finalize_quantization_symm(in_s32, load(result_multipliers, x), load(result_shifts, x), result_offset, min_s8, max_s8, is_bounded_relu));
+            vst1q_s8(reinterpret_cast<int8_t *>(out_it.ptr() + x),
+                     finalize_quantization_symm(in_s32, load(result_multipliers, x), load(result_shifts, x),
+                                                result_offset, min_s8, max_s8, is_bounded_relu));
         }
         else
         {
-            vst1q_s8(reinterpret_cast<int8_t *>(out_it.ptr() + x), finalize_quantization_floating_point(in_s32, load(result_shifts, x), min_s8, max_s8, is_bounded_relu));
+            vst1q_s8(
+                reinterpret_cast<int8_t *>(out_it.ptr() + x),
+                finalize_quantization_floating_point(in_s32, load(result_shifts, x), min_s8, max_s8, is_bounded_relu));
         }
     }
     // Compute left-over elements
-    for(; x < window_end_x; ++x)
+    for (; x < window_end_x; ++x)
     {
-        int32_t in_value = *(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x) + wrapper::vgetlane(offset_term_s32.val[0], 0);
+        int32_t in_value =
+            *(reinterpret_cast<const int32_t *>(mm_result_it.ptr()) + x) + wrapper::vgetlane(offset_term_s32.val[0], 0);
 
-        if(has_a_offset)
+        if (has_a_offset)
         {
             in_value += (*(vector_sum_col_ptr + x) * a_offset);
         }
-        if(has_bias)
+        if (has_bias)
         {
             in_value += *(bias_ptr + x);
         }
 
-        if(is_fixed_point)
+        if (is_fixed_point)
         {
             // Finalize and store the result
-            *(out_it.ptr() + x) = finalize_quantization(in_value, result_multipliers[x], result_shifts[x], offset, static_cast<int8_t>(min_bound), static_cast<int8_t>(max_bound), is_bounded_relu);
+            *(out_it.ptr() + x) =
+                finalize_quantization(in_value, result_multipliers[x], result_shifts[x], offset,
+                                      static_cast<int8_t>(min_bound), static_cast<int8_t>(max_bound), is_bounded_relu);
         }
         else
         {
@@ -463,7 +449,7 @@ inline void run_offset_contribution_output_stage_window_symm(const int32_t *vect
             in_value = (in_value * result_multipliers[x]) >> (-result_shifts[x]);
 
             // Bound and store the result
-            if(is_bounded_relu)
+            if (is_bounded_relu)
             {
                 in_value = static_cast<int8_t>(std::max<int32_t>(min_bound, std::min<int32_t>(max_bound, in_value)));
             }
@@ -473,10 +459,20 @@ inline void run_offset_contribution_output_stage_window_symm(const int32_t *vect
 }
 
 template <typename T>
-void run_offset_contribution_output_stage(const Window &window,
-                                          const ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row, const ITensor *bias, ITensor *output,
-                                          int32_t a_offset, int32_t b_offset, int32_t k_offset, bool is_vector_sum_col_batched,
-                                          GEMMLowpOutputStageInfo output_stage, bool is_gemm3d, bool is_bounded_relu, bool is_fixed_point)
+void run_offset_contribution_output_stage(const Window           &window,
+                                          const ITensor          *mm_result,
+                                          const ITensor          *vector_sum_col,
+                                          const ITensor          *vector_sum_row,
+                                          const ITensor          *bias,
+                                          ITensor                *output,
+                                          int32_t                 a_offset,
+                                          int32_t                 b_offset,
+                                          int32_t                 k_offset,
+                                          bool                    is_vector_sum_col_batched,
+                                          GEMMLowpOutputStageInfo output_stage,
+                                          bool                    is_gemm3d,
+                                          bool                    is_bounded_relu,
+                                          bool                    is_fixed_point)
 {
     //  Semantics of XYZW Explained for each tensor
     //
@@ -516,7 +512,7 @@ void run_offset_contribution_output_stage(const Window &window,
     Iterator mm_result_it(mm_result, win);
     Iterator out_it(output, win);
 
-    if((a_offset != 0) && (b_offset != 0))
+    if ((a_offset != 0) && (b_offset != 0))
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(vector_sum_col);
         ARM_COMPUTE_ERROR_ON_NULLPTR(vector_sum_row);
@@ -527,45 +523,52 @@ void run_offset_contribution_output_stage(const Window &window,
         const size_t sum_row_stride_y = vector_sum_row->info()->strides_in_bytes().y();
 
         // Offset in case vector_sum_col is batched in y dimension
-        const int vector_sum_col_stride_batch = is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
+        const int vector_sum_col_stride_batch =
+            is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
 
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                const auto vector_sum_row_ptr = reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y)
-                                                + id.y() + (id.z() % depth_input) * height_input;
-                run_offset_contribution_output_stage_window<Typer>(vector_sum_col_ptr, vector_sum_row_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()),
-                                                                   mm_result_it,
-                                                                   out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, true, true, true, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, vector_sum_row_it, bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    const auto vector_sum_row_ptr =
+                        reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y) +
+                        id.y() + (id.z() % depth_input) * height_input;
+                    run_offset_contribution_output_stage_window<Typer>(
+                        vector_sum_col_ptr, vector_sum_row_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()),
+                        mm_result_it, out_it, result_offset_s32, result_shift_s32, min_vec, max_vec, a_offset, b_offset,
+                        k_offset, multiplier, shift, offset, min_bound, max_bound, window_step_x, window_start_x,
+                        window_end_x, true, true, true, is_bounded_relu, is_fixed_point);
+                },
+                vector_sum_col_it, vector_sum_row_it, bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                const auto vector_sum_row_ptr = reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y)
-                                                + id.y() + (id.z() % depth_input) * height_input;
-                run_offset_contribution_output_stage_window<Typer>(vector_sum_col_ptr, vector_sum_row_ptr, nullptr, mm_result_it, out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, true, true, false, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, vector_sum_row_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    const auto vector_sum_row_ptr =
+                        reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y) +
+                        id.y() + (id.z() % depth_input) * height_input;
+                    run_offset_contribution_output_stage_window<Typer>(
+                        vector_sum_col_ptr, vector_sum_row_ptr, nullptr, mm_result_it, out_it, result_offset_s32,
+                        result_shift_s32, min_vec, max_vec, a_offset, b_offset, k_offset, multiplier, shift, offset,
+                        min_bound, max_bound, window_step_x, window_start_x, window_end_x, true, true, false,
+                        is_bounded_relu, is_fixed_point);
+                },
+                vector_sum_col_it, vector_sum_row_it, mm_result_it, out_it);
         }
     }
-    else if((a_offset == 0) && (b_offset != 0))
+    else if ((a_offset == 0) && (b_offset != 0))
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(vector_sum_row);
 
@@ -573,114 +576,139 @@ void run_offset_contribution_output_stage(const Window &window,
 
         const size_t sum_row_stride_y = vector_sum_row->info()->strides_in_bytes().y();
 
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_row_ptr = reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y)
-                                                + id.y() + (id.z() % depth_input) * height_input;
-                run_offset_contribution_output_stage_window<Typer>(nullptr, vector_sum_row_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it,
-                                                                   out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, false, true, true, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_row_it, bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id = id.z() / depth_input;
+                    const auto vector_sum_row_ptr =
+                        reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y) +
+                        id.y() + (id.z() % depth_input) * height_input;
+                    run_offset_contribution_output_stage_window<Typer>(
+                        nullptr, vector_sum_row_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it,
+                        out_it, result_offset_s32, result_shift_s32, min_vec, max_vec, a_offset, b_offset, k_offset,
+                        multiplier, shift, offset, min_bound, max_bound, window_step_x, window_start_x, window_end_x,
+                        false, true, true, is_bounded_relu, is_fixed_point);
+                },
+                vector_sum_row_it, bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_row_ptr = reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y)
-                                                + id.y() + (id.z() % depth_input) * height_input;
-                run_offset_contribution_output_stage_window<Typer>(nullptr, vector_sum_row_ptr, nullptr, mm_result_it, out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, false, true, false, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_row_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id = id.z() / depth_input;
+                    const auto vector_sum_row_ptr =
+                        reinterpret_cast<const int32_t *>(vector_sum_row_it.ptr() + batch_id * sum_row_stride_y) +
+                        id.y() + (id.z() % depth_input) * height_input;
+                    run_offset_contribution_output_stage_window<Typer>(
+                        nullptr, vector_sum_row_ptr, nullptr, mm_result_it, out_it, result_offset_s32, result_shift_s32,
+                        min_vec, max_vec, a_offset, b_offset, k_offset, multiplier, shift, offset, min_bound, max_bound,
+                        window_step_x, window_start_x, window_end_x, false, true, false, is_bounded_relu,
+                        is_fixed_point);
+                },
+                vector_sum_row_it, mm_result_it, out_it);
         }
     }
-    else if((a_offset != 0) && (b_offset == 0))
+    else if ((a_offset != 0) && (b_offset == 0))
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(vector_sum_col);
 
         Iterator vector_sum_col_it = get_vector_sum_col_it(collapsed_window, vector_sum_col);
 
         // Offset in case vector_sum_col is batched in y dimension
-        const int vector_sum_col_stride_batch = is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
+        const int vector_sum_col_stride_batch =
+            is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
 
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                run_offset_contribution_output_stage_window<Typer>(vector_sum_col_ptr, nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it,
-                                                                   out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, true, false, true, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    run_offset_contribution_output_stage_window<Typer>(
+                        vector_sum_col_ptr, nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it,
+                        out_it, result_offset_s32, result_shift_s32, min_vec, max_vec, a_offset, b_offset, k_offset,
+                        multiplier, shift, offset, min_bound, max_bound, window_step_x, window_start_x, window_end_x,
+                        true, false, true, is_bounded_relu, is_fixed_point);
+                },
+                vector_sum_col_it, bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                run_offset_contribution_output_stage_window<Typer>(vector_sum_col_ptr, nullptr, nullptr, mm_result_it, out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, true, false, false, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    run_offset_contribution_output_stage_window<Typer>(
+                        vector_sum_col_ptr, nullptr, nullptr, mm_result_it, out_it, result_offset_s32, result_shift_s32,
+                        min_vec, max_vec, a_offset, b_offset, k_offset, multiplier, shift, offset, min_bound, max_bound,
+                        window_step_x, window_start_x, window_end_x, true, false, false, is_bounded_relu,
+                        is_fixed_point);
+                },
+                vector_sum_col_it, mm_result_it, out_it);
         }
     }
     else
     {
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates &)
-            {
-                run_offset_contribution_output_stage_window<Typer>(nullptr, nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, false, false, true, is_bounded_relu, is_fixed_point);
-            },
-            bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &)
+                {
+                    run_offset_contribution_output_stage_window<Typer>(
+                        nullptr, nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
+                        result_offset_s32, result_shift_s32, min_vec, max_vec, a_offset, b_offset, k_offset, multiplier,
+                        shift, offset, min_bound, max_bound, window_step_x, window_start_x, window_end_x, false, false,
+                        true, is_bounded_relu, is_fixed_point);
+                },
+                bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates &)
-            {
-                run_offset_contribution_output_stage_window<Typer>(nullptr, nullptr, nullptr, mm_result_it, out_it,
-                                                                   result_offset_s32, result_shift_s32,
-                                                                   min_vec, max_vec, a_offset, b_offset, k_offset,
-                                                                   multiplier, shift, offset, min_bound, max_bound,
-                                                                   window_step_x, window_start_x, window_end_x, false, false, false, is_bounded_relu, is_fixed_point);
-            },
-            mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &)
+                {
+                    run_offset_contribution_output_stage_window<Typer>(
+                        nullptr, nullptr, nullptr, mm_result_it, out_it, result_offset_s32, result_shift_s32, min_vec,
+                        max_vec, a_offset, b_offset, k_offset, multiplier, shift, offset, min_bound, max_bound,
+                        window_step_x, window_start_x, window_end_x, false, false, false, is_bounded_relu,
+                        is_fixed_point);
+                },
+                mm_result_it, out_it);
         }
         return;
     }
 }
 
-void run_offset_contribution_output_stage_symm(const Window &window,
-                                               const ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row, const ITensor *bias, ITensor *output,
-                                               int32_t a_offset, int32_t b_offset, int32_t k_offset, bool is_vector_sum_col_batched,
-                                               GEMMLowpOutputStageInfo output_stage, bool is_gemm3d, bool is_bounded_relu, bool is_fixed_point)
+void run_offset_contribution_output_stage_symm(const Window           &window,
+                                               const ITensor          *mm_result,
+                                               const ITensor          *vector_sum_col,
+                                               const ITensor          *vector_sum_row,
+                                               const ITensor          *bias,
+                                               ITensor                *output,
+                                               int32_t                 a_offset,
+                                               int32_t                 b_offset,
+                                               int32_t                 k_offset,
+                                               bool                    is_vector_sum_col_batched,
+                                               GEMMLowpOutputStageInfo output_stage,
+                                               bool                    is_gemm3d,
+                                               bool                    is_bounded_relu,
+                                               bool                    is_fixed_point)
 {
     ARM_COMPUTE_UNUSED(vector_sum_row, b_offset, k_offset);
 
@@ -690,8 +718,8 @@ void run_offset_contribution_output_stage_symm(const Window &window,
     const int32_t min_bound = output_stage.gemmlowp_min_bound;
     const int32_t max_bound = output_stage.gemmlowp_max_bound;
 
-    const int32_t *result_multipliers = output_stage.gemmlowp_multipliers.data();
-    const int32_t *result_shifts      = output_stage.gemmlowp_shifts.data();
+    const int32_t  *result_multipliers = output_stage.gemmlowp_multipliers.data();
+    const int32_t  *result_shifts      = output_stage.gemmlowp_shifts.data();
     const int32x4_t result_offset_s32  = vdupq_n_s32(offset);
     const int8x16_t min_s8             = vdupq_n_s8(static_cast<int8_t>(min_bound));
     const int8x16_t max_s8             = vdupq_n_s8(static_cast<int8_t>(max_bound));
@@ -708,88 +736,105 @@ void run_offset_contribution_output_stage_symm(const Window &window,
     Iterator mm_result_it(mm_result, win);
     Iterator out_it(output, win);
 
-    if(a_offset != 0)
+    if (a_offset != 0)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(vector_sum_col);
 
         Iterator vector_sum_col_it = get_vector_sum_col_it(collapsed_window, vector_sum_col);
 
         // Offset in case vector_sum_col is batched in y dimension
-        const int vector_sum_col_stride_batch = is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
+        const int vector_sum_col_stride_batch =
+            is_vector_sum_col_batched ? vector_sum_col->info()->strides_in_bytes().y() : 0;
 
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                run_offset_contribution_output_stage_window_symm(vector_sum_col_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
-                                                                 result_multipliers, result_shifts,
-                                                                 result_offset_s32, min_s8, max_s8,
-                                                                 a_offset, offset, min_bound, max_bound,
-                                                                 window_step_x, window_start_x, window_end_x, true, true, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    run_offset_contribution_output_stage_window_symm(
+                        vector_sum_col_ptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
+                        result_multipliers, result_shifts, result_offset_s32, min_s8, max_s8, a_offset, offset,
+                        min_bound, max_bound, window_step_x, window_start_x, window_end_x, true, true, is_bounded_relu,
+                        is_fixed_point);
+                },
+                vector_sum_col_it, bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
-            {
-                const int  batch_id           = id.z() / depth_input;
-                const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
-                run_offset_contribution_output_stage_window_symm(vector_sum_col_ptr, nullptr, mm_result_it, out_it,
-                                                                 result_multipliers, result_shifts,
-                                                                 result_offset_s32, min_s8, max_s8,
-                                                                 a_offset, offset, min_bound, max_bound,
-                                                                 window_step_x, window_start_x, window_end_x, true, false, is_bounded_relu, is_fixed_point);
-            },
-            vector_sum_col_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &id)
+                {
+                    const int  batch_id           = id.z() / depth_input;
+                    const auto vector_sum_col_ptr = reinterpret_cast<const int32_t *>(
+                        vector_sum_col_it.ptr() + batch_id * vector_sum_col_stride_batch);
+                    run_offset_contribution_output_stage_window_symm(
+                        vector_sum_col_ptr, nullptr, mm_result_it, out_it, result_multipliers, result_shifts,
+                        result_offset_s32, min_s8, max_s8, a_offset, offset, min_bound, max_bound, window_step_x,
+                        window_start_x, window_end_x, true, false, is_bounded_relu, is_fixed_point);
+                },
+                vector_sum_col_it, mm_result_it, out_it);
         }
     }
     else
     {
-        if(bias != nullptr)
+        if (bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates &)
-            {
-                run_offset_contribution_output_stage_window_symm(nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
-                                                                 result_multipliers, result_shifts,
-                                                                 result_offset_s32, min_s8, max_s8,
-                                                                 a_offset, offset, min_bound, max_bound,
-                                                                 window_step_x, window_start_x, window_end_x, false, true, is_bounded_relu, is_fixed_point);
-            },
-            bias_it, mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &)
+                {
+                    run_offset_contribution_output_stage_window_symm(
+                        nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
+                        result_multipliers, result_shifts, result_offset_s32, min_s8, max_s8, a_offset, offset,
+                        min_bound, max_bound, window_step_x, window_start_x, window_end_x, false, true, is_bounded_relu,
+                        is_fixed_point);
+                },
+                bias_it, mm_result_it, out_it);
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates &)
-            {
-                run_offset_contribution_output_stage_window_symm(nullptr, nullptr, mm_result_it, out_it,
-                                                                 result_multipliers, result_shifts,
-                                                                 result_offset_s32, min_s8, max_s8,
-                                                                 a_offset, offset, min_bound, max_bound,
-                                                                 window_step_x, window_start_x, window_end_x, false, false, is_bounded_relu, is_fixed_point);
-            },
-            mm_result_it, out_it);
+            execute_window_loop(
+                collapsed_window,
+                [&](const Coordinates &)
+                {
+                    run_offset_contribution_output_stage_window_symm(
+                        nullptr, nullptr, mm_result_it, out_it, result_multipliers, result_shifts, result_offset_s32,
+                        min_s8, max_s8, a_offset, offset, min_bound, max_bound, window_step_x, window_start_x,
+                        window_end_x, false, false, is_bounded_relu, is_fixed_point);
+                },
+                mm_result_it, out_it);
         }
         return;
     }
 }
 
-Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output,
-                          int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage)
+Status validate_arguments(const ITensorInfo      *mm_result,
+                          const ITensorInfo      *vector_sum_col,
+                          const ITensorInfo      *vector_sum_row,
+                          const ITensorInfo      *bias,
+                          const ITensorInfo      *output,
+                          int32_t                 a_offset,
+                          int32_t                 b_offset,
+                          GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
-    if(output->data_type() != DataType::QASYMM8)
+    if (output->data_type() != DataType::QASYMM8)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) > 1 && output_stage.gemmlowp_multipliers.size() > 1 && b_offset != 0);
+        ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) > 1 && output_stage.gemmlowp_multipliers.size() > 1 &&
+                                    b_offset != 0);
     }
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN && output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN &&
+                                output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT);
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
@@ -797,7 +842,7 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
     }
 
     // If a_offset == 0, vector_sum_col can be a nullptr
-    if(a_offset != 0)
+    if (a_offset != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != mm_result->dimension(0));
@@ -805,19 +850,21 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
     }
 
     // If b_offset == 0, vector_sum_row can be a nullptr
-    if(b_offset != 0)
+    if (b_offset != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
 
         // Check if input is a 3D reinterpretation
-        const bool reinterpret_as_3d = mm_result->num_dimensions() > 1 && mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
+        const bool reinterpret_as_3d =
+            mm_result->num_dimensions() > 1 && mm_result->tensor_shape().y() != vector_sum_row->tensor_shape().x();
 
         // Validate input
-        ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) != (mm_result->dimension(1) * mm_result->dimension(2)));
+        ARM_COMPUTE_RETURN_ERROR_ON(reinterpret_as_3d && vector_sum_row->dimension(0) !=
+                                                             (mm_result->dimension(1) * mm_result->dimension(2)));
         ARM_COMPUTE_RETURN_ERROR_ON(!reinterpret_as_3d && vector_sum_row->dimension(0) != mm_result->dimension(1));
 
         TensorShape output_shape = output->tensor_shape();
-        if(output_shape.num_dimensions() > 1)
+        if (output_shape.num_dimensions() > 1)
         {
             const unsigned int output_batch_idx = reinterpret_as_3d ? 3 : 2;
 
@@ -828,13 +875,15 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[output_batch_idx],
                                             "mm_result tensor must have the same number of batches of output tensor");
 
-            if(a_offset != 0)
+            if (a_offset != 0)
             {
                 TensorShape vector_sum_col_shape = vector_sum_col->tensor_shape();
                 vector_sum_col_shape.collapse_from(1);
 
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                                "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 &&
+                                                    vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                                "vector_sum_col tensor must have the same number of batches of "
+                                                "vector_sum_row_shape or the number of batches must be set to 1");
             }
         }
 
@@ -842,7 +891,7 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_row->num_dimensions() > 3);
     }
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
@@ -852,15 +901,21 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
 }
 } // namespace
 
-void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col,
-                                                               const ITensorInfo *vector_sum_row, const ITensorInfo *bias, ITensorInfo *dst,
-                                                               int32_t k, int32_t a_offset, int32_t b_offset,
+void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo      *mm_result,
+                                                               const ITensorInfo      *vector_sum_col,
+                                                               const ITensorInfo      *vector_sum_row,
+                                                               const ITensorInfo      *bias,
+                                                               ITensorInfo            *dst,
+                                                               int32_t                 k,
+                                                               int32_t                 a_offset,
+                                                               int32_t                 b_offset,
                                                                GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_UNUSED(vector_sum_row, bias);
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset, b_offset, output_stage));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, dst, a_offset, b_offset, output_stage));
 
     _a_offset     = a_offset;
     _b_offset     = b_offset;
@@ -868,7 +923,7 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo
     _output_stage = output_stage;
 
     // If a_offset == 0, vector_sum_col can be a nullptr
-    if(a_offset != 0)
+    if (a_offset != 0)
     {
         // Check if vector_sum_col_shape should be slidden or not
         // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
@@ -888,16 +943,24 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::configure(const ITensorInfo
     ICpuKernel::configure(win);
 }
 
-Status CpuGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col,
-                                                                const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output,
-                                                                int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage)
+Status CpuGemmLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo      *mm_result,
+                                                                const ITensorInfo      *vector_sum_col,
+                                                                const ITensorInfo      *vector_sum_row,
+                                                                const ITensorInfo      *bias,
+                                                                const ITensorInfo      *output,
+                                                                int32_t                 a_offset,
+                                                                int32_t                 b_offset,
+                                                                GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, output, a_offset, b_offset, output_stage));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, output, a_offset, b_offset, output_stage));
     return Status{};
 }
 
-void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)
+void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack      &tensors,
+                                                            const Window     &window,
+                                                            const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -912,14 +975,14 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors
     PixelValue type_min{};
     PixelValue type_max{};
     std::tie(type_min, type_max) = get_min_max(dst->info()->data_type());
-    int32_t type_min_int = type_min.get<int32_t>();
-    int32_t type_max_int = type_max.get<int32_t>();
+    int32_t type_min_int         = type_min.get<int32_t>();
+    int32_t type_max_int         = type_max.get<int32_t>();
 
-    const bool reinterpret_as_3d = vector_sum_row != nullptr
-                                   && mm_result->info()->num_dimensions() > 1
-                                   && mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
+    const bool reinterpret_as_3d = vector_sum_row != nullptr && mm_result->info()->num_dimensions() > 1 &&
+                                   mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
 
-    const bool is_bounded_relu = !(_output_stage.gemmlowp_min_bound <= type_min_int && _output_stage.gemmlowp_max_bound >= type_max_int);
+    const bool is_bounded_relu =
+        !(_output_stage.gemmlowp_min_bound <= type_min_int && _output_stage.gemmlowp_max_bound >= type_max_int);
 
     // Check if we need to perform fixed point requantization
     const bool is_fixed_point = _output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN;
@@ -930,22 +993,25 @@ void CpuGemmLowpOffsetContributionOutputStageKernel::run_op(ITensorPack &tensors
     // Check if symmetric per-channel execution
     const bool is_symm = _output_stage.is_quantized_per_channel;
 
-    if(is_symm)
+    if (is_symm)
     {
-        run_offset_contribution_output_stage_symm(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _is_vector_sum_col_batched, _output_stage,
-                                                  reinterpret_as_3d, is_bounded_relu, is_fixed_point);
+        run_offset_contribution_output_stage_symm(window, mm_result, vector_sum_col, vector_sum_row, bias, dst,
+                                                  _a_offset, _b_offset, _k_offset, _is_vector_sum_col_batched,
+                                                  _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
     }
     else
     {
-        if(is_signed)
+        if (is_signed)
         {
-            run_offset_contribution_output_stage<int8_t>(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _is_vector_sum_col_batched, _output_stage,
-                                                         reinterpret_as_3d, is_bounded_relu, is_fixed_point);
+            run_offset_contribution_output_stage<int8_t>(
+                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset,
+                _is_vector_sum_col_batched, _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
         else
         {
-            run_offset_contribution_output_stage<uint8_t>(window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset, _is_vector_sum_col_batched, _output_stage,
-                                                          reinterpret_as_3d, is_bounded_relu, is_fixed_point);
+            run_offset_contribution_output_stage<uint8_t>(
+                window, mm_result, vector_sum_col, vector_sum_row, bias, dst, _a_offset, _b_offset, _k_offset,
+                _is_vector_sum_col_batched, _output_stage, reinterpret_as_3d, is_bounded_relu, is_fixed_point);
         }
     }
 }

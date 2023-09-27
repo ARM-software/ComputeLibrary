@@ -79,7 +79,7 @@ public:
      * @return ID of the node
      */
     template <typename NT, typename... Ts>
-    NodeID add_node(Ts &&... args);
+    NodeID add_node(Ts &&...args);
     /** Remove the node with the given ID
      *
      * @param[in] nid ID of the node to remove
@@ -221,17 +221,17 @@ private:
     TensorID create_tensor(const TensorDescriptor &desc = TensorDescriptor());
 
 private:
-    GraphID                              _id      = GraphID(0); /**< Graph id */
-    std::string                          _name    = {};         /**< Graph name */
-    std::vector<std::unique_ptr<INode>>  _nodes   = {};         /**< Graph nodes */
-    std::vector<std::unique_ptr<Edge>>   _edges   = {};         /**< Graph edges */
-    std::vector<std::unique_ptr<Tensor>> _tensors = {};         /**< Graph tensors */
+    GraphID                                 _id           = GraphID(0); /**< Graph id */
+    std::string                             _name         = {};         /**< Graph name */
+    std::vector<std::unique_ptr<INode>>     _nodes        = {};         /**< Graph nodes */
+    std::vector<std::unique_ptr<Edge>>      _edges        = {};         /**< Graph edges */
+    std::vector<std::unique_ptr<Tensor>>    _tensors      = {};         /**< Graph tensors */
     std::map<NodeType, std::vector<NodeID>> _tagged_nodes = {}; /**< Graph nodes map with the node type as key */
-    arm_compute::Mutex _mtx = {};                               /**< Mutex used for graph construction */
+    arm_compute::Mutex                      _mtx          = {}; /**< Mutex used for graph construction */
 };
 
 template <typename NT, typename... Ts>
-inline NodeID Graph::add_node(Ts &&... args)
+inline NodeID Graph::add_node(Ts &&...args)
 {
     arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
 
@@ -245,7 +245,7 @@ inline NodeID Graph::add_node(Ts &&... args)
     _tagged_nodes[node->type()].push_back(nid);
 
     // Associate a new tensor with each output
-    for(auto &output : node->_outputs)
+    for (auto &output : node->_outputs)
     {
         output = create_tensor();
     }

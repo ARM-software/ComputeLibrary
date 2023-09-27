@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuAdd.h"
 
 #include <utility>
@@ -32,26 +33,33 @@ namespace arm_compute
 {
 struct NEArithmeticAddition::Impl
 {
-    const ITensor               *src_0{ nullptr };
-    const ITensor               *src_1{ nullptr };
-    ITensor                     *dst{ nullptr };
-    std::unique_ptr<cpu::CpuAdd> op{ nullptr };
+    const ITensor               *src_0{nullptr};
+    const ITensor               *src_1{nullptr};
+    ITensor                     *dst{nullptr};
+    std::unique_ptr<cpu::CpuAdd> op{nullptr};
 };
 
-NEArithmeticAddition::NEArithmeticAddition()
-    : _impl(std::make_unique<Impl>())
+NEArithmeticAddition::NEArithmeticAddition() : _impl(std::make_unique<Impl>())
 {
 }
-NEArithmeticAddition::NEArithmeticAddition(NEArithmeticAddition &&) = default;
+NEArithmeticAddition::NEArithmeticAddition(NEArithmeticAddition &&)            = default;
 NEArithmeticAddition &NEArithmeticAddition::operator=(NEArithmeticAddition &&) = default;
 NEArithmeticAddition::~NEArithmeticAddition()                                  = default;
 
-Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status NEArithmeticAddition::validate(const ITensorInfo         *input1,
+                                      const ITensorInfo         *input2,
+                                      const ITensorInfo         *output,
+                                      ConvertPolicy              policy,
+                                      const ActivationLayerInfo &act_info)
 {
     return cpu::CpuAdd::validate(input1, input2, output, policy, act_info);
 }
 
-void NEArithmeticAddition::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void NEArithmeticAddition::configure(const ITensor             *input1,
+                                     const ITensor             *input2,
+                                     ITensor                   *output,
+                                     ConvertPolicy              policy,
+                                     const ActivationLayerInfo &act_info)
 {
     _impl->src_0 = input1;
     _impl->src_1 = input2;

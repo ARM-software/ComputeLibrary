@@ -42,20 +42,28 @@ public:
      * Similar to @ref NEAddMulAdd::configure()
      *
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2,
-                   const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                   ITensorInfo *add_output, ITensorInfo *final_output,
-                   ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    void configure(const ITensorInfo         *input1,
+                   const ITensorInfo         *input2,
+                   const ITensorInfo         *bn_mul,
+                   const ITensorInfo         *bn_add,
+                   ITensorInfo               *add_output,
+                   ITensorInfo               *final_output,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuAddMulAdd::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2,
-                           const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                           const ITensorInfo *add_output, const ITensorInfo *final_output,
-                           ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *bn_mul,
+                           const ITensorInfo         *bn_add,
+                           const ITensorInfo         *add_output,
+                           const ITensorInfo         *final_output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
@@ -77,7 +85,7 @@ private:
     TensorInfo _dequantized_bn_mul{};
     TensorInfo _dequantized_bn_add{};
 
-    experimental::MemoryRequirements _aux_mem{ Count };
+    experimental::MemoryRequirements _aux_mem{Count};
 };
 } // namespace cpu
 } // namespace arm_compute

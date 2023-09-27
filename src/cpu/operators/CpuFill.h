@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_FILL_H
 
 #include "arm_compute/core/PixelValue.h"
+
 #include "src/cpu/ICpuOperator.h"
 
 namespace arm_compute

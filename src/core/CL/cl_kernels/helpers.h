@@ -81,11 +81,11 @@
  * @return The reversed vector
  * @{
  */
-#define REV1(x) ((x))
-#define REV2(x) ((x).s10)
-#define REV3(x) ((x).s210)
-#define REV4(x) ((x).s3210)
-#define REV8(x) ((x).s76543210)
+#define REV1(x)  ((x))
+#define REV2(x)  ((x).s10)
+#define REV3(x)  ((x).s210)
+#define REV4(x)  ((x).s3210)
+#define REV8(x)  ((x).s76543210)
 #define REV16(x) ((x).sFEDCBA9876543210)
 /** @} */ // end of group REVn
 
@@ -99,7 +99,7 @@
  * @{
  */
 #define REVERSE_STR(x, s) REV##s((x))
-#define REVERSE(x, s) REVERSE_STR(x, s)
+#define REVERSE(x, s)     REVERSE_STR(x, s)
 /** @} */ // end of group REVERSE
 
 /** Circular-right-shift (rotate-right) the vector of size s by the amount of n.
@@ -138,16 +138,16 @@
 #define ROT8_7(x) ((x).s12345670)
 #define ROT8_8(x) ((x))
 
-#define ROT16_0(x) ((x))
-#define ROT16_1(x) ((x).sF0123456789ABCDE)
-#define ROT16_2(x) ((x).sEF0123456789ABCD)
-#define ROT16_3(x) ((x).sDEF0123456789ABC)
-#define ROT16_4(x) ((x).sCDEF0123456789AB)
-#define ROT16_5(x) ((x).sBCDEF0123456789A)
-#define ROT16_6(x) ((x).sABCDEF0123456789)
-#define ROT16_7(x) ((x).s9ABCDEF012345678)
-#define ROT16_8(x) ((x).s89ABCDEF01234567)
-#define ROT16_9(x) ((x).s789ABCDEF0123456)
+#define ROT16_0(x)  ((x))
+#define ROT16_1(x)  ((x).sF0123456789ABCDE)
+#define ROT16_2(x)  ((x).sEF0123456789ABCD)
+#define ROT16_3(x)  ((x).sDEF0123456789ABC)
+#define ROT16_4(x)  ((x).sCDEF0123456789AB)
+#define ROT16_5(x)  ((x).sBCDEF0123456789A)
+#define ROT16_6(x)  ((x).sABCDEF0123456789)
+#define ROT16_7(x)  ((x).s9ABCDEF012345678)
+#define ROT16_8(x)  ((x).s89ABCDEF01234567)
+#define ROT16_9(x)  ((x).s789ABCDEF0123456)
 #define ROT16_10(x) ((x).s6789ABCDEF012345)
 #define ROT16_11(x) ((x).s56789ABCDEF01234)
 #define ROT16_12(x) ((x).s456789ABCDEF0123)
@@ -168,7 +168,7 @@
  * @{
  */
 #define ROTATE_STR(x, s, n) ROT##s##_##n(x)
-#define ROTATE(x, s, n) ROTATE_STR(x, s, n)
+#define ROTATE(x, s, n)     ROTATE_STR(x, s, n)
 /** @} */ // end of group ROTATE
 
 /** Creates a vector of size n filled with offset values corresponding to the location of each element.
@@ -179,11 +179,11 @@
  * @return The vector filled with offset values
  * @{
  */
-#define V_OFFS1(dt) (dt##1)(0)
-#define V_OFFS2(dt) (dt##2)(0, 1)
-#define V_OFFS3(dt) (dt##3)(0, 1, 2)
-#define V_OFFS4(dt) (dt##4)(0, 1, 2, 3)
-#define V_OFFS8(dt) (dt##8)(0, 1, 2, 3, 4, 5, 6, 7)
+#define V_OFFS1(dt)  (dt##1)(0)
+#define V_OFFS2(dt)  (dt##2)(0, 1)
+#define V_OFFS3(dt)  (dt##3)(0, 1, 2)
+#define V_OFFS4(dt)  (dt##4)(0, 1, 2, 3)
+#define V_OFFS8(dt)  (dt##8)(0, 1, 2, 3, 4, 5, 6, 7)
 #define V_OFFS16(dt) (dt##16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 /** @} */ // end of group V_OFFSn
 
@@ -197,11 +197,11 @@
  * @{
  */
 #define VEC_OFFS_STR(dt, s) V_OFFS##s(dt)
-#define VEC_OFFS(dt, s) VEC_OFFS_STR(dt, s)
+#define VEC_OFFS(dt, s)     VEC_OFFS_STR(dt, s)
 /** @} */ // end of group VEC_OFFS
 
 #define VLOAD_STR(size) vload##size
-#define VLOAD(size) VLOAD_STR(size)
+#define VLOAD(size)     VLOAD_STR(size)
 
 /** Extended partial vload that correctly handles scalar values as well.
  * Load the **lower** 0 to (n-1)th elements of the given vector while minimising the amount of load ops
@@ -219,23 +219,23 @@
  * @{
  */
 #define VLOAD_PARTIAL_STR(size, load_size) vload_partial_##size##_##load_size
-#define VLOAD_PARTIAL(size, load_size) VLOAD_PARTIAL_STR(size, load_size)
+#define VLOAD_PARTIAL(size, load_size)     VLOAD_PARTIAL_STR(size, load_size)
 
 #define NO_LOAD(data, offs, ptr) \
     {                            \
     }
 
 // Size == 1 (scalar)
-#define vload_partial_1_0 NO_LOAD
-#define vload_partial_1_1 vload1
-#define vload_partial_1_2 NO_LOAD
-#define vload_partial_1_3 NO_LOAD
-#define vload_partial_1_4 NO_LOAD
-#define vload_partial_1_5 NO_LOAD
-#define vload_partial_1_6 NO_LOAD
-#define vload_partial_1_7 NO_LOAD
-#define vload_partial_1_8 NO_LOAD
-#define vload_partial_1_9 NO_LOAD
+#define vload_partial_1_0  NO_LOAD
+#define vload_partial_1_1  vload1
+#define vload_partial_1_2  NO_LOAD
+#define vload_partial_1_3  NO_LOAD
+#define vload_partial_1_4  NO_LOAD
+#define vload_partial_1_5  NO_LOAD
+#define vload_partial_1_6  NO_LOAD
+#define vload_partial_1_7  NO_LOAD
+#define vload_partial_1_8  NO_LOAD
+#define vload_partial_1_9  NO_LOAD
 #define vload_partial_1_10 NO_LOAD
 #define vload_partial_1_11 NO_LOAD
 #define vload_partial_1_12 NO_LOAD
@@ -244,16 +244,16 @@
 #define vload_partial_1_15 NO_LOAD
 #define vload_partial_1_16 NO_LOAD
 // Size == 2
-#define vload_partial_2_0 NO_LOAD
-#define vload_partial_2_1 vload_partial_1
-#define vload_partial_2_2 vload_partial_2
-#define vload_partial_2_3 NO_LOAD
-#define vload_partial_2_4 NO_LOAD
-#define vload_partial_2_5 NO_LOAD
-#define vload_partial_2_6 NO_LOAD
-#define vload_partial_2_7 NO_LOAD
-#define vload_partial_2_8 NO_LOAD
-#define vload_partial_2_9 NO_LOAD
+#define vload_partial_2_0  NO_LOAD
+#define vload_partial_2_1  vload_partial_1
+#define vload_partial_2_2  vload_partial_2
+#define vload_partial_2_3  NO_LOAD
+#define vload_partial_2_4  NO_LOAD
+#define vload_partial_2_5  NO_LOAD
+#define vload_partial_2_6  NO_LOAD
+#define vload_partial_2_7  NO_LOAD
+#define vload_partial_2_8  NO_LOAD
+#define vload_partial_2_9  NO_LOAD
 #define vload_partial_2_10 NO_LOAD
 #define vload_partial_2_11 NO_LOAD
 #define vload_partial_2_12 NO_LOAD
@@ -262,16 +262,16 @@
 #define vload_partial_2_15 NO_LOAD
 #define vload_partial_2_16 NO_LOAD
 // Size == 3
-#define vload_partial_3_0 NO_LOAD
-#define vload_partial_3_1 vload_partial_1
-#define vload_partial_3_2 vload_partial_2
-#define vload_partial_3_3 vload_partial_3
-#define vload_partial_3_4 NO_LOAD
-#define vload_partial_3_5 NO_LOAD
-#define vload_partial_3_6 NO_LOAD
-#define vload_partial_3_7 NO_LOAD
-#define vload_partial_3_8 NO_LOAD
-#define vload_partial_3_9 NO_LOAD
+#define vload_partial_3_0  NO_LOAD
+#define vload_partial_3_1  vload_partial_1
+#define vload_partial_3_2  vload_partial_2
+#define vload_partial_3_3  vload_partial_3
+#define vload_partial_3_4  NO_LOAD
+#define vload_partial_3_5  NO_LOAD
+#define vload_partial_3_6  NO_LOAD
+#define vload_partial_3_7  NO_LOAD
+#define vload_partial_3_8  NO_LOAD
+#define vload_partial_3_9  NO_LOAD
 #define vload_partial_3_10 NO_LOAD
 #define vload_partial_3_11 NO_LOAD
 #define vload_partial_3_12 NO_LOAD
@@ -280,16 +280,16 @@
 #define vload_partial_3_15 NO_LOAD
 #define vload_partial_3_16 NO_LOAD
 // Size == 4
-#define vload_partial_4_0 NO_LOAD
-#define vload_partial_4_1 vload_partial_1
-#define vload_partial_4_2 vload_partial_2
-#define vload_partial_4_3 vload_partial_3
-#define vload_partial_4_4 vload_partial_4
-#define vload_partial_4_5 NO_LOAD
-#define vload_partial_4_6 NO_LOAD
-#define vload_partial_4_7 NO_LOAD
-#define vload_partial_4_8 NO_LOAD
-#define vload_partial_4_9 NO_LOAD
+#define vload_partial_4_0  NO_LOAD
+#define vload_partial_4_1  vload_partial_1
+#define vload_partial_4_2  vload_partial_2
+#define vload_partial_4_3  vload_partial_3
+#define vload_partial_4_4  vload_partial_4
+#define vload_partial_4_5  NO_LOAD
+#define vload_partial_4_6  NO_LOAD
+#define vload_partial_4_7  NO_LOAD
+#define vload_partial_4_8  NO_LOAD
+#define vload_partial_4_9  NO_LOAD
 #define vload_partial_4_10 NO_LOAD
 #define vload_partial_4_11 NO_LOAD
 #define vload_partial_4_12 NO_LOAD
@@ -298,16 +298,16 @@
 #define vload_partial_4_15 NO_LOAD
 #define vload_partial_4_16 NO_LOAD
 // Size == 8
-#define vload_partial_8_0 NO_LOAD
-#define vload_partial_8_1 vload_partial_1
-#define vload_partial_8_2 vload_partial_2
-#define vload_partial_8_3 vload_partial_3
-#define vload_partial_8_4 vload_partial_4
-#define vload_partial_8_5 vload_partial_5
-#define vload_partial_8_6 vload_partial_6
-#define vload_partial_8_7 vload_partial_7
-#define vload_partial_8_8 vload_partial_8
-#define vload_partial_8_9 NO_LOAD
+#define vload_partial_8_0  NO_LOAD
+#define vload_partial_8_1  vload_partial_1
+#define vload_partial_8_2  vload_partial_2
+#define vload_partial_8_3  vload_partial_3
+#define vload_partial_8_4  vload_partial_4
+#define vload_partial_8_5  vload_partial_5
+#define vload_partial_8_6  vload_partial_6
+#define vload_partial_8_7  vload_partial_7
+#define vload_partial_8_8  vload_partial_8
+#define vload_partial_8_9  NO_LOAD
 #define vload_partial_8_10 NO_LOAD
 #define vload_partial_8_11 NO_LOAD
 #define vload_partial_8_12 NO_LOAD
@@ -316,16 +316,16 @@
 #define vload_partial_8_15 NO_LOAD
 #define vload_partial_8_16 NO_LOAD
 // Size == 16
-#define vload_partial_16_0 NO_LOAD
-#define vload_partial_16_1 vload_partial_1
-#define vload_partial_16_2 vload_partial_2
-#define vload_partial_16_3 vload_partial_3
-#define vload_partial_16_4 vload_partial_4
-#define vload_partial_16_5 vload_partial_5
-#define vload_partial_16_6 vload_partial_6
-#define vload_partial_16_7 vload_partial_7
-#define vload_partial_16_8 vload_partial_8
-#define vload_partial_16_9 vload_partial_9
+#define vload_partial_16_0  NO_LOAD
+#define vload_partial_16_1  vload_partial_1
+#define vload_partial_16_2  vload_partial_2
+#define vload_partial_16_3  vload_partial_3
+#define vload_partial_16_4  vload_partial_4
+#define vload_partial_16_5  vload_partial_5
+#define vload_partial_16_6  vload_partial_6
+#define vload_partial_16_7  vload_partial_7
+#define vload_partial_16_8  vload_partial_8
+#define vload_partial_16_9  vload_partial_9
 #define vload_partial_16_10 vload_partial_10
 #define vload_partial_16_11 vload_partial_11
 #define vload_partial_16_12 vload_partial_12
@@ -351,17 +351,13 @@
  * @param[in] PTR    The base pointer
  * @{
  */
-#define vload_partial_1(DATA, OFFSET, PTR) \
-    DATA.s0 = vload1(OFFSET, PTR);
+#define vload_partial_1(DATA, OFFSET, PTR) DATA.s0 = vload1(OFFSET, PTR);
 
-#define vload_partial_2(DATA, OFFSET, PTR) \
-    DATA.s01 = vload2(OFFSET, PTR);
+#define vload_partial_2(DATA, OFFSET, PTR) DATA.s01 = vload2(OFFSET, PTR);
 
-#define vload_partial_3(DATA, OFFSET, PTR) \
-    DATA.s012 = vload3(OFFSET, PTR);
+#define vload_partial_3(DATA, OFFSET, PTR) DATA.s012 = vload3(OFFSET, PTR);
 
-#define vload_partial_4(DATA, OFFSET, PTR) \
-    DATA.s0123 = vload4(OFFSET, PTR);
+#define vload_partial_4(DATA, OFFSET, PTR) DATA.s0123 = vload4(OFFSET, PTR);
 
 #define vload_partial_5(DATA, OFFSET, PTR)    \
     vload_partial_4(DATA.s0123, OFFSET, PTR); \
@@ -375,8 +371,7 @@
     vload_partial_4(DATA.s0123, OFFSET, PTR); \
     vload_partial_3(DATA.s456, OFFSET, PTR + 4);
 
-#define vload_partial_8(DATA, OFFSET, PTR) \
-    DATA.s01234567 = vload8(OFFSET, PTR);
+#define vload_partial_8(DATA, OFFSET, PTR) DATA.s01234567 = vload8(OFFSET, PTR);
 
 #define vload_partial_9(DATA, OFFSET, PTR)        \
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
@@ -406,13 +401,12 @@
     vload_partial_8(DATA.s01234567, OFFSET, PTR); \
     vload_partial_7(DATA.s89ABCDEF, OFFSET, PTR + 8);
 
-#define vload_partial_16(DATA, OFFSET, PTR) \
-    DATA = vload16(OFFSET, PTR);
+#define vload_partial_16(DATA, OFFSET, PTR) DATA = vload16(OFFSET, PTR);
 /** @} */ // end of groupd vload_partial_n
 /** @} */ // end of groupd VLOAD_PARTIAL
 
-#define PIXEL_UNIT4 1
-#define PIXEL_UNIT8 2
+#define PIXEL_UNIT4  1
+#define PIXEL_UNIT8  2
 #define PIXEL_UNIT16 4
 
 /** Utility macro to convert a vector size in pixel unit.
@@ -425,27 +419,45 @@
  * @{
  */
 #define CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT_STR(vec_size) PIXEL_UNIT##vec_size
-#define CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(vec_size) CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT_STR(vec_size)
+#define CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(vec_size)     CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT_STR(vec_size)
 /** @} */ // end of group CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT
 
 #define read_image2d_floatx1(img, x_coord, y_coord) (float4)(read_imagef(img, (int2)(x_coord, y_coord)));
-#define read_image2d_floatx2(img, x_coord, y_coord) (float8)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)));
-#define read_image2d_floatx4(img, x_coord, y_coord) (float16)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)), read_imagef(img, (int2)(x_coord + 2, y_coord)), read_imagef(img, (int2)(x_coord + 3, y_coord)));
+#define read_image2d_floatx2(img, x_coord, y_coord) \
+    (float8)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)));
+#define read_image2d_floatx4(img, x_coord, y_coord)                                                       \
+    (float16)(read_imagef(img, (int2)(x_coord, y_coord)), read_imagef(img, (int2)(x_coord + 1, y_coord)), \
+              read_imagef(img, (int2)(x_coord + 2, y_coord)), read_imagef(img, (int2)(x_coord + 3, y_coord)));
 
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 #define read_image2d_halfx1(img, x_coord, y_coord) (half4)(read_imageh(img, (int2)(x_coord, y_coord)));
-#define read_image2d_halfx2(img, x_coord, y_coord) (half8)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)));
-#define read_image2d_halfx4(img, x_coord, y_coord) (half16)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)), read_imageh(img, (int2)(x_coord + 2, y_coord)), read_imageh(img, (int2)(x_coord + 3, y_coord)));
+#define read_image2d_halfx2(img, x_coord, y_coord) \
+    (half8)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)));
+#define read_image2d_halfx4(img, x_coord, y_coord)                                                       \
+    (half16)(read_imageh(img, (int2)(x_coord, y_coord)), read_imageh(img, (int2)(x_coord + 1, y_coord)), \
+             read_imageh(img, (int2)(x_coord + 2, y_coord)), read_imageh(img, (int2)(x_coord + 3, y_coord)));
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 
 #define write_image2d_floatx1(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values));
-#define write_image2d_floatx2(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values.s0123), write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567));
-#define write_image2d_floatx4(img, x_coord, y_coord, values) (write_imagef(img, (int2)(x_coord, y_coord), values.s0123), write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567), write_imagef(img, (int2)(x_coord + 2, y_coord), values.s89AB), write_imagef(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
+#define write_image2d_floatx2(img, x_coord, y_coord, values)    \
+    (write_imagef(img, (int2)(x_coord, y_coord), values.s0123), \
+     write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567));
+#define write_image2d_floatx4(img, x_coord, y_coord, values)        \
+    (write_imagef(img, (int2)(x_coord, y_coord), values.s0123),     \
+     write_imagef(img, (int2)(x_coord + 1, y_coord), values.s4567), \
+     write_imagef(img, (int2)(x_coord + 2, y_coord), values.s89AB), \
+     write_imagef(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
 
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 #define write_image2d_halfx1(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values));
-#define write_image2d_halfx2(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values.s0123), write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567));
-#define write_image2d_halfx4(img, x_coord, y_coord, values) (write_imageh(img, (int2)(x_coord, y_coord), values.s0123), write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567), write_imageh(img, (int2)(x_coord + 2, y_coord), values.s89AB), write_imageh(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
+#define write_image2d_halfx2(img, x_coord, y_coord, values)     \
+    (write_imageh(img, (int2)(x_coord, y_coord), values.s0123), \
+     write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567));
+#define write_image2d_halfx4(img, x_coord, y_coord, values)         \
+    (write_imageh(img, (int2)(x_coord, y_coord), values.s0123),     \
+     write_imageh(img, (int2)(x_coord + 1, y_coord), values.s4567), \
+     write_imageh(img, (int2)(x_coord + 2, y_coord), values.s89AB), \
+     write_imageh(img, (int2)(x_coord + 3, y_coord), values.sCDEF));
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 
 /** Utility macro to read a 2D OpenCL image object.
@@ -462,7 +474,7 @@
  * @{
  */
 #define READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord) read_image2d_##data_type##x##n0(img, x_coord, y_coord)
-#define READ_IMAGE2D(data_type, n0, img, x_coord, y_coord) READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord)
+#define READ_IMAGE2D(data_type, n0, img, x_coord, y_coord)     READ_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord)
 /** @} */
 
 /** Utility macro to write a 2D OpenCL image object.
@@ -478,26 +490,28 @@
  *
  * @{
  */
-#define WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values) write_image2d_##data_type##x##n0(img, x_coord, y_coord, values)
-#define WRITE_IMAGE2D(data_type, n0, img, x_coord, y_coord, values) WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values)
+#define WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values) \
+    write_image2d_##data_type##x##n0(img, x_coord, y_coord, values)
+#define WRITE_IMAGE2D(data_type, n0, img, x_coord, y_coord, values) \
+    WRITE_IMAGE2D_STR(data_type, n0, img, x_coord, y_coord, values)
 /** @} */
 
 #define VSTORE_STR(size) vstore##size
-#define VSTORE(size) VSTORE_STR(size)
+#define VSTORE(size)     VSTORE_STR(size)
 
-#define float1 float
-#define half1 half
-#define char1 char
-#define uchar1 uchar
-#define short1 short
+#define float1  float
+#define half1   half
+#define char1   char
+#define uchar1  uchar
+#define short1  short
 #define ushort1 ushort
-#define int1 int
-#define uint1 uint
-#define long1 long
-#define ulong1 ulong
+#define int1    int
+#define uint1   uint
+#define long1   long
+#define ulong1  ulong
 #define double1 double
 
-#define vload1(OFFSET, PTR) *(OFFSET + PTR)
+#define vload1(OFFSET, PTR)        *(OFFSET + PTR)
 #define vstore1(DATA, OFFSET, PTR) *(OFFSET + PTR) = DATA
 
 /** Extended partial vstore that correctly handles scalar values as well.
@@ -516,23 +530,23 @@
  * @{
  */
 #define VSTORE_PARTIAL_STR(size, store_size) vstore_partial_##size##_##store_size
-#define VSTORE_PARTIAL(size, store_size) VSTORE_PARTIAL_STR(size, store_size)
+#define VSTORE_PARTIAL(size, store_size)     VSTORE_PARTIAL_STR(size, store_size)
 
 #define NO_STORE(data, offs, ptr) \
     {                             \
     }
 
 // Size == 1 (scalar)
-#define vstore_partial_1_0 NO_STORE
-#define vstore_partial_1_1 vstore1
-#define vstore_partial_1_2 NO_STORE
-#define vstore_partial_1_3 NO_STORE
-#define vstore_partial_1_4 NO_STORE
-#define vstore_partial_1_5 NO_STORE
-#define vstore_partial_1_6 NO_STORE
-#define vstore_partial_1_7 NO_STORE
-#define vstore_partial_1_8 NO_STORE
-#define vstore_partial_1_9 NO_STORE
+#define vstore_partial_1_0  NO_STORE
+#define vstore_partial_1_1  vstore1
+#define vstore_partial_1_2  NO_STORE
+#define vstore_partial_1_3  NO_STORE
+#define vstore_partial_1_4  NO_STORE
+#define vstore_partial_1_5  NO_STORE
+#define vstore_partial_1_6  NO_STORE
+#define vstore_partial_1_7  NO_STORE
+#define vstore_partial_1_8  NO_STORE
+#define vstore_partial_1_9  NO_STORE
 #define vstore_partial_1_10 NO_STORE
 #define vstore_partial_1_11 NO_STORE
 #define vstore_partial_1_12 NO_STORE
@@ -541,16 +555,16 @@
 #define vstore_partial_1_15 NO_STORE
 #define vstore_partial_1_16 NO_STORE
 // Size == 2
-#define vstore_partial_2_0 NO_STORE
-#define vstore_partial_2_1 vstore_partial_1
-#define vstore_partial_2_2 vstore_partial_2
-#define vstore_partial_2_3 NO_STORE
-#define vstore_partial_2_4 NO_STORE
-#define vstore_partial_2_5 NO_STORE
-#define vstore_partial_2_6 NO_STORE
-#define vstore_partial_2_7 NO_STORE
-#define vstore_partial_2_8 NO_STORE
-#define vstore_partial_2_9 NO_STORE
+#define vstore_partial_2_0  NO_STORE
+#define vstore_partial_2_1  vstore_partial_1
+#define vstore_partial_2_2  vstore_partial_2
+#define vstore_partial_2_3  NO_STORE
+#define vstore_partial_2_4  NO_STORE
+#define vstore_partial_2_5  NO_STORE
+#define vstore_partial_2_6  NO_STORE
+#define vstore_partial_2_7  NO_STORE
+#define vstore_partial_2_8  NO_STORE
+#define vstore_partial_2_9  NO_STORE
 #define vstore_partial_2_10 NO_STORE
 #define vstore_partial_2_11 NO_STORE
 #define vstore_partial_2_12 NO_STORE
@@ -559,16 +573,16 @@
 #define vstore_partial_2_15 NO_STORE
 #define vstore_partial_2_16 NO_STORE
 // Size == 3
-#define vstore_partial_3_0 NO_STORE
-#define vstore_partial_3_1 vstore_partial_1
-#define vstore_partial_3_2 vstore_partial_2
-#define vstore_partial_3_3 vstore_partial_3
-#define vstore_partial_3_4 NO_STORE
-#define vstore_partial_3_5 NO_STORE
-#define vstore_partial_3_6 NO_STORE
-#define vstore_partial_3_7 NO_STORE
-#define vstore_partial_3_8 NO_STORE
-#define vstore_partial_3_9 NO_STORE
+#define vstore_partial_3_0  NO_STORE
+#define vstore_partial_3_1  vstore_partial_1
+#define vstore_partial_3_2  vstore_partial_2
+#define vstore_partial_3_3  vstore_partial_3
+#define vstore_partial_3_4  NO_STORE
+#define vstore_partial_3_5  NO_STORE
+#define vstore_partial_3_6  NO_STORE
+#define vstore_partial_3_7  NO_STORE
+#define vstore_partial_3_8  NO_STORE
+#define vstore_partial_3_9  NO_STORE
 #define vstore_partial_3_10 NO_STORE
 #define vstore_partial_3_11 NO_STORE
 #define vstore_partial_3_12 NO_STORE
@@ -577,16 +591,16 @@
 #define vstore_partial_3_15 NO_STORE
 #define vstore_partial_3_16 NO_STORE
 // Size == 4
-#define vstore_partial_4_0 NO_STORE
-#define vstore_partial_4_1 vstore_partial_1
-#define vstore_partial_4_2 vstore_partial_2
-#define vstore_partial_4_3 vstore_partial_3
-#define vstore_partial_4_4 vstore_partial_4
-#define vstore_partial_4_5 NO_STORE
-#define vstore_partial_4_6 NO_STORE
-#define vstore_partial_4_7 NO_STORE
-#define vstore_partial_4_8 NO_STORE
-#define vstore_partial_4_9 NO_STORE
+#define vstore_partial_4_0  NO_STORE
+#define vstore_partial_4_1  vstore_partial_1
+#define vstore_partial_4_2  vstore_partial_2
+#define vstore_partial_4_3  vstore_partial_3
+#define vstore_partial_4_4  vstore_partial_4
+#define vstore_partial_4_5  NO_STORE
+#define vstore_partial_4_6  NO_STORE
+#define vstore_partial_4_7  NO_STORE
+#define vstore_partial_4_8  NO_STORE
+#define vstore_partial_4_9  NO_STORE
 #define vstore_partial_4_10 NO_STORE
 #define vstore_partial_4_11 NO_STORE
 #define vstore_partial_4_12 NO_STORE
@@ -595,16 +609,16 @@
 #define vstore_partial_4_15 NO_STORE
 #define vstore_partial_4_16 NO_STORE
 // Size == 8
-#define vstore_partial_8_0 NO_STORE
-#define vstore_partial_8_1 vstore_partial_1
-#define vstore_partial_8_2 vstore_partial_2
-#define vstore_partial_8_3 vstore_partial_3
-#define vstore_partial_8_4 vstore_partial_4
-#define vstore_partial_8_5 vstore_partial_5
-#define vstore_partial_8_6 vstore_partial_6
-#define vstore_partial_8_7 vstore_partial_7
-#define vstore_partial_8_8 vstore_partial_8
-#define vstore_partial_8_9 NO_STORE
+#define vstore_partial_8_0  NO_STORE
+#define vstore_partial_8_1  vstore_partial_1
+#define vstore_partial_8_2  vstore_partial_2
+#define vstore_partial_8_3  vstore_partial_3
+#define vstore_partial_8_4  vstore_partial_4
+#define vstore_partial_8_5  vstore_partial_5
+#define vstore_partial_8_6  vstore_partial_6
+#define vstore_partial_8_7  vstore_partial_7
+#define vstore_partial_8_8  vstore_partial_8
+#define vstore_partial_8_9  NO_STORE
 #define vstore_partial_8_10 NO_STORE
 #define vstore_partial_8_11 NO_STORE
 #define vstore_partial_8_12 NO_STORE
@@ -613,16 +627,16 @@
 #define vstore_partial_8_15 NO_STORE
 #define vstore_partial_8_16 NO_STORE
 // Size == 16
-#define vstore_partial_16_0 NO_STORE
-#define vstore_partial_16_1 vstore_partial_1
-#define vstore_partial_16_2 vstore_partial_2
-#define vstore_partial_16_3 vstore_partial_3
-#define vstore_partial_16_4 vstore_partial_4
-#define vstore_partial_16_5 vstore_partial_5
-#define vstore_partial_16_6 vstore_partial_6
-#define vstore_partial_16_7 vstore_partial_7
-#define vstore_partial_16_8 vstore_partial_8
-#define vstore_partial_16_9 vstore_partial_9
+#define vstore_partial_16_0  NO_STORE
+#define vstore_partial_16_1  vstore_partial_1
+#define vstore_partial_16_2  vstore_partial_2
+#define vstore_partial_16_3  vstore_partial_3
+#define vstore_partial_16_4  vstore_partial_4
+#define vstore_partial_16_5  vstore_partial_5
+#define vstore_partial_16_6  vstore_partial_6
+#define vstore_partial_16_7  vstore_partial_7
+#define vstore_partial_16_8  vstore_partial_8
+#define vstore_partial_16_9  vstore_partial_9
 #define vstore_partial_16_10 vstore_partial_10
 #define vstore_partial_16_11 vstore_partial_11
 #define vstore_partial_16_12 vstore_partial_12
@@ -648,17 +662,13 @@
  * @param[in] PTR    The base pointer
  * @{
  */
-#define vstore_partial_1(DATA, OFFSET, PTR) \
-    vstore1(DATA.s0, OFFSET, PTR);
+#define vstore_partial_1(DATA, OFFSET, PTR) vstore1(DATA.s0, OFFSET, PTR);
 
-#define vstore_partial_2(DATA, OFFSET, PTR) \
-    vstore2(DATA.s01, OFFSET, PTR);
+#define vstore_partial_2(DATA, OFFSET, PTR) vstore2(DATA.s01, OFFSET, PTR);
 
-#define vstore_partial_3(DATA, OFFSET, PTR) \
-    vstore3(DATA.s012, OFFSET, PTR);
+#define vstore_partial_3(DATA, OFFSET, PTR) vstore3(DATA.s012, OFFSET, PTR);
 
-#define vstore_partial_4(DATA, OFFSET, PTR) \
-    vstore4(DATA.s0123, OFFSET, PTR);
+#define vstore_partial_4(DATA, OFFSET, PTR) vstore4(DATA.s0123, OFFSET, PTR);
 
 #define vstore_partial_5(DATA, OFFSET, PTR)    \
     vstore_partial_4(DATA.s0123, OFFSET, PTR); \
@@ -672,8 +682,7 @@
     vstore_partial_4(DATA.s0123, OFFSET, PTR); \
     vstore_partial_3(DATA.s456, OFFSET, PTR + 4);
 
-#define vstore_partial_8(DATA, OFFSET, PTR) \
-    vstore8(DATA.s01234567, OFFSET, PTR);
+#define vstore_partial_8(DATA, OFFSET, PTR) vstore8(DATA.s01234567, OFFSET, PTR);
 
 #define vstore_partial_9(DATA, OFFSET, PTR)        \
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
@@ -703,186 +712,156 @@
     vstore_partial_8(DATA.s01234567, OFFSET, PTR); \
     vstore_partial_7(DATA.s89abcdef, OFFSET, PTR + 8);
 
-#define vstore_partial_16(DATA, OFFSET, PTR) \
-    vstore16(DATA, OFFSET, PTR);
+#define vstore_partial_16(DATA, OFFSET, PTR) vstore16(DATA, OFFSET, PTR);
 /** @} */ // end of groupd vstore_partial_n
 /** @} */ // end of groupd VSTORE_PARTIAL
 
 // Convert built-in functions with _sat modifier are not supported in floating point so we create defines
 // without _sat to overcome this issue
-#define convert_float_sat convert_float
-#define convert_float1_sat convert_float
-#define convert_float2_sat convert_float2
-#define convert_float3_sat convert_float3
-#define convert_float4_sat convert_float4
-#define convert_float8_sat convert_float8
+#define convert_float_sat   convert_float
+#define convert_float1_sat  convert_float
+#define convert_float2_sat  convert_float2
+#define convert_float3_sat  convert_float3
+#define convert_float4_sat  convert_float4
+#define convert_float8_sat  convert_float8
 #define convert_float16_sat convert_float16
-#define convert_half_sat convert_float
-#define convert_half1_sat convert_half
-#define convert_half2_sat convert_half2
-#define convert_half3_sat convert_half3
-#define convert_half4_sat convert_half4
-#define convert_half8_sat convert_half8
-#define convert_half16_sat convert_half16
+#define convert_half_sat    convert_float
+#define convert_half1_sat   convert_half
+#define convert_half2_sat   convert_half2
+#define convert_half3_sat   convert_half3
+#define convert_half4_sat   convert_half4
+#define convert_half8_sat   convert_half8
+#define convert_half16_sat  convert_half16
 
-#define convert_float1 convert_float
-#define convert_half1 convert_half
-#define convert_char1 convert_char
-#define convert_uchar1 convert_uchar
-#define convert_short1 convert_short
+#define convert_float1  convert_float
+#define convert_half1   convert_half
+#define convert_char1   convert_char
+#define convert_uchar1  convert_uchar
+#define convert_short1  convert_short
 #define convert_ushort1 convert_ushort
-#define convert_int1 convert_int
-#define convert_uint1 convert_uint
-#define convert_long1 convert_long
-#define convert_ulong1 convert_ulong
+#define convert_int1    convert_int
+#define convert_uint1   convert_uint
+#define convert_long1   convert_long
+#define convert_ulong1  convert_ulong
 #define convert_double1 convert_double
 
-#define convert_char1_sat convert_char_sat
-#define convert_uchar1_sat convert_uchar_sat
-#define convert_uchar2_sat convert_uchar2_sat
-#define convert_uchar3_sat convert_uchar3_sat
-#define convert_uchar4_sat convert_uchar4_sat
-#define convert_uchar8_sat convert_uchar8_sat
+#define convert_char1_sat   convert_char_sat
+#define convert_uchar1_sat  convert_uchar_sat
+#define convert_uchar2_sat  convert_uchar2_sat
+#define convert_uchar3_sat  convert_uchar3_sat
+#define convert_uchar4_sat  convert_uchar4_sat
+#define convert_uchar8_sat  convert_uchar8_sat
 #define convert_uchar16_sat convert_uchar16_sat
-#define convert_short1_sat convert_short_sat
+#define convert_short1_sat  convert_short_sat
 #define convert_ushort1_sat convert_ushort_sat
-#define convert_int1_sat convert_int_sat
-#define convert_uint1_sat convert_uint_sat
-#define convert_long1_sat convert_long_sat
-#define convert_ulong1_sat convert_ulong_sat
+#define convert_int1_sat    convert_int_sat
+#define convert_uint1_sat   convert_uint_sat
+#define convert_long1_sat   convert_long_sat
+#define convert_ulong1_sat  convert_ulong_sat
 #define convert_double1_sat convert_double_sat
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
-#define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
+#define VEC_DATA_TYPE(type, size)     VEC_DATA_TYPE_STR(type, size)
 
 #define CONVERT_STR(x, type) (convert_##type((x)))
-#define CONVERT(x, type) CONVERT_STR(x, type)
+#define CONVERT(x, type)     CONVERT_STR(x, type)
 
 #define CONVERT_SAT_STR(x, type) (convert_##type##_sat((x)))
-#define CONVERT_SAT(x, type) CONVERT_SAT_STR(x, type)
+#define CONVERT_SAT(x, type)     CONVERT_SAT_STR(x, type)
 
 #define CONVERT_SAT_ROUND_STR(x, type, round) (convert_##type##_sat_##round((x)))
-#define CONVERT_SAT_ROUND(x, type, round) CONVERT_SAT_ROUND_STR(x, type, round)
+#define CONVERT_SAT_ROUND(x, type, round)     CONVERT_SAT_ROUND_STR(x, type, round)
 
-#define select_vec_dt_uchar(size) uchar##size
-#define select_vec_dt_char(size) char##size
+#define select_vec_dt_uchar(size)  uchar##size
+#define select_vec_dt_char(size)   char##size
 #define select_vec_dt_ushort(size) ushort##size
-#define select_vec_dt_short(size) short##size
-#define select_vec_dt_half(size) short##size
-#define select_vec_dt_uint(size) uint##size
-#define select_vec_dt_int(size) int##size
-#define select_vec_dt_float(size) int##size
-#define select_vec_dt_ulong(size) ulong##size
-#define select_vec_dt_long(size) long##size
+#define select_vec_dt_short(size)  short##size
+#define select_vec_dt_half(size)   short##size
+#define select_vec_dt_uint(size)   uint##size
+#define select_vec_dt_int(size)    int##size
+#define select_vec_dt_float(size)  int##size
+#define select_vec_dt_ulong(size)  ulong##size
+#define select_vec_dt_long(size)   long##size
 
 #define SELECT_VEC_DATA_TYPE_STR(type, size) select_vec_dt_##type(size)
-#define SELECT_VEC_DATA_TYPE(type, size) SELECT_VEC_DATA_TYPE_STR(type, size)
-#define SELECT_DATA_TYPE(type) SELECT_VEC_DATA_TYPE_STR(type, 1)
+#define SELECT_VEC_DATA_TYPE(type, size)     SELECT_VEC_DATA_TYPE_STR(type, size)
+#define SELECT_DATA_TYPE(type)               SELECT_VEC_DATA_TYPE_STR(type, 1)
 
-#define signed_int_vec_dt_uchar(size) char##size
-#define signed_int_vec_dt_char(size) char##size
+#define signed_int_vec_dt_uchar(size)  char##size
+#define signed_int_vec_dt_char(size)   char##size
 #define signed_int_vec_dt_ushort(size) short##size
-#define signed_int_vec_dt_short(size) short##size
-#define signed_int_vec_dt_half(size) short##size
-#define signed_int_vec_dt_uint(size) int##size
-#define signed_int_vec_dt_int(size) int##size
-#define signed_int_vec_dt_float(size) int##size
-#define signed_int_vec_dt_ulong(size) long##size
-#define signed_int_vec_dt_long(size) long##size
+#define signed_int_vec_dt_short(size)  short##size
+#define signed_int_vec_dt_half(size)   short##size
+#define signed_int_vec_dt_uint(size)   int##size
+#define signed_int_vec_dt_int(size)    int##size
+#define signed_int_vec_dt_float(size)  int##size
+#define signed_int_vec_dt_ulong(size)  long##size
+#define signed_int_vec_dt_long(size)   long##size
 
 #define SIGNED_INT_VEC_DATA_TYPE_STR(type, size) signed_int_vec_dt_##type(size)
-#define SIGNED_INT_VEC_DATA_TYPE(type, size) SIGNED_INT_VEC_DATA_TYPE_STR(type, size)
-#define SIGNED_INT_DATA_TYPE(type) SIGNED_INT_VEC_DATA_TYPE_STR(type, 1)
+#define SIGNED_INT_VEC_DATA_TYPE(type, size)     SIGNED_INT_VEC_DATA_TYPE_STR(type, size)
+#define SIGNED_INT_DATA_TYPE(type)               SIGNED_INT_VEC_DATA_TYPE_STR(type, 1)
 
-#define sum_reduce_1(x) (x)
-#define sum_reduce_2(x) ((x).s0) + ((x).s1)
-#define sum_reduce_3(x) sum_reduce_2((x).s01) + ((x).s2)
-#define sum_reduce_4(x) sum_reduce_2((x).s01) + sum_reduce_2((x).s23)
-#define sum_reduce_8(x) sum_reduce_4((x).s0123) + sum_reduce_4((x).s4567)
+#define sum_reduce_1(x)  (x)
+#define sum_reduce_2(x)  ((x).s0) + ((x).s1)
+#define sum_reduce_3(x)  sum_reduce_2((x).s01) + ((x).s2)
+#define sum_reduce_4(x)  sum_reduce_2((x).s01) + sum_reduce_2((x).s23)
+#define sum_reduce_8(x)  sum_reduce_4((x).s0123) + sum_reduce_4((x).s4567)
 #define sum_reduce_16(x) sum_reduce_8((x).s01234567) + sum_reduce_8((x).s89ABCDEF)
 
 #define SUM_REDUCE_STR(x, size) sum_reduce_##size(x)
-#define SUM_REDUCE(x, size) SUM_REDUCE_STR(x, size)
+#define SUM_REDUCE(x, size)     SUM_REDUCE_STR(x, size)
 
-#define prod_reduce_1(x) (x)
-#define prod_reduce_2(x) ((x).s0) * ((x).s1)
-#define prod_reduce_3(x) prod_reduce_2((x).s01) * ((x).s2)
-#define prod_reduce_4(x) prod_reduce_2((x).s01) * prod_reduce_2((x).s23)
-#define prod_reduce_8(x) prod_reduce_4((x).s0123) * prod_reduce_4((x).s4567)
+#define prod_reduce_1(x)  (x)
+#define prod_reduce_2(x)  ((x).s0) * ((x).s1)
+#define prod_reduce_3(x)  prod_reduce_2((x).s01) * ((x).s2)
+#define prod_reduce_4(x)  prod_reduce_2((x).s01) * prod_reduce_2((x).s23)
+#define prod_reduce_8(x)  prod_reduce_4((x).s0123) * prod_reduce_4((x).s4567)
 #define prod_reduce_16(x) prod_reduce_8((x).s01234567) * prod_reduce_8((x).s89ABCDEF)
 
 #define PROD_REDUCE_STR(x, size) prod_reduce_##size(x)
-#define PROD_REDUCE(x, size) PROD_REDUCE_STR(x, size)
+#define PROD_REDUCE(x, size)     PROD_REDUCE_STR(x, size)
 
-#define max_reduce_1(x) (x)
-#define max_reduce_2(x) max(((x).s0), ((x).s1))
-#define max_reduce_3(x) max(max_reduce_2((x).s01), ((x).s2))
-#define max_reduce_4(x) max(max_reduce_2((x).s01), max_reduce_2((x).s23))
-#define max_reduce_8(x) max(max_reduce_4((x).s0123), max_reduce_4((x).s4567))
+#define max_reduce_1(x)  (x)
+#define max_reduce_2(x)  max(((x).s0), ((x).s1))
+#define max_reduce_3(x)  max(max_reduce_2((x).s01), ((x).s2))
+#define max_reduce_4(x)  max(max_reduce_2((x).s01), max_reduce_2((x).s23))
+#define max_reduce_8(x)  max(max_reduce_4((x).s0123), max_reduce_4((x).s4567))
 #define max_reduce_16(x) max(max_reduce_8((x).s01234567), max_reduce_8((x).s89ABCDEF))
 
 #define MAX_REDUCE_STR(x, size) max_reduce_##size(x)
-#define MAX_REDUCE(x, size) MAX_REDUCE_STR(x, size)
+#define MAX_REDUCE(x, size)     MAX_REDUCE_STR(x, size)
 
-#define min_reduce_1(x) (x)
-#define min_reduce_2(x) min(((x).s0), ((x).s1))
-#define min_reduce_3(x) min(min_reduce_2((x).s01), ((x).s2))
-#define min_reduce_4(x) min(min_reduce_2((x).s01), min_reduce_2((x).s23))
-#define min_reduce_8(x) min(min_reduce_4((x).s0123), min_reduce_4((x).s4567))
+#define min_reduce_1(x)  (x)
+#define min_reduce_2(x)  min(((x).s0), ((x).s1))
+#define min_reduce_3(x)  min(min_reduce_2((x).s01), ((x).s2))
+#define min_reduce_4(x)  min(min_reduce_2((x).s01), min_reduce_2((x).s23))
+#define min_reduce_8(x)  min(min_reduce_4((x).s0123), min_reduce_4((x).s4567))
 #define min_reduce_16(x) min(min_reduce_8((x).s01234567), min_reduce_8((x).s89ABCDEF))
 
 #define MIN_REDUCE_STR(x, size) min_reduce_##size(x)
-#define MIN_REDUCE(x, size) MIN_REDUCE_STR(x, size)
+#define MIN_REDUCE(x, size)     MIN_REDUCE_STR(x, size)
 
-#define VECTOR_DECLARATION(name)     \
-    __global uchar *name##_ptr,      \
-    uint        name##_stride_x, \
-    uint        name##_step_x,   \
-    uint        name##_offset_first_element_in_bytes
+#define VECTOR_DECLARATION(name) \
+    __global uchar *name##_ptr, uint name##_stride_x, uint name##_step_x, uint name##_offset_first_element_in_bytes
 
-#define IMAGE_DECLARATION(name)      \
-    __global uchar *name##_ptr,      \
-    uint        name##_stride_x, \
-    uint        name##_step_x,   \
-    uint        name##_stride_y, \
-    uint        name##_step_y,   \
-    uint        name##_offset_first_element_in_bytes
+#define IMAGE_DECLARATION(name)                                                                                     \
+    __global uchar *name##_ptr, uint name##_stride_x, uint name##_step_x, uint name##_stride_y, uint name##_step_y, \
+        uint name##_offset_first_element_in_bytes
 
-#define TENSOR3D_DECLARATION(name)   \
-    __global uchar *name##_ptr,      \
-    uint        name##_stride_x, \
-    uint        name##_step_x,   \
-    uint        name##_stride_y, \
-    uint        name##_step_y,   \
-    uint        name##_stride_z, \
-    uint        name##_step_z,   \
-    uint        name##_offset_first_element_in_bytes
+#define TENSOR3D_DECLARATION(name)                                                                                  \
+    __global uchar *name##_ptr, uint name##_stride_x, uint name##_step_x, uint name##_stride_y, uint name##_step_y, \
+        uint name##_stride_z, uint name##_step_z, uint name##_offset_first_element_in_bytes
 
-#define TENSOR4D_DECLARATION(name)   \
-    __global uchar *name##_ptr,      \
-    uint        name##_stride_x, \
-    uint        name##_step_x,   \
-    uint        name##_stride_y, \
-    uint        name##_step_y,   \
-    uint        name##_stride_z, \
-    uint        name##_step_z,   \
-    uint        name##_stride_w, \
-    uint        name##_step_w,   \
-    uint        name##_offset_first_element_in_bytes
+#define TENSOR4D_DECLARATION(name)                                                                                  \
+    __global uchar *name##_ptr, uint name##_stride_x, uint name##_step_x, uint name##_stride_y, uint name##_step_y, \
+        uint name##_stride_z, uint name##_step_z, uint name##_stride_w, uint name##_step_w,                         \
+        uint name##_offset_first_element_in_bytes
 
-#define TENSOR5D_DECLARATION(name)   \
-    __global uchar *name##_ptr,      \
-    uint        name##_stride_x, \
-    uint        name##_step_x,   \
-    uint        name##_stride_y, \
-    uint        name##_step_y,   \
-    uint        name##_stride_z, \
-    uint        name##_step_z,   \
-    uint        name##_stride_w, \
-    uint        name##_step_w,   \
-    uint        name##_stride_v, \
-    uint        name##_step_v,   \
-    uint        name##_offset_first_element_in_bytes
+#define TENSOR5D_DECLARATION(name)                                                                                  \
+    __global uchar *name##_ptr, uint name##_stride_x, uint name##_step_x, uint name##_stride_y, uint name##_step_y, \
+        uint name##_stride_z, uint name##_step_z, uint name##_stride_w, uint name##_step_w, uint name##_stride_v,   \
+        uint name##_step_v, uint name##_offset_first_element_in_bytes
 
 #define CONVERT_TO_VECTOR_STRUCT(name) \
     update_vector_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x)
@@ -890,38 +869,47 @@
 #define CONVERT_TO_VECTOR_STRUCT_NO_STEP(name) \
     update_vector_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0)
 
-#define CONVERT_TO_IMAGE_STRUCT(name) \
-    update_image_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y)
+#define CONVERT_TO_IMAGE_STRUCT(name)                                                                           \
+    update_image_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, \
+                              name##_stride_y, name##_step_y)
 
 #define CONVERT_TO_IMAGE_STRUCT_NO_STEP(name) \
     update_image_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0)
 
-#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT(name) \
-    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, name##_stride_z, name##_step_z)
+#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT(name)                                                                 \
+    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, \
+                                            name##_step_x, name##_stride_y, name##_step_y, name##_stride_z,    \
+                                            name##_step_z)
 
-#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(name) \
-    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0, name##_stride_z, name##_step_z)
+#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(name)                                                            \
+    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, \
+                                            name##_stride_y, 0, name##_stride_z, name##_step_z)
 
-#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT(name) \
-    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, name##_stride_z, name##_step_z)
+#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT(name)                                                                 \
+    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, \
+                                            name##_step_x, name##_stride_y, name##_step_y, name##_stride_z,    \
+                                            name##_step_z)
 
-#define CONVERT_TO_TENSOR3D_STRUCT(name)                                                                                                           \
-    update_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \
-                                 name##_stride_z, name##_step_z)
+#define CONVERT_TO_TENSOR3D_STRUCT(name)                                                                           \
+    update_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, \
+                                 name##_stride_y, name##_step_y, name##_stride_z, name##_step_z)
 
-#define CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(name) \
-    update_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0, name##_stride_z, 0)
+#define CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(name)                                                       \
+    update_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, \
+                                 name##_stride_y, 0, name##_stride_z, 0)
 
-#define CONVERT_TO_TENSOR4D_STRUCT(name, mod_size)                                                                                                 \
-    update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \
-                                 name##_stride_z, name##_step_z, name##_stride_w, name##_step_w, mod_size)
+#define CONVERT_TO_TENSOR4D_STRUCT(name, mod_size)                                                                 \
+    update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, \
+                                 name##_stride_y, name##_step_y, name##_stride_z, name##_step_z, name##_stride_w,  \
+                                 name##_step_w, mod_size)
 
-#define CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(name, mod_size) \
-    update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0, name##_stride_z, 0, name##_stride_w, 0, mod_size)
+#define CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(name, mod_size)                                             \
+    update_tensor4D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, \
+                                 name##_stride_y, 0, name##_stride_z, 0, name##_stride_w, 0, mod_size)
 
-#define CONVERT_TO_TENSOR3D_STRUCT_NO_UPDATE_PTR(name)                                                                                       \
-    tensor3D_ptr_no_update(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \
-                           name##_stride_z, name##_step_z)
+#define CONVERT_TO_TENSOR3D_STRUCT_NO_UPDATE_PTR(name)                                                       \
+    tensor3D_ptr_no_update(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, \
+                           name##_stride_y, name##_step_y, name##_stride_z, name##_step_z)
 
 /** Structure to hold Vector information */
 typedef struct Vector
@@ -970,10 +958,10 @@ typedef struct Tensor4D
  *
  * @return An image object
  */
-inline Vector update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x)
+inline Vector
+update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x)
 {
-    Vector vector =
-    {
+    Vector vector = {
         .ptr                           = ptr,
         .offset_first_element_in_bytes = offset_first_element_in_bytes,
         .stride_x                      = stride_x,
@@ -993,15 +981,13 @@ inline Vector update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_
  *
  * @return An image object
  */
-inline Image update_image_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y)
+inline Image update_image_workitem_ptr(
+    __global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y)
 {
-    Image img =
-    {
-        .ptr                           = ptr,
-        .offset_first_element_in_bytes = offset_first_element_in_bytes,
-        .stride_x                      = stride_x,
-        .stride_y                      = stride_y
-    };
+    Image img = {.ptr                           = ptr,
+                 .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                 .stride_x                      = stride_x,
+                 .stride_y                      = stride_y};
     img.ptr += img.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y;
     return img;
 }
@@ -1019,16 +1005,21 @@ inline Image update_image_workitem_ptr(__global uchar *ptr, uint offset_first_el
  *
  * @return A 3D tensor object
  */
-inline Image update_image_from_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+inline Image update_image_from_tensor3D_workitem_ptr(__global uchar *ptr,
+                                                     uint            offset_first_element_in_bytes,
+                                                     uint            stride_x,
+                                                     uint            step_x,
+                                                     uint            stride_y,
+                                                     uint            step_y,
+                                                     uint            stride_z,
+                                                     uint            step_z)
 {
-    Image img =
-    {
-        .ptr                           = ptr,
-        .offset_first_element_in_bytes = offset_first_element_in_bytes,
-        .stride_x                      = stride_x,
-        .stride_y                      = stride_y
-    };
-    img.ptr += img.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;
+    Image img = {.ptr                           = ptr,
+                 .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                 .stride_x                      = stride_x,
+                 .stride_y                      = stride_y};
+    img.ptr += img.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y +
+               get_global_id(2) * step_z;
     return img;
 }
 
@@ -1045,17 +1036,22 @@ inline Image update_image_from_tensor3D_workitem_ptr(__global uchar *ptr, uint o
  *
  * @return A 3D tensor object
  */
-inline Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+inline Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr,
+                                             uint            offset_first_element_in_bytes,
+                                             uint            stride_x,
+                                             uint            step_x,
+                                             uint            stride_y,
+                                             uint            step_y,
+                                             uint            stride_z,
+                                             uint            step_z)
 {
-    Tensor3D tensor =
-    {
-        .ptr                           = ptr,
-        .offset_first_element_in_bytes = offset_first_element_in_bytes,
-        .stride_x                      = stride_x,
-        .stride_y                      = stride_y,
-        .stride_z                      = stride_z
-    };
-    tensor.ptr += tensor.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;
+    Tensor3D tensor = {.ptr                           = ptr,
+                       .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                       .stride_x                      = stride_x,
+                       .stride_y                      = stride_y,
+                       .stride_z                      = stride_z};
+    tensor.ptr += tensor.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y +
+                  get_global_id(2) * step_z;
     return tensor;
 }
 
@@ -1072,34 +1068,44 @@ inline Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_fi
  *
  * @return A 3D tensor object
  */
-inline Tensor3D tensor3D_ptr_no_update(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+inline Tensor3D tensor3D_ptr_no_update(__global uchar *ptr,
+                                       uint            offset_first_element_in_bytes,
+                                       uint            stride_x,
+                                       uint            step_x,
+                                       uint            stride_y,
+                                       uint            step_y,
+                                       uint            stride_z,
+                                       uint            step_z)
 {
-    Tensor3D tensor =
-    {
-        .ptr                           = ptr,
-        .offset_first_element_in_bytes = offset_first_element_in_bytes,
-        .stride_x                      = stride_x,
-        .stride_y                      = stride_y,
-        .stride_z                      = stride_z
-    };
+    Tensor3D tensor = {.ptr                           = ptr,
+                       .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                       .stride_x                      = stride_x,
+                       .stride_y                      = stride_y,
+                       .stride_z                      = stride_z};
     return tensor;
 }
 
-inline Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w,
-                                             uint step_w,
-                                             uint mod_size)
+inline Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr,
+                                             uint            offset_first_element_in_bytes,
+                                             uint            stride_x,
+                                             uint            step_x,
+                                             uint            stride_y,
+                                             uint            step_y,
+                                             uint            stride_z,
+                                             uint            step_z,
+                                             uint            stride_w,
+                                             uint            step_w,
+                                             uint            mod_size)
 {
-    Tensor4D tensor =
-    {
-        .ptr                           = ptr,
-        .offset_first_element_in_bytes = offset_first_element_in_bytes,
-        .stride_x                      = stride_x,
-        .stride_y                      = stride_y,
-        .stride_z                      = stride_z,
-        .stride_w                      = stride_w
-    };
+    Tensor4D tensor = {.ptr                           = ptr,
+                       .offset_first_element_in_bytes = offset_first_element_in_bytes,
+                       .stride_x                      = stride_x,
+                       .stride_y                      = stride_y,
+                       .stride_z                      = stride_z,
+                       .stride_w                      = stride_w};
 
-    tensor.ptr += tensor.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y + (get_global_id(2) % mod_size) * step_z + (get_global_id(2) / mod_size) * step_w;
+    tensor.ptr += tensor.offset_first_element_in_bytes + get_global_id(0) * step_x + get_global_id(1) * step_y +
+                  (get_global_id(2) % mod_size) * step_z + (get_global_id(2) / mod_size) * step_w;
     return tensor;
 }
 
@@ -1171,7 +1177,8 @@ inline __global const uchar *tensor3D_index2ptr(const Tensor3D *tensor, uint wid
 
     const uint x = index;
 
-    return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z + tensor->offset_first_element_in_bytes;
+    return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z +
+           tensor->offset_first_element_in_bytes;
 }
 
 #endif // _HELPER_H

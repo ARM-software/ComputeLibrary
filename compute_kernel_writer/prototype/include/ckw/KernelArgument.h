@@ -26,6 +26,7 @@
 #define CKW_PROTOTYPE_INCLUDE_CKW_KERNELARGUMENT_H
 
 #include "ckw/TensorInfo.h"
+
 #include <cstdint>
 
 namespace ckw
@@ -98,7 +99,7 @@ private:
         TensorComponentType tensor_component_type;
     };
 
-    SubId _sub_id{ 0 };
+    SubId _sub_id{0};
 };
 
 } // namespace ckw

@@ -26,7 +26,11 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_qu16_boundingboxtransform(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, BoundingBoxTransformInfo bbinfo, const Window &window)
+void neon_qu16_boundingboxtransform(const ITensor           *boxes,
+                                    ITensor                 *pred_boxes,
+                                    const ITensor           *deltas,
+                                    BoundingBoxTransformInfo bbinfo,
+                                    const Window            &window)
 {
     return bounding_box_transform_qsymm16(boxes, pred_boxes, deltas, bbinfo, window);
 }

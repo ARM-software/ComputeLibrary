@@ -53,22 +53,30 @@ public:
      * @param[in] original_input_shape Shape of the original src tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
-    void configure(const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_input_shape, DataLayout data_layout);
+    void configure(const ITensorInfo *src,
+                   ITensorInfo       *dst,
+                   const TensorShape &original_input_shape,
+                   DataLayout         data_layout);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref CpuConvertFullyConnectedWeightsKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_input_shape, DataLayout data_layout);
+    static Status validate(const ITensorInfo *src,
+                           const ITensorInfo *dst,
+                           const TensorShape &original_input_shape,
+                           DataLayout         data_layout);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
-    unsigned int _factor1{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NCHW; its number of channels otherwise */
-    unsigned int _factor2{ 0 }; /* equals to the number of elements per original src plane if @p data_layout == NHWC; its number of channels otherwise */
+    unsigned int _factor1{
+        0}; /* equals to the number of elements per original src plane if @p data_layout == NCHW; its number of channels otherwise */
+    unsigned int _factor2{
+        0}; /* equals to the number of elements per original src plane if @p data_layout == NHWC; its number of channels otherwise */
 };
 } // namespace kernels
 } // namespace cpu

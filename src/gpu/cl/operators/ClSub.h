@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_SUB_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -65,7 +66,11 @@ public:
      * @param[in]      policy          Policy to use to handle overflow.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, ConvertPolicy policy,
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   ConvertPolicy              policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -73,7 +78,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, ConvertPolicy policy,
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           ConvertPolicy              policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 } // namespace opencl

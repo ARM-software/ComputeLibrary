@@ -24,19 +24,19 @@
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuPermute.h"
 
 namespace arm_compute
 {
 struct NEPermute::Impl
 {
-    const ITensor                   *src{ nullptr };
-    ITensor                         *dst{ nullptr };
-    std::unique_ptr<cpu::CpuPermute> op{ nullptr };
+    const ITensor                   *src{nullptr};
+    ITensor                         *dst{nullptr};
+    std::unique_ptr<cpu::CpuPermute> op{nullptr};
 };
 
-NEPermute::NEPermute()
-    : _impl(std::make_unique<Impl>())
+NEPermute::NEPermute() : _impl(std::make_unique<Impl>())
 {
 }
 

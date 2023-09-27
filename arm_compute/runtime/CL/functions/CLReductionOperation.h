@@ -80,7 +80,8 @@ public:
      * @param[in]  op        Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in]  keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
      */
-    void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
+    void
+    configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -90,7 +91,12 @@ public:
      * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in]  keep_dims       (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   unsigned int            axis,
+                   ReductionOperation      op,
+                   bool                    keep_dims = true);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperation.
      *
@@ -102,7 +108,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *output,
+                           unsigned int       axis,
+                           ReductionOperation op,
+                           bool               keep_dims = true);
 
     // Inherited methods overridden:
     void run() override;

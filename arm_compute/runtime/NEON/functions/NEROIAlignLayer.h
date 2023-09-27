@@ -77,7 +77,10 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *rois,
+                           ITensorInfo               *output,
+                           const ROIPoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEROIALIGNLAYER_H */

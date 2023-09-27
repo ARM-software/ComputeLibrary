@@ -27,6 +27,7 @@
 
 #include "ckw/Error.h"
 #include "ckw/types/DataType.h"
+
 #include "src/ITile.h"
 
 #include <cstdint>
@@ -81,8 +82,7 @@ public:
      *
      * @param[in] tile The tile object.
      */
-    TileView(const T &tile)
-        : _tile(&tile), _area(0, tile.info().height(), 0, tile.info().width())
+    TileView(const T &tile) : _tile(&tile), _area(0, tile.info().height(), 0, tile.info().width())
     {
     }
 
@@ -91,8 +91,7 @@ public:
      * @param[in] tile The tile object.
      * @param[in] area The rectangular active area.
      */
-    TileView(const T &tile, const TileArea &area)
-        : _tile(&tile), _area(area)
+    TileView(const T &tile, const TileArea &area) : _tile(&tile), _area(area)
     {
     }
 
@@ -176,7 +175,8 @@ public:
     /** Get whether the tile view refers to the whole tile. */
     bool is_full_tile() const
     {
-        return row_start() == 0 && row_end() == _tile->info().height() && col_start() == 0 && col_end() == _tile->info().width();
+        return row_start() == 0 && row_end() == _tile->info().height() && col_start() == 0 &&
+               col_end() == _tile->info().width();
     }
 
 private:

@@ -48,8 +48,18 @@ public:
      * @param[in] consumer_idx Consumer node input index
      * @param[in] tensor       Tensor associated with the edge
      */
-    Edge(EdgeID id, INode *producer, unsigned int producer_idx, INode *consumer, unsigned int consumer_idx, Tensor *tensor)
-        : _id(id), _producer(producer), _consumer(consumer), _producer_idx(producer_idx), _consumer_idx(consumer_idx), _tensor(tensor)
+    Edge(EdgeID       id,
+         INode       *producer,
+         unsigned int producer_idx,
+         INode       *consumer,
+         unsigned int consumer_idx,
+         Tensor      *tensor)
+        : _id(id),
+          _producer(producer),
+          _consumer(consumer),
+          _producer_idx(producer_idx),
+          _consumer_idx(consumer_idx),
+          _tensor(tensor)
 
     {
     }

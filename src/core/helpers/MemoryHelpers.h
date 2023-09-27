@@ -24,9 +24,9 @@
 #ifndef SRC_COMMON_MEMORY_HELPERS_H
 #define SRC_COMMON_MEMORY_HELPERS_H
 
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
@@ -43,18 +43,17 @@ inline int offset_int_vec(int offset)
 template <typename TensorType>
 struct WorkspaceDataElement
 {
-    int                          slot{ -1 };
-    experimental::MemoryLifetime lifetime{ experimental::MemoryLifetime::Temporary };
-    std::unique_ptr<TensorType>  tensor{ nullptr };
+    int                          slot{-1};
+    experimental::MemoryLifetime lifetime{experimental::MemoryLifetime::Temporary};
+    std::unique_ptr<TensorType>  tensor{nullptr};
 };
 
 template <typename TensorType>
 using WorkspaceData = std::vector<WorkspaceDataElement<TensorType>>;
 
 template <typename TensorType>
-WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
-                                           MemoryGroup                            &mgroup,
-                                           ITensorPack                            &run_pack)
+WorkspaceData<TensorType>
+manage_workspace(const experimental::MemoryRequirements &mem_reqs, MemoryGroup &mgroup, ITensorPack &run_pack)
 {
     ITensorPack dummy_pack = ITensorPack();
     return manage_workspace<TensorType>(mem_reqs, mgroup, run_pack, dummy_pack);
@@ -63,24 +62,26 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
 template <typename TensorType>
 WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirements &mem_reqs,
                                            MemoryGroup                            &mgroup,
-                                           ITensorPack &run_pack, ITensorPack &prep_pack)
+                                           ITensorPack                            &run_pack,
+                                           ITensorPack                            &prep_pack)
 {
     WorkspaceData<TensorType> workspace_memory;
-    for(const auto &req : mem_reqs)
+    for (const auto &req : mem_reqs)
     {
-        if(req.size == 0)
+        if (req.size == 0)
         {
             continue;
         }
 
-        const auto aux_info = TensorInfo{ TensorShape(req.size), 1, DataType::U8 };
-        workspace_memory.emplace_back(WorkspaceDataElement<TensorType> { req.slot, req.lifetime, std::make_unique<TensorType>() });
+        const auto aux_info = TensorInfo{TensorShape(req.size), 1, DataType::U8};
+        workspace_memory.emplace_back(
+            WorkspaceDataElement<TensorType>{req.slot, req.lifetime, std::make_unique<TensorType>()});
 
         auto aux_tensor = workspace_memory.back().tensor.get();
         ARM_COMPUTE_ERROR_ON_NULLPTR(aux_tensor);
         aux_tensor->allocator()->init(aux_info, req.alignment);
 
-        if(req.lifetime == experimental::MemoryLifetime::Temporary)
+        if (req.lifetime == experimental::MemoryLifetime::Temporary)
         {
             mgroup.manage(aux_tensor);
         }
@@ -91,7 +92,7 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
         run_pack.add_tensor(req.slot, aux_tensor);
     }
 
-    for(auto &mem : workspace_memory)
+    for (auto &mem : workspace_memory)
     {
         auto tensor = mem.tensor.get();
         tensor->allocator()->allocate();
@@ -103,31 +104,29 @@ WorkspaceData<TensorType> manage_workspace(const experimental::MemoryRequirement
 template <typename TensorType>
 void release_prepare_tensors(WorkspaceData<TensorType> &workspace, ITensorPack &prep_pack)
 {
-    workspace.erase(std::remove_if(workspace.begin(),
-                                   workspace.end(),
-                                   [&prep_pack](auto & wk)
-    {
-        const bool to_erase = wk.lifetime == experimental::MemoryLifetime::Prepare;
-        if(to_erase)
-        {
-            prep_pack.remove_tensor(wk.slot);
-        }
-        return to_erase;
-    }),
-    workspace.end());
+    workspace.erase(std::remove_if(workspace.begin(), workspace.end(),
+                                   [&prep_pack](auto &wk)
+                                   {
+                                       const bool to_erase = wk.lifetime == experimental::MemoryLifetime::Prepare;
+                                       if (to_erase)
+                                       {
+                                           prep_pack.remove_tensor(wk.slot);
+                                       }
+                                       return to_erase;
+                                   }),
+                    workspace.end());
 }
 
 /** Utility function to release tensors with lifetime marked as Prepare */
 template <typename TensorType>
-void release_temporaries(const experimental::MemoryRequirements &mem_reqs,
-                         WorkspaceData<TensorType>              &workspace)
+void release_temporaries(const experimental::MemoryRequirements &mem_reqs, WorkspaceData<TensorType> &workspace)
 {
-    for(auto &ws : workspace)
+    for (auto &ws : workspace)
     {
         const int slot = ws.slot;
-        for(auto &m : mem_reqs)
+        for (auto &m : mem_reqs)
         {
-            if(m.slot == slot && m.lifetime == experimental::MemoryLifetime::Prepare)
+            if (m.slot == slot && m.lifetime == experimental::MemoryLifetime::Prepare)
             {
                 auto tensor = ws.tensor.get();
                 tensor->allocator()->free();

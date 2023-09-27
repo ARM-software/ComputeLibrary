@@ -32,10 +32,10 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/Cast.h"
 #include "support/StringSupport.h"
 
@@ -52,20 +52,17 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src,
-                                                         1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32, DataType::S64, DataType::U64);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst,
-                                                         1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
+                                                         DataType::S16, DataType::U16, DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32, DataType::S64, DataType::U64);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::S16, DataType::U16, DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == dst->data_type(), "src and dst data types must be different");
 
     // Validate in case of configured dst
-    if(dst->total_size() > 0)
+    if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }
@@ -79,7 +76,10 @@ ClCastKernel::ClCastKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClCastKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
+void ClCastKernel::configure(const CLCompileContext &compile_context,
+                             const ITensorInfo      *src,
+                             ITensorInfo            *dst,
+                             ConvertPolicy           policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -88,7 +88,7 @@ void ClCastKernel::configure(const CLCompileContext &compile_context, const ITen
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, policy));
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Get data sizes
     const size_t src_size = data_size_from_type(src->data_type());
@@ -100,12 +100,14 @@ void ClCastKernel::configure(const CLCompileContext &compile_context, const ITen
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % num_elems_processed_per_iteration));
     build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(dst->data_type()));
     // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
     build_opts.add_option_if(is_data_type_float(src->data_type()) || policy == ConvertPolicy::SATURATE, "-DSATURATE");
-    build_opts.add_option_if(is_data_type_float(src->data_type()) || is_data_type_float(dst->data_type()), "-DIS_DATA_TYPE_FLOAT");
+    build_opts.add_option_if(is_data_type_float(src->data_type()) || is_data_type_float(dst->data_type()),
+                             "-DIS_DATA_TYPE_FLOAT");
     build_opts.add_option_if(is_data_type_quantized(src->data_type()), "-DIS_DATA_TYPE_QUANTIZED");
 
     // Create kernel
@@ -148,8 +150,9 @@ void ClCastKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::Comm
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
@@ -162,8 +165,7 @@ void ClCastKernel::run_op(ITensorPack &tensors, const Window &window, ::cl::Comm
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

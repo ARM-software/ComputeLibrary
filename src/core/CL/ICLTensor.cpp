@@ -27,8 +27,7 @@
 
 using namespace arm_compute;
 
-ICLTensor::ICLTensor()
-    : _mapping(nullptr)
+ICLTensor::ICLTensor() : _mapping(nullptr)
 {
 }
 

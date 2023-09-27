@@ -43,7 +43,7 @@ enum class CLTunerMode
 struct CLTuningInfo
 {
     CLTunerMode tuner_mode = CLTunerMode::NORMAL; /**< Parameter to select the level (granularity) of the tuning */
-    bool        tune_wbsm  = false;               /**< Flag to tune the batches of work groups distributed to compute units.
+    bool        tune_wbsm  = false; /**< Flag to tune the batches of work groups distributed to compute units.
                                                        Internally, the library will check if this feature is available on
                                                        the target platform. This OpenCL tuner extension is still in experimental phase */
 };
@@ -56,11 +56,10 @@ struct CLTuningInfo
  */
 inline CLTunerMode tuner_mode_from_name(const std::string &name)
 {
-    static const std::map<std::string, CLTunerMode> tuner_modes =
-    {
-        { "exhaustive", CLTunerMode::EXHAUSTIVE },
-        { "normal", CLTunerMode::NORMAL },
-        { "rapid", CLTunerMode::RAPID },
+    static const std::map<std::string, CLTunerMode> tuner_modes = {
+        {"exhaustive", CLTunerMode::EXHAUSTIVE},
+        {"normal", CLTunerMode::NORMAL},
+        {"rapid", CLTunerMode::RAPID},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -71,7 +70,7 @@ inline CLTunerMode tuner_mode_from_name(const std::string &name)
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }

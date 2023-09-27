@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEDEPTHTOSPACELAYER_H
 #define ARM_COMPUTE_NEDEPTHTOSPACELAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute

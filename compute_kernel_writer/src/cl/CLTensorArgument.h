@@ -26,7 +26,9 @@
 
 #include "ckw/types/TensorComponentType.h"
 #include "ckw/types/TensorStorageType.h"
+
 #include "src/ITensor.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -67,7 +69,7 @@ public:
      * unlike @ref CLTensorComponent::component which is for the public API and only returns
      * a reference to a generic @ref ITile object.
      */
-    CLTensorComponent& cl_component(TensorComponentType component_type);
+    CLTensorComponent &cl_component(TensorComponentType component_type);
 
     // Inherited method overridden
     TensorStorageVariable                &storage(TensorStorageType x) override;
@@ -78,7 +80,7 @@ public:
 private:
     std::string create_storage_name(TensorStorageType x) const;
 
-    bool                                            _return_dims_by_value{ false };
+    bool                                            _return_dims_by_value{false};
     std::vector<TensorStorageVariable>              _storages_used{};
     std::vector<std::unique_ptr<CLTensorComponent>> _components_used{};
 };

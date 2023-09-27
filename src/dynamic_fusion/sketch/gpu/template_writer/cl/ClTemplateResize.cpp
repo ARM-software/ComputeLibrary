@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
@@ -37,8 +38,10 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-ClTemplateResize::ClTemplateResize(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const ClTemplateResize::Attributes &attributes)
-    : IGpuTemplateComponentWriter{ id, tensors }, _src{}, _dst{}, _attributes{ attributes }
+ClTemplateResize::ClTemplateResize(ComponentId                         id,
+                                   const ArgumentPack<ITensorInfo>    &tensors,
+                                   const ClTemplateResize::Attributes &attributes)
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _dst{}, _attributes{attributes}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
@@ -63,9 +66,9 @@ TILE(uint, 1, 1, g_dst_indirect_y);
     const int bout = g_ind_2 / {{arg_dst}}_h;
 )_";
 
-    if(_attributes.interpolation_policy() == InterpolationPolicy::NEAREST_NEIGHBOR)
+    if (_attributes.interpolation_policy() == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
-        if(_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
+        if (_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
         {
             code += R"_(
     float xi_f = (g_ind_1 * {{SCALE_X}});
@@ -80,7 +83,7 @@ TILE(uint, 1, 1, g_dst_indirect_y);
 )_";
         }
 
-        if(_attributes.align_corners())
+        if (_attributes.align_corners())
         {
             code += R"_(
     xi_f = round(xi_f);
@@ -95,9 +98,9 @@ TILE(uint, 1, 1, g_dst_indirect_y);
     T_LOAD_NHWC_WITH_DILATION({{SRC_DATA_TYPE}}, 1, 1, N0, {{SRC_TENSOR_TYPE}}, {{src}}, bout, yi0, xi0, g_ind_0, {{src}}_w, {{src}}_h, 1, 1, false, {{dst}});
 )_";
     }
-    else if(_attributes.interpolation_policy() == InterpolationPolicy::BILINEAR)
+    else if (_attributes.interpolation_policy() == InterpolationPolicy::BILINEAR)
     {
-        if(_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
+        if (_attributes.sampling_policy() == SamplingPolicy::TOP_LEFT)
         {
             code += R"_(
     float xi_f = (g_ind_1 * {{SCALE_X}});
@@ -137,7 +140,7 @@ TILE(uint, 1, 1, g_dst_indirect_y);
     T_LOAD_NHWC_WITH_DILATION({{SRC_DATA_TYPE}}, 1, 1, N0, {{SRC_TENSOR_TYPE}}, {{src}}, bout, yi1, xi1, g_ind_0, {{src}}_w, {{src}}_h, 1, 1, false, in11);
 )_";
 
-        if(is_data_type_float(_src->data_type()))
+        if (is_data_type_float(_src->data_type()))
         {
             code += R"_(
     const {{SRC_DATA_TYPE}} a  = ({{SRC_DATA_TYPE}})(xi_f - (float)xi);
@@ -158,9 +161,9 @@ TILE(uint, 1, 1, g_dst_indirect_y);
     const float b1 = (1.f - a1);
 
     {{dst}}[0].v = CONVERT_SAT(
-        (CONVERT(in00[0].v, VEC_DATA_TYPE(float, N0)) * b * b1) + 
+        (CONVERT(in00[0].v, VEC_DATA_TYPE(float, N0)) * b * b1) +
         (CONVERT(in01[0].v, VEC_DATA_TYPE(float, N0)) * a * b1) +
-        (CONVERT(in10[0].v, VEC_DATA_TYPE(float, N0)) * b * a1) + 
+        (CONVERT(in10[0].v, VEC_DATA_TYPE(float, N0)) * b * a1) +
         (CONVERT(in11[0].v, VEC_DATA_TYPE(float, N0)) * a * a1), VEC_DATA_TYPE({{DST_DATA_TYPE}}, N0));
 )_";
         }
@@ -179,22 +182,18 @@ TILE(uint, 1, 1, g_dst_indirect_y);
     return code;
 }
 
-void ClTemplateResize::declare_variables(GpuKernelVariableTable &vtable, const IGpuTemplateComponentWriter::ComponentGroup &comp_group) const
+void ClTemplateResize::declare_variables(GpuKernelVariableTable                            &vtable,
+                                         const IGpuTemplateComponentWriter::ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "dst");
 }
 
-TagLUT ClTemplateResize::get_tag_lut(const GpuKernelVariableTable &vtable, const IGpuTemplateComponentWriter::ComponentGroup &comp_group) const
+TagLUT ClTemplateResize::get_tag_lut(const GpuKernelVariableTable                      &vtable,
+                                     const IGpuTemplateComponentWriter::ComponentGroup &comp_group) const
 {
     TagLUT lut{};
 
@@ -212,8 +211,10 @@ TagLUT ClTemplateResize::get_tag_lut(const GpuKernelVariableTable &vtable, const
     lut["DST_DATA_TYPE"]   = get_cl_type_from_data_type(_dst->data_type());
     lut["CONSTANT_VALUE"]  = string_from_pixel_value(0, _src->data_type());
 
-    const float scale_x = scale_utils::calculate_resize_ratio(_src->dimension(1), _dst->dimension(1), _attributes.align_corners());
-    const float scale_y = scale_utils::calculate_resize_ratio(_src->dimension(2), _dst->dimension(2), _attributes.align_corners());
+    const float scale_x =
+        scale_utils::calculate_resize_ratio(_src->dimension(1), _dst->dimension(1), _attributes.align_corners());
+    const float scale_y =
+        scale_utils::calculate_resize_ratio(_src->dimension(2), _dst->dimension(2), _attributes.align_corners());
 
     lut["SCALE_X"] = float_to_string_with_full_precision(scale_x);
     lut["SCALE_Y"] = float_to_string_with_full_precision(scale_y);
@@ -242,7 +243,8 @@ std::string ClTemplateResize::get_config_id() const
     std::string config_id{};
 
     config_id += "resize_";
-    config_id += (_attributes.interpolation_policy() == InterpolationPolicy::NEAREST_NEIGHBOR ? "NEAREST_NEIGHBOR" : "");
+    config_id +=
+        (_attributes.interpolation_policy() == InterpolationPolicy::NEAREST_NEIGHBOR ? "NEAREST_NEIGHBOR" : "");
     config_id += (_attributes.interpolation_policy() == InterpolationPolicy::BILINEAR ? "BILINEAR" : "");
     config_id += "_";
     config_id += (_attributes.sampling_policy() == SamplingPolicy::CENTER ? "center" : "topleft");
@@ -260,7 +262,7 @@ std::string ClTemplateResize::get_config_id() const
 
 std::set<std::string> ClTemplateResize::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateResize::get_window() const

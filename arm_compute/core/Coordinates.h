@@ -42,8 +42,7 @@ public:
      * @param[in] coords Values to initialize the dimensions.
      */
     template <typename... Ts>
-    constexpr Coordinates(Ts... coords)
-        : Dimensions{ coords... }
+    constexpr Coordinates(Ts... coords) : Dimensions{coords...}
     {
     }
     /** Allow instances of this class to be copy constructed */
@@ -57,5 +56,5 @@ public:
     /** Default destructor */
     ~Coordinates() = default;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_COORDINATES_H*/

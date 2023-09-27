@@ -23,16 +23,19 @@
  */
 #include "src/gpu/cl/operators/ClConvertFullyConnectedWeights.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClConvertFullyConnectedWeightsKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClConvertFullyConnectedWeights::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout)
+void ClConvertFullyConnectedWeights::configure(const ClCompileContext &compile_context,
+                                               const ITensorInfo      *src,
+                                               ITensorInfo            *dst,
+                                               const TensorShape      &original_src_shape,
+                                               DataLayout              data_layout)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst, original_src_shape, data_layout);
     auto k = std::make_unique<kernels::ClConvertFullyConnectedWeightsKernel>();
@@ -40,7 +43,10 @@ void ClConvertFullyConnectedWeights::configure(const ClCompileContext &compile_c
     _kernel = std::move(k);
 }
 
-Status ClConvertFullyConnectedWeights::validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout)
+Status ClConvertFullyConnectedWeights::validate(const ITensorInfo *src,
+                                                const ITensorInfo *dst,
+                                                const TensorShape &original_src_shape,
+                                                DataLayout         data_layout)
 {
     return kernels::ClConvertFullyConnectedWeightsKernel::validate(src, dst, original_src_shape, data_layout);
 }

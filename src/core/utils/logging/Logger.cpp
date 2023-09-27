@@ -30,10 +30,7 @@
 using namespace arm_compute::logging;
 
 Logger::Logger(std::string name, LogLevel log_level, std::shared_ptr<Printer> printer)
-    : _name(std::move(name)), _log_level(log_level), _printers(
-{
-    std::move(printer)
-}), _decorators()
+    : _name(std::move(name)), _log_level(log_level), _printers({std::move(printer)}), _decorators()
 {
     // Check printer
     ARM_COMPUTE_ERROR_ON(printer == nullptr);
@@ -46,7 +43,7 @@ Logger::Logger(std::string name, LogLevel log_level, std::vector<std::shared_ptr
     : _name(std::move(name)), _log_level(log_level), _printers(std::move(printers)), _decorators()
 {
     // Check printers
-    for(const auto &p : _printers)
+    for (const auto &p : _printers)
     {
         ARM_COMPUTE_UNUSED(p);
         ARM_COMPUTE_ERROR_ON(p == nullptr);
@@ -62,13 +59,13 @@ Logger::Logger(std::string                              name,
     : _name(std::move(name)), _log_level(log_level), _printers(std::move(printers)), _decorators(std::move(decorators))
 {
     // Check printers
-    for(const auto &p : _printers)
+    for (const auto &p : _printers)
     {
         ARM_COMPUTE_UNUSED(p);
         ARM_COMPUTE_ERROR_ON(p == nullptr);
     }
     // Check decorators
-    for(const auto &d : _decorators)
+    for (const auto &d : _decorators)
     {
         ARM_COMPUTE_UNUSED(d);
         ARM_COMPUTE_ERROR_ON(d == nullptr);
@@ -79,7 +76,7 @@ void Logger::log(LogLevel log_level, const std::string &msg)
 {
     // Return if message shouldn't be logged
     // i.e. if log level does not match the logger's
-    if(!is_loggable(log_level))
+    if (!is_loggable(log_level))
     {
         return;
     }
@@ -129,7 +126,7 @@ bool Logger::is_loggable(LogLevel log_level)
 
 void Logger::decorate_log_msg(LogMsg &msg)
 {
-    for(const auto &d : _decorators)
+    for (const auto &d : _decorators)
     {
         d->decorate(msg);
     }
@@ -148,7 +145,7 @@ std::string Logger::create_log_msg(const std::string &str, LogLevel log_level)
 
 void Logger::print_all(const std::string &msg)
 {
-    for(auto &p : _printers)
+    for (auto &p : _printers)
     {
         p->print(msg);
     }

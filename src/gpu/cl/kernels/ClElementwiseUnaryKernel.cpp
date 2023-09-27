@@ -23,11 +23,12 @@
  */
 #include "src/gpu/cl/kernels/ClElementwiseUnaryKernel.h"
 
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -46,17 +47,18 @@ constexpr unsigned int vector_size_byte_opencl = 16;
 Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const ElementWiseUnary op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
-    if(op == ElementWiseUnary::LOGICAL_NOT)
+    if (op == ElementWiseUnary::LOGICAL_NOT)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::U8);
     }
-    else if(op == ElementWiseUnary::NEG)
+    else if (op == ElementWiseUnary::NEG)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::S32);
     }
-    else if(op == ElementWiseUnary::RSQRT) // Allow quantized types for only RSQRT.
+    else if (op == ElementWiseUnary::RSQRT) // Allow quantized types for only RSQRT.
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src, 1, DataType::F16, DataType::F32, DataType::QASYMM8,
+                                                             DataType::QASYMM8_SIGNED);
     }
     else
     {
@@ -64,7 +66,7 @@ Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const 
     }
 
     // Validate in case of configured dst
-    if(dst.total_size() > 0)
+    if (dst.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
@@ -80,19 +82,23 @@ ClElementWiseUnaryKernel::ClElementWiseUnaryKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const ElementWiseUnary &op)
+void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context,
+                                         const ITensorInfo      *src,
+                                         ITensorInfo            *dst,
+                                         const ElementWiseUnary &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*src, *dst, op));
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / dst->element_size(), dst->dimension(0));
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(vector_size_byte_opencl / dst->element_size(), dst->dimension(0));
 
-    std::string kernel_name    = "elementwise_unary";
-    const int   vec_size_x     = num_elems_processed_per_iteration;
-    const int   dst_width_x    = dst->dimension(0);
-    if(is_data_type_quantized(src->data_type()))
+    std::string kernel_name = "elementwise_unary";
+    const int   vec_size_x  = num_elems_processed_per_iteration;
+    const int   dst_width_x = dst->dimension(0);
+    if (is_data_type_quantized(src->data_type()))
     {
         kernel_name += "_quantized";
     }
@@ -101,7 +107,7 @@ void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option("-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(dst_width_x - vec_size_x, 0)));
-    if(is_data_type_quantized(src->data_type()))
+    if (is_data_type_quantized(src->data_type()))
     {
         const UniformQuantizationInfo iqinfo = src->quantization_info().uniform();
         const UniformQuantizationInfo oqinfo = dst->quantization_info().uniform();
@@ -110,7 +116,7 @@ void ClElementWiseUnaryKernel::configure(const CLCompileContext &compile_context
         build_opts.add_option("-DSCALE_IN=" + float_to_string_with_full_precision(iqinfo.scale));
         build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
-    switch(op)
+    switch (op)
     {
         case ElementWiseUnary::RSQRT:
             build_opts.add_option("-DOPERATION=rsqrt_op");
@@ -169,8 +175,9 @@ void ClElementWiseUnaryKernel::run_op(ITensorPack &tensors, const Window &window
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     do
     {
@@ -178,8 +185,7 @@ void ClElementWiseUnaryKernel::run_op(ITensorPack &tensors, const Window &window
         add_3D_tensor_argument(idx, src, slice);
         add_3D_tensor_argument(idx, dst, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

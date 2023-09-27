@@ -86,7 +86,8 @@ public:
      *                     Data types supported: Same as @p input.
      * @param[in]  info    Convolution layer descriptor
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info);
+    void
+    configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConv2d
      *
      * @param[in] input   Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
@@ -102,7 +103,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &info);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *weights,
+                           const ITensorInfo *biases,
+                           const ITensorInfo *output,
+                           const Conv2dInfo  &info);
 
     // Inherited methods overridden:
     void run() override;

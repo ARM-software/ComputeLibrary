@@ -35,7 +35,7 @@ namespace arm_compute
 {
 void ITensor::copy_from(const ITensor &src)
 {
-    if(&src == this)
+    if (&src == this)
     {
         return;
     }
@@ -47,7 +47,7 @@ void ITensor::copy_from(const ITensor &src)
     ARM_COMPUTE_ERROR_ON(src_info->num_channels() != dst_info->num_channels());
     ARM_COMPUTE_ERROR_ON(src_info->element_size() != dst_info->element_size());
 
-    for(size_t d = 0; d < src_info->num_dimensions(); d++)
+    for (size_t d = 0; d < src_info->num_dimensions(); d++)
     {
         ARM_COMPUTE_ERROR_ON(src_info->dimension(d) > dst_info->dimension(d));
     }
@@ -66,11 +66,7 @@ void ITensor::copy_from(const ITensor &src)
     const size_t line_size = src_info->element_size() * src_info->dimension(0);
 
     execute_window_loop(
-        win_src, [&](const Coordinates &)
-    {
-        memcpy(dst_it.ptr(), src_it.ptr(), line_size);
-    },
-    src_it, dst_it);
+        win_src, [&](const Coordinates &) { memcpy(dst_it.ptr(), src_it.ptr(), line_size); }, src_it, dst_it);
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
@@ -87,10 +83,10 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
     stream_status.copyfmt(s);
 
     // Set precision
-    if(is_data_type_float(dt) && (io_fmt.precision_type != IOFormatInfo::PrecisionType::Default))
+    if (is_data_type_float(dt) && (io_fmt.precision_type != IOFormatInfo::PrecisionType::Default))
     {
         int precision = io_fmt.precision;
-        if(io_fmt.precision_type == IOFormatInfo::PrecisionType::Full)
+        if (io_fmt.precision_type == IOFormatInfo::PrecisionType::Full)
         {
             precision = std::numeric_limits<float>().max_digits10;
         }
@@ -101,7 +97,7 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
     size_t print_width  = 0;
     size_t print_height = 0;
     int    start_offset = 0;
-    switch(io_fmt.print_region)
+    switch (io_fmt.print_region)
     {
         case IOFormatInfo::PrintRegion::NoPadding:
             print_width  = this->info()->dimension(0);
@@ -111,13 +107,14 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
         case IOFormatInfo::PrintRegion::ValidRegion:
             print_width  = this->info()->valid_region().shape.x();
             print_height = this->info()->valid_region().shape.y();
-            start_offset = this->info()->offset_element_in_bytes(Coordinates(this->info()->valid_region().anchor.x(),
-                                                                             this->info()->valid_region().anchor.y()));
+            start_offset = this->info()->offset_element_in_bytes(
+                Coordinates(this->info()->valid_region().anchor.x(), this->info()->valid_region().anchor.y()));
             break;
         case IOFormatInfo::PrintRegion::Full:
             print_width  = padding.left + this->info()->dimension(0) + padding.right;
             print_height = padding.top + this->info()->dimension(1) + padding.bottom;
-            start_offset = static_cast<int>(this->info()->offset_first_element_in_bytes()) - padding.top * strides[1] - padding.left * strides[0];
+            start_offset = static_cast<int>(this->info()->offset_first_element_in_bytes()) - padding.top * strides[1] -
+                           padding.left * strides[0];
             break;
         default:
             break;
@@ -129,16 +126,17 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
     const uint8_t *ptr = this->buffer() + start_offset;
 
     // Start printing
-    for(size_t i = 0; i < slices2D; ++i)
+    for (size_t i = 0; i < slices2D; ++i)
     {
         // Find max_width of elements in slice to align columns
         int max_element_width = 0;
-        if(io_fmt.align_columns)
+        if (io_fmt.align_columns)
         {
             size_t offset = i * strides[2];
-            for(size_t h = 0; h < print_height; ++h)
+            for (size_t h = 0; h < print_height; ++h)
             {
-                max_element_width = std::max<int>(max_element_width, max_consecutive_elements_display_width(s, dt, ptr + offset, print_width));
+                max_element_width = std::max<int>(
+                    max_element_width, max_consecutive_elements_display_width(s, dt, ptr + offset, print_width));
                 offset += strides[1];
             }
         }
@@ -146,7 +144,7 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
         // Print slice
         {
             size_t offset = i * strides[2];
-            for(size_t h = 0; h < print_height; ++h)
+            for (size_t h = 0; h < print_height; ++h)
             {
                 print_consecutive_elements(s, dt, ptr + offset, print_width, max_element_width, io_fmt.element_delim);
                 offset += strides[1];

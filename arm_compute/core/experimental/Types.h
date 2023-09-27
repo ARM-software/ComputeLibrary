@@ -92,24 +92,18 @@ struct MemoryInfo
 {
     MemoryInfo() = default;
 
-    MemoryInfo(int slot, size_t size, size_t alignment = 0) noexcept
-        : slot(slot),
-          size(size),
-          alignment(alignment)
+    MemoryInfo(int slot, size_t size, size_t alignment = 0) noexcept : slot(slot), size(size), alignment(alignment)
     {
     }
 
     MemoryInfo(int slot, MemoryLifetime lifetime, size_t size, size_t alignment = 0) noexcept
-        : slot(slot),
-          lifetime(lifetime),
-          size(size),
-          alignment(alignment)
+        : slot(slot), lifetime(lifetime), size(size), alignment(alignment)
     {
     }
 
     bool merge(int slot, size_t new_size, size_t new_alignment = 0) noexcept
     {
-        if(slot != this->slot)
+        if (slot != this->slot)
         {
             return false;
         }
@@ -120,10 +114,10 @@ struct MemoryInfo
         return true;
     }
 
-    int            slot{ ACL_UNKNOWN };
-    MemoryLifetime lifetime{ MemoryLifetime::Temporary };
-    size_t         size{ 0 };
-    size_t         alignment{ 64 };
+    int            slot{ACL_UNKNOWN};
+    MemoryLifetime lifetime{MemoryLifetime::Temporary};
+    size_t         size{0};
+    size_t         alignment{64};
 };
 
 using MemoryRequirements = std::vector<MemoryInfo>;

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_COL2IM_KERNEL_H
 
 #include "arm_compute/core/Size2D.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -68,14 +69,19 @@ public:
      * @param[in]  convolved_dims  Output convolved dimensions.
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups = 1);
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const Size2D           &convolved_dims,
+                   unsigned int            num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClCol2ImKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups = 1);
+    static Status
+    validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &convolved_dims, unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

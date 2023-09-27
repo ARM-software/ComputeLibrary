@@ -85,7 +85,7 @@ public:
      * @return TensorInfo Newly created tensor info
      */
     template <typename... TArgs>
-    TensorInfo create_tensor_info(TArgs &&... args)
+    TensorInfo create_tensor_info(TArgs &&...args)
     {
         auto tensor_info = TensorInfo(std::forward<TArgs>(args)...);
         register_user_tensor(tensor_info);

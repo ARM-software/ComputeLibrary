@@ -46,7 +46,10 @@ public:
      * @param[in] coords        Coordinates of the first subtensor element inside the parent tensor.
      * @param[in] extend_parent (Optional) Extend parent with subtensor shape if subtensor indexes out of bounds
      */
-    CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent = false);
+    CLSubTensor(ICLTensor         *parent,
+                const TensorShape &tensor_shape,
+                const Coordinates &coords,
+                bool               extend_parent = false);
     /** Destructor: free the tensor's memory */
     ~CLSubTensor() = default;
     /** Restrict instances of this class to be copy constructed */
@@ -93,11 +96,11 @@ public:
 protected:
     // Inherited methods overridden:
     uint8_t *do_map(cl::CommandQueue &q, bool blocking) override;
-    void do_unmap(cl::CommandQueue &q) override;
+    void     do_unmap(cl::CommandQueue &q) override;
 
 private:
     ICLTensor            *_parent;
     mutable SubTensorInfo _info;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CLSUBTENSOR_H */

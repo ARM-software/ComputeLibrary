@@ -73,7 +73,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for max
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
@@ -83,7 +86,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -133,7 +139,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for min
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
@@ -143,7 +152,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -193,7 +205,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for squared difference
      *
      * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
@@ -203,7 +218,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -249,7 +267,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for division
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
@@ -259,7 +280,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -306,7 +330,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref cpu::kernels::CpuArithmeticKernel for power
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
@@ -316,7 +343,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -377,7 +407,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op);
+    static Status
+    validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation op);
 
     // Inherited methods overridden:
     void run() override;

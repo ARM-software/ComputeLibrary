@@ -44,7 +44,7 @@ struct index_sequence
 };
 
 template <std::size_t N, std::size_t... S>
-struct index_sequence_generator : index_sequence_generator < N - 1, N - 1, S... >
+struct index_sequence_generator : index_sequence_generator<N - 1, N - 1, S...>
 {
 };
 
@@ -58,17 +58,17 @@ template <std::size_t N>
 using index_sequence_t = typename index_sequence_generator<N>::type;
 
 template <typename T, std::size_t N, T val, T... vals>
-struct generate_array : generate_array < T, N - 1, val, val, vals... >
+struct generate_array : generate_array<T, N - 1, val, val, vals...>
 {
 };
 
 template <typename T, T val, T... vals>
 struct generate_array<T, 0, val, vals...>
 {
-    static constexpr std::array<T, sizeof...(vals)> value{ vals... };
+    static constexpr std::array<T, sizeof...(vals)> value{vals...};
 };
 
-template <typename T, T                  val, T... vals>
+template <typename T, T val, T... vals>
 constexpr std::array<T, sizeof...(vals)> generate_array<T, 0, val, vals...>::value;
 /** @endcond */
 
@@ -79,7 +79,7 @@ template <std::size_t... S,
           typename T = std::array<typename std::iterator_traits<Iterator>::value_type, sizeof...(S)>>
 T make_array(Iterator first, index_sequence<S...>)
 {
-    return T{ { first[S]... } };
+    return T{{first[S]...}};
 }
 } // namespace detail
 
@@ -87,7 +87,7 @@ template <std::size_t N, typename Iterator>
 std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(Iterator first, Iterator last)
 {
     ARM_COMPUTE_UNUSED(last);
-    return detail::make_array(first, index_sequence_t<N> {});
+    return detail::make_array(first, index_sequence_t<N>{});
 }
 
 /** Performs clamping among a lower and upper value.
@@ -119,7 +119,7 @@ inline void for_each(F &&)
  * @param[in] args Remaining arguments
  */
 template <typename F, typename T, typename... Ts>
-inline void for_each(F &&func, T &&arg, Ts &&... args)
+inline void for_each(F &&func, T &&arg, Ts &&...args)
 {
     func(std::forward<T>(arg));
     for_each(std::forward<F>(func), std::forward<Ts>(args)...);
@@ -143,9 +143,11 @@ inline T &&foldl(F &&, T &&value)
  * @param[in] values  Remaining arguments
  */
 template <typename F, typename T, typename U, typename... Us>
-inline auto foldl(F &&func, T &&initial, U &&value, Us &&... values) -> decltype(func(std::forward<T>(initial), std::forward<U>(value)))
+inline auto foldl(F &&func, T &&initial, U &&value, Us &&...values)
+    -> decltype(func(std::forward<T>(initial), std::forward<U>(value)))
 {
-    return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)), std::forward<Us>(values)...);
+    return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)),
+                 std::forward<Us>(values)...);
 }
 
 /** Perform an index sort of a given vector.
@@ -160,11 +162,7 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
     std::vector<size_t> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
 
-    std::sort(idx.begin(), idx.end(),
-              [&v](size_t i1, size_t i2)
-    {
-        return v[i1] < v[i2];
-    });
+    std::sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; });
 
     return idx;
 }
@@ -178,7 +176,7 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
  */
 inline bool endswith(const std::string &str, const std::string &suffix)
 {
-    if(str.size() < suffix.size())
+    if (str.size() < suffix.size())
     {
         return false;
     }
@@ -205,10 +203,7 @@ inline bool check_aligned(void *ptr, const size_t alignment)
  */
 inline std::string tolower(std::string string)
 {
-    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c)
-    {
-        return std::tolower(c);
-    });
+    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c) { return std::tolower(c); });
     return string;
 }
 
@@ -227,7 +222,7 @@ inline std::string getenv(const std::string &env_name)
     return std::string{};
 #else  // BARE_METAL
     const auto env_chr = std::getenv(env_name.c_str());
-    return env_chr == nullptr ? std::string{} : std::string{ env_chr };
+    return env_chr == nullptr ? std::string{} : std::string{env_chr};
 #endif // BARE_METAL
 }
 } // namespace utility

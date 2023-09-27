@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
 
 #include "arm_compute/core/ITensor.h"
+
 #include "src/cpu/operators/CpuPRelu.h"
 
 namespace arm_compute
@@ -32,17 +33,16 @@ using OperatorType = cpu::CpuPRelu;
 
 struct NEPReluLayer::Impl
 {
-    const ITensor                *src_0{ nullptr };
-    const ITensor                *src_1{ nullptr };
-    ITensor                      *dst{ nullptr };
-    std::unique_ptr<OperatorType> op{ nullptr };
+    const ITensor                *src_0{nullptr};
+    const ITensor                *src_1{nullptr};
+    ITensor                      *dst{nullptr};
+    std::unique_ptr<OperatorType> op{nullptr};
 };
 
-NEPReluLayer::NEPReluLayer()
-    : _impl(std::make_unique<Impl>())
+NEPReluLayer::NEPReluLayer() : _impl(std::make_unique<Impl>())
 {
 }
-NEPReluLayer::NEPReluLayer(NEPReluLayer &&) = default;
+NEPReluLayer::NEPReluLayer(NEPReluLayer &&)            = default;
 NEPReluLayer &NEPReluLayer::operator=(NEPReluLayer &&) = default;
 NEPReluLayer::~NEPReluLayer()                          = default;
 

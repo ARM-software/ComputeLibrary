@@ -63,8 +63,7 @@ public:
      *
      * @param str Sting to append
      */
-    StringDecorator(const std::string &str)
-        : _str(str)
+    StringDecorator(const std::string &str) : _str(str)
     {
         _str = angle_wrap_value(str);
     }
@@ -103,7 +102,7 @@ private:
         auto time = std::chrono::system_clock::to_time_t(now);
 
         // TODO: use put_time for gcc > 4.9
-        char buf[100] = { 0 };
+        char buf[100] = {0};
         std::strftime(buf, sizeof(buf), "%d-%m-%Y %I:%M:%S", std::localtime(&time));
         return buf;
     }

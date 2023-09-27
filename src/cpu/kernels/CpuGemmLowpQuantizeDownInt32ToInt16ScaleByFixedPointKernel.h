@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_GEMMLOWP_QUANTIZEDOWN_INT32TOINT16_SCALEBYFIXEDPOINT_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -48,7 +49,8 @@ namespace kernels
  *  -# Clamp the resulting int32 values to the [-32768, 32767] range and cast to QSYMM16.
  *
  */
-class CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>
+class CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+    : public ICpuKernel<CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>
 {
 public:
     CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel() = default;
@@ -65,17 +67,24 @@ public:
      * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QSYMM16.
      *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to 0.
      */
-    void configure(ITensorInfo *src, ITensorInfo *bias, ITensorInfo *dst, int result_fixedpoint_multiplier, int result_shift, int min = 0, int max = 0);
+    void configure(ITensorInfo *src,
+                   ITensorInfo *bias,
+                   ITensorInfo *dst,
+                   int          result_fixedpoint_multiplier,
+                   int          result_shift,
+                   int          min = 0,
+                   int          max = 0);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, int min = 0, int max = 0);
+    static Status
+    validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, int min = 0, int max = 0);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
@@ -97,13 +106,13 @@ private:
      * @param[in]  window Region on which to execute the kernel.
      */
     using QuantizeDownFunctionPtr = void (CpuGemmLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::*)(
-                                        const ITensor *src, const ITensor *bias, ITensor *dst, const Window &window);
+        const ITensor *src, const ITensor *bias, ITensor *dst, const Window &window);
 
-    QuantizeDownFunctionPtr _func{ nullptr };
-    int                     _result_fixedpoint_multiplier{ 0 };
-    int                     _result_shift{ 0 };
-    int                     _min{ 0 };
-    int                     _max{ 0 };
+    QuantizeDownFunctionPtr _func{nullptr};
+    int                     _result_fixedpoint_multiplier{0};
+    int                     _result_shift{0};
+    int                     _min{0};
+    int                     _max{0};
 };
 } // namespace kernels
 } // namespace cpu

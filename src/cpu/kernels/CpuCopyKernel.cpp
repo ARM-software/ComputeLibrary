@@ -27,9 +27,10 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -48,9 +49,10 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON(padding.size() > 4);
 
     // Validate destination if initialized
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(misc::shape_calculator::compute_padded_shape(src->tensor_shape(), padding), dst->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            misc::shape_calculator::compute_padded_shape(src->tensor_shape(), padding), dst->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
@@ -64,7 +66,8 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *src, 
     return std::make_pair(Status{}, calculate_max_window(*dst));
 }
 
-std::pair<Status, Window> validate_and_configure_window_with_padding(const ITensorInfo *src, ITensorInfo *dst, const PaddingList &padding)
+std::pair<Status, Window>
+validate_and_configure_window_with_padding(const ITensorInfo *src, ITensorInfo *dst, const PaddingList &padding)
 {
     const TensorShape src_shape    = src->tensor_shape();
     const TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(src_shape, padding);
@@ -84,7 +87,7 @@ void CpuCopyKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Pa
     _padding = padding;
 
     std::pair<Status, Window> win_config;
-    if(padding.empty())
+    if (padding.empty())
     {
         win_config = validate_and_configure_window(src, dst);
     }
@@ -97,17 +100,20 @@ void CpuCopyKernel::configure(const ITensorInfo *src, ITensorInfo *dst, const Pa
     ICpuKernel::configure(win_config.second);
 }
 
-Status CpuCopyKernel::validate(const arm_compute::ITensorInfo *src, const arm_compute::ITensorInfo *dst, const PaddingList &padding)
+Status CpuCopyKernel::validate(const arm_compute::ITensorInfo *src,
+                               const arm_compute::ITensorInfo *dst,
+                               const PaddingList              &padding)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, dst, padding));
 
-    if(padding.empty())
+    if (padding.empty())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src->clone().get(), dst->clone().get()).first);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_with_padding(src->clone().get(), dst->clone().get(), padding).first);
+        ARM_COMPUTE_RETURN_ON_ERROR(
+            validate_and_configure_window_with_padding(src->clone().get(), dst->clone().get(), padding).first);
     }
 
     return Status{};
@@ -122,38 +128,41 @@ void CpuCopyKernel::run_op(ITensorPack &tensors, const Window &window, const Thr
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto       dst = tensors.get_tensor(TensorType::ACL_DST);
 
-    if(_padding.empty())
+    if (_padding.empty())
     {
-        Window dst_window{ window };
-        dst_window.set(Window::DimX, Window::Dimension(dst_window.x().start(), dst_window.x().end(), src->info()->dimension(0)));
+        Window dst_window{window};
+        dst_window.set(Window::DimX,
+                       Window::Dimension(dst_window.x().start(), dst_window.x().end(), src->info()->dimension(0)));
         Window out_slice = dst_window.first_slice_window_1D();
         do
         {
             Iterator src_it(src, out_slice);
             Iterator dst_it(dst, out_slice);
 
-            execute_window_loop(out_slice, [&](const Coordinates &)
-            {
-                memcpy(dst_it.ptr(), src_it.ptr(), dst->info()->dimension(0) * dst->info()->element_size());
-            },
-            src_it, dst_it);
-        }
-        while(dst_window.slide_window_slice_1D(out_slice));
+            execute_window_loop(
+                out_slice,
+                [&](const Coordinates &)
+                { memcpy(dst_it.ptr(), src_it.ptr(), dst->info()->dimension(0) * dst->info()->element_size()); },
+                src_it, dst_it);
+        } while (dst_window.slide_window_slice_1D(out_slice));
     }
     else
     {
-        Window src_window{ window };
-        src_window.set(Window::DimX, Window::Dimension(0, window.x().end() - _padding[0].first, src->info()->dimension(0)));
+        Window src_window{window};
+        src_window.set(Window::DimX,
+                       Window::Dimension(0, window.x().end() - _padding[0].first, src->info()->dimension(0)));
 
         Iterator     src_it(src, src_window);
         Iterator     dst_it(dst, window);
         const size_t row_size_in_bytes = src->info()->dimension(0) * src->info()->element_size();
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            auto dst_ptr = dst_it.ptr() + _padding[0].first * dst->info()->element_size();
-            std::memcpy(dst_ptr, src_it.ptr(), row_size_in_bytes);
-        },
-        src_it, dst_it);
+        execute_window_loop(
+            window,
+            [&](const Coordinates &)
+            {
+                auto dst_ptr = dst_it.ptr() + _padding[0].first * dst->info()->element_size();
+                std::memcpy(dst_ptr, src_it.ptr(), row_size_in_bytes);
+            },
+            src_it, dst_it);
     }
 }
 

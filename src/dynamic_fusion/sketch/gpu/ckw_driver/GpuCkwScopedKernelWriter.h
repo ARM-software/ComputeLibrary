@@ -63,7 +63,7 @@ public:
 
 private:
     GpuCkwKernelWriter *_writer;
-    int32_t          _parent_id_space;
+    int32_t             _parent_id_space;
 };
 
 } // namespace dynamic_fusion

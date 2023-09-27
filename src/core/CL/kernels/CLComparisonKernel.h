@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLCOMPARISONKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -64,7 +65,11 @@ public:
      * @param[out] output          Destination tensor. Data types supported: U8.
      * @param[in]  operation       Comparison operation to use.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input1,
+                   const ICLTensor        *input2,
+                   ICLTensor              *output,
+                   ComparisonOperation     operation);
     /** Static function to check if given info will lead to a valid configuration of @ref CLComparisonKernel
      *
      * @param[in] input1    Source tensor. Data types supported: All.
@@ -74,10 +79,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ComparisonOperation operation);
+    static Status validate(const ITensorInfo  *input1,
+                           const ITensorInfo  *input2,
+                           const ITensorInfo  *output,
+                           ComparisonOperation operation);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    void       run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:

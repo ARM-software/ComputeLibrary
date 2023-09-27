@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_MEMORY_H
 
 #include "arm_compute/runtime/IMemory.h"
-
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include <cstddef>
@@ -64,8 +63,8 @@ public:
     // Inherited methods overridden:
     IMemoryRegion *region() final;
     IMemoryRegion *region() const final;
-    void set_region(IMemoryRegion *region) final;
-    void set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
+    void           set_region(IMemoryRegion *region) final;
+    void           set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
 
 private:
     IMemoryRegion                 *_region;

@@ -25,8 +25,11 @@
 
 namespace arm_compute
 {
-ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
-                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
+ValidRegion calculate_valid_region_scale(const ITensorInfo  &src_info,
+                                         const TensorShape  &dst_shape,
+                                         InterpolationPolicy interpolate_policy,
+                                         SamplingPolicy      sampling_policy,
+                                         bool                border_undefined)
 {
     const DataLayout data_layout = src_info.data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -49,9 +52,9 @@ ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const Tens
     auto valid_end_out_y   = std::min<int>(std::ceil(valid_end_in_y * scale_y), dst_shape[idx_height]);
 
     // Handle valid points in case of the bi-linear interpolation
-    if(border_undefined)
+    if (border_undefined)
     {
-        switch(interpolate_policy)
+        switch (interpolate_policy)
         {
             case InterpolationPolicy::NEAREST_NEIGHBOR:
             {
@@ -90,7 +93,7 @@ ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const Tens
     }
 
     // Setup output valid region
-    ValidRegion valid_region{ Coordinates(), dst_shape, dst_shape.num_dimensions() };
+    ValidRegion valid_region{Coordinates(), dst_shape, dst_shape.num_dimensions()};
 
     valid_region.anchor.set(idx_width, std::max(0, valid_start_out_x));
     valid_region.anchor.set(idx_height, std::max(0, valid_start_out_y));
@@ -109,13 +112,11 @@ const std::map<DataLayout, std::vector<DataLayoutDimension>> &get_layout_map()
     constexpr DataLayoutDimension D = DataLayoutDimension::DEPTH;
     constexpr DataLayoutDimension N = DataLayoutDimension::BATCHES;
 
-    static const std::map<DataLayout, std::vector<DataLayoutDimension>> layout_map =
-    {
-        { DataLayout::NDHWC, { C, W, H, D, N } },
-        { DataLayout::NCDHW, { W, H, D, C, N } },
-        { DataLayout::NHWC, { C, W, H, N } },
-        { DataLayout::NCHW, { W, H, C, N } }
-    };
+    static const std::map<DataLayout, std::vector<DataLayoutDimension>> layout_map = {
+        {DataLayout::NDHWC, {C, W, H, D, N}},
+        {DataLayout::NCDHW, {W, H, D, C, N}},
+        {DataLayout::NHWC, {C, W, H, N}},
+        {DataLayout::NCHW, {W, H, C, N}}};
 
     return layout_map;
 }

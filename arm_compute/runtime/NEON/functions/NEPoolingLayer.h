@@ -91,7 +91,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *input,
+                           const ITensorInfo      *output,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices = nullptr);
 
     // Inherited methods overridden:
     void run() override;
@@ -100,5 +103,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEPOOLINGLAYER_H */

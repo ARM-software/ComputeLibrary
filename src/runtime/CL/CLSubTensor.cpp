@@ -29,12 +29,14 @@
 
 using namespace arm_compute;
 
-CLSubTensor::CLSubTensor()
-    : _parent(nullptr), _info()
+CLSubTensor::CLSubTensor() : _parent(nullptr), _info()
 {
 }
 
-CLSubTensor::CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent)
+CLSubTensor::CLSubTensor(ICLTensor         *parent,
+                         const TensorShape &tensor_shape,
+                         const Coordinates &coords,
+                         bool               extend_parent)
     : _parent(nullptr), _info()
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
@@ -81,7 +83,7 @@ void CLSubTensor::unmap()
 uint8_t *CLSubTensor::do_map(cl::CommandQueue &q, bool blocking)
 {
     ARM_COMPUTE_ERROR_ON(cl_buffer().get() == nullptr);
-    if(_parent->buffer() == nullptr)
+    if (_parent->buffer() == nullptr)
     {
         _parent->map(q, blocking);
     }

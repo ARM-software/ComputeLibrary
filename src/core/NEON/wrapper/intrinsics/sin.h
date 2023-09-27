@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_WRAPPER_SIN_H
 
 #include "src/core/NEON/NEMath.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute

@@ -26,6 +26,7 @@
 #define CKW_SRC_CL_HELPERS_ICLMEMORYOPHELPER_H
 
 #include "ckw/TensorSampler.h"
+
 #include "src/Tensor3dMapper.h"
 
 #include <cstdint>
@@ -98,16 +99,16 @@ public:
     virtual void finalize() = 0;
 
 protected:
-    CLKernelWriter                  *_writer{ nullptr };
-    ITensor                         *_tensor{ nullptr };
-    TensorSampler                   *_sampler{ nullptr };
-    MemoryOperation                  _op;
-    std::unique_ptr<Tensor3dMapper>  _mapper{ nullptr };
-    const CLTile                    *_dst{ nullptr };
-    int32_t                          _ls_width_full{ 0 };
-    std::string                      _coord_x{};
-    std::string                      _coord_z{};
-    std::string                      _coord_b{};
+    CLKernelWriter                 *_writer{nullptr};
+    ITensor                        *_tensor{nullptr};
+    TensorSampler                  *_sampler{nullptr};
+    MemoryOperation                 _op;
+    std::unique_ptr<Tensor3dMapper> _mapper{nullptr};
+    const CLTile                   *_dst{nullptr};
+    int32_t                         _ls_width_full{0};
+    std::string                     _coord_x{};
+    std::string                     _coord_z{};
+    std::string                     _coord_b{};
 };
 } // namespace ckw
 

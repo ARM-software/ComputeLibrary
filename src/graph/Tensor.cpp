@@ -75,20 +75,20 @@ std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
 bool Tensor::call_accessor()
 {
     // Early exit guard
-    if(!_accessor || !_handle)
+    if (!_accessor || !_handle)
     {
         return false;
     }
 
     const bool access_data = _accessor->access_tensor_data();
 
-    if(access_data)
+    if (access_data)
     {
         // Map tensor
         _handle->map(true);
 
         // Return in case of null backend buffer
-        if(_handle->tensor().buffer() == nullptr)
+        if (_handle->tensor().buffer() == nullptr)
         {
             return false;
         }
@@ -97,7 +97,7 @@ bool Tensor::call_accessor()
     // Call accessor
     bool retval = _accessor->access_tensor(_handle->tensor());
 
-    if(access_data)
+    if (access_data)
     {
         // Unmap tensor
         _handle->unmap();

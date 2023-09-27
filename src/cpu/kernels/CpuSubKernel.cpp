@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/add/generic/neon/impl.h"
@@ -51,70 +52,48 @@ namespace
 using CpuSubKernelDataTypeISASelectorData    = CpuAddKernelDataTypeISASelectorData;
 using CpuSubKernelDataTypeISASelectorDataPtr = CpuAddKernelDataTypeISASelectorDataPtr;
 
-static const std::vector<CpuSubKernel::SubKernel> available_kernels =
-{
-    {
-        "neon_fp32_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::F32); },
-        REGISTER_FP32_NEON(arm_compute::cpu::sub_same_neon<float>)
-    },
-    {
-        "neon_fp16_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::F16) && data.isa.fp16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::sub_same_neon<float16_t>)
-    },
-    {
-        "neon_u8_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::U8); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<uint8_t>)
-    },
-    {
-        "neon_s16_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::S16); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<int16_t>)
-    },
-    {
-        "neon_s32_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::S32); },
-        REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<int32_t>)
-    },
-    {
-        "neon_qu8_sub_fixedpoint",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return ((data.dt == DataType::QASYMM8) && data.can_use_fixedpoint); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::sub_qasymm8_neon_fixedpoint)
-    },
-    {
-        "neon_qs8_sub_fixedpoint",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return ((data.dt == DataType::QASYMM8_SIGNED) && data.can_use_fixedpoint); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::sub_qasymm8_signed_neon_fixedpoint)
-    },
-    {
-        "neon_qu8_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8); },
-        REGISTER_QASYMM8_NEON(arm_compute::cpu::sub_qasymm8_neon)
-    },
-    {
-        "neon_qs8_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::QASYMM8_SIGNED); },
-        REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::sub_qasymm8_signed_neon)
-    },
-    {
-        "neon_qs16_sub",
-        [](const CpuSubKernelDataTypeISASelectorData & data) { return (data.dt == DataType::QSYMM16); },
-        REGISTER_QSYMM16_NEON(arm_compute::cpu::sub_qsymm16_neon)
-    },
+static const std::vector<CpuSubKernel::SubKernel> available_kernels = {
+    {"neon_fp32_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
+     REGISTER_FP32_NEON(arm_compute::cpu::sub_same_neon<float>)},
+    {"neon_fp16_sub",
+     [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F16) && data.isa.fp16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::sub_same_neon<float16_t>)},
+    {"neon_u8_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::U8); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<uint8_t>)},
+    {"neon_s16_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::S16); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<int16_t>)},
+    {"neon_s32_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::S32); },
+     REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<int32_t>)},
+    {"neon_qu8_sub_fixedpoint",
+     [](const CpuSubKernelDataTypeISASelectorData &data)
+     { return ((data.dt == DataType::QASYMM8) && data.can_use_fixedpoint); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::sub_qasymm8_neon_fixedpoint)},
+    {"neon_qs8_sub_fixedpoint",
+     [](const CpuSubKernelDataTypeISASelectorData &data)
+     { return ((data.dt == DataType::QASYMM8_SIGNED) && data.can_use_fixedpoint); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::sub_qasymm8_signed_neon_fixedpoint)},
+    {"neon_qu8_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8); },
+     REGISTER_QASYMM8_NEON(arm_compute::cpu::sub_qasymm8_neon)},
+    {"neon_qs8_sub",
+     [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8_SIGNED); },
+     REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::sub_qasymm8_signed_neon)},
+    {"neon_qs16_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QSYMM16); },
+     REGISTER_QSYMM16_NEON(arm_compute::cpu::sub_qsymm16_neon)},
 };
 
-inline Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst, ConvertPolicy policy)
+inline Status
+validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITensorInfo &dst, ConvertPolicy policy)
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src0, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::S32, DataType::F16,
-                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src0, 1, DataType::U8, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16,
+                                                         DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &src1);
 
     const auto can_use_fixedpoint = sub_q8_neon_fixedpoint_possible(&src0, &src1, &dst);
-    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(CpuSubKernelDataTypeISASelectorData{ src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint });
+    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(
+        CpuSubKernelDataTypeISASelectorData{src0.data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -125,7 +104,7 @@ inline Status validate_arguments(const ITensorInfo &src0, const ITensorInfo &src
                                     "Convert policy cannot be WRAP if datatype is quantized");
 
     // Validate in case of configured dst
-    if(dst.total_size() > 0)
+    if (dst.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
@@ -147,7 +126,8 @@ void CpuSubKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     set_data_type_if_unknown(*dst, src0->data_type());
 
     const auto can_use_fixedpoint = sub_q8_neon_fixedpoint_possible(src0, src1, dst);
-    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(CpuSubKernelDataTypeISASelectorData{ src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint });
+    const auto uk                 = CpuSubKernel::get_implementation<CpuSubKernelDataTypeISASelectorData>(
+        CpuSubKernelDataTypeISASelectorData{src0->data_type(), CPUInfo::get().get_isa(), can_use_fixedpoint});
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
@@ -167,14 +147,14 @@ size_t CpuSubKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
     ARM_COMPUTE_UNUSED(thread_count);
 
 #if defined(ENABLE_FP32_KERNELS)
-    if(this->_run_method == &sub_same_neon<float>)
+    if (this->_run_method == &sub_same_neon<float>)
     {
         size_t mws = ICPPKernel::default_mws;
-        if(platform.get_cpu_model() == CPUModel::N1)
+        if (platform.get_cpu_model() == CPUModel::N1)
         {
             mws = default_mws_N1_fp32_neon;
         }
-        else if(platform.get_cpu_model() == CPUModel::V1)
+        else if (platform.get_cpu_model() == CPUModel::V1)
         {
             mws = default_mws_V1_fp32_neon;
         }
@@ -184,7 +164,7 @@ size_t CpuSubKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
         }
 
         // tensor is 1D or was re-interpreted as 1D
-        if(this->window().shape().num_dimensions() == 1)
+        if (this->window().shape().num_dimensions() == 1)
         {
             return mws;
         }
@@ -203,7 +183,8 @@ size_t CpuSubKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
     return ICPPKernel::default_mws;
 }
 
-Status CpuSubKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy)
+Status
+CpuSubKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*src0, *src1, *dst, policy));

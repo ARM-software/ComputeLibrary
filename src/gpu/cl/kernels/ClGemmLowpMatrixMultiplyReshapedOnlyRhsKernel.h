@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_GEMMLOWP_MATRIXMULTIPLY_RESHAPED_ONLY_RHS_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -70,29 +71,42 @@ public:
      * @param[in]  output_shifts      (Optional) Output shifts tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
      *                                Supported data types: S32.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, const GEMMKernelInfo &gemm_info,
-                   ITensorInfo *vector_sum_col = nullptr, const ITensorInfo *vector_sum_row = nullptr, ITensorInfo *bias = nullptr,
-                   ITensorInfo *output_multipliers = nullptr, ITensorInfo *output_shifts = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src0,
+                   const ITensorInfo      *src1,
+                   ITensorInfo            *dst,
+                   const GEMMKernelInfo   &gemm_info,
+                   ITensorInfo            *vector_sum_col     = nullptr,
+                   const ITensorInfo      *vector_sum_row     = nullptr,
+                   ITensorInfo            *bias               = nullptr,
+                   ITensorInfo            *output_multipliers = nullptr,
+                   ITensorInfo            *output_shifts      = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, const GEMMKernelInfo &gemm_info,
-                           const ITensorInfo *vector_sum_col = nullptr, const ITensorInfo *vector_sum_row = nullptr, const ITensorInfo *bias = nullptr,
-                           const ITensorInfo *output_multipliers = nullptr, const ITensorInfo *output_shifts = nullptr);
+    static Status validate(const ITensorInfo    *src0,
+                           const ITensorInfo    *src1,
+                           const ITensorInfo    *dst,
+                           const GEMMKernelInfo &gemm_info,
+                           const ITensorInfo    *vector_sum_col     = nullptr,
+                           const ITensorInfo    *vector_sum_row     = nullptr,
+                           const ITensorInfo    *bias               = nullptr,
+                           const ITensorInfo    *output_multipliers = nullptr,
+                           const ITensorInfo    *output_shifts      = nullptr);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool _slide_matrix_b{ true };
-    bool _reinterpret_input_as_3d{ false };
-    bool _reinterpret_output_as_3d{ false };
-    bool _use_dummy_work_items{ false };
-    bool _is_quantized_per_channel{ false };
-    bool _fuse_output_stage{ false };
+    bool _slide_matrix_b{true};
+    bool _reinterpret_input_as_3d{false};
+    bool _reinterpret_output_as_3d{false};
+    bool _use_dummy_work_items{false};
+    bool _is_quantized_per_channel{false};
+    bool _fuse_output_stage{false};
 };
 } // namespace kernels
 } // namespace opencl

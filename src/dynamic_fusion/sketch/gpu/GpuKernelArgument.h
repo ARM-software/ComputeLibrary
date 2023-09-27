@@ -61,11 +61,10 @@ struct GpuKernelArgumentInfo
     /** Default constructor */
     GpuKernelArgumentInfo() = default;
     /** Constructor */
-    GpuKernelArgumentInfo(Type type)
-        : type{ type }
+    GpuKernelArgumentInfo(Type type) : type{type}
     {
     }
-    Type type{ Type::Tensor_4D_t_Buffer };
+    Type type{Type::Tensor_4D_t_Buffer};
 };
 bool operator==(const GpuKernelArgumentInfo &info0, const GpuKernelArgumentInfo &info1);
 /** Kernel argument information linked with its corresponding @ref ITensorInfo
@@ -79,10 +78,8 @@ public:
      * @param[in] tensor_info     Associated @ref ITensorInfo
      * @param[in] kernel_arg_info Associated @ref GpuKernelArgumentInfo
      */
-    GpuKernelArgument(const ITensorInfo           &tensor_info,
-                      const GpuKernelArgumentInfo &kernel_arg_info)
-        : _tensor_info{ tensor_info },
-          _kernel_arg_info{ kernel_arg_info }
+    GpuKernelArgument(const ITensorInfo &tensor_info, const GpuKernelArgumentInfo &kernel_arg_info)
+        : _tensor_info{tensor_info}, _kernel_arg_info{kernel_arg_info}
     {
     }
     /** Get workload tensor id */
@@ -200,12 +197,12 @@ public:
         TensorComponent /** @ref TensorComponentType */
     };
     GpuKernelArgumentBinding(ITensorInfo::Id id, TensorStorageType storage)
-        : _type{ Type::TensorStorage }, _id{ id }, _value{}
+        : _type{Type::TensorStorage}, _id{id}, _value{}
     {
         _value.tensor_storage_type = storage;
     }
     GpuKernelArgumentBinding(ITensorInfo::Id id, TensorComponentType component)
-        : _type{ Type::TensorComponent }, _id{ id }, _value{}
+        : _type{Type::TensorComponent}, _id{id}, _value{}
     {
         _value.tensor_component_type = component;
     }

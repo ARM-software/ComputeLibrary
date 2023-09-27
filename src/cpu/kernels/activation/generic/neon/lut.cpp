@@ -24,6 +24,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/cpu/kernels/lut/list.h"
 
 namespace arm_compute
@@ -33,19 +34,22 @@ namespace cpu
 #ifdef __aarch64__
 void neon_q8_activation_lut(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::QASYMM8 && src->info()->data_type() != DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_ERROR_ON(src->info()->data_type() != DataType::QASYMM8 &&
+                         src->info()->data_type() != DataType::QASYMM8_SIGNED);
     const auto window_end_x  = window.x().end();
     Window     win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
     Iterator input(src, win_collapsed);
     Iterator output(dst, win_collapsed);
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
-        auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
-        lut_u8_neon(act_info.lut().data(), 1u, window_end_x, &input_ptr, &output_ptr);
-    },
-    input, output);
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
+        {
+            const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+            auto       output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+            lut_u8_neon(act_info.lut().data(), 1u, window_end_x, &input_ptr, &output_ptr);
+        },
+        input, output);
 }
 #endif // __aarch64__
 } // namespace cpu

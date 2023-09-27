@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClLogicalNot.h"
 
@@ -32,16 +33,15 @@ namespace arm_compute
 {
 struct CLLogicalNot::Impl
 {
-    const ICLTensor                      *src{ nullptr };
-    ICLTensor                            *dst{ nullptr };
-    std::unique_ptr<opencl::ClLogicalNot> op{ nullptr };
+    const ICLTensor                      *src{nullptr};
+    ICLTensor                            *dst{nullptr};
+    std::unique_ptr<opencl::ClLogicalNot> op{nullptr};
 };
 
-CLLogicalNot::CLLogicalNot()
-    : _impl(std::make_unique<Impl>())
+CLLogicalNot::CLLogicalNot() : _impl(std::make_unique<Impl>())
 {
 }
-CLLogicalNot::CLLogicalNot(CLLogicalNot &&) = default;
+CLLogicalNot::CLLogicalNot(CLLogicalNot &&)            = default;
 CLLogicalNot &CLLogicalNot::operator=(CLLogicalNot &&) = default;
 CLLogicalNot::~CLLogicalNot()                          = default;
 

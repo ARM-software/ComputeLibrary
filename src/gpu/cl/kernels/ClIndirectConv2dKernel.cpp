@@ -23,13 +23,14 @@
  */
 #include "src/gpu/cl/kernels/ClIndirectConv2dKernel.h"
 
-#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -46,8 +47,14 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *indirect_buffer, const ITensorInfo *dst,
-                          const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
+Status validate_arguments(const ITensorInfo                 *src,
+                          const ITensorInfo                 *weights,
+                          const ITensorInfo                 *biases,
+                          const ITensorInfo                 *indirect_buffer,
+                          const ITensorInfo                 *dst,
+                          const PadStrideInfo               &conv_info,
+                          const ActivationLayerInfo         &act_info,
+                          const DirectConvComputeKernelInfo &desc)
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
@@ -55,37 +62,38 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indirect_buffer, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(indirect_buffer->tensor_shape(),
-                                                       misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(),
-                                                                                                             src->data_layout(),
-                                                                                                             weights->tensor_shape(),
-                                                                                                             conv_info,
-                                                                                                             desc));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+        indirect_buffer->tensor_shape(),
+        misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(), src->data_layout(),
+                                                              weights->tensor_shape(), conv_info, desc));
 
     constexpr int channel_idx = 0;
     constexpr int batch_idx   = 3;
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != src->dimension(channel_idx), "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != src->dimension(channel_idx),
+                                    "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.m0 <= 0 || desc.m0 > 8, "M0 can only be greater than 0 and less than or equal to 8");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.m0 <= 0 || desc.m0 > 8,
+                                    "M0 can only be greater than 0 and less than or equal to 8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 && desc.n0 != 16,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.n0 != 1 && desc.n0 != 2 && desc.n0 != 3 && desc.n0 != 4 && desc.n0 != 8 &&
+                                        desc.n0 != 16,
                                     "N0 can only be: 1, 2, 3, 4, 8, and 16");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 1 && desc.k0 != 2 && desc.k0 != 3 && desc.k0 != 4 && desc.k0 != 8 &&
+                                        desc.k0 != 16,
                                     "K0 can only be: 1, 2, 3, 4, 8, and 16");
 
-    if(desc.export_weights_to_cl_image)
+    if (desc.export_weights_to_cl_image)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16,
-                                        "K0 can only be: 4, 8, and 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.k0 != 4 && desc.k0 != 8 && desc.k0 != 16, "K0 can only be: 4, 8, and 16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(!export_to_cl_image(weights),
                                         "Export to CLImage is not supported for this weight configuration");
     }
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
-        if(is_data_type_quantized_asymmetric(src->data_type()))
+        if (is_data_type_quantized_asymmetric(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -95,15 +103,14 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *weights, co
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->dimension(channel_idx) != weights->dimension(batch_idx),
                                         "Biases size and number of dst feature maps should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1,
-                                        "Biases should be one dimensional");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
     // Checks performed when dst is configured
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
-                                                           misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            dst->tensor_shape(), misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
@@ -116,13 +123,21 @@ ClIndirectConv2dKernel::ClIndirectConv2dKernel()
     _type = CLKernelType::DIRECT;
 }
 
-void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *indirect_buffer, ITensorInfo *dst,
-                                       const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
+void ClIndirectConv2dKernel::configure(const CLCompileContext            &compile_context,
+                                       ITensorInfo                       *src,
+                                       ITensorInfo                       *weights,
+                                       ITensorInfo                       *biases,
+                                       ITensorInfo                       *indirect_buffer,
+                                       ITensorInfo                       *dst,
+                                       const PadStrideInfo               &conv_info,
+                                       const ActivationLayerInfo         &act_info,
+                                       const DirectConvComputeKernelInfo &desc)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, indirect_buffer, dst);
 
     // Perform validation
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, weights, biases, indirect_buffer, dst, conv_info, act_info, desc));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments(src, weights, biases, indirect_buffer, dst, conv_info, act_info, desc));
 
     constexpr unsigned int channel_idx   = 0;
     constexpr unsigned int width_idx     = 1;
@@ -137,10 +152,7 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*dst, output_shape,
-                       1,
-                       src->data_type(),
-                       src->quantization_info());
+    auto_init_if_empty(*dst, output_shape, 1, src->data_type(), src->quantization_info());
 
     // Configure kernel window
     Window win;
@@ -164,7 +176,7 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     _export_to_cl_image = desc.export_weights_to_cl_image;
 
     // Update the padding for the weights tensor if we can export to cl_image
-    if(_export_to_cl_image)
+    if (_export_to_cl_image)
     {
         gemm::update_padding_for_cl_image(weights);
     }
@@ -173,11 +185,12 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     // When M0 is 5, 6, and 7, we use vload8 to fetch the data from the buffer
     const unsigned int load_indirect_buf_size = m0 > 4 ? 8 : m0;
     const unsigned int indirect_buf_width     = indirect_buffer->tensor_shape()[0];
-    const unsigned int round_up_width         = ((indirect_buf_width + load_indirect_buf_size - 1) / load_indirect_buf_size) * load_indirect_buf_size;
-    const unsigned int padding                = round_up_width - indirect_buf_width;
+    const unsigned int round_up_width =
+        ((indirect_buf_width + load_indirect_buf_size - 1) / load_indirect_buf_size) * load_indirect_buf_size;
+    const unsigned int padding = round_up_width - indirect_buf_width;
     indirect_buffer->extend_padding(PaddingSize(0, indirect_buffer->padding().right + padding, 0, 0));
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         build_options.add_option(std::string("-DHAS_BIAS"));
         build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(biases->data_type())));
@@ -186,9 +199,10 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     // Conditions of -cl-fast-relaxed-math causing accuracy issues can be traced from COMPMID-5324
     const auto act_function = act_info.activation();
 
-    if((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST)
-       && (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU || act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-       && (data_type == DataType::F32 || data_type == DataType::F16))
+    if ((gpu_target != GPUTarget::G71 && (gpu_target & GPUTarget::GPU_ARCH_MASK) == GPUTarget::BIFROST) &&
+        (act_function == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU ||
+         act_function == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU) &&
+        (data_type == DataType::F32 || data_type == DataType::F16))
     {
         // -cl-fast-relaxed-math also sets -cl-finite-math-only and -cl-unsafe-math-optimizations
         // to disable -cl-finite-math-only, we only include -cl-unsafe-math-optimizations
@@ -224,7 +238,7 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     // A macro guard to compile ONLY the kernel of interest
     build_options.add_option("-D" + upper_string(kernel_name.str()));
 
-    if(compile_context.get_ddk_version() >= 30)
+    if (compile_context.get_ddk_version() >= 30)
     {
         build_options.add_option("-fregister-allocation=64");
     }
@@ -253,10 +267,17 @@ void ClIndirectConv2dKernel::configure(const CLCompileContext &compile_context, 
     _config_id += support::cpp11::to_string(dst->dimension(channel_idx));
 }
 
-Status ClIndirectConv2dKernel::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *indirect_buffer, const ITensorInfo *dst,
-                                        const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info, const DirectConvComputeKernelInfo &desc)
+Status ClIndirectConv2dKernel::validate(const ITensorInfo                 *src,
+                                        const ITensorInfo                 *weights,
+                                        const ITensorInfo                 *biases,
+                                        const ITensorInfo                 *indirect_buffer,
+                                        const ITensorInfo                 *dst,
+                                        const PadStrideInfo               &conv_info,
+                                        const ActivationLayerInfo         &act_info,
+                                        const DirectConvComputeKernelInfo &desc)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, weights, biases, indirect_buffer, dst, conv_info, act_info, desc));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        validate_arguments(src, weights, biases, indirect_buffer, dst, conv_info, act_info, desc));
     return Status{};
 }
 
@@ -268,35 +289,42 @@ void ClIndirectConv2dKernel::run_op(ITensorPack &tensors, const Window &window, 
     // Get initial windows
     Window slice = window.first_slice_window_3D();
 
-    const auto src             = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const auto weights         = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const auto biases          = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
-    const auto indirect_buffer = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_3));
-    auto       dst             = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto weights =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto biases =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    const auto indirect_buffer =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_3));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     cl::Image2D weights_cl_image;
 
-    if(_export_to_cl_image)
+    if (_export_to_cl_image)
     {
-        const size_t      image_w = weights->info()->dimension(0) / 4;
-        const size_t      image_h = weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
+        const size_t image_w = weights->info()->dimension(0) / 4;
+        const size_t image_h =
+            weights->info()->dimension(1) * weights->info()->dimension(2) * weights->info()->dimension(3);
         const TensorShape shape2d(image_w, image_h);
         const size_t      image_row_pitch = weights->info()->strides_in_bytes()[1];
 
         // Export cl_buffer to cl_image
-        weights_cl_image = create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d, weights->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+        weights_cl_image =
+            create_image2d_from_buffer(CLKernelLibrary::get().context(), weights->cl_buffer(), shape2d,
+                                       weights->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
     }
 
     unsigned int idx = 0;
     add_4d_tensor_nhwc_argument(idx, src);
     add_4d_tensor_nhwc_argument(idx, indirect_buffer);
     add_4d_tensor_nhwc_argument(idx, dst);
-    if(_export_to_cl_image)
+    if (_export_to_cl_image)
     {
         _kernel.setArg(idx++, weights_cl_image);
     }
     add_4d_tensor_nhwc_argument(idx, weights);
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         add_1D_tensor_argument(idx, biases, slice);
     }

@@ -51,14 +51,14 @@ inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t v
     D_f32x4 = vmlaq_f32(vo, D_f32x4, vs);
     // Convert float32 vectors to uint32 vectors
 #if __aarch64__
-    if(round_policy == RoundingPolicy::TO_NEAREST_EVEN)
+    if (round_policy == RoundingPolicy::TO_NEAREST_EVEN)
     {
         A_u32x4 = vcvtnq_u32_f32(A_f32x4);
         B_u32x4 = vcvtnq_u32_f32(B_f32x4);
         C_u32x4 = vcvtnq_u32_f32(C_f32x4);
         D_u32x4 = vcvtnq_u32_f32(D_f32x4);
     }
-    else if(round_policy == RoundingPolicy::TO_NEAREST_UP)
+    else if (round_policy == RoundingPolicy::TO_NEAREST_UP)
     {
         A_u32x4 = vcvtaq_u32_f32(A_f32x4);
         B_u32x4 = vcvtaq_u32_f32(B_f32x4);
@@ -86,7 +86,7 @@ inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t v
     return vcombine_u8(vqmovn_u16(vd_low_u16x8), vqmovn_u16(vd_high_u16x8));
 }
 
-template <RoundingPolicy   round_policy>
+template <RoundingPolicy round_policy>
 inline qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo)
 {
     // Convert uint8 vectors to int16 vectors
@@ -110,14 +110,14 @@ inline qasymm8x16_signed_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x
     C_f32x4 = vmlaq_f32(vo, C_f32x4, vs);
     D_f32x4 = vmlaq_f32(vo, D_f32x4, vs);
 #if __aarch64__
-    if(round_policy == RoundingPolicy::TO_NEAREST_EVEN)
+    if (round_policy == RoundingPolicy::TO_NEAREST_EVEN)
     {
         A_s32x4 = vcvtnq_s32_f32(A_f32x4);
         B_s32x4 = vcvtnq_s32_f32(B_f32x4);
         C_s32x4 = vcvtnq_s32_f32(C_f32x4);
         D_s32x4 = vcvtnq_s32_f32(D_f32x4);
     }
-    else if(round_policy == RoundingPolicy::TO_NEAREST_UP)
+    else if (round_policy == RoundingPolicy::TO_NEAREST_UP)
     {
         A_s32x4 = vcvtaq_s32_f32(A_f32x4);
         B_s32x4 = vcvtaq_s32_f32(B_f32x4);

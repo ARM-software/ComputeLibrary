@@ -30,7 +30,7 @@ namespace arm_compute
 namespace wrapper
 {
 template <size_t element_size>
-inline svbool_t  svptrue_size();
+inline svbool_t svptrue_size();
 
 template <>
 inline svbool_t svptrue_size<64>()

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_DETAIL_NEACTIVATION_FUNCTION_DETAIL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
@@ -158,8 +159,7 @@ struct logistic
      *
      * @param[in] act_info Activation layer information.
      */
-    explicit logistic(ActivationLayerInfo act_info)
-        : vone(wrapper::vdup_n(static_cast<T>(1), ExactTagType{}))
+    explicit logistic(ActivationLayerInfo act_info) : vone(wrapper::vdup_n(static_cast<T>(1), ExactTagType{}))
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
@@ -198,8 +198,7 @@ struct relu
      *
      * @param[in] act_info Activation layer information.
      */
-    explicit relu(ActivationLayerInfo act_info)
-        : vzero(wrapper::vdup_n(static_cast<T>(0), ExactTagType{}))
+    explicit relu(ActivationLayerInfo act_info) : vzero(wrapper::vdup_n(static_cast<T>(0), ExactTagType{}))
     {
         ARM_COMPUTE_UNUSED(act_info);
     }

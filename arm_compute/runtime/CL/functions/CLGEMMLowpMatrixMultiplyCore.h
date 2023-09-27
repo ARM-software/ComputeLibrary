@@ -91,7 +91,11 @@ public:
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const ICLTensor *a,
+                   const ICLTensor *b,
+                   const ICLTensor *c,
+                   ICLTensor       *output,
+                   const GEMMInfo  &gemm_info = GEMMInfo());
     /** Initialise the kernel's inputs, output
      *
      * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
@@ -110,7 +114,12 @@ public:
      * @param[in]  gemm_info       (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *a,
+                   const ICLTensor        *b,
+                   const ICLTensor        *c,
+                   ICLTensor              *output,
+                   const GEMMInfo         &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyCore
      *
      * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.
@@ -122,7 +131,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a,
+                           const ITensorInfo *b,
+                           const ITensorInfo *c,
+                           const ITensorInfo *output,
+                           const GEMMInfo    &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

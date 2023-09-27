@@ -31,8 +31,7 @@ namespace arm_compute
 {
 namespace graph
 {
-NormalizationLayerNode::NormalizationLayerNode(NormalizationLayerInfo norm_info)
-    : _info(norm_info)
+NormalizationLayerNode::NormalizationLayerNode(NormalizationLayerInfo norm_info) : _info(norm_info)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -45,7 +44,7 @@ NormalizationLayerInfo NormalizationLayerNode::normalization_info() const
 
 bool NormalizationLayerNode::forward_descriptors()
 {
-    if(input_id(0) != NullTensorID && (output_id(0) != NullTensorID))
+    if (input_id(0) != NullTensorID && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLogicalOr.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClElementwiseKernel.h"
 
 #include <utility>
 
@@ -33,7 +34,10 @@ namespace arm_compute
 {
 namespace experimental
 {
-void CLLogicalOr::configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+void CLLogicalOr::configure(const CLCompileContext &compile_context,
+                            ITensorInfo            *input1,
+                            ITensorInfo            *input2,
+                            ITensorInfo            *output)
 {
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output);
     auto k = std::make_unique<arm_compute::opencl::kernels::ClLogicalBinaryKernel>();
@@ -54,17 +58,16 @@ void CLLogicalOr::run(ITensorPack &tensors)
 
 struct CLLogicalOr::Impl
 {
-    const ICLTensor                           *src0{ nullptr };
-    const ICLTensor                           *src1{ nullptr };
-    ICLTensor                                 *dst{ nullptr };
-    std::unique_ptr<experimental::CLLogicalOr> op{ nullptr };
+    const ICLTensor                           *src0{nullptr};
+    const ICLTensor                           *src1{nullptr};
+    ICLTensor                                 *dst{nullptr};
+    std::unique_ptr<experimental::CLLogicalOr> op{nullptr};
 };
 
-CLLogicalOr::CLLogicalOr()
-    : _impl(std::make_unique<Impl>())
+CLLogicalOr::CLLogicalOr() : _impl(std::make_unique<Impl>())
 {
 }
-CLLogicalOr::CLLogicalOr(CLLogicalOr &&) = default;
+CLLogicalOr::CLLogicalOr(CLLogicalOr &&)            = default;
 CLLogicalOr &CLLogicalOr::operator=(CLLogicalOr &&) = default;
 CLLogicalOr::~CLLogicalOr()                         = default;
 
@@ -73,7 +76,10 @@ void CLLogicalOr::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLLogicalOr::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+void CLLogicalOr::configure(const CLCompileContext &compile_context,
+                            ICLTensor              *input1,
+                            ICLTensor              *input2,
+                            ICLTensor              *output)
 {
     _impl->src0 = input1;
     _impl->src1 = input2;

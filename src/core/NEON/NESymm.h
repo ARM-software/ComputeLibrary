@@ -25,7 +25,9 @@
 #define ARM_COMPUTE_NESYMM_H
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
 #include "src/core/NEON/NEMath.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -49,13 +51,10 @@ using qsymm16x8x2_t = int16x8x2_t; /**< 16 bit quantized symmetric vector with 1
  * @return Quantized values
  */
 template <bool is_bounded_relu>
-int16x8_t finalize_quantization_int16(int32x4x2_t &in_s32,
-                                      int          result_fixedpoint_multiplier,
-                                      int32_t      result_shift,
-                                      int16x8_t    min_s16,
-                                      int16x8_t    max_s16)
+int16x8_t finalize_quantization_int16(
+    int32x4x2_t &in_s32, int result_fixedpoint_multiplier, int32_t result_shift, int16x8_t min_s16, int16x8_t max_s16)
 {
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
         in_s32.val[0] = vmulq_n_s32(in_s32.val[0], (1 << -result_shift));
         in_s32.val[1] = vmulq_n_s32(in_s32.val[1], (1 << -result_shift));
@@ -76,7 +75,7 @@ int16x8_t finalize_quantization_int16(int32x4x2_t &in_s32,
     // Convert S32 to S16
     int16x8_t out_s16 = vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s16 = vmaxq_s16(out_s16, min_s16);
         out_s16 = vminq_s16(out_s16, max_s16);
@@ -98,13 +97,14 @@ int16x8_t finalize_quantization_int16(int32x4x2_t &in_s32,
  * @return Quantized values
  */
 template <bool is_bounded_relu>
-inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoint_multiplier,
-                                           int32_t result_shift, int16_t min_s16, int16_t max_s16)
+inline int16_t finalize_quantization_int16(
+    int32_t in_value, int result_fixedpoint_multiplier, int32_t result_shift, int16_t min_s16, int16_t max_s16)
 {
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
-        const int64_t in_64 = static_cast<int64_t>(in_value) * (1 << (-result_shift)) * static_cast<int64_t>(result_fixedpoint_multiplier);
-        in_value            = static_cast<int32_t>((in_64 + (1 << 30)) >> 31);
+        const int64_t in_64 = static_cast<int64_t>(in_value) * (1 << (-result_shift)) *
+                              static_cast<int64_t>(result_fixedpoint_multiplier);
+        in_value = static_cast<int32_t>((in_64 + (1 << 30)) >> 31);
     }
     else
     {
@@ -117,7 +117,7 @@ inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoi
     // Bound the result
     int16_t out_s16 = static_cast<int16_t>(std::max<int32_t>(-32768, std::min<int32_t>(32767, in_value)));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s16 = static_cast<int16_t>(std::max(min_s16, std::min(max_s16, out_s16)));
     }
@@ -134,14 +134,9 @@ inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoi
  */
 inline float32x4x2_t vdequantize_int16(const int16x8_t &qv, float scale)
 {
-    const float32x4_t   vscale = vdupq_n_f32(scale);
-    const float32x4x2_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv))), vscale)
-        }
-    };
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input = {{vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv))), vscale),
+                                               vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv))), vscale)}};
     return vdequantized_input;
 }
 
@@ -156,18 +151,13 @@ inline int16x8_t vquantize_int16(const float32x4x2_t &qv, float scale)
 {
     const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
 
-    const int32x4x2_t rf =
-    {
-        {
+    const int32x4x2_t rf = {{
 #ifdef __aarch64__
-            vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
-            vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
+        vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
 #else  //__aarch64__
-            vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
-            vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
+        vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
 #endif //__aarch64__
-        }
-    };
+    }};
     return vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1]));
 }
 
@@ -180,17 +170,14 @@ inline int16x8_t vquantize_int16(const float32x4x2_t &qv, float scale)
  */
 inline float32x4x4_t vdequantize(const int16x8x2_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale  = qi.scale;
-    const float32x4_t   vscale = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[0]))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[0]))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[1]))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[1]))), vscale),
-        }
-    };
+    const float         scale              = qi.scale;
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[0]))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[0]))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[1]))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[1]))), vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -206,24 +193,20 @@ inline qsymm16x8x2_t vquantize_qsymm16(const float32x4x4_t &qv, const UniformQua
     const float scale = qi.scale;
     ARM_COMPUTE_ERROR_ON(scale == 0.f);
     const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
-    const int32x4x4_t rf =
-    {
-        {
+    const int32x4x4_t rf        = {{
 #ifdef __aarch64__
-            vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
-            vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
-            vcvtnq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
-            vcvtnq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
+        vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+        vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
+        vcvtnq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
+        vcvtnq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
 #else  //__aarch64__
-            vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
-            vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
-            vcvtq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
-            vcvtq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
+        vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+        vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
+        vcvtq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
+        vcvtq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
 #endif //__aarch64__
-        }
-    };
-    const qsymm16x8x2_t res =
-    {
+    }};
+    const qsymm16x8x2_t res = {
         vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])),
         vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])),
     };

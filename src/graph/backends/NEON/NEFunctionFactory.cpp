@@ -23,13 +23,13 @@
  */
 #include "arm_compute/graph/backends/NEON/NEFunctionFactory.h"
 
+#include "arm_compute/graph/backends/FunctionHelpers.h"
+#include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/Logger.h"
-#include "arm_compute/graph/TypePrinter.h"
-#include "arm_compute/graph/backends/FunctionHelpers.h"
-#include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
+#include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
@@ -88,7 +88,8 @@ struct NEFusedLayerTypes
 namespace detail
 {
 template <>
-std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETargetInfo>(NormalizationLayerNode &node, GraphContext &ctx)
+std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETargetInfo>(NormalizationLayerNode &node,
+                                                                                          GraphContext           &ctx)
 {
     validate_node<NETargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
@@ -105,14 +106,10 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Type: " << node.type()
-                               << " Target: " << NETargetInfo::TargetType
-                               << " Data Type: " << input->info()->data_type()
-                               << " Input shape: " << input->info()->tensor_shape()
-                               << " Output shape: " << output->info()->tensor_shape()
-                               << " Normalization info: " << norm_info.type()
-                               << std::endl);
+                               << node.name() << " Type: " << node.type() << " Target: " << NETargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type() << " Input shape: "
+                               << input->info()->tensor_shape() << " Output shape: " << output->info()->tensor_shape()
+                               << " Normalization info: " << norm_info.type() << std::endl);
 
     return func;
 }
@@ -120,84 +117,116 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
 
 std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &ctx)
 {
-    if(node == nullptr)
+    if (node == nullptr)
     {
         return nullptr;
     }
 
     NodeType type = node->type();
-    switch(type)
+    switch (type)
     {
         case NodeType::ActivationLayer:
-            return detail::create_activation_layer<NEActivationLayer, NETargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
+            return detail::create_activation_layer<NEActivationLayer, NETargetInfo>(
+                *polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::ArgMinMaxLayer:
-            return detail::create_arg_min_max_layer<NEArgMinMaxLayer, NETargetInfo>(*polymorphic_downcast<ArgMinMaxLayerNode *>(node));
+            return detail::create_arg_min_max_layer<NEArgMinMaxLayer, NETargetInfo>(
+                *polymorphic_downcast<ArgMinMaxLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
-            return detail::create_batch_normalization_layer<NEBatchNormalizationLayer, NETargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
+            return detail::create_batch_normalization_layer<NEBatchNormalizationLayer, NETargetInfo>(
+                *polymorphic_downcast<BatchNormalizationLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:
-            return detail::create_channel_shuffle_layer<NEChannelShuffleLayer, NETargetInfo>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
+            return detail::create_channel_shuffle_layer<NEChannelShuffleLayer, NETargetInfo>(
+                *polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
-            return detail::create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
+            return detail::create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(
+                *polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
         case NodeType::DepthToSpaceLayer:
-            return detail::create_depth_to_space_layer<NEDepthToSpaceLayer, NETargetInfo>(*polymorphic_downcast<DepthToSpaceLayerNode *>(node));
+            return detail::create_depth_to_space_layer<NEDepthToSpaceLayer, NETargetInfo>(
+                *polymorphic_downcast<DepthToSpaceLayerNode *>(node));
         case NodeType::DeconvolutionLayer:
-            return detail::create_deconvolution_layer<NEDeconvolutionLayer, NETargetInfo>(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
+            return detail::create_deconvolution_layer<NEDeconvolutionLayer, NETargetInfo>(
+                *polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
         case NodeType::ConcatenateLayer:
-            return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
+            return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(
+                *polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
-            return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayer, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+            return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayer, NETargetInfo>(
+                *polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DequantizationLayer:
-            return detail::create_dequantization_layer<NEDequantizationLayer, NETargetInfo>(*polymorphic_downcast<DequantizationLayerNode *>(node));
+            return detail::create_dequantization_layer<NEDequantizationLayer, NETargetInfo>(
+                *polymorphic_downcast<DequantizationLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
-            return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
+            return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(
+                *polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:
-            return detail::create_detection_post_process_layer<NEDetectionPostProcessLayer, NETargetInfo>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
+            return detail::create_detection_post_process_layer<NEDetectionPostProcessLayer, NETargetInfo>(
+                *polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::EltwiseLayer:
-            return detail::create_eltwise_layer<NEEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
+            return detail::create_eltwise_layer<NEEltwiseFunctions, NETargetInfo>(
+                *polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::UnaryEltwiseLayer:
-            return detail::create_unary_eltwise_layer<NEUnaryEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
+            return detail::create_unary_eltwise_layer<NEUnaryEltwiseFunctions, NETargetInfo>(
+                *polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:
-            return detail::create_flatten_layer<NEFlattenLayer, NETargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
+            return detail::create_flatten_layer<NEFlattenLayer, NETargetInfo>(
+                *polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:
-            return detail::create_fully_connected_layer<NEFullyConnectedLayer, NETargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
+            return detail::create_fully_connected_layer<NEFullyConnectedLayer, NETargetInfo>(
+                *polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::FusedConvolutionBatchNormalizationLayer:
-            return detail::create_fused_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node), ctx);
+            return detail::create_fused_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(
+                *polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node), ctx);
         case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
-            return detail::create_fused_depthwise_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node), ctx);
+            return detail::create_fused_depthwise_convolution_batch_normalization_layer<NEFusedLayerTypes,
+                                                                                        NETargetInfo>(
+                *polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node), ctx);
         case NodeType::L2NormalizeLayer:
-            return detail::create_l2_normalize_layer<NEL2NormalizeLayer, NETargetInfo>(*polymorphic_downcast<L2NormalizeLayerNode *>(node), ctx);
+            return detail::create_l2_normalize_layer<NEL2NormalizeLayer, NETargetInfo>(
+                *polymorphic_downcast<L2NormalizeLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
-            return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
+            return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(
+                *polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
         case NodeType::PadLayer:
             return detail::create_pad_layer<NEPadLayer, NETargetInfo>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
-            return detail::create_permute_layer<NEPermute, NETargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
+            return detail::create_permute_layer<NEPermute, NETargetInfo>(
+                *polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
-            return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+            return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(
+                *polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::PReluLayer:
-            return detail::create_prelu_layer<NEPReluLayer, NETargetInfo>(*polymorphic_downcast<PReluLayerNode *>(node));
+            return detail::create_prelu_layer<NEPReluLayer, NETargetInfo>(
+                *polymorphic_downcast<PReluLayerNode *>(node));
         case NodeType::PrintLayer:
             return detail::create_print_layer<NETargetInfo>(*polymorphic_downcast<PrintLayerNode *>(node));
         case NodeType::PriorBoxLayer:
-            return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+            return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(
+                *polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:
-            return detail::create_quantization_layer<NEQuantizationLayer, NETargetInfo>(*polymorphic_downcast<QuantizationLayerNode *>(node));
+            return detail::create_quantization_layer<NEQuantizationLayer, NETargetInfo>(
+                *polymorphic_downcast<QuantizationLayerNode *>(node));
         case NodeType::ReductionOperationLayer:
-            return detail::create_reduction_operation_layer<NEReductionOperation, NETargetInfo>(*polymorphic_downcast<ReductionLayerNode *>(node), ctx);
+            return detail::create_reduction_operation_layer<NEReductionOperation, NETargetInfo>(
+                *polymorphic_downcast<ReductionLayerNode *>(node), ctx);
         case NodeType::ReorgLayer:
-            return detail::create_reorg_layer<NEReorgLayer, NETargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
+            return detail::create_reorg_layer<NEReorgLayer, NETargetInfo>(
+                *polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
-            return detail::create_reshape_layer<NEReshapeLayer, NETargetInfo>(*polymorphic_downcast<ReshapeLayerNode *>(node));
+            return detail::create_reshape_layer<NEReshapeLayer, NETargetInfo>(
+                *polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<NEScale, NETargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
         case NodeType::SliceLayer:
             return detail::create_slice_layer<NESlice, NETargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
-            return detail::create_softmax_layer<NESoftmaxLayer, NETargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+            return detail::create_softmax_layer<NESoftmaxLayer, NETargetInfo>(
+                *polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
         case NodeType::StackLayer:
-            return detail::create_stack_layer<NEStackLayer, NETargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
+            return detail::create_stack_layer<NEStackLayer, NETargetInfo>(
+                *polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::StridedSliceLayer:
-            return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(*polymorphic_downcast<StridedSliceLayerNode *>(node));
+            return detail::create_strided_slice_layer<NEStridedSlice, NETargetInfo>(
+                *polymorphic_downcast<StridedSliceLayerNode *>(node));
         default:
             return nullptr;
     }

@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_NEFFTSCALEKERNEL_H
 #define ARM_COMPUTE_NEFFTSCALEKERNEL_H
 
-#include "src/core/NEON/INEKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
+
+#include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {

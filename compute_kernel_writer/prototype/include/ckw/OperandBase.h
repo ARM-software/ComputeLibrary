@@ -26,6 +26,7 @@
 #define CKW_PROTOTYPE_INCLUDE_CKW_OPERANDBASE_H
 
 #include "ckw/types/DataType.h"
+
 #include <string>
 
 namespace ckw

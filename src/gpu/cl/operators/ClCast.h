@@ -58,7 +58,8 @@ public:
      * @param[out] dst             The destinatio tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy          Conversion policy.
      */
-    void configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
+    void
+    configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClCast::configure()

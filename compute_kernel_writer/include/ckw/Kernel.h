@@ -26,6 +26,7 @@
 #define CKW_INCLUDE_CKW_KERNEL_H
 
 #include "ckw/KernelArgument.h"
+
 #include <string>
 #include <vector>
 

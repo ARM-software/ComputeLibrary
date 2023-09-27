@@ -84,8 +84,13 @@ public:
      * @param[in]      rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
-                   ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and convertion policy.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -100,8 +105,14 @@ public:
      * @param[in]      rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
-                   ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplication
      *
      * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
@@ -115,8 +126,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           float                      scale,
+                           ConvertPolicy              overflow_policy,
+                           RoundingPolicy             rounding_policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -151,7 +167,10 @@ public:
      * @param[out]     output   The output tensor, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -162,7 +181,11 @@ public:
      * @param[out]     output          The output tensor, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplication
      *
      * @param[in] input1   An input tensor info. Data types supported: F16/F32. Number of channels supported: 2.
@@ -170,7 +193,10 @@ public:
      * @param[in] output   The output tensor info, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include "support/Rounding.h"
 
 namespace arm_compute

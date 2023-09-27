@@ -82,7 +82,11 @@ public:
      * @param[in]      policy   Policy to use to handle overflow.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * Valid configurations (Input1,Input2) -> Output :
@@ -108,7 +112,11 @@ public:
      * @param[in]      policy          Policy to use to handle overflow.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy,
+    void configure(const CLCompileContext    &compile_context,
+                   const ICLTensor           *input1,
+                   const ICLTensor           *input2,
+                   ICLTensor                 *output,
+                   ConvertPolicy              policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClSaturatedArithmeticKernel for addition
      *
@@ -134,7 +142,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -192,7 +204,11 @@ public:
      * @param[in]      policy   Policy to use to handle overflow.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ICLTensor           *input1,
+                   const ICLTensor           *input2,
+                   ICLTensor                 *output,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * Valid configurations (Input1,Input2) -> Output :
@@ -218,7 +234,11 @@ public:
      * @param[in]      policy          Policy to use to handle overflow.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy,
+    void configure(const CLCompileContext    &compile_context,
+                   const ICLTensor           *input1,
+                   const ICLTensor           *input2,
+                   ICLTensor                 *output,
+                   ConvertPolicy              policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClSaturatedArithmeticKernel for subtraction
      *
@@ -244,7 +264,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -292,7 +316,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -303,7 +330,11 @@ public:
      * @param[out]     output          Output tensor. Data types supported: Same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   const ICLTensor           *input1,
+                   const ICLTensor           *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticDivision
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
@@ -313,7 +344,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -368,7 +402,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -379,7 +416,11 @@ public:
      * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for max
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
@@ -389,7 +430,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -444,7 +488,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -455,7 +502,11 @@ public:
      * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for min
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
@@ -465,7 +516,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -518,7 +572,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -529,7 +586,11 @@ public:
      * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for squared difference
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
@@ -539,7 +600,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -587,7 +651,10 @@ public:
      * @param[out]     output   Output tensor. Data types supported:F16/F32.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
@@ -598,7 +665,11 @@ public:
      * @param[out]     output          Output tensor. Data types supported:F16/F32.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input1,
+                   ICLTensor                 *input2,
+                   ICLTensor                 *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref opencl::kernels::ClArithmeticKernel for power
      *
      * @param[in] input1   First tensor input info. Data types supported: F16/F32.
@@ -608,7 +679,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;

@@ -26,6 +26,7 @@
 #define SRC_CPU_KERNELS_CPUADDMULADDKERNEL
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -39,8 +40,15 @@ namespace kernels
 class CpuAddMulAddKernel : public ICpuKernel<CpuAddMulAddKernel>
 {
 private:
-    using AddMulAddKernelPtr =
-        std::add_pointer<void(const ITensor *, const ITensor *, const ITensor *, const ITensor *, ITensor *, ITensor *, ConvertPolicy, const ActivationLayerInfo &, const Window &)>::type;
+    using AddMulAddKernelPtr = std::add_pointer<void(const ITensor *,
+                                                     const ITensor *,
+                                                     const ITensor *,
+                                                     const ITensor *,
+                                                     ITensor *,
+                                                     ITensor *,
+                                                     ConvertPolicy,
+                                                     const ActivationLayerInfo &,
+                                                     const Window &)>::type;
 
 public:
     struct AddMulAddKernel
@@ -57,23 +65,31 @@ public:
      * Similar to @ref NEAddMulAdd::configure()
      *
      */
-    void configure(const ITensorInfo *input1, const ITensorInfo *input2,
-                   const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                   ITensorInfo *add_output, ITensorInfo *final_output,
-                   ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    void configure(const ITensorInfo         *input1,
+                   const ITensorInfo         *input2,
+                   const ITensorInfo         *bn_mul,
+                   const ITensorInfo         *bn_add,
+                   ITensorInfo               *add_output,
+                   ITensorInfo               *final_output,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuAddMulAddKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2,
-                           const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                           const ITensorInfo *add_output, const ITensorInfo *final_output,
-                           ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *bn_mul,
+                           const ITensorInfo         *bn_add,
+                           const ITensorInfo         *add_output,
+                           const ITensorInfo         *final_output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     static const std::vector<AddMulAddKernel> &get_available_kernels();
@@ -81,7 +97,7 @@ public:
 private:
     ConvertPolicy       _policy{};
     ActivationLayerInfo _act_info{};
-    AddMulAddKernelPtr  _run_method{ nullptr };
+    AddMulAddKernelPtr  _run_method{nullptr};
     std::string         _name{};
 };
 } // namespace kernels

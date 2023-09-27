@@ -24,6 +24,7 @@
 #include "arm_compute/AclEntrypoints.h"
 #include "arm_compute/AclUtils.h"
 #include "arm_compute/core/Error.h"
+
 #include "src/common/ITensorV2.h"
 #include "src/common/utils/Macros.h"
 
@@ -41,17 +42,17 @@ constexpr int32_t max_allowed_dims = 6;
  */
 bool is_desc_valid(const AclTensorDescriptor &desc)
 {
-    if(desc.data_type > AclFloat32 || desc.data_type <= AclDataTypeUnknown)
+    if (desc.data_type > AclFloat32 || desc.data_type <= AclDataTypeUnknown)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Unknown data type!");
         return false;
     }
-    if(desc.ndims > max_allowed_dims)
+    if (desc.ndims > max_allowed_dims)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Dimensions surpass the maximum allowed value!");
         return false;
     }
-    if(desc.ndims > 0 && desc.shape == nullptr)
+    if (desc.ndims > 0 && desc.shape == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Dimensions values are empty while dimensionality is > 0!");
         return false;
@@ -66,10 +67,8 @@ StatusCode convert_and_validate_tensor(AclTensor tensor, ITensorV2 **internal_te
 }
 } // namespace
 
-extern "C" AclStatus AclCreateTensor(AclTensor                 *external_tensor,
-                                     AclContext                 external_ctx,
-                                     const AclTensorDescriptor *desc,
-                                     bool                       allocate)
+extern "C" AclStatus
+AclCreateTensor(AclTensor *external_tensor, AclContext external_ctx, const AclTensorDescriptor *desc, bool allocate)
 {
     using namespace arm_compute;
 
@@ -78,14 +77,14 @@ extern "C" AclStatus AclCreateTensor(AclTensor                 *external_tensor,
     StatusCode status = detail::validate_internal_context(ctx);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
-    if(desc == nullptr || !is_desc_valid(*desc))
+    if (desc == nullptr || !is_desc_valid(*desc))
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Descriptor is invalid!");
         return AclInvalidArgument;
     }
 
     auto tensor = ctx->create_tensor(*desc, allocate);
-    if(tensor == nullptr)
+    if (tensor == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclCreateTensor]: Couldn't allocate internal resources for tensor creation!");
         return AclOutOfMemory;
@@ -103,7 +102,7 @@ extern "C" AclStatus AclMapTensor(AclTensor external_tensor, void **handle)
     StatusCode status = detail::validate_internal_tensor(tensor);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
-    if(handle == nullptr)
+    if (handle == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[AclMapTensor]: Handle object is nullptr!");
         return AclInvalidArgument;
@@ -160,12 +159,12 @@ extern "C" AclStatus AclGetTensorSize(AclTensor tensor, uint64_t *size)
 {
     using namespace arm_compute;
 
-    if(size == nullptr)
+    if (size == nullptr)
     {
         return AclStatus::AclInvalidArgument;
     }
 
-    ITensorV2 *internal_tensor{ nullptr };
+    ITensorV2 *internal_tensor{nullptr};
     auto       status = convert_and_validate_tensor(tensor, &internal_tensor);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
@@ -177,12 +176,12 @@ extern "C" AclStatus AclGetTensorDescriptor(AclTensor tensor, AclTensorDescripto
 {
     using namespace arm_compute;
 
-    if(desc == nullptr)
+    if (desc == nullptr)
     {
         return AclStatus::AclInvalidArgument;
     }
 
-    ITensorV2 *internal_tensor{ nullptr };
+    ITensorV2 *internal_tensor{nullptr};
     const auto status = convert_and_validate_tensor(tensor, &internal_tensor);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 

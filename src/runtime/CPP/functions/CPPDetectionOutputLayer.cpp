@@ -26,9 +26,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/helpers/AutoConfiguration.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/helpers/AutoConfiguration.h"
 
 #include <list>
 
@@ -36,25 +36,35 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output, DetectionOutputLayerInfo info)
+Status validate_arguments(const ITensorInfo       *input_loc,
+                          const ITensorInfo       *input_conf,
+                          const ITensorInfo       *input_priorbox,
+                          const ITensorInfo       *output,
+                          DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_loc, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_loc, input_conf, input_priorbox);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_loc->num_dimensions() > 2, "The location input tensor should be [C1, N].");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_conf->num_dimensions() > 2, "The location input tensor should be [C2, N].");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_priorbox->num_dimensions() > 3, "The priorbox input tensor should be [C3, 2, N].");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_priorbox->num_dimensions() > 3,
+                                    "The priorbox input tensor should be [C3, 2, N].");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.eta() <= 0.f && info.eta() > 1.f, "Eta should be between 0 and 1");
 
     const int num_priors = input_priorbox->tensor_shape()[0] / 4;
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(static_cast<size_t>((num_priors * info.num_loc_classes() * 4)) != input_loc->tensor_shape()[0], "Number of priors must match number of location predictions.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(static_cast<size_t>((num_priors * info.num_classes())) != input_conf->tensor_shape()[0], "Number of priors must match number of confidence predictions.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(static_cast<size_t>((num_priors * info.num_loc_classes() * 4)) !=
+                                        input_loc->tensor_shape()[0],
+                                    "Number of priors must match number of location predictions.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(static_cast<size_t>((num_priors * info.num_classes())) !=
+                                        input_conf->tensor_shape()[0],
+                                    "Number of priors must match number of confidence predictions.");
 
     // Validate configured output
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        const unsigned int max_size = info.keep_top_k() * (input_loc->num_dimensions() > 1 ? input_loc->dimension(1) : 1);
+        const unsigned int max_size =
+            info.keep_top_k() * (input_loc->num_dimensions() > 1 ? input_loc->dimension(1) : 1);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), TensorShape(7U, max_size));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_loc, output);
     }
@@ -65,8 +75,7 @@ Status validate_arguments(const ITensorInfo *input_loc, const ITensorInfo *input
 /** Function used to sort pair<float, T> in descend order based on the score (first) value.
  */
 template <typename T>
-bool SortScorePairDescend(const std::pair<float, T> &pair1,
-                          const std::pair<float, T> &pair2)
+bool SortScorePairDescend(const std::pair<float, T> &pair1, const std::pair<float, T> &pair2)
 {
     return pair1.first > pair2.first;
 }
@@ -82,16 +91,19 @@ bool SortScorePairDescend(const std::pair<float, T> &pair1,
  * @param[out] all_location_predictions All the location predictions.
  *
  */
-void retrieve_all_loc_predictions(const ITensor *input_loc, const int num,
-                                  const int num_priors, const int num_loc_classes,
-                                  const bool share_location, std::vector<LabelBBox> &all_location_predictions)
+void retrieve_all_loc_predictions(const ITensor          *input_loc,
+                                  const int               num,
+                                  const int               num_priors,
+                                  const int               num_loc_classes,
+                                  const bool              share_location,
+                                  std::vector<LabelBBox> &all_location_predictions)
 {
-    for(int i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i)
     {
-        for(int c = 0; c < num_loc_classes; ++c)
+        for (int c = 0; c < num_loc_classes; ++c)
         {
             int label = share_location ? -1 : c;
-            if(all_location_predictions[i].find(label) == all_location_predictions[i].end())
+            if (all_location_predictions[i].find(label) == all_location_predictions[i].end())
             {
                 all_location_predictions[i][label].resize(num_priors);
             }
@@ -102,19 +114,23 @@ void retrieve_all_loc_predictions(const ITensor *input_loc, const int num,
             }
         }
     }
-    for(int i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i)
     {
-        for(int p = 0; p < num_priors; ++p)
+        for (int p = 0; p < num_priors; ++p)
         {
-            for(int c = 0; c < num_loc_classes; ++c)
+            for (int c = 0; c < num_loc_classes; ++c)
             {
                 const int label    = share_location ? -1 : c;
                 const int base_ptr = i * num_priors * num_loc_classes * 4 + p * num_loc_classes * 4 + c * 4;
                 //xmin, ymin, xmax, ymax
-                all_location_predictions[i][label][p][0] = *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr)));
-                all_location_predictions[i][label][p][1] = *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 1)));
-                all_location_predictions[i][label][p][2] = *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 2)));
-                all_location_predictions[i][label][p][3] = *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 3)));
+                all_location_predictions[i][label][p][0] =
+                    *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr)));
+                all_location_predictions[i][label][p][1] =
+                    *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 1)));
+                all_location_predictions[i][label][p][2] =
+                    *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 2)));
+                all_location_predictions[i][label][p][3] =
+                    *reinterpret_cast<float *>(input_loc->ptr_to_element(Coordinates(base_ptr + 3)));
             }
         }
     }
@@ -130,26 +146,28 @@ void retrieve_all_loc_predictions(const ITensor *input_loc, const int num,
  * @param[out] all_location_predictions All the location predictions.
  *
  */
-void retrieve_all_conf_scores(const ITensor *input_conf, const int num,
-                              const int num_priors, const int                 num_classes,
+void retrieve_all_conf_scores(const ITensor                                  *input_conf,
+                              const int                                       num,
+                              const int                                       num_priors,
+                              const int                                       num_classes,
                               std::vector<std::map<int, std::vector<float>>> &all_confidence_scores)
 {
     std::vector<float> tmp_buffer;
     tmp_buffer.resize(num * num_priors * num_classes);
-    for(int i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i)
     {
-        for(int c = 0; c < num_classes; ++c)
+        for (int c = 0; c < num_classes; ++c)
         {
-            for(int p = 0; p < num_priors; ++p)
+            for (int p = 0; p < num_priors; ++p)
             {
-                tmp_buffer[i * num_classes * num_priors + c * num_priors + p] =
-                    *reinterpret_cast<float *>(input_conf->ptr_to_element(Coordinates(i * num_classes * num_priors + p * num_classes + c)));
+                tmp_buffer[i * num_classes * num_priors + c * num_priors + p] = *reinterpret_cast<float *>(
+                    input_conf->ptr_to_element(Coordinates(i * num_classes * num_priors + p * num_classes + c)));
             }
         }
     }
-    for(int i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i)
     {
-        for(int c = 0; c < num_classes; ++c)
+        for (int c = 0; c < num_classes; ++c)
         {
             all_confidence_scores[i][c].resize(num_priors);
             all_confidence_scores[i][c].assign(&tmp_buffer[i * num_classes * num_priors + c * num_priors],
@@ -168,28 +186,23 @@ void retrieve_all_conf_scores(const ITensor *input_conf, const int num,
  * @param[out] all_location_predictions All the location predictions.
  *
  */
-void retrieve_all_priorbox(const ITensor     *input_priorbox,
-                           const int          num_priors,
-                           std::vector<BBox> &all_prior_bboxes,
+void retrieve_all_priorbox(const ITensor                     *input_priorbox,
+                           const int                          num_priors,
+                           std::vector<BBox>                 &all_prior_bboxes,
                            std::vector<std::array<float, 4>> &all_prior_variances)
 {
-    for(int i = 0; i < num_priors; ++i)
+    for (int i = 0; i < num_priors; ++i)
     {
-        all_prior_bboxes[i] =
-        {
-            {
-                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4))),
-                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 1))),
-                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 2))),
-                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 3)))
-            }
-        };
+        all_prior_bboxes[i] = {{*reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4))),
+                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 1))),
+                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 2))),
+                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 3)))}};
     }
 
-    std::array<float, 4> var({ { 0, 0, 0, 0 } });
-    for(int i = 0; i < num_priors; ++i)
+    std::array<float, 4> var({{0, 0, 0, 0}});
+    for (int i = 0; i < num_priors; ++i)
     {
-        for(int j = 0; j < 4; ++j)
+        for (int j = 0; j < 4; ++j)
         {
             var[j] = *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates((num_priors + i) * 4 + j)));
         }
@@ -208,13 +221,17 @@ void retrieve_all_priorbox(const ITensor     *input_priorbox,
  * @param[out] decode_bbox                The decoded bboxes.
  *
  */
-void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_variance,
-                const DetectionOutputLayerCodeType code_type, const bool variance_encoded_in_target,
-                const bool clip_bbox, const BBox &bbox, BBox &decode_bbox)
+void DecodeBBox(const BBox                        &prior_bbox,
+                const std::array<float, 4>        &prior_variance,
+                const DetectionOutputLayerCodeType code_type,
+                const bool                         variance_encoded_in_target,
+                const bool                         clip_bbox,
+                const BBox                        &bbox,
+                BBox                              &decode_bbox)
 {
     // if the variance is encoded in target, we simply need to add the offset predictions
     // otherwise we need to scale the offset accordingly.
-    switch(code_type)
+    switch (code_type)
     {
         case DetectionOutputLayerCodeType::CORNER:
         {
@@ -237,10 +254,14 @@ void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_varian
             const float prior_center_x = (prior_bbox[0] + prior_bbox[2]) / 2.;
             const float prior_center_y = (prior_bbox[1] + prior_bbox[3]) / 2.;
 
-            const float decode_bbox_center_x = (variance_encoded_in_target ? bbox[0] : prior_variance[0] * bbox[0]) * prior_width + prior_center_x;
-            const float decode_bbox_center_y = (variance_encoded_in_target ? bbox[1] : prior_variance[1] * bbox[1]) * prior_height + prior_center_y;
-            const float decode_bbox_width    = (variance_encoded_in_target ? std::exp(bbox[2]) : std::exp(prior_variance[2] * bbox[2])) * prior_width;
-            const float decode_bbox_height   = (variance_encoded_in_target ? std::exp(bbox[3]) : std::exp(prior_variance[3] * bbox[3])) * prior_height;
+            const float decode_bbox_center_x =
+                (variance_encoded_in_target ? bbox[0] : prior_variance[0] * bbox[0]) * prior_width + prior_center_x;
+            const float decode_bbox_center_y =
+                (variance_encoded_in_target ? bbox[1] : prior_variance[1] * bbox[1]) * prior_height + prior_center_y;
+            const float decode_bbox_width =
+                (variance_encoded_in_target ? std::exp(bbox[2]) : std::exp(prior_variance[2] * bbox[2])) * prior_width;
+            const float decode_bbox_height =
+                (variance_encoded_in_target ? std::exp(bbox[3]) : std::exp(prior_variance[3] * bbox[3])) * prior_height;
 
             decode_bbox[0] = (decode_bbox_center_x - decode_bbox_width / 2.f);
             decode_bbox[1] = (decode_bbox_center_y - decode_bbox_height / 2.f);
@@ -258,10 +279,14 @@ void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_varian
             ARM_COMPUTE_ERROR_ON(prior_width <= 0.f);
             ARM_COMPUTE_ERROR_ON(prior_height <= 0.f);
 
-            decode_bbox[0] = prior_bbox[0] + (variance_encoded_in_target ? bbox[0] : prior_variance[0] * bbox[0]) * prior_width;
-            decode_bbox[1] = prior_bbox[1] + (variance_encoded_in_target ? bbox[1] : prior_variance[1] * bbox[1]) * prior_height;
-            decode_bbox[2] = prior_bbox[2] + (variance_encoded_in_target ? bbox[2] : prior_variance[2] * bbox[2]) * prior_width;
-            decode_bbox[3] = prior_bbox[3] + (variance_encoded_in_target ? bbox[3] : prior_variance[3] * bbox[3]) * prior_height;
+            decode_bbox[0] =
+                prior_bbox[0] + (variance_encoded_in_target ? bbox[0] : prior_variance[0] * bbox[0]) * prior_width;
+            decode_bbox[1] =
+                prior_bbox[1] + (variance_encoded_in_target ? bbox[1] : prior_variance[1] * bbox[1]) * prior_height;
+            decode_bbox[2] =
+                prior_bbox[2] + (variance_encoded_in_target ? bbox[2] : prior_variance[2] * bbox[2]) * prior_width;
+            decode_bbox[3] =
+                prior_bbox[3] + (variance_encoded_in_target ? bbox[3] : prior_variance[3] * bbox[3]) * prior_height;
 
             break;
         }
@@ -269,9 +294,9 @@ void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_varian
             ARM_COMPUTE_ERROR("Unsupported Detection Output Code Type.");
     }
 
-    if(clip_bbox)
+    if (clip_bbox)
     {
-        for(auto &d_bbox : decode_bbox)
+        for (auto &d_bbox : decode_bbox)
         {
             d_bbox = utility::clamp(d_bbox, 0.f, 1.f);
         }
@@ -289,10 +314,13 @@ void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_varian
  * @param[out] indices         The kept indices of bboxes after nms.
  *
  */
-void ApplyNMSFast(const std::vector<BBox> &bboxes,
-                  const std::vector<float> &scores, const float score_threshold,
-                  const float nms_threshold, const float eta, const int top_k,
-                  std::vector<int> &indices)
+void ApplyNMSFast(const std::vector<BBox>  &bboxes,
+                  const std::vector<float> &scores,
+                  const float               score_threshold,
+                  const float               nms_threshold,
+                  const float               eta,
+                  const int                 top_k,
+                  std::vector<int>         &indices)
 {
     ARM_COMPUTE_ERROR_ON_MSG(bboxes.size() != scores.size(), "bboxes and scores have different size.");
 
@@ -300,9 +328,9 @@ void ApplyNMSFast(const std::vector<BBox> &bboxes,
     std::list<std::pair<float, int>> score_index_vec;
 
     // Generate index score pairs.
-    for(size_t i = 0; i < scores.size(); ++i)
+    for (size_t i = 0; i < scores.size(); ++i)
     {
-        if(scores[i] > score_threshold)
+        if (scores[i] > score_threshold)
         {
             score_index_vec.emplace_back(std::make_pair(scores[i], i));
         }
@@ -313,7 +341,7 @@ void ApplyNMSFast(const std::vector<BBox> &bboxes,
 
     // Keep top_k scores if needed.
     const int score_index_vec_size = score_index_vec.size();
-    if(top_k > -1 && top_k < score_index_vec_size)
+    if (top_k > -1 && top_k < score_index_vec_size)
     {
         score_index_vec.resize(top_k);
     }
@@ -322,46 +350,45 @@ void ApplyNMSFast(const std::vector<BBox> &bboxes,
     float adaptive_threshold = nms_threshold;
     indices.clear();
 
-    while(!score_index_vec.empty())
+    while (!score_index_vec.empty())
     {
         const int idx  = score_index_vec.front().second;
         bool      keep = true;
-        for(int kept_idx : indices)
+        for (int kept_idx : indices)
         {
-            if(keep)
+            if (keep)
             {
                 // Compute the jaccard (intersection over union IoU) overlap between two bboxes.
-                BBox intersect_bbox = std::array<float, 4>({ 0, 0, 0, 0 });
-                if(bboxes[kept_idx][0] > bboxes[idx][2] || bboxes[kept_idx][2] < bboxes[idx][0] || bboxes[kept_idx][1] > bboxes[idx][3] || bboxes[kept_idx][3] < bboxes[idx][1])
+                BBox intersect_bbox = std::array<float, 4>({0, 0, 0, 0});
+                if (bboxes[kept_idx][0] > bboxes[idx][2] || bboxes[kept_idx][2] < bboxes[idx][0] ||
+                    bboxes[kept_idx][1] > bboxes[idx][3] || bboxes[kept_idx][3] < bboxes[idx][1])
                 {
-                    intersect_bbox = std::array<float, 4>({ { 0, 0, 0, 0 } });
+                    intersect_bbox = std::array<float, 4>({{0, 0, 0, 0}});
                 }
                 else
                 {
-                    intersect_bbox = std::array<float, 4>({ {
-                            std::max(bboxes[idx][0], bboxes[kept_idx][0]),
-                            std::max(bboxes[idx][1], bboxes[kept_idx][1]),
-                            std::min(bboxes[idx][2], bboxes[kept_idx][2]),
-                            std::min(bboxes[idx][3], bboxes[kept_idx][3])
-                        }
-                    });
+                    intersect_bbox = std::array<float, 4>(
+                        {{std::max(bboxes[idx][0], bboxes[kept_idx][0]), std::max(bboxes[idx][1], bboxes[kept_idx][1]),
+                          std::min(bboxes[idx][2], bboxes[kept_idx][2]),
+                          std::min(bboxes[idx][3], bboxes[kept_idx][3])}});
                 }
 
                 float intersect_width  = intersect_bbox[2] - intersect_bbox[0];
                 float intersect_height = intersect_bbox[3] - intersect_bbox[1];
 
                 float overlap = 0.f;
-                if(intersect_width > 0 && intersect_height > 0)
+                if (intersect_width > 0 && intersect_height > 0)
                 {
                     float intersect_size = intersect_width * intersect_height;
-                    float bbox1_size     = (bboxes[idx][2] < bboxes[idx][0]
-                                            || bboxes[idx][3] < bboxes[idx][1]) ?
-                                           0.f :
-                                           (bboxes[idx][2] - bboxes[idx][0]) * (bboxes[idx][3] - bboxes[idx][1]); //BBoxSize(bboxes[idx]);
-                    float bbox2_size = (bboxes[kept_idx][2] < bboxes[kept_idx][0]
-                                        || bboxes[kept_idx][3] < bboxes[kept_idx][1]) ?
-                                       0.f :
-                                       (bboxes[kept_idx][2] - bboxes[kept_idx][0]) * (bboxes[kept_idx][3] - bboxes[kept_idx][1]); // BBoxSize(bboxes[kept_idx]);
+                    float bbox1_size     = (bboxes[idx][2] < bboxes[idx][0] || bboxes[idx][3] < bboxes[idx][1])
+                                               ? 0.f
+                                               : (bboxes[idx][2] - bboxes[idx][0]) *
+                                                 (bboxes[idx][3] - bboxes[idx][1]); //BBoxSize(bboxes[idx]);
+                    float bbox2_size =
+                        (bboxes[kept_idx][2] < bboxes[kept_idx][0] || bboxes[kept_idx][3] < bboxes[kept_idx][1])
+                            ? 0.f
+                            : (bboxes[kept_idx][2] - bboxes[kept_idx][0]) *
+                                  (bboxes[kept_idx][3] - bboxes[kept_idx][1]); // BBoxSize(bboxes[kept_idx]);
                     overlap = intersect_size / (bbox1_size + bbox2_size - intersect_size);
                 }
                 keep = (overlap <= adaptive_threshold);
@@ -371,12 +398,12 @@ void ApplyNMSFast(const std::vector<BBox> &bboxes,
                 break;
             }
         }
-        if(keep)
+        if (keep)
         {
             indices.push_back(idx);
         }
         score_index_vec.erase(score_index_vec.begin());
-        if(keep && eta < 1.f && adaptive_threshold > 0.5f)
+        if (keep && eta < 1.f && adaptive_threshold > 0.5f)
         {
             adaptive_threshold *= eta;
         }
@@ -385,13 +412,27 @@ void ApplyNMSFast(const std::vector<BBox> &bboxes,
 } // namespace
 
 CPPDetectionOutputLayer::CPPDetectionOutputLayer()
-    : _input_loc(nullptr), _input_conf(nullptr), _input_priorbox(nullptr), _output(nullptr), _info(), _num_priors(), _num(), _all_location_predictions(), _all_confidence_scores(), _all_prior_bboxes(),
-      _all_prior_variances(), _all_decode_bboxes(), _all_indices()
+    : _input_loc(nullptr),
+      _input_conf(nullptr),
+      _input_priorbox(nullptr),
+      _output(nullptr),
+      _info(),
+      _num_priors(),
+      _num(),
+      _all_location_predictions(),
+      _all_confidence_scores(),
+      _all_prior_bboxes(),
+      _all_prior_variances(),
+      _all_decode_bboxes(),
+      _all_indices()
 {
 }
 
-void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor *input_conf, const ITensor *input_priorbox,
-                                        ITensor *output, DetectionOutputLayerInfo info)
+void CPPDetectionOutputLayer::configure(const ITensor           *input_loc,
+                                        const ITensor           *input_conf,
+                                        const ITensor           *input_priorbox,
+                                        ITensor                 *output,
+                                        DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
     ARM_COMPUTE_LOG_PARAMS(input_loc, input_conf, input_priorbox, output, info);
@@ -400,11 +441,13 @@ void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor 
     // Since the number of bboxes to kept is unknown before nms, the shape is set to the maximum
     // The maximum is keep_top_k * input_loc_size[1]
     // Each row is a 7 dimension std::vector, which stores [image_id, label, confidence, xmin, ymin, xmax, ymax]
-    const unsigned int max_size = info.keep_top_k() * (input_loc->info()->num_dimensions() > 1 ? input_loc->info()->dimension(1) : 1);
+    const unsigned int max_size =
+        info.keep_top_k() * (input_loc->info()->num_dimensions() > 1 ? input_loc->info()->dimension(1) : 1);
     auto_init_if_empty(*output->info(), input_loc->info()->clone()->set_tensor_shape(TensorShape(7U, max_size)));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_loc->info(), input_conf->info(), input_priorbox->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        validate_arguments(input_loc->info(), input_conf->info(), input_priorbox->info(), output->info(), info));
 
     _input_loc      = input_loc;
     _input_conf     = input_conf;
@@ -420,12 +463,12 @@ void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor 
     _all_prior_variances.resize(_num_priors);
     _all_decode_bboxes.resize(_num);
 
-    for(int i = 0; i < _num; ++i)
+    for (int i = 0; i < _num; ++i)
     {
-        for(int c = 0; c < _info.num_loc_classes(); ++c)
+        for (int c = 0; c < _info.num_loc_classes(); ++c)
         {
             const int label = _info.share_location() ? -1 : c;
-            if(label == _info.background_label_id())
+            if (label == _info.background_label_id())
             {
                 // Ignore background class.
                 continue;
@@ -440,7 +483,11 @@ void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor 
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 }
 
-Status CPPDetectionOutputLayer::validate(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output, DetectionOutputLayerInfo info)
+Status CPPDetectionOutputLayer::validate(const ITensorInfo       *input_loc,
+                                         const ITensorInfo       *input_conf,
+                                         const ITensorInfo       *input_priorbox,
+                                         const ITensorInfo       *output,
+                                         DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input_loc, input_conf, input_priorbox, output, info));
     return Status{};
@@ -449,7 +496,8 @@ Status CPPDetectionOutputLayer::validate(const ITensorInfo *input_loc, const ITe
 void CPPDetectionOutputLayer::run()
 {
     // Retrieve all location predictions.
-    retrieve_all_loc_predictions(_input_loc, _num, _num_priors, _info.num_loc_classes(), _info.share_location(), _all_location_predictions);
+    retrieve_all_loc_predictions(_input_loc, _num, _num_priors, _info.num_loc_classes(), _info.share_location(),
+                                 _all_location_predictions);
 
     // Retrieve all confidences.
     retrieve_all_conf_scores(_input_conf, _num, _num_priors, _info.num_classes(), _all_confidence_scores);
@@ -459,75 +507,79 @@ void CPPDetectionOutputLayer::run()
 
     // Decode all loc predictions to bboxes
     const bool clip_bbox = false;
-    for(int i = 0; i < _num; ++i)
+    for (int i = 0; i < _num; ++i)
     {
-        for(int c = 0; c < _info.num_loc_classes(); ++c)
+        for (int c = 0; c < _info.num_loc_classes(); ++c)
         {
             const int label = _info.share_location() ? -1 : c;
-            if(label == _info.background_label_id())
+            if (label == _info.background_label_id())
             {
                 // Ignore background class.
                 continue;
             }
-            ARM_COMPUTE_ERROR_ON_MSG_VAR(_all_location_predictions[i].find(label) == _all_location_predictions[i].end(), "Could not find location predictions for label %d.", label);
+            ARM_COMPUTE_ERROR_ON_MSG_VAR(_all_location_predictions[i].find(label) == _all_location_predictions[i].end(),
+                                         "Could not find location predictions for label %d.", label);
 
             const std::vector<BBox> &label_loc_preds = _all_location_predictions[i].find(label)->second;
 
             const int num_bboxes = _all_prior_bboxes.size();
             ARM_COMPUTE_ERROR_ON(_all_prior_variances[i].size() != 4);
 
-            for(int j = 0; j < num_bboxes; ++j)
+            for (int j = 0; j < num_bboxes; ++j)
             {
-                DecodeBBox(_all_prior_bboxes[j], _all_prior_variances[j], _info.code_type(), _info.variance_encoded_in_target(), clip_bbox, label_loc_preds[j], _all_decode_bboxes[i][label][j]);
+                DecodeBBox(_all_prior_bboxes[j], _all_prior_variances[j], _info.code_type(),
+                           _info.variance_encoded_in_target(), clip_bbox, label_loc_preds[j],
+                           _all_decode_bboxes[i][label][j]);
             }
         }
     }
 
     int num_kept = 0;
 
-    for(int i = 0; i < _num; ++i)
+    for (int i = 0; i < _num; ++i)
     {
-        const LabelBBox &decode_bboxes = _all_decode_bboxes[i];
-        const std::map<int, std::vector<float>> &conf_scores = _all_confidence_scores[i];
+        const LabelBBox                         &decode_bboxes = _all_decode_bboxes[i];
+        const std::map<int, std::vector<float>> &conf_scores   = _all_confidence_scores[i];
 
         std::map<int, std::vector<int>> indices;
-        int num_det = 0;
-        for(int c = 0; c < _info.num_classes(); ++c)
+        int                             num_det = 0;
+        for (int c = 0; c < _info.num_classes(); ++c)
         {
-            if(c == _info.background_label_id())
+            if (c == _info.background_label_id())
             {
                 // Ignore background class
                 continue;
             }
             const int label = _info.share_location() ? -1 : c;
-            if(conf_scores.find(c) == conf_scores.end() || decode_bboxes.find(label) == decode_bboxes.end())
+            if (conf_scores.find(c) == conf_scores.end() || decode_bboxes.find(label) == decode_bboxes.end())
             {
                 ARM_COMPUTE_ERROR_VAR("Could not find predictions for label %d.", label);
             }
             const std::vector<float> &scores = conf_scores.find(c)->second;
-            const std::vector<BBox> &bboxes = decode_bboxes.find(label)->second;
+            const std::vector<BBox>  &bboxes = decode_bboxes.find(label)->second;
 
-            ApplyNMSFast(bboxes, scores, _info.confidence_threshold(), _info.nms_threshold(), _info.eta(), _info.top_k(), indices[c]);
+            ApplyNMSFast(bboxes, scores, _info.confidence_threshold(), _info.nms_threshold(), _info.eta(),
+                         _info.top_k(), indices[c]);
 
             num_det += indices[c].size();
         }
 
         int num_to_add = 0;
-        if(_info.keep_top_k() > -1 && num_det > _info.keep_top_k())
+        if (_info.keep_top_k() > -1 && num_det > _info.keep_top_k())
         {
             std::vector<std::pair<float, std::pair<int, int>>> score_index_pairs;
-            for(auto const &it : indices)
+            for (auto const &it : indices)
             {
                 const int               label         = it.first;
                 const std::vector<int> &label_indices = it.second;
 
-                if(conf_scores.find(label) == conf_scores.end())
+                if (conf_scores.find(label) == conf_scores.end())
                 {
                     ARM_COMPUTE_ERROR_VAR("Could not find predictions for label %d.", label);
                 }
 
                 const std::vector<float> &scores = conf_scores.find(label)->second;
-                for(auto idx : label_indices)
+                for (auto idx : label_indices)
                 {
                     ARM_COMPUTE_ERROR_ON(idx > static_cast<int>(scores.size()));
                     score_index_pairs.emplace_back(std::make_pair(scores[idx], std::make_pair(label, idx)));
@@ -541,7 +593,7 @@ void CPPDetectionOutputLayer::run()
             // Store the new indices.
 
             std::map<int, std::vector<int>> new_indices;
-            for(auto score_index_pair : score_index_pairs)
+            for (auto score_index_pair : score_index_pairs)
             {
                 int label = score_index_pair.second.first;
                 int idx   = score_index_pair.second.second;
@@ -562,25 +614,25 @@ void CPPDetectionOutputLayer::run()
     _output->info()->set_valid_region(ValidRegion(Coordinates(0, 0), TensorShape(7, num_kept)));
 
     int count = 0;
-    for(int i = 0; i < _num; ++i)
+    for (int i = 0; i < _num; ++i)
     {
-        const std::map<int, std::vector<float>> &conf_scores = _all_confidence_scores[i];
-        const LabelBBox &decode_bboxes = _all_decode_bboxes[i];
-        for(auto &it : _all_indices[i])
+        const std::map<int, std::vector<float>> &conf_scores   = _all_confidence_scores[i];
+        const LabelBBox                         &decode_bboxes = _all_decode_bboxes[i];
+        for (auto &it : _all_indices[i])
         {
             const int                 label     = it.first;
             const std::vector<float> &scores    = conf_scores.find(label)->second;
             const int                 loc_label = _info.share_location() ? -1 : label;
-            if(conf_scores.find(label) == conf_scores.end() || decode_bboxes.find(loc_label) == decode_bboxes.end())
+            if (conf_scores.find(label) == conf_scores.end() || decode_bboxes.find(loc_label) == decode_bboxes.end())
             {
                 // Either if there are no confidence predictions
                 // or there are no location predictions for current label.
                 ARM_COMPUTE_ERROR_VAR("Could not find predictions for the label %d.", label);
             }
             const std::vector<BBox> &bboxes  = decode_bboxes.find(loc_label)->second;
-            const std::vector<int> &indices = it.second;
+            const std::vector<int>  &indices = it.second;
 
-            for(auto idx : indices)
+            for (auto idx : indices)
             {
                 *(reinterpret_cast<float *>(_output->ptr_to_element(Coordinates(count * 7))))     = i;
                 *(reinterpret_cast<float *>(_output->ptr_to_element(Coordinates(count * 7 + 1)))) = label;

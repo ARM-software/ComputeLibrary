@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/cpu/operators/CpuTranspose.h"
 
@@ -31,13 +32,12 @@ namespace arm_compute
 {
 struct NETranspose::Impl
 {
-    const ITensor                     *src{ nullptr };
-    ITensor                           *dst{ nullptr };
-    std::unique_ptr<cpu::CpuTranspose> op{ nullptr };
+    const ITensor                     *src{nullptr};
+    ITensor                           *dst{nullptr};
+    std::unique_ptr<cpu::CpuTranspose> op{nullptr};
 };
 
-NETranspose::NETranspose()
-    : _impl(std::make_unique<Impl>())
+NETranspose::NETranspose() : _impl(std::make_unique<Impl>())
 {
 }
 

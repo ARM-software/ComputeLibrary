@@ -38,7 +38,10 @@ void CPPTopKV::configure(const ITensor *predictions, const ITensor *targets, ITe
     _kernel = std::move(kernel);
 }
 
-Status CPPTopKV::validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k)
+Status CPPTopKV::validate(const ITensorInfo *predictions,
+                          const ITensorInfo *targets,
+                          ITensorInfo       *output,
+                          const unsigned int k)
 {
     return CPPTopKVKernel::validate(predictions, targets, output, k);
 }

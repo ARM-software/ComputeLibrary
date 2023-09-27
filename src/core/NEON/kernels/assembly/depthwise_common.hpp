@@ -49,11 +49,7 @@ struct KernelDescription
     bool            is_default     = false;
     uint64_t        cycle_estimate = 0;
 
-    KernelDescription(
-        DepthwiseMethod method,
-        std::string     name,
-        bool            is_default,
-        uint64_t        cycle_estimate)
+    KernelDescription(DepthwiseMethod method, std::string name, bool is_default, uint64_t cycle_estimate)
         : method(method), name(name), is_default(is_default), cycle_estimate(cycle_estimate)
     {
     }
@@ -78,58 +74,51 @@ public:
     // pointer the bias vector (which may be nullptr in the case of no bias) and
     // a pointer to the array of weights (stored in HWIO order).
     virtual void pack_parameters(
-        void       *buffer,
-        const void *biases,
-        const void *weights,
-        size_t      ld_weight_col = 0,
-        size_t      ld_weight_row = 0) = 0;
+        void *buffer, const void *biases, const void *weights, size_t ld_weight_col = 0, size_t ld_weight_row = 0) = 0;
 
     // Determine the amount of working space required
     virtual size_t get_working_size(unsigned int n_threads) const = 0;
 
     // Execute the convolution over the specified area of memory.
-    virtual void execute(
-        const void *input,       // Pointer to input tensor
-        const void *parameters,  // Packed parameters buffer
-        void        *output,
-        void        *working_space,
-        unsigned int thread_id,
-        unsigned int n_threads) const = 0;
+    virtual void execute(const void  *input,      // Pointer to input tensor
+                         const void  *parameters, // Packed parameters buffer
+                         void        *output,
+                         void        *working_space,
+                         unsigned int thread_id,
+                         unsigned int n_threads) const = 0;
 
-    virtual void execute(
-        const void *input,
-        size_t       ld_input_col,
-        size_t       ld_input_row,
-        size_t       ld_input_batch,
-        const void *parameters,
-        void        *output,
-        size_t       ld_output_col,
-        size_t       ld_output_row,
-        size_t       ld_output_batch,
-        void        *working_space,
-        unsigned int thread_id,
-        unsigned int n_threads) const = 0;
+    virtual void execute(const void  *input,
+                         size_t       ld_input_col,
+                         size_t       ld_input_row,
+                         size_t       ld_input_batch,
+                         const void  *parameters,
+                         void        *output,
+                         size_t       ld_output_col,
+                         size_t       ld_output_row,
+                         size_t       ld_output_batch,
+                         void        *working_space,
+                         unsigned int thread_id,
+                         unsigned int n_threads) const = 0;
 
-    virtual void execute(
-        unsigned int batches,
-        unsigned int input_height,
-        unsigned int input_width,
-        unsigned int channels,
-        const PaddingValues &,
-        const void *input,
-        size_t       ld_input_col,
-        size_t       ld_input_row,
-        size_t       ld_input_batch,
-        const void *parameters,
-        unsigned int output_height,
-        unsigned int output_width,
-        void        *output,
-        size_t       ld_output_col,
-        size_t       ld_output_row,
-        size_t       ld_output_batch,
-        void        *working_space,
-        unsigned int thread_id,
-        unsigned int n_threads) const = 0;
+    virtual void execute(unsigned int batches,
+                         unsigned int input_height,
+                         unsigned int input_width,
+                         unsigned int channels,
+                         const PaddingValues &,
+                         const void  *input,
+                         size_t       ld_input_col,
+                         size_t       ld_input_row,
+                         size_t       ld_input_batch,
+                         const void  *parameters,
+                         unsigned int output_height,
+                         unsigned int output_width,
+                         void        *output,
+                         size_t       ld_output_col,
+                         size_t       ld_output_row,
+                         size_t       ld_output_batch,
+                         void        *working_space,
+                         unsigned int thread_id,
+                         unsigned int n_threads) const = 0;
 };
 
 // To handle a dilation factor of D execute the kernel once for each d in
@@ -145,12 +134,13 @@ public:
 // - Number of valid input pixels corresponding to `d`
 // - Offset of the first pixel corresponding to `d`
 // - Amount of padding in the view for `d`
-std::tuple<size_t, size_t, size_t, size_t, size_t>
-get_reduced_view_for_dilation(
-    size_t out_size, size_t in_size,
-    size_t d, size_t dilation_factor,
-    size_t kernel_size, size_t stride,
-    size_t pad_before);
+std::tuple<size_t, size_t, size_t, size_t, size_t> get_reduced_view_for_dilation(size_t out_size,
+                                                                                 size_t in_size,
+                                                                                 size_t d,
+                                                                                 size_t dilation_factor,
+                                                                                 size_t kernel_size,
+                                                                                 size_t stride,
+                                                                                 size_t pad_before);
 
 } // namespace depthwise
 } // namespace arm_conv

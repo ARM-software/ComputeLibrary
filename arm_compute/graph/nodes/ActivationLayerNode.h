@@ -39,8 +39,7 @@ public:
      * @param[in] info           Activation Layer information
      * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ActivationLayerNode(ActivationLayerInfo info,
-                        QuantizationInfo    out_quant_info = QuantizationInfo());
+    ActivationLayerNode(ActivationLayerInfo info, QuantizationInfo out_quant_info = QuantizationInfo());
     /** Activation metadata accessor
      *
      * @return The activation info of the layer
@@ -51,7 +50,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 public:
     static constexpr NodeType node_type = NodeType::ActivationLayer;

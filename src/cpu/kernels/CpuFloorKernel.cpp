@@ -27,11 +27,11 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Validate.h"
+
+#include "src/core/common/Registrars.h"
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
-#include "src/core/common/Registrars.h"
 #include "src/cpu/kernels/floor/list.h"
 
 namespace arm_compute
@@ -42,29 +42,22 @@ namespace kernels
 {
 namespace
 {
-static const std::vector<CpuFloorKernel::FloorKernel> available_kernels =
-{
-    {
-        "neon_fp16_floor",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_floor)
-    },
-    {
-        "neon_fp32_floor",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_floor)
-    }
-};
+static const std::vector<CpuFloorKernel::FloorKernel> available_kernels = {
+    {"neon_fp16_floor", [](const DataTypeISASelectorData &data) { return data.dt == DataType::F16 && data.isa.fp16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::fp16_neon_floor)},
+    {"neon_fp32_floor", [](const DataTypeISASelectorData &data) { return data.dt == DataType::F32; },
+     REGISTER_FP32_NEON(arm_compute::cpu::fp32_neon_floor)}};
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
 
-    const auto *uk = CpuFloorKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk =
+        CpuFloorKernel::get_implementation(DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     // Validate in case of configured output
-    if(dst->total_size() > 0)
+    if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
@@ -81,7 +74,8 @@ void CpuFloorKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
 
     auto_init_if_empty(*dst, src->tensor_shape(), 1, src->data_type());
 
-    const auto *uk = CpuFloorKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto *uk =
+        CpuFloorKernel::get_implementation(DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
 
     _run_method = uk->ukernel;
@@ -122,17 +116,14 @@ void CpuFloorKernel::run_op(ITensorPack &tensors, const Window &window, const Th
     ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
     const auto     len = static_cast<int>(window.x().end()) - static_cast<int>(window.x().start());
 
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator src_it(src, win);
     Iterator dst_it(dst, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        _run_method(src_it.ptr(), dst_it.ptr(), len);
-    },
-    src_it, dst_it);
+    execute_window_loop(
+        win, [&](const Coordinates &) { _run_method(src_it.ptr(), dst_it.ptr(), len); }, src_it, dst_it);
 }
 
 const char *CpuFloorKernel::name() const

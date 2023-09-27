@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
+
 #include <omp.h>
 
 namespace arm_compute
@@ -63,7 +64,7 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Win
     const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
     const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 
-    if(!kernel->is_parallelisable() || num_threads == 1)
+    if (!kernel->is_parallelisable() || num_threads == 1)
     {
         ThreadInfo info;
         info.cpu_info = &cpu_info();
@@ -73,10 +74,10 @@ void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const Win
     {
         const unsigned int                num_windows = num_threads;
         std::vector<IScheduler::Workload> workloads(num_windows);
-        for(unsigned int t = 0; t < num_windows; t++)
+        for (unsigned int t = 0; t < num_windows; t++)
         {
             //Capture 't' by copy, all the other variables by reference:
-            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo & info)
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &tensors](const ThreadInfo &info)
             {
                 Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                 win.validate();
@@ -92,7 +93,7 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     const unsigned int amount_of_work     = static_cast<unsigned int>(workloads.size());
     const unsigned int num_threads_to_use = std::min(_num_threads, amount_of_work);
 
-    if(num_threads_to_use < 1)
+    if (num_threads_to_use < 1)
     {
         return;
     }
@@ -100,8 +101,9 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     ThreadInfo info;
     info.cpu_info    = &cpu_info();
     info.num_threads = num_threads_to_use;
-    #pragma omp parallel for firstprivate(info) num_threads(num_threads_to_use) default(shared) proc_bind(close) schedule(static, 1)
-    for(unsigned int wid = 0; wid < amount_of_work; ++wid)
+#pragma omp parallel for firstprivate(info) num_threads(num_threads_to_use) default(shared) proc_bind(close) \
+    schedule(static, 1)
+    for (unsigned int wid = 0; wid < amount_of_work; ++wid)
     {
         const int tid = omp_get_thread_num();
 

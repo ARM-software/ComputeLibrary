@@ -23,16 +23,17 @@
  */
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel.h"
 
-#include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/ActivationFunctionUtils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/core/CL/CLUtils.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -56,23 +57,36 @@ constexpr int mmul_m0 = 4;
 constexpr int mmul_n0 = 4;
 constexpr int mmul_k0 = 4;
 
-Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+Status validate_arguments(const ITensorInfo       *src0,
+                          const ITensorInfo       *src1,
+                          const ITensorInfo       *src2,
+                          const ITensorInfo       *dst,
+                          float                    alpha,
+                          float                    beta,
+                          const GEMMLHSMatrixInfo &lhs_info,
                           const GEMMRHSMatrixInfo &rhs_info,
                           const GEMMKernelInfo    &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()), "The extension cl_arm_matrix_multiply is not supported on the target platform");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()),
+                                    "The extension cl_arm_matrix_multiply is not supported on the target platform");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4,
+                                    "The number of dimensions for the LHS matrix must be <= 4");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 3,
+                                    "The number of dimensions for the RHS matrix must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(lhs_info.m0 < 1, "Only values greater than 0 are supported for m0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.n0 != 1 && rhs_info.n0 != 2 && rhs_info.n0 != 3 && rhs_info.n0 != 4 && rhs_info.n0 != 8 && rhs_info.n0 != 16, "Only 1,2,3,4,8, and 16 are supported for n0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.n0 != 1 && rhs_info.n0 != 2 && rhs_info.n0 != 3 && rhs_info.n0 != 4 &&
+                                        rhs_info.n0 != 8 && rhs_info.n0 != 16,
+                                    "Only 1,2,3,4,8, and 16 are supported for n0");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 != 1 || lhs_info.k0 != 1), "Only 1 is supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.h0 != 4), "Only 4 is supported for h0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.interleave != true, "Only true is supported for interleave with mmul extension enabled");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.transpose != false, "Only false is supported for transpose with mmul extension enabled");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.interleave != true,
+                                    "Only true is supported for interleave with mmul extension enabled");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.transpose != false,
+                                    "Only false is supported for transpose with mmul extension enabled");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision, "Mixed precision not supported");
     ARM_COMPUTE_RETURN_ON_ERROR(gemm::validate_image2d_support_on_rhs(*src1, rhs_info));
 
@@ -87,7 +101,7 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(0) != k);
 
     // Validate the reinterpreted-as-3D-case
-    if(gemm_info.depth_output_gemm3d != 0)
+    if (gemm_info.depth_output_gemm3d != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(1) * src0->dimension(2) != m);
     }
@@ -97,9 +111,9 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     }
 
     // Validate the gemm-batched case
-    if(src1->num_dimensions() > 2)
+    if (src1->num_dimensions() > 2)
     {
-        if(gemm_info.depth_output_gemm3d != 0)
+        if (gemm_info.depth_output_gemm3d != 0)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(src0->dimension(3) != src1->dimension(2));
         }
@@ -109,15 +123,16 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
         }
     }
 
-    if(src2 != nullptr && !(helpers::float_ops::is_zero(beta)))
+    if (src2 != nullptr && !(helpers::float_ops::is_zero(beta)))
     {
         const unsigned int src2_dim0 = src2->dimension(0);
         const unsigned int src2_dim1 = src2->dimension(1);
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src2, src1);
-        if(gemm_info.broadcast_bias)
+        if (gemm_info.broadcast_bias)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG((src2_dim1 != 1 || src2_dim0 != n), "Incorrect dimension of bias matrix which is to be broadcasted");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((src2_dim1 != 1 || src2_dim0 != n),
+                                            "Incorrect dimension of bias matrix which is to be broadcasted");
         }
         else
         {
@@ -125,18 +140,20 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
         }
     }
 
-    TensorShape tensor_shape1{ src1->tensor_shape() };
+    TensorShape tensor_shape1{src1->tensor_shape()};
     tensor_shape1.set(0, n);
     tensor_shape1.set(1, k);
 
-    const TensorInfo tensor_info1          = src1->clone()->set_tensor_shape(tensor_shape1);
-    const TensorInfo tensor_info_reshaped1 = src1->clone()->set_tensor_shape(misc::shape_calculator::compute_rhs_reshaped_shape(tensor_info1, rhs_info));
+    const TensorInfo tensor_info1 = src1->clone()->set_tensor_shape(tensor_shape1);
+    const TensorInfo tensor_info_reshaped1 =
+        src1->clone()->set_tensor_shape(misc::shape_calculator::compute_rhs_reshaped_shape(tensor_info1, rhs_info));
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src1, &tensor_info_reshaped1);
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info));
+        const TensorInfo tensor_info_dst =
+            dst->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
     }
@@ -144,7 +161,11 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const GEMMLHSMatrixInfo &lhs_info,
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo             *src0,
+                                                        ITensorInfo             *src1,
+                                                        ITensorInfo             *src2,
+                                                        ITensorInfo             *dst,
+                                                        const GEMMLHSMatrixInfo &lhs_info,
                                                         const GEMMRHSMatrixInfo &rhs_info,
                                                         const GEMMKernelInfo    &gemm_info)
 {
@@ -152,11 +173,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *src0, ITens
     bool reinterpret_output_as_3d = gemm_info.depth_output_gemm3d != 0;
 
     // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
+    auto_init_if_empty(
+        *dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
 
     TensorInfo tmp_info(*dst);
 
-    if(reinterpret_output_as_3d)
+    if (reinterpret_output_as_3d)
     {
         // Since the dst tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
         // the window needs to be constructed on the 2D collapsed version of the tensor
@@ -204,19 +226,26 @@ ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::ClGemmMatrixMultiplyReshapedOnlyR
     _type = CLKernelType::GEMM;
 }
 
-void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileContext &compile_context, ITensorInfo *src0, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, float alpha,
+void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileContext  &compile_context,
+                                                              ITensorInfo             *src0,
+                                                              ITensorInfo             *src1,
+                                                              ITensorInfo             *src2,
+                                                              ITensorInfo             *dst,
+                                                              float                    alpha,
                                                               float                    beta,
                                                               const GEMMLHSMatrixInfo &lhs_info,
-                                                              const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
+                                                              const GEMMRHSMatrixInfo &rhs_info,
+                                                              const GEMMKernelInfo    &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
     // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
+    auto_init_if_empty(
+        *dst, src0->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info)));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
 
-    auto padding_info   = get_padding_info({ src0, src1, src2, dst });
+    auto padding_info   = get_padding_info({src0, src1, src2, dst});
     _add_bias           = src2 != nullptr;
     _export_to_cl_image = rhs_info.export_to_cl_image;
 
@@ -236,7 +265,8 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileCon
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(src0->data_type()));
-    build_opts.add_option_if(!(helpers::float_ops::is_one(alpha)), "-DALPHA=" + float_to_string_with_full_precision(alpha));
+    build_opts.add_option_if(!(helpers::float_ops::is_one(alpha)),
+                             "-DALPHA=" + float_to_string_with_full_precision(alpha));
     build_opts.add_option_if(src2 != nullptr, "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_option_if(helpers::float_ops::is_one(beta), "-DUNIT_BETA");
     build_opts.add_option_if(gemm_info.broadcast_bias, "-DBROADCAST_BIAS");
@@ -249,7 +279,8 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileCon
     build_opts.add_option("-DMMUL_M0=" + support::cpp11::to_string(mmul_m0));
     build_opts.add_option("-DMMUL_N0=" + support::cpp11::to_string(mmul_n0));
     build_opts.add_option("-DMMUL_K0=" + support::cpp11::to_string(mmul_k0));
-    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" +
+                          lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
     build_opts.add_option("-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
     build_opts.add_option("-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));
 
@@ -283,37 +314,44 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::configure(const CLCompileCon
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, float alpha, float beta,
+Status ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::validate(const ITensorInfo       *src0,
+                                                               const ITensorInfo       *src1,
+                                                               const ITensorInfo       *src2,
+                                                               const ITensorInfo       *dst,
+                                                               float                    alpha,
+                                                               float                    beta,
                                                                const GEMMLHSMatrixInfo &lhs_info,
-                                                               const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
+                                                               const GEMMRHSMatrixInfo &rhs_info,
+                                                               const GEMMKernelInfo    &gemm_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, src2, dst, alpha, beta, lhs_info, rhs_info, gemm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src0->clone().get(),
-                                                              src1->clone().get(),
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(src0->clone().get(), src1->clone().get(),
                                                               src2 != nullptr ? src2->clone().get() : nullptr,
-                                                              dst->clone().get(),
-                                                              lhs_info,
-                                                              rhs_info,
-                                                              gemm_info)
-                                .first);
+                                                              dst->clone().get(), lhs_info, rhs_info, gemm_info)
+                                    .first);
 
     return Status{};
 }
 
-void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue)
+void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::run_op(ITensorPack      &tensors,
+                                                           const Window     &window,
+                                                           cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src0 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const auto src1 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const auto src2 = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
-    auto       dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src0 =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto src1 =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto src2 =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
     ARM_COMPUTE_ERROR_ON(_add_bias && src2 == nullptr);
 
-    if(src1->info()->num_dimensions() < 3)
+    if (src1->info()->num_dimensions() < 3)
     {
         // The stride_z for matrix B must be zero if we do not slice
         ARM_COMPUTE_ERROR_ON(src1->info()->strides_in_bytes()[3] != 0);
@@ -321,12 +359,14 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::run_op(ITensorPack &tensors,
 
     cl::Image2D src1_image2d;
 
-    if(_export_to_cl_image)
+    if (_export_to_cl_image)
     {
-        const TensorShape shape2d(src1->info()->dimension(0) / 4, src1->info()->dimension(1) * src1->info()->dimension(2));
+        const TensorShape shape2d(src1->info()->dimension(0) / 4,
+                                  src1->info()->dimension(1) * src1->info()->dimension(2));
         const size_t      image_row_pitch = src1->info()->strides_in_bytes()[1];
 
-        src1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), src1->cl_buffer(), shape2d, src1->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
+        src1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), src1->cl_buffer(), shape2d,
+                                                  src1->info()->data_type(), image_row_pitch, CLImage2DType::ReadOnly);
     }
 
     Window slice = window.first_slice_window_3D();
@@ -336,14 +376,14 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::run_op(ITensorPack &tensors,
         unsigned int idx = 0;
 
         add_3d_tensor_nhw_argument(idx, src0);
-        if(_export_to_cl_image)
+        if (_export_to_cl_image)
         {
             _kernel.setArg(idx++, src1_image2d);
         }
         add_3d_tensor_nhw_argument(idx, src1);
 
         // Bias buffer (_add_bias == true)
-        if(_add_bias)
+        if (_add_bias)
         {
             add_3d_tensor_nhw_argument(idx, src2);
         }
@@ -358,8 +398,7 @@ void ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel::run_op(ITensorPack &tensors,
         // LWS_x should be multiple of 16 at least. (32, 2) has been chosen to have more work-items on a single core
         // LWS also enforces the order of execution of the workitems which improves cache utilization
         enqueue(queue, *this, slice, cl::NDRange(32, 2), false);
-    }
-    while(window.slide_window_slice_3D(slice));
+    } while (window.slide_window_slice_3D(slice));
 }
 } // namespace kernels
 } // namespace opencl

@@ -26,8 +26,9 @@
 #define CKW_SRC_CL_CLTENSORCOMPONENT_H
 
 #include "ckw/types/TensorComponentType.h"
-#include "src/ITensorComponent.h"
+
 #include "src/cl/CLTile.h"
+#include "src/ITensorComponent.h"
 
 namespace ckw
 {
@@ -72,7 +73,7 @@ public:
     TensorComponentType component_type() const override;
 
 private:
-    TensorComponentType _component_type{ TensorComponentType::Unknown };
+    TensorComponentType _component_type{TensorComponentType::Unknown};
 };
 
 } // namespace ckw

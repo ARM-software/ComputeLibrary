@@ -24,8 +24,9 @@
 #ifndef ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_H
 #define ARM_COMPUTE_CPU_DEPTHWISE_CONV2D_H
 
-#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/experimental/Types.h"
+#include "arm_compute/core/ITensorInfo.h"
+
 #include "src/cpu/ICpuKernel.h"
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
@@ -56,14 +57,22 @@ public:
      *                         Data type supported: Same as @p src, S32 when src is QASYMM8/QASYMM8_SIGNED.
      * @param[in]      info    Depthwise convolution meta-data.
      */
-    void configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
+    void configure(ITensorInfo           *src,
+                   const ITensorInfo     *weights,
+                   const ITensorInfo     *biases,
+                   ITensorInfo           *dst,
+                   const ConvolutionInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDepthwiseConv2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
+    static Status validate(const ITensorInfo     *src,
+                           const ITensorInfo     *weights,
+                           const ITensorInfo     *biases,
+                           const ITensorInfo     *dst,
+                           const ConvolutionInfo &info);
     /** Static function to choose the best depthwise convolution function for @ref CpuDepthwiseConv2d
      *
      * @param[in] src     Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
@@ -76,7 +85,10 @@ public:
      *
      * @return a Depthwise Convolution Function
      */
-    static DepthwiseConvolutionFunction get_depthwiseconvolution_function(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+    static DepthwiseConvolutionFunction get_depthwiseconvolution_function(const ITensorInfo     *src,
+                                                                          const ITensorInfo     *weights,
+                                                                          const ITensorInfo     *biases,
+                                                                          const ITensorInfo     *dst,
                                                                           const ConvolutionInfo &info);
 
     // Inherited methods overriden:
@@ -118,32 +130,40 @@ private:
          * @param[out]     dst     Destination tensor info. Data type supported: same as @p src.
          * @param[in]      info    Depthwise convolution meta-data.
          */
-        void configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
+        void configure(ITensorInfo           *src,
+                       const ITensorInfo     *weights,
+                       const ITensorInfo     *biases,
+                       ITensorInfo           *dst,
+                       const ConvolutionInfo &info);
         /** Static function to check if given info will lead to a valid configuration
          *
          * Similar to CpuDepthwiseConv2dOptimizedInternal::configure()
          *
          * @return a status
          */
-        static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
+        static Status validate(const ITensorInfo     *src,
+                               const ITensorInfo     *weights,
+                               const ITensorInfo     *biases,
+                               const ITensorInfo     *dst,
+                               const ConvolutionInfo &info);
 
         // Inherited methods overriden:
         void run(ITensorPack &tensors) override;
         void prepare(ITensorPack &tensors) override;
 
     private:
-        std::unique_ptr<CpuDepthwiseConv2dAssemblyDispatch> _dwc_optimized_func{ nullptr };
-        std::unique_ptr<CpuPermute>                         _permute_input{ nullptr };
-        std::unique_ptr<CpuPermute>                         _permute_weights{ nullptr };
-        std::unique_ptr<CpuPermute>                         _permute_output{ nullptr };
-        std::unique_ptr<CpuActivation>                      _activationlayer_function{ nullptr };
-        bool                                                _has_bias{ false };
-        bool                                                _is_quantized{ false };
-        bool                                                _is_nchw{ true };
-        bool                                                _permute{ false };
-        bool                                                _is_activationlayer_enabled{ false };
-        bool                                                _is_prepared{ false };
-        bool                                                _are_weights_const{ true };
+        std::unique_ptr<CpuDepthwiseConv2dAssemblyDispatch> _dwc_optimized_func{nullptr};
+        std::unique_ptr<CpuPermute>                         _permute_input{nullptr};
+        std::unique_ptr<CpuPermute>                         _permute_weights{nullptr};
+        std::unique_ptr<CpuPermute>                         _permute_output{nullptr};
+        std::unique_ptr<CpuActivation>                      _activationlayer_function{nullptr};
+        bool                                                _has_bias{false};
+        bool                                                _is_quantized{false};
+        bool                                                _is_nchw{true};
+        bool                                                _permute{false};
+        bool                                                _is_activationlayer_enabled{false};
+        bool                                                _is_prepared{false};
+        bool                                                _are_weights_const{true};
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following kernel:
@@ -176,7 +196,11 @@ private:
          *                         Data type supported: Same as @p src, S32 when src is QASYMM8/QASYMM8_SIGNED.
          * @param[in]      info    Depthwise convolution meta-data.
          */
-        void configure(ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ConvolutionInfo &info);
+        void configure(ITensorInfo           *src,
+                       const ITensorInfo     *weights,
+                       const ITensorInfo     *biases,
+                       ITensorInfo           *dst,
+                       const ConvolutionInfo &info);
 
         /** Static function to check if given info will lead to a valid configuration
          *
@@ -184,24 +208,28 @@ private:
          *
          * @return a status
          */
-        static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ConvolutionInfo &info);
+        static Status validate(const ITensorInfo     *src,
+                               const ITensorInfo     *weights,
+                               const ITensorInfo     *biases,
+                               const ITensorInfo     *dst,
+                               const ConvolutionInfo &info);
 
         // Inherited methods overridden:
         void run(ITensorPack &tensors) override;
         void prepare(ITensorPack &tensors) override;
 
     private:
-        std::unique_ptr<kernels::CpuDepthwiseConv2dNativeKernel> _depthwise_conv_kernel{ nullptr };
-        std::unique_ptr<CpuPermute>                              _permute_input{ nullptr };
-        std::unique_ptr<CpuPermute>                              _permute_weights{ nullptr };
-        std::unique_ptr<CpuPermute>                              _permute_output{ nullptr };
-        std::unique_ptr<CpuActivation>                           _activationlayer_function{ nullptr };
-        bool                                                     _is_nchw{ true };
-        bool                                                     _is_prepared{ false };
-        bool                                                     _is_activationlayer_enabled{ false };
+        std::unique_ptr<kernels::CpuDepthwiseConv2dNativeKernel> _depthwise_conv_kernel{nullptr};
+        std::unique_ptr<CpuPermute>                              _permute_input{nullptr};
+        std::unique_ptr<CpuPermute>                              _permute_weights{nullptr};
+        std::unique_ptr<CpuPermute>                              _permute_output{nullptr};
+        std::unique_ptr<CpuActivation>                           _activationlayer_function{nullptr};
+        bool                                                     _is_nchw{true};
+        bool                                                     _is_prepared{false};
+        bool                                                     _is_activationlayer_enabled{false};
     };
 
-    DepthwiseConvolutionFunction        _depth_conv_func{ DepthwiseConvolutionFunction::GENERIC };
+    DepthwiseConvolutionFunction        _depth_conv_func{DepthwiseConvolutionFunction::GENERIC};
     CpuDepthwiseConv2dOptimizedInternal _func_optimized{};
     CpuDepthwiseConv2dGeneric           _func_generic{};
 };

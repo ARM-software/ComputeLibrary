@@ -23,9 +23,11 @@
  */
 
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
-#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
+
 #include "ckw/Error.h"
 #include "ckw/TileInfo.h"
+
+#include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 
 namespace arm_compute
 {
@@ -34,21 +36,21 @@ namespace experimental
 namespace dynamic_fusion
 {
 
-GpuCkwKernelWriter::GpuCkwKernelWriter(ckw::Kernel &kernel)
-    : KernelWriter(kernel)
+GpuCkwKernelWriter::GpuCkwKernelWriter(ckw::Kernel &kernel) : KernelWriter(kernel)
 {
 }
 
 void GpuCkwKernelWriter::op_load_once(GpuCkwComponentArgument *tensor_or_tile, const ckw::TensorTileSampler &sampler)
 {
-    if(!tensor_or_tile->has_tile())
+    if (!tensor_or_tile->has_tile())
     {
         CKW_ASSERT(tensor_or_tile->has_tensor());
 
         auto &tensor = tensor_or_tile->tensor();
 
         const auto tile_name = tensor.name() + "_tile";
-        auto      &tile      = declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
+        auto      &tile =
+            declare_tile(tile_name.c_str(), ckw::TileInfo(tensor.data_type(), sampler.height(), sampler.width()));
 
         op_load(tile, tensor, sampler);
 

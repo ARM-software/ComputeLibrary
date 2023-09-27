@@ -84,7 +84,11 @@ public:
      * @param[in]  starts          The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends            The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const Coordinates      &starts,
+                   const Coordinates      &ends);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSlice
      *
@@ -100,7 +104,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
 
     // Inherited methods overridden:
     void run() override;
@@ -129,7 +134,11 @@ public:
      * @param[in]  starts          The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends            The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *input,
+                   ITensorInfo            *output,
+                   const Coordinates      &starts,
+                   const Coordinates      &ends);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSlice
      *
@@ -145,7 +154,8 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
 };
 } // namespace experimental
 } // namespace arm_compute

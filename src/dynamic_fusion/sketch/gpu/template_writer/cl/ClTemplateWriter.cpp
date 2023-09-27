@@ -24,6 +24,7 @@
 #include "ClTemplateWriter.h"
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
 
@@ -39,11 +40,11 @@ std::string ClTemplateWriter::replace_tags(const std::string &code_template, con
     std::string replaced_code    = "";
     bool        scanning_pattern = false;
     std::string pattern_found    = "";
-    for(size_t i = 0; i < code_template.size() - 1; ++i)
+    for (size_t i = 0; i < code_template.size() - 1; ++i)
     {
-        if(!scanning_pattern)
+        if (!scanning_pattern)
         {
-            if(code_template[i] == '{' && code_template[i + 1] == '{')
+            if (code_template[i] == '{' && code_template[i + 1] == '{')
             {
                 i += 1;
                 scanning_pattern = true;
@@ -56,7 +57,7 @@ std::string ClTemplateWriter::replace_tags(const std::string &code_template, con
         }
         else
         {
-            if(code_template[i] == '}' && code_template[i + 1] == '}')
+            if (code_template[i] == '}' && code_template[i + 1] == '}')
             {
                 i += 1;
                 scanning_pattern = false;
@@ -76,8 +77,7 @@ std::string ClTemplateWriter::replace_tags(const std::string &code_template, con
 ClTemplateWriter::~ClTemplateWriter()
 {
 }
-ClTemplateWriter::ClTemplateWriter(const GpuKernelComponentGroup &components)
-    : _components{ components }
+ClTemplateWriter::ClTemplateWriter(const GpuKernelComponentGroup &components) : _components{components}
 {
 }
 std::string ClTemplateWriter::get_name()
@@ -91,7 +91,7 @@ std::string ClTemplateWriter::get_code()
 std::string ClTemplateWriter::get_config_id()
 {
     std::string config_id = get_name();
-    for(const auto &comp : _components)
+    for (const auto &comp : _components)
     {
         config_id += "--" + comp->template_writer()->get_config_id() + "--";
     }
@@ -103,7 +103,7 @@ CLBuildOptions ClTemplateWriter::get_build_options()
 {
     CLBuildOptions build_opts{};
 
-    for(const auto &comp : _components)
+    for (const auto &comp : _components)
     {
         build_opts.add_options(comp->template_writer()->get_build_options(_components).options());
     }
@@ -122,11 +122,9 @@ std::map<ITensorInfo::Id, GpuKernelArgument> ClTemplateWriter::get_tensors()
 {
     // Assemble GpuKernelArguments
     std::map<ITensorInfo::Id, GpuKernelArgument> tensors;
-    for(const auto t : _components.get_argument_tensors())
+    for (const auto t : _components.get_argument_tensors())
     {
-        tensors.emplace(
-            t->id(),
-            GpuKernelArgument{ *t, _vtable.get_variable(t).kernel_argument_info });
+        tensors.emplace(t->id(), GpuKernelArgument{*t, _vtable.get_variable(t).kernel_argument_info});
     }
     return tensors;
 }
@@ -141,22 +139,24 @@ std::string ClTemplateWriter::write_code()
     std::vector<std::string> component_codes{}; // vector because order matters
 
     // Pass 1: Declare all kernel variables
-    for(auto &component : _components)
+    for (auto &component : _components)
     {
         component->template_writer()->declare_variables(_vtable, _components);
     }
     // Pass 2: Generate component codes
-    for(auto &component : _components)
+    for (auto &component : _components)
     {
         const auto component_writer       = component->template_writer();
         auto       curr_headers_list      = component_writer->get_headers_list();
         auto       curr_additional_macros = component_writer->get_additional_macros();
         auto       curr_component_code    = component_writer->get_component_code(_components);
-        const auto var_lut                = component_writer->get_tag_lut(_vtable, _components); // Ideally can be merged with get_component_code once we have finer-grained code generation technique
+        const auto var_lut                = component_writer->get_tag_lut(
+                           _vtable,
+                           _components); // Ideally can be merged with get_component_code once we have finer-grained code generation technique
         component_codes.push_back(replace_tags(curr_component_code, var_lut));
 
         headers_list.insert(curr_headers_list.begin(), curr_headers_list.end());
-        if(!additional_macros.empty()) // Some components might not have any
+        if (!additional_macros.empty()) // Some components might not have any
         {
             additional_macros.insert(replace_tags(curr_additional_macros, var_lut));
         }
@@ -165,7 +165,7 @@ std::string ClTemplateWriter::write_code()
     // Step 3: Assemble the data gathered by traversing the graph into the string "code"
     std::string code = "";
 
-    for(auto &header : headers_list)
+    for (auto &header : headers_list)
     {
 #if defined(EMBEDDED_KERNELS)
         code += CLKernelLibrary::get().get_program(header).first;
@@ -174,16 +174,14 @@ std::string ClTemplateWriter::write_code()
 #endif // defined(EMBEDDED_KERNELS)
     }
 
-    for(auto &macros : additional_macros)
+    for (auto &macros : additional_macros)
     {
         code += macros;
     }
 
     auto arguments = _components.get_argument_tensors();
-    std::sort(arguments.begin(), arguments.end(), [](const ITensorInfo * l, const ITensorInfo * r)
-    {
-        return l->id() < r->id();
-    });
+    std::sort(arguments.begin(), arguments.end(),
+              [](const ITensorInfo *l, const ITensorInfo *r) { return l->id() < r->id(); });
     code += write_kernel_signature(_vtable.get_variable_list(arguments));
 
     code += "\n{\n\n";
@@ -198,7 +196,7 @@ std::string ClTemplateWriter::write_code()
 
         tiles_ss << "    //------------------ START TILE DECLARATION ---------------------\n";
 
-        for(auto tile : tiles)
+        for (auto tile : tiles)
         {
             const auto var       = _vtable.get_variable(tile);
             const auto data_type = get_cl_type_from_data_type(tile->data_type());
@@ -212,7 +210,7 @@ std::string ClTemplateWriter::write_code()
         code += tiles_ss.str();
     }
 
-    for(const auto &component_code : component_codes)
+    for (const auto &component_code : component_codes)
     {
         code += component_code;
         code += "\n";
@@ -231,7 +229,8 @@ std::string ClTemplateWriter::write_global_section() const
     auto       leftover_w = dst_w % tile_w;
 
     std::string code = "";
-    code += std::string("    int g_ind_0 = GET_SPATIAL_IDX(0, ") + std::to_string(tile_w) + ", " + std::to_string(leftover_w) + ");\n";
+    code += std::string("    int g_ind_0 = GET_SPATIAL_IDX(0, ") + std::to_string(tile_w) + ", " +
+            std::to_string(leftover_w) + ");\n";
     code += std::string("    int g_ind_1 = GET_SPATIAL_IDX(1, ") + std::to_string(tile_h) + ", " + "0);\n";
     code += std::string("    int g_ind_2 = GET_SPATIAL_IDX(2, 1, 0);\n\n");
 
@@ -243,7 +242,7 @@ std::string ClTemplateWriter::write_global_section() const
 std::string ClTemplateWriter::write_argument_declaration(const GpuKernelVariableTable::TensorVariable &var) const
 {
     std::string code;
-    switch(var.kernel_argument_info.type)
+    switch (var.kernel_argument_info.type)
     {
         case GpuKernelArgumentInfo::Type::Vector:
         {
@@ -293,11 +292,11 @@ std::string ClTemplateWriter::write_kernel_signature(const GpuKernelVariableTabl
 {
     std::string code = "\n__kernel void " + write_kernel_name() + "(";
 
-    for(int i = 0; i < static_cast<int>(argument_list.size()) - 1; ++i)
+    for (int i = 0; i < static_cast<int>(argument_list.size()) - 1; ++i)
     {
         code += write_argument_declaration(argument_list[i]) + ",";
     }
-    if(static_cast<int>(argument_list.size()) - 1 >= 0)
+    if (static_cast<int>(argument_list.size()) - 1 >= 0)
     {
         code += write_argument_declaration(argument_list[argument_list.size() - 1]);
     }
@@ -308,12 +307,12 @@ std::string ClTemplateWriter::write_kernel_signature(const GpuKernelVariableTabl
 }
 std::string ClTemplateWriter::write_kernel_name() const
 {
-    if(_components.empty())
+    if (_components.empty())
     {
         return "empty_kernel";
     }
     std::string name = _components.empty() ? "" : _components[0]->template_writer()->get_name();
-    for(size_t i = 1; i < _components.size(); ++i)
+    for (size_t i = 1; i < _components.size(); ++i)
     {
         name += "___";
         name += _components[i]->template_writer()->get_name();

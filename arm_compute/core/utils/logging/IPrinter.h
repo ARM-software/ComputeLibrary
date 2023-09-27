@@ -35,8 +35,7 @@ class Printer
 {
 public:
     /** Default Constructor */
-    Printer() noexcept
-        : _mtx()
+    Printer() noexcept : _mtx()
     {
     }
     /** Prevent instances of this class from being copied */

@@ -26,6 +26,7 @@
 #define ARM_COMPUTE_CLSTACKLAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -60,7 +61,8 @@ public:
      * @param[out] output      Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
+    void configure(
+        const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
     /** Initialise the kernel's inputs and output
      *
      * @note Supported input tensor rank: up to 4
@@ -74,7 +76,12 @@ public:
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   unsigned int            axis,
+                   unsigned int            idx_input,
+                   unsigned int            num_tensors,
+                   ICLTensor              *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
@@ -88,7 +95,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           unsigned int       axis,
+                           unsigned int       idx_input,
+                           unsigned int       num_tensors,
+                           const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

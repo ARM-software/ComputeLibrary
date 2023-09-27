@@ -27,10 +27,9 @@
 
 namespace arm_compute
 {
-ITensorPack::ITensorPack(std::initializer_list<PackElement> l)
-    : _pack()
+ITensorPack::ITensorPack(std::initializer_list<PackElement> l) : _pack()
 {
-    for(auto &e : l)
+    for (auto &e : l)
     {
         _pack[e.id] = e;
     }
@@ -54,7 +53,7 @@ void ITensorPack::add_const_tensor(int id, const ITensor *tensor)
 const ITensor *ITensorPack::get_const_tensor(int id) const
 {
     auto it = _pack.find(id);
-    if(it != _pack.end())
+    if (it != _pack.end())
     {
         return it->second.ctensor != nullptr ? it->second.ctensor : it->second.tensor;
     }

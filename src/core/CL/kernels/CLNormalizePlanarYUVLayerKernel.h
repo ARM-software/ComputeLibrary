@@ -67,7 +67,11 @@ public:
      * @param[in]  std             Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
      *                             Data types supported: same as @p input
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const ICLTensor        *mean,
+                   const ICLTensor        *std);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayerKernel
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
@@ -79,7 +83,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

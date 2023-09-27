@@ -66,7 +66,11 @@ public:
      * @param[out] output          Destination tensor. Output dimensions are [W * H * num_priors * 4, 2]. Data types and layouts supported: same as @p input1
      * @param[in]  info            Prior box layer info.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info);
+    void configure(const CLCompileContext  &compile_context,
+                   const ICLTensor         *input1,
+                   const ICLTensor         *input2,
+                   ICLTensor               *output,
+                   const PriorBoxLayerInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPriorBoxLayer
      *
      * @param[in] input1 First source tensor info. Data types supported: F32. Data layouts supported: NCHW/NHWC.
@@ -76,12 +80,15 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info);
+    static Status validate(const ITensorInfo       *input1,
+                           const ITensorInfo       *input2,
+                           const ITensorInfo       *output,
+                           const PriorBoxLayerInfo &info);
 
 private:
     cl::Buffer _min;
     cl::Buffer _max;
     cl::Buffer _aspect_ratios;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLPRIORBOXLAYER_H */

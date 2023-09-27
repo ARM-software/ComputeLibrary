@@ -79,7 +79,7 @@ TensorDescriptor StridedSliceLayerNode::compute_output_descriptor(const TensorDe
 
 bool StridedSliceLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

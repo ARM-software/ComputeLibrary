@@ -82,17 +82,17 @@ public:
      * |S16            |S16            |S16            |
      * |U8             |U8             |U8             |
      */
-    static Status validate(const ArgumentPack<ITensorInfo> &tensors, const ElementwiseBinaryCommonAttributes &attributes);
+    static Status validate(const ArgumentPack<ITensorInfo>         &tensors,
+                           const ElementwiseBinaryCommonAttributes &attributes);
 
     /** Constructor
      *
      * Similar to @ref ClComponentElementwiseBinary::validate()
      */
-    ClComponentElementwiseBinary(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes);
+    ClComponentElementwiseBinary(ComponentId                      id,
+                                 const Properties                &properties,
+                                 const ArgumentPack<ITensorInfo> &tensors,
+                                 const Attributes                &attributes);
 
     /** Destructor */
     ~ClComponentElementwiseBinary() override;

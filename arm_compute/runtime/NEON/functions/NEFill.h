@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_NEFILL_H
 #define ARM_COMPUTE_NEFILL_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 

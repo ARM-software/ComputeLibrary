@@ -24,20 +24,26 @@
 
 #include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
 
-#include "src/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
-
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-void CLNormalizePlanarYUVLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+void CLNormalizePlanarYUVLayer::configure(const ICLTensor *input,
+                                          ICLTensor       *output,
+                                          const ICLTensor *mean,
+                                          const ICLTensor *std)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, std);
 }
 
-void CLNormalizePlanarYUVLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+void CLNormalizePlanarYUVLayer::configure(const CLCompileContext &compile_context,
+                                          const ICLTensor        *input,
+                                          ICLTensor              *output,
+                                          const ICLTensor        *mean,
+                                          const ICLTensor        *std)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, mean, std);
     auto k = std::make_unique<CLNormalizePlanarYUVLayerKernel>();
@@ -45,8 +51,10 @@ void CLNormalizePlanarYUVLayer::configure(const CLCompileContext &compile_contex
     _kernel = std::move(k);
 }
 
-Status CLNormalizePlanarYUVLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                           const ITensorInfo *mean, const ITensorInfo *std)
+Status CLNormalizePlanarYUVLayer::validate(const ITensorInfo *input,
+                                           const ITensorInfo *output,
+                                           const ITensorInfo *mean,
+                                           const ITensorInfo *std)
 {
     return CLNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
 }

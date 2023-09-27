@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-DepthToSpaceLayerNode::DepthToSpaceLayerNode(int block_shape)
-    : _block_shape(block_shape)
+DepthToSpaceLayerNode::DepthToSpaceLayerNode(int block_shape) : _block_shape(block_shape)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -44,7 +43,8 @@ int DepthToSpaceLayerNode::block_shape() const
     return _block_shape;
 }
 
-TensorDescriptor DepthToSpaceLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor, int block_shape)
+TensorDescriptor DepthToSpaceLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                                  int                     block_shape)
 {
     using namespace arm_compute::helpers::tensor_transform;
 
@@ -53,14 +53,15 @@ TensorDescriptor DepthToSpaceLayerNode::compute_output_descriptor(const TensorDe
 
     // Set descriptor shape
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape            = misc::shape_calculator::compute_depth_to_space_shape(input_shape, data_layout, block_shape);
+    output_descriptor.shape =
+        misc::shape_calculator::compute_depth_to_space_shape(input_shape, data_layout, block_shape);
 
     return output_descriptor;
 }
 
 bool DepthToSpaceLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

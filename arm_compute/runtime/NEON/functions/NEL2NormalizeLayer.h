@@ -97,5 +97,5 @@ private:
     std::unique_ptr<NEL2NormalizeLayerKernel> _normalize_kernel;
     Tensor                                    _sumsq;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEL2NORMALIZELAYER_H */

@@ -27,8 +27,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_BOUNDINGBOXTRANFORM_KERNEL(func_name) \
-    void func_name(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, BoundingBoxTransformInfo bbinfo, const Window &window)
+#define DECLARE_BOUNDINGBOXTRANFORM_KERNEL(func_name)                                                                 \
+    void func_name(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, BoundingBoxTransformInfo bbinfo, \
+                   const Window &window)
 DECLARE_BOUNDINGBOXTRANFORM_KERNEL(neon_fp32_boundingboxtransform);
 DECLARE_BOUNDINGBOXTRANFORM_KERNEL(neon_fp16_boundingboxtransform);
 DECLARE_BOUNDINGBOXTRANFORM_KERNEL(neon_qu16_boundingboxtransform);

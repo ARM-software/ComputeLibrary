@@ -41,15 +41,17 @@ namespace tensor_info
  * @return True if tensors have mismatching quantization info else false.
  */
 template <typename... Ts>
-inline bool tensors_have_different_quantization_info(const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
+inline bool tensors_have_different_quantization_info(const ITensorInfo *tensor_info_1,
+                                                     const ITensorInfo *tensor_info_2,
+                                                     Ts... tensor_infos)
 {
     const QuantizationInfo first_quantization_info = tensor_info_1->quantization_info();
 
-    const std::array < const ITensorInfo *, 1 + sizeof...(Ts) > tensor_infos_array{ { tensor_info_2, std::forward<Ts>(tensor_infos)... } };
-    return std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->quantization_info() != first_quantization_info;
-    });
+    const std::array<const ITensorInfo *, 1 + sizeof...(Ts)> tensor_infos_array{
+        {tensor_info_2, std::forward<Ts>(tensor_infos)...}};
+    return std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(),
+                       [&](const ITensorInfo *tensor_info)
+                       { return tensor_info->quantization_info() != first_quantization_info; });
 }
 } // namespace tensor_info
 } // namespace helpers

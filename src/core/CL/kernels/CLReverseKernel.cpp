@@ -30,6 +30,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -49,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->dimension(0) > 4, "Only up to 4 dimensions can be reversed");
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -60,8 +61,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 } // namespace
 
-CLReverseKernel::CLReverseKernel()
-    : _input(nullptr), _output(nullptr), _axis(nullptr)
+CLReverseKernel::CLReverseKernel() : _input(nullptr), _output(nullptr), _axis(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
@@ -71,10 +71,13 @@ void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const
     configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
 }
 
-void CLReverseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+void CLReverseKernel::configure(const CLCompileContext &compile_context,
+                                const ICLTensor        *input,
+                                ICLTensor              *output,
+                                const ICLTensor        *axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
-    auto padding_info = get_padding_info({ input, output, axis });
+    auto padding_info = get_padding_info({input, output, axis});
 
     _input  = input;
     _output = output;
@@ -138,7 +141,6 @@ void CLReverseKernel::run(const Window &window, cl::CommandQueue &queue)
         add_1D_tensor_argument(idx, _axis, axis_slice);
         add_4D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_4D(slice));
+    } while (collapsed.slide_window_slice_4D(slice));
 }
 } // namespace arm_compute

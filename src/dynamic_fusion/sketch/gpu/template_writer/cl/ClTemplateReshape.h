@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATERESHAPE
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentReshape.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
 
@@ -42,8 +43,7 @@ public:
      * @param[in] id      Component id
      * @param[in] tensors Tensor arguments to the components
      */
-    ClTemplateReshape(ComponentId                      id,
-                      const ArgumentPack<ITensorInfo> &tensors);
+    ClTemplateReshape(ComponentId id, const ArgumentPack<ITensorInfo> &tensors);
     /** Prevent instances of this class from being copy constructed */
     ClTemplateReshape(const ClTemplateReshape &reshape) = delete;
     /** Prevent instances of this class from being copied */

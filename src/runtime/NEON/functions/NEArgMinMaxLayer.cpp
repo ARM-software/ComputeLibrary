@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEReductionOperationKernel.h"
 
@@ -48,8 +49,7 @@ struct NEArgMinMaxLayer::Impl
 
 NEArgMinMaxLayer::~NEArgMinMaxLayer() = default;
 
-NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _impl(std::make_unique<Impl>())
+NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
 {
     _impl->memory_manager = std::move(memory_manager);
 }
@@ -58,7 +58,8 @@ void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, cons
 {
     ARM_COMPUTE_LOG_PARAMS(input, axis, output, op);
     _impl->reduction_function = std::make_unique<NEReductionOperation>();
-    if(output->info() && (output->info()->data_type() == DataType::S64 || output->info()->data_type() == DataType::U64))
+    if (output->info() &&
+        (output->info()->data_type() == DataType::S64 || output->info()->data_type() == DataType::U64))
     {
         _impl->memory_group         = MemoryGroup(std::move(_impl->memory_manager));
         _impl->cast_function        = std::make_unique<NECast>();
@@ -74,9 +75,11 @@ void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, cons
     }
 }
 
-Status NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
+Status
+NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Invalid operation");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN,
+                                    "Invalid operation");
     return NEReductionOperation::validate(input, output, axis, op, false);
 }
 
@@ -84,7 +87,7 @@ void NEArgMinMaxLayer::run()
 {
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
     _impl->reduction_function->run();
-    if(_impl->tmp_reduction_result != nullptr)
+    if (_impl->tmp_reduction_result != nullptr)
     {
         _impl->cast_function->run();
     }

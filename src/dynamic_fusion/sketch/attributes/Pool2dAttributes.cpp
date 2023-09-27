@@ -23,6 +23,7 @@
  */
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
+
 #include "arm_compute/core/Size2D.h"
 
 namespace arm_compute

@@ -30,13 +30,14 @@
 // TODO: Remove when all functions have been ported
 #include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IOperator.h"
+
 #include "src/common/utils/Validate.h"
 
 #include <vector>
 
 struct AclOperator_
 {
-    arm_compute::detail::Header header{ arm_compute::detail::ObjectType::Operator, nullptr };
+    arm_compute::detail::Header header{arm_compute::detail::ObjectType::Operator, nullptr};
 
 protected:
     AclOperator_()  = default;
@@ -100,7 +101,7 @@ public:
     }
 
 private:
-    std::unique_ptr<experimental::IOperator> _op{ nullptr };
+    std::unique_ptr<experimental::IOperator> _op{nullptr};
 };
 
 /** Extract internal representation of an Operator
@@ -124,7 +125,7 @@ namespace detail
  */
 inline StatusCode validate_internal_operator(const IOperator *op)
 {
-    if(op == nullptr || !op->is_valid())
+    if (op == nullptr || !op->is_valid())
     {
         ARM_COMPUTE_LOG_ERROR_ACL("[IOperator]: Invalid operator object");
         return StatusCode::InvalidArgument;

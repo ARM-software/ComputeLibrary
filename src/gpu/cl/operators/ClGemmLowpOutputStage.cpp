@@ -27,22 +27,25 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel.h"
 #include "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleByFloatKernel.h"
 #include "src/gpu/cl/kernels/ClGemmLowpQuantizeDownInt32ScaleKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClGemmLowpOutputStage::configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst, const GEMMLowpOutputStageInfo &info)
+void ClGemmLowpOutputStage::configure(const CLCompileContext        &compile_context,
+                                      const ITensorInfo             *src,
+                                      const ITensorInfo             *bias,
+                                      ITensorInfo                   *dst,
+                                      const GEMMLowpOutputStageInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_LOG_PARAMS(src, bias, dst, info);
 
-    switch(info.type)
+    switch (info.type)
     {
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
         {
@@ -70,12 +73,16 @@ void ClGemmLowpOutputStage::configure(const CLCompileContext &compile_context, c
     }
 }
 
-Status ClGemmLowpOutputStage::validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo &info)
+Status ClGemmLowpOutputStage::validate(const ITensorInfo             *src,
+                                       const ITensorInfo             *bias,
+                                       const ITensorInfo             *dst,
+                                       const GEMMLowpOutputStageInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::QSYMM16);
 
-    switch(info.type)
+    switch (info.type)
     {
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT:
             return opencl::kernels::ClGemmLowpQuantizeDownInt32ScaleByFixedPointKernel::validate(src, bias, dst, &info);
@@ -94,7 +101,7 @@ void ClGemmLowpOutputStage::run(ITensorPack &tensors)
     const ITensor *bias = tensors.get_const_tensor(ACL_BIAS);
     ITensor       *dst  = tensors.get_tensor(ACL_DST);
 
-    ITensorPack pack{ { ACL_SRC, src }, { ACL_BIAS, bias }, { ACL_DST, dst } };
+    ITensorPack pack{{ACL_SRC, src}, {ACL_BIAS, bias}, {ACL_DST, dst}};
     CLScheduler::get().enqueue_op(*_kernel, pack, true);
 }
 } // namespace opencl

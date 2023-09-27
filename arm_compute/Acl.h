@@ -25,7 +25,8 @@
 #define ARM_COMPUTE_ACL_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
 /* Core headers */

@@ -60,5 +60,5 @@ public:
      */
     virtual std::unique_ptr<IMemoryPool> duplicate() = 0;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_IMEMORYPOOL_H */

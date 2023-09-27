@@ -28,6 +28,7 @@
 
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
 #include "src/core/NEON/SVEMath.h"
+
 #include <arm_sve.h>
 
 namespace arm_compute
@@ -42,8 +43,10 @@ namespace arm_compute
  */
 inline svfloat32x2_t svdequantize_qsymm16_z(svbool_t pg, const svint16_t &qv, float scale)
 {
-    const auto          vscale             = svdup_n_f32(scale);
-    const svfloat32x2_t vdequantized_input = svcreate2_f32(svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(qv)), vscale), svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(qv)), vscale));
+    const auto          vscale = svdup_n_f32(scale);
+    const svfloat32x2_t vdequantized_input =
+        svcreate2_f32(svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(qv)), vscale),
+                      svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(qv)), vscale));
     return vdequantized_input;
 }
 
@@ -76,13 +79,13 @@ inline svint16_t svquantize_qsymm16_z(svbool_t pg, const svfloat32x2_t qv, float
  */
 inline svfloat32x4_t svdequantize_z(svbool_t pg, const svint16x2_t qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale              = qi.scale;
-    const auto          vscale             = svdup_n_f32(scale);
-    const svfloat32x4_t vdequantized_input = svcreate4_f32(
-                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svget2_s16(qv, 0))), vscale),
-                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svget2_s16(qv, 0))), vscale),
-                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svget2_s16(qv, 1))), vscale),
-                                                 svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svget2_s16(qv, 1))), vscale));
+    const float         scale  = qi.scale;
+    const auto          vscale = svdup_n_f32(scale);
+    const svfloat32x4_t vdequantized_input =
+        svcreate4_f32(svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svget2_s16(qv, 0))), vscale),
+                      svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svget2_s16(qv, 0))), vscale),
+                      svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlb_s32(svget2_s16(qv, 1))), vscale),
+                      svmul_f32_z(pg, svcvt_f32_s32_z(pg, svmovlt_s32(svget2_s16(qv, 1))), vscale));
     return vdequantized_input;
 }
 

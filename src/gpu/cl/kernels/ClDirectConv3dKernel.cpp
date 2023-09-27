@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -40,7 +41,11 @@ namespace kernels
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status validate_arguments(const ITensorInfo *src0,
+                          const ITensorInfo *src1,
+                          const ITensorInfo *src2,
+                          const ITensorInfo *dst,
+                          const Conv3dInfo  &conv3d_info)
 {
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(src0, src1, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
@@ -49,20 +54,25 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv3d_info.act_info.enabled(), "Fused activation not supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv3d_info.dilation != Size3D(1U, 1U, 1U));
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->dimension(1) != src0->dimension(0), "Weights feature map dimension should match the respective src's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->dimension(1) != src0->dimension(0),
+                                    "Weights feature map dimension should match the respective src's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src1->num_dimensions() > 5, "Weights can be at most 5 dimensional");
 
-    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(2) > (src0->dimension(1) + conv3d_info.padding.left + conv3d_info.padding.right));
-    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(3) > (src0->dimension(2) + conv3d_info.padding.top + conv3d_info.padding.bottom));
-    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(4) > (src0->dimension(3) + conv3d_info.padding.front + conv3d_info.padding.back));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(2) >
+                                (src0->dimension(1) + conv3d_info.padding.left + conv3d_info.padding.right));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(3) >
+                                (src0->dimension(2) + conv3d_info.padding.top + conv3d_info.padding.bottom));
+    ARM_COMPUTE_RETURN_ERROR_ON(src1->dimension(4) >
+                                (src0->dimension(3) + conv3d_info.padding.front + conv3d_info.padding.back));
 
-    if(src2 != nullptr)
+    if (src2 != nullptr)
     {
-        if(is_data_type_quantized(src0->data_type()))
+        if (is_data_type_quantized(src0->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, 1, DataType::S32);
         }
@@ -70,15 +80,18 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->dimension(0) != src1->dimension(0), "Biases size and number of dst feature maps should match");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->dimension(0) != src1->dimension(0),
+                                        "Biases size and number of dst feature maps should match");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
     // Checks performed when dst is configured
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src1->dimension(0), "Weights and dst OFMs should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), misc::shape_calculator::compute_conv3d_shape(src0->tensor_shape(), src1->tensor_shape(), conv3d_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+            dst->tensor_shape(),
+            misc::shape_calculator::compute_conv3d_shape(src0->tensor_shape(), src1->tensor_shape(), conv3d_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
     }
 
@@ -91,8 +104,12 @@ ClDirectConv3dKernel::ClDirectConv3dKernel()
     _type = CLKernelType::DIRECT;
 }
 
-void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, ITensorInfo *dst,
-                                     const Conv3dInfo &conv3d_info)
+void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context,
+                                     const ITensorInfo      *src0,
+                                     const ITensorInfo      *src1,
+                                     const ITensorInfo      *src2,
+                                     ITensorInfo            *dst,
+                                     const Conv3dInfo       &conv3d_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src0, src1, dst);
 
@@ -149,13 +166,13 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     build_options.add_option("-DK0=" + support::cpp11::to_string(k0));
     build_options.add_option("-DPARTIAL_N0=" + support::cpp11::to_string(partial_store_n0));
 
-    if(src2 != nullptr)
+    if (src2 != nullptr)
     {
         build_options.add_option(std::string("-DHAS_BIAS"));
         build_options.add_option(std::string("-DBIA_DATA_TYPE=" + get_cl_type_from_data_type(src2->data_type())));
     }
 
-    if(is_data_type_quantized(data_type))
+    if (is_data_type_quantized(data_type))
     {
         const UniformQuantizationInfo iqinfo = src0->quantization_info().uniform();
         const UniformQuantizationInfo wqinfo = src1->quantization_info().uniform();
@@ -218,7 +235,11 @@ void ClDirectConv3dKernel::configure(const CLCompileContext &compile_context, co
     _config_id += support::cpp11::to_string(dst_channels);
 }
 
-Status ClDirectConv3dKernel::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const Conv3dInfo &conv3d_info)
+Status ClDirectConv3dKernel::validate(const ITensorInfo *src0,
+                                      const ITensorInfo *src1,
+                                      const ITensorInfo *src2,
+                                      const ITensorInfo *dst,
+                                      const Conv3dInfo  &conv3d_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src0, src1, src2, dst, conv3d_info));
     return Status{};
@@ -229,21 +250,28 @@ void ClDirectConv3dKernel::run_op(ITensorPack &tensors, const Window &window, cl
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    const auto src     = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const auto weights = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const auto biases  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
-    auto       dst     = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto weights =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto biases =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     // Get initial windows
     Window slice = window.first_slice_window_3D();
-    slice.set(Window::DimY, Window::Dimension(0, ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2) * dst->info()->dimension(3), slice.y().step()), slice.y().step()));
+    slice.set(Window::DimY, Window::Dimension(0,
+                                              ceil_to_multiple(dst->info()->dimension(1) * dst->info()->dimension(2) *
+                                                                   dst->info()->dimension(3),
+                                                               slice.y().step()),
+                                              slice.y().step()));
     slice.set(Window::DimZ, Window::Dimension(0, dst->info()->dimension(4), 1));
 
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, src, slice);
     add_4D_tensor_argument(idx, dst, slice);
     add_4D_tensor_argument(idx, weights, slice);
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         add_1D_tensor_argument(idx, biases, slice);
     }

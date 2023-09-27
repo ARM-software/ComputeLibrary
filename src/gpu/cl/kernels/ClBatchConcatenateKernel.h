@@ -53,7 +53,8 @@ public:
      * @note: The gaps between the two lowest dimensions of src and dst need to be divisible by 2.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int batch_offset, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClBatchConcatenateKernel::configure()
@@ -66,7 +67,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    unsigned int _batch_offset{ 0 };
+    unsigned int _batch_offset{0};
 };
 } // namespace kernels
 } // namespace opencl

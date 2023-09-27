@@ -47,7 +47,10 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src.
      * @param[in]  op              Element wise unary operation to perform.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const ElementWiseUnary &op);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src,
+                   ITensorInfo            *dst,
+                   const ElementWiseUnary &op);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementWiseUnaryKernel::configure()

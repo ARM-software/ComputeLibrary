@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -44,7 +45,10 @@ public:
      * @param[in]     constant_value  The value used to fill the planes of the tensor
      * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *tensor,
+                   const PixelValue       &constant_value,
+                   Window                 *window = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClFill::configure()

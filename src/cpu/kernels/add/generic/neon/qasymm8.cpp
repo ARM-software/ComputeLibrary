@@ -23,13 +23,15 @@
  */
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/kernels/add/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void add_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_qasymm8_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     add_sub_qasymm8_neon(src0, src1, dst, policy, window, true /*is_addition*/);
 }

@@ -61,7 +61,10 @@ public:
      * @param[in]  input2          Input tensor. Data types supported: U8.
      * @param[out] output          Output tensor. Data types supported: U8.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input1,
+                   const ICLTensor        *input2,
+                   ICLTensor              *output);
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBITWISEOR_H */

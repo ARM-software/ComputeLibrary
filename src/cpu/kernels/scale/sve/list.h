@@ -28,10 +28,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SCALE_KERNEL(func_name)                                                                                         \
-    void func_name(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,              \
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset, \
-                   bool align_corners, const Window &window)
+#define DECLARE_SCALE_KERNEL(func_name)                                                                            \
+    void func_name(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy, \
+                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value,           \
+                   float sampling_offset, bool align_corners, const Window &window)
 
 DECLARE_SCALE_KERNEL(fp16_sve_scale);
 DECLARE_SCALE_KERNEL(fp32_sve_scale);

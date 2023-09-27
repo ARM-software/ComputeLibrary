@@ -28,7 +28,10 @@ class ITensor;
 class Window;
 namespace cpu
 {
-void compute_all_anchors_qasymm16(const ITensor *anchors, ITensor *all_anchors, ComputeAnchorsInfo anchors_info, const Window &window)
+void compute_all_anchors_qasymm16(const ITensor     *anchors,
+                                  ITensor           *all_anchors,
+                                  ComputeAnchorsInfo anchors_info,
+                                  const Window      &window)
 {
     Iterator all_anchors_it(all_anchors, window);
     Iterator anchors_it(all_anchors, window);
@@ -39,28 +42,30 @@ void compute_all_anchors_qasymm16(const ITensor *anchors, ITensor *all_anchors, 
 
     const UniformQuantizationInfo qinfo = anchors->info()->quantization_info().uniform();
 
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const size_t anchor_offset = id.y() % num_anchors;
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const size_t anchor_offset = id.y() % num_anchors;
 
-        const auto out_anchor_ptr = reinterpret_cast<int16_t *>(all_anchors_it.ptr());
-        const auto anchor_ptr     = reinterpret_cast<int16_t *>(anchors->ptr_to_element(Coordinates(0, anchor_offset)));
+            const auto out_anchor_ptr = reinterpret_cast<int16_t *>(all_anchors_it.ptr());
+            const auto anchor_ptr = reinterpret_cast<int16_t *>(anchors->ptr_to_element(Coordinates(0, anchor_offset)));
 
-        const size_t shift_idy = id.y() / num_anchors;
-        const float  shiftx    = (shift_idy % feat_width) * stride;
-        const float  shifty    = (shift_idy / feat_width) * stride;
+            const size_t shift_idy = id.y() / num_anchors;
+            const float  shiftx    = (shift_idy % feat_width) * stride;
+            const float  shifty    = (shift_idy / feat_width) * stride;
 
-        const float new_anchor_x1 = dequantize_qsymm16(*anchor_ptr, qinfo.scale) + shiftx;
-        const float new_anchor_y1 = dequantize_qsymm16(*(1 + anchor_ptr), qinfo.scale) + shifty;
-        const float new_anchor_x2 = dequantize_qsymm16(*(2 + anchor_ptr), qinfo.scale) + shiftx;
-        const float new_anchor_y2 = dequantize_qsymm16(*(3 + anchor_ptr), qinfo.scale) + shifty;
+            const float new_anchor_x1 = dequantize_qsymm16(*anchor_ptr, qinfo.scale) + shiftx;
+            const float new_anchor_y1 = dequantize_qsymm16(*(1 + anchor_ptr), qinfo.scale) + shifty;
+            const float new_anchor_x2 = dequantize_qsymm16(*(2 + anchor_ptr), qinfo.scale) + shiftx;
+            const float new_anchor_y2 = dequantize_qsymm16(*(3 + anchor_ptr), qinfo.scale) + shifty;
 
-        *out_anchor_ptr       = quantize_qsymm16(new_anchor_x1, qinfo.scale);
-        *(out_anchor_ptr + 1) = quantize_qsymm16(new_anchor_y1, qinfo.scale);
-        *(out_anchor_ptr + 2) = quantize_qsymm16(new_anchor_x2, qinfo.scale);
-        *(out_anchor_ptr + 3) = quantize_qsymm16(new_anchor_y2, qinfo.scale);
-    },
-    all_anchors_it);
+            *out_anchor_ptr       = quantize_qsymm16(new_anchor_x1, qinfo.scale);
+            *(out_anchor_ptr + 1) = quantize_qsymm16(new_anchor_y1, qinfo.scale);
+            *(out_anchor_ptr + 2) = quantize_qsymm16(new_anchor_x2, qinfo.scale);
+            *(out_anchor_ptr + 3) = quantize_qsymm16(new_anchor_y2, qinfo.scale);
+        },
+        all_anchors_it);
 }
 } // namespace cpu
 } // namespace arm_compute

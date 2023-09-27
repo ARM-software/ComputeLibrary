@@ -31,7 +31,8 @@
 #endif // GPU_ARCH == GPU_ARCH_BIFROST
 
 // Hard-Swish
-#define hard_swish_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (x * ((min(max((x + (DATA_TYPE)3.0), (DATA_TYPE)0.0), (DATA_TYPE)6.0)) * (DATA_TYPE)0.166666667))
+#define hard_swish_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) \
+    (x * ((min(max((x + (DATA_TYPE)3.0), (DATA_TYPE)0.0), (DATA_TYPE)6.0)) * (DATA_TYPE)0.166666667))
 
 // Logistic Activation
 #define logistic_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) ((DATA_TYPE)1.0 / ((DATA_TYPE)1.0 + exp(-x)))
@@ -49,13 +50,16 @@
 #define lu_brelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (min(max(x, (DATA_TYPE)B_VAL), (DATA_TYPE)A_VAL))
 
 // Leaky RELU Activation
-#define lrelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) ((min(x, (DATA_TYPE)0.0) * (DATA_TYPE)A_VAL) + max(x, (DATA_TYPE)0.0))
+#define lrelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) \
+    ((min(x, (DATA_TYPE)0.0) * (DATA_TYPE)A_VAL) + max(x, (DATA_TYPE)0.0))
 
 // Soft RELU Activation
 #define srelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (log((DATA_TYPE)1.0 + exp(x)))
 
 // ELU Activation
-#define elu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (select(((DATA_TYPE)A_VAL * (exp(x) - (DATA_TYPE)1.0)), x, (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x, (DATA_TYPE)0.0)))
+#define elu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL)           \
+    (select(((DATA_TYPE)A_VAL * (exp(x) - (DATA_TYPE)1.0)), x, \
+            (SELECT_VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))isgreaterequal(x, (DATA_TYPE)0.0)))
 
 // Absolute Activation
 #define abs_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (fabs(x))
@@ -70,7 +74,8 @@
 #define linear_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (MLA((DATA_TYPE)B_VAL, (DATA_TYPE)A_VAL, x))
 
 // GELU Activation
-#define gelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (x * (DATA_TYPE)0.5 * ((DATA_TYPE)1.0 + erf(x / (DATA_TYPE)1.41421356237)))
+#define gelu_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) \
+    (x * (DATA_TYPE)0.5 * ((DATA_TYPE)1.0 + erf(x / (DATA_TYPE)1.41421356237)))
 
 // Identity Activation
 #define identity_op(DATA_TYPE, VEC_SIZE, x, A_VAL, B_VAL) (x)

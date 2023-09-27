@@ -95,7 +95,12 @@ public:
      * @param[in]      rounding_policy Rounding policy.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+    void configure(const ITensor             *input1,
+                   const ITensor             *input2,
+                   ITensor                   *output,
+                   float                      scale,
+                   ConvertPolicy              overflow_policy,
+                   RoundingPolicy             rounding_policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplication
      *
@@ -122,7 +127,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           float                      scale,
+                           ConvertPolicy              overflow_policy,
+                           RoundingPolicy             rounding_policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
@@ -158,7 +168,10 @@ public:
      * @param[out]     output   The output tensor. Data types supported: same as @p input1. Number of channels: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplication
      *
      * @param[in] input1   An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
@@ -166,7 +179,10 @@ public:
      * @param[in] output   The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;

@@ -43,10 +43,10 @@ std::ostream &operator<<(std::ostream &os, HeuristicType ht);
 std::ostream &operator<<(std::ostream &os, DataType dt);
 std::ostream &operator<<(std::ostream &os, const HeuristicTree::Index &index);
 std::ostream &operator<<(std::ostream &os, const Query &query);
-std::string to_string(const GEMMConfigNative &config);
-std::string to_string(const GEMMConfigReshapedOnlyRHS &config);
-std::string to_string(const GEMMConfigReshaped &config);
-std::string to_string(const Query &query);
+std::string   to_string(const GEMMConfigNative &config);
+std::string   to_string(const GEMMConfigReshapedOnlyRHS &config);
+std::string   to_string(const GEMMConfigReshaped &config);
+std::string   to_string(const Query &query);
 namespace parser
 {
 std::ostream &operator<<(std::ostream &os, const CharPosition &pos);

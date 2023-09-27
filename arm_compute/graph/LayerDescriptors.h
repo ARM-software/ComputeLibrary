@@ -37,8 +37,7 @@ namespace descriptors
 struct ConcatLayerDescriptor
 {
     /** Default constructor */
-    ConcatLayerDescriptor()
-        : axis(DataLayoutDimension::CHANNEL), output_qinfo()
+    ConcatLayerDescriptor() : axis(DataLayoutDimension::CHANNEL), output_qinfo()
     {
     }
 
@@ -46,8 +45,7 @@ struct ConcatLayerDescriptor
      *
      * @param[in] axis Axis.
      */
-    ConcatLayerDescriptor(DataLayoutDimension axis)
-        : axis(axis), output_qinfo()
+    ConcatLayerDescriptor(DataLayoutDimension axis) : axis(axis), output_qinfo()
     {
     }
 
@@ -76,9 +74,16 @@ struct EltwiseLayerDescriptor
      * @param[in] r_policy         (Optional) Rounding policy used for the operation. Defaults to @ref RoundingPolicy::TO_ZERO
      * @param[in] fused_activation (Optional) Fused activation information. Defaults to empty (identity) @ref ActivationLayerInfo
      */
-    EltwiseLayerDescriptor(EltwiseOperation op, QuantizationInfo out_quant_info = QuantizationInfo(), ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO,
+    EltwiseLayerDescriptor(EltwiseOperation    op,
+                           QuantizationInfo    out_quant_info   = QuantizationInfo(),
+                           ConvertPolicy       c_policy         = ConvertPolicy::SATURATE,
+                           RoundingPolicy      r_policy         = RoundingPolicy::TO_ZERO,
                            ActivationLayerInfo fused_activation = ActivationLayerInfo())
-        : op(op), out_quant_info(out_quant_info), c_policy(c_policy), r_policy(r_policy), fused_activation(fused_activation)
+        : op(op),
+          out_quant_info(out_quant_info),
+          c_policy(c_policy),
+          r_policy(r_policy),
+          fused_activation(fused_activation)
     {
     }
 
@@ -100,10 +105,16 @@ struct UnaryEltwiseLayerDescriptor
      * @param[in] r_policy         (Optional) Rounding policy used for the operation. Defaults to @ref RoundingPolicy::TO_ZERO
      * @param[in] fused_activation (Optional) Fused activation information. Defaults to empty (identity) @ref ActivationLayerInfo
      */
-    UnaryEltwiseLayerDescriptor(UnaryEltwiseOperation op, QuantizationInfo out_quant_info = QuantizationInfo(), ConvertPolicy c_policy = ConvertPolicy::SATURATE,
-                                RoundingPolicy      r_policy         = RoundingPolicy::TO_ZERO,
-                                ActivationLayerInfo fused_activation = ActivationLayerInfo())
-        : op(op), out_quant_info(out_quant_info), c_policy(c_policy), r_policy(r_policy), fused_activation(fused_activation)
+    UnaryEltwiseLayerDescriptor(UnaryEltwiseOperation op,
+                                QuantizationInfo      out_quant_info   = QuantizationInfo(),
+                                ConvertPolicy         c_policy         = ConvertPolicy::SATURATE,
+                                RoundingPolicy        r_policy         = RoundingPolicy::TO_ZERO,
+                                ActivationLayerInfo   fused_activation = ActivationLayerInfo())
+        : op(op),
+          out_quant_info(out_quant_info),
+          c_policy(c_policy),
+          r_policy(r_policy),
+          fused_activation(fused_activation)
     {
     }
 
@@ -130,7 +141,7 @@ struct DeconvolutionLayerDescriptor
     PadStrideInfo    info;           /**< Padding and stride information */
     QuantizationInfo out_quant_info; /**< Output quantization information */
 };
-} // namespace descriptor
+} // namespace descriptors
 } // namespace graph
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_LAYER_DESCRIPTORS_H */

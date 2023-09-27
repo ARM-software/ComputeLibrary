@@ -37,5 +37,5 @@ namespace arm_compute
  * @return The string describing the interpolation policy.
  */
 const std::string &string_from_interpolation_policy(InterpolationPolicy policy);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_INTERPOLATIONPOLICYUTILS_H */

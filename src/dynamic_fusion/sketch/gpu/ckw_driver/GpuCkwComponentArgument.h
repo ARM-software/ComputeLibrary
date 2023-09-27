@@ -110,9 +110,9 @@ public:
     const ckw::TensorTileSampler &tile_sampler() const;
 
 private:
-    ckw::TensorOperand *_tensor{ nullptr };
-    ckw::TileOperand   *_tile{ nullptr };
-    ckw::TensorTileSampler  _tile_sampler{};
+    ckw::TensorOperand    *_tensor{nullptr};
+    ckw::TileOperand      *_tile{nullptr};
+    ckw::TensorTileSampler _tile_sampler{};
 };
 
 } // namespace dynamic_fusion

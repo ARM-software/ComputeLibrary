@@ -27,9 +27,10 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 
 namespace arm_compute
@@ -37,13 +38,26 @@ namespace arm_compute
 NERNNLayer::~NERNNLayer() = default;
 
 NERNNLayer::NERNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_f(), _activation(), _fully_connected(memory_manager), _copy_f(), _fully_connected_out(), _gemm_output(), _add_output(),
+    : _memory_group(std::move(memory_manager)),
+      _gemm_state_f(),
+      _add_f(),
+      _activation(),
+      _fully_connected(memory_manager),
+      _copy_f(),
+      _fully_connected_out(),
+      _gemm_output(),
+      _add_output(),
       _is_prepared(false)
 {
 }
 
-Status NERNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *recurrent_weights, const ITensorInfo *bias, const ITensorInfo *hidden_state,
-                            const ITensorInfo *output, const ActivationLayerInfo &info)
+Status NERNNLayer::validate(const ITensorInfo         *input,
+                            const ITensorInfo         *weights,
+                            const ITensorInfo         *recurrent_weights,
+                            const ITensorInfo         *bias,
+                            const ITensorInfo         *hidden_state,
+                            const ITensorInfo         *output,
+                            const ActivationLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
@@ -60,24 +74,34 @@ Status NERNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
     ARM_COMPUTE_RETURN_ERROR_ON(hidden_state->dimension(idx_height) != input->dimension(idx_height));
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), hidden_state->tensor_shape());
 
-    auto shape_info = TensorInfo(misc::shape_calculator::compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1, input->data_type());
+    auto shape_info =
+        TensorInfo(misc::shape_calculator::compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1,
+                   input->data_type());
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, weights, bias, &shape_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        NEArithmeticAddition::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&shape_info, &shape_info, info));
 
     return Status{};
 }
 
-void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *recurrent_weights, const ITensor *bias, ITensor *hidden_state, ITensor *output,
+void NERNNLayer::configure(const ITensor       *input,
+                           const ITensor       *weights,
+                           const ITensor       *recurrent_weights,
+                           const ITensor       *bias,
+                           ITensor             *hidden_state,
+                           ITensor             *output,
                            ActivationLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NERNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(), bias->info(), hidden_state->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(NERNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(),
+                                                    bias->info(), hidden_state->info(), output->info(), info));
     ARM_COMPUTE_LOG_PARAMS(input, weights, recurrent_weights, bias, hidden_state, output, info);
 
     const int   idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    TensorShape shape      = misc::shape_calculator::compute_rnn_shape(recurrent_weights->info(), hidden_state->info()->dimension(idx_height));
+    TensorShape shape      = misc::shape_calculator::compute_rnn_shape(recurrent_weights->info(),
+                                                                       hidden_state->info()->dimension(idx_height));
 
     _is_prepared = false;
 
@@ -125,7 +149,7 @@ void NERNNLayer::run()
 
 void NERNNLayer::prepare()
 {
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
         _fully_connected.prepare();
         _gemm_state_f.prepare();

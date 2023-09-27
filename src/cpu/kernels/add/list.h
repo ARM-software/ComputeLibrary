@@ -31,8 +31,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_ADD_KERNEL(func_name) \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+#define DECLARE_ADD_KERNEL(func_name)                                                                   \
+    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, \
+                   const Window &window)
 
 DECLARE_ADD_KERNEL(add_qasymm8_neon);
 DECLARE_ADD_KERNEL(add_qasymm8_signed_neon);

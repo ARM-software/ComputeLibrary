@@ -57,7 +57,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 private:
     PoolingLayerInfo _info;

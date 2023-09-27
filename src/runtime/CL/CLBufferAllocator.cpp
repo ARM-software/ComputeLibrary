@@ -35,7 +35,8 @@ namespace arm_compute
 void *CLBufferAllocator::allocate(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    cl_mem buf{ clCreateBuffer(CLScheduler::get().context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, nullptr, nullptr) };
+    cl_mem buf{clCreateBuffer(CLScheduler::get().context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size,
+                              nullptr, nullptr)};
     return static_cast<void *>(buf);
 }
 

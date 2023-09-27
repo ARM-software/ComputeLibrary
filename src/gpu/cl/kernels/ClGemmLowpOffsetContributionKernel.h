@@ -67,15 +67,25 @@ public:
      * @param[in]      b_offset        Offset to be added to each element of the matrix B.
      */
     void configure(const CLCompileContext &compile_context,
-                   const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
-                   int32_t k, int32_t a_offset, int32_t b_offset);
+                   const ITensorInfo      *mm_result,
+                   const ITensorInfo      *vector_sum_col,
+                   const ITensorInfo      *vector_sum_row,
+                   const ITensorInfo      *bias,
+                   int32_t                 k,
+                   int32_t                 a_offset,
+                   int32_t                 b_offset);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpOffsetContributionKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, int32_t a_offset, int32_t b_offset);
+    static Status validate(const ITensorInfo *mm_result,
+                           const ITensorInfo *vector_sum_col,
+                           const ITensorInfo *vector_sum_row,
+                           const ITensorInfo *bias,
+                           int32_t            a_offset,
+                           int32_t            b_offset);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

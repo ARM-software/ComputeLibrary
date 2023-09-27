@@ -38,7 +38,7 @@ namespace
 bool is_mode_valid(const AclQueueOptions *options)
 {
     ARM_COMPUTE_ASSERT_NOT_NULLPTR(options);
-    return arm_compute::utils::is_in(options->mode, { AclTuningModeNone, AclRapid, AclNormal, AclExhaustive });
+    return arm_compute::utils::is_in(options->mode, {AclTuningModeNone, AclRapid, AclNormal, AclExhaustive});
 }
 } // namespace
 
@@ -51,14 +51,14 @@ extern "C" AclStatus AclCreateQueue(AclQueue *external_queue, AclContext externa
     StatusCode status = detail::validate_internal_context(ctx);
     ARM_COMPUTE_RETURN_CENUM_ON_FAILURE(status);
 
-    if(options != nullptr && !is_mode_valid(options))
+    if (options != nullptr && !is_mode_valid(options))
     {
         ARM_COMPUTE_LOG_ERROR_ACL("Queue options are invalid");
         return AclInvalidArgument;
     }
 
     auto queue = ctx->create_queue(options);
-    if(queue == nullptr)
+    if (queue == nullptr)
     {
         ARM_COMPUTE_LOG_ERROR_ACL("Couldn't allocate internal resources");
         return AclOutOfMemory;

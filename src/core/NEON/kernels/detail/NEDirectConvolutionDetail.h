@@ -45,14 +45,7 @@ namespace detail
 inline float32x4x3_t load_matrix_row(const float *ptr, int weights_offset = 0)
 {
     ARM_COMPUTE_UNUSED(weights_offset);
-    const float32x4x3_t r =
-    {
-        {
-            vld1q_dup_f32(ptr),
-            vld1q_dup_f32(1 + ptr),
-            vld1q_dup_f32(2 + ptr)
-        }
-    };
+    const float32x4x3_t r = {{vld1q_dup_f32(ptr), vld1q_dup_f32(1 + ptr), vld1q_dup_f32(2 + ptr)}};
     return r;
 }
 
@@ -63,21 +56,16 @@ inline float32x4x3_t load_matrix_row(const float *ptr, int weights_offset = 0)
  *
  * @return The loaded matrix.
  */
-template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+template <typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value)>
 inline int32x4x3_t load_matrix_row(const T *ptr, int weights_offset = 0)
 {
     const int32x4_t v_weights_offset = vdupq_n_s32(weights_offset);
 
     /* ptr is a pointer to a row in a 3x3 matrix, the function returns 3 vectors holding exactly the same value in all lanes:
        r.val[0] contains the first element, r.val[1] the second element and r.val[2] the third element (in all lanes) */
-    int32x4x3_t r =
-    {
-        {
-            vaddq_s32(v_weights_offset, vdupq_n_s32(*ptr)),
-            vaddq_s32(v_weights_offset, vdupq_n_s32(*(ptr + 1))),
-            vaddq_s32(v_weights_offset, vdupq_n_s32(*(ptr + 2)))
-        }
-    };
+    int32x4x3_t r = {{vaddq_s32(v_weights_offset, vdupq_n_s32(*ptr)),
+                      vaddq_s32(v_weights_offset, vdupq_n_s32(*(ptr + 1))),
+                      vaddq_s32(v_weights_offset, vdupq_n_s32(*(ptr + 2)))}};
     return r;
 }
 
@@ -245,36 +233,23 @@ inline void accumulate_results<3>(float16_t *buffer, const float16x8x2_t &values
  * @param[in] input_offset (Optional) Input quantization offset.
  *
  */
-inline float32x4_t single_convolve_3x3_dilation(const float *in_top, const float *in_mid, const float *in_low,
-                                                const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                                                const size_t dilation_x, int input_offset)
+inline float32x4_t single_convolve_3x3_dilation(const float         *in_top,
+                                                const float         *in_mid,
+                                                const float         *in_low,
+                                                const float32x4x3_t &m0,
+                                                const float32x4x3_t &m1,
+                                                const float32x4x3_t &m2,
+                                                const size_t         dilation_x,
+                                                int                  input_offset)
 {
     ARM_COMPUTE_UNUSED(input_offset);
 
-    const float32x4x3_t vtop =
-    {
-        {
-            vld1q_f32(in_top),
-            vld1q_f32(in_top + dilation_x),
-            vld1q_f32(in_top + 2 * dilation_x)
-        }
-    };
-    const float32x4x3_t vmid =
-    {
-        {
-            vld1q_f32(in_mid),
-            vld1q_f32(in_mid + dilation_x),
-            vld1q_f32(in_mid + 2 * dilation_x)
-        }
-    };
-    const float32x4x3_t vlow =
-    {
-        {
-            vld1q_f32(in_low),
-            vld1q_f32(in_low + dilation_x),
-            vld1q_f32(in_low + 2 * dilation_x)
-        }
-    };
+    const float32x4x3_t vtop = {
+        {vld1q_f32(in_top), vld1q_f32(in_top + dilation_x), vld1q_f32(in_top + 2 * dilation_x)}};
+    const float32x4x3_t vmid = {
+        {vld1q_f32(in_mid), vld1q_f32(in_mid + dilation_x), vld1q_f32(in_mid + 2 * dilation_x)}};
+    const float32x4x3_t vlow = {
+        {vld1q_f32(in_low), vld1q_f32(in_low + dilation_x), vld1q_f32(in_low + 2 * dilation_x)}};
     float32x4_t out = vmulq_f32(vtop.val[0], m0.val[0]);
     out             = vmlaq_f32(out, vtop.val[1], m0.val[1]);
     out             = vmlaq_f32(out, vtop.val[2], m0.val[2]);
@@ -303,26 +278,28 @@ inline float32x4_t single_convolve_3x3_dilation(const float *in_top, const float
  * @param[in] input_offset (Optional) Input quantization offset.
  *
  */
-inline float32x4x2_t convolve_3x3_dilation(const float *in_top, const float *in_mid, const float *in_low,
-                                           const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                                           const size_t dilation_x, unsigned int stridex, int input_offset = 0)
+inline float32x4x2_t convolve_3x3_dilation(const float         *in_top,
+                                           const float         *in_mid,
+                                           const float         *in_low,
+                                           const float32x4x3_t &m0,
+                                           const float32x4x3_t &m1,
+                                           const float32x4x3_t &m2,
+                                           const size_t         dilation_x,
+                                           unsigned int         stridex,
+                                           int                  input_offset = 0)
 {
     ARM_COMPUTE_ERROR_ON(stridex > 3);
-    float32x4x2_t out =
-    {
-        {
-            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
-            single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)
-        }
-    };
+    float32x4x2_t out = {
+        {single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+         single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)}};
 
-    if(stridex == 2)
+    if (stridex == 2)
     {
         out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 2), out.val[0], 1);
         out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 0), out.val[0], 2);
         out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 2), out.val[0], 3);
     }
-    else if(stridex == 3)
+    else if (stridex == 3)
     {
         out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
     }
@@ -344,26 +321,32 @@ inline float32x4x2_t convolve_3x3_dilation(const float *in_top, const float *in_
  *
  */
 template <bool accumulate>
-void convolve_3x3(const float *in_top, const float *in_mid, const float *in_low, float *out_ptr,
-                  const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                  unsigned int stridex, int input_offset = 0);
+void convolve_3x3(const float         *in_top,
+                  const float         *in_mid,
+                  const float         *in_low,
+                  float               *out_ptr,
+                  const float32x4x3_t &m0,
+                  const float32x4x3_t &m1,
+                  const float32x4x3_t &m2,
+                  unsigned int         stridex,
+                  int                  input_offset = 0);
 
 template <bool accumulate>
-inline void convolve_3x3(const float *in_top, const float *in_mid, const float *in_low, float *out_ptr,
-                         const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                         unsigned int stridex, int input_offset)
+inline void convolve_3x3(const float         *in_top,
+                         const float         *in_mid,
+                         const float         *in_low,
+                         float               *out_ptr,
+                         const float32x4x3_t &m0,
+                         const float32x4x3_t &m1,
+                         const float32x4x3_t &m2,
+                         unsigned int         stridex,
+                         int                  input_offset)
 {
     ARM_COMPUTE_UNUSED(input_offset);
     ARM_COMPUTE_ERROR_ON(stridex > 3);
 
-    float32x4x2_t out =
-    {
-        {
-            vdupq_n_f32(0.f),
-            vdupq_n_f32(0.f)
-        }
-    };
-    if(stridex == 2)
+    float32x4x2_t out = {{vdupq_n_f32(0.f), vdupq_n_f32(0.f)}};
+    if (stridex == 2)
     {
         const float32x4x2_t vtop     = vld2q_f32(in_top);
         const float32x4x2_t vmid     = vld2q_f32(in_mid);
@@ -389,32 +372,11 @@ inline void convolve_3x3(const float *in_top, const float *in_mid, const float *
     }
     else
     {
-        const float32x4x3_t vtop =
-        {
-            {
-                vld1q_f32(in_top),
-                vld1q_f32(in_top + 4),
-                vld1q_f32(in_top + 8)
-            }
-        };
-        const float32x4x3_t vmid =
-        {
-            {
-                vld1q_f32(in_mid),
-                vld1q_f32(in_mid + 4),
-                vld1q_f32(in_mid + 8)
-            }
-        };
-        const float32x4x3_t vlow =
-        {
-            {
-                vld1q_f32(in_low),
-                vld1q_f32(in_low + 4),
-                vld1q_f32(in_low + 8)
-            }
-        };
-        out.val[0] = vmulq_f32(vtop.val[0], m0.val[0]);
-        out.val[1] = vmulq_f32(vtop.val[1], m0.val[0]);
+        const float32x4x3_t vtop = {{vld1q_f32(in_top), vld1q_f32(in_top + 4), vld1q_f32(in_top + 8)}};
+        const float32x4x3_t vmid = {{vld1q_f32(in_mid), vld1q_f32(in_mid + 4), vld1q_f32(in_mid + 8)}};
+        const float32x4x3_t vlow = {{vld1q_f32(in_low), vld1q_f32(in_low + 4), vld1q_f32(in_low + 8)}};
+        out.val[0]               = vmulq_f32(vtop.val[0], m0.val[0]);
+        out.val[1]               = vmulq_f32(vtop.val[1], m0.val[0]);
 
         out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 1), m0.val[1]);
         out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop.val[1], 2), m0.val[2]);
@@ -438,7 +400,7 @@ inline void convolve_3x3(const float *in_top, const float *in_mid, const float *
         out.val[1] = vmlaq_f32(out.val[1], vextq_f32(vlow.val[1], vlow.val[2], 1), m2.val[1]);
         out.val[1] = vmlaq_f32(out.val[1], vextq_f32(vlow.val[1], vlow.val[2], 2), m2.val[2]);
 
-        if(stridex == 3)
+        if (stridex == 3)
         {
             out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
             accumulate ? accumulate_results<3>(out_ptr, out) : store_results<3>(out_ptr, out);
@@ -462,65 +424,43 @@ inline void convolve_3x3(const float *in_top, const float *in_mid, const float *
  * @param[in] input_offset Input quantization offset.
  *
  */
-template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
-inline int32x4_t single_convolve_3x3_dilation(const T *in_top, const T *in_mid, const T *in_low,
-                                              const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                                              size_t dilation_x, int32_t input_offset)
+template <typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value)>
+inline int32x4_t single_convolve_3x3_dilation(const T           *in_top,
+                                              const T           *in_mid,
+                                              const T           *in_low,
+                                              const int32x4x3_t &m0,
+                                              const int32x4x3_t &m1,
+                                              const int32x4x3_t &m2,
+                                              size_t             dilation_x,
+                                              int32_t            input_offset)
 {
     using VectorType    = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x3_t, int8x8x3_t>::type;
     using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int32_t, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t v_input_offset = wrapper::vdup_n(input_offset, OutputTagType{});
 
-    const VectorType vtop =
-    {
-        {
-            wrapper::vload(in_top),
-            wrapper::vload(in_top + dilation_x),
-            wrapper::vload(in_top + 2 * dilation_x)
-        }
-    };
-    const VectorType vmid =
-    {
-        {
-            wrapper::vload(in_mid),
-            wrapper::vload(in_mid + dilation_x),
-            wrapper::vload(in_mid + 2 * dilation_x)
-        }
-    };
-    const VectorType vlow =
-    {
-        {
-            wrapper::vload(in_low),
-            wrapper::vload(in_low + dilation_x),
-            wrapper::vload(in_low + 2 * dilation_x)
-        }
-    };
+    const VectorType vtop = {
+        {wrapper::vload(in_top), wrapper::vload(in_top + dilation_x), wrapper::vload(in_top + 2 * dilation_x)}};
+    const VectorType vmid = {
+        {wrapper::vload(in_mid), wrapper::vload(in_mid + dilation_x), wrapper::vload(in_mid + 2 * dilation_x)}};
+    const VectorType vlow = {
+        {wrapper::vload(in_low), wrapper::vload(in_low + dilation_x), wrapper::vload(in_low + 2 * dilation_x)}};
 
-    const int32x4x3_t vtop_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[1])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[2])))),
-        }
-    };
-    const int32x4x3_t vmid_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[1])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[2])))),
-        }
-    };
-    const int32x4x3_t vlow_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[1])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[2])))),
-        }
-    };
+    const int32x4x3_t vtop_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[1])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[2])))),
+    }};
+    const int32x4x3_t vmid_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[1])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[2])))),
+    }};
+    const int32x4x3_t vlow_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[1])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[2])))),
+    }};
 
     int32x4_t out = wrapper::vmul(vtop_s32.val[0], m0.val[0]);
     out           = wrapper::vmla(out, vtop_s32.val[1], m0.val[1]);
@@ -550,26 +490,29 @@ inline int32x4_t single_convolve_3x3_dilation(const T *in_top, const T *in_mid, 
  * @param[in] input_offset Input quantization offset.
  *
  */
-template < typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
-inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const T *in_low, const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                                         const size_t dilation_x, unsigned int stridex, int input_offset)
+template <typename T, ARM_COMPUTE_REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value)>
+inline int32x4x2_t convolve_3x3_dilation(const T           *in_top,
+                                         const T           *in_mid,
+                                         const T           *in_low,
+                                         const int32x4x3_t &m0,
+                                         const int32x4x3_t &m1,
+                                         const int32x4x3_t &m2,
+                                         const size_t       dilation_x,
+                                         unsigned int       stridex,
+                                         int                input_offset)
 {
     ARM_COMPUTE_ERROR_ON(stridex > 3);
-    int32x4x2_t out =
-    {
-        {
-            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
-            single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)
-        }
-    };
+    int32x4x2_t out = {
+        {single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+         single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)}};
 
-    if(stridex == 2)
+    if (stridex == 2)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 2), out.val[0], 1);
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[1], 0), out.val[0], 2);
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[1], 2), out.val[0], 3);
     }
-    else if(stridex == 3)
+    else if (stridex == 3)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 3), out.val[0], 1);
     }
@@ -589,10 +532,19 @@ inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const
  * @param[in]  input_offset Input quantization offset.
  *
  */
-template < bool accumulate, typename T1, typename T2, ARM_COMPUTE_REQUIRES_TA(std::is_same<T1, uint8_t>::value || std::is_same<T1, int8_t>::value) >
-void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_ptr,
-                  const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                  unsigned int stridex, int32_t input_offset)
+template <bool accumulate,
+          typename T1,
+          typename T2,
+          ARM_COMPUTE_REQUIRES_TA(std::is_same<T1, uint8_t>::value || std::is_same<T1, int8_t>::value)>
+void convolve_3x3(const T1          *in_top,
+                  const T1          *in_mid,
+                  const T1          *in_low,
+                  T2                *out_ptr,
+                  const int32x4x3_t &m0,
+                  const int32x4x3_t &m1,
+                  const int32x4x3_t &m2,
+                  unsigned int       stridex,
+                  int32_t            input_offset)
 {
     ARM_COMPUTE_ERROR_ON(stridex > 3);
     using VectorType    = typename std::conditional<std::is_same<T1, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
@@ -600,60 +552,30 @@ void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_
 
     const int32x4_t v_input_offset = wrapper::vdup_n(input_offset, OutputTagType{});
 
-    const VectorType vtop =
-    {
-        {
-            wrapper::vload(in_top),
-            wrapper::vload(in_top + 8)
-        }
-    };
-    const VectorType vmid =
-    {
-        {
-            wrapper::vload(in_mid),
-            wrapper::vload(in_mid + 8)
-        }
-    };
-    const VectorType vlow =
-    {
-        {
-            wrapper::vload(in_low),
-            wrapper::vload(in_low + 8)
-        }
-    };
+    const VectorType vtop = {{wrapper::vload(in_top), wrapper::vload(in_top + 8)}};
+    const VectorType vmid = {{wrapper::vload(in_mid), wrapper::vload(in_mid + 8)}};
+    const VectorType vlow = {{wrapper::vload(in_low), wrapper::vload(in_low + 8)}};
 
-    const int32x4x3_t vtop_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vtop.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[1])))),
-        }
-    };
-    const int32x4x3_t vmid_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vmid.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[1])))),
-        }
-    };
-    const int32x4x3_t vlow_s32 =
-    {
-        {
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vlow.val[0])))),
-            wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[1])))),
-        }
-    };
+    const int32x4x3_t vtop_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vtop.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vtop.val[1])))),
+    }};
+    const int32x4x3_t vmid_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vmid.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vmid.val[1])))),
+    }};
+    const int32x4x3_t vlow_s32 = {{
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgethigh(wrapper::vmovl(vlow.val[0])))),
+        wrapper::vaddw(v_input_offset, wrapper::vreinterpret(wrapper::vgetlow(wrapper::vmovl(vlow.val[1])))),
+    }};
 
-    int32x4x2_t out
-    {
-        {
-            wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
-            wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
-        }
-    };
+    int32x4x2_t out{{
+        wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
+        wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
+    }};
 
     // 0
     out.val[0] = wrapper::vmla(out.val[0], vtop_s32.val[0], m0.val[0]);
@@ -681,11 +603,11 @@ void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_
     out.val[1] = wrapper::vmla(out.val[1], wrapper::vext_1(vlow_s32.val[1], vlow_s32.val[2]), m2.val[1]);
     out.val[1] = wrapper::vmla(out.val[1], wrapper::vext_2(vlow_s32.val[1], vlow_s32.val[2]), m2.val[2]);
 
-    if(stridex == 1)
+    if (stridex == 1)
     {
         accumulate ? accumulate_results<1>(out_ptr, out) : store_results<1>(out_ptr, out);
     }
-    else if(stridex == 2)
+    else if (stridex == 2)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 2), out.val[0], 1);
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[1], 0), out.val[0], 2);
@@ -693,7 +615,7 @@ void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_
 
         accumulate ? accumulate_results<2>(out_ptr, out) : store_results<2>(out_ptr, out);
     }
-    else if(stridex == 3)
+    else if (stridex == 3)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 3), out.val[0], 1);
         accumulate ? accumulate_results<3>(out_ptr, out) : store_results<3>(out_ptr, out);
@@ -712,14 +634,7 @@ inline float16x8x3_t load_matrix_row(const float16_t *ptr, int weights_offset = 
     ARM_COMPUTE_UNUSED(weights_offset);
     /* ptr is a pointer to a row in a 3x3 matrix, the function returns 3 vectors holding exactly the same value in all lanes:
        r.val[0] contains the first element, r.val[1] the second element and r.val[2] the third element (in all lanes) */
-    const float16x8x3_t r =
-    {
-        {
-            vld1q_dup_f16(ptr),
-            vld1q_dup_f16(1 + ptr),
-            vld1q_dup_f16(2 + ptr)
-        }
-    };
+    const float16x8x3_t r = {{vld1q_dup_f16(ptr), vld1q_dup_f16(1 + ptr), vld1q_dup_f16(2 + ptr)}};
     return r;
 }
 
@@ -735,35 +650,22 @@ inline float16x8x3_t load_matrix_row(const float16_t *ptr, int weights_offset = 
  * @param[in] input_offset (Optional)Input quantization offset.
  *
  */
-inline float16x8_t single_convolve_3x3_dilation(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
-                                                const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
-                                                const size_t dilation_x, int input_offset = 0)
+inline float16x8_t single_convolve_3x3_dilation(const float16_t     *in_top,
+                                                const float16_t     *in_mid,
+                                                const float16_t     *in_low,
+                                                const float16x8x3_t &m0,
+                                                const float16x8x3_t &m1,
+                                                const float16x8x3_t &m2,
+                                                const size_t         dilation_x,
+                                                int                  input_offset = 0)
 {
     ARM_COMPUTE_UNUSED(input_offset);
-    const float16x8x3_t vtop =
-    {
-        {
-            vld1q_f16(in_top),
-            vld1q_f16(in_top + dilation_x),
-            vld1q_f16(in_top + 2 * dilation_x)
-        }
-    };
-    const float16x8x3_t vmid =
-    {
-        {
-            vld1q_f16(in_mid),
-            vld1q_f16(in_mid + dilation_x),
-            vld1q_f16(in_mid + 2 * dilation_x)
-        }
-    };
-    const float16x8x3_t vlow =
-    {
-        {
-            vld1q_f16(in_low),
-            vld1q_f16(in_low + dilation_x),
-            vld1q_f16(in_low + 2 * dilation_x)
-        }
-    };
+    const float16x8x3_t vtop = {
+        {vld1q_f16(in_top), vld1q_f16(in_top + dilation_x), vld1q_f16(in_top + 2 * dilation_x)}};
+    const float16x8x3_t vmid = {
+        {vld1q_f16(in_mid), vld1q_f16(in_mid + dilation_x), vld1q_f16(in_mid + 2 * dilation_x)}};
+    const float16x8x3_t vlow = {
+        {vld1q_f16(in_low), vld1q_f16(in_low + dilation_x), vld1q_f16(in_low + 2 * dilation_x)}};
     float16x8_t out = vmulq_f16(vtop.val[0], m0.val[0]);
     out             = vaddq_f16(out, vmulq_f16(vtop.val[1], m0.val[1]));
     out             = vaddq_f16(out, vmulq_f16(vtop.val[2], m0.val[2]));
@@ -792,19 +694,21 @@ inline float16x8_t single_convolve_3x3_dilation(const float16_t *in_top, const f
  * @param[in] input_offset (Optional) Input quantization offset.
  *
  */
-inline float16x8x2_t convolve_3x3_dilation(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
-                                           const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
-                                           const size_t dilation_x, unsigned int stridex, int input_offset = 0)
+inline float16x8x2_t convolve_3x3_dilation(const float16_t     *in_top,
+                                           const float16_t     *in_mid,
+                                           const float16_t     *in_low,
+                                           const float16x8x3_t &m0,
+                                           const float16x8x3_t &m1,
+                                           const float16x8x3_t &m2,
+                                           const size_t         dilation_x,
+                                           unsigned int         stridex,
+                                           int                  input_offset = 0)
 {
-    float16x8x2_t out =
-    {
-        {
-            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
-            single_convolve_3x3_dilation(in_top + 8, in_mid + 8, in_low + 8, m0, m1, m2, dilation_x, input_offset)
-        }
-    };
+    float16x8x2_t out = {
+        {single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+         single_convolve_3x3_dilation(in_top + 8, in_mid + 8, in_low + 8, m0, m1, m2, dilation_x, input_offset)}};
 
-    if(stridex == 2)
+    if (stridex == 2)
     {
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 2), out.val[0], 1);
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 4), out.val[0], 2);
@@ -814,7 +718,7 @@ inline float16x8x2_t convolve_3x3_dilation(const float16_t *in_top, const float1
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 4), out.val[0], 6);
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 6), out.val[0], 7);
     }
-    else if(stridex == 3)
+    else if (stridex == 3)
     {
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
         out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);
@@ -838,20 +742,20 @@ inline float16x8x2_t convolve_3x3_dilation(const float16_t *in_top, const float1
  *
  */
 template <bool accumulate>
-inline void convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, float16_t *out_ptr,
-                         const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
-                         unsigned int stridex, int input_offset = 0)
+inline void convolve_3x3(const float16_t     *in_top,
+                         const float16_t     *in_mid,
+                         const float16_t     *in_low,
+                         float16_t           *out_ptr,
+                         const float16x8x3_t &m0,
+                         const float16x8x3_t &m1,
+                         const float16x8x3_t &m2,
+                         unsigned int         stridex,
+                         int                  input_offset = 0)
 {
     ARM_COMPUTE_UNUSED(input_offset);
 
-    float16x8x2_t out =
-    {
-        {
-            vdupq_n_f16(0),
-            vdupq_n_f16(0)
-        }
-    };
-    if(stridex == 2)
+    float16x8x2_t out = {{vdupq_n_f16(0), vdupq_n_f16(0)}};
+    if (stridex == 2)
     {
         const float16x8x2_t vtop     = vld2q_f16(in_top);
         const float16x8x2_t vmid     = vld2q_f16(in_mid);
@@ -877,32 +781,11 @@ inline void convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const
     }
     else
     {
-        const float16x8x3_t vtop =
-        {
-            {
-                vld1q_f16(in_top),
-                vld1q_f16(in_top + 8),
-                vld1q_f16(in_top + 16)
-            }
-        };
-        const float16x8x3_t vmid =
-        {
-            {
-                vld1q_f16(in_mid),
-                vld1q_f16(in_mid + 8),
-                vld1q_f16(in_mid + 16)
-            }
-        };
-        const float16x8x3_t vlow =
-        {
-            {
-                vld1q_f16(in_low),
-                vld1q_f16(in_low + 8),
-                vld1q_f16(in_low + 16)
-            }
-        };
-        out.val[0] = vmulq_f16(vtop.val[0], m0.val[0]);
-        out.val[1] = vmulq_f16(vtop.val[1], m0.val[0]);
+        const float16x8x3_t vtop = {{vld1q_f16(in_top), vld1q_f16(in_top + 8), vld1q_f16(in_top + 16)}};
+        const float16x8x3_t vmid = {{vld1q_f16(in_mid), vld1q_f16(in_mid + 8), vld1q_f16(in_mid + 16)}};
+        const float16x8x3_t vlow = {{vld1q_f16(in_low), vld1q_f16(in_low + 8), vld1q_f16(in_low + 16)}};
+        out.val[0]               = vmulq_f16(vtop.val[0], m0.val[0]);
+        out.val[1]               = vmulq_f16(vtop.val[1], m0.val[0]);
 
         out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vtop.val[0], vtop.val[1], 1), m0.val[1]));
         out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vtop.val[0], vtop.val[1], 2), m0.val[2]));
@@ -921,7 +804,7 @@ inline void convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const
         out.val[1] = vaddq_f16(out.val[1], vmulq_f16(vextq_f16(vlow.val[1], vlow.val[2], 1), m2.val[1]));
         out.val[1] = vaddq_f16(out.val[1], vmulq_f16(vextq_f16(vlow.val[1], vlow.val[2], 2), m2.val[2]));
 
-        if(stridex == 3)
+        if (stridex == 3)
         {
             out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
             out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);
@@ -946,7 +829,7 @@ inline void convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const
  */
 inline int get_input_num_elems_processed(unsigned int num_elems_written_per_iteration, unsigned int stridex)
 {
-    switch(stridex)
+    switch (stridex)
     {
         case 1:
             return num_elems_written_per_iteration;
@@ -959,6 +842,6 @@ inline int get_input_num_elems_processed(unsigned int num_elems_written_per_iter
             return 0;
     }
 }
-}
+} // namespace detail
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H */

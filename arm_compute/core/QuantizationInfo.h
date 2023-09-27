@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include "support/ToolchainSupport.h"
 
 #include <vector>
@@ -41,8 +42,7 @@ using qasymm16_t       = uint16_t; /**< 16 bit quantized asymmetric scalar value
 struct UniformQuantizationInfo
 {
     /** Default constructor */
-    UniformQuantizationInfo()
-        : scale(0.f), offset(0)
+    UniformQuantizationInfo() : scale(0.f), offset(0)
     {
     }
     /** Constructor
@@ -50,8 +50,7 @@ struct UniformQuantizationInfo
      * @param[in] scale  Quantization scale
      * @param[in] offset Quantization offset
      */
-    UniformQuantizationInfo(float scale, int32_t offset)
-        : scale(scale), offset(offset)
+    UniformQuantizationInfo(float scale, int32_t offset) : scale(scale), offset(offset)
     {
     }
     /** Checks if the scale and offset are both zero */
@@ -69,9 +68,7 @@ class QuantizationInfo
 {
 public:
     /** Default constructor */
-    QuantizationInfo() noexcept
-        : _scale(),
-          _offset()
+    QuantizationInfo() noexcept : _scale(), _offset()
     {
     }
     /** Construct quantization info.
@@ -80,8 +77,7 @@ public:
      *
      * @param[in] scale Scale.
      */
-    QuantizationInfo(float scale)
-        : _scale(1, scale), _offset()
+    QuantizationInfo(float scale) : _scale(1, scale), _offset()
     {
     }
     /** Construct quantization info.
@@ -91,8 +87,7 @@ public:
      * @param[in] scale  Scale.
      * @param[in] offset Offset.
      */
-    QuantizationInfo(float scale, int offset)
-        : _scale(1, scale), _offset(1, offset)
+    QuantizationInfo(float scale, int offset) : _scale(1, scale), _offset(1, offset)
     {
     }
     /** Construct quantization info.
@@ -101,8 +96,7 @@ public:
      *
      * @param[in] scale Scale.
      */
-    QuantizationInfo(std::vector<float> scale)
-        : _scale(scale), _offset()
+    QuantizationInfo(std::vector<float> scale) : _scale(scale), _offset()
     {
     }
     /** Construct quantization info.
@@ -112,8 +106,7 @@ public:
      * @param[in] scale  Scale.
      * @param[in] offset Offset.
      */
-    QuantizationInfo(std::vector<float> scale, std::vector<int32_t> offset)
-        : _scale(scale), _offset(offset)
+    QuantizationInfo(std::vector<float> scale, std::vector<int32_t> offset) : _scale(scale), _offset(offset)
     {
     }
     /** Scale vector accessor
@@ -208,8 +201,7 @@ inline bool operator!=(const UniformQuantizationInfo &lhs, const UniformQuantiza
 template <typename QUANTIZED_TYPE = uint8_t>
 struct Qasymm8QuantizationHelper
 {
-    static_assert(std::is_same<QUANTIZED_TYPE, uint8_t>::value
-                  || std::is_same<QUANTIZED_TYPE, int8_t>::value,
+    static_assert(std::is_same<QUANTIZED_TYPE, uint8_t>::value || std::is_same<QUANTIZED_TYPE, int8_t>::value,
                   "quantized type should be either uint8_t or int8_t.");
 
     /** Quantize a value given a 8-bit asymmetric quantization scheme
@@ -234,9 +226,10 @@ struct Qasymm8QuantizationHelper
      *
      * @return Quantized value
      */
-    static inline QUANTIZED_TYPE quantize(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy)
+    static inline QUANTIZED_TYPE
+    quantize(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy)
     {
-        if(rounding_policy == RoundingPolicy::TO_NEAREST_UP)
+        if (rounding_policy == RoundingPolicy::TO_NEAREST_UP)
         {
             return quantize(value, qinfo);
         }
@@ -254,7 +247,8 @@ struct Qasymm8QuantizationHelper
      *
      * @return Quantized value
      */
-    static inline QUANTIZED_TYPE quantize(float value, const QuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+    static inline QUANTIZED_TYPE
+    quantize(float value, const QuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
     {
         const UniformQuantizationInfo uqinfo = qinfo.uniform();
         ARM_COMPUTE_ERROR_ON(uqinfo.scale == 0);
@@ -297,7 +291,8 @@ struct Qasymm8QuantizationHelper
  * @return Quantized value
  */
 template <typename INFO_TYPE>
-inline uint8_t quantize_qasymm8(float value, const INFO_TYPE &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+inline uint8_t
+quantize_qasymm8(float value, const INFO_TYPE &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
     return Qasymm8QuantizationHelper<uint8_t>::quantize(value, qinfo, rounding_policy);
 }
@@ -311,7 +306,9 @@ inline uint8_t quantize_qasymm8(float value, const INFO_TYPE &qinfo, RoundingPol
  * @return Quantized value
  */
 template <typename INFO_TYPE>
-inline int8_t quantize_qasymm8_signed(float value, const INFO_TYPE &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+inline int8_t quantize_qasymm8_signed(float            value,
+                                      const INFO_TYPE &qinfo,
+                                      RoundingPolicy   rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
     return Qasymm8QuantizationHelper<int8_t>::quantize(value, qinfo, rounding_policy);
 }
@@ -441,7 +438,9 @@ inline float dequantize(uint16_t value, float scale, int32_t offset)
  *
  * @return Quantized value
  */
-inline int16_t quantize_qsymm16(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+inline int16_t quantize_qsymm16(float                          value,
+                                const UniformQuantizationInfo &qinfo,
+                                RoundingPolicy                 rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
     int quantized = arm_compute::round(value / qinfo.scale, rounding_policy);
     quantized     = arm_compute::utility::clamp<int, int16_t>(quantized);
@@ -492,7 +491,9 @@ inline float dequantize_qsymm16(int16_t value, const QuantizationInfo &qinfo)
  *
  * @return Quantized value
  */
-inline uint16_t quantize_qasymm16(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+inline uint16_t quantize_qasymm16(float                          value,
+                                  const UniformQuantizationInfo &qinfo,
+                                  RoundingPolicy                 rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
     int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
     quantized     = arm_compute::utility::clamp<int, uint16_t>(quantized);
@@ -565,7 +566,8 @@ inline float dequantize_qasymm16(uint16_t value, const QuantizationInfo &qinfo)
  * z_n = - z_i * s_i / s_o + z_o
  *
  */
-inline UniformQuantizationInfo compute_requantization_scale_offset(const UniformQuantizationInfo &uqinfo_in, const UniformQuantizationInfo &uqinfo_out)
+inline UniformQuantizationInfo compute_requantization_scale_offset(const UniformQuantizationInfo &uqinfo_in,
+                                                                   const UniformQuantizationInfo &uqinfo_out)
 {
     float   scale_to_apply  = uqinfo_out.scale;
     int32_t offset_to_apply = uqinfo_out.offset;

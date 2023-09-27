@@ -75,8 +75,13 @@ public:
      * @param[in]  method              The policy to be used when resizing image. Default is bilinear.
      * @param[in]  extrapolation_value Value to be used for values outside of the image for cropping and resizing. Default is 0.
      */
-    void configure(const ITensor *input, const ITensor *boxes, const ITensor *box_ind, ITensor *output, Coordinates2D crop_size,
-                   InterpolationPolicy method = InterpolationPolicy::BILINEAR, float extrapolation_value = 0);
+    void configure(const ITensor      *input,
+                   const ITensor      *boxes,
+                   const ITensor      *box_ind,
+                   ITensor            *output,
+                   Coordinates2D       crop_size,
+                   InterpolationPolicy method              = InterpolationPolicy::BILINEAR,
+                   float               extrapolation_value = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NESlice
      *
@@ -96,8 +101,13 @@ public:
      *
      * @return A status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *boxes, const ITensorInfo *box_ind, const ITensorInfo *output,
-                           Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
+    static Status validate(const ITensorInfo  *input,
+                           const ITensorInfo  *boxes,
+                           const ITensorInfo  *box_ind,
+                           const ITensorInfo  *output,
+                           Coordinates2D       crop_size,
+                           InterpolationPolicy method,
+                           float               extrapolation_value);
 
     void run() override;
 

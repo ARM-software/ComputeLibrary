@@ -57,7 +57,10 @@ public:
     /** Disallow move assignment. */
     CLMutableCommandBuffer &operator=(CLMutableCommandBuffer &&) = delete;
 
-    void add_kernel(cl_kernel kernel, const cl::NDRange &offset, const cl::NDRange &global, const cl::NDRange &local) override;
+    void add_kernel(cl_kernel          kernel,
+                    const cl::NDRange &offset,
+                    const cl::NDRange &global,
+                    const cl::NDRange &local) override;
 
     void finalize() override;
 

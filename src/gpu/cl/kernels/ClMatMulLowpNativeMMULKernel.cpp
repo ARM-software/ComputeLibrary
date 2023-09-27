@@ -28,10 +28,10 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
@@ -64,13 +64,15 @@ Status validate_matmul_kernel_info(const MatMulKernelInfo &matmul_kernel_info)
     // Validate M0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(m0 < 1, "Only positive integers are supported for M0");
 
-    if(adj_lhs)
+    if (adj_lhs)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((m0 != 1) && (m0 != 2) && (m0 != 3) && (m0 != 4) && (m0 != 8) && (m0 != 16), "Only 1,2,3,4,8,16 are supported for M0 for Lhs transposed");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((m0 != 1) && (m0 != 2) && (m0 != 3) && (m0 != 4) && (m0 != 8) && (m0 != 16),
+                                        "Only 1,2,3,4,8,16 are supported for M0 for Lhs transposed");
     }
 
     // Validate N0
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((n0 != 1) && (n0 != 2) && (n0 != 3) && (n0 != 4) && (n0 != 8) && (n0 != 16), "Only 1,2,3,4,8,16 are supported for N0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((n0 != 1) && (n0 != 2) && (n0 != 3) && (n0 != 4) && (n0 != 8) && (n0 != 16),
+                                    "Only 1,2,3,4,8,16 are supported for N0");
 
     // Validate K0
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((k0 != 4), "Only 4 is supported for k0");
@@ -84,7 +86,11 @@ ClMatMulLowpNativeMMULKernel::ClMatMulLowpNativeMMULKernel()
     _type = CLKernelType::GEMM;
 }
 
-Status ClMatMulLowpNativeMMULKernel::validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *bias, const ITensorInfo *dst, const MatMulKernelInfo &matmul_kernel_info,
+Status ClMatMulLowpNativeMMULKernel::validate(const ITensorInfo         *lhs,
+                                              const ITensorInfo         *rhs,
+                                              const ITensorInfo         *bias,
+                                              const ITensorInfo         *dst,
+                                              const MatMulKernelInfo    &matmul_kernel_info,
                                               const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
@@ -102,16 +108,17 @@ Status ClMatMulLowpNativeMMULKernel::validate(const ITensorInfo *lhs, const ITen
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.activation() != ActivationFunction::IDENTITY),
                                     "Activation Function specified is unsupported.");
-    const TensorShape expected_output_shape = misc::shape_calculator::compute_matmul_shape(lhs_shape, rhs->tensor_shape(), matmul_kernel_info);
+    const TensorShape expected_output_shape =
+        misc::shape_calculator::compute_matmul_shape(lhs_shape, rhs->tensor_shape(), matmul_kernel_info);
 
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         const TensorInfo tensor_info_output = dst->clone()->set_tensor_shape(expected_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
     }
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
@@ -121,15 +128,21 @@ Status ClMatMulLowpNativeMMULKernel::validate(const ITensorInfo *lhs, const ITen
     return Status{};
 }
 
-void ClMatMulLowpNativeMMULKernel::configure(const ClCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *bias, ITensorInfo *dst,
-                                             const MatMulKernelInfo &matmul_kernel_info, const ActivationLayerInfo &act_info)
+void ClMatMulLowpNativeMMULKernel::configure(const ClCompileContext    &compile_context,
+                                             ITensorInfo               *lhs,
+                                             ITensorInfo               *rhs,
+                                             ITensorInfo               *bias,
+                                             ITensorInfo               *dst,
+                                             const MatMulKernelInfo    &matmul_kernel_info,
+                                             const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, bias, dst, matmul_kernel_info, act_info);
     ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, bias, dst, matmul_kernel_info));
 
     // dst tensor auto initialization if not yet initialized
-    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
+    auto_init_if_empty(*dst, lhs->clone()->set_tensor_shape(misc::shape_calculator::compute_matmul_shape(
+                                 lhs->tensor_shape(), rhs->tensor_shape(), matmul_kernel_info)));
 
     ARM_COMPUTE_UNUSED(compile_context, lhs, rhs, bias, matmul_kernel_info, act_info);
     CLBuildOptions build_opts;
@@ -147,7 +160,8 @@ void ClMatMulLowpNativeMMULKernel::configure(const ClCompileContext &compile_con
     const unsigned int n0_leftover = n % n0;
 
     // Configure kernel window
-    const auto win_config = validate_and_configure_window_for_mmul_kernels(lhs, rhs, dst, matmul_kernel_info, mmul_m0, mmul_n0);
+    const auto win_config =
+        validate_and_configure_window_for_mmul_kernels(lhs, rhs, dst, matmul_kernel_info, mmul_m0, mmul_n0);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     IClKernel::configure_internal(win_config.second);
 
@@ -215,10 +229,13 @@ void ClMatMulLowpNativeMMULKernel::run_op(ITensorPack &tensors, const Window &wi
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto *lhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
-    const auto *rhs  = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
-    const auto *bias = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_2)); // nullptr if bias is not present
-    auto       *dst  = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto *lhs =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_0));
+    const auto *rhs =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC_1));
+    const auto *bias = utils::cast::polymorphic_downcast<const ICLTensor *>(
+        tensors.get_const_tensor(TensorType::ACL_SRC_2)); // nullptr if bias is not present
+    auto *dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(lhs, rhs, dst);
     ARM_COMPUTE_LOG_PARAMS(lhs, rhs, bias, dst);
@@ -227,7 +244,7 @@ void ClMatMulLowpNativeMMULKernel::run_op(ITensorPack &tensors, const Window &wi
     add_3d_tensor_nhw_argument(idx, lhs);
     add_3d_tensor_nhw_argument(idx, rhs);
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
         add_3d_tensor_nhw_argument(idx, bias);
     }

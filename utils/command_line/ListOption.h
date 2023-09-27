@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_UTILS_LISTOPTION
 
 #include "Option.h"
-
 #include <initializer_list>
 #include <sstream>
 #include <stdexcept>
@@ -50,7 +49,7 @@ public:
      */
     ListOption(std::string name, std::initializer_list<T> &&default_values);
 
-    bool parse(std::string value) override;
+    bool        parse(std::string value) override;
     std::string help() const override;
 
     /** Get the list of option values.
@@ -65,7 +64,7 @@ private:
 
 template <typename T>
 inline ListOption<T>::ListOption(std::string name, std::initializer_list<T> &&default_values)
-    : Option{ std::move(name), false, true }, _values{ std::forward<std::initializer_list<T>>(default_values) }
+    : Option{std::move(name), false, true}, _values{std::forward<std::initializer_list<T>>(default_values)}
 {
 }
 
@@ -76,17 +75,17 @@ bool ListOption<T>::parse(std::string value)
 
     try
     {
-        std::stringstream stream{ value };
+        std::stringstream stream{value};
         std::string       item;
 
-        while(!std::getline(stream, item, ',').fail())
+        while (!std::getline(stream, item, ',').fail())
         {
             std::stringstream item_stream(item);
             T                 typed_value{};
 
             item_stream >> typed_value;
 
-            if(!item_stream.fail())
+            if (!item_stream.fail())
             {
                 _values.emplace_back(typed_value);
             }
@@ -96,7 +95,7 @@ bool ListOption<T>::parse(std::string value)
 
         return _is_set;
     }
-    catch(const std::invalid_argument &)
+    catch (const std::invalid_argument &)
     {
         return false;
     }

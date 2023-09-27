@@ -55,8 +55,8 @@ public:
     GpuPool2dSettings use_inf_as_limit(bool use_inf_as_limit);
 
 private:
-    bool _mixed_precision{ false };
-    bool _use_inf_as_limit{ true };
+    bool _mixed_precision{false};
+    bool _use_inf_as_limit{true};
 };
 
 /** Operator interface. */
@@ -86,10 +86,8 @@ public:
      * @param[in]     attributes Operator attributes
      * @param[in]     settings   Operator settings
      */
-    static ITensorInfo *create_op(GpuWorkloadSketch &sketch,
-                                  ITensorInfo       *src,
-                                  const Attributes  &attributes,
-                                  const Settings    &settings);
+    static ITensorInfo *
+    create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, const Attributes &attributes, const Settings &settings);
     /** Check if the operator configuration is supported, irrespective of fusion
      *
      * @param[in] context    Workload context within which the operator is running

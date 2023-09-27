@@ -56,9 +56,7 @@ public:
      * @param[in, out] dst    Destination tensor info.
      *                        If an uninitialized ITensorInfo is passed in, it will be auto-initialized.
      */
-    static void create_op(GpuWorkloadSketch &sketch,
-                          ITensorInfo       *src,
-                          ITensorInfo       *dst);
+    static void create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, ITensorInfo *dst);
 
     /** Check if the operator configuration is supported, irrespective of fusion.
      *
@@ -68,9 +66,7 @@ public:
      *
      * @return Status
      */
-    static Status is_supported_op(const GpuWorkloadContext &context,
-                                  const ITensorInfo        *src,
-                                  const ITensorInfo        *dst);
+    static Status is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src, const ITensorInfo *dst);
 
     /** Validate the operator and check if the its configuration is supported and if it can be fused into the workload sketch.
      *
@@ -78,9 +74,7 @@ public:
      *
      * @return Status
      */
-    static Status validate_op(const GpuWorkloadSketch &sketch,
-                              const ITensorInfo       *src,
-                              const ITensorInfo       *dst);
+    static Status validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src, const ITensorInfo *dst);
 };
 
 } // namespace dynamic_fusion

@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include "support/ICloneable.h"
 
 #include <cstddef>
@@ -328,23 +329,23 @@ public:
      * not broadcast compatible.
      */
     template <typename... Infos>
-    static std::pair<TensorShape, ValidRegion> broadcast_shape_and_valid_region(const Infos &... infos)
+    static std::pair<TensorShape, ValidRegion> broadcast_shape_and_valid_region(const Infos &...infos)
     {
         TensorShape bc_shape = TensorShape::broadcast_shape(infos.tensor_shape()...);
-        ValidRegion bc_valid_region{ Coordinates(), bc_shape };
+        ValidRegion bc_valid_region{Coordinates(), bc_shape};
 
-        auto broadcast_valid_region = [&bc_valid_region](const ITensorInfo & info)
+        auto broadcast_valid_region = [&bc_valid_region](const ITensorInfo &info)
         {
-            if(info.num_dimensions() != 0)
+            if (info.num_dimensions() != 0)
             {
-                for(size_t d = 0; d < bc_valid_region.shape.num_dimensions(); ++d)
+                for (size_t d = 0; d < bc_valid_region.shape.num_dimensions(); ++d)
                 {
                     const bool is_broadcast = (info.tensor_shape()[d] == 1);
 
                     const int    anchor_max = std::max(bc_valid_region.anchor[d], info.valid_region().anchor[d]);
                     const size_t valid_min  = std::min(bc_valid_region.shape[d], info.valid_region().shape[d]);
 
-                    if(!is_broadcast || (valid_min == 0))
+                    if (!is_broadcast || (valid_min == 0))
                     {
                         bc_valid_region.anchor.set(d, anchor_max);
                         bc_valid_region.shape.set(d, valid_min);

@@ -25,6 +25,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/NEON/NEAsymm.h"
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -38,7 +39,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
+void neon_qasymm8_activation(const ITensor             *src,
+                             ITensor                   *dst,
+                             const ActivationLayerInfo &act_info,
+                             const Window              &window)
 {
     constexpr int                                 window_step_x  = 16;
     const auto                                    window_start_x = static_cast<int>(window.x().start());
@@ -85,206 +89,222 @@ void neon_qasymm8_activation(const ITensor *src, ITensor *dst, const ActivationL
     float32x4_t vs = vdupq_n_f32(s);
     float32x4_t vo = vdupq_n_f32(o);
 
-    execute_window_loop(win_collapsed, [&](const Coordinates &)
-    {
-        const auto input_ptr  = reinterpret_cast<const qasymm8_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<qasymm8_t *>(output.ptr());
-
-        wrapper::traits::neon_bitvector_t<qasymm8_t, wrapper::traits::BitWidth::W128> tmp;
-
-        // Compute S elements per iteration
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win_collapsed,
+        [&](const Coordinates &)
         {
-            const auto vin = wrapper::vloadq(input_ptr + x);
-            if(act == ActivationLayerInfo::ActivationFunction::RELU)
+            const auto input_ptr  = reinterpret_cast<const qasymm8_t *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<qasymm8_t *>(output.ptr());
+
+            wrapper::traits::neon_bitvector_t<qasymm8_t, wrapper::traits::BitWidth::W128> tmp;
+
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                // Perform activation
-                tmp = vmaxq_u8(vconst_0, vin);
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_u8(va, vmaxq_u8(vconst_0, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-            {
-                // Perform activation
-                tmp = vminq_u8(va, vmaxq_u8(vb, vin));
-                // Re-quantize to new output space
-                tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
-            }
-#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
-            else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
+                const auto vin = wrapper::vloadq(input_ptr + x);
+                if (act == ActivationLayerInfo::ActivationFunction::RELU)
                 {
-                    {
+                    // Perform activation
+                    tmp = vmaxq_u8(vconst_0, vin);
+                    // Re-quantize to new output space
+                    tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                {
+                    // Perform activation
+                    tmp = vminq_u8(va, vmaxq_u8(vconst_0, vin));
+                    // Re-quantize to new output space
+                    tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                {
+                    // Perform activation
+                    tmp = vminq_u8(va, vmaxq_u8(vb, vin));
+                    // Re-quantize to new output space
+                    tmp = vmlaq_qasymm8<RoundingPolicy::TO_NEAREST_UP>(tmp, vs, vo);
+                }
+#ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
+                else if (act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+                {
+                    // De-quantize
+                    const auto vin_deq = vdequantize(vin, qi_in);
+                    // Perform activation
+                    const float32x4x4_t tmp_dep = {{
                         wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[0])))),
                         wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[1])))),
                         wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[2])))),
                         wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(vin_deq.val[3])))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
+                    }};
+                    // Re-quantize to new output space
+                    tmp = vquantize(tmp_dep, qi_out);
+                }
 #endif // __aarch64__
-            else if(act == ActivationLayerInfo::ActivationFunction::TANH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
+                else if (act == ActivationLayerInfo::ActivationFunction::TANH)
                 {
-                    {
+                    // De-quantize
+                    const auto vin_deq = vdequantize(vin, qi_in);
+                    // Perform activation
+                    const float32x4x4_t tmp_dep = {{
                         wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[0], vb_f32))),
                         wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[1], vb_f32))),
                         wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[2], vb_f32))),
                         wrapper::vmul(va_f32, wrapper::vtanh(wrapper::vmul(vin_deq.val[3], vb_f32))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
+                    }};
+                    // Re-quantize to new output space
+                    tmp = vquantize(tmp_dep, qi_out);
+                }
 #ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
-            else if(act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-            {
-                // De-quantize
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
+                else if (act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
                 {
-                    {
-                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
-                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
-            {
-                const auto vin_deq = vdequantize(vin, qi_in);
+                    // De-quantize
+                    const auto vin_deq = vdequantize(vin, qi_in);
+                    // Perform activation
+                    const float32x4x4_t tmp_dep = {{
+                        wrapper::vmul(
+                            vin_deq.val[0],
+                            wrapper::vmul(
+                                const_inv_6_f32,
+                                wrapper::vmin(const_6_f32,
+                                              wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
+                        wrapper::vmul(
+                            vin_deq.val[1],
+                            wrapper::vmul(
+                                const_inv_6_f32,
+                                wrapper::vmin(const_6_f32,
+                                              wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
+                        wrapper::vmul(
+                            vin_deq.val[2],
+                            wrapper::vmul(
+                                const_inv_6_f32,
+                                wrapper::vmin(const_6_f32,
+                                              wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
+                        wrapper::vmul(
+                            vin_deq.val[3],
+                            wrapper::vmul(
+                                const_inv_6_f32,
+                                wrapper::vmin(const_6_f32,
+                                              wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
+                    }};
+                    // Re-quantize to new output space
+                    tmp = vquantize(tmp_dep, qi_out);
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+                {
+                    const auto vin_deq = vdequantize(vin, qi_in);
 
-                const uint32x4x4_t pos_mask =
-                {
-                    {
+                    const uint32x4x4_t pos_mask = {{
                         wrapper::vcgt(vin_deq.val[0], vconst_0_f32),
                         wrapper::vcgt(vin_deq.val[1], vconst_0_f32),
                         wrapper::vcgt(vin_deq.val[2], vconst_0_f32),
                         wrapper::vcgt(vin_deq.val[3], vconst_0_f32),
-                    }
-                };
+                    }};
 
-                const float32x4x4_t tmp_dep =
-                {
-                    {
+                    const float32x4x4_t tmp_dep = {{
                         wrapper::vbsl(pos_mask.val[0], vin_deq.val[0], wrapper::vmul(va_f32, vin_deq.val[0])),
                         wrapper::vbsl(pos_mask.val[1], vin_deq.val[1], wrapper::vmul(va_f32, vin_deq.val[1])),
                         wrapper::vbsl(pos_mask.val[2], vin_deq.val[2], wrapper::vmul(va_f32, vin_deq.val[2])),
                         wrapper::vbsl(pos_mask.val[3], vin_deq.val[3], wrapper::vmul(va_f32, vin_deq.val[3])),
-                    }
-                };
+                    }};
 
-                tmp = vquantize(tmp_dep, qi_out);
-            }
+                    tmp = vquantize(tmp_dep, qi_out);
+                }
 #else  // #ifndef __aarch64__
-            else if (act == ActivationLayerInfo::ActivationFunction::GELU)
-            {
-                const auto vin_deq = vdequantize(vin, qi_in);
-                // Perform activation
-                const float32x4x4_t tmp_dep =
+                else if (act == ActivationLayerInfo::ActivationFunction::GELU)
                 {
-                    {
-                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[0], const_inv_sqrt_2))))),
-                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[1], const_inv_sqrt_2))))),
-                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[2], const_inv_sqrt_2))))),
-                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_2, wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(vin_deq.val[3], const_inv_sqrt_2))))),
-                    }
-                };
-                // Re-quantize to new output space
-                tmp = vquantize(tmp_dep, qi_out);
-            }
+                    const auto vin_deq = vdequantize(vin, qi_in);
+                    // Perform activation
+                    const float32x4x4_t tmp_dep = {{
+                        wrapper::vmul(vin_deq.val[0],
+                                      wrapper::vmul(const_inv_2,
+                                                    wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(
+                                                                                vin_deq.val[0], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[1],
+                                      wrapper::vmul(const_inv_2,
+                                                    wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(
+                                                                                vin_deq.val[1], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[2],
+                                      wrapper::vmul(const_inv_2,
+                                                    wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(
+                                                                                vin_deq.val[2], const_inv_sqrt_2))))),
+                        wrapper::vmul(vin_deq.val[3],
+                                      wrapper::vmul(const_inv_2,
+                                                    wrapper::vadd(vconst_1, wrapper::verf(wrapper::vmul(
+                                                                                vin_deq.val[3], const_inv_sqrt_2))))),
+                    }};
+                    // Re-quantize to new output space
+                    tmp = vquantize(tmp_dep, qi_out);
+                }
 #endif // __aarch64__
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
+                else
+                {
+                    ARM_COMPUTE_ERROR("Unsupported activation function");
+                }
+                wrapper::vstore(output_ptr + x, tmp);
             }
-            wrapper::vstore(output_ptr + x, tmp);
-        }
 
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            qasymm8_t in  = *(reinterpret_cast<const qasymm8_t *>(input_ptr + x));
-            qasymm8_t tmp = 0;
-            if(act == ActivationLayerInfo::ActivationFunction::RELU)
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
             {
-                tmp = std::max(const_0, in);
-                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-            {
-                tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
-            }
+                qasymm8_t in  = *(reinterpret_cast<const qasymm8_t *>(input_ptr + x));
+                qasymm8_t tmp = 0;
+                if (act == ActivationLayerInfo::ActivationFunction::RELU)
+                {
+                    tmp = std::max(const_0, in);
+                    tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                {
+                    tmp = std::min(a, std::max(const_0, in));
+                    tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                {
+                    tmp = std::min(a, std::max(b, in));
+                    tmp = utility::clamp<int32_t, qasymm8_t>(support::cpp11::lround(tmp * s + o));
+                }
 #ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
-            else if(act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
+                else if (act == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+                {
+                    float tmp_f = dequantize_qasymm8(in, qi_in);
+                    tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
+                    tmp         = quantize_qasymm8(tmp_f, qi_out);
+                }
 #endif // __aarch64__
-            else if(act == ActivationLayerInfo::ActivationFunction::TANH)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
+                else if (act == ActivationLayerInfo::ActivationFunction::TANH)
+                {
+                    float tmp_f = dequantize_qasymm8(in, qi_in);
+                    tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
+                    tmp         = quantize_qasymm8(tmp_f, qi_out);
+                }
 #ifndef __aarch64__ // LUT-based implementation is used for aarch64 instead.
-            else if(act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp_f       = tmp_f > 0 ? tmp_f : tmp_f * a_f32;
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
-            else if(act == ActivationLayerInfo::ActivationFunction::GELU)
-            {
-                float tmp_f = dequantize_qasymm8(in, qi_in);
-                tmp         = tmp_f * 0.5f * (1.0f + std::erff(in / 1.41421356237f));
-                tmp         = quantize_qasymm8(tmp_f, qi_out);
-            }
+                else if (act == ActivationLayerInfo::ActivationFunction::HARD_SWISH)
+                {
+                    float tmp_f = dequantize_qasymm8(in, qi_in);
+                    tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
+                    tmp         = quantize_qasymm8(tmp_f, qi_out);
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+                {
+                    float tmp_f = dequantize_qasymm8(in, qi_in);
+                    tmp_f       = tmp_f > 0 ? tmp_f : tmp_f * a_f32;
+                    tmp         = quantize_qasymm8(tmp_f, qi_out);
+                }
+                else if (act == ActivationLayerInfo::ActivationFunction::GELU)
+                {
+                    float tmp_f = dequantize_qasymm8(in, qi_in);
+                    tmp         = tmp_f * 0.5f * (1.0f + std::erff(in / 1.41421356237f));
+                    tmp         = quantize_qasymm8(tmp_f, qi_out);
+                }
 #endif // __aarch64__
-            else
-            {
-                ARM_COMPUTE_ERROR("Unsupported activation function");
+                else
+                {
+                    ARM_COMPUTE_ERROR("Unsupported activation function");
+                }
+                *(output_ptr + x) = tmp;
             }
-            *(output_ptr + x) = tmp;
-        }
-    },
-    input, output);
+        },
+        input, output);
 }
 } // namespace cpu
 } // namespace arm_compute

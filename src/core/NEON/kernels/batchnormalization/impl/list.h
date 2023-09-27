@@ -28,9 +28,9 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_BATCH_NORMALIZATION_KERNEL(func_name)                                                                              \
-    void func_name(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, \
-                   float epsilon, ActivationLayerInfo &act_info, const Window &window)
+#define DECLARE_BATCH_NORMALIZATION_KERNEL(func_name)                                                        \
+    void func_name(ITensor *src, ITensor *dst, const ITensor *mean, const ITensor *var, const ITensor *beta, \
+                   const ITensor *gamma, float epsilon, ActivationLayerInfo &act_info, const Window &window)
 
 DECLARE_BATCH_NORMALIZATION_KERNEL(fp16_neon_batch_normalization);
 DECLARE_BATCH_NORMALIZATION_KERNEL(fp16_sve_batch_normalization);

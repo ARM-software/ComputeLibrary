@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClQuantize.h"
 
@@ -32,13 +33,12 @@ namespace arm_compute
 {
 struct CLQuantizationLayer::Impl
 {
-    const ICLTensor                    *src{ nullptr };
-    ICLTensor                          *dst{ nullptr };
-    std::unique_ptr<opencl::ClQuantize> op{ nullptr };
+    const ICLTensor                    *src{nullptr};
+    ICLTensor                          *dst{nullptr};
+    std::unique_ptr<opencl::ClQuantize> op{nullptr};
 };
 
-CLQuantizationLayer::CLQuantizationLayer()
-    : _impl(std::make_unique<Impl>())
+CLQuantizationLayer::CLQuantizationLayer() : _impl(std::make_unique<Impl>())
 {
 }
 CLQuantizationLayer::~CLQuantizationLayer() = default;

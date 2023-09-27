@@ -78,10 +78,10 @@ public:
 
     /* Delete move and copy constructors and assignment operator
     s */
-    CPUInfo(CPUInfo const &) = delete;            // Copy construct
-    CPUInfo(CPUInfo &&)      = delete;            // Move construct
+    CPUInfo(CPUInfo const &)            = delete; // Copy construct
+    CPUInfo(CPUInfo &&)                 = delete; // Move construct
     CPUInfo &operator=(CPUInfo const &) = delete; // Copy assign
-    CPUInfo &operator=(CPUInfo &&) = delete;      // Move assign
+    CPUInfo &operator=(CPUInfo &&)      = delete; // Move assign
 
     /** Checks if the cpu model supports fp16.
      *
@@ -179,9 +179,9 @@ private:
 /** Information about executing thread and CPU. */
 struct ThreadInfo
 {
-    int            thread_id{ 0 };
-    int            num_threads{ 1 };
-    const CPUInfo *cpu_info{ nullptr };
+    int            thread_id{0};
+    int            num_threads{1};
+    const CPUInfo *cpu_info{nullptr};
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CPP_TYPES_H */

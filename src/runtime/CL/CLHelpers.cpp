@@ -50,34 +50,30 @@ void printf_callback(const char *buffer, unsigned int len, size_t complete, void
  * @return A pointer to the context properties which can be used to create an opencl context
  */
 
-void initialise_context_properties(const cl::Platform &platform, const cl::Device &device, std::array<cl_context_properties, 7> &prop)
+void initialise_context_properties(const cl::Platform                   &platform,
+                                   const cl::Device                     &device,
+                                   std::array<cl_context_properties, 7> &prop)
 {
     ARM_COMPUTE_UNUSED(device);
 #if defined(ARM_COMPUTE_ASSERTS_ENABLED)
     // Query devices in the context for cl_arm_printf support
-    if(arm_compute::device_supports_extension(device, "cl_arm_printf"))
+    if (arm_compute::device_supports_extension(device, "cl_arm_printf"))
     {
         // Create a cl_context with a printf_callback and user specified buffer size.
-        std::array<cl_context_properties, 7> properties_printf =
-        {
+        std::array<cl_context_properties, 7> properties_printf = {
             CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform()),
             // Enable a printf callback function for this context.
             CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
             // Request a minimum printf buffer size of 4MB for devices in the
             // context that support this extension.
-            CL_PRINTF_BUFFERSIZE_ARM, 0x1000,
-            0
-        };
+            CL_PRINTF_BUFFERSIZE_ARM, 0x1000, 0};
         prop = properties_printf;
     }
     else
 #endif // defined(ARM_COMPUTE_ASSERTS_ENABLED)
     {
-        std::array<cl_context_properties, 3> properties =
-        {
-            CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform()),
-            0
-        };
+        std::array<cl_context_properties, 3> properties = {CL_CONTEXT_PLATFORM,
+                                                           reinterpret_cast<cl_context_properties>(platform()), 0};
         std::copy(properties.begin(), properties.end(), prop.begin());
     };
 }
@@ -91,19 +87,19 @@ cl::Platform select_preferable_platform(CLBackendType cl_backend_type)
     cl::Platform::get(&platforms);
     ARM_COMPUTE_ERROR_ON_MSG(platforms.size() == 0, "Couldn't find any OpenCL platform");
 
-    cl::Platform selected_platform{ nullptr };
+    cl::Platform selected_platform{nullptr};
 
     // If the user has selected the Native platform, return the first available.
-    switch(cl_backend_type)
+    switch (cl_backend_type)
     {
         case CLBackendType::Native:
             selected_platform = platforms[0];
             break;
         case CLBackendType::Clvk:
-            for(auto p : platforms)
+            for (auto p : platforms)
             {
                 std::string res = p.getInfo<CL_PLATFORM_NAME>();
-                if(res.find("clvk") != std::string::npos)
+                if (res.find("clvk") != std::string::npos)
                 {
                     selected_platform = p;
                     break;
@@ -114,7 +110,7 @@ cl::Platform select_preferable_platform(CLBackendType cl_backend_type)
             ARM_COMPUTE_ERROR("Unsupported backend type");
     }
 
-    if(!selected_platform())
+    if (!selected_platform())
     {
         ARM_COMPUTE_ERROR("No valid platform found");
     }
@@ -122,8 +118,7 @@ cl::Platform select_preferable_platform(CLBackendType cl_backend_type)
     return selected_platform;
 }
 
-std::tuple<cl::Context, cl::Device, cl_int>
-create_opencl_context_and_device(CLBackendType cl_backend_type)
+std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device(CLBackendType cl_backend_type)
 {
     ARM_COMPUTE_ERROR_ON(!opencl_is_available());
     cl::Platform            p = select_preferable_platform(cl_backend_type);
@@ -131,9 +126,9 @@ create_opencl_context_and_device(CLBackendType cl_backend_type)
     std::vector<cl::Device> platform_devices;
     p.getDevices(CL_DEVICE_TYPE_DEFAULT, &platform_devices);
     ARM_COMPUTE_ERROR_ON_MSG(platform_devices.size() == 0, "Couldn't find any OpenCL device");
-    device     = platform_devices[0];
-    cl_int err = CL_SUCCESS;
-    std::array<cl_context_properties, 7> properties = { 0, 0, 0, 0, 0, 0, 0 };
+    device                                          = platform_devices[0];
+    cl_int                               err        = CL_SUCCESS;
+    std::array<cl_context_properties, 7> properties = {0, 0, 0, 0, 0, 0, 0};
     initialise_context_properties(p, device, properties);
     cl::Context cl_context = cl::Context(device, properties.data(), nullptr, nullptr, &err);
     ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Failed to create OpenCL context");
@@ -143,7 +138,7 @@ create_opencl_context_and_device(CLBackendType cl_backend_type)
 void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(kernel);
-    if(ctx)
+    if (ctx)
     {
         ARM_COMPUTE_ERROR_ON(ctx->gpu_scheduler() == nullptr);
         ctx->gpu_scheduler()->enqueue(*kernel, flush);

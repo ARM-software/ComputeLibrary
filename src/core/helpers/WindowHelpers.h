@@ -43,21 +43,13 @@ namespace arm_compute
  *         influence the returned value.
  */
 template <typename... Ts>
-bool update_window_and_padding(Window &win, Ts &&... patterns)
+bool update_window_and_padding(Window &win, Ts &&...patterns)
 {
     bool window_changed = false;
 
-    utility::for_each([&](const IAccessWindow & w)
-    {
-        window_changed |= w.update_window_if_needed(win);
-    },
-    patterns...);
+    utility::for_each([&](const IAccessWindow &w) { window_changed |= w.update_window_if_needed(win); }, patterns...);
 
-    utility::for_each([&](IAccessWindow & w)
-    {
-        w.update_padding_if_needed(win);
-    },
-    patterns...);
+    utility::for_each([&](IAccessWindow &w) { w.update_padding_if_needed(win); }, patterns...);
 
     return window_changed;
 }
@@ -69,18 +61,18 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
  * @return Intersection of all regions.
  */
 template <typename... Ts>
-ValidRegion intersect_valid_regions(const Ts &... regions)
+ValidRegion intersect_valid_regions(const Ts &...regions)
 {
-    auto intersect = [](const ValidRegion & r1, const ValidRegion & r2) -> ValidRegion
+    auto intersect = [](const ValidRegion &r1, const ValidRegion &r2) -> ValidRegion
     {
         ValidRegion region;
 
-        for(size_t d = 0; d < std::min(r1.anchor.num_dimensions(), r2.anchor.num_dimensions()); ++d)
+        for (size_t d = 0; d < std::min(r1.anchor.num_dimensions(), r2.anchor.num_dimensions()); ++d)
         {
             region.anchor.set(d, std::max(r1.anchor[d], r2.anchor[d]));
         }
 
-        for(size_t d = 0; d < std::min(r1.shape.num_dimensions(), r2.shape.num_dimensions()); ++d)
+        for (size_t d = 0; d < std::min(r1.shape.num_dimensions(), r2.shape.num_dimensions()); ++d)
         {
             region.shape.set(d, std::min(r1.shape[d], r2.shape[d]));
         }
@@ -101,7 +93,10 @@ ValidRegion intersect_valid_regions(const Ts &... regions)
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window(const ValidRegion &valid_region, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+Window calculate_max_window(const ValidRegion &valid_region,
+                            const Steps       &steps       = Steps(),
+                            bool               skip_border = false,
+                            BorderSize         border_size = BorderSize());
 
 /** Calculate the maximum window for a given tensor shape and border setting
  *
@@ -112,7 +107,10 @@ Window calculate_max_window(const ValidRegion &valid_region, const Steps &steps 
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window(const TensorShape &shape, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+Window calculate_max_window(const TensorShape &shape,
+                            const Steps       &steps       = Steps(),
+                            bool               skip_border = false,
+                            BorderSize         border_size = BorderSize());
 
 /** Calculate the maximum window for a given tensor shape and border setting
  *
@@ -123,7 +121,10 @@ Window calculate_max_window(const TensorShape &shape, const Steps &steps = Steps
  *
  * @return The maximum window the kernel can be executed on.
  */
-inline Window calculate_max_window(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize())
+inline Window calculate_max_window(const ITensorInfo &info,
+                                   const Steps       &steps       = Steps(),
+                                   bool               skip_border = false,
+                                   BorderSize         border_size = BorderSize())
 {
     return calculate_max_window(info.tensor_shape(), steps, skip_border, border_size);
 }
@@ -137,7 +138,10 @@ inline Window calculate_max_window(const ITensorInfo &info, const Steps &steps =
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+Window calculate_max_window_horizontal(const ValidRegion &valid_region,
+                                       const Steps       &steps       = Steps(),
+                                       bool               skip_border = false,
+                                       BorderSize         border_size = BorderSize());
 
 /** Calculate the maximum window used by a horizontal kernel for a given tensor shape and border setting
  *
@@ -148,7 +152,10 @@ Window calculate_max_window_horizontal(const ValidRegion &valid_region, const St
  *
  * @return The maximum window the kernel can be executed on.
  */
-inline Window calculate_max_window_horizontal(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize())
+inline Window calculate_max_window_horizontal(const ITensorInfo &info,
+                                              const Steps       &steps       = Steps(),
+                                              bool               skip_border = false,
+                                              BorderSize         border_size = BorderSize())
 {
     return calculate_max_window_horizontal(info.valid_region(), steps, skip_border, border_size);
 }
@@ -161,7 +168,9 @@ inline Window calculate_max_window_horizontal(const ITensorInfo &info, const Ste
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps = Steps(), BorderSize border_size = BorderSize());
+Window calculate_max_enlarged_window(const ValidRegion &valid_region,
+                                     const Steps       &steps       = Steps(),
+                                     BorderSize         border_size = BorderSize());
 
 /** Calculate the maximum window for a given tensor shape and border setting. The window will also includes the border.
  *
@@ -171,7 +180,9 @@ Window calculate_max_enlarged_window(const ValidRegion &valid_region, const Step
  *
  * @return The maximum window the kernel can be executed on.
  */
-inline Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps = Steps(), BorderSize border_size = BorderSize())
+inline Window calculate_max_enlarged_window(const ITensorInfo &info,
+                                            const Steps       &steps       = Steps(),
+                                            BorderSize         border_size = BorderSize())
 {
     return calculate_max_enlarged_window(info.valid_region(), steps, border_size);
 }
@@ -208,7 +219,7 @@ std::pair<Window, size_t> calculate_squashed_or_max_window(const ITensorInfo &sr
  * @return A pair of the shape and window
  */
 template <typename... Shapes>
-std::pair<TensorShape, Window> compute_output_shape_and_window(const Shapes &... shapes)
+std::pair<TensorShape, Window> compute_output_shape_and_window(const Shapes &...shapes)
 {
     const TensorShape out_shape = TensorShape::broadcast_shape(shapes...);
     return std::make_pair(out_shape, calculate_max_window(out_shape));

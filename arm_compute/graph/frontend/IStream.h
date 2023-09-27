@@ -84,8 +84,8 @@ public:
     }
 
 protected:
-    StreamHints _hints     = {};              /**< Execution and algorithmic hints */
-    NodeID      _tail_node = { EmptyNodeID }; /**< NodeID pointing to the last(tail) node of the graph */
+    StreamHints _hints     = {};            /**< Execution and algorithmic hints */
+    NodeID      _tail_node = {EmptyNodeID}; /**< NodeID pointing to the last(tail) node of the graph */
 };
 } // namespace frontend
 } // namespace graph

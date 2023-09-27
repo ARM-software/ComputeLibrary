@@ -24,14 +24,13 @@
 #ifndef ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
 #define ACL_ARM_COMPUTE_GRAPH_BACKENDS_VALIDATEHELPERS_H
 
-#include "arm_compute/graph/Logger.h"
-#include "arm_compute/graph/Tensor.h"
-#include "arm_compute/graph/Types.h"
-#include "arm_compute/graph/nodes/Nodes.h"
-
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/graph/Logger.h"
+#include "arm_compute/graph/nodes/Nodes.h"
+#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/Types.h"
 
 namespace arm_compute
 {
@@ -63,7 +62,8 @@ inline arm_compute::ITensorInfo *get_backing_tensor_info(arm_compute::graph::Ten
 template <typename ArgMinMaxLayer>
 Status validate_arg_min_max_layer(ArgMinMaxLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ArgMinMaxLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating ArgMinMaxLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -86,7 +86,8 @@ Status validate_arg_min_max_layer(ArgMinMaxLayerNode &node)
 template <typename BoundingBoxTransformLayer>
 Status validate_bounding_box_transform_layer(BoundingBoxTransformLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating BoundingBoxTransformLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating BoundingBoxTransformLayer node with ID : " << node.id() << " and Name: "
+                                                                                         << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -110,7 +111,8 @@ Status validate_bounding_box_transform_layer(BoundingBoxTransformLayerNode &node
 template <typename ChannelShuffleLayer>
 Status validate_channel_shuffle_layer(ChannelShuffleLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ChannelShuffle node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating ChannelShuffle node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -133,10 +135,14 @@ Status validate_channel_shuffle_layer(ChannelShuffleLayerNode &node)
  *
  * @return Status
  */
-template <typename ConvolutionLayer, typename DirectConvolutionLayer, typename GEMMConvolutionLayer, typename WinogradConvolutionLayer>
+template <typename ConvolutionLayer,
+          typename DirectConvolutionLayer,
+          typename GEMMConvolutionLayer,
+          typename WinogradConvolutionLayer>
 Status validate_convolution_layer(ConvolutionLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ConvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating ConvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -146,7 +152,7 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     arm_compute::ITensorInfo *biases  = get_backing_tensor_info(node.input(2));
     arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
 
-    if(is_data_type_quantized_asymmetric(input->data_type()))
+    if (is_data_type_quantized_asymmetric(input->data_type()))
     {
         biases->set_data_type(DataType::S32);
     }
@@ -158,23 +164,24 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
 
     // Validate function
     Status status{};
-    switch(conv_algorithm)
+    switch (conv_algorithm)
     {
         case ConvolutionMethod::Direct:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "DirectConvolutionLayer does not support grouping!");
             status = DirectConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
         case ConvolutionMethod::GEMM:
-            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info,
-                                                    WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), num_groups);
+            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, WeightsInfo(),
+                                                    Size2D(1, 1), ActivationLayerInfo(), num_groups);
             break;
         case ConvolutionMethod::Winograd:
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "WinogradConvolutionLayer does not support grouping!");
-            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, ActivationLayerInfo(), fast_math);
+            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info,
+                                                        ActivationLayerInfo(), fast_math);
             break;
         case ConvolutionMethod::Default:
-            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info,
-                                                WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), fast_math, num_groups);
+            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1, 1),
+                                                ActivationLayerInfo(), fast_math, num_groups);
             break;
         default:
             ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported convolution method");
@@ -194,7 +201,8 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
 template <typename DepthwiseConvolutionLayer>
 Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DepthwiseConvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DepthwiseConvolutionLayer node with ID : " << node.id() << " and Name: "
+                                                                                         << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -210,7 +218,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 
     // Validate function
     Status status{};
-    switch(dwc_algorithm)
+    switch (dwc_algorithm)
     {
         case DepthwiseConvolutionMethod::Default:
         case DepthwiseConvolutionMethod::Optimized3x3:
@@ -233,7 +241,8 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 template <typename DepthToSpaceLayer>
 Status validate_depth_to_space_layer(DepthToSpaceLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -254,7 +263,8 @@ Status validate_depth_to_space_layer(DepthToSpaceLayerNode &node)
 template <typename DequantizationLayer>
 Status validate_dequantization_layer(DequantizationLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -275,7 +285,8 @@ Status validate_dequantization_layer(DequantizationLayerNode &node)
 template <typename DetectionOutputLayer>
 Status validate_detection_output_layer(DetectionOutputLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -299,7 +310,8 @@ Status validate_detection_output_layer(DetectionOutputLayerNode &node)
 template <typename DetectionPostProcessLayer>
 Status validate_detection_post_process_layer(DetectionPostProcessLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionPostProcessLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionPostProcessLayer node with ID : " << node.id() << " and Name: "
+                                                                                         << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 4);
 
@@ -327,7 +339,8 @@ Status validate_detection_post_process_layer(DetectionPostProcessLayerNode &node
 template <typename GenerateProposalsLayer>
 Status validate_generate_proposals_layer(GenerateProposalsLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating GenerateProposalsLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating GenerateProposalsLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 3);
 
@@ -354,7 +367,8 @@ Status validate_generate_proposals_layer(GenerateProposalsLayerNode &node)
 template <typename L2NormalizeLayer>
 Status validate_l2_normalize_layer(L2NormalizeLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating L2NormalizeLayerNode node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating L2NormalizeLayerNode node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -379,7 +393,8 @@ Status validate_l2_normalize_layer(L2NormalizeLayerNode &node)
 template <typename NormalizePlanarYUVLayer>
 Status validate_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating NormalizePlanarYUVLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating NormalizePlanarYUVLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -404,7 +419,8 @@ Status validate_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
 template <typename PadLayer>
 Status validate_pad_layer(PadLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PadLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PadLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                        << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -427,14 +443,15 @@ Status validate_pad_layer(PadLayerNode &node)
 template <typename PermuteLayer>
 Status validate_permute_layer(PermuteLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PermuteLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PermuteLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                            << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
     arm_compute::ITensorInfo *input  = get_backing_tensor_info(node.input(0));
     arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
-    const PermutationVector &perm   = node.permutation_vector();
+    const PermutationVector  &perm   = node.permutation_vector();
 
     return PermuteLayer::validate(input, output, perm);
 }
@@ -450,7 +467,8 @@ Status validate_permute_layer(PermuteLayerNode &node)
 template <typename PReluLayer>
 Status validate_prelu_layer(PReluLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PRelu node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PRelu node with ID : " << node.id() << " and Name: " << node.name()
+                                                                     << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -473,7 +491,8 @@ Status validate_prelu_layer(PReluLayerNode &node)
 template <typename PriorBoxLayer>
 Status validate_priorbox_layer(PriorBoxLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PriorBoxLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating PriorBoxLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -497,7 +516,8 @@ Status validate_priorbox_layer(PriorBoxLayerNode &node)
 template <typename QuantizationLayer>
 Status validate_quantization_layer(QuantizationLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating QuantizationLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating QuantizationLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -520,7 +540,8 @@ Status validate_quantization_layer(QuantizationLayerNode &node)
 template <typename ReductionLayer>
 Status validate_reduction_operation_layer(ReductionLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReductionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating ReductionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
 
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
@@ -544,7 +565,8 @@ Status validate_reduction_operation_layer(ReductionLayerNode &node)
 template <typename ReorgLayer>
 Status validate_reorg_layer(ReorgLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReorgLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReorgLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                          << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -567,7 +589,8 @@ Status validate_reorg_layer(ReorgLayerNode &node)
 template <typename ReshapeLayer>
 Status validate_reshape_layer(ReshapeLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReshapeLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReshapeLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                            << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -590,14 +613,15 @@ Status validate_reshape_layer(ReshapeLayerNode &node)
 template <typename ROIAlignLayer>
 Status validate_roi_align_layer(ROIAlignLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ROIAlignLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Validating ROIAlignLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
     // Extract input and output
-    arm_compute::ITensorInfo *input     = detail::get_backing_tensor_info(node.input(0));
-    arm_compute::ITensorInfo *rois      = detail::get_backing_tensor_info(node.input(1));
-    arm_compute::ITensorInfo *output    = detail::get_backing_tensor_info(node.output(0));
+    arm_compute::ITensorInfo  *input     = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo  *rois      = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo  *output    = detail::get_backing_tensor_info(node.output(0));
     const ROIPoolingLayerInfo &pool_info = node.pooling_info();
 
     // Validate function
@@ -615,7 +639,8 @@ Status validate_roi_align_layer(ROIAlignLayerNode &node)
 template <typename SliceLayer>
 Status validate_slice_layer(SliceLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating Slice node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating Slice node with ID : " << node.id() << " and Name: " << node.name()
+                                                                     << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -639,7 +664,8 @@ Status validate_slice_layer(SliceLayerNode &node)
 template <typename StridedSliceLayer>
 Status validate_strided_slice_layer(StridedSliceLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating StridedSlice node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating StridedSlice node with ID : " << node.id() << " and Name: " << node.name()
+                                                                            << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -651,7 +677,8 @@ Status validate_strided_slice_layer(StridedSliceLayerNode &node)
     const BiStrides             strides = node.strides();
     const StridedSliceLayerInfo info    = node.strided_slice_info();
 
-    return StridedSliceLayer::validate(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(), info.shrink_axis_mask());
+    return StridedSliceLayer::validate(input, output, starts, ends, strides, info.begin_mask(), info.end_mask(),
+                                       info.shrink_axis_mask());
 }
 
 /** Validates a element-wise layer node
@@ -663,7 +690,8 @@ Status validate_strided_slice_layer(StridedSliceLayerNode &node)
 template <typename EltwiseLayerFunctions>
 Status validate_eltwise_Layer(EltwiseLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                            << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -678,23 +706,24 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
     const QuantizationInfo          quant_info     = node.output_quant_info();
 
     // Validate function
-    if(eltwise_op == EltwiseOperation::Add)
+    if (eltwise_op == EltwiseOperation::Add)
     {
         return EltwiseLayerFunctions::ArithmeticAddition::validate(input1, input2, output, convert_policy, act_info);
     }
-    else if(eltwise_op == EltwiseOperation::Sub)
+    else if (eltwise_op == EltwiseOperation::Sub)
     {
         return EltwiseLayerFunctions::ArithmeticSubtraction::validate(input1, input2, output, convert_policy, act_info);
     }
-    else if(eltwise_op == EltwiseOperation::Mul)
+    else if (eltwise_op == EltwiseOperation::Mul)
     {
-        return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, 1.0f, convert_policy, round_policy, act_info);
+        return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, 1.0f, convert_policy,
+                                                                        round_policy, act_info);
     }
-    else if(eltwise_op == EltwiseOperation::Max)
+    else if (eltwise_op == EltwiseOperation::Max)
     {
         return EltwiseLayerFunctions::ElementwiseMax::validate(input1, input2, output, act_info);
     }
-    else if(eltwise_op == EltwiseOperation::Div)
+    else if (eltwise_op == EltwiseOperation::Div)
     {
         return EltwiseLayerFunctions::ArithmeticDivision::validate(input1, input2, output, act_info);
     }
@@ -713,7 +742,8 @@ Status validate_eltwise_Layer(EltwiseLayerNode &node)
 template <typename UnaryEltwiseLayerFunctions>
 Status validate_unary_eltwise_layer(UnaryEltwiseLayerNode &node)
 {
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name()
+                                                                            << std::endl);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
@@ -723,7 +753,7 @@ Status validate_unary_eltwise_layer(UnaryEltwiseLayerNode &node)
     const UnaryEltwiseOperation eltwise_op = node.eltwise_descriptor().op;
 
     // Validate function
-    if(eltwise_op == UnaryEltwiseOperation::Exp)
+    if (eltwise_op == UnaryEltwiseOperation::Exp)
     {
         return UnaryEltwiseLayerFunctions::ExpLayer::validate(input, output);
     }

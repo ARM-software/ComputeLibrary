@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_CLFFT1D_H
 #define ARM_COMPUTE_CLFFT1D_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
@@ -82,7 +81,10 @@ public:
      * @param[out] output          Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  config          FFT related configuration
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const FFT1DInfo &config);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   const FFT1DInfo        &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFT1D.
      *
      * @param[in] input  Source tensor info. Data types supported: F16/F32.

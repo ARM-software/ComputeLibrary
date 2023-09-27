@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
+
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
@@ -36,7 +37,12 @@ class GraphSRCNN955Example : public Example
 {
 public:
     GraphSRCNN955Example()
-        : cmd_parser(), common_opts(cmd_parser), model_input_width(nullptr), model_input_height(nullptr), common_params(), graph(0, "SRCNN955")
+        : cmd_parser(),
+          common_opts(cmd_parser),
+          model_input_width(nullptr),
+          model_input_height(nullptr),
+          common_params(),
+          graph(0, "SRCNN955")
     {
         model_input_width  = cmd_parser.add_option<SimpleOption<unsigned int>>("image-width", 300);
         model_input_height = cmd_parser.add_option<SimpleOption<unsigned int>>("image-height", 300);
@@ -45,7 +51,7 @@ public:
         model_input_width->set_help("Input image width.");
         model_input_height->set_help("Input image height.");
     }
-    GraphSRCNN955Example(const GraphSRCNN955Example &) = delete;
+    GraphSRCNN955Example(const GraphSRCNN955Example &)            = delete;
     GraphSRCNN955Example &operator=(const GraphSRCNN955Example &) = delete;
     ~GraphSRCNN955Example() override                              = default;
     bool do_setup(int argc, char **argv) override
@@ -58,7 +64,7 @@ public:
         common_params = consume_common_graph_parameters(common_opts);
 
         // Return when help menu is requested
-        if(common_params.help)
+        if (common_params.help)
         {
             cmd_parser.print_help(argv[0]);
             return false;
@@ -81,36 +87,33 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = std::make_unique<TFPreproccessor>();
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(image_width, image_height, 3U, common_params.batches), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const TensorShape tensor_shape =
+            permute_shape(TensorShape(image_width, image_height, 3U, common_params.batches), DataLayout::NCHW,
+                          common_params.data_layout);
+        TensorDescriptor input_descriptor =
+            TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
 
-        graph << common_params.target
-              << common_params.fast_math_hint
-              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor), false /* Do not convert to BGR */))
-              << ConvolutionLayer(
-                  9U, 9U, 64U,
-                  get_weights_accessor(data_path, "conv1_weights.npy", weights_layout),
-                  get_weights_accessor(data_path, "conv1_biases.npy"),
-                  PadStrideInfo(1, 1, 4, 4))
-              .set_name("conv1/convolution")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu")
-              << ConvolutionLayer(
-                  5U, 5U, 32U,
-                  get_weights_accessor(data_path, "conv2_weights.npy", weights_layout),
-                  get_weights_accessor(data_path, "conv2_biases.npy"),
-                  PadStrideInfo(1, 1, 2, 2))
-              .set_name("conv2/convolution")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv2/Relu")
-              << ConvolutionLayer(
-                  5U, 5U, 3U,
-                  get_weights_accessor(data_path, "conv3_weights.npy", weights_layout),
-                  get_weights_accessor(data_path, "conv3_biases.npy"),
-                  PadStrideInfo(1, 1, 2, 2))
-              .set_name("conv3/convolution")
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv3/Relu")
+        graph << common_params.target << common_params.fast_math_hint
+              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor),
+                                                                 false /* Do not convert to BGR */))
+              << ConvolutionLayer(9U, 9U, 64U, get_weights_accessor(data_path, "conv1_weights.npy", weights_layout),
+                                  get_weights_accessor(data_path, "conv1_biases.npy"), PadStrideInfo(1, 1, 4, 4))
+                     .set_name("conv1/convolution")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                     .set_name("conv1/Relu")
+              << ConvolutionLayer(5U, 5U, 32U, get_weights_accessor(data_path, "conv2_weights.npy", weights_layout),
+                                  get_weights_accessor(data_path, "conv2_biases.npy"), PadStrideInfo(1, 1, 2, 2))
+                     .set_name("conv2/convolution")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                     .set_name("conv2/Relu")
+              << ConvolutionLayer(5U, 5U, 3U, get_weights_accessor(data_path, "conv3_weights.npy", weights_layout),
+                                  get_weights_accessor(data_path, "conv3_biases.npy"), PadStrideInfo(1, 1, 2, 2))
+                     .set_name("conv3/convolution")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                     .set_name("conv3/Relu")
               << OutputLayer(std::make_unique<DummyAccessor>(0));
 
         // Finalize graph
@@ -137,8 +140,8 @@ public:
 private:
     CommandLineParser           cmd_parser;
     CommonGraphOptions          common_opts;
-    SimpleOption<unsigned int> *model_input_width{ nullptr };
-    SimpleOption<unsigned int> *model_input_height{ nullptr };
+    SimpleOption<unsigned int> *model_input_width{nullptr};
+    SimpleOption<unsigned int> *model_input_height{nullptr};
     CommonGraphParams           common_params;
     Stream                      graph;
 };

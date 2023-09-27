@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/nodes/Nodes.h"
+#include "arm_compute/graph/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -43,17 +43,14 @@ void add_convolution_layer_data(DataLayerVisitor::LayerData &layer_data, T &node
     layer_data["data_layout"] = to_string(layout);
     // Add padding info
     std::ostringstream padding;
-    padding << "[" << to_string(ps_info.pad_left()) << ","
-            << to_string(ps_info.pad_top()) << ","
-            << to_string(ps_info.pad_bottom()) << ","
-            << to_string(ps_info.pad_right()) << "]";
+    padding << "[" << to_string(ps_info.pad_left()) << "," << to_string(ps_info.pad_top()) << ","
+            << to_string(ps_info.pad_bottom()) << "," << to_string(ps_info.pad_right()) << "]";
 
     layer_data["pad"] = padding.str();
 
     // Add stride info
     std::ostringstream stride;
-    stride << "[" << to_string(ps_info.stride().first) << ","
-           << to_string(ps_info.stride().second) << "]";
+    stride << "[" << to_string(ps_info.stride().first) << "," << to_string(ps_info.stride().second) << "]";
 
     layer_data["stride"] = stride.str();
 
@@ -68,12 +65,12 @@ void add_convolution_layer_data(DataLayerVisitor::LayerData &layer_data, T &node
 
     // Change input names for weights / bias (if applicable)
     // Assumes input(1) is weights and input(2) is bias
-    if(layer_data.count("input_shape1"))
+    if (layer_data.count("input_shape1"))
     {
         layer_data["weights_shape"] = layer_data["input_shape1"];
         layer_data.erase("input_shape1");
     }
-    if(layer_data.count("input_shape2"))
+    if (layer_data.count("input_shape2"))
     {
         layer_data["bias_shape"] = layer_data["input_shape2"];
         layer_data.erase("input_shape2");
@@ -92,16 +89,17 @@ template <typename T>
 void add_generic_layer_data(DataLayerVisitor::LayerData &layer_data, T &node)
 {
     // Loop over each input tensor
-    for(size_t tensor_no = 0; tensor_no < node.num_inputs(); ++tensor_no)
+    for (size_t tensor_no = 0; tensor_no < node.num_inputs(); ++tensor_no)
     {
         // Add input tensor shapes
-        if(node.input(tensor_no) != nullptr)
+        if (node.input(tensor_no) != nullptr)
         {
-            layer_data["input_shape" + to_string(tensor_no)] = "[" + to_string(node.input(tensor_no)->desc().shape) + "]";
+            layer_data["input_shape" + to_string(tensor_no)] =
+                "[" + to_string(node.input(tensor_no)->desc().shape) + "]";
         }
     }
     // Add output tensor shape
-    if(node.output(0) != nullptr)
+    if (node.output(0) != nullptr)
     {
         layer_data["output_shape0"] = "[" + to_string(node.output(0)->desc().shape) + "]";
     }

@@ -111,7 +111,8 @@ public:
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref arm_compute::opencl::kernels::ClLogicalBinaryKernel
      *
      * @param[in] input1 First tensor input info. Data types supported: U8.

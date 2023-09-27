@@ -24,9 +24,9 @@
 #ifndef SRC_CPU_CPUQUEUE_H
 #define SRC_CPU_CPUQUEUE_H
 
-#include "src/common/IQueue.h"
-
 #include "arm_compute/runtime/IScheduler.h"
+
+#include "src/common/IQueue.h"
 
 namespace arm_compute
 {

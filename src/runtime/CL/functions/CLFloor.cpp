@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClFloor.h"
 
@@ -34,16 +35,15 @@ namespace arm_compute
 {
 struct CLFloor::Impl
 {
-    const ICLTensor                 *src{ nullptr };
-    ICLTensor                       *dst{ nullptr };
-    std::unique_ptr<opencl::ClFloor> op{ nullptr };
+    const ICLTensor                 *src{nullptr};
+    ICLTensor                       *dst{nullptr};
+    std::unique_ptr<opencl::ClFloor> op{nullptr};
 };
 
-CLFloor::CLFloor()
-    : _impl(std::make_unique<Impl>())
+CLFloor::CLFloor() : _impl(std::make_unique<Impl>())
 {
 }
-CLFloor::CLFloor(CLFloor &&) = default;
+CLFloor::CLFloor(CLFloor &&)            = default;
 CLFloor &CLFloor::operator=(CLFloor &&) = default;
 CLFloor::~CLFloor()                     = default;
 

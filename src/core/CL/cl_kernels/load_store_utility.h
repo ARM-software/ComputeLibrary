@@ -223,8 +223,10 @@
  * @param[in] Z         The offset in z-axis direction
  * @{
  */
-#define STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-#define STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 /** @} */ // end of group STORE_BLOCK
 
 /** Convert and store a block of the given size M0xN0
@@ -245,8 +247,10 @@
  * @param[in] Z         The offset in z-axis direction
  * @{
  */
-#define CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-#define CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 /** @} */ // end of group CONVERT_STORE_BLOCK
 
 /** Partially store the 0 to (n-1)th rows of the given variables
@@ -365,8 +369,10 @@
  * @param[in] Z         The offset in z-axis direction
  * @{
  */
-#define STORE_BLOCK_PARTIAL_STR(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_ROW_PARTIAL_##STORE_M0(N0, STORE_N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-#define STORE_BLOCK_PARTIAL(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_BLOCK_PARTIAL_STR(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define STORE_BLOCK_PARTIAL_STR(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    STORE_ROW_PARTIAL_##STORE_M0(N0, STORE_N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+#define STORE_BLOCK_PARTIAL(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    STORE_BLOCK_PARTIAL_STR(STORE_M0, STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 /** Store a block that can be partial in both x and y dimensions
  *
  * @note in cases @p PARTIAL_STORE_N0 != 1, 2, 3, 4, 8, 16, extra vstore(s) will be invoked, thus incurring small performance penalty.
@@ -388,22 +394,23 @@
  * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
  * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  */
-#define STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    if(!(PARTIAL_COND_X) && !(PARTIAL_COND_Y))                                                                                                            \
-    {                                                                                                                                                     \
-        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                                           \
-    }                                                                                                                                                     \
-    else if((PARTIAL_COND_Y) && !(PARTIAL_COND_X))                                                                                                        \
-    {                                                                                                                                                     \
-        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                             \
-    }                                                                                                                                                     \
-    else if(!(PARTIAL_COND_Y) && (PARTIAL_COND_X))                                                                                                        \
-    {                                                                                                                                                     \
-        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                                             \
-    }                                                                                                                                                     \
-    else                                                                                                                                                  \
-    {                                                                                                                                                     \
-        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                               \
+#define STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0,     \
+                                       PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)                    \
+    if (!(PARTIAL_COND_X) && !(PARTIAL_COND_Y))                                                             \
+    {                                                                                                       \
+        STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                             \
+    }                                                                                                       \
+    else if ((PARTIAL_COND_Y) && !(PARTIAL_COND_X))                                                         \
+    {                                                                                                       \
+        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);               \
+    }                                                                                                       \
+    else if (!(PARTIAL_COND_Y) && (PARTIAL_COND_X))                                                         \
+    {                                                                                                       \
+        STORE_BLOCK_PARTIAL(M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);               \
+    }                                                                                                       \
+    else                                                                                                    \
+    {                                                                                                       \
+        STORE_BLOCK_PARTIAL(PARTIAL_STORE_M0, PARTIAL_STORE_N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z); \
     }
 /** Store a block that can only be partial in x but not y.
  *
@@ -425,7 +432,7 @@
  * @param[in] PARTIAL_COND_X   Condition on the x axis to perform the partial store X. True to use PARTIAL_STORE_N0 rather than N0.
  */
 #define STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, PARTIAL_COND_X) \
-    if(!(PARTIAL_COND_X))                                                                                         \
+    if (!(PARTIAL_COND_X))                                                                                        \
     {                                                                                                             \
         STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                   \
     }                                                                                                             \
@@ -453,7 +460,7 @@
  * @param[in] PARTIAL_COND_Y   Condition on the y axis to perform the partial store Y. True to use PARTIAL_STORE_M0 rather than M0.
  */
 #define STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y) \
-    if(!(PARTIAL_COND_Y))                                                                                         \
+    if (!(PARTIAL_COND_Y))                                                                                        \
     {                                                                                                             \
         STORE_BLOCK_PARTIAL(M0, N0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z);                                   \
     }                                                                                                             \
@@ -517,23 +524,28 @@
 #if defined(PARTIAL_STORE_M0) && defined(PARTIAL_STORE_N0)
 #if PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case1: No partial blocks in either x or y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, \
+                                   PARTIAL_COND_Y, PARTIAL_COND_X)                                                    \
     STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 
 #elif PARTIAL_STORE_M0 > 0 && PARTIAL_STORE_N0 == 0
 // Case2: Partial blocks in y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, \
+                                   PARTIAL_COND_Y, PARTIAL_COND_X)                                                    \
     STORE_BLOCK_PARTIAL_IN_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_COND_Y)
 
 #elif PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 > 0
 // Case3: Partial blocks in x
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, \
+                                   PARTIAL_COND_Y, PARTIAL_COND_X)                                                    \
     STORE_BLOCK_PARTIAL_IN_X(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_N0, PARTIAL_COND_X)
 
 #else // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 // Case4: Partial blocks in both x and y
-#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X) \
-    STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, PARTIAL_COND_Y, PARTIAL_COND_X)
+#define STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, \
+                                   PARTIAL_COND_Y, PARTIAL_COND_X)                                                    \
+    STORE_BLOCK_PARTIAL_IN_X_AND_Y(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z, PARTIAL_STORE_M0, PARTIAL_STORE_N0, \
+                                   PARTIAL_COND_Y, PARTIAL_COND_X)
 
 #endif // PARTIAL_STORE_M0 == 0 && PARTIAL_STORE_N0 == 0
 
@@ -560,8 +572,7 @@
 #define COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) \
     ((uint)(max(0, (int)(y * M0) - (int)((M0 - PARTIAL_STORE_M0) % M0))))
 #else // defined(PARTIAL_STORE_M0)
-#define COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) \
-    ((uint)(y * M0))
+#define COMPUTE_M0_START_ROW(y, M0, PARTIAL_STORE_M0) ((uint)(y * M0))
 #endif    // defined(PARTIAL_STORE_M0)
 /** @} */ // end of group COMPUTE_M0_START_ROW
 

@@ -23,12 +23,11 @@
  */
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuCast.h"
 
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentCast.h"
-
-#include "src/common/utils/Log.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 
 namespace arm_compute
 {
@@ -49,7 +48,7 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -58,25 +57,22 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 
     // Check support level
     // Data Type
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src,
-                                                         1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst_info_to_validate_ptr,
-                                                         1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
+        src, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
+        DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst_info_to_validate_ptr, 1, DataType::U8, DataType::S8,
+                                                         DataType::QASYMM8, DataType::S16, DataType::U16, DataType::U32,
+                                                         DataType::S32, DataType::F16, DataType::F32);
 
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
         // Validate Cast Component
         {
-            const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
-            auto       settings   = ClComponentCast::Settings();
+            const auto properties =
+                IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
+            auto settings = ClComponentCast::Settings();
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);
@@ -94,16 +90,13 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
-Status GpuCast::is_supported_op(const GpuWorkloadContext &context,
-                                const ITensorInfo        *src,
-                                const CastAttributes     &attributes)
+Status
+GpuCast::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src, const CastAttributes &attributes)
 {
     return is_supported_op_helper(context, src, nullptr, attributes);
 }
 
-Status GpuCast::validate_op(const GpuWorkloadSketch &sketch,
-                            const ITensorInfo       *src,
-                            const CastAttributes    &attributes)
+Status GpuCast::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src, const CastAttributes &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
@@ -127,9 +120,7 @@ Status GpuCast::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-ITensorInfo *GpuCast::create_op(GpuWorkloadSketch    &sketch,
-                                ITensorInfo          *src,
-                                const CastAttributes &attributes)
+ITensorInfo *GpuCast::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, const CastAttributes &attributes)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, attributes);
@@ -145,14 +136,15 @@ ITensorInfo *GpuCast::create_op(GpuWorkloadSketch    &sketch,
     GpuKernelComponentGraph &comp_graph = sketch.implementation().component_graph();
     const auto              *sketch_ctx = sketch.implementation().context();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         ARM_COMPUTE_ERROR_ON(sketch_ctx->cl_compile_context() == nullptr);
 
         // Add Depthwise Conv2d Component
         {
-            const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
-            auto       settings   = ClComponentCast::Settings();
+            const auto properties =
+                IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
+            auto settings = ClComponentCast::Settings();
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);

@@ -24,24 +24,24 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
 #include "arm_compute/core/Validate.h"
+
 #include "src/cpu/operators/CpuActivation.h"
 
 namespace arm_compute
 {
 struct NEActivationLayer::Impl
 {
-    const ITensor                      *src{ nullptr };
-    ITensor                            *dst{ nullptr };
-    IRuntimeContext                    *ctx{ nullptr };
-    std::unique_ptr<cpu::CpuActivation> op{ nullptr };
+    const ITensor                      *src{nullptr};
+    ITensor                            *dst{nullptr};
+    IRuntimeContext                    *ctx{nullptr};
+    std::unique_ptr<cpu::CpuActivation> op{nullptr};
 };
 
-NEActivationLayer::NEActivationLayer(IRuntimeContext *ctx)
-    : _impl(std::make_unique<Impl>())
+NEActivationLayer::NEActivationLayer(IRuntimeContext *ctx) : _impl(std::make_unique<Impl>())
 {
     _impl->ctx = ctx;
 }
-NEActivationLayer::NEActivationLayer(NEActivationLayer &&) = default;
+NEActivationLayer::NEActivationLayer(NEActivationLayer &&)            = default;
 NEActivationLayer &NEActivationLayer::operator=(NEActivationLayer &&) = default;
 NEActivationLayer::~NEActivationLayer()                               = default;
 
@@ -56,7 +56,8 @@ void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLay
     _impl->op->configure(_impl->src->info(), _impl->dst->info(), activation_info);
 }
 
-Status NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status
+NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     return cpu::CpuActivation::validate(input, output, act_info);
 }

@@ -26,15 +26,17 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
+Status
+validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
 {
     ARM_COMPUTE_UNUSED(use_inverted_axis);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, axis);
@@ -42,11 +44,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Current implementation only supports up to 4 dimensions.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4,
+                                    "Current implementation only supports up to 4 dimensions.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->dimension(0) > 4, "Only up to 4 dimensions can be reversed");
 
     // Checks performed when output is configured
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -57,8 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 } // namespace
 
-NEReverseKernel::NEReverseKernel()
-    : _input(nullptr), _output(nullptr), _axis(nullptr), _use_inverted_axis(false)
+NEReverseKernel::NEReverseKernel() : _input(nullptr), _output(nullptr), _axis(nullptr), _use_inverted_axis(false)
 {
 }
 
@@ -80,7 +82,10 @@ void NEReverseKernel::configure(const ITensor *input, ITensor *output, const ITe
     INEKernel::configure(calculate_max_window(*output->info()));
 }
 
-Status NEReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
+Status NEReverseKernel::validate(const ITensorInfo *input,
+                                 const ITensorInfo *output,
+                                 const ITensorInfo *axis,
+                                 bool               use_inverted_axis)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, use_inverted_axis));
 
@@ -88,29 +93,30 @@ Status NEReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *ou
 }
 
 template <typename T>
-void run_reverse(const Window &window, const ITensor *input, const ITensor *axis, ITensor *output, bool use_inverted_axis)
+void run_reverse(
+    const Window &window, const ITensor *input, const ITensor *axis, ITensor *output, bool use_inverted_axis)
 {
     unsigned int axis_bit = 0;
     const int    rank     = input->info()->num_dimensions();
 
-    for(unsigned int i = 0; i < axis->info()->dimension(0); ++i)
+    for (unsigned int i = 0; i < axis->info()->dimension(0); ++i)
     {
         int axis_i = *(reinterpret_cast<const int *>(axis->buffer()) + i);
 
         // The values of axis tensor must be between [-rank, rank-1].
-        if((axis_i < -rank) || (axis_i >= rank))
+        if ((axis_i < -rank) || (axis_i >= rank))
         {
             ARM_COMPUTE_ERROR("the valuses of the axis tensor must be within [-rank, rank-1].");
         }
 
         // In case of negative axis value i.e targeted axis(i) = rank + axis(i)
-        if(axis_i < 0)
+        if (axis_i < 0)
         {
             axis_i = rank + axis_i;
         }
 
         // Reverse ACL axis indices convention i.e. (inverted)axis = (tensor_rank - 1) - axis
-        if(use_inverted_axis)
+        if (use_inverted_axis)
         {
             axis_i = (rank - 1) - axis_i;
         }
@@ -127,43 +133,47 @@ void run_reverse(const Window &window, const ITensor *input, const ITensor *axis
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator input_it(input, win);
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        int x = window_start_x;
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &id)
         {
-            auto in = wrapper::vloadq(reinterpret_cast<T *>(input_it.ptr()) + x);
-
-            // Reverse 0 axis
-            if(axis_bit & 0x1)
+            int x = window_start_x;
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                in = wrapper::vrev64(in);
-                in = wrapper::vcombine(wrapper::vgethigh(in), wrapper::vgetlow(in));
+                auto in = wrapper::vloadq(reinterpret_cast<T *>(input_it.ptr()) + x);
+
+                // Reverse 0 axis
+                if (axis_bit & 0x1)
+                {
+                    in = wrapper::vrev64(in);
+                    in = wrapper::vcombine(wrapper::vgethigh(in), wrapper::vgetlow(in));
+                }
+
+                const int offset_x = (axis_bit & 0x1) ? output->info()->dimension(0) - x - window_step_x : x;
+                const int offset_y = (axis_bit & 0x2) ? output->info()->dimension(1) - id.y() - 1 : id.y();
+                const int offset_z = (axis_bit & 0x4) ? output->info()->dimension(2) - id.z() - 1 : id.z();
+                const int offset_w = (axis_bit & 0x8) ? output->info()->dimension(3) - id[3] - 1 : id[3];
+
+                auto out_ptr =
+                    reinterpret_cast<T *>(output->ptr_to_element(Coordinates(offset_x, offset_y, offset_z, offset_w)));
+                wrapper::vstore(out_ptr, in);
             }
 
-            const int offset_x = (axis_bit & 0x1) ? output->info()->dimension(0) - x - window_step_x : x;
-            const int offset_y = (axis_bit & 0x2) ? output->info()->dimension(1) - id.y() - 1 : id.y();
-            const int offset_z = (axis_bit & 0x4) ? output->info()->dimension(2) - id.z() - 1 : id.z();
-            const int offset_w = (axis_bit & 0x8) ? output->info()->dimension(3) - id[3] - 1 : id[3];
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                const auto in = *(reinterpret_cast<T *>(input_it.ptr()) + x);
 
-            auto out_ptr = reinterpret_cast<T *>(output->ptr_to_element(Coordinates(offset_x, offset_y, offset_z, offset_w)));
-            wrapper::vstore(out_ptr, in);
-        }
+                const int offset_x = (axis_bit & 0x1) ? output->info()->dimension(0) - x - 1 : x;
+                const int offset_y = (axis_bit & 0x2) ? output->info()->dimension(1) - id.y() - 1 : id.y();
+                const int offset_z = (axis_bit & 0x4) ? output->info()->dimension(2) - id.z() - 1 : id.z();
+                const int offset_w = (axis_bit & 0x8) ? output->info()->dimension(3) - id[3] - 1 : id[3];
 
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const auto in = *(reinterpret_cast<T *>(input_it.ptr()) + x);
-
-            const int offset_x = (axis_bit & 0x1) ? output->info()->dimension(0) - x - 1 : x;
-            const int offset_y = (axis_bit & 0x2) ? output->info()->dimension(1) - id.y() - 1 : id.y();
-            const int offset_z = (axis_bit & 0x4) ? output->info()->dimension(2) - id.z() - 1 : id.z();
-            const int offset_w = (axis_bit & 0x8) ? output->info()->dimension(3) - id[3] - 1 : id[3];
-
-            *reinterpret_cast<T *>(output->ptr_to_element(Coordinates(offset_x, offset_y, offset_z, offset_w))) = in;
-        }
-    },
-    input_it);
+                *reinterpret_cast<T *>(output->ptr_to_element(Coordinates(offset_x, offset_y, offset_z, offset_w))) =
+                    in;
+            }
+        },
+        input_it);
 }
 
 void NEReverseKernel::run(const Window &window, const ThreadInfo &info)
@@ -172,7 +182,7 @@ void NEReverseKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_input->info()->element_size())
+    switch (_input->info()->element_size())
     {
         case 4:
             run_reverse<uint32_t>(window, _input, _axis, _output, _use_inverted_axis);

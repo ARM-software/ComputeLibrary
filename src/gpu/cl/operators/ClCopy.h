@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_COPY_H
 
 #include "arm_compute/core/Window.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -44,7 +45,10 @@ public:
      * @param[in]  dst_window      (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, Window *dst_window = nullptr);
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   Window                 *dst_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClCopy::configure()

@@ -23,8 +23,8 @@
  */
 #include "arm_compute/graph/frontend/SubStream.h"
 
-#include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/frontend/ILayer.h"
+#include "arm_compute/graph/Graph.h"
 
 namespace arm_compute
 {
@@ -32,8 +32,7 @@ namespace graph
 {
 namespace frontend
 {
-SubStream::SubStream(IStream &s)
-    : _s(s)
+SubStream::SubStream(IStream &s) : _s(s)
 {
     _hints     = s.hints();
     _tail_node = s.tail_node();

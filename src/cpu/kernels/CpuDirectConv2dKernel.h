@@ -37,7 +37,8 @@ namespace kernels
 class CpuDirectConv2dKernel : public ICpuKernel<CpuDirectConv2dKernel>
 {
 private:
-    using DirectConv2dKernel_Ptr = std::add_pointer<void(const Window &, const ITensor *, const ITensor *, ITensor *, const PadStrideInfo &)>::type;
+    using DirectConv2dKernel_Ptr = std::add_pointer<void(
+        const Window &, const ITensor *, const ITensor *, ITensor *, const PadStrideInfo &)>::type;
 
 public:
     CpuDirectConv2dKernel() = default;
@@ -64,10 +65,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const PadStrideInfo &conv_info);
+    static Status validate(const ITensorInfo   *src,
+                           const ITensorInfo   *weights,
+                           const ITensorInfo   *dst,
+                           const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct DirectConv2dKernel
@@ -81,8 +85,8 @@ public:
 
 private:
     PadStrideInfo _conv_info{};
-    unsigned int  _kernel_size{ 0 };
-    DataLayout    _data_layout{ DataLayout::UNKNOWN };
+    unsigned int  _kernel_size{0};
+    DataLayout    _data_layout{DataLayout::UNKNOWN};
 };
 } // namespace kernels
 } // namespace cpu

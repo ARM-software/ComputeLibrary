@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <string>
-
 #include "arm_compute/core/utils/io/FileHandler.h"
 
 #include "arm_compute/core/Error.h"
 
+#include <string>
+
 using namespace arm_compute::io;
 
-FileHandler::FileHandler()
-    : _filestream(), _filename(" "), _mode()
+FileHandler::FileHandler() : _filestream(), _filename(" "), _mode()
 {
 }
 

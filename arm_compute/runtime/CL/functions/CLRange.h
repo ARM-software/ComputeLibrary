@@ -73,7 +73,8 @@ public:
      * @param[in]  end             The ending (not including) value of the sequence.
      * @param[in]  step            The gap between each pair of values in the sequence. Default is 1.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *output, float start, float end, float step = 1.f);
+    void
+    configure(const CLCompileContext &compile_context, ICLTensor *output, float start, float end, float step = 1.f);
     /** Static function to check if given info will lead to a valid configuration of @ref CLRange
      *
      * @param[in] output Output tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/GPUTarget.h"
+
 #include "arm_compute/core/Log.h"
 
 #include <map>
@@ -31,47 +32,47 @@ namespace
 {
 arm_compute::GPUTarget get_valhall_target(const std::string &version)
 {
-    if(version.find("G77") != std::string::npos)
+    if (version.find("G77") != std::string::npos)
     {
         return arm_compute::GPUTarget::G77;
     }
-    else if(version.find("G57") != std::string::npos)
+    else if (version.find("G57") != std::string::npos)
     {
         return arm_compute::GPUTarget::G57;
     }
-    if(version.find("G68") != std::string::npos)
+    if (version.find("G68") != std::string::npos)
     {
         return arm_compute::GPUTarget::G68;
     }
-    if(version.find("G78AE") != std::string::npos)
+    if (version.find("G78AE") != std::string::npos)
     {
         return arm_compute::GPUTarget::G78AE;
     }
-    if(version.find("G78") != std::string::npos)
+    if (version.find("G78") != std::string::npos)
     {
         return arm_compute::GPUTarget::G78;
     }
-    else if(version.find("G710") != std::string::npos)
+    else if (version.find("G710") != std::string::npos)
     {
         return arm_compute::GPUTarget::G710;
     }
-    else if(version.find("G610") != std::string::npos)
+    else if (version.find("G610") != std::string::npos)
     {
         return arm_compute::GPUTarget::G610;
     }
-    else if(version.find("G510") != std::string::npos)
+    else if (version.find("G510") != std::string::npos)
     {
         return arm_compute::GPUTarget::G510;
     }
-    else if(version.find("G310") != std::string::npos)
+    else if (version.find("G310") != std::string::npos)
     {
         return arm_compute::GPUTarget::G310;
     }
-    else if(version.find("G715") != std::string::npos)
+    else if (version.find("G715") != std::string::npos)
     {
         return arm_compute::GPUTarget::G715;
     }
-    else if(version.find("G615") != std::string::npos)
+    else if (version.find("G615") != std::string::npos)
     {
         return arm_compute::GPUTarget::G615;
     }
@@ -83,39 +84,39 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
 
 arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 {
-    if(version.find("G71") != std::string::npos)
+    if (version.find("G71") != std::string::npos)
     {
         return arm_compute::GPUTarget::G71;
     }
-    else if(version.find("G72") != std::string::npos)
+    else if (version.find("G72") != std::string::npos)
     {
         return arm_compute::GPUTarget::G72;
     }
-    else if(version.find("G51BIG") != std::string::npos)
+    else if (version.find("G51BIG") != std::string::npos)
     {
         return arm_compute::GPUTarget::G51BIG;
     }
-    else if(version.find("G51LIT") != std::string::npos)
+    else if (version.find("G51LIT") != std::string::npos)
     {
         return arm_compute::GPUTarget::G51LIT;
     }
-    else if(version.find("G51") != std::string::npos)
+    else if (version.find("G51") != std::string::npos)
     {
         return arm_compute::GPUTarget::G51;
     }
-    else if(version.find("G52LIT") != std::string::npos)
+    else if (version.find("G52LIT") != std::string::npos)
     {
         return arm_compute::GPUTarget::G52LIT;
     }
-    else if(version.find("G52") != std::string::npos)
+    else if (version.find("G52") != std::string::npos)
     {
         return arm_compute::GPUTarget::G52;
     }
-    else if(version.find("G76") != std::string::npos)
+    else if (version.find("G76") != std::string::npos)
     {
         return arm_compute::GPUTarget::G76;
     }
-    else if(version.find("G31") != std::string::npos)
+    else if (version.find("G31") != std::string::npos)
     {
         return arm_compute::GPUTarget::G31;
     }
@@ -127,15 +128,15 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 
 arm_compute::GPUTarget get_midgard_target(const std::string &version)
 {
-    if(version.find("T600") != std::string::npos)
+    if (version.find("T600") != std::string::npos)
     {
         return arm_compute::GPUTarget::T600;
     }
-    else if(version.find("T700") != std::string::npos)
+    else if (version.find("T700") != std::string::npos)
     {
         return arm_compute::GPUTarget::T700;
     }
-    else if(version.find("T800") != std::string::npos)
+    else if (version.find("T800") != std::string::npos)
     {
         return arm_compute::GPUTarget::T800;
     }
@@ -150,34 +151,16 @@ namespace arm_compute
 {
 const std::string &string_from_target(GPUTarget target)
 {
-    static std::map<GPUTarget, const std::string> gpu_target_map =
-    {
-        { GPUTarget::MIDGARD, "midgard" },
-        { GPUTarget::BIFROST, "bifrost" },
-        { GPUTarget::VALHALL, "valhall" },
-        { GPUTarget::T600, "t600" },
-        { GPUTarget::T700, "t700" },
-        { GPUTarget::T800, "t800" },
-        { GPUTarget::G71, "g71" },
-        { GPUTarget::G72, "g72" },
-        { GPUTarget::G51, "g51" },
-        { GPUTarget::G51BIG, "g51big" },
-        { GPUTarget::G51LIT, "g51lit" },
-        { GPUTarget::G31, "g31" },
-        { GPUTarget::G76, "g76" },
-        { GPUTarget::G52, "g52" },
-        { GPUTarget::G52LIT, "g52lit" },
-        { GPUTarget::G77, "g77" },
-        { GPUTarget::G57, "g57" },
-        { GPUTarget::G78, "g78" },
-        { GPUTarget::G68, "g68" },
-        { GPUTarget::G78AE, "g78ae" },
-        { GPUTarget::G710, "g710" },
-        { GPUTarget::G610, "g610" },
-        { GPUTarget::G510, "g510" },
-        { GPUTarget::G310, "g310" },
-        { GPUTarget::G715, "g715" },
-        { GPUTarget::G615, "g615" },
+    static std::map<GPUTarget, const std::string> gpu_target_map = {
+        {GPUTarget::MIDGARD, "midgard"}, {GPUTarget::BIFROST, "bifrost"}, {GPUTarget::VALHALL, "valhall"},
+        {GPUTarget::T600, "t600"},       {GPUTarget::T700, "t700"},       {GPUTarget::T800, "t800"},
+        {GPUTarget::G71, "g71"},         {GPUTarget::G72, "g72"},         {GPUTarget::G51, "g51"},
+        {GPUTarget::G51BIG, "g51big"},   {GPUTarget::G51LIT, "g51lit"},   {GPUTarget::G31, "g31"},
+        {GPUTarget::G76, "g76"},         {GPUTarget::G52, "g52"},         {GPUTarget::G52LIT, "g52lit"},
+        {GPUTarget::G77, "g77"},         {GPUTarget::G57, "g57"},         {GPUTarget::G78, "g78"},
+        {GPUTarget::G68, "g68"},         {GPUTarget::G78AE, "g78ae"},     {GPUTarget::G710, "g710"},
+        {GPUTarget::G610, "g610"},       {GPUTarget::G510, "g510"},       {GPUTarget::G310, "g310"},
+        {GPUTarget::G715, "g715"},       {GPUTarget::G615, "g615"},
     };
 
     return gpu_target_map[target];
@@ -189,7 +172,7 @@ GPUTarget get_target_from_name(const std::string &device_name)
     std::smatch name_parts;
     const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
 
-    if(!found_mali)
+    if (!found_mali)
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Arm® Mali™ GPU. Target is set to default.");
         return GPUTarget::MIDGARD;
@@ -203,22 +186,22 @@ GPUTarget get_target_from_name(const std::string &device_name)
 
     // Work-out gpu target
     GPUTarget gpu_target;
-    if(target == 'G' || is_future_gpu)
+    if (target == 'G' || is_future_gpu)
     {
         // Check for Valhall or Bifrost
         gpu_target = get_valhall_target(version);
-        if(gpu_target == GPUTarget::UNKNOWN)
+        if (gpu_target == GPUTarget::UNKNOWN)
         {
             gpu_target = get_bifrost_target(version);
         }
 
         // Default GPUTarget
-        if(gpu_target == GPUTarget::UNKNOWN)
+        if (gpu_target == GPUTarget::UNKNOWN)
         {
             gpu_target = GPUTarget::VALHALL;
         }
     }
-    else if(target == 'T')
+    else if (target == 'T')
     {
         gpu_target = get_midgard_target(version);
     }
@@ -228,7 +211,7 @@ GPUTarget get_target_from_name(const std::string &device_name)
     }
 
     // Report in case of unknown target
-    if(gpu_target == GPUTarget::UNKNOWN)
+    if (gpu_target == GPUTarget::UNKNOWN)
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("Arm® Mali™ Mali GPU unknown. Target is set to the default one. (BIFROST)");
         return GPUTarget::BIFROST;

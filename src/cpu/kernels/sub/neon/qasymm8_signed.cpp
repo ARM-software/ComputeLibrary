@@ -24,18 +24,21 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/kernels/add/generic/neon/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void sub_qasymm8_signed_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void sub_qasymm8_signed_neon_fixedpoint(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     add_sub_q8_neon_fixedpoint<int8_t>(src0, src1, dst, policy, window, false /*is_addition*/);
 }
 
-void sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void sub_qasymm8_signed_neon(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     add_sub_qasymm8_signed_neon(src0, src1, dst, policy, window, false /*is_addition*/);
 }

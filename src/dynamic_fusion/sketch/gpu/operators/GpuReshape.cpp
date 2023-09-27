@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuReshape.h"
+
 #include "arm_compute/core/Error.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentReshape.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 
 namespace arm_compute
 {
@@ -40,14 +42,14 @@ namespace
 Status is_supported_op_helper(const GpuWorkloadContext &context,
                               const ITensorInfo        *src,
                               const ITensorInfo        *dst,
-                              const ReshapeAttributes &attributes)
+                              const ReshapeAttributes  &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -55,7 +57,7 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     auto_init_if_empty(dst_info_to_validate, src->clone()->set_tensor_shape(attributes.shape()));
 
     // Check components
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = context.cl_compile_context();
         ARM_COMPUTE_RETURN_ERROR_ON(cl_compile_ctx == nullptr);
@@ -78,16 +80,13 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 GpuOperatorType operator_type = GpuOperatorType::Complex;
 } // namespace
 
-Status GpuReshape::is_supported_op(const GpuWorkloadContext &context,
-                                   const ITensorInfo        *src,
-                                   const Attributes         &attributes)
+Status
+GpuReshape::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src, const Attributes &attributes)
 {
     return is_supported_op_helper(context, src, nullptr, attributes);
 }
 
-Status GpuReshape::validate_op(const GpuWorkloadSketch &sketch,
-                               const ITensorInfo       *src,
-                               const Attributes        &attributes)
+Status GpuReshape::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src, const Attributes &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_RETURN_ERROR_ON(!src->has_valid_id());
@@ -111,9 +110,7 @@ Status GpuReshape::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-ITensorInfo *GpuReshape::create_op(GpuWorkloadSketch &sketch,
-                                   ITensorInfo       *src,
-                                   const Attributes &attributes)
+ITensorInfo *GpuReshape::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, const Attributes &attributes)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, attributes.shape());
@@ -127,7 +124,7 @@ ITensorInfo *GpuReshape::create_op(GpuWorkloadSketch &sketch,
     // Translate into components and add to component graph
     auto      &comp_graph = sketch.implementation().component_graph();
     const auto sketch_ctx = sketch.implementation().context();
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         const auto cl_compile_ctx = sketch_ctx->cl_compile_context();
         ARM_COMPUTE_UNUSED(cl_compile_ctx);
@@ -136,7 +133,7 @@ ITensorInfo *GpuReshape::create_op(GpuWorkloadSketch &sketch,
         // Add ElementwiseBinary Component
         {
             auto properties = IGpuKernelComponent::Properties();
-            properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+            properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
             ArgumentPack<ITensorInfo> arguments;
             arguments.add_const_tensor(ACL_SRC_0, src);

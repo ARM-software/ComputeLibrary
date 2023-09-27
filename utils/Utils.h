@@ -87,9 +87,9 @@ public:
         return true;
     };
     /** Run the example. */
-    virtual void do_run() {};
+    virtual void do_run(){};
     /** Teardown the example. */
-    virtual void do_teardown() {};
+    virtual void do_teardown(){};
 
     /** Default destructor. */
     virtual ~Example() = default;
@@ -117,7 +117,8 @@ int run_example(int argc, char **argv)
  * @param[in]      g      Green colour to use
  * @param[in]      b      Blue colour to use
  */
-void draw_detection_rectangle(arm_compute::ITensor *tensor, const arm_compute::DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b);
+void draw_detection_rectangle(
+    arm_compute::ITensor *tensor, const arm_compute::DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b);
 
 /** Gets image type given a file
  *
@@ -157,7 +158,7 @@ inline std::string get_typestring(DataType data_type)
     const unsigned int i = 1;
     const char        *c = reinterpret_cast<const char *>(&i);
     std::string        endianness;
-    if(*c == 1)
+    if (*c == 1)
     {
         endianness = std::string("<");
     }
@@ -167,7 +168,7 @@ inline std::string get_typestring(DataType data_type)
     }
     const std::string no_endianness("|");
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -253,7 +254,8 @@ inline void unmap(CLTensor &tensor)
 template <typename T>
 class uniform_real_distribution_16bit
 {
-    static_assert(std::is_same<T, half>::value || std::is_same<T, bfloat16>::value, "Only half and bfloat16 data types supported");
+    static_assert(std::is_same<T, half>::value || std::is_same<T, bfloat16>::value,
+                  "Only half and bfloat16 data types supported");
 
 public:
     using result_type = T;
@@ -262,8 +264,7 @@ public:
      * @param[in] min Minimum value of the distribution
      * @param[in] max Maximum value of the distribution
      */
-    explicit uniform_real_distribution_16bit(float min = 0.f, float max = 1.0)
-        : dist(min, max)
+    explicit uniform_real_distribution_16bit(float min = 0.f, float max = 1.0) : dist(min, max)
     {
     }
 
@@ -285,8 +286,7 @@ class NPYLoader
 {
 public:
     /** Default constructor */
-    NPYLoader()
-        : _fs(), _shape(), _fortran_order(false), _typestring(), _file_layout(DataLayout::NCHW)
+    NPYLoader() : _fs(), _shape(), _fortran_order(false), _typestring(), _file_layout(DataLayout::NCHW)
     {
     }
 
@@ -310,7 +310,7 @@ public:
             _fortran_order       = header.fortran_order;
             _typestring          = header.dtype.str();
         }
-        catch(const std::ifstream::failure &e)
+        catch (const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", npy_filename.c_str(), e.what());
         }
@@ -341,10 +341,10 @@ public:
         // Use the size of the input NPY tensor
         TensorShape shape;
         shape.set_num_dimensions(_shape.size());
-        for(size_t i = 0; i < _shape.size(); ++i)
+        for (size_t i = 0; i < _shape.size(); ++i)
         {
             size_t src = i;
-            if(_fortran_order)
+            if (_fortran_order)
             {
                 src = _shape.size() - 1 - i;
             }
@@ -365,7 +365,8 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32, arm_compute::DataType::F16);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32,
+                                              arm_compute::DataType::F32, arm_compute::DataType::F16);
         try
         {
             // Map buffer if creating a CLTensor
@@ -377,7 +378,8 @@ public:
             const size_t end_position = _fs.tellg();
             _fs.seekg(current_position, std::ios_base::beg);
 
-            ARM_COMPUTE_ERROR_ON_MSG((end_position - current_position) < tensor.info()->tensor_shape().total_size() * tensor.info()->element_size(),
+            ARM_COMPUTE_ERROR_ON_MSG((end_position - current_position) <
+                                         tensor.info()->tensor_shape().total_size() * tensor.info()->element_size(),
                                      "Not enough data in file");
             ARM_COMPUTE_UNUSED(end_position);
 
@@ -385,12 +387,12 @@ public:
             std::string expect_typestr = get_typestring(tensor.info()->data_type());
 
             bool enable_f32_to_f16_conversion = false;
-            if(_typestring != expect_typestr)
+            if (_typestring != expect_typestr)
             {
                 const std::string f32_typestring = "<f4";
                 const std::string f16_typestring = "<f2";
                 // if typestring does not match, check whether _typestring is F32 and can be downcasted to expect_typestr
-                if(_typestring == f32_typestring && expect_typestr == f16_typestring)
+                if (_typestring == f32_typestring && expect_typestr == f16_typestring)
                 {
                     enable_f32_to_f16_conversion = true;
                 }
@@ -402,11 +404,11 @@ public:
 
             bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
             // Correct dimensions (Needs to match TensorShape dimension corrections)
-            if(_shape.size() != tensor.info()->tensor_shape().num_dimensions())
+            if (_shape.size() != tensor.info()->tensor_shape().num_dimensions())
             {
-                for(int i = static_cast<int>(_shape.size()) - 1; i > 0; --i)
+                for (int i = static_cast<int>(_shape.size()) - 1; i > 0; --i)
                 {
-                    if(_shape[i] == 1)
+                    if (_shape[i] == 1)
                     {
                         _shape.pop_back();
                     }
@@ -419,22 +421,28 @@ public:
 
             TensorShape                    permuted_shape = tensor.info()->tensor_shape();
             arm_compute::PermutationVector perm;
-            if(are_layouts_different && tensor.info()->tensor_shape().num_dimensions() > 2)
+            if (are_layouts_different && tensor.info()->tensor_shape().num_dimensions() > 2)
             {
-                perm                                    = (tensor.info()->data_layout() == arm_compute::DataLayout::NHWC) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
-                arm_compute::PermutationVector perm_vec = (tensor.info()->data_layout() == arm_compute::DataLayout::NCHW) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+                perm = (tensor.info()->data_layout() == arm_compute::DataLayout::NHWC)
+                           ? arm_compute::PermutationVector(2U, 0U, 1U)
+                           : arm_compute::PermutationVector(1U, 2U, 0U);
+                arm_compute::PermutationVector perm_vec =
+                    (tensor.info()->data_layout() == arm_compute::DataLayout::NCHW)
+                        ? arm_compute::PermutationVector(2U, 0U, 1U)
+                        : arm_compute::PermutationVector(1U, 2U, 0U);
 
                 arm_compute::permute(permuted_shape, perm_vec);
             }
 
             // Validate tensor shape
-            ARM_COMPUTE_ERROR_ON_MSG(_shape.size() != tensor.info()->tensor_shape().num_dimensions(), "Tensor ranks mismatch");
-            for(size_t i = 0; i < _shape.size(); ++i)
+            ARM_COMPUTE_ERROR_ON_MSG(_shape.size() != tensor.info()->tensor_shape().num_dimensions(),
+                                     "Tensor ranks mismatch");
+            for (size_t i = 0; i < _shape.size(); ++i)
             {
                 ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != _shape[i], "Tensor dimensions mismatch");
             }
 
-            switch(tensor.info()->data_type())
+            switch (tensor.info()->data_type())
             {
                 case arm_compute::DataType::QASYMM8:
                 case arm_compute::DataType::S32:
@@ -442,7 +450,8 @@ public:
                 case arm_compute::DataType::F16:
                 {
                     // Read data
-                    if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty() && !enable_f32_to_f16_conversion)
+                    if (!are_layouts_different && !_fortran_order && tensor.info()->padding().empty() &&
+                        !enable_f32_to_f16_conversion)
                     {
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
@@ -452,19 +461,19 @@ public:
                         // If tensor has padding or is in fortran order accessing tensor elements through execution window.
                         Window             window;
                         const unsigned int num_dims = _shape.size();
-                        if(_fortran_order)
+                        if (_fortran_order)
                         {
-                            for(unsigned int dim = 0; dim < num_dims; dim++)
+                            for (unsigned int dim = 0; dim < num_dims; dim++)
                             {
                                 permuted_shape.set(dim, _shape[num_dims - dim - 1]);
                                 perm.set(dim, num_dims - dim - 1);
                             }
-                            if(are_layouts_different)
+                            if (are_layouts_different)
                             {
                                 // Permute only if num_dimensions greater than 2
-                                if(num_dims > 2)
+                                if (num_dims > 2)
                                 {
-                                    if(_file_layout == DataLayout::NHWC) // i.e destination is NCHW --> permute(1,2,0)
+                                    if (_file_layout == DataLayout::NHWC) // i.e destination is NCHW --> permute(1,2,0)
                                     {
                                         arm_compute::permute(perm, arm_compute::PermutationVector(1U, 2U, 0U));
                                     }
@@ -477,22 +486,25 @@ public:
                         }
                         window.use_tensor_dimensions(permuted_shape);
 
-                        execute_window_loop(window, [&](const Coordinates & id)
-                        {
-                            Coordinates dst(id);
-                            arm_compute::permute(dst, perm);
-                            if(enable_f32_to_f16_conversion)
-                            {
-                                float f32_val = 0;
-                                _fs.read(reinterpret_cast<char *>(&f32_val), 4u);
-                                half f16_val                                            = half_float::half_cast<half, std::round_to_nearest>(f32_val);
-                                *(reinterpret_cast<half *>(tensor.ptr_to_element(dst))) = f16_val;
-                            }
-                            else
-                            {
-                                _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(dst)), tensor.info()->element_size());
-                            }
-                        });
+                        execute_window_loop(window,
+                                            [&](const Coordinates &id)
+                                            {
+                                                Coordinates dst(id);
+                                                arm_compute::permute(dst, perm);
+                                                if (enable_f32_to_f16_conversion)
+                                                {
+                                                    float f32_val = 0;
+                                                    _fs.read(reinterpret_cast<char *>(&f32_val), 4u);
+                                                    half f16_val =
+                                                        half_float::half_cast<half, std::round_to_nearest>(f32_val);
+                                                    *(reinterpret_cast<half *>(tensor.ptr_to_element(dst))) = f16_val;
+                                                }
+                                                else
+                                                {
+                                                    _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(dst)),
+                                                             tensor.info()->element_size());
+                                                }
+                                            });
                     }
 
                     break;
@@ -504,7 +516,7 @@ public:
             // Unmap buffer if creating a CLTensor
             unmap(tensor);
         }
-        catch(const std::ifstream::failure &e)
+        catch (const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
@@ -543,13 +555,12 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         const unsigned int width  = tensor.info()->tensor_shape()[0];
         const unsigned int height = tensor.info()->tensor_shape()[1];
 
-        fs << "P6\n"
-           << width << " " << height << " 255\n";
+        fs << "P6\n" << width << " " << height << " 255\n";
 
         // Map buffer if creating a CLTensor
         map(tensor, true);
 
-        switch(tensor.info()->format())
+        switch (tensor.info()->format())
         {
             case arm_compute::Format::U8:
             {
@@ -559,13 +570,15 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
-                {
-                    const unsigned char value = *in.ptr();
+                arm_compute::execute_window_loop(
+                    window,
+                    [&](const arm_compute::Coordinates &)
+                    {
+                        const unsigned char value = *in.ptr();
 
-                    fs << value << value << value;
-                },
-                in);
+                        fs << value << value << value;
+                    },
+                    in);
 
                 break;
             }
@@ -577,11 +590,13 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
-                {
-                    fs.write(reinterpret_cast<std::fstream::char_type *>(in.ptr()), width * tensor.info()->element_size());
-                },
-                in);
+                arm_compute::execute_window_loop(
+                    window,
+                    [&](const arm_compute::Coordinates &) {
+                        fs.write(reinterpret_cast<std::fstream::char_type *>(in.ptr()),
+                                 width * tensor.info()->element_size());
+                    },
+                    in);
 
                 break;
             }
@@ -592,7 +607,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
-    catch(const std::ofstream::failure &e)
+    catch (const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
     }
@@ -620,7 +635,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         std::vector<npy::ndarray_len_t> shape(tensor.info()->num_dimensions());
 
-        for(unsigned int i = 0, j = tensor.info()->num_dimensions() - 1; i < tensor.info()->num_dimensions(); ++i, --j)
+        for (unsigned int i = 0, j = tensor.info()->num_dimensions() - 1; i < tensor.info()->num_dimensions(); ++i, --j)
         {
             shape[i] = tensor.info()->tensor_shape()[!fortran_order ? j : i];
         }
@@ -634,7 +649,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
         const npy::dtype_t           dtype = npy::dtype_map.at(std::type_index(typeid(tmp)));
 
         std::ofstream stream(npy_filename, std::ofstream::binary);
-        npy::header_t header{ dtype, fortran_order, shape };
+        npy::header_t header{dtype, fortran_order, shape};
         npy::write_header(stream, header);
 
         arm_compute::Window window;
@@ -642,16 +657,16 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         arm_compute::Iterator in(&tensor, window);
 
-        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
-        {
-            stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(typestring_type));
-        },
-        in);
+        arm_compute::execute_window_loop(
+            window,
+            [&](const arm_compute::Coordinates &)
+            { stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(typestring_type)); },
+            in);
 
         // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
-    catch(const std::ofstream::failure &e)
+    catch (const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", npy_filename.c_str(), e.what());
     }
@@ -675,7 +690,7 @@ void load_trained_data(T &tensor, const std::string &filename)
         // Open file
         fs.open(filename, std::ios::in | std::ios::binary);
 
-        if(!fs.good())
+        if (!fs.good())
         {
             throw std::runtime_error("Could not load binary data: " + filename);
         }
@@ -687,23 +702,26 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, 1, 1));
 
-        for(unsigned int d = 1; d < tensor.info()->num_dimensions(); ++d)
+        for (unsigned int d = 1; d < tensor.info()->num_dimensions(); ++d)
         {
             window.set(d, Window::Dimension(0, tensor.info()->tensor_shape()[d], 1));
         }
 
         arm_compute::Iterator in(&tensor, window);
 
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            fs.read(reinterpret_cast<std::fstream::char_type *>(in.ptr()), tensor.info()->tensor_shape()[0] * tensor.info()->element_size());
-        },
-        in);
+        execute_window_loop(
+            window,
+            [&](const Coordinates &)
+            {
+                fs.read(reinterpret_cast<std::fstream::char_type *>(in.ptr()),
+                        tensor.info()->tensor_shape()[0] * tensor.info()->element_size());
+            },
+            in);
 
         // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
-    catch(const std::ofstream::failure &e)
+    catch (const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", filename.c_str(), e.what());
     }
@@ -718,11 +736,8 @@ void fill_tensor_value(TensorType &tensor, T value)
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     Iterator it_tensor(&tensor, window);
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        *reinterpret_cast<T *>(it_tensor.ptr()) = value;
-    },
-    it_tensor);
+    execute_window_loop(
+        window, [&](const Coordinates &) { *reinterpret_cast<T *>(it_tensor.ptr()) = value; }, it_tensor);
 
     unmap(tensor);
 }
@@ -745,22 +760,23 @@ void fill_tensor_vector(TensorType &tensor, std::vector<T> vec)
 
     int      i = 0;
     Iterator it_tensor(&tensor, window);
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        *reinterpret_cast<T *>(it_tensor.ptr()) = vec.at(i++);
-    },
-    it_tensor);
+    execute_window_loop(
+        window, [&](const Coordinates &) { *reinterpret_cast<T *>(it_tensor.ptr()) = vec.at(i++); }, it_tensor);
 
     unmap(tensor);
 }
 
 template <typename T, typename TensorType>
-void fill_random_tensor(TensorType &tensor, std::random_device::result_type seed, T lower_bound = std::numeric_limits<T>::lowest(), T upper_bound = std::numeric_limits<T>::max())
+void fill_random_tensor(TensorType                     &tensor,
+                        std::random_device::result_type seed,
+                        T                               lower_bound = std::numeric_limits<T>::lowest(),
+                        T                               upper_bound = std::numeric_limits<T>::max())
 {
     constexpr bool is_fp_16bit = std::is_same<T, half>::value || std::is_same<T, bfloat16>::value;
     constexpr bool is_integral = std::is_integral<T>::value && !is_fp_16bit;
 
-    using fp_dist_type = typename std::conditional<is_fp_16bit, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+    using fp_dist_type = typename std::conditional<is_fp_16bit, arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                   std::uniform_real_distribution<T>>::type;
     using dist_type    = typename std::conditional<is_integral, std::uniform_int_distribution<T>, fp_dist_type>::type;
 
     std::mt19937 gen(seed);
@@ -772,17 +788,16 @@ void fill_random_tensor(TensorType &tensor, std::random_device::result_type seed
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     Iterator it(&tensor, window);
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        *reinterpret_cast<T *>(it.ptr()) = dist(gen);
-    },
-    it);
+    execute_window_loop(
+        window, [&](const Coordinates &) { *reinterpret_cast<T *>(it.ptr()) = dist(gen); }, it);
 
     unmap(tensor);
 }
 
 template <typename T, typename TensorType>
-void fill_random_tensor(TensorType &tensor, T lower_bound = std::numeric_limits<T>::lowest(), T upper_bound = std::numeric_limits<T>::max())
+void fill_random_tensor(TensorType &tensor,
+                        T           lower_bound = std::numeric_limits<T>::lowest(),
+                        T           upper_bound = std::numeric_limits<T>::max())
 {
     std::random_device rd;
     fill_random_tensor(tensor, rd(), lower_bound, upper_bound);
@@ -791,7 +806,8 @@ void fill_random_tensor(TensorType &tensor, T lower_bound = std::numeric_limits<
 template <typename T>
 void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::DataType dt)
 {
-    dst.allocator()->init(TensorInfo(TensorShape(src1.info()->dimension(0), src0.info()->dimension(1), src0.info()->dimension(2)), 1, dt));
+    dst.allocator()->init(TensorInfo(
+        TensorShape(src1.info()->dimension(0), src0.info()->dimension(1), src0.info()->dimension(2)), 1, dt));
 }
 /** This function returns the amount of memory free reading from /proc/meminfo
  *
@@ -823,14 +839,16 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
     Iterator itensor1(&tensor1, window);
     Iterator itensor2(&tensor2, window);
 
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > tolerance)
+    execute_window_loop(
+        window,
+        [&](const Coordinates &)
         {
-            ++num_mismatches;
-        }
-    },
-    itensor1, itensor2);
+            if (std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > tolerance)
+            {
+                ++num_mismatches;
+            }
+        },
+        itensor1, itensor2);
 
     unmap(itensor1);
     unmap(itensor2);

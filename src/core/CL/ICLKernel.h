@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/IKernel.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/CL/CLTuningParams.h"
 
 #include "src/core/CL/DefaultLWSHeuristics.h"
@@ -43,14 +43,14 @@ namespace
 {
 bool is_same_lws(cl::NDRange lws0, cl::NDRange lws1)
 {
-    if(lws0.dimensions() != lws1.dimensions())
+    if (lws0.dimensions() != lws1.dimensions())
     {
         return false;
     }
 
-    for(size_t i = 0; i < lws0.dimensions(); ++i)
+    for (size_t i = 0; i < lws0.dimensions(); ++i)
     {
-        if(lws0.get()[i] != lws1.get()[i])
+        if (lws0.get()[i] != lws1.get()[i])
         {
             return false;
         }
@@ -71,7 +71,7 @@ private:
      *
      * @return The number of arguments enqueued per array object.
      */
-    template <unsigned int        dimension_size>
+    template <unsigned int dimension_size>
     constexpr static unsigned int num_arguments_per_array()
     {
         return num_arguments_per_tensor<dimension_size>();
@@ -80,7 +80,7 @@ private:
      *
      * @return The number of arguments enqueued per tensor object.
      */
-    template <unsigned int        dimension_size>
+    template <unsigned int dimension_size>
     constexpr static unsigned int num_arguments_per_tensor()
     {
         return 2 + 2 * dimension_size;
@@ -116,11 +116,13 @@ protected:
      * @param[in] window             The maximum window which will be returned by window()
      * @param[in] tuning_params_hint (Optional) Tuning parameters to use.
      */
-    void configure_internal(const Window &window, CLTuningParams tuning_params_hint = CLTuningParams(CLKernelLibrary::get().default_ndrange(), 0))
+    void configure_internal(const Window  &window,
+                            CLTuningParams tuning_params_hint = CLTuningParams(CLKernelLibrary::get().default_ndrange(),
+                                                                               0))
     {
         _tuning_params_hint = tuning_params_hint;
 
-        if(is_same_lws(_tuning_params_hint.get_lws(), CLKernelLibrary::get().default_ndrange()))
+        if (is_same_lws(_tuning_params_hint.get_lws(), CLKernelLibrary::get().default_ndrange()))
         {
             // Disable use_dummy_work_items at configure time. Because dummy work items only affect gws size, which
             // will be recalculated with use_dummy_work_items flag at run time again anyway.
@@ -133,7 +135,13 @@ protected:
 public:
     /** Constructor */
     ICLKernel()
-        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _type(CLKernelType::UNKNOWN), _tuning_params_hint(), _cached_gws(cl::NullRange)
+        : _kernel(nullptr),
+          _target(GPUTarget::MIDGARD),
+          _config_id(arm_compute::default_config_id),
+          _max_workgroup_size(0),
+          _type(CLKernelType::UNKNOWN),
+          _tuning_params_hint(),
+          _cached_gws(cl::NullRange)
     {
     }
     /** Returns a reference to the OpenCL kernel of this object.
@@ -161,7 +169,11 @@ public:
      * @param[in]     window         Window the kernel will be executed on.
      */
     template <typename T>
-    void add_1D_array_argument(unsigned int &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window)
+    void add_1D_array_argument(unsigned int      &idx,
+                               const ICLArray<T> *array,
+                               const Strides     &strides,
+                               unsigned int       num_dimensions,
+                               const Window      &window)
     {
         add_array_argument<T, 1>(idx, array, strides, num_dimensions, window);
     }
@@ -184,7 +196,7 @@ public:
      */
     void add_1D_tensor_argument_if(bool cond, unsigned int &idx, const ICLTensor *tensor, const Window &window)
     {
-        if(cond)
+        if (cond)
         {
             add_1D_tensor_argument(idx, tensor, window);
         }
@@ -208,7 +220,7 @@ public:
      */
     void add_2D_tensor_argument_if(bool cond, unsigned int &idx, const ICLTensor *tensor, const Window &window)
     {
-        if(cond)
+        if (cond)
         {
             add_2D_tensor_argument(idx, tensor, window);
         }
@@ -469,7 +481,11 @@ private:
      * @param[in]     window         Window the kernel will be executed on.
      */
     template <typename T, unsigned int dimension_size>
-    void add_array_argument(unsigned int &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window);
+    void add_array_argument(unsigned int      &idx,
+                            const ICLArray<T> *array,
+                            const Strides     &strides,
+                            unsigned int       num_dimensions,
+                            const Window      &window);
     /** Add the passed tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
      * @param[in,out] idx    Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
@@ -505,7 +521,11 @@ private:
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */
-void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange(), bool use_dummy_work_items = false);
+void enqueue(cl::CommandQueue  &queue,
+             ICLKernel         &kernel,
+             const Window      &window,
+             const cl::NDRange &lws_hint             = CLKernelLibrary::get().default_ndrange(),
+             bool               use_dummy_work_items = false);
 
 /** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
  *
@@ -516,14 +536,15 @@ void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, c
  * @param[in]     window         Window the kernel will be executed on.
  */
 template <typename T, unsigned int dimension_size>
-void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window)
+void ICLKernel::add_array_argument(
+    unsigned &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(array == nullptr);
 
     // Calculate offset to the start of the window
     unsigned int offset_first_element = 0;
 
-    for(unsigned int n = 0; n < num_dimensions; ++n)
+    for (unsigned int n = 0; n < num_dimensions; ++n)
     {
         offset_first_element += window[n].start() * strides[n];
     }
@@ -531,7 +552,7 @@ void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, cons
     unsigned int idx_start = idx;
     _kernel.setArg(idx++, array->cl_buffer());
 
-    for(unsigned int dimension = 0; dimension < dimension_size; dimension++)
+    for (unsigned int dimension = 0; dimension < dimension_size; dimension++)
     {
         _kernel.setArg<cl_uint>(idx++, strides[dimension]);
         _kernel.setArg<cl_uint>(idx++, strides[dimension] * window[dimension].step());
@@ -540,8 +561,9 @@ void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, cons
     _kernel.setArg<cl_uint>(idx++, offset_first_element);
 
     ARM_COMPUTE_ERROR_ON_MSG_VAR(idx_start + num_arguments_per_array<dimension_size>() != idx,
-                                 "add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_array<dimension_size>());
+                                 "add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel",
+                                 dimension_size, num_arguments_per_array<dimension_size>());
     ARM_COMPUTE_UNUSED(idx_start);
 }
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ICLKERNEL_H */

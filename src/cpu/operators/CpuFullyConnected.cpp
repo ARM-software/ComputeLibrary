@@ -25,10 +25,11 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorPack.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/MemoryHelpers.h"
@@ -49,8 +50,11 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst, const ActivationLayerInfo &act,
-                                      GEMMLowpOutputStageInfo &gemmlowp_output_stage_info)
+Status get_gemmlowp_output_stage_info(const ITensorInfo         *src,
+                                      const ITensorInfo         *weights,
+                                      const ITensorInfo         *dst,
+                                      const ActivationLayerInfo &act,
+                                      GEMMLowpOutputStageInfo   &gemmlowp_output_stage_info)
 {
     const auto                    data_type = src->data_type();
     const QuantizationInfo        oq_info   = dst->quantization_info();
@@ -62,10 +66,11 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
     int32_t output_multiplier;
     int32_t output_shift;
 
-    ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
-    int32_t type_min = 0;
-    int32_t type_max = 0;
+    int32_t type_min             = 0;
+    int32_t type_max             = 0;
     std::tie(type_min, type_max) = quantization::get_quantized_asymmetric_output_min_max(oq_info, act, data_type);
 
     gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
@@ -78,14 +83,22 @@ Status get_gemmlowp_output_stage_info(const ITensorInfo *src, const ITensorInfo 
     return Status{};
 }
 
-Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const ActivationLayerInfo &act, bool enable_fast_math, WeightFormat weight_format)
+Status validate_mm(const ITensorInfo         *src,
+                   const ITensorInfo         *weights,
+                   const ITensorInfo         *biases,
+                   const ITensorInfo         *dst,
+                   const ActivationLayerInfo &act,
+                   bool                       enable_fast_math,
+                   WeightFormat               weight_format)
 {
-    if(is_data_type_quantized_asymmetric(src->data_type()))
+    if (is_data_type_quantized_asymmetric(src->data_type()))
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate src and weights offset
-        const QuantizationInfo src_quantization_info(src->quantization_info().uniform().scale, -src->quantization_info().uniform().offset);
-        const QuantizationInfo weights_quantization_info(weights->quantization_info().uniform().scale, -weights->quantization_info().uniform().offset);
+        const QuantizationInfo src_quantization_info(src->quantization_info().uniform().scale,
+                                                     -src->quantization_info().uniform().offset);
+        const QuantizationInfo weights_quantization_info(weights->quantization_info().uniform().scale,
+                                                         -weights->quantization_info().uniform().offset);
 
         GEMMLowpOutputStageInfo gemmlowp_output_stage_info;
         ARM_COMPUTE_RETURN_ON_ERROR(get_gemmlowp_output_stage_info(src, weights, dst, act, gemmlowp_output_stage_info));
@@ -97,11 +110,8 @@ Status validate_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITe
         // Validate gemmlowp function
         TensorInfo src_info     = src->clone()->set_quantization_info(src_quantization_info);
         TensorInfo weights_info = weights->clone()->set_quantization_info(weights_quantization_info);
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuGemmLowpMatrixMultiplyCore::validate(&src_info,
-                                                                            &weights_info,
-                                                                            biases,
-                                                                            dst,
-                                                                            gemm_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(
+            CpuGemmLowpMatrixMultiplyCore::validate(&src_info, &weights_info, biases, dst, gemm_info));
     }
     else
     {
@@ -142,21 +152,28 @@ CpuFullyConnected::CpuFullyConnected()
 
 CpuFullyConnected::~CpuFullyConnected() = default;
 
-void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act)
+void CpuFullyConnected::configure_mm(const ITensorInfo         *src,
+                                     const ITensorInfo         *weights,
+                                     const ITensorInfo         *biases,
+                                     ITensorInfo               *dst,
+                                     const ActivationLayerInfo &act)
 {
-    if(_is_quantized_asymmetric)
+    if (_is_quantized_asymmetric)
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate src and weights offset
-        const QuantizationInfo src_quantization_info(src->quantization_info().uniform().scale, -src->quantization_info().uniform().offset);
-        const QuantizationInfo weights_quantization_info(weights->quantization_info().uniform().scale, -weights->quantization_info().uniform().offset);
+        const QuantizationInfo src_quantization_info(src->quantization_info().uniform().scale,
+                                                     -src->quantization_info().uniform().offset);
+        const QuantizationInfo weights_quantization_info(weights->quantization_info().uniform().scale,
+                                                         -weights->quantization_info().uniform().offset);
 
         TensorInfo src_info     = src->clone()->set_quantization_info(src_quantization_info);
         TensorInfo weights_info = weights->clone()->set_quantization_info(weights_quantization_info);
 
         // Configure gemmlowp function and output stage for asymmetric quantized types
         GEMMLowpOutputStageInfo gemmlowp_output_stage_info;
-        const Status            status = get_gemmlowp_output_stage_info(&src_info, &weights_info, dst, act, gemmlowp_output_stage_info);
+        const Status            status =
+            get_gemmlowp_output_stage_info(&src_info, &weights_info, dst, act, gemmlowp_output_stage_info);
         ARM_COMPUTE_ERROR_ON(status.error_code() != ErrorCode::OK);
 
         GEMMInfo gemm_info;
@@ -179,7 +196,11 @@ void CpuFullyConnected::configure_mm(const ITensorInfo *src, const ITensorInfo *
     }
 }
 
-void CpuFullyConnected::configure_conv_fc(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act)
+void CpuFullyConnected::configure_conv_fc(const ITensorInfo         *src,
+                                          const ITensorInfo         *weights,
+                                          const ITensorInfo         *biases,
+                                          ITensorInfo               *dst,
+                                          const ActivationLayerInfo &act)
 {
     ARM_COMPUTE_ERROR_ON((weights->dimension(1) != (src->dimension(0) * src->dimension(1) * src->dimension(2))));
 
@@ -195,7 +216,11 @@ void CpuFullyConnected::configure_conv_fc(const ITensorInfo *src, const ITensorI
     configure_mm(&_flattened_src, weights, biases, dst, act);
 }
 
-void CpuFullyConnected::configure_fc_fc(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const ActivationLayerInfo &act)
+void CpuFullyConnected::configure_fc_fc(const ITensorInfo         *src,
+                                        const ITensorInfo         *weights,
+                                        const ITensorInfo         *biases,
+                                        ITensorInfo               *dst,
+                                        const ActivationLayerInfo &act)
 {
     ARM_COMPUTE_ERROR_ON(src->dimension(0) != weights->dimension(1));
 
@@ -203,17 +228,17 @@ void CpuFullyConnected::configure_fc_fc(const ITensorInfo *src, const ITensorInf
     configure_mm(src, weights, biases, dst, act);
 }
 
-void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst,
-                                  FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
+void CpuFullyConnected::configure(const ITensorInfo      *src,
+                                  const ITensorInfo      *weights,
+                                  const ITensorInfo      *biases,
+                                  ITensorInfo            *dst,
+                                  FullyConnectedLayerInfo fc_info,
+                                  const WeightsInfo      &weights_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_ERROR_THROW_ON(CpuFullyConnected::validate(src,
-                                                           weights,
-                                                           biases != nullptr ? biases : nullptr,
-                                                           dst,
-                                                           fc_info,
-                                                           weights_info));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        CpuFullyConnected::validate(src, weights, biases != nullptr ? biases : nullptr, dst, fc_info, weights_info));
     ARM_COMPUTE_LOG_PARAMS(src, weights, biases, dst, fc_info);
 
     _needs_weights_conversion = false;
@@ -238,9 +263,11 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
 
     // Check if we have a fully connected layer with batches
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
-    if(is_batched_fc_layer)
+    if (is_batched_fc_layer)
     {
-        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(), dst->tensor_shape().cbegin() + 1));
+        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) &&
+                            (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(),
+                                        dst->tensor_shape().cbegin() + 1));
     }
     else
     {
@@ -248,7 +275,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     }
 
     // Reshape weights if needed
-    if(_needs_weights_reshape)
+    if (_needs_weights_reshape)
     {
         // Reshape the weights
         _transpose_weights = std::make_unique<kernels::CpuTransposeKernel>();
@@ -260,13 +287,11 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     }
 
     // Convert weights if needed
-    if(_is_fc_after_conv && (src->data_layout() != fc_info.weights_trained_layout))
+    if (_is_fc_after_conv && (src->data_layout() != fc_info.weights_trained_layout))
     {
         // Convert weights
         _convert_weights = std::make_unique<CpuConvertFullyConnectedWeights>();
-        _convert_weights->configure(weights_to_use,
-                                    &_converted_weights,
-                                    src->tensor_shape(),
+        _convert_weights->configure(weights_to_use, &_converted_weights, src->tensor_shape(),
                                     fc_info.weights_trained_layout);
         _converted_weights.set_are_values_constant(weights_to_use->are_values_constant());
 
@@ -275,7 +300,7 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
         _trans_weights_idx        = AuxTensorIdx::ConvertedWeights;
     }
 
-    if(_is_fc_after_conv)
+    if (_is_fc_after_conv)
     {
         // Fully Connected layer after a Convolution Layer without batches
         configure_conv_fc(src, weights_to_use, biases, dst, fc_info.activation_info);
@@ -287,54 +312,57 @@ void CpuFullyConnected::configure(const ITensorInfo *src, const ITensorInfo *wei
     }
 
     // Retain the tensorinfo with the weights to use
-    if(_needs_weights_reshape || _needs_weights_conversion)
+    if (_needs_weights_reshape || _needs_weights_conversion)
     {
         _trans_weights = *weights_to_use;
     }
 
     // Set auxiliary memory requirements
     auto gemm_mem_req = (_is_quantized_asymmetric) ? _mm_gemmlowp->workspace() : _mm_gemm->workspace();
-    for(unsigned int i = 0; i < gemm_mem_req.size(); ++i)
+    for (unsigned int i = 0; i < gemm_mem_req.size(); ++i)
     {
         _aux_mem[i] = gemm_mem_req[i];
     }
 
-    if(_aux_mem[Pretranspose].size > 0)
+    if (_aux_mem[Pretranspose].size > 0)
     {
         // Release permuted weights at the end of prepare as they are further transposed by the assembly dispatch
         // Do not release them if biases are dynamic and data type is quantized, since the weights tensor will be used for biases offset calculation
         // Keep all the auxiliary tensors in case of dynamic weights as they are recalculated every time.
         _aux_mem[TransposedWeights] = MemoryInfo(
             offset_int_vec(TransposedWeights),
-            _dynamic_weights                                                         ? MemoryLifetime::Temporary  :
-            (_is_quantized_asymmetric && biases && !(biases->are_values_constant())) ? MemoryLifetime::Persistent :
-                                                                                       MemoryLifetime::Prepare,
+            _dynamic_weights                                                           ? MemoryLifetime::Temporary
+            : (_is_quantized_asymmetric && biases && !(biases->are_values_constant())) ? MemoryLifetime::Persistent
+                                                                                       : MemoryLifetime::Prepare,
             _reshaped_weights.total_size());
 
-        _aux_mem[ConvertedWeights] = MemoryInfo(
-            offset_int_vec(ConvertedWeights),
-            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Prepare,
-            _converted_weights.total_size());
+        _aux_mem[ConvertedWeights] = MemoryInfo(offset_int_vec(ConvertedWeights),
+                                                _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Prepare,
+                                                _converted_weights.total_size());
     }
     else
     {
-        _aux_mem[TransposedWeights] = MemoryInfo(
-            offset_int_vec(TransposedWeights),
-            _dynamic_weights          ? MemoryLifetime::Temporary :
-            _needs_weights_conversion ? MemoryLifetime::Prepare   :
-                                        MemoryLifetime::Persistent,
-            _reshaped_weights.total_size());
+        _aux_mem[TransposedWeights] = MemoryInfo(offset_int_vec(TransposedWeights),
+                                                 _dynamic_weights            ? MemoryLifetime::Temporary
+                                                 : _needs_weights_conversion ? MemoryLifetime::Prepare
+                                                                             : MemoryLifetime::Persistent,
+                                                 _reshaped_weights.total_size());
 
         _aux_mem[ConvertedWeights] = MemoryInfo(
-            offset_int_vec(ConvertedWeights),
-            _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Persistent,
+            offset_int_vec(ConvertedWeights), _dynamic_weights ? MemoryLifetime::Temporary : MemoryLifetime::Persistent,
             _converted_weights.total_size());
     }
-    _aux_mem[FlattenedSrc] = MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
+    _aux_mem[FlattenedSrc] =
+        MemoryInfo(offset_int_vec(FlattenedSrc), MemoryLifetime::Temporary, _flattened_src.total_size());
 }
 
-Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weight_format, const ITensorInfo *src, const ITensorInfo *weights,
-                                       const ITensorInfo *biases, const ITensorInfo *dst, FullyConnectedLayerInfo fc_info, WeightsInfo weights_info)
+Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weight_format,
+                                       const ITensorInfo         *src,
+                                       const ITensorInfo         *weights,
+                                       const ITensorInfo         *biases,
+                                       const ITensorInfo         *dst,
+                                       FullyConnectedLayerInfo    fc_info,
+                                       WeightsInfo                weights_info)
 {
     GEMMInfo gemm_info;
     gemm_info.set_activation_info(fc_info.activation_info);
@@ -345,12 +373,17 @@ Status CpuFullyConnected::has_opt_impl(arm_compute::WeightFormat &expected_weigh
     return CpuGemm::has_opt_impl(expected_weight_format, src, weights, biases, dst, gemm_info);
 }
 
-Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
-                                   FullyConnectedLayerInfo fc_info, const WeightsInfo &weights_info)
+Status CpuFullyConnected::validate(const ITensorInfo      *src,
+                                   const ITensorInfo      *weights,
+                                   const ITensorInfo      *biases,
+                                   const ITensorInfo      *dst,
+                                   FullyConnectedLayerInfo fc_info,
+                                   const WeightsInfo      &weights_info)
 {
     ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
 
     if (is_fixed_format_fast_math(weights_info.weight_format()))
     {
@@ -364,15 +397,22 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
-    ARM_COMPUTE_RETURN_ERROR_ON(fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU
-                                && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU && fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
+    ARM_COMPUTE_RETURN_ERROR_ON(
+        fc_info.activation_info.enabled() && is_data_type_quantized(src->data_type()) &&
+        fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU &&
+        fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU &&
+        fc_info.activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
 
     bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     bool is_fc_after_conv = true;
 
-    const ITensorInfo &flatten_src       = TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(src)));
-    const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
-    const ITensorInfo &converted_weights = weights_reshaped ? TensorInfo(weights->clone()->set_is_resizable(true).reset_padding()) : TensorInfo(*reshaped_weights.clone());
+    const ITensorInfo &flatten_src =
+        TensorInfo(src->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(src)));
+    const ITensorInfo &reshaped_weights = TensorInfo(
+        weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
+    const ITensorInfo &converted_weights = weights_reshaped
+                                               ? TensorInfo(weights->clone()->set_is_resizable(true).reset_padding())
+                                               : TensorInfo(*reshaped_weights.clone());
 
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -386,10 +426,10 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
     // Check if we have a fully connected layer with batches
     const bool is_batched_fc_layer = dst->dimension(1) > 1;
 
-    if(biases != nullptr)
+    if (biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
-        if(is_data_type_quantized(src->data_type()))
+        if (is_data_type_quantized(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -399,36 +439,37 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
         }
     }
 
-    if(is_batched_fc_layer)
+    if (is_batched_fc_layer)
     {
-        is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(), dst->tensor_shape().cbegin() + 1));
+        is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) &&
+                           (std::equal(src->tensor_shape().cbegin() + 3, src->tensor_shape().cend(),
+                                       dst->tensor_shape().cbegin() + 1));
     }
     else
     {
         is_fc_after_conv = src->num_dimensions() > 1;
     }
 
-    if(!weights_reshaped)
+    if (!weights_reshaped)
     {
         // Validate reshape weights kernel
         ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuTransposeKernel::validate(weights, &reshaped_weights));
         weights_to_use = &reshaped_weights;
     }
 
-    if(is_fc_after_conv && (src->data_layout() != fc_info.weights_trained_layout))
+    if (is_fc_after_conv && (src->data_layout() != fc_info.weights_trained_layout))
     {
         // Validate convert weights kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CpuConvertFullyConnectedWeights::validate(weights_to_use,
-                                                                              &converted_weights,
-                                                                              src->tensor_shape(),
-                                                                              fc_info.weights_trained_layout));
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuConvertFullyConnectedWeights::validate(
+            weights_to_use, &converted_weights, src->tensor_shape(), fc_info.weights_trained_layout));
         weights_to_use = &converted_weights;
     }
 
-    if(is_fc_after_conv)
+    if (is_fc_after_conv)
     {
         // Fully Connected layer after a Convolution Layer without batches
-        ARM_COMPUTE_RETURN_ERROR_ON((weights_to_use->dimension(1) != (src->dimension(0) * src->dimension(1) * src->dimension(2))));
+        ARM_COMPUTE_RETURN_ERROR_ON(
+            (weights_to_use->dimension(1) != (src->dimension(0) * src->dimension(1) * src->dimension(2))));
 
         // Validate flatten kernel
         ARM_COMPUTE_RETURN_ON_ERROR(CpuFlatten::validate(src, &flatten_src));
@@ -440,7 +481,8 @@ Status CpuFullyConnected::validate(const ITensorInfo *src, const ITensorInfo *we
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != weights_to_use->dimension(1));
     }
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info, fc_info.enable_fast_math, weights_info.weight_format()));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(src_to_use, weights_to_use, biases, dst, fc_info.activation_info,
+                                            fc_info.enable_fast_math, weights_info.weight_format()));
 
     return Status{};
 }
@@ -460,21 +502,21 @@ void CpuFullyConnected::run(ITensorPack &tensors)
     CpuAuxTensorHandler transformed_wei(offset_int_vec(_trans_weights_idx), _trans_weights, tensors, false);
 
     // Linearize src if it comes from a convolutional layer
-    if(_is_fc_after_conv)
+    if (_is_fc_after_conv)
     {
-        ITensorPack flatten_pack{ { ACL_SRC, src }, { ACL_DST, flattened_src.get() } };
+        ITensorPack flatten_pack{{ACL_SRC, src}, {ACL_DST, flattened_src.get()}};
         _flatten->run(flatten_pack);
     }
 
     ITensorPack gemm_pack = tensors;
     gemm_pack.add_const_tensor(ACL_SRC_0, (_is_fc_after_conv) ? flattened_src.get() : src);
-    if(_needs_weights_reshape || _needs_weights_conversion)
+    if (_needs_weights_reshape || _needs_weights_conversion)
     {
         gemm_pack.add_const_tensor(ACL_SRC_1, transformed_wei.get());
     }
 
     // Run matrix multiply
-    if(_is_quantized_asymmetric)
+    if (_is_quantized_asymmetric)
     {
         _mm_gemmlowp->run(gemm_pack);
     }
@@ -486,7 +528,7 @@ void CpuFullyConnected::run(ITensorPack &tensors)
 
 void CpuFullyConnected::prepare(ITensorPack &tensors)
 {
-    if(!_is_prepared || _dynamic_weights)
+    if (!_is_prepared || _dynamic_weights)
     {
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
         ++_asrt_prepare_count;
@@ -502,20 +544,21 @@ void CpuFullyConnected::prepare(ITensorPack &tensors)
         const ITensor *cur_weights = weights;
 
         // Reshape of the weights (happens only once)
-        if(_needs_weights_reshape)
+        if (_needs_weights_reshape)
         {
             // Run reshape weights kernel and mark weights as unused
-            ITensorPack transpose_pack{ { ACL_SRC, weights }, { ACL_DST, reshaped_weights.get() } };
-            NEScheduler::get().schedule_op(_transpose_weights.get(), Window::DimY, _transpose_weights->window(), transpose_pack);
+            ITensorPack transpose_pack{{ACL_SRC, weights}, {ACL_DST, reshaped_weights.get()}};
+            NEScheduler::get().schedule_op(_transpose_weights.get(), Window::DimY, _transpose_weights->window(),
+                                           transpose_pack);
 
             cur_weights->mark_as_unused();
             cur_weights = reshaped_weights.get();
         }
 
         // Convert weights if needed (happens only once)
-        if(_needs_weights_conversion)
+        if (_needs_weights_conversion)
         {
-            ITensorPack convert_pack{ { ACL_SRC, cur_weights }, { ACL_DST, converted_weights.get() } };
+            ITensorPack convert_pack{{ACL_SRC, cur_weights}, {ACL_DST, converted_weights.get()}};
             _convert_weights->run(convert_pack);
 
             cur_weights->mark_as_unused();
@@ -526,7 +569,7 @@ void CpuFullyConnected::prepare(ITensorPack &tensors)
         gemm_pack.add_const_tensor(ACL_SRC_1, cur_weights);
 
         // Prepare GEMM prepare and release unused weights
-        if(!_is_quantized_asymmetric)
+        if (!_is_quantized_asymmetric)
         {
             _mm_gemm->prepare(gemm_pack);
         }

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -61,14 +62,20 @@ public:
      * @param[out]    sum             Sum of 1D logits tensor. Data types supported: same as @p src
      * @param[in]     info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &max, ITensorInfo &dst, ITensorInfo &sum, const SoftmaxKernelInfo &info);
+    void configure(const CLCompileContext  &compile_context,
+                   const ITensorInfo       &src,
+                   ITensorInfo             &max,
+                   ITensorInfo             &dst,
+                   ITensorInfo             &sum,
+                   const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClLogits1DMaxShiftExpSumKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum);
+    static Status
+    validate(const ITensorInfo &src, const ITensorInfo &max, const ITensorInfo &dst, const ITensorInfo &sum);
     /** Checks if the given size is eligible for parallel reduction
      *
      * @note  Serial reduction is launched for width < (_grid_size * _serial_vector_size).
@@ -100,14 +107,19 @@ public:
      * @param[out] dst             Destination tensor. Data types supported: QASYMM8/QASYMM8_SIGNED for S32 @p input, or same as @p input
      * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo &src, const ITensorInfo &sum, ITensorInfo &dst, const SoftmaxKernelInfo &info);
+    void configure(const CLCompileContext  &compile_context,
+                   const ITensorInfo       &src,
+                   const ITensorInfo       &sum,
+                   ITensorInfo             &dst,
+                   const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClLogits1DNormKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info);
+    static Status
+    validate(const ITensorInfo &src, const ITensorInfo &sum, const ITensorInfo &dst, const SoftmaxKernelInfo &info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;

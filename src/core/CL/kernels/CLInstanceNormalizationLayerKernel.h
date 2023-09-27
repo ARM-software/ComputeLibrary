@@ -24,9 +24,9 @@
 #ifndef ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYERKERNEL_H
 #define ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYERKERNEL_H
 
-#include "src/core/CL/ICLKernel.h"
-
 #include "arm_compute/core/KernelDescriptors.h"
+
+#include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
@@ -59,7 +59,11 @@ public:
      * @param[out]     output          Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      info            Kernel meta-data descriptor
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *mean_var, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
+    void configure(const CLCompileContext                     &compile_context,
+                   ICLTensor                                  *input,
+                   ICLTensor                                  *mean_var,
+                   ICLTensor                                  *output,
+                   const InstanceNormalizationLayerKernelInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *
@@ -69,7 +73,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -106,7 +111,8 @@ public:
      * @param[out]     output              Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      use_mixed_precision Use mixed precision in case of FP16 execution
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, bool use_mixed_precision);
+    void
+    configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, bool use_mixed_precision);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *

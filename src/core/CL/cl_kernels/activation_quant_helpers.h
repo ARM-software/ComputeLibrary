@@ -60,17 +60,17 @@ inline TYPE identiy_op(TYPE x)
 }
 
 #define ACTIVATION_OP2(op, x) op##_op(x)
-#define ACTIVATION_OP(op, x) ACTIVATION_OP2(op, x)
+#define ACTIVATION_OP(op, x)  ACTIVATION_OP2(op, x)
 
 #if defined(S1_VAL) && defined(S2_VAL)
 #if defined(O1_VAL) && defined(O2_VAL)
 #define PERFORM_ACTIVATION_QUANT(act, data)                                                       \
     ({                                                                                            \
         data = ACTIVATION_OP(act, data);                                                          \
-        \
+                                                                                                  \
         VEC_DATA_TYPE(float, VEC_SIZE)                                                            \
         fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));                                    \
-        \
+                                                                                                  \
         fdata = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL); \
         data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE));                           \
     })
@@ -78,17 +78,14 @@ inline TYPE identiy_op(TYPE x)
 #define PERFORM_ACTIVATION_QUANT(act, data)                             \
     ({                                                                  \
         data = ACTIVATION_OP(act, data);                                \
-        \
+                                                                        \
         VEC_DATA_TYPE(float, VEC_SIZE)                                  \
         fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));          \
-        \
+                                                                        \
         fdata = round((fdata) * ((float)S1_VAL / (float)S2_VAL));       \
         data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)); \
     })
 #endif /* defined(O1_VAL) && defined(O2_VAL) */
 #else  /* defined(S1_VAL) && defined(S2_VAL) */
-#define PERFORM_ACTIVATION_QUANT(act, data) \
-    ({                                      \
-        data = ACTIVATION_OP(act, data);    \
-    })
+#define PERFORM_ACTIVATION_QUANT(act, data) ({ data = ACTIVATION_OP(act, data); })
 #endif /* defined(S1_VAL) && defined(S2_VAL) */

@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 

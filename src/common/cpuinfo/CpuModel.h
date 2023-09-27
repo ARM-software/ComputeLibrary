@@ -24,10 +24,10 @@
 #ifndef SRC_COMMON_CPUINFO_CPUMODEL_H
 #define SRC_COMMON_CPUINFO_CPUMODEL_H
 
+#include "arm_compute/core/CPP/CPPTypes.h"
+
 #include <cstdint>
 #include <string>
-
-#include "arm_compute/core/CPP/CPPTypes.h"
 
 namespace arm_compute
 {

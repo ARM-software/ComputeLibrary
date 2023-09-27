@@ -25,6 +25,7 @@
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_GPUCKWVARIABLETABLE
 
 #include "arm_compute/core/ITensorInfo.h"
+
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 
 #include <map>
@@ -58,8 +59,11 @@ public:
      *
      * @return GpuCkwComponentArgument*
      */
-    GpuCkwComponentArgument *declare_variable(const GpuKernelComponentGroup &comp_group, GpuCkwScopedKernelWriter &writer, const ITensorInfo *tensor, TensorStorageType storage,
-                                              const std::string &alias = "unnamed");
+    GpuCkwComponentArgument *declare_variable(const GpuKernelComponentGroup &comp_group,
+                                              GpuCkwScopedKernelWriter      &writer,
+                                              const ITensorInfo             *tensor,
+                                              TensorStorageType              storage,
+                                              const std::string             &alias = "unnamed");
 
 private:
     std::map<ITensorInfo::Id, GpuCkwComponentArgument> _vars{};

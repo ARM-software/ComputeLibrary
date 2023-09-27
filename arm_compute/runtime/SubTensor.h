@@ -72,5 +72,5 @@ private:
     ITensor              *_parent;
     mutable SubTensorInfo _info;
 };
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_SUBTENSOR_H */

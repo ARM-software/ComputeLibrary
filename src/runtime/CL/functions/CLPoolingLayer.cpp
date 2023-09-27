@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClPool2d.h"
 
@@ -32,34 +33,44 @@ namespace arm_compute
 {
 struct CLPoolingLayer::Impl
 {
-    const ICLTensor                  *src{ nullptr };
-    ICLTensor                        *dst{ nullptr };
-    ICLTensor                        *indices{ nullptr };
-    std::unique_ptr<opencl::ClPool2d> op{ nullptr };
+    const ICLTensor                  *src{nullptr};
+    ICLTensor                        *dst{nullptr};
+    ICLTensor                        *indices{nullptr};
+    std::unique_ptr<opencl::ClPool2d> op{nullptr};
 };
 
-CLPoolingLayer::CLPoolingLayer()
-    : _impl(std::make_unique<Impl>())
+CLPoolingLayer::CLPoolingLayer() : _impl(std::make_unique<Impl>())
 {
 }
 CLPoolingLayer::~CLPoolingLayer() = default;
 
-void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+void CLPoolingLayer::configure(ICLTensor              *input,
+                               ICLTensor              *output,
+                               const PoolingLayerInfo &pool_info,
+                               ICLTensor              *indices)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
 }
 
-void CLPoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+void CLPoolingLayer::configure(const CLCompileContext &compile_context,
+                               ICLTensor              *input,
+                               ICLTensor              *output,
+                               const PoolingLayerInfo &pool_info,
+                               ICLTensor              *indices)
 {
     _impl->src     = input;
     _impl->dst     = output;
     _impl->indices = indices;
 
     _impl->op = std::make_unique<opencl::ClPool2d>();
-    _impl->op->configure(compile_context, input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr);
+    _impl->op->configure(compile_context, input->info(), output->info(), pool_info,
+                         (indices) ? indices->info() : nullptr);
 }
 
-Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
+Status CLPoolingLayer::validate(const ITensorInfo      *input,
+                                const ITensorInfo      *output,
+                                const PoolingLayerInfo &pool_info,
+                                const ITensorInfo      *indices)
 {
     return opencl::ClPool2d::validate(input, output, pool_info, indices);
 }

@@ -23,6 +23,8 @@
  */
 #include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
 
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/GraphManager.h"
@@ -30,9 +32,7 @@
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/Utils.h"
-#include "arm_compute/graph/backends/BackendRegistry.h"
 
-#include "arm_compute/core/ITensor.h"
 #include "support/Cast.h"
 
 #include <algorithm>
@@ -78,28 +78,28 @@ IMemoryGroup *get_memory_group_from_handle(GraphContext &ctx, ITensorHandle *han
  */
 std::set<ITensorHandle *> get_const_handles(const Graph &g)
 {
-    std::set<NodeType> const_node_types = { NodeType::Input, NodeType::Output, NodeType::Const };
+    std::set<NodeType> const_node_types = {NodeType::Input, NodeType::Output, NodeType::Const};
 
     std::set<ITensorHandle *> const_tensors;
 
     auto &nodes = g.nodes();
-    for(auto &node : nodes)
+    for (auto &node : nodes)
     {
         // If its a const node:
-        if(node != nullptr && const_node_types.find(node->type()) != std::end(const_node_types))
+        if (node != nullptr && const_node_types.find(node->type()) != std::end(const_node_types))
         {
             // TODO (geopin01) : Create IO iterator wrappers
             // Add all its inputs / outputs to the list of constant handles
-            for(unsigned int i = 0; i < node->num_inputs(); ++i)
+            for (unsigned int i = 0; i < node->num_inputs(); ++i)
             {
-                if(node->input(i) != nullptr)
+                if (node->input(i) != nullptr)
                 {
                     const_tensors.insert(node->input(i)->handle()->parent_handle());
                 }
             }
-            for(unsigned int i = 0; i < node->num_outputs(); ++i)
+            for (unsigned int i = 0; i < node->num_outputs(); ++i)
             {
-                if(node->output(i) != nullptr)
+                if (node->output(i) != nullptr)
                 {
                     const_tensors.insert(node->output(i)->handle()->parent_handle());
                 }
@@ -118,9 +118,8 @@ std::set<ITensorHandle *> get_const_handles(const Graph &g)
  *
  * @return List of transition handles
  */
-TaskHandles get_transition_handles(GraphContext                    &ctx,
-                                   ExecutionTask                   &task,
-                                   const std::set<ITensorHandle *> &const_tensors)
+TaskHandles
+get_transition_handles(GraphContext &ctx, ExecutionTask &task, const std::set<ITensorHandle *> &const_tensors)
 {
     ARM_COMPUTE_ERROR_ON(task.node == nullptr || (task.task == nullptr && !is_utility_node(task.node)));
     INode &node = *task.node;
@@ -128,28 +127,30 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
     TaskHandles transition_handles;
 
     // Add input handles
-    for(unsigned int i = 0; i < node.input_edges().size(); ++i)
+    for (unsigned int i = 0; i < node.input_edges().size(); ++i)
     {
         Edge *input_edge = node.input_edge(i);
         // If this input is the output of another node
-        if(input_edge != nullptr && input_edge->tensor() != nullptr && const_tensors.find(input_edge->tensor()->handle()->parent_handle()) == std::end(const_tensors))
+        if (input_edge != nullptr && input_edge->tensor() != nullptr &&
+            const_tensors.find(input_edge->tensor()->handle()->parent_handle()) == std::end(const_tensors))
         {
             // Then add it to the list of transition buffers
             ITensorHandle *tensor_handle = input_edge->tensor()->handle()->parent_handle();
-            IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
+            IMemoryGroup  *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
             transition_handles.input_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
         }
     }
 
     // Add output handles
-    for(unsigned int i = 0; i < node.num_outputs(); ++i)
+    for (unsigned int i = 0; i < node.num_outputs(); ++i)
     {
         Tensor *output_tensor = node.output(i);
         // If this output is used as an input for another node
-        if(output_tensor != nullptr && const_tensors.find(output_tensor->handle()->parent_handle()) == std::end(const_tensors))
+        if (output_tensor != nullptr &&
+            const_tensors.find(output_tensor->handle()->parent_handle()) == std::end(const_tensors))
         {
             ITensorHandle *tensor_handle = output_tensor->handle()->parent_handle();
-            IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
+            IMemoryGroup  *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
             transition_handles.output_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
         }
     }
@@ -164,11 +165,11 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
  */
 void count_input_handles_per_target(const TaskHandles &task_handles, TargetHandleCounter &handle_counter)
 {
-    for(const auto &handle : task_handles.input_handles)
+    for (const auto &handle : task_handles.input_handles)
     {
         ITensorHandle *key            = handle.first;
         HandleCounter &target_counter = handle_counter[key->target()];
-        if(target_counter.find(key) == std::end(target_counter))
+        if (target_counter.find(key) == std::end(target_counter))
         {
             target_counter.emplace(std::make_pair(key, 1));
         }
@@ -192,12 +193,12 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
     // Acquires the given handles and sets them as in flight if they aren't already
     auto acquire = [&](std::vector<std::pair<ITensorHandle *, IMemoryGroup *>> &handles)
     {
-        for(auto &handle : handles)
+        for (auto &handle : handles)
         {
             ITensorHandle *parent_handle = handle.first;
             ARM_COMPUTE_ERROR_ON(parent_handle == nullptr);
             // If the tensor is not already in flight:
-            if(tensors_in_flight.find(parent_handle) == std::end(tensors_in_flight))
+            if (tensors_in_flight.find(parent_handle) == std::end(tensors_in_flight))
             {
                 ARM_COMPUTE_ERROR_ON(hc.find(parent_handle) == std::end(hc));
                 // Then add it to the list of in flight tensors
@@ -208,20 +209,20 @@ void configure_handle_lifetime(std::vector<TaskHandles> &tasks_handles, const Ha
         }
     };
 
-    for(auto &task_handle : tasks_handles)
+    for (auto &task_handle : tasks_handles)
     {
         // Marking all the input and output tensors of the task as in flight
         acquire(task_handle.input_handles);
         acquire(task_handle.output_handles);
 
         // Releasing the input tensors
-        for(auto &input_handle : task_handle.input_handles)
+        for (auto &input_handle : task_handle.input_handles)
         {
             ITensorHandle *ihandle = input_handle.first;
             ARM_COMPUTE_ERROR_ON(ihandle == nullptr);
             ARM_COMPUTE_ERROR_ON(tensors_in_flight.find(ihandle) == std::end(tensors_in_flight));
             --tensors_in_flight[ihandle];
-            if(tensors_in_flight[ihandle] <= 0)
+            if (tensors_in_flight[ihandle] <= 0)
             {
                 // Remove tensor for tensors in flight
                 tensors_in_flight.erase(ihandle);
@@ -242,7 +243,7 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
     TargetHandleCounter      target_handle_count;
 
     // Count handles
-    for(auto &task : workload.tasks)
+    for (auto &task : workload.tasks)
     {
         // Populates IO handles
         tasks_handles.push_back(get_transition_handles(ctx, task, const_tensors));
@@ -252,12 +253,12 @@ void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload
     }
 
     // Setup memory managers
-    for(auto &hc : target_handle_count)
+    for (auto &hc : target_handle_count)
     {
         MemoryManagerContext *mm_ctx = ctx.memory_management_ctx(hc.first);
-        if(mm_ctx != nullptr)
+        if (mm_ctx != nullptr)
         {
-            if(mm_ctx->cross_mm != nullptr && mm_ctx->cross_group != nullptr)
+            if (mm_ctx->cross_mm != nullptr && mm_ctx->cross_group != nullptr)
             {
                 // Manage and allocate tensors
                 configure_handle_lifetime(tasks_handles, hc.second);

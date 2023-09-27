@@ -26,6 +26,7 @@
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/function_info/MatMulInfo.h"
+
 #include "src/gpu/cl/IClOperator.h"
 #include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
 #include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
@@ -73,7 +74,11 @@ public:
      * @param[in]  matmul_info     Contains MatMul operation information described in @ref MatMulInfo.
      * @param[in]  act_info        Class containing information about fused activation function.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulInfo &matmul_info,
+    void configure(const CLCompileContext    &compile_context,
+                   ITensorInfo               *lhs,
+                   ITensorInfo               *rhs,
+                   ITensorInfo               *dst,
+                   const MatMulInfo          &matmul_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -81,15 +86,19 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &matmul_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *dst,
+                           const MatMulInfo          &matmul_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
     // Inherited methods overridden:
     void run(ITensorPack &tensors) override;
 
 private:
-    std::unique_ptr<kernels::ClMatMulNativeKernel>     _matmul_native_kernel{ nullptr };
-    std::unique_ptr<kernels::ClMatMulLowpNativeKernel> _matmul_lowp_native_kernel{ nullptr };
+    std::unique_ptr<kernels::ClMatMulNativeKernel>     _matmul_native_kernel{nullptr};
+    std::unique_ptr<kernels::ClMatMulLowpNativeKernel> _matmul_lowp_native_kernel{nullptr};
 
-    bool _is_quantized{ false };
+    bool _is_quantized{false};
 };
 } // namespace opencl
 } // namespace arm_compute

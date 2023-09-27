@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_ALLOCATOR_H
 
 #include "arm_compute/runtime/IAllocator.h"
-
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include <cstddef>
@@ -40,9 +39,9 @@ public:
     Allocator() = default;
 
     // Inherited methods overridden:
-    void *allocate(size_t size, size_t alignment) override;
-    void free(void *ptr) override;
+    void                          *allocate(size_t size, size_t alignment) override;
+    void                           free(void *ptr) override;
     std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_ALLOCATOR_H */

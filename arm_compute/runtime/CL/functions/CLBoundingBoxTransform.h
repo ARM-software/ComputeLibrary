@@ -64,7 +64,10 @@ public:
      *
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.
      */
-    void configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info);
+    void configure(const ICLTensor                *boxes,
+                   ICLTensor                      *pred_boxes,
+                   const ICLTensor                *deltas,
+                   const BoundingBoxTransformInfo &info);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -76,7 +79,11 @@ public:
      *
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info);
+    void configure(const CLCompileContext         &compile_context,
+                   const ICLTensor                *boxes,
+                   ICLTensor                      *pred_boxes,
+                   const ICLTensor                *deltas,
+                   const BoundingBoxTransformInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLBoundingBoxTransform
      *
@@ -90,7 +97,10 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info);
+    static Status validate(const ITensorInfo              *boxes,
+                           const ITensorInfo              *pred_boxes,
+                           const ITensorInfo              *deltas,
+                           const BoundingBoxTransformInfo &info);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBOUNDINGBOXTRANSFORM_H */

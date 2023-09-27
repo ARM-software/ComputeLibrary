@@ -62,7 +62,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info);
+    static Status validate(const ITensorInfo       *input1,
+                           const ITensorInfo       *input2,
+                           const ITensorInfo       *output,
+                           const PriorBoxLayerInfo &info);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEPRIORBOXLAYER_H */

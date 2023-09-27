@@ -66,23 +66,40 @@ public:
      * @param[in]  output_shifts      Output shifts tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
      *                                Supported data types: S32
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, ITensorInfo *dst,
-                   int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
-                   const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts);
+    void configure(const CLCompileContext        &compile_context,
+                   const ITensorInfo             *mm_result,
+                   const ITensorInfo             *vector_sum_col,
+                   const ITensorInfo             *vector_sum_row,
+                   const ITensorInfo             *bias,
+                   ITensorInfo                   *dst,
+                   int32_t                        k,
+                   int32_t                        a_offset,
+                   int32_t                        b_offset,
+                   const GEMMLowpOutputStageInfo &output_stage,
+                   const ITensorInfo             *output_multipliers,
+                   const ITensorInfo             *output_shifts);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpOffsetContributionOutputStageKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *dst, int32_t a_offset,
-                           int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts);
+    static Status validate(const ITensorInfo             *mm_result,
+                           const ITensorInfo             *vector_sum_col,
+                           const ITensorInfo             *vector_sum_row,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *dst,
+                           int32_t                        a_offset,
+                           int32_t                        b_offset,
+                           const GEMMLowpOutputStageInfo &output_stage,
+                           const ITensorInfo             *output_multipliers,
+                           const ITensorInfo             *output_shifts);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    bool _is_quantized_per_channel{ false };
+    bool _is_quantized_per_channel{false};
 };
 } // namespace kernels
 } // namespace opencl

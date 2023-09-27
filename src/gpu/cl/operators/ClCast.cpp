@@ -23,16 +23,18 @@
  */
 #include "src/gpu/cl/operators/ClCast.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClCastKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClCast::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, ConvertPolicy policy)
+void ClCast::configure(const ClCompileContext &compile_context,
+                       const ITensorInfo      *src,
+                       ITensorInfo            *dst,
+                       ConvertPolicy           policy)
 {
     ARM_COMPUTE_LOG_PARAMS(src, dst, policy);
     auto k = std::make_unique<kernels::ClCastKernel>();

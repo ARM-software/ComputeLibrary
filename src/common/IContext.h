@@ -33,7 +33,7 @@
 
 struct AclContext_
 {
-    arm_compute::detail::Header header{ arm_compute::detail::ObjectType::Context, nullptr };
+    arm_compute::detail::Header header{arm_compute::detail::ObjectType::Context, nullptr};
 
 protected:
     AclContext_()  = default;
@@ -51,8 +51,7 @@ class IOperator;
 class IContext : public AclContext_
 {
 public:
-    IContext(Target target)
-        : AclContext_(), _target(target), _refcount(0)
+    IContext(Target target) : AclContext_(), _target(target), _refcount(0)
     {
     }
     /** Virtual Destructor */
@@ -108,11 +107,11 @@ public:
      *
      * @return A pointer to the created queue object
      */
-    virtual IQueue *create_queue(const AclQueueOptions *options) = 0;
-    virtual std::tuple<IOperator *, StatusCode> create_activation(const AclTensorDescriptor &src,
+    virtual IQueue                             *create_queue(const AclQueueOptions *options) = 0;
+    virtual std::tuple<IOperator *, StatusCode> create_activation(const AclTensorDescriptor     &src,
                                                                   const AclTensorDescriptor     &dst,
                                                                   const AclActivationDescriptor &act,
-                                                                  bool                           is_validate) = 0;
+                                                                  bool                           is_validate)          = 0;
 
 private:
     Target                   _target;   /**< Target type of context */
@@ -140,7 +139,7 @@ namespace detail
  */
 inline StatusCode validate_internal_context(const IContext *ctx)
 {
-    if(ctx == nullptr || !ctx->is_valid())
+    if (ctx == nullptr || !ctx->is_valid())
     {
         ARM_COMPUTE_LOG_ERROR_ACL("Invalid context object");
         return StatusCode::InvalidArgument;

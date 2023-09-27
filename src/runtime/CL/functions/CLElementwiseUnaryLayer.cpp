@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClElementwiseUnary.h"
 
@@ -32,17 +33,16 @@ namespace arm_compute
 {
 struct CLRsqrtLayer::Impl
 {
-    const ICLTensor                 *src{ nullptr };
-    ICLTensor                       *dst{ nullptr };
-    std::unique_ptr<opencl::ClRsqrt> op{ nullptr };
+    const ICLTensor                 *src{nullptr};
+    ICLTensor                       *dst{nullptr};
+    std::unique_ptr<opencl::ClRsqrt> op{nullptr};
 };
 
-CLRsqrtLayer::CLRsqrtLayer()
-    : _impl(std::make_unique<Impl>())
+CLRsqrtLayer::CLRsqrtLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLRsqrtLayer::CLRsqrtLayer(CLRsqrtLayer &&) = default;
+CLRsqrtLayer::CLRsqrtLayer(CLRsqrtLayer &&)            = default;
 CLRsqrtLayer &CLRsqrtLayer::operator=(CLRsqrtLayer &&) = default;
 CLRsqrtLayer::~CLRsqrtLayer()                          = default;
 
@@ -74,17 +74,16 @@ void CLRsqrtLayer::run()
 
 struct CLExpLayer::Impl
 {
-    const ICLTensor               *src{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClExp> op{ nullptr };
+    const ICLTensor               *src{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClExp> op{nullptr};
 };
 
-CLExpLayer::CLExpLayer()
-    : _impl(std::make_unique<Impl>())
+CLExpLayer::CLExpLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLExpLayer::CLExpLayer(CLExpLayer &&) = default;
+CLExpLayer::CLExpLayer(CLExpLayer &&)            = default;
 CLExpLayer &CLExpLayer::operator=(CLExpLayer &&) = default;
 CLExpLayer::~CLExpLayer()                        = default;
 
@@ -116,17 +115,16 @@ void CLExpLayer::run()
 
 struct CLNegLayer::Impl
 {
-    const ICLTensor               *src{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClNeg> op{ nullptr };
+    const ICLTensor               *src{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClNeg> op{nullptr};
 };
 
-CLNegLayer::CLNegLayer()
-    : _impl(std::make_unique<Impl>())
+CLNegLayer::CLNegLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLNegLayer::CLNegLayer(CLNegLayer &&) = default;
+CLNegLayer::CLNegLayer(CLNegLayer &&)            = default;
 CLNegLayer &CLNegLayer::operator=(CLNegLayer &&) = default;
 CLNegLayer::~CLNegLayer()                        = default;
 
@@ -157,17 +155,16 @@ void CLNegLayer::run()
 
 struct CLSinLayer::Impl
 {
-    const ICLTensor               *src{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClSin> op{ nullptr };
+    const ICLTensor               *src{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClSin> op{nullptr};
 };
 
-CLSinLayer::CLSinLayer()
-    : _impl(std::make_unique<Impl>())
+CLSinLayer::CLSinLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLSinLayer::CLSinLayer(CLSinLayer &&) = default;
+CLSinLayer::CLSinLayer(CLSinLayer &&)            = default;
 CLSinLayer &CLSinLayer::operator=(CLSinLayer &&) = default;
 CLSinLayer::~CLSinLayer()                        = default;
 
@@ -198,17 +195,16 @@ void CLSinLayer::run()
 
 struct CLAbsLayer::Impl
 {
-    const ICLTensor               *src{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClAbs> op{ nullptr };
+    const ICLTensor               *src{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClAbs> op{nullptr};
 };
 
-CLAbsLayer::CLAbsLayer()
-    : _impl(std::make_unique<Impl>())
+CLAbsLayer::CLAbsLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLAbsLayer::CLAbsLayer(CLAbsLayer &&) = default;
+CLAbsLayer::CLAbsLayer(CLAbsLayer &&)            = default;
 CLAbsLayer &CLAbsLayer::operator=(CLAbsLayer &&) = default;
 CLAbsLayer::~CLAbsLayer()                        = default;
 
@@ -239,17 +235,16 @@ void CLAbsLayer::run()
 
 struct CLLogLayer::Impl
 {
-    const ICLTensor               *src{ nullptr };
-    ICLTensor                     *dst{ nullptr };
-    std::unique_ptr<opencl::ClLog> op{ nullptr };
+    const ICLTensor               *src{nullptr};
+    ICLTensor                     *dst{nullptr};
+    std::unique_ptr<opencl::ClLog> op{nullptr};
 };
 
-CLLogLayer::CLLogLayer()
-    : _impl(std::make_unique<Impl>())
+CLLogLayer::CLLogLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLLogLayer::CLLogLayer(CLLogLayer &&) = default;
+CLLogLayer::CLLogLayer(CLLogLayer &&)            = default;
 CLLogLayer &CLLogLayer::operator=(CLLogLayer &&) = default;
 CLLogLayer::~CLLogLayer()                        = default;
 
@@ -280,17 +275,16 @@ void CLLogLayer::run()
 
 struct CLRoundLayer::Impl
 {
-    const ICLTensor                 *src{ nullptr };
-    ICLTensor                       *dst{ nullptr };
-    std::unique_ptr<opencl::ClRound> op{ nullptr };
+    const ICLTensor                 *src{nullptr};
+    ICLTensor                       *dst{nullptr};
+    std::unique_ptr<opencl::ClRound> op{nullptr};
 };
 
-CLRoundLayer::CLRoundLayer()
-    : _impl(std::make_unique<Impl>())
+CLRoundLayer::CLRoundLayer() : _impl(std::make_unique<Impl>())
 {
 }
 
-CLRoundLayer::CLRoundLayer(CLRoundLayer &&) = default;
+CLRoundLayer::CLRoundLayer(CLRoundLayer &&)            = default;
 CLRoundLayer &CLRoundLayer::operator=(CLRoundLayer &&) = default;
 CLRoundLayer::~CLRoundLayer()                          = default;
 

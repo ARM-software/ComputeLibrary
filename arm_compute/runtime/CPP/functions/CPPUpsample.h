@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CPPUPSAMPLE_H
 #define ARM_COMPUTE_CPPUPSAMPLE_H
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -44,5 +43,5 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info);
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CPPUPSAMPLE_H */

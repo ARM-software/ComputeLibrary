@@ -24,14 +24,14 @@
 #ifndef ARM_COMPUTE_WINDOW_H
 #define ARM_COMPUTE_WINDOW_H
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
-
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/utils/math/Math.h"
+
+#include <algorithm>
+#include <array>
+#include <cstddef>
 
 namespace arm_compute
 {
@@ -86,8 +86,7 @@ public:
          * @param[in] step  Step between two elements of the dimension when iterating.
          *
          */
-        constexpr Dimension(int start = 0, int end = 1, int step = 1)
-            : _start(start), _end(end), _step(step)
+        constexpr Dimension(int start = 0, int end = 1, int step = 1) : _start(start), _end(end), _step(step)
         {
         }
         Dimension(const Dimension &d) = default;
@@ -373,7 +372,8 @@ public:
      *
      * @return Collapsed window.
      */
-    Window collapse_if_possible(const Window &full_window, size_t first, size_t last, bool *has_collapsed = nullptr) const;
+    Window
+    collapse_if_possible(const Window &full_window, size_t first, size_t last, bool *has_collapsed = nullptr) const;
 
     /** Collapse the dimensions higher than @p first if possible.
      *
@@ -441,7 +441,7 @@ private:
      * @return The first slice of the window.
      */
     template <unsigned int window_dimension>
-    Window                 first_slice_window() const;
+    Window first_slice_window() const;
 
     /** Slide the passed window slice.
      *

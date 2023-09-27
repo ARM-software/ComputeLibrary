@@ -81,19 +81,28 @@ public:
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      *
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *bn_mul, ITensor *bn_add,
-                   ITensor *add_output, ITensor *final_output,
-                   ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    void configure(ITensor                   *input1,
+                   ITensor                   *input2,
+                   ITensor                   *bn_mul,
+                   ITensor                   *bn_add,
+                   ITensor                   *add_output,
+                   ITensor                   *final_output,
+                   ConvertPolicy              policy,
+                   const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEAddMulAdd
      *
      * Similar to @ref NEAddMulAdd::configure() except the arguments are @ref ITensorInfo * instead of @ref ITensor *
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2,
-                           const ITensorInfo *bn_mul, const ITensorInfo *bn_add,
-                           const ITensorInfo *add_output, const ITensorInfo *final_output,
-                           ConvertPolicy policy, const ActivationLayerInfo &act_info);
+    static Status validate(const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *bn_mul,
+                           const ITensorInfo         *bn_add,
+                           const ITensorInfo         *add_output,
+                           const ITensorInfo         *final_output,
+                           ConvertPolicy              policy,
+                           const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run() override;

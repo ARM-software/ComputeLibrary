@@ -25,6 +25,7 @@
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateLogits1DNorm.h"
 
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
@@ -38,11 +39,7 @@ namespace dynamic_fusion
 ClTemplateLogits1DNorm::ClTemplateLogits1DNorm(ComponentId                      id,
                                                const ArgumentPack<ITensorInfo> &tensors,
                                                const Attributes                &attributes)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _src{},
-      _sum{},
-      _dst{},
-      _attributes{ attributes }
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _sum{}, _dst{}, _attributes{attributes}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _sum = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
@@ -76,7 +73,7 @@ std::string ClTemplateLogits1DNorm::get_component_code(const ComponentGroup &com
     data0 = VLOAD(N0)(0, (__global {{DATA_TYPE}} *)src_addr);
 )_";
 
-    if(_attributes.is_log_softmax())
+    if (_attributes.is_log_softmax())
     {
         code += R"_(
     sum_val = log(sum_val);
@@ -101,23 +98,11 @@ std::string ClTemplateLogits1DNorm::get_component_code(const ComponentGroup &com
 
 void ClTemplateLogits1DNorm::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _sum,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "sum");
+    vtable.declare_variable(comp_group, _sum, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "sum");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_3D), "dst");
 }
 
 TagLUT ClTemplateLogits1DNorm::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
@@ -168,14 +153,14 @@ std::string ClTemplateLogits1DNorm::get_config_id() const
 
 std::set<std::string> ClTemplateLogits1DNorm::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateLogits1DNorm::get_window() const
 {
     ARM_COMPUTE_ERROR_ON_MSG(_dst->tensor_shape().total_size() == 0U, "Destination tensor is not initialized");
     constexpr unsigned int serial_vector_size = 16;
-    const unsigned int vector_size = adjust_vec_size(serial_vector_size, _src->dimension(0));
+    const unsigned int     vector_size        = adjust_vec_size(serial_vector_size, _src->dimension(0));
 
     Window win = calculate_max_window(*_src, Steps(vector_size));
     return win.collapse(win, Window::DimZ);

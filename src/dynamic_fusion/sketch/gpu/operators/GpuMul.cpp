@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/dynamic_fusion/sketch/gpu/operators/GpuMul.h"
+
 #include "arm_compute/dynamic_fusion/sketch/gpu/GpuWorkloadSketch.h"
 
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
@@ -32,9 +33,7 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status GpuMul::validate_op(const GpuWorkloadSketch &sketch,
-                           const ITensorInfo       *lhs,
-                           const ITensorInfo       *rhs)
+Status GpuMul::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *lhs, const ITensorInfo *rhs)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
@@ -46,9 +45,7 @@ Status GpuMul::validate_op(const GpuWorkloadSketch &sketch,
     return GpuElementwiseBinaryCommon::validate_op(sketch, lhs, rhs, common_attributes);
 }
 
-Status GpuMul::is_supported_op(const GpuWorkloadContext &context,
-                               const ITensorInfo        *lhs,
-                               const ITensorInfo        *rhs)
+Status GpuMul::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *lhs, const ITensorInfo *rhs)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
@@ -60,9 +57,7 @@ Status GpuMul::is_supported_op(const GpuWorkloadContext &context,
     return GpuElementwiseBinaryCommon::is_supported_op(context, lhs, rhs, common_attributes);
 }
 
-ITensorInfo *GpuMul::create_op(GpuWorkloadSketch &sketch,
-                               ITensorInfo       *lhs,
-                               ITensorInfo       *rhs)
+ITensorInfo *GpuMul::create_op(GpuWorkloadSketch &sketch, ITensorInfo *lhs, ITensorInfo *rhs)
 {
     // Set the elementwise operation to Mul then call the elementwise common create_op
     ElementwiseBinaryCommonAttributes common_attributes{};

@@ -25,8 +25,9 @@
 #define ARM_COMPUTE_CL_ELEMENTWISE_KERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
-#include "src/core/KernelTypes.h"
+
 #include "src/core/common/Macros.h"
+#include "src/core/KernelTypes.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
 
@@ -65,24 +66,28 @@ protected:
      *
      * @return a pair of Status and Window
      */
-    virtual std::pair<Status, Window> validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) = 0;
+    virtual std::pair<Status, Window>
+    validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) = 0;
 
     /** Generate the build options for the specific kernel
      *
      * @reutrn a CLBuildOptions struct
      */
-    virtual CLBuildOptions generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) = 0;
+    virtual CLBuildOptions
+    generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) = 0;
 
     /** Generate the identifier for tuning
      *
      * @reutrn a string
      */
-    virtual std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) = 0;
+    virtual std::string
+    generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) = 0;
 
     /** Commmon configure function for element-wise operators with no additional options (e.g., Div, Min, Max, SquaredDiff)
      *
      */
-    void configure_common(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
+    void
+    configure_common(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
 
     ActivationLayerInfo _act_info{};
 };
@@ -100,23 +105,31 @@ public:
      * @param[in] src2            Second source tensor info. Data types supported: same as @p src1.
      * @param[in] dst             Destination tensor info. Data types supported: same as @p src1.
      */
-    void configure(const ClCompileContext &compile_context, LogicalOperation op, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst);
+    void configure(const ClCompileContext &compile_context,
+                   LogicalOperation        op,
+                   ITensorInfo            *src1,
+                   ITensorInfo            *src2,
+                   ITensorInfo            *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClLogicalBinaryKernel::configure()
      *
      * @return a status
      */
-    static Status validate(LogicalOperation op, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst);
+    static Status
+    validate(LogicalOperation op, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst);
 
 private:
     // Inherited methods overridden:
     std::string name() override;
-    std::pair<Status, Window> validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) override;
-    CLBuildOptions generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) override;
-    std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) override;
+    std::pair<Status, Window>
+    validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) override;
+    CLBuildOptions
+    generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) override;
+    std::string
+    generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) override;
 
-    LogicalOperation _op{ LogicalOperation::Unknown };
+    LogicalOperation _op{LogicalOperation::Unknown};
 };
 
 /** Addition operation */
@@ -135,7 +148,12 @@ public:
      * @param[in] policy          Policy to use to handle overflow.
      * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ConvertPolicy &policy,
+    void configure(const ClCompileContext    &compile_context,
+                   ArithmeticOperation        op,
+                   ITensorInfo               *input1,
+                   ITensorInfo               *input2,
+                   ITensorInfo               *output,
+                   const ConvertPolicy       &policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration
@@ -144,15 +162,23 @@ public:
      *
      * @return a status
      */
-    static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
+    static Status validate(ArithmeticOperation        op,
+                           const ITensorInfo         *input1,
+                           const ITensorInfo         *input2,
+                           const ITensorInfo         *output,
+                           const ConvertPolicy       &policy,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
 protected:
     // Inherited methods overridden:
     std::string name() override;
-    std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) override;
-    CLBuildOptions generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
-    std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &input1, const ITensorInfo &output) override;
+    std::pair<Status, Window>
+    validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) override;
+    CLBuildOptions
+    generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
+    std::string generate_id_for_tuning(const std::string &kernel_name,
+                                       const ITensorInfo &input1,
+                                       const ITensorInfo &output) override;
 
 private:
     ConvertPolicy       _policy{};
@@ -174,7 +200,11 @@ public:
      * @param[in] dst             Destination tensor info. Data types supported: same as @p src1.
      * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ArithmeticOperation op, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst,
+    void configure(const ClCompileContext    &compile_context,
+                   ArithmeticOperation        op,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration
@@ -183,14 +213,21 @@ public:
      *
      * @return a status
      */
-    static Status validate(ArithmeticOperation op, const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(ArithmeticOperation        op,
+                           const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
 protected:
     // Inherited methods overridden:
     std::string name() override;
-    std::pair<Status, Window> validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) override;
-    CLBuildOptions generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) override;
-    std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) override;
+    std::pair<Status, Window>
+    validate_and_configure_window(ITensorInfo &src1, ITensorInfo &src2, ITensorInfo &dst) override;
+    CLBuildOptions
+    generate_build_options(const ITensorInfo &src1, const ITensorInfo &src2, const ITensorInfo &dst) override;
+    std::string
+    generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &src1, const ITensorInfo &dst) override;
 
 private:
     ArithmeticOperation _op{};

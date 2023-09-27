@@ -44,8 +44,7 @@ public:
      *
      * @param[in] it Value to reverse iterate on
      */
-    explicit reverse_iterable(T &it)
-        : _it(it)
+    explicit reverse_iterable(T &it) : _it(it)
     {
     }
 

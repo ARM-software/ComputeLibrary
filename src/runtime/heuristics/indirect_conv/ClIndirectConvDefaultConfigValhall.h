@@ -41,11 +41,14 @@ public:
     ClIndirectConvDefaultConfigValhall(GPUTarget gpu);
 
     // Inherited overridden method
-    DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) override;
+    DirectConvComputeKernelInfo
+    configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) override;
 
 private:
-    DirectConvComputeKernelInfo configure_G77_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
-    DirectConvComputeKernelInfo configure_G77_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo
+    configure_G77_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
+    DirectConvComputeKernelInfo
+    configure_G77_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
 };
 } // namespace cl_indirect_conv
 } // namespace arm_compute

@@ -30,27 +30,26 @@ namespace arm_compute
 {
 const std::string &string_from_data_type(DataType dt)
 {
-    static std::map<DataType, const std::string> dt_map =
-    {
-        { DataType::UNKNOWN, "UNKNOWN" },
-        { DataType::S8, "S8" },
-        { DataType::U8, "U8" },
-        { DataType::S16, "S16" },
-        { DataType::U16, "U16" },
-        { DataType::S32, "S32" },
-        { DataType::U32, "U32" },
-        { DataType::S64, "S64" },
-        { DataType::U64, "U64" },
-        { DataType::F16, "F16" },
-        { DataType::F32, "F32" },
-        { DataType::F64, "F64" },
-        { DataType::SIZET, "SIZET" },
-        { DataType::QSYMM8, "QSYMM8" },
-        { DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL" },
-        { DataType::QASYMM8, "QASYMM8" },
-        { DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED" },
-        { DataType::QSYMM16, "QSYMM16" },
-        { DataType::QASYMM16, "QASYMM16" },
+    static std::map<DataType, const std::string> dt_map = {
+        {DataType::UNKNOWN, "UNKNOWN"},
+        {DataType::S8, "S8"},
+        {DataType::U8, "U8"},
+        {DataType::S16, "S16"},
+        {DataType::U16, "U16"},
+        {DataType::S32, "S32"},
+        {DataType::U32, "U32"},
+        {DataType::S64, "S64"},
+        {DataType::U64, "U64"},
+        {DataType::F16, "F16"},
+        {DataType::F32, "F32"},
+        {DataType::F64, "F64"},
+        {DataType::SIZET, "SIZET"},
+        {DataType::QSYMM8, "QSYMM8"},
+        {DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL"},
+        {DataType::QASYMM8, "QASYMM8"},
+        {DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED"},
+        {DataType::QSYMM16, "QSYMM16"},
+        {DataType::QASYMM16, "QASYMM16"},
     };
 
     return dt_map[dt];
@@ -58,12 +57,11 @@ const std::string &string_from_data_type(DataType dt)
 
 DataType data_type_from_name(const std::string &name)
 {
-    static const std::map<std::string, DataType> data_types =
-    {
-        { "f16", DataType::F16 },
-        { "f32", DataType::F32 },
-        { "qasymm8", DataType::QASYMM8 },
-        { "qasymm8_signed", DataType::QASYMM8_SIGNED },
+    static const std::map<std::string, DataType> data_types = {
+        {"f16", DataType::F16},
+        {"f32", DataType::F32},
+        {"qasymm8", DataType::QASYMM8},
+        {"qasymm8_signed", DataType::QASYMM8_SIGNED},
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
@@ -74,7 +72,7 @@ DataType data_type_from_name(const std::string &name)
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         ARM_COMPUTE_ERROR_VAR("Invalid data type name: %s", name.c_str());
     }

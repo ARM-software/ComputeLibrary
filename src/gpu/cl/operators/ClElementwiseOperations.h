@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_ELEMENTWISE_OPERATIONS_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -48,14 +49,21 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementwiseDivision::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref opencl::kernels::ClArithmeticKernel for max
@@ -74,14 +82,21 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementwiseMax::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref opencl::kernels::ClArithmeticKernel for min
@@ -100,14 +115,21 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementwiseMin::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref opencl::kernels::ClArithmeticKernel for squared difference
@@ -126,14 +148,21 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementwiseSquaredDiff::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref opencl::kernels::ClArithmeticKernel for power
@@ -152,14 +181,21 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported:F16/F32.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ClCompileContext    &compile_context,
+                   ITensorInfo               *src1,
+                   ITensorInfo               *src2,
+                   ITensorInfo               *dst,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClElementwisePower::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *dst, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    static Status validate(const ITensorInfo         *src1,
+                           const ITensorInfo         *src2,
+                           const ITensorInfo         *dst,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 } // namespace opencl
 } // namespace arm_compute

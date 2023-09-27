@@ -29,8 +29,7 @@ namespace arm_compute
 {
 namespace cpu
 {
-CpuQueue::CpuQueue(IContext *ctx, const AclQueueOptions *options)
-    : IQueue(ctx)
+CpuQueue::CpuQueue(IContext *ctx, const AclQueueOptions *options) : IQueue(ctx)
 {
     ARM_COMPUTE_UNUSED(options);
 }

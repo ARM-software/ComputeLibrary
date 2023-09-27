@@ -30,5 +30,5 @@ namespace arm_compute
 {
 /** CPU Scheduler */
 using NEScheduler = Scheduler;
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_NESCHEDULER_H */

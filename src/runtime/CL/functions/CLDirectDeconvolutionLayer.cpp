@@ -26,14 +26,14 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/helpers/AutoConfiguration.h"
-
-#include "src/common/utils/Log.h"
 
 #include <memory>
 #include <tuple>
@@ -55,11 +55,16 @@ CLDirectDeconvolutionLayer::CLDirectDeconvolutionLayer(std::shared_ptr<IMemoryMa
 {
 }
 
-Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &info,
-                                            const WeightsInfo &weights_info)
+Status CLDirectDeconvolutionLayer::validate(const ITensorInfo   *input,
+                                            const ITensorInfo   *weights,
+                                            const ITensorInfo   *bias,
+                                            ITensorInfo         *output,
+                                            const PadStrideInfo &info,
+                                            const WeightsInfo   &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
     const DataLayout data_layout = input->data_layout();
 
@@ -70,20 +75,22 @@ Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITen
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) < 1);
 
-    auto out_dims = deconvolution_output_dimensions(input->dimension(idx_w), input->dimension(idx_h), weights->dimension(idx_w), weights->dimension(idx_h), info);
+    auto out_dims = deconvolution_output_dimensions(input->dimension(idx_w), input->dimension(idx_h),
+                                                    weights->dimension(idx_w), weights->dimension(idx_h), info);
 
     const TensorShape output_shape = compute_deconvolution_output_shape(out_dims, *input, *weights);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-    if(input->data_type() != weights->data_type())
+    if (input->data_type() != weights->data_type())
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(weights->data_type() != DataType::QSYMM8_PER_CHANNEL || !is_data_type_quantized_asymmetric(input->data_type()));
+        ARM_COMPUTE_RETURN_ERROR_ON(weights->data_type() != DataType::QSYMM8_PER_CHANNEL ||
+                                    !is_data_type_quantized_asymmetric(input->data_type()));
     }
 
-    if(bias != nullptr)
+    if (bias != nullptr)
     {
-        if(is_data_type_quantized_asymmetric(input->data_type()))
+        if (is_data_type_quantized_asymmetric(input->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         }
@@ -102,24 +109,39 @@ Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITen
     unsigned int        deconv_pad_y    = 0;
     const unsigned int  stride_x        = info.stride().first;
     const unsigned int  stride_y        = info.stride().second;
-    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
-    TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape).set_data_layout(data_layout));
+    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y,
+                                                                                out_dims, deconv_pad_x, deconv_pad_y);
+    TensorInfo          scale_out_info(input->clone()
+                                           ->set_is_resizable(true)
+                                           .reset_padding()
+                                           .set_tensor_shape(scale_out_shape)
+                                           .set_data_layout(data_layout));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, weights_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, weights_info));
 
     return Status{};
 }
 
-void CLDirectDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
-                                           const WeightsInfo &weights_info)
+void CLDirectDeconvolutionLayer::configure(ICLTensor           *input,
+                                           ICLTensor           *weights,
+                                           const ICLTensor     *bias,
+                                           ICLTensor           *output,
+                                           const PadStrideInfo &info,
+                                           const WeightsInfo   &weights_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, bias, output, info, weights_info);
 }
 
-void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
-                                           const WeightsInfo &weights_info)
+void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_context,
+                                           ICLTensor              *input,
+                                           ICLTensor              *weights,
+                                           const ICLTensor        *bias,
+                                           ICLTensor              *output,
+                                           const PadStrideInfo    &info,
+                                           const WeightsInfo      &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_LOG_PARAMS(input, weights, bias, output, info, weights_info);
@@ -141,15 +163,19 @@ void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_conte
     _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
     _flip_weights.configure(compile_context, weights, &_weights_flipped, &_flip_axis);
 
-    auto out_dims = deconvolution_output_dimensions(input->info()->dimension(idx_w), input->info()->dimension(idx_h), weights->info()->dimension(idx_w), weights->info()->dimension(idx_h), info);
+    auto out_dims =
+        deconvolution_output_dimensions(input->info()->dimension(idx_w), input->info()->dimension(idx_h),
+                                        weights->info()->dimension(idx_w), weights->info()->dimension(idx_h), info);
 
     const TensorShape output_shape = compute_deconvolution_output_shape(out_dims, *input->info(), *weights->info());
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_layout(data_layout));
+    auto_init_if_empty(*output->info(),
+                       input->info()->clone()->set_tensor_shape(output_shape).set_data_layout(data_layout));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLDirectDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLDirectDeconvolutionLayer::validate(
+        input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info));
 
     _is_prepared = weights_info.retain_internal_weights();
 
@@ -158,7 +184,8 @@ void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_conte
     // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int      deconv_pad_x    = 0;
     unsigned int      deconv_pad_y    = 0;
-    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
+    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(
+        *input->info(), *weights->info(), stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
 
     unsigned int deconv_pad_left  = pad_right > pad_left ? pad_right - pad_left : 0;
     unsigned int deconv_pad_right = pad_left > pad_right ? pad_left - pad_right : 0;
@@ -179,7 +206,8 @@ void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_conte
     _scaled_output.allocator()->init(scale_out_info);
 
     // configure scale function
-    const PadStrideInfo upsample_info(stride_x, stride_y, deconv_pad_left, deconv_pad_right, deconv_pad_top, deconv_pad_bottom, DimensionRoundingType::FLOOR);
+    const PadStrideInfo upsample_info(stride_x, stride_y, deconv_pad_left, deconv_pad_right, deconv_pad_top,
+                                      deconv_pad_bottom, DimensionRoundingType::FLOOR);
     _scale_f.configure(compile_context, input, &_scaled_output, upsample_info);
 
     // Setup the function to convolve the upscaled output
@@ -191,7 +219,7 @@ void CLDirectDeconvolutionLayer::configure(const CLCompileContext &compile_conte
     _flip_axis.allocator()->allocate();
     _flip_axis.map(true);
     auto axis_data = reinterpret_cast<uint32_t *>(_flip_axis.buffer());
-    if(weights->info()->data_layout() == DataLayout::NHWC)
+    if (weights->info()->data_layout() == DataLayout::NHWC)
     {
         axis_data[0] = 1;
         axis_data[1] = 2;
@@ -216,7 +244,7 @@ void CLDirectDeconvolutionLayer::run()
 
 void CLDirectDeconvolutionLayer::prepare()
 {
-    if(!_is_prepared)
+    if (!_is_prepared)
     {
         ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
 
@@ -229,7 +257,7 @@ void CLDirectDeconvolutionLayer::prepare()
         _conv_f.prepare();
 
         // Free flipped weights
-        if(!_weights_flipped.is_used())
+        if (!_weights_flipped.is_used())
         {
             _weights_flipped.allocator()->free();
         }

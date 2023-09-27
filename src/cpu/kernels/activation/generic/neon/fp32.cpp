@@ -29,7 +29,7 @@ namespace cpu
 {
 namespace
 {
-constexpr ActFpImplParams Fp32Params = { static_cast<float>(1e-24), 4 };
+constexpr ActFpImplParams Fp32Params = {static_cast<float>(1e-24), 4};
 } // namespace
 void neon_fp32_activation(const ITensor *src, ITensor *dst, const ActivationLayerInfo &act_info, const Window &window)
 {

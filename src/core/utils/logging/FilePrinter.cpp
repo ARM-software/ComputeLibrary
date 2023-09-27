@@ -25,8 +25,7 @@
 
 using namespace arm_compute::logging;
 
-FilePrinter::FilePrinter(const std::string &filename)
-    : _handler()
+FilePrinter::FilePrinter(const std::string &filename) : _handler()
 {
     _handler.open(filename, std::fstream::out | std::fstream::trunc);
 }

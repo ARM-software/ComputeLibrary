@@ -66,7 +66,10 @@ public:
      *                             rhs_info.transpose: true, false
      *                             rhs_info.interleave: true, false
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info);
+    void configure(const ClCompileContext  &compile_context,
+                   ITensorInfo             *src,
+                   ITensorInfo             *dst,
+                   const GEMMRHSMatrixInfo &rhs_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmReshapeRhsMatrixKernel::configure()

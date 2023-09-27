@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <algorithm>
-
 #include "arm_compute/runtime/OffsetMemoryPool.h"
 
 #include "arm_compute/core/Error.h"
@@ -30,6 +28,8 @@
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
+
+#include <algorithm>
 
 namespace arm_compute
 {
@@ -50,7 +50,7 @@ void OffsetMemoryPool::acquire(MemoryMappings &handles)
     ARM_COMPUTE_ERROR_ON(_blob == nullptr);
 
     // Set memory to handlers
-    for(auto &handle : handles)
+    for (auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
         handle.first->set_owned_region(_blob->extract_subregion(handle.second, _blob_info.size - handle.second));
@@ -59,7 +59,7 @@ void OffsetMemoryPool::acquire(MemoryMappings &handles)
 
 void OffsetMemoryPool::release(MemoryMappings &handles)
 {
-    for(auto &handle : handles)
+    for (auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
         handle.first->set_region(nullptr);

@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_GRAPH_NETENSORHANDLE_H
 
 #include "arm_compute/graph/ITensorHandle.h"
-
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -51,10 +50,10 @@ public:
     NETensorHandle &operator=(NETensorHandle &&) = default;
 
     // Inherited overridden methods
-    void allocate() override;
-    void free() override;
-    void manage(IMemoryGroup *mg) override;
-    void map(bool blocking) override;
+    void                        allocate() override;
+    void                        free() override;
+    void                        manage(IMemoryGroup *mg) override;
+    void                        map(bool blocking) override;
     void                        unmap() override;
     void                        release_if_unused() override;
     arm_compute::ITensor       &tensor() override;

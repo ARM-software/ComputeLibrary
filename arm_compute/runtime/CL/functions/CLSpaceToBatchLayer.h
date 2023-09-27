@@ -83,7 +83,11 @@ public:
      * @param[in]  paddings        2-D tensor with shape [2, M] (First dimension is the fastest-changing dimension). Supported M: 2. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *block_shape,
+                   const ICLTensor        *paddings,
+                   ICLTensor              *output);
     /** Set the input and output tensors. (Static block shape and paddings)
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -93,7 +97,12 @@ public:
      * @param[in]  padding_right The padding at the end of every dimension of the output tensor.
      * @param[out] output        Tensor output. Data types supported: same as @p input
      */
-    void configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output);
+    void configure(const ICLTensor *input,
+                   const int        block_shape_x,
+                   const int        block_shape_y,
+                   const Size2D    &padding_left,
+                   const Size2D    &padding_right,
+                   ICLTensor       *output);
     /** Set the input and output tensors. (Static block shape and paddings)
      *
      * @param[in]  compile_context The compile context to be used.
@@ -104,8 +113,13 @@ public:
      * @param[in]  padding_right   The padding at the end of every dimension of the output tensor.
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,
-                   ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const int               block_shape_x,
+                   const int               block_shape_y,
+                   const Size2D           &padding_left,
+                   const Size2D           &padding_right,
+                   ICLTensor              *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSpaceToBatchLayer
      *
      * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
@@ -115,7 +129,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *block_shape,
+                           const ITensorInfo *paddings,
+                           const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSpaceToBatchLayer (Static block shape and paddings)
      *
      * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: All.
@@ -127,7 +144,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           const int          block_shape_x,
+                           const int          block_shape_y,
+                           const Size2D      &padding_left,
+                           const Size2D      &padding_right,
+                           const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

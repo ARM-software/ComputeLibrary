@@ -36,7 +36,7 @@ class GraphContext;
 
 inline bool is_utility_node(INode *node)
 {
-    std::set<NodeType> utility_node_types = { NodeType::PrintLayer };
+    std::set<NodeType> utility_node_types = {NodeType::PrintLayer};
     return utility_node_types.find(node->type()) != utility_node_types.end();
 }
 

@@ -28,20 +28,25 @@
 #include "ckw/types/MemoryOperation.h"
 #include "ckw/types/TensorStorageType.h"
 
-#include "src/ITensor.h"
-#include "src/Tensor3dMapper.h"
 #include "src/cl/CLHelpers.h"
 #include "src/cl/CLKernelWriter.h"
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
+#include "src/ITensor.h"
+#include "src/Tensor3dMapper.h"
 
 namespace ckw
 {
-bool CLMemoryOpBufferHelper::validate(const CLKernelWriter *writer, const ITensor *tensor, const TensorSampler *sampler, const Tensor3dMapper *mapper, MemoryOperation op, const CLTile *dst)
+bool CLMemoryOpBufferHelper::validate(const CLKernelWriter *writer,
+                                      const ITensor        *tensor,
+                                      const TensorSampler  *sampler,
+                                      const Tensor3dMapper *mapper,
+                                      MemoryOperation       op,
+                                      const CLTile         *dst)
 {
     CKW_UNUSED(writer, tensor, mapper, op, dst);
 
-    if(sampler->storage() != TensorStorageType::BufferUint8Ptr)
+    if (sampler->storage() != TensorStorageType::BufferUint8Ptr)
     {
         return false;
     }
@@ -97,15 +102,15 @@ bool CLMemoryOpBufferHelper::validate(const CLKernelWriter *writer, const ITenso
  */
 void CLMemoryOpBufferHelper::initialize(const CLTile *dst, const CLTile *x, const CLTile *z, const CLTile *b)
 {
-    _dst           = dst;
+    _dst = dst;
 
     CKW_ASSERT(validate(_writer, _tensor, _sampler, _mapper.get(), _op, _dst));
 
     _ls_width_full = dst->info().width();
-    _coord_x      = x->scalar(0, 0).str;
-    _coord_z      = z->scalar(0, 0).str;
-    _coord_b      = b->scalar(0, 0).str;
-    _coord_orig_z = _coord_z;
+    _coord_x       = x->scalar(0, 0).str;
+    _coord_z       = z->scalar(0, 0).str;
+    _coord_b       = b->scalar(0, 0).str;
+    _coord_orig_z  = _coord_z;
 
     out_of_bound_initialize_x(_coord_x);
     out_of_bound_initialize_z(_coord_z);
@@ -126,10 +131,10 @@ void CLMemoryOpBufferHelper::write_row(int32_t row_id, const std::string &coord_
     out_of_bound_finalize_y(dst);
 
     // The left over load/store will be written in the finalize stage
-    if(_ls_width_part.size() != 0)
+    if (_ls_width_part.size() != 0)
     {
         int32_t col_start = 0;
-        for(int32_t partial_width : _ls_width_part)
+        for (int32_t partial_width : _ls_width_part)
         {
             const std::string dst       = _dst->vector(row_id, col_start, partial_width).str;
             const std::string coord_x   = _coord_x + " + " + std::to_string(col_start);
@@ -150,13 +155,13 @@ void CLMemoryOpBufferHelper::finalize()
 
 void CLMemoryOpBufferHelper::out_of_bound_initialize_x(const std::string &coord)
 {
-    if(_sampler->address_mode_x() == TensorSamplerAddressModeX::OverlappingMin)
+    if (_sampler->address_mode_x() == TensorSamplerAddressModeX::OverlappingMin)
     {
-        TensorInfo tensor_info = _tensor->info();
-        TensorShape shape      = tensor_info.shape();
+        TensorInfo  tensor_info = _tensor->info();
+        TensorShape shape       = tensor_info.shape();
 
         _ls_width_part = cl_decompose_vector_width(shape[0] % _ls_width_full);
-        if(_ls_width_part.size() != 0)
+        if (_ls_width_part.size() != 0)
         {
             _writer->op_write_raw_code("if(" + coord + " > 0)\n{\n");
         }
@@ -165,14 +170,14 @@ void CLMemoryOpBufferHelper::out_of_bound_initialize_x(const std::string &coord)
 
 void CLMemoryOpBufferHelper::out_of_bound_finalize_x()
 {
-    if(_sampler->address_mode_x() == TensorSamplerAddressModeX::OverlappingMin)
+    if (_sampler->address_mode_x() == TensorSamplerAddressModeX::OverlappingMin)
     {
-        if(_ls_width_part.size() != 0)
+        if (_ls_width_part.size() != 0)
         {
             _writer->op_write_raw_code("}\nelse\n{\n");
 
             out_of_bound_initialize_z(_coord_orig_z);
-            for(LeftoverDescriptor leftover_desc : _leftovers_x)
+            for (LeftoverDescriptor leftover_desc : _leftovers_x)
             {
                 out_of_bound_initialize_y(leftover_desc.coord);
                 _writer->op_write_raw_code(leftover_desc.statement);
@@ -191,7 +196,7 @@ void CLMemoryOpBufferHelper::out_of_bound_initialize_y(const std::string &coord)
 
     const TensorSamplerAddressModeY address_mode_y = _sampler->address_mode_y();
 
-    switch(address_mode_y)
+    switch (address_mode_y)
     {
         case TensorSamplerAddressModeY::ClampToBorderMaxOnly:
             // Not to be moved outside the case because it marks the relevant tensor component as used even if we dont't use the variable
@@ -212,7 +217,7 @@ void CLMemoryOpBufferHelper::out_of_bound_finalize_y(const std::string &dst)
 {
     const TensorSamplerAddressModeY address_mode_y = _sampler->address_mode_y();
 
-    switch(address_mode_y)
+    switch (address_mode_y)
     {
         case TensorSamplerAddressModeY::ClampToBorderMaxOnly:
             _writer->op_write_raw_code("}\nelse\n{\n");
@@ -234,7 +239,7 @@ void CLMemoryOpBufferHelper::out_of_bound_initialize_z(const std::string &coord)
     CKW_UNUSED(coord);
 
     const TensorSamplerAddressModeZ address_mode_z = _sampler->address_mode_z();
-    switch(address_mode_z)
+    switch (address_mode_z)
     {
         case TensorSamplerAddressModeZ::None:
             break;
@@ -247,7 +252,7 @@ void CLMemoryOpBufferHelper::out_of_bound_finalize_z()
 {
     const TensorSamplerAddressModeZ address_mode_z = _sampler->address_mode_z();
 
-    switch(address_mode_z)
+    switch (address_mode_z)
     {
         case TensorSamplerAddressModeZ::None:
             break;
@@ -256,13 +261,15 @@ void CLMemoryOpBufferHelper::out_of_bound_finalize_z()
     }
 }
 
-std::string CLMemoryOpBufferHelper::to_statement(MemoryOperation op, int32_t vector_width, const std::string &data,
-                             const std::string &address) const
+std::string CLMemoryOpBufferHelper::to_statement(MemoryOperation    op,
+                                                 int32_t            vector_width,
+                                                 const std::string &data,
+                                                 const std::string &address) const
 {
-    switch(op)
+    switch (op)
     {
         case MemoryOperation::Load:
-            if(vector_width != 1)
+            if (vector_width != 1)
             {
                 return data + " = vload" + std::to_string(vector_width) + "(0, " + address + ")";
             }
@@ -272,7 +279,7 @@ std::string CLMemoryOpBufferHelper::to_statement(MemoryOperation op, int32_t vec
             }
             break;
         case MemoryOperation::Store:
-            if(vector_width != 1)
+            if (vector_width != 1)
             {
                 return "vstore" + std::to_string(vector_width) + "(" + data + ", 0, " + address + ")";
             }
@@ -288,26 +295,28 @@ std::string CLMemoryOpBufferHelper::to_statement(MemoryOperation op, int32_t vec
     return "";
 }
 
-std::string CLMemoryOpBufferHelper::to_buffer_address(const std::string &x, const std::string &y, const std::string &z,
-                                     const std::string &b) const
+std::string CLMemoryOpBufferHelper::to_buffer_address(const std::string &x,
+                                                      const std::string &y,
+                                                      const std::string &z,
+                                                      const std::string &b) const
 {
     TensorStorageType tensor_storage = _sampler->storage();
     CKW_ASSERT(tensor_storage == TensorStorageType::BufferUint8Ptr);
 
-    const std::string ptr_buf      = _tensor->storage(tensor_storage).val;
-    const std::string dst_type     = cl_data_type_rounded_up_to_valid_vector_width(_dst->info().data_type(), 1);
+    const std::string ptr_buf  = _tensor->storage(tensor_storage).val;
+    const std::string dst_type = cl_data_type_rounded_up_to_valid_vector_width(_dst->info().data_type(), 1);
 
     std::string address;
     address += "(__global ";
     address += dst_type;
     address += "*)(";
     address += ptr_buf;
-    if(x != "0" && (_mapper->dim_x().str != "1"))
+    if (x != "0" && (_mapper->dim_x().str != "1"))
     {
         address += " + (";
         address += x + ") * sizeof(" + dst_type + ")";
     }
-    if(y != "0")
+    if (y != "0")
     {
         const std::string stride_y = _mapper->stride_y().str;
         address += " + (";
@@ -315,7 +324,7 @@ std::string CLMemoryOpBufferHelper::to_buffer_address(const std::string &x, cons
         address += " * ";
         address += stride_y;
     }
-    if(z != "0" && (_mapper->dim_z().str != "1"))
+    if (z != "0" && (_mapper->dim_z().str != "1"))
     {
         const std::string stride_z = _mapper->stride_z().str;
         address += " + (";
@@ -323,7 +332,7 @@ std::string CLMemoryOpBufferHelper::to_buffer_address(const std::string &x, cons
         address += " * ";
         address += stride_z;
     }
-    if(b != "0" && (_mapper->dim_batch().str != "1"))
+    if (b != "0" && (_mapper->dim_batch().str != "1"))
     {
         const std::string stride_b = _mapper->stride_batch().str;
         address += " + (";

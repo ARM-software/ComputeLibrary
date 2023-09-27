@@ -45,7 +45,7 @@ inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&...fixe
     // Create strides object
     Strides strides(stride_x, fixed_strides...);
 
-    for(size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
+    for (size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
     {
         strides.set(i, shape[i - 1] * strides[i - 1]);
     }

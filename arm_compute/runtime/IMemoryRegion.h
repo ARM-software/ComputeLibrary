@@ -37,8 +37,7 @@ public:
      *
      * @param[in] size Region size
      */
-    explicit IMemoryRegion(size_t size)
-        : _size(size)
+    explicit IMemoryRegion(size_t size) : _size(size)
     {
     }
     /** Virtual Destructor */

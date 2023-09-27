@@ -52,23 +52,32 @@ public:
      * @param[in]  src4            Fourth source tensor info. Data types supported: same as @p src1
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src1.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src1, ITensorInfo *src2, ITensorInfo *src3, ITensorInfo *src4, ITensorInfo *dst);
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *src1,
+                   ITensorInfo            *src2,
+                   ITensorInfo            *src3,
+                   ITensorInfo            *src4,
+                   ITensorInfo            *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClWidthConcatenate4TensorsKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src1, const ITensorInfo *src2, const ITensorInfo *src3, const ITensorInfo *src4, const ITensorInfo *dst);
+    static Status validate(const ITensorInfo *src1,
+                           const ITensorInfo *src2,
+                           const ITensorInfo *src3,
+                           const ITensorInfo *src4,
+                           const ITensorInfo *dst);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    int32_t _depth{ 0 };
-    int32_t _input1_width{ 0 };
-    int32_t _input2_width{ 0 };
-    int32_t _input3_width{ 0 };
+    int32_t _depth{0};
+    int32_t _input1_width{0};
+    int32_t _input2_width{0};
+    int32_t _input3_width{0};
 };
 } // namespace kernels
 } // namespace opencl

@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include <utility>
 
 namespace arm_compute
@@ -37,25 +38,27 @@ namespace cl_direct_conv
 {
 using namespace arm_compute::misc::shape_calculator;
 
-ClDirectConvDefaultConfigValhall::ClDirectConvDefaultConfigValhall(GPUTarget gpu)
-    : IClDirectConvKernelConfig(gpu)
+ClDirectConvDefaultConfigValhall::ClDirectConvDefaultConfigValhall(GPUTarget gpu) : IClDirectConvKernelConfig(gpu)
 {
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure(const ITensorInfo   *src,
+                                                                        const ITensorInfo   *wei,
+                                                                        const PadStrideInfo &conv_info)
 {
-    using ConfigurationFunctionExecutorPtr = DirectConvComputeKernelInfo (ClDirectConvDefaultConfigValhall::*)(const ITensorInfo * src, const ITensorInfo * wei, const PadStrideInfo & conv_info);
+    using ConfigurationFunctionExecutorPtr = DirectConvComputeKernelInfo (ClDirectConvDefaultConfigValhall::*)(
+        const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info);
 
-    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G78(&ClDirectConvDefaultConfigValhall::configure_G78_f32,
-                                                                          &ClDirectConvDefaultConfigValhall::configure_G78_f16,
-                                                                          &ClDirectConvDefaultConfigValhall::configure_G78_u8);
+    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G78(
+        &ClDirectConvDefaultConfigValhall::configure_G78_f32, &ClDirectConvDefaultConfigValhall::configure_G78_f16,
+        &ClDirectConvDefaultConfigValhall::configure_G78_u8);
 
-    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G57(&ClDirectConvDefaultConfigValhall::configure_G57_f32,
-                                                                          &ClDirectConvDefaultConfigValhall::configure_G57_f16,
-                                                                          &ClDirectConvDefaultConfigValhall::configure_G78_u8);
+    ClDirectConvConfigArray<ConfigurationFunctionExecutorPtr> configs_G57(
+        &ClDirectConvDefaultConfigValhall::configure_G57_f32, &ClDirectConvDefaultConfigValhall::configure_G57_f16,
+        &ClDirectConvDefaultConfigValhall::configure_G78_u8);
 
     ConfigurationFunctionExecutorPtr func = nullptr;
-    switch(_target)
+    switch (_target)
     {
         case GPUTarget::G57:
             func = configs_G57.get_function(src->data_type());
@@ -70,15 +73,17 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure(const IT
     return (this->*func)(src, wei, conv_info);
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape                  = wei->tensor_shape();
-        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const TensorShape wei_shape = wei->tensor_shape();
+        const TensorShape dst_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
         const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
@@ -87,11 +92,11 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(
 
         desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
-        if(dst_shape[0] <= 4)
+        if (dst_shape[0] <= 4)
         {
-            if(is_pointwise)
+            if (is_pointwise)
             {
-                if(ofm == 4)
+                if (ofm == 4)
                 {
                     desc.m0 = 1;
                     desc.n0 = 4;
@@ -113,7 +118,7 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(
         }
         else
         {
-            if(m < 64)
+            if (m < 64)
             {
                 desc.m0 = 1;
                 desc.n0 = 1;
@@ -131,15 +136,17 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f32(
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape                  = wei->tensor_shape();
-        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const TensorShape wei_shape = wei->tensor_shape();
+        const TensorShape dst_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
         const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
@@ -149,15 +156,15 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
 
         desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
-        if(dst_shape[0] <= 4)
+        if (dst_shape[0] <= 4)
         {
             // k0 should be as larger as possible. However, we should avoid
             // having left-over for loops that make the implementation slower.
-            if((k % 16) == 0)
+            if ((k % 16) == 0)
             {
                 desc.k0 = 16;
             }
-            else if((k % 8) == 0)
+            else if ((k % 8) == 0)
             {
                 desc.k0 = 8;
             }
@@ -166,9 +173,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
                 desc.k0 = 4;
             }
 
-            if(is_pointwise)
+            if (is_pointwise)
             {
-                if(ofm == 4)
+                if (ofm == 4)
                 {
                     desc.m0 = 1;
                     desc.n0 = 4;
@@ -187,15 +194,15 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
         }
         else
         {
-            if(m < 64)
+            if (m < 64)
             {
                 desc.m0 = 1;
                 desc.n0 = 1;
-                if((k % 16) == 0)
+                if ((k % 16) == 0)
                 {
                     desc.k0 = 16;
                 }
-                else if((k % 8) == 0)
+                else if ((k % 8) == 0)
                 {
                     desc.k0 = 8;
                 }
@@ -206,9 +213,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
             }
             else
             {
-                if(ofm >= 16)
+                if (ofm >= 16)
                 {
-                    if(m / 6 > 24000)
+                    if (m / 6 > 24000)
                     {
                         desc.m0 = 6;
                     }
@@ -223,11 +230,11 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
                 {
                     desc.m0 = 2;
                     desc.n0 = 8;
-                    if((k % 16) == 0)
+                    if ((k % 16) == 0)
                     {
                         desc.k0 = 16;
                     }
-                    else if((k % 8) == 0)
+                    else if ((k % 8) == 0)
                     {
                         desc.k0 = 8;
                     }
@@ -243,18 +250,20 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_f16(
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_u8(const ITensorInfo   *src,
+                                                                               const ITensorInfo   *wei,
+                                                                               const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
 
         desc.n0 = 4;
 
-        if(output_shape[0] > 16)
+        if (output_shape[0] > 16)
         {
             desc.m0 = 4;
         }
@@ -267,15 +276,17 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G78_u8(c
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape                  = wei->tensor_shape();
-        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const TensorShape wei_shape = wei->tensor_shape();
+        const TensorShape dst_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
         const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t m            = dst_shape[1] * dst_shape[2];
@@ -283,9 +294,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(
 
         desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
-        if(dst_shape[0] <= 4)
+        if (dst_shape[0] <= 4)
         {
-            if(is_pointwise)
+            if (is_pointwise)
             {
                 desc.m0 = 1;
                 desc.n0 = 1;
@@ -300,9 +311,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(
         }
         else
         {
-            if(m < 64)
+            if (m < 64)
             {
-                if(m == 1)
+                if (m == 1)
                 {
                     desc.m0 = 1;
                     desc.n0 = 1;
@@ -327,15 +338,17 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f32(
     return desc;
 }
 
-DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info)
+DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(const ITensorInfo   *src,
+                                                                                const ITensorInfo   *wei,
+                                                                                const PadStrideInfo &conv_info)
 {
     DirectConvComputeKernelInfo desc;
 
-    if(src->data_layout() == DataLayout::NHWC)
+    if (src->data_layout() == DataLayout::NHWC)
     {
         // Get the output shape
-        const TensorShape wei_shape                  = wei->tensor_shape();
-        const TensorShape dst_shape                  = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
+        const TensorShape wei_shape = wei->tensor_shape();
+        const TensorShape dst_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *wei, conv_info);
         const bool        export_weights_to_cl_image = export_to_cl_image(wei);
 
         const int32_t ofm          = dst_shape[0];
@@ -344,9 +357,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(
 
         desc.export_weights_to_cl_image = export_weights_to_cl_image;
 
-        if(dst_shape[0] <= 4)
+        if (dst_shape[0] <= 4)
         {
-            if(is_pointwise)
+            if (is_pointwise)
             {
                 desc.m0 = 2;
                 desc.n0 = 1;
@@ -361,9 +374,9 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(
         }
         else
         {
-            if(m < 64)
+            if (m < 64)
             {
-                if(m == 1)
+                if (m == 1)
                 {
                     desc.m0 = 1;
                     desc.n0 = 1;
@@ -378,7 +391,7 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(
             }
             else
             {
-                if(ofm > 16)
+                if (ofm > 16)
                 {
                     desc.m0 = 4;
                     desc.n0 = 8;
@@ -396,5 +409,5 @@ DirectConvComputeKernelInfo ClDirectConvDefaultConfigValhall::configure_G57_f16(
 
     return desc;
 }
-} // namespace opencl
+} // namespace cl_direct_conv
 } // namespace arm_compute

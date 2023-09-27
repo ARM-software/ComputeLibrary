@@ -42,28 +42,37 @@ void dequantize_tensor(const ITensor *input, ITensor *output)
     Iterator input_it(input, window);
     Iterator output_it(output, window);
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::QASYMM8:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<float *>(output_it.ptr()) = dequantize(*reinterpret_cast<const uint8_t *>(input_it.ptr()), qinfo.scale, qinfo.offset);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<float *>(output_it.ptr()) =
+                        dequantize(*reinterpret_cast<const uint8_t *>(input_it.ptr()), qinfo.scale, qinfo.offset);
+                },
+                input_it, output_it);
             break;
         case DataType::QASYMM8_SIGNED:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<float *>(output_it.ptr()) = dequantize_qasymm8_signed(*reinterpret_cast<const int8_t *>(input_it.ptr()), qinfo);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<float *>(output_it.ptr()) =
+                        dequantize_qasymm8_signed(*reinterpret_cast<const int8_t *>(input_it.ptr()), qinfo);
+                },
+                input_it, output_it);
             break;
         case DataType::QASYMM16:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<float *>(output_it.ptr()) = dequantize(*reinterpret_cast<const uint16_t *>(input_it.ptr()), qinfo.scale, qinfo.offset);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<float *>(output_it.ptr()) =
+                        dequantize(*reinterpret_cast<const uint16_t *>(input_it.ptr()), qinfo.scale, qinfo.offset);
+                },
+                input_it, output_it);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported data type");
@@ -80,28 +89,37 @@ void quantize_tensor(const ITensor *input, ITensor *output)
     Iterator input_it(input, window);
     Iterator output_it(output, window);
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::QASYMM8:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<uint8_t *>(output_it.ptr()) = quantize_qasymm8(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<uint8_t *>(output_it.ptr()) =
+                        quantize_qasymm8(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
+                },
+                input_it, output_it);
             break;
         case DataType::QASYMM8_SIGNED:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<int8_t *>(output_it.ptr()) = quantize_qasymm8_signed(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<int8_t *>(output_it.ptr()) =
+                        quantize_qasymm8_signed(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
+                },
+                input_it, output_it);
             break;
         case DataType::QASYMM16:
-            execute_window_loop(window, [&](const Coordinates &)
-            {
-                *reinterpret_cast<uint16_t *>(output_it.ptr()) = quantize_qasymm16(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
-            },
-            input_it, output_it);
+            execute_window_loop(
+                window,
+                [&](const Coordinates &)
+                {
+                    *reinterpret_cast<uint16_t *>(output_it.ptr()) =
+                        quantize_qasymm16(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
+                },
+                input_it, output_it);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported data type");
@@ -132,14 +150,23 @@ CPPBoxWithNonMaximaSuppressionLimit::CPPBoxWithNonMaximaSuppressionLimit(std::sh
 {
 }
 
-void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in,
-                                                    ITensor *scores_out, ITensor *boxes_out, ITensor *classes, ITensor *batch_splits_out,
-                                                    ITensor *keeps, ITensor *keeps_size, const BoxNMSLimitInfo info)
+void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor        *scores_in,
+                                                    const ITensor        *boxes_in,
+                                                    const ITensor        *batch_splits_in,
+                                                    ITensor              *scores_out,
+                                                    ITensor              *boxes_out,
+                                                    ITensor              *classes,
+                                                    ITensor              *batch_splits_out,
+                                                    ITensor              *keeps,
+                                                    ITensor              *keeps_size,
+                                                    const BoxNMSLimitInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
-    ARM_COMPUTE_LOG_PARAMS(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes, batch_splits_out, keeps, keeps_size, info);
+    ARM_COMPUTE_LOG_PARAMS(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes, batch_splits_out,
+                           keeps, keeps_size, info);
 
-    _is_qasymm8 = scores_in->info()->data_type() == DataType::QASYMM8 || scores_in->info()->data_type() == DataType::QASYMM8_SIGNED;
+    _is_qasymm8 = scores_in->info()->data_type() == DataType::QASYMM8 ||
+                  scores_in->info()->data_type() == DataType::QASYMM8_SIGNED;
 
     _scores_in        = scores_in;
     _boxes_in         = boxes_in;
@@ -150,7 +177,7 @@ void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, co
     _batch_splits_out = batch_splits_out;
     _keeps            = keeps;
 
-    if(_is_qasymm8)
+    if (_is_qasymm8)
     {
         // Manage intermediate buffers
         _memory_group.manage(&_scores_in_f32);
@@ -160,7 +187,7 @@ void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, co
         _memory_group.manage(&_classes_f32);
         _scores_in_f32.allocator()->init(scores_in->info()->clone()->set_data_type(DataType::F32));
         _boxes_in_f32.allocator()->init(boxes_in->info()->clone()->set_data_type(DataType::F32));
-        if(batch_splits_in != nullptr)
+        if (batch_splits_in != nullptr)
         {
             _memory_group.manage(&_batch_splits_in_f32);
             _batch_splits_in_f32.allocator()->init(batch_splits_in->info()->clone()->set_data_type(DataType::F32));
@@ -168,58 +195,70 @@ void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, co
         _scores_out_f32.allocator()->init(scores_out->info()->clone()->set_data_type(DataType::F32));
         _boxes_out_f32.allocator()->init(boxes_out->info()->clone()->set_data_type(DataType::F32));
         _classes_f32.allocator()->init(classes->info()->clone()->set_data_type(DataType::F32));
-        if(batch_splits_out != nullptr)
+        if (batch_splits_out != nullptr)
         {
             _memory_group.manage(&_batch_splits_out_f32);
             _batch_splits_out_f32.allocator()->init(batch_splits_out->info()->clone()->set_data_type(DataType::F32));
         }
-        if(keeps != nullptr)
+        if (keeps != nullptr)
         {
             _memory_group.manage(&_keeps_f32);
             _keeps_f32.allocator()->init(keeps->info()->clone()->set_data_type(DataType::F32));
         }
 
-        _box_with_nms_limit_kernel.configure(&_scores_in_f32, &_boxes_in_f32, (batch_splits_in != nullptr) ? &_batch_splits_in_f32 : nullptr,
+        _box_with_nms_limit_kernel.configure(&_scores_in_f32, &_boxes_in_f32,
+                                             (batch_splits_in != nullptr) ? &_batch_splits_in_f32 : nullptr,
                                              &_scores_out_f32, &_boxes_out_f32, &_classes_f32,
-                                             (batch_splits_out != nullptr) ? &_batch_splits_out_f32 : nullptr, (keeps != nullptr) ? &_keeps_f32 : nullptr,
-                                             keeps_size, info);
+                                             (batch_splits_out != nullptr) ? &_batch_splits_out_f32 : nullptr,
+                                             (keeps != nullptr) ? &_keeps_f32 : nullptr, keeps_size, info);
     }
     else
     {
-        _box_with_nms_limit_kernel.configure(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes, batch_splits_out, keeps, keeps_size, info);
+        _box_with_nms_limit_kernel.configure(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes,
+                                             batch_splits_out, keeps, keeps_size, info);
     }
 
-    if(_is_qasymm8)
+    if (_is_qasymm8)
     {
         _scores_in_f32.allocator()->allocate();
         _boxes_in_f32.allocator()->allocate();
-        if(_batch_splits_in != nullptr)
+        if (_batch_splits_in != nullptr)
         {
             _batch_splits_in_f32.allocator()->allocate();
         }
         _scores_out_f32.allocator()->allocate();
         _boxes_out_f32.allocator()->allocate();
         _classes_f32.allocator()->allocate();
-        if(batch_splits_out != nullptr)
+        if (batch_splits_out != nullptr)
         {
             _batch_splits_out_f32.allocator()->allocate();
         }
-        if(keeps != nullptr)
+        if (keeps != nullptr)
         {
             _keeps_f32.allocator()->allocate();
         }
     }
 }
 
-Status validate(const ITensorInfo *scores_in, const ITensorInfo *boxes_in, const ITensorInfo *batch_splits_in, const ITensorInfo *scores_out, const ITensorInfo *boxes_out, const ITensorInfo *classes,
-                const ITensorInfo *batch_splits_out, const ITensorInfo *keeps, const ITensorInfo *keeps_size, const BoxNMSLimitInfo info)
+Status validate(const ITensorInfo    *scores_in,
+                const ITensorInfo    *boxes_in,
+                const ITensorInfo    *batch_splits_in,
+                const ITensorInfo    *scores_out,
+                const ITensorInfo    *boxes_out,
+                const ITensorInfo    *classes,
+                const ITensorInfo    *batch_splits_out,
+                const ITensorInfo    *keeps,
+                const ITensorInfo    *keeps_size,
+                const BoxNMSLimitInfo info)
 {
     ARM_COMPUTE_UNUSED(batch_splits_in, batch_splits_out, keeps, keeps_size, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
 
-    const bool is_qasymm8 = scores_in->data_type() == DataType::QASYMM8 || scores_in->data_type() == DataType::QASYMM8_SIGNED;
-    if(is_qasymm8)
+    const bool is_qasymm8 =
+        scores_in->data_type() == DataType::QASYMM8 || scores_in->data_type() == DataType::QASYMM8_SIGNED;
+    if (is_qasymm8)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(boxes_in, 1, DataType::QASYMM16);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(boxes_in, boxes_out);
@@ -237,11 +276,11 @@ void CPPBoxWithNonMaximaSuppressionLimit::run()
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    if(_is_qasymm8)
+    if (_is_qasymm8)
     {
         dequantize_tensor(_scores_in, &_scores_in_f32);
         dequantize_tensor(_boxes_in, &_boxes_in_f32);
-        if(_batch_splits_in != nullptr)
+        if (_batch_splits_in != nullptr)
         {
             dequantize_tensor(_batch_splits_in, &_batch_splits_in_f32);
         }
@@ -249,16 +288,16 @@ void CPPBoxWithNonMaximaSuppressionLimit::run()
 
     Scheduler::get().schedule(&_box_with_nms_limit_kernel, Window::DimY);
 
-    if(_is_qasymm8)
+    if (_is_qasymm8)
     {
         quantize_tensor(&_scores_out_f32, _scores_out);
         quantize_tensor(&_boxes_out_f32, _boxes_out);
         quantize_tensor(&_classes_f32, _classes);
-        if(_batch_splits_out != nullptr)
+        if (_batch_splits_out != nullptr)
         {
             quantize_tensor(&_batch_splits_out_f32, _batch_splits_out);
         }
-        if(_keeps != nullptr)
+        if (_keeps != nullptr)
         {
             quantize_tensor(&_keeps_f32, _keeps);
         }

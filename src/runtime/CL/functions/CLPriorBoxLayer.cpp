@@ -29,31 +29,40 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLPriorBoxLayerKernel.h"
 
-#include "src/common/utils/Log.h"
-
 using namespace arm_compute;
 
-CLPriorBoxLayer::CLPriorBoxLayer()
-    : _min(nullptr), _max(nullptr), _aspect_ratios(nullptr)
+CLPriorBoxLayer::CLPriorBoxLayer() : _min(nullptr), _max(nullptr), _aspect_ratios(nullptr)
 {
 }
 
-void CLPriorBoxLayer::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info)
+void CLPriorBoxLayer::configure(const ICLTensor         *input1,
+                                const ICLTensor         *input2,
+                                ICLTensor               *output,
+                                const PriorBoxLayerInfo &info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, info);
 }
 
-void CLPriorBoxLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info)
+void CLPriorBoxLayer::configure(const CLCompileContext  &compile_context,
+                                const ICLTensor         *input1,
+                                const ICLTensor         *input2,
+                                ICLTensor               *output,
+                                const PriorBoxLayerInfo &info)
 {
     ARM_COMPUTE_LOG_PARAMS(input1, input2, output, info);
-    _min           = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.min_sizes().size() * sizeof(float));
-    _aspect_ratios = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.aspect_ratios().size() * sizeof(float));
-    if(!info.max_sizes().empty())
+    _min           = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
+                                info.min_sizes().size() * sizeof(float));
+    _aspect_ratios = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
+                                info.aspect_ratios().size() * sizeof(float));
+    if (!info.max_sizes().empty())
     {
-        _max = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.max_sizes().size() * sizeof(float));
+        _max = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
+                          info.max_sizes().size() * sizeof(float));
     }
 
     auto k = std::make_unique<CLPriorBoxLayerKernel>();
@@ -61,7 +70,10 @@ void CLPriorBoxLayer::configure(const CLCompileContext &compile_context, const I
     _kernel = std::move(k);
 }
 
-Status CLPriorBoxLayer::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info)
+Status CLPriorBoxLayer::validate(const ITensorInfo       *input1,
+                                 const ITensorInfo       *input2,
+                                 const ITensorInfo       *output,
+                                 const PriorBoxLayerInfo &info)
 {
     return CLPriorBoxLayerKernel::validate(input1, input2, output, info);
 }

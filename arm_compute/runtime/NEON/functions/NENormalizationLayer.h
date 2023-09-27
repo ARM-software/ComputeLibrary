@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NENORMALIZATIONLAYER_H
 #define ARM_COMPUTE_NENORMALIZATIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
@@ -88,16 +87,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    MemoryGroup                                 _memory_group;  /**< Function memory group */
-    std::unique_ptr<NENormalizationLayerKernel> _norm_kernel;   /**< Normalization layer kernel */
-    NEPixelWiseMultiplication                   _multiply_f;    /**< Pixel multiplication function */
-    Tensor                                      _input_squared; /**< The intermediate buffer which stores results of squaring input */
+    MemoryGroup                                 _memory_group; /**< Function memory group */
+    std::unique_ptr<NENormalizationLayerKernel> _norm_kernel;  /**< Normalization layer kernel */
+    NEPixelWiseMultiplication                   _multiply_f;   /**< Pixel multiplication function */
+    Tensor _input_squared; /**< The intermediate buffer which stores results of squaring input */
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NENORMALIZATIONLAYER_H */

@@ -29,11 +29,10 @@ namespace arm_compute
 
 const std::string &string_from_interpolation_policy(InterpolationPolicy policy)
 {
-    static std::map<InterpolationPolicy, const std::string> interpolation_policy_map =
-    {
-        { InterpolationPolicy::AREA, "AREA" },
-        { InterpolationPolicy::BILINEAR, "BILINEAR" },
-        { InterpolationPolicy::NEAREST_NEIGHBOR, "NEAREST_NEIGHBOUR" },
+    static std::map<InterpolationPolicy, const std::string> interpolation_policy_map = {
+        {InterpolationPolicy::AREA, "AREA"},
+        {InterpolationPolicy::BILINEAR, "BILINEAR"},
+        {InterpolationPolicy::NEAREST_NEIGHBOR, "NEAREST_NEIGHBOUR"},
     };
 
     return interpolation_policy_map[policy];

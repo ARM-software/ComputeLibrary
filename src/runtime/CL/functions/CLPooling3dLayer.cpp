@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClPool3d.h"
 
@@ -32,14 +33,13 @@ namespace arm_compute
 {
 struct CLPooling3dLayer::Impl
 {
-    const ICLTensor                  *src{ nullptr };
-    ICLTensor                        *dst{ nullptr };
-    ICLTensor                        *indices{ nullptr };
-    std::unique_ptr<opencl::ClPool3d> op{ nullptr };
+    const ICLTensor                  *src{nullptr};
+    ICLTensor                        *dst{nullptr};
+    ICLTensor                        *indices{nullptr};
+    std::unique_ptr<opencl::ClPool3d> op{nullptr};
 };
 
-CLPooling3dLayer::CLPooling3dLayer()
-    : _impl(std::make_unique<Impl>())
+CLPooling3dLayer::CLPooling3dLayer() : _impl(std::make_unique<Impl>())
 {
 }
 CLPooling3dLayer::~CLPooling3dLayer() = default;
@@ -49,7 +49,10 @@ void CLPooling3dLayer::configure(const ICLTensor *input, ICLTensor *output, cons
     configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info);
 }
 
-void CLPooling3dLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Pooling3dLayerInfo &pool_info)
+void CLPooling3dLayer::configure(const CLCompileContext   &compile_context,
+                                 const ICLTensor          *input,
+                                 ICLTensor                *output,
+                                 const Pooling3dLayerInfo &pool_info)
 {
     _impl->src = input;
     _impl->dst = output;
@@ -58,7 +61,8 @@ void CLPooling3dLayer::configure(const CLCompileContext &compile_context, const 
     _impl->op->configure(compile_context, input->info(), output->info(), pool_info);
 }
 
-Status CLPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
+Status
+CLPooling3dLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Pooling3dLayerInfo &pool_info)
 {
     return opencl::ClPool3d::validate(input, output, pool_info);
 }

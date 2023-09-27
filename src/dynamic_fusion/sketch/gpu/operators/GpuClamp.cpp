@@ -25,13 +25,12 @@
 
 #include "arm_compute/core/experimental/Types.h"
 
+#include "src/common/utils/Log.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
-#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentActivation.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuWorkloadSketchImpl.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplateActivation.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -48,12 +47,13 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(attributes.max_val() < attributes.min_val(), "Maximum clamp value cannot be lower than minimum value");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(attributes.max_val() < attributes.min_val(),
+                                    "Maximum clamp value cannot be lower than minimum value");
 
     TensorInfo         dst_info_to_validate;
     const ITensorInfo *dst_info_to_validate_ptr = &dst_info_to_validate;
 
-    if(dst != nullptr)
+    if (dst != nullptr)
     {
         dst_info_to_validate_ptr = dst;
     }
@@ -61,16 +61,15 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     auto_init_if_empty(dst_info_to_validate, *src->clone());
 
     // CLAMP operator is implemented as LU_BOUNDED_RELU with the alpha and beta variables swapped
-    const ClComponentActivation::Attributes act_info
-    {
-        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, attributes.max_val(), attributes.min_val()
-    };
+    const ClComponentActivation::Attributes act_info{ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                     attributes.max_val(), attributes.min_val()};
 
     // Check components
-    if(context.gpu_language() == GpuLanguage::OpenCL)
+    if (context.gpu_language() == GpuLanguage::OpenCL)
     {
         // Validate Activation Component
-        const auto properties = IGpuKernelComponent::Properties().stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+        const auto properties =
+            IGpuKernelComponent::Properties().stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
         ArgumentPack<ITensorInfo> arguments;
         arguments.add_const_tensor(ACL_SRC, src);
@@ -87,16 +86,13 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
 constexpr GpuOperatorType operator_type = GpuOperatorType::Simple;
 } // namespace
 
-Status GpuClamp::is_supported_op(const GpuWorkloadContext &context,
-                                 const ITensorInfo        *src,
-                                 const ClampAttributes    &attributes)
+Status
+GpuClamp::is_supported_op(const GpuWorkloadContext &context, const ITensorInfo *src, const ClampAttributes &attributes)
 {
     return is_supported_op_helper(context, src, nullptr, attributes);
 }
 
-Status GpuClamp::validate_op(const GpuWorkloadSketch &sketch,
-                             const ITensorInfo       *src,
-                             const ClampAttributes   &attributes)
+Status GpuClamp::validate_op(const GpuWorkloadSketch &sketch, const ITensorInfo *src, const ClampAttributes &attributes)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
 
@@ -121,9 +117,7 @@ Status GpuClamp::validate_op(const GpuWorkloadSketch &sketch,
     return is_supported_op_helper(*sketch.gpu_context(), src, &dst_info_to_validate, attributes);
 }
 
-ITensorInfo *GpuClamp::create_op(GpuWorkloadSketch     &sketch,
-                                 ITensorInfo           *src,
-                                 const ClampAttributes &attributes)
+ITensorInfo *GpuClamp::create_op(GpuWorkloadSketch &sketch, ITensorInfo *src, const ClampAttributes &attributes)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, attributes);
@@ -139,18 +133,16 @@ ITensorInfo *GpuClamp::create_op(GpuWorkloadSketch     &sketch,
     GpuKernelComponentGraph &comp_graph = sketch.implementation().component_graph();
 
     // CLAMP operator is implemented as LU_BOUNDED_RELU with the alpha and beta variables swapped
-    const ClComponentActivation::Attributes act_info
-    {
-        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, attributes.max_val(), attributes.min_val()
-    };
+    const ClComponentActivation::Attributes act_info{ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                     attributes.max_val(), attributes.min_val()};
 
     const auto *const sketch_ctx = sketch.implementation().context();
 
-    if(sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
+    if (sketch_ctx->gpu_language() == GpuLanguage::OpenCL)
     {
         // Add Activation Component
         auto properties = IGpuKernelComponent::Properties();
-        properties.stage(UnitWorkloadStage{ UnitWorkloadStage::Stage::Run });
+        properties.stage(UnitWorkloadStage{UnitWorkloadStage::Stage::Run});
 
         ArgumentPack<ITensorInfo> arguments;
         arguments.add_const_tensor(ACL_SRC, src);

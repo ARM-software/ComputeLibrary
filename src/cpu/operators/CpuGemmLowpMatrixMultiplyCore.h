@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/GEMMInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -108,18 +109,26 @@ public:
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, ITensorInfo *dst, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const ITensorInfo *a,
+                   const ITensorInfo *b,
+                   const ITensorInfo *c,
+                   ITensorInfo       *dst,
+                   const GEMMInfo    &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuGemmLowpMatrixMultiplyCore::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *dst, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a,
+                           const ITensorInfo *b,
+                           const ITensorInfo *c,
+                           const ITensorInfo *dst,
+                           const GEMMInfo    &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

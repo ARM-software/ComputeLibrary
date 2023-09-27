@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_GEMMLOWP_OFFSETCONTRIBUTION_OUTPUTSTAGE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -85,7 +86,13 @@ public:
      * @param[in]  b_offset       Offset to be added to each element of the matrix B.
      * @param[in]  output_stage   GEMMLowp output stage info, providing the type of quantization and the necessary parameters.
      */
-    void configure(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, ITensorInfo *dst, int32_t k, int32_t a_offset,
+    void configure(const ITensorInfo      *mm_result,
+                   const ITensorInfo      *vector_sum_col,
+                   const ITensorInfo      *vector_sum_row,
+                   const ITensorInfo      *bias,
+                   ITensorInfo            *dst,
+                   int32_t                 k,
+                   int32_t                 a_offset,
                    int32_t                 b_offset,
                    GEMMLowpOutputStageInfo output_stage);
     /** Static function to check if given info will lead to a valid configuration
@@ -94,21 +101,26 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *dst, int32_t a_offset,
+    static Status validate(const ITensorInfo      *mm_result,
+                           const ITensorInfo      *vector_sum_col,
+                           const ITensorInfo      *vector_sum_row,
+                           const ITensorInfo      *bias,
+                           const ITensorInfo      *dst,
+                           int32_t                 a_offset,
                            int32_t                 b_offset,
                            GEMMLowpOutputStageInfo output_stage);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
     /** Function to use for the particular tensors passed to configure() */
-    int32_t                 _a_offset{ 0 };
-    int32_t                 _b_offset{ 0 };
-    int32_t                 _k_offset{ 0 };
-    bool                    _is_vector_sum_col_batched{ true };
-    GEMMLowpOutputStageInfo _output_stage{ GEMMLowpOutputStageInfo() };
+    int32_t                 _a_offset{0};
+    int32_t                 _b_offset{0};
+    int32_t                 _k_offset{0};
+    bool                    _is_vector_sum_col_batched{true};
+    GEMMLowpOutputStageInfo _output_stage{GEMMLowpOutputStageInfo()};
 };
 } // namespace kernels
 } // namespace cpu

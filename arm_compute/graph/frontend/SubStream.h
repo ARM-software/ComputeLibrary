@@ -54,7 +54,7 @@ public:
     SubStream(IStream &s);
 
     // Inherited overridden methods
-    void add_layer(ILayer &layer) override;
+    void         add_layer(ILayer &layer) override;
     Graph       &graph() override;
     const Graph &graph() const override;
 

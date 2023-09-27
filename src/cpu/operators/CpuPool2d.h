@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_POOL2D_H
 
 #include "arm_compute/core/experimental/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 
@@ -58,17 +59,21 @@ public:
      * @param[in]      pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      * @param[out]     indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
+    void
+    configure(ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &pool_info, ITensorInfo *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuPool2d::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info,
+                           const ITensorInfo      *indices = nullptr);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:

@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClTranspose.h"
 
@@ -34,12 +35,11 @@ namespace arm_compute
 {
 struct CLTranspose::Impl
 {
-    const ICLTensor                     *src{ nullptr };
-    ICLTensor                           *dst{ nullptr };
-    std::unique_ptr<opencl::ClTranspose> op{ nullptr };
+    const ICLTensor                     *src{nullptr};
+    ICLTensor                           *dst{nullptr};
+    std::unique_ptr<opencl::ClTranspose> op{nullptr};
 };
-CLTranspose::CLTranspose()
-    : _impl(std::make_unique<Impl>())
+CLTranspose::CLTranspose() : _impl(std::make_unique<Impl>())
 {
 }
 CLTranspose::~CLTranspose() = default;

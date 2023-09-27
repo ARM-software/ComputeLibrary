@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/softmax/generic/neon/impl.h"
 
@@ -30,8 +31,13 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp16_softmax(const ITensor *in, const ITensor *max, void *const tmp,
-                       ITensor *out, const float beta, bool is_log, const Window &window)
+void neon_fp16_softmax(const ITensor *in,
+                       const ITensor *max,
+                       void *const    tmp,
+                       ITensor       *out,
+                       const float    beta,
+                       bool           is_log,
+                       const Window  &window)
 {
     return neon_softmax_logits_1d_float<float16_t>(in, max, tmp, out, beta, is_log, window);
 }
@@ -40,6 +46,6 @@ void neon_fp16_logits(const ITensor *in, ITensor *out, const Window &window)
 {
     return neon_logits_1d_max<float16_t>(in, out, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute
 #endif //defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

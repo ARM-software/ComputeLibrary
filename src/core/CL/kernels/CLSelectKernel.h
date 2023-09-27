@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLSELECTKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -60,7 +61,11 @@ public:
      * @param[out] y               Second input tensor. Data types supported: Same as @p x
      * @param[in]  output          Output tensor. Data types supported: Same as @p x.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *c,
+                   const ICLTensor        *x,
+                   const ICLTensor        *y,
+                   ICLTensor              *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSelectKernel
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.

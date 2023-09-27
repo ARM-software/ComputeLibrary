@@ -24,8 +24,6 @@
 #ifndef ARM_COMPUTE_CLFFTCONVOLUTIONLAYER_H
 #define ARM_COMPUTE_CLFFTCONVOLUTIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
@@ -37,6 +35,7 @@
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReverse.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
+#include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
@@ -94,8 +93,13 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    void configure(ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
     /** Set the input and output tensors.
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout
@@ -113,8 +117,14 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                   bool                       enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTConvolutionLayer
      *
      * @note: This function only works with any square kernel size and unit strides for both NCHW and NHWC data layout
@@ -133,8 +143,13 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
+                           const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
+                           bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;

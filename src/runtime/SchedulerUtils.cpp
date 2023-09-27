@@ -47,35 +47,34 @@ std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std:
     double ratio = m / static_cast<double>(n);
 
     // nt = sqrt(max_threads * (m / n) )
-    const unsigned adjusted = std::round(
-                                  std::sqrt(max_threads * ratio));
+    const unsigned adjusted = std::round(std::sqrt(max_threads * ratio));
 
     //find the nearest factor of max_threads
-    for(unsigned i = 0; i != adjusted; ++i)
+    for (unsigned i = 0; i != adjusted; ++i)
     {
         //try down
         const unsigned adj_down = adjusted - i;
-        if(max_threads % adj_down == 0)
+        if (max_threads % adj_down == 0)
         {
-            return { adj_down, max_threads / adj_down };
+            return {adj_down, max_threads / adj_down};
         }
 
         //try up
         const unsigned adj_up = adjusted + i;
-        if(max_threads % adj_up == 0)
+        if (max_threads % adj_up == 0)
         {
-            return { adj_up, max_threads / adj_up };
+            return {adj_up, max_threads / adj_up};
         }
     }
 
     //we didn't find anything so lets bail out with maxes biased to the largest dimension
-    if(m > n)
+    if (m > n)
     {
-        return { std::min<unsigned>(m, max_threads), 1 };
+        return {std::min<unsigned>(m, max_threads), 1};
     }
     else
     {
-        return { 1, std::min<unsigned>(n, max_threads) };
+        return {1, std::min<unsigned>(n, max_threads)};
     }
 }
 #endif /* #ifndef BARE_METAL */

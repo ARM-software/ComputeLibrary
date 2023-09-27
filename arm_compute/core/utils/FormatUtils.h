@@ -37,7 +37,7 @@ namespace arm_compute
  */
 inline size_t pixel_size_from_format(Format format)
 {
-    switch(format)
+    switch (format)
     {
         case Format::U8:
             return 1;
@@ -77,7 +77,7 @@ inline size_t pixel_size_from_format(Format format)
  */
 inline int plane_idx_from_channel(Format format, Channel channel)
 {
-    switch(format)
+    switch (format)
     {
         // Single planar formats have a single plane
         case Format::U8:
@@ -99,7 +99,7 @@ inline int plane_idx_from_channel(Format format, Channel channel)
         case Format::NV21:
         {
             // Channel U and V share the same plane of format UV88
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -114,7 +114,7 @@ inline int plane_idx_from_channel(Format format, Channel channel)
         case Format::IYUV:
         case Format::YUV444:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -142,11 +142,11 @@ inline int plane_idx_from_channel(Format format, Channel channel)
  */
 inline int channel_idx_from_format(Format format, Channel channel)
 {
-    switch(format)
+    switch (format)
     {
         case Format::RGB888:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::R:
                     return 0;
@@ -161,7 +161,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         }
         case Format::RGBA8888:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::R:
                     return 0;
@@ -178,7 +178,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         }
         case Format::YUYV422:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -193,7 +193,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         }
         case Format::UYVY422:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 1;
@@ -208,7 +208,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         }
         case Format::NV12:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -223,7 +223,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         }
         case Format::NV21:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -239,7 +239,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
         case Format::YUV444:
         case Format::IYUV:
         {
-            switch(channel)
+            switch (channel)
             {
                 case Channel::Y:
                     return 0;
@@ -266,7 +266,7 @@ inline int channel_idx_from_format(Format format, Channel channel)
  */
 inline size_t num_planes_from_format(Format format)
 {
-    switch(format)
+    switch (format)
     {
         case Format::U8:
         case Format::S16:
@@ -301,7 +301,7 @@ inline size_t num_planes_from_format(Format format)
  */
 inline size_t num_channels_from_format(Format format)
 {
-    switch(format)
+    switch (format)
     {
         case Format::U8:
         case Format::U16:
@@ -340,5 +340,5 @@ inline size_t num_channels_from_format(Format format)
  * @return The string describing the format.
  */
 const std::string &string_from_format(Format format);
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_CORE_UTILS_FORMATUTILS_H */

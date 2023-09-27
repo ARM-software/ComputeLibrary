@@ -27,8 +27,7 @@
 
 using namespace arm_compute;
 
-SubTensor::SubTensor()
-    : _parent(nullptr), _info()
+SubTensor::SubTensor() : _parent(nullptr), _info()
 {
 }
 

@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuGemmDirectConv2d.h"
 
@@ -35,25 +36,25 @@ using namespace arm_compute::experimental;
 
 struct NEGEMMConv2d::Impl
 {
-    const ITensor                   *weights{ nullptr };
-    std::unique_ptr<OperatorType>    op{ nullptr };
+    const ITensor                   *weights{nullptr};
+    std::unique_ptr<OperatorType>    op{nullptr};
     ITensorPack                      run_pack{};
     ITensorPack                      prep_pack{};
     WorkspaceData<Tensor>            workspace{};
     MemoryGroup                      memory_group{};
-    bool                             is_prepared{ false };
+    bool                             is_prepared{false};
     experimental::MemoryRequirements aux_mem_req{};
 };
 
-NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _impl(std::make_unique<Impl>())
+NEGEMMConv2d::NEGEMMConv2d(const std::shared_ptr<IMemoryManager> &memory_manager) : _impl(std::make_unique<Impl>())
 {
     _impl->memory_group = MemoryGroup(memory_manager);
 }
 
 NEGEMMConv2d::~NEGEMMConv2d() = default;
 
-void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info)
+void NEGEMMConv2d::configure(
+    ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const Conv2dInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
@@ -61,15 +62,21 @@ void NEGEMMConv2d::configure(ITensor *input, const ITensor *weights, const ITens
     _impl->is_prepared = false;
     _impl->op          = std::make_unique<OperatorType>();
 
-    _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), info);
+    _impl->op->configure(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
+                         info);
 
     _impl->aux_mem_req = _impl->op->workspace();
-    _impl->run_pack    = { { TensorType::ACL_SRC_0, input }, { TensorType::ACL_SRC_2, biases }, { TensorType::ACL_DST, output } };
-    _impl->prep_pack   = { { TensorType::ACL_SRC_1, weights }, { TensorType::ACL_SRC_2, biases } };
-    _impl->workspace   = manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+    _impl->run_pack  = {{TensorType::ACL_SRC_0, input}, {TensorType::ACL_SRC_2, biases}, {TensorType::ACL_DST, output}};
+    _impl->prep_pack = {{TensorType::ACL_SRC_1, weights}, {TensorType::ACL_SRC_2, biases}};
+    _impl->workspace =
+        manage_workspace<Tensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack, _impl->prep_pack);
 }
 
-Status NEGEMMConv2d::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const Conv2dInfo &info)
+Status NEGEMMConv2d::validate(const ITensorInfo *input,
+                              const ITensorInfo *weights,
+                              const ITensorInfo *biases,
+                              const ITensorInfo *output,
+                              const Conv2dInfo  &info)
 {
     return OperatorType::validate(input, weights, biases, output, info);
 }
@@ -84,15 +91,15 @@ void NEGEMMConv2d::run()
 
 void NEGEMMConv2d::prepare()
 {
-    if(!_impl->is_prepared)
+    if (!_impl->is_prepared)
     {
         _impl->op->prepare(_impl->prep_pack);
 
-        auto has_reshape = std::find_if(_impl->aux_mem_req.begin(),
-                                        _impl->aux_mem_req.end(),
-                                        [](const MemoryInfo & m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
+        auto has_reshape =
+            std::find_if(_impl->aux_mem_req.begin(), _impl->aux_mem_req.end(),
+                         [](const MemoryInfo &m) -> bool { return m.lifetime == MemoryLifetime::Persistent; });
 
-        if(has_reshape != std::end(_impl->aux_mem_req))
+        if (has_reshape != std::end(_impl->aux_mem_req))
         {
             _impl->weights->mark_as_unused();
         }

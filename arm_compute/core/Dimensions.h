@@ -50,8 +50,7 @@ public:
      * @param[in] dims Values to initialize the dimensions.
      */
     template <typename... Ts>
-    explicit Dimensions(Ts... dims)
-        : _id{ { static_cast<T>(dims)... } }, _num_dimensions{ sizeof...(dims) }
+    explicit Dimensions(Ts... dims) : _id{{static_cast<T>(dims)...}}, _num_dimensions{sizeof...(dims)}
     {
     }
 
@@ -78,7 +77,7 @@ public:
         ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
         _id[dimension] = value;
         // Don't increase the number of dimensions if the new dimension is 1
-        if(increase_dim_unit || value != 1)
+        if (increase_dim_unit || value != 1)
         {
             _num_dimensions = std::max(_num_dimensions, dimension + 1);
         }
@@ -108,7 +107,7 @@ public:
     void increment(size_t dim, T step = 1)
     {
         ARM_COMPUTE_ERROR_ON(dim >= _num_dimensions);
-        if((std::numeric_limits<T>::max() - _id[dim]) >= step)
+        if ((std::numeric_limits<T>::max() - _id[dim]) >= step)
         {
             _id[dim] += step;
         }
@@ -162,7 +161,7 @@ public:
 
         const size_t last = std::min(_num_dimensions, first + n);
 
-        if(last > (first + 1))
+        if (last > (first + 1))
         {
             // Collapse dimensions into the first
             _id[first] = std::accumulate(&_id[first], &_id[last], 1, std::multiplies<T>());
@@ -196,7 +195,7 @@ public:
     void remove(size_t idx)
     {
         ARM_COMPUTE_ERROR_ON(_num_dimensions < 1);
-        if(idx >= _num_dimensions)
+        if (idx >= _num_dimensions)
         {
             return;
         }
@@ -262,7 +261,7 @@ protected:
     ~Dimensions() = default;
 
     std::array<T, num_max_dimensions> _id;
-    size_t _num_dimensions{ 0 };
+    size_t                            _num_dimensions{0};
 };
 
 /** Check that given dimensions are equal.
@@ -289,5 +288,5 @@ inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
 {
     return !(lhs == rhs);
 }
-}
+} // namespace arm_compute
 #endif /*ARM_COMPUTE_DIMENSIONS_H*/

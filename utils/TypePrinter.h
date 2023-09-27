@@ -51,11 +51,13 @@
 #include "arm_compute/function_info/MatMulInfo.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/CLTypes.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/NEON/functions/NEMatMul.h"
-#include "arm_compute/runtime/common/LSTMParams.h"
+
 #include "support/Cast.h"
 #include "support/StringSupport.h"
+
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -71,7 +73,7 @@ namespace arm_compute
 template <typename T>
 std::string to_string_if_not_null(T *arg)
 {
-    if(arg == nullptr)
+    if (arg == nullptr)
     {
         return "nullptr";
     }
@@ -111,13 +113,13 @@ template <typename T>
     os << "[";
     bool   first = true;
     size_t i;
-    for(i = 0; i < args.size(); ++i)
+    for (i = 0; i < args.size(); ++i)
     {
-        if(i == max_print_size)
+        if (i == max_print_size)
         {
             break;
         }
-        if(first)
+        if (first)
         {
             first = false;
         }
@@ -127,7 +129,7 @@ template <typename T>
         }
         os << to_string(args[i]);
     }
-    if(i < args.size())
+    if (i < args.size())
     {
         os << ", ...";
     }
@@ -159,11 +161,11 @@ std::string to_string(const std::vector<T> &args)
 template <typename T>
 inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimensions)
 {
-    if(dimensions.num_dimensions() > 0)
+    if (dimensions.num_dimensions() > 0)
     {
         os << dimensions[0];
 
-        for(unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
+        for (unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
         {
             os << "," << dimensions[d];
         }
@@ -181,7 +183,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &rounding_policy)
 {
-    switch(rounding_policy)
+    switch (rounding_policy)
     {
         case RoundingPolicy::TO_ZERO:
             os << "TO_ZERO";
@@ -209,7 +211,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &roun
 inline ::std::ostream &operator<<(::std::ostream &os, const WeightsInfo &weights_info)
 {
     os << weights_info.are_reshaped() << ";";
-    os << weights_info.num_kernels() << ";" << weights_info.kernel_size().first << "," << weights_info.kernel_size().second;
+    os << weights_info.num_kernels() << ";" << weights_info.kernel_size().first << ","
+       << weights_info.kernel_size().second;
 
     return os;
 }
@@ -273,7 +276,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &gemm_info)
 {
-    os << "( m0=" << (unsigned int)gemm_info.m0 << " k0=" << gemm_info.k0 << "  v0=" << gemm_info.v0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << "})";
+    os << "( m0=" << (unsigned int)gemm_info.m0 << " k0=" << gemm_info.k0 << "  v0=" << gemm_info.v0
+       << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << "})";
     return os;
 }
 
@@ -286,8 +290,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &g
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
 {
-    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0 << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave << " exp_img=" <<
-       gemm_info.export_to_cl_image << "})";
+    os << "( n0=" << (unsigned int)gemm_info.n0 << " k0=" << gemm_info.k0 << "  h0=" << gemm_info.h0
+       << "  trans=" << gemm_info.transpose << "  inter=" << gemm_info.interleave
+       << " exp_img=" << gemm_info.export_to_cl_image << "})";
     return os;
 }
 
@@ -340,8 +345,8 @@ inline std::string to_string(const GEMMKernelInfo &gemm_info)
 inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
 {
     auto weights = bbox_info.weights();
-    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
-       "})";
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights={"
+       << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] << "})";
     return os;
 }
 
@@ -454,7 +459,7 @@ inline std::string to_string(const QuantizationInfo &quantization_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {
-    switch(act_function)
+    switch (act_function)
     {
         case ActivationLayerInfo::ActivationFunction::ABS:
             os << "ABS";
@@ -521,7 +526,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
 inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
 {
     std::stringstream str;
-    if(info.enabled())
+    if (info.enabled())
     {
         str << info.activation();
     }
@@ -537,9 +542,9 @@ inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo *info)
 {
-    if(info != nullptr)
+    if (info != nullptr)
     {
-        if(info->enabled())
+        if (info->enabled())
         {
             os << info->activation();
             os << "(";
@@ -581,7 +586,7 @@ inline std::string to_string(const arm_compute::ActivationLayerInfo::ActivationF
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
 {
-    switch(norm_type)
+    switch (norm_type)
     {
         case NormType::CROSS_MAP:
             os << "CROSS_MAP";
@@ -634,7 +639,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerIn
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_type)
 {
-    switch(pool_type)
+    switch (pool_type)
     {
         case PoolingType::AVG:
             os << "AVG";
@@ -689,7 +694,7 @@ inline std::string to_string(const RoundingPolicy &rounding_policy)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_layout)
 {
-    switch(data_layout)
+    switch (data_layout)
     {
         case DataLayout::UNKNOWN:
             os << "UNKNOWN";
@@ -736,7 +741,7 @@ inline std::string to_string(const arm_compute::DataLayout &data_layout)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataLayoutDimension &data_layout_dim)
 {
-    switch(data_layout_dim)
+    switch (data_layout_dim)
     {
         case DataLayoutDimension::WIDTH:
             os << "WIDTH";
@@ -768,7 +773,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataLayoutDimension 
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::UNKNOWN:
             os << "UNKNOWN";
@@ -859,7 +864,7 @@ inline std::string to_string(const arm_compute::DataType &data_type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Format &format)
 {
-    switch(format)
+    switch (format)
     {
         case Format::UNKNOWN:
             os << "UNKNOWN";
@@ -941,7 +946,7 @@ inline std::string to_string(const Format &format)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
 {
-    switch(channel)
+    switch (channel)
     {
         case Channel::UNKNOWN:
             os << "UNKNOWN";
@@ -1008,7 +1013,7 @@ inline std::string to_string(const Channel &channel)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
 {
-    switch(mode)
+    switch (mode)
     {
         case BorderMode::UNDEFINED:
             os << "UNDEFINED";
@@ -1035,10 +1040,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 {
-    os << border.top << ","
-       << border.right << ","
-       << border.bottom << ","
-       << border.left;
+    os << border.top << "," << border.right << "," << border.bottom << "," << border.left;
 
     return os;
 }
@@ -1053,7 +1055,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding)
 {
     os << "{";
-    for(auto const &p : padding)
+    for (auto const &p : padding)
     {
         os << "{" << p.first << "," << p.second << "}";
     }
@@ -1071,7 +1073,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding
 inline ::std::ostream &operator<<(::std::ostream &os, const Multiples &multiples)
 {
     os << "(";
-    for(size_t i = 0; i < multiples.size() - 1; i++)
+    for (size_t i = 0; i < multiples.size() - 1; i++)
     {
         os << multiples[i] << ", ";
     }
@@ -1088,7 +1090,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Multiples &multiples
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
 {
-    switch(policy)
+    switch (policy)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
             os << "NEAREST_NEIGHBOR";
@@ -1115,7 +1117,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &policy)
 {
-    switch(policy)
+    switch (policy)
     {
         case SamplingPolicy::CENTER:
             os << "CENTER";
@@ -1146,18 +1148,16 @@ inline ::std::ostream &operator<<(std::ostream &os, const ITensorInfo *info)
        << "DataLayout=" << string_from_data_layout(data_layout) << ","
        << "DataType=" << string_from_data_type(data_type);
 
-    if(is_data_type_quantized(data_type))
+    if (is_data_type_quantized(data_type))
     {
         const QuantizationInfo qinfo   = info->quantization_info();
         const auto             scales  = qinfo.scale();
         const auto             offsets = qinfo.offset();
 
         os << ", QuantizationInfo={"
-           << "scales.size=" << scales.size()
-           << ", scale(s)=" << scales << ", ";
+           << "scales.size=" << scales.size() << ", scale(s)=" << scales << ", ";
 
-        os << "offsets.size=" << offsets.size()
-           << ", offset(s)=" << offsets << "}";
+        os << "offsets.size=" << offsets.size() << ", offset(s)=" << offsets << "}";
     }
     return os;
 }
@@ -1210,7 +1210,7 @@ inline std::string to_string(const ITensorInfo &info)
 inline std::string to_string(const ITensorInfo *info)
 {
     std::string ret_str = "nullptr";
-    if(info != nullptr)
+    if (info != nullptr)
     {
         std::stringstream str;
         str << info;
@@ -1239,7 +1239,7 @@ inline std::string to_string(ITensorInfo *info)
 inline std::string to_string(const ITensor *tensor)
 {
     std::string ret_str = "nullptr";
-    if(tensor != nullptr)
+    if (tensor != nullptr)
     {
         std::stringstream str;
         str << "ITensor->info(): " << tensor->info();
@@ -1282,7 +1282,7 @@ inline std::string to_string(ITensor &tensor)
 inline std::string to_string(const ICLTensor *cl_tensor)
 {
     std::string ret_str = "nullptr";
-    if(cl_tensor != nullptr)
+    if (cl_tensor != nullptr)
     {
         std::stringstream str;
         str << "ICLTensor->info(): " << cl_tensor->info();
@@ -1311,11 +1311,7 @@ inline std::string to_string(ICLTensor *cl_tensor)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const cl::NDRange &nd_range)
 {
-    os << "{"
-       << nd_range[0] << ","
-       << nd_range[1] << ","
-       << nd_range[2]
-       << "}";
+    os << "{" << nd_range[0] << "," << nd_range[1] << "," << nd_range[2] << "}";
     return os;
 }
 
@@ -1451,9 +1447,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Window::Dimension &d
 inline ::std::ostream &operator<<(::std::ostream &os, const Window &win)
 {
     os << "{";
-    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; i++)
+    for (unsigned int i = 0; i < Coordinates::num_max_dimensions; i++)
     {
-        if(i > 0)
+        if (i > 0)
         {
             os << ", ";
         }
@@ -1537,7 +1533,7 @@ inline std::string to_string(const Window &win)
 inline std::string to_string(Window *win)
 {
     std::string ret_str = "nullptr";
-    if(win != nullptr)
+    if (win != nullptr)
     {
         std::stringstream str;
         str << *win;
@@ -1570,7 +1566,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PaddingMode &mode)
 {
-    switch(mode)
+    switch (mode)
     {
         case PaddingMode::CONSTANT:
             os << "CONSTANT";
@@ -1612,8 +1608,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
 {
     os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
     os << ";";
-    os << pad_stride_info.pad_left() << "," << pad_stride_info.pad_right() << ","
-       << pad_stride_info.pad_top() << "," << pad_stride_info.pad_bottom();
+    os << pad_stride_info.pad_left() << "," << pad_stride_info.pad_right() << "," << pad_stride_info.pad_top() << ","
+       << pad_stride_info.pad_bottom();
 
     return os;
 }
@@ -1718,7 +1714,7 @@ inline std::string to_string(const SamplingPolicy &policy)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &policy)
 {
-    switch(policy)
+    switch (policy)
     {
         case ConvertPolicy::WRAP:
             os << "WRAP";
@@ -1749,7 +1745,7 @@ inline std::string to_string(const ConvertPolicy &policy)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation &op)
 {
-    switch(op)
+    switch (op)
     {
         case ArithmeticOperation::ADD:
             os << "ADD";
@@ -1804,7 +1800,7 @@ inline std::string to_string(const ArithmeticOperation &op)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
 {
-    switch(op)
+    switch (op)
     {
         case ReductionOperation::SUM:
             os << "SUM";
@@ -1859,7 +1855,7 @@ inline std::string to_string(const ReductionOperation &op)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation &op)
 {
-    switch(op)
+    switch (op)
     {
         case ComparisonOperation::Equal:
             os << "Equal";
@@ -1895,7 +1891,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation 
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op)
 {
-    switch(op)
+    switch (op)
     {
         case ElementWiseUnary::RSQRT:
             os << "RSQRT";
@@ -1992,7 +1988,7 @@ inline std::string to_string(const PoolingLayerInfo &info)
     str << "{Type=" << info.pool_type << ","
         << "DataLayout=" << info.data_layout << ","
         << "IsGlobalPooling=" << info.is_global_pooling;
-    if(!info.is_global_pooling)
+    if (!info.is_global_pooling)
     {
         str << ","
             << "PoolSize=" << info.pool_size.width << "," << info.pool_size.height << ","
@@ -2038,8 +2034,7 @@ inline std::string to_string(const Size3D &type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Padding3D &padding3d)
 {
-    os << padding3d.left << "," << padding3d.right << ","
-       << padding3d.top << "," << padding3d.bottom << ","
+    os << padding3d.left << "," << padding3d.right << "," << padding3d.top << "," << padding3d.bottom << ","
        << padding3d.front << "," << padding3d.back;
     return os;
 }
@@ -2066,7 +2061,7 @@ inline std::string to_string(const Padding3D &padding3d)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const DimensionRoundingType &rounding_type)
 {
-    switch(rounding_type)
+    switch (rounding_type)
     {
         case DimensionRoundingType::CEIL:
             os << "CEIL";
@@ -2091,7 +2086,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Pooling3dLayerInfo &
 {
     os << "{Type=" << info.pool_type << ","
        << "IsGlobalPooling=" << info.is_global_pooling;
-    if(!info.is_global_pooling)
+    if (!info.is_global_pooling)
     {
         os << ","
            << "PoolSize=" << info.pool_size << ", "
@@ -2128,16 +2123,10 @@ inline std::string to_string(const PriorBoxLayerInfo &info)
 {
     std::stringstream str;
     str << "{";
-    str << "Clip:" << info.clip()
-        << "Flip:" << info.flip()
-        << "StepX:" << info.steps()[0]
-        << "StepY:" << info.steps()[1]
-        << "MinSizes:" << info.min_sizes().size()
-        << "MaxSizes:" << info.max_sizes().size()
-        << "ImgSizeX:" << info.img_size().x
-        << "ImgSizeY:" << info.img_size().y
-        << "Offset:" << info.offset()
-        << "Variances:" << info.variances().size();
+    str << "Clip:" << info.clip() << "Flip:" << info.flip() << "StepX:" << info.steps()[0]
+        << "StepY:" << info.steps()[1] << "MinSizes:" << info.min_sizes().size()
+        << "MaxSizes:" << info.max_sizes().size() << "ImgSizeX:" << info.img_size().x
+        << "ImgSizeY:" << info.img_size().y << "Offset:" << info.offset() << "Variances:" << info.variances().size();
     str << "}";
     return str.str();
 }
@@ -2178,7 +2167,7 @@ inline std::string to_string(const Size2D &type)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &conv_method)
 {
-    switch(conv_method)
+    switch (conv_method)
     {
         case ConvolutionMethod::GEMM:
             os << "GEMM";
@@ -2224,7 +2213,7 @@ inline std::string to_string(const ConvolutionMethod &conv_method)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_target)
 {
-    switch(gpu_target)
+    switch (gpu_target)
     {
         case GPUTarget::GPU_ARCH_MASK:
             os << "GPU_ARCH_MASK";
@@ -2358,7 +2347,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &det
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayerCodeType &detection_code)
 {
-    switch(detection_code)
+    switch (detection_code)
     {
         case DetectionOutputLayerCodeType::CENTER_SIZE:
             os << "CENTER_SIZE";
@@ -2410,8 +2399,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayer
        << "BackgroundLabelId=" << detection_info.background_label_id() << ","
        << "ConfidenceThreshold=" << detection_info.confidence_threshold() << ","
        << "TopK=" << detection_info.top_k() << ","
-       << "NumLocClasses=" << detection_info.num_loc_classes()
-       << "}";
+       << "NumLocClasses=" << detection_info.num_loc_classes() << "}";
 
     return os;
 }
@@ -2447,8 +2435,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionPostProcess
        << "ScaleValue_h=" << detection_info.scale_value_h() << ","
        << "ScaleValue_w=" << detection_info.scale_value_w() << ","
        << "UseRegularNms=" << detection_info.use_regular_nms() << ","
-       << "DetectionPerClass=" << detection_info.detection_per_class()
-       << "}";
+       << "DetectionPerClass=" << detection_info.detection_per_class() << "}";
 
     return os;
 }
@@ -2488,16 +2475,9 @@ inline std::string to_string(const DetectionWindow &detection_window)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PriorBoxLayerInfo &info)
 {
-    os << "Clip:" << info.clip()
-       << "Flip:" << info.flip()
-       << "StepX:" << info.steps()[0]
-       << "StepY:" << info.steps()[1]
-       << "MinSizes:" << info.min_sizes()
-       << "MaxSizes:" << info.max_sizes()
-       << "ImgSizeX:" << info.img_size().x
-       << "ImgSizeY:" << info.img_size().y
-       << "Offset:" << info.offset()
-       << "Variances:" << info.variances();
+    os << "Clip:" << info.clip() << "Flip:" << info.flip() << "StepX:" << info.steps()[0] << "StepY:" << info.steps()[1]
+       << "MinSizes:" << info.min_sizes() << "MaxSizes:" << info.max_sizes() << "ImgSizeX:" << info.img_size().x
+       << "ImgSizeY:" << info.img_size().y << "Offset:" << info.offset() << "Variances:" << info.variances();
 
     return os;
 }
@@ -2528,7 +2508,7 @@ inline std::string to_string(const WinogradInfo &type)
  */
 inline std::string to_string(const CLTunerMode val)
 {
-    switch(val)
+    switch (val)
     {
         case CLTunerMode::EXHAUSTIVE:
         {
@@ -2557,7 +2537,7 @@ inline std::string to_string(const CLTunerMode val)
  */
 inline std::string to_string(CLGEMMKernelType val)
 {
-    switch(val)
+    switch (val)
     {
         case CLGEMMKernelType::NATIVE:
         {
@@ -2660,7 +2640,7 @@ inline std::string to_string(const FullyConnectedLayerInfo &info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLowpOutputStageType &gemm_type)
 {
-    switch(gemm_type)
+    switch (gemm_type)
     {
         case GEMMLowpOutputStageType::NONE:
             os << "NONE";
@@ -2827,7 +2807,7 @@ inline std::string to_string(const ScaleKernelInfo &scale_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FFTDirection &fft_dir)
 {
-    switch(fft_dir)
+    switch (fft_dir)
     {
         case FFTDirection::Forward:
             os << "Forward";
@@ -2945,7 +2925,7 @@ inline std::string to_string(const Coordinates2D &coord_2d)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const FuseBatchNormalizationType &fuse_type)
 {
-    switch(fuse_type)
+    switch (fuse_type)
     {
         case FuseBatchNormalizationType::CONVOLUTION:
             os << "CONVOLUTION";
@@ -3073,7 +3053,7 @@ inline std::string to_string(const uint8_t num)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const NMSType &nms_type)
 {
-    switch(nms_type)
+    switch (nms_type)
     {
         case NMSType::LINEAR:
             os << "LINEAR";
@@ -3196,46 +3176,46 @@ inline std::string to_string(const Conv3dInfo &conv3d_info)
 inline std::string to_string(const WeightFormat wf)
 {
 #define __CASE_WEIGHT_FORMAT(wf) \
-case WeightFormat::wf:       \
-    return #wf;
-    switch(wf)
+    case WeightFormat::wf:       \
+        return #wf;
+    switch (wf)
     {
-            __CASE_WEIGHT_FORMAT(UNSPECIFIED)
-            __CASE_WEIGHT_FORMAT(ANY)
-            __CASE_WEIGHT_FORMAT(OHWI)
-            __CASE_WEIGHT_FORMAT(OHWIo2)
-            __CASE_WEIGHT_FORMAT(OHWIo4)
-            __CASE_WEIGHT_FORMAT(OHWIo8)
-            __CASE_WEIGHT_FORMAT(OHWIo16)
-            __CASE_WEIGHT_FORMAT(OHWIo32)
-            __CASE_WEIGHT_FORMAT(OHWIo64)
-            __CASE_WEIGHT_FORMAT(OHWIo128)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2)
-            __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2)
-            __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2)
-            __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2)
-            __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2)
-            __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4)
-            __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4)
-            __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4)
-            __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4)
-            __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4)
-            __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
-            __CASE_WEIGHT_FORMAT(OHWIo2i8)
-            __CASE_WEIGHT_FORMAT(OHWIo4i8)
-            __CASE_WEIGHT_FORMAT(OHWIo8i8)
-            __CASE_WEIGHT_FORMAT(OHWIo16i8)
-            __CASE_WEIGHT_FORMAT(OHWIo32i8)
-            __CASE_WEIGHT_FORMAT(OHWIo64i8)
+        __CASE_WEIGHT_FORMAT(UNSPECIFIED)
+        __CASE_WEIGHT_FORMAT(ANY)
+        __CASE_WEIGHT_FORMAT(OHWI)
+        __CASE_WEIGHT_FORMAT(OHWIo2)
+        __CASE_WEIGHT_FORMAT(OHWIo4)
+        __CASE_WEIGHT_FORMAT(OHWIo8)
+        __CASE_WEIGHT_FORMAT(OHWIo16)
+        __CASE_WEIGHT_FORMAT(OHWIo32)
+        __CASE_WEIGHT_FORMAT(OHWIo64)
+        __CASE_WEIGHT_FORMAT(OHWIo128)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2)
+        __CASE_WEIGHT_FORMAT(OHWIo4i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2)
+        __CASE_WEIGHT_FORMAT(OHWIo8i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2)
+        __CASE_WEIGHT_FORMAT(OHWIo16i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2)
+        __CASE_WEIGHT_FORMAT(OHWIo32i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2)
+        __CASE_WEIGHT_FORMAT(OHWIo64i2_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4)
+        __CASE_WEIGHT_FORMAT(OHWIo4i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4)
+        __CASE_WEIGHT_FORMAT(OHWIo8i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4)
+        __CASE_WEIGHT_FORMAT(OHWIo16i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4)
+        __CASE_WEIGHT_FORMAT(OHWIo32i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4)
+        __CASE_WEIGHT_FORMAT(OHWIo64i4_bf16)
+        __CASE_WEIGHT_FORMAT(OHWIo2i8)
+        __CASE_WEIGHT_FORMAT(OHWIo4i8)
+        __CASE_WEIGHT_FORMAT(OHWIo8i8)
+        __CASE_WEIGHT_FORMAT(OHWIo16i8)
+        __CASE_WEIGHT_FORMAT(OHWIo32i8)
+        __CASE_WEIGHT_FORMAT(OHWIo64i8)
         default:
             return "invalid value";
     }
@@ -3282,8 +3262,7 @@ inline std::string to_string(const std::tuple<TensorShape, TensorShape, arm_comp
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const Padding2D &padding2d)
 {
-    os << padding2d.left << "," << padding2d.right << ","
-       << padding2d.top << "," << padding2d.bottom;
+    os << padding2d.left << "," << padding2d.right << "," << padding2d.top << "," << padding2d.bottom;
     return os;
 }
 
@@ -3426,7 +3405,8 @@ inline std::string to_string(const experimental::dynamic_fusion::CastAttributes 
  *
  * @return Modified output stream.
  */
-inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
+inline ::std::ostream &operator<<(::std::ostream                                                &os,
+                                  const experimental::dynamic_fusion::DepthwiseConv2dAttributes &dw_conv2d_attr)
 {
     os << "DepthwiseConv2dAttributes="
        << "["
@@ -3518,7 +3498,8 @@ inline std::string to_string(const experimental::dynamic_fusion::ResizeAttribute
  *
  * @return Modified output stream.
  */
-inline ::std::ostream &operator<<(::std::ostream &os, const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
+inline ::std::ostream &operator<<(::std::ostream                                        &os,
+                                  const experimental::dynamic_fusion::SoftmaxAttributes &softmax_attr)
 {
     os << "SoftmaxAttributes="
        << "["
@@ -3583,8 +3564,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::MatMulK
        << "M0=" << matmul_info.m0 << ", "
        << "N0=" << matmul_info.n0 << ", "
        << "K0=" << matmul_info.k0 << ", "
-       << "export_rhs_to_cl_image=" << matmul_info.export_rhs_to_cl_image
-       << "]";
+       << "export_rhs_to_cl_image=" << matmul_info.export_rhs_to_cl_image << "]";
 
     return os;
 }
@@ -3612,8 +3592,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::CpuMatM
 {
     os << "CpuMatMulSettings="
        << "["
-       << "fast_math=" << settings.fast_math()
-       << "]";
+       << "fast_math=" << settings.fast_math() << "]";
 
     return os;
 }

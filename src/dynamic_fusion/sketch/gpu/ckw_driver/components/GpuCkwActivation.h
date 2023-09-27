@@ -46,15 +46,15 @@ public:
      * @param[in] tensors    Tensor arguments to the component
      * @param[in] attributes Component attributes
      */
-    GpuCkwActivation(ComponentId                      id,
-                            const ArgumentPack<ITensorInfo> &tensors,
-                            const Attributes                &attributes);
+    GpuCkwActivation(ComponentId id, const ArgumentPack<ITensorInfo> &tensors, const Attributes &attributes);
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(GpuCkwActivation);
     /** Destructor */
     ~GpuCkwActivation() override = default;
     // Inherited methods overriden:
-    virtual void write_component_code(const ComponentGroup &comp_group, GpuCkwVariableTable &vtable, GpuCkwScopedKernelWriter writer) const override;
-    Window get_window() const override;
+    virtual void write_component_code(const ComponentGroup    &comp_group,
+                                      GpuCkwVariableTable     &vtable,
+                                      GpuCkwScopedKernelWriter writer) const override;
+    Window       get_window() const override;
 
 private:
     const ITensorInfo *_src;

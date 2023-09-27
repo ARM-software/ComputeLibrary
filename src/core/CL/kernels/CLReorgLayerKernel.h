@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLREORGLAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute

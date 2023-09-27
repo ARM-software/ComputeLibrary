@@ -32,7 +32,7 @@ namespace experimental
 namespace dynamic_fusion
 {
 ClTemplateStore::ClTemplateStore(ComponentId id, const ArgumentPack<ITensorInfo> &tensors)
-    : IGpuTemplateComponentWriter{ id, tensors }, _src{}, _dst{}
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _dst{}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST_0);
@@ -61,16 +61,10 @@ std::string ClTemplateStore::get_component_code(const ComponentGroup &comp_group
 
 void ClTemplateStore::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "src");
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "dst");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "src");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "dst");
 }
 
 TagLUT ClTemplateStore::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const

@@ -24,13 +24,15 @@
 #include "ClComponentPool2d.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/dynamic_fusion/sketch/attributes/Pool2dAttributes.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/components/GpuCkwPool2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/cl/ClTemplatePool2d.h"
 #include "src/dynamic_fusion/utils/Utils.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -39,23 +41,24 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentPool2d::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
+Status ClComponentPool2d::validate(const Properties                &properties,
+                                   const ArgumentPack<ITensorInfo> &tensors,
+                                   const Attributes                &attributes,
+                                   const Settings                  &settings)
 {
     ARM_COMPUTE_UNUSED(properties);
     const auto src = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     const auto dst = tensors.get_const_tensor(TensorType::ACL_DST_0);
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_ERROR_ON_MSG((attributes.pool_type() != PoolingType::AVG && attributes.pool_type() != PoolingType::MAX), "Unsupported Pooling type");
+    ARM_COMPUTE_ERROR_ON_MSG((attributes.pool_type() != PoolingType::AVG && attributes.pool_type() != PoolingType::MAX),
+                             "Unsupported Pooling type");
 
     // 1. Check validity
     // Check if pooling is valid
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_region_entirely_outside_input(convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())),
-                                    "Pooling region that is entirely outside input tensor is unsupported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        is_pool_region_entirely_outside_input(convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())),
+        "Pooling region that is entirely outside input tensor is unsupported");
 
     // Matching data type
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
@@ -70,8 +73,9 @@ Status ClComponentPool2d::validate(
     // Device requirements are met
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
-                                                       misc::shape_calculator::compute_pool_shape(*src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
+        dst->tensor_shape(), misc::shape_calculator::compute_pool_shape(
+                                 *src, convert_pool_attr_to_pool_info(attributes, settings.mixed_precision())));
 
     // 2. Check support level
     // Data type
@@ -83,23 +87,16 @@ Status ClComponentPool2d::validate(
     return Status{};
 }
 
-ClComponentPool2d::ClComponentPool2d(
-    ComponentId                      id,
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
-    : IGpuKernelComponent{ id, properties, tensors },
+ClComponentPool2d::ClComponentPool2d(ComponentId                      id,
+                                     const Properties                &properties,
+                                     const ArgumentPack<ITensorInfo> &tensors,
+                                     const Attributes                &attributes,
+                                     const Settings                  &settings)
+    : IGpuKernelComponent{id, properties, tensors},
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<ClTemplatePool2d>(id, tensors, attributes, settings)
-}
+      _component_writer{std::make_unique<ClTemplatePool2d>(id, tensors, attributes, settings)}
 #else  //ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<GpuCkwPool2d>(id, tensors, attributes, settings)
-}
+      _component_writer{std::make_unique<GpuCkwPool2d>(id, tensors, attributes, settings)}
 #endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
 }

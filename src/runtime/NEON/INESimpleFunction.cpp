@@ -26,6 +26,7 @@
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 
 namespace arm_compute
@@ -33,8 +34,7 @@ namespace arm_compute
 INESimpleFunction::~INESimpleFunction() = default;
 
 INESimpleFunction::INESimpleFunction() // NOLINT
-    : _kernel(),
-      _border_handler()
+    : _kernel(), _border_handler()
 {
 }
 

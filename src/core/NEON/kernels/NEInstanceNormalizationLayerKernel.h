@@ -68,7 +68,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -82,14 +83,15 @@ private:
      * @param[in]      beta    The offset scalar value applied to the normalized tensor. Defaults to 0.0
      * @param[in]      epsilon Lower bound value for the normalization. Defaults to 1e-12
      */
-    using NormalizationFunction = void(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
+    using NormalizationFunction =
+        void(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, const Window &window);
 
     ITensor *_input;
     ITensor *_output;
     float    _gamma;
     float    _beta;
     float    _epsilon;
-    bool     _use_mixed_precision{ true };
+    bool     _use_mixed_precision{true};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYERKERNEL_H */

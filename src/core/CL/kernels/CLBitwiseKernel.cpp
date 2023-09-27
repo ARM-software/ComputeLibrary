@@ -28,25 +28,29 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
 {
-CLBitwiseKernel::CLBitwiseKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
+CLBitwiseKernel::CLBitwiseKernel() : _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLBitwiseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, BitwiseOperation op)
+void CLBitwiseKernel::configure(const CLCompileContext &compile_context,
+                                const ICLTensor        *input1,
+                                const ICLTensor        *input2,
+                                ICLTensor              *output,
+                                BitwiseOperation        op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
-    if(op != BitwiseOperation::NOT)
+    if (op != BitwiseOperation::NOT)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input2);
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8);
@@ -56,7 +60,7 @@ void CLBitwiseKernel::configure(const CLCompileContext &compile_context, const I
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*(output->info()), *(input1->info()));
-    auto padding_info = get_padding_info({ input1, input2, output });
+    auto padding_info = get_padding_info({input1, input2, output});
 
     // Configure kernel window
     const unsigned int vec_size_x = adjust_vec_size(16 / output->info()->element_size(), output->info()->dimension(0));
@@ -68,7 +72,7 @@ void CLBitwiseKernel::configure(const CLCompileContext &compile_context, const I
 
     // Create kernel
     std::string kernel_name = "";
-    switch(op)
+    switch (op)
     {
         case BitwiseOperation::AND:
             kernel_name = "bitwise_and";
@@ -107,13 +111,12 @@ void CLBitwiseKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input1, slice);
-        if(_input2 != nullptr)
+        if (_input2 != nullptr)
         {
             add_2D_tensor_argument(idx, _input2, slice);
         }
         add_2D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_2D(slice));
+    } while (window.slide_window_slice_2D(slice));
 }
 } // namespace arm_compute

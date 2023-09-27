@@ -26,10 +26,11 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
-#include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
 #include "src/cpu/kernels/assembly/gemm_common.hpp"
+#include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
 #include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "src/cpu/operators/CpuPermute.h"
@@ -73,7 +74,11 @@ public:
      * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *dst, const PadStrideInfo &conv_info,
+    void configure(const ITensorInfo         *src,
+                   const ITensorInfo         *weights,
+                   const ITensorInfo         *biases,
+                   ITensorInfo               *dst,
+                   const PadStrideInfo       &conv_info,
                    const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
                    bool                       enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CpuWinogradConv2d
@@ -82,13 +87,17 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *src,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *dst,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info         = ActivationLayerInfo(),
                            bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &constants) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -108,27 +117,28 @@ private:
         PermutedOutput     = TransformedInput,
         Count              = 10
     };
-    std::unique_ptr<CpuGemm>                   _gemm_function;
-    std::unique_ptr<CpuActivation>             _activation_func;
-    std::unique_ptr<ICPPKernel>                _transform_input_kernel;
-    std::unique_ptr<ICPPKernel>                _transform_output_kernel;
-    std::unique_ptr<CpuPermute>                _permute_input;
-    std::unique_ptr<CpuPermute>                _permute_output;
-    std::unique_ptr<CpuPermute>                _permute_weights;
-    experimental::MemoryRequirements           _aux_mem{ Count };
-    std::unique_ptr<arm_conv::ConvolutionArgs> _conv_args; // Make it unique ptr because this type does not have a default constructor
-    arm_conv::winograd::WinogradImpl           _winograd_impl;
-    DataLayout                                 _data_layout;
-    TensorInfo                                 _winograd_transformed_input;
-    TensorInfo                                 _winograd_transformed_output;
-    TensorInfo                                 _winograd_transformed_weights;
-    TensorInfo                                 _input_workspace;
-    TensorInfo                                 _output_workspace;
-    TensorInfo                                 _weights_hwio;
-    TensorInfo                                 _input_nhwc;
-    TensorInfo                                 _output_nhwc;
-    bool                                       _is_prepared;
-    bool                                       _run_activation;
+    std::unique_ptr<CpuGemm>         _gemm_function;
+    std::unique_ptr<CpuActivation>   _activation_func;
+    std::unique_ptr<ICPPKernel>      _transform_input_kernel;
+    std::unique_ptr<ICPPKernel>      _transform_output_kernel;
+    std::unique_ptr<CpuPermute>      _permute_input;
+    std::unique_ptr<CpuPermute>      _permute_output;
+    std::unique_ptr<CpuPermute>      _permute_weights;
+    experimental::MemoryRequirements _aux_mem{Count};
+    std::unique_ptr<arm_conv::ConvolutionArgs>
+        _conv_args; // Make it unique ptr because this type does not have a default constructor
+    arm_conv::winograd::WinogradImpl _winograd_impl;
+    DataLayout                       _data_layout;
+    TensorInfo                       _winograd_transformed_input;
+    TensorInfo                       _winograd_transformed_output;
+    TensorInfo                       _winograd_transformed_weights;
+    TensorInfo                       _input_workspace;
+    TensorInfo                       _output_workspace;
+    TensorInfo                       _weights_hwio;
+    TensorInfo                       _input_nhwc;
+    TensorInfo                       _output_nhwc;
+    bool                             _is_prepared;
+    bool                             _run_activation;
 };
 } // namespace cpu
 } // namespace arm_compute

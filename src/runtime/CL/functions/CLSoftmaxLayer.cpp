@@ -22,12 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
+
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/gpu/cl/kernels/ClSoftmaxKernel.h"
 #include "src/gpu/cl/operators/ClPermute.h"
@@ -40,9 +42,9 @@ using OperatorType = opencl::ClSoftmax;
 template <bool IS_LOG>
 struct CLSoftmaxLayerGeneric<IS_LOG>::Impl
 {
-    const ICLTensor              *src{ nullptr };
-    ICLTensor                    *dst{ nullptr };
-    std::unique_ptr<OperatorType> op{ nullptr };
+    const ICLTensor              *src{nullptr};
+    ICLTensor                    *dst{nullptr};
+    std::unique_ptr<OperatorType> op{nullptr};
     MemoryGroup                   memory_group{};
     ITensorPack                   run_pack{};
     WorkspaceData<CLTensor>       workspace_tensors{};
@@ -65,28 +67,30 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor 
 }
 
 template <bool IS_LOG>
-void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(
+    const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta, int32_t axis)
 {
     _impl->src = input;
     _impl->dst = output;
     _impl->op  = std::make_unique<OperatorType>();
 
-    SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->info()->data_type(), axis };
+    SoftmaxKernelInfo softmax_info{beta, IS_LOG, input->info()->data_type(), axis};
     _impl->op->configure(compile_context, *input->info(), *output->info(), softmax_info);
 
-    _impl->run_pack          = { { TensorType::ACL_SRC, _impl->src }, { TensorType::ACL_DST, _impl->dst } };
+    _impl->run_pack          = {{TensorType::ACL_SRC, _impl->src}, {TensorType::ACL_DST, _impl->dst}};
     _impl->workspace_tensors = manage_workspace<CLTensor>(_impl->op->workspace(), _impl->memory_group, _impl->run_pack);
 }
 
 template <bool IS_LOG>
-Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
+Status
+CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
-    SoftmaxKernelInfo softmax_info{ beta, IS_LOG, input->data_type(), axis };
+    SoftmaxKernelInfo softmax_info{beta, IS_LOG, input->data_type(), axis};
     return OperatorType::validate(*input, *output, softmax_info);
 }
 
 template <bool IS_LOG>
-void           CLSoftmaxLayerGeneric<IS_LOG>::run()
+void CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
     // Acquire all the temporaries
     MemoryGroupResourceScope scope_mg(_impl->memory_group);

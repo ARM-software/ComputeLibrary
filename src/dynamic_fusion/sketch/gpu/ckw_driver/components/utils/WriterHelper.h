@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "ckw/TensorTileSampler.h"
+
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwComponentArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwKernelWriter.h"
 #include "src/dynamic_fusion/sketch/gpu/ckw_driver/GpuCkwScopedKernelWriter.h"
@@ -44,9 +45,14 @@ using SamplerCreator = std::function<TensorTileSampler(GpuCkwScopedKernelWriter 
 
 /** Load src and dst tiles of dimension [m0, n0] only when not loaded and prepare the sampler
  */
-inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &writer, GpuCkwComponentArgument *src, GpuCkwComponentArgument *dst, int32_t m0, int32_t n0, SamplerCreator create_sampler)
+inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &writer,
+                                                   GpuCkwComponentArgument  *src,
+                                                   GpuCkwComponentArgument  *dst,
+                                                   int32_t                   m0,
+                                                   int32_t                   n0,
+                                                   SamplerCreator            create_sampler)
 {
-    if(!src->has_tile())
+    if (!src->has_tile())
     {
         const auto sampler = create_sampler(writer, m0, n0);
         writer->op_load_once(src, sampler);
@@ -61,7 +67,7 @@ inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &wri
     const auto &sampler  = src->tile_sampler();
 
     // Prepare the output tile.
-    if(!dst->has_tile())
+    if (!dst->has_tile())
     {
         auto &tile = writer->declare_tile("dst_tile", src_tile.tile_info());
         dst->init_virtual_tensor(tile, sampler);
@@ -78,7 +84,13 @@ inline void load_src_dst_tiles_and_prepare_sampler(GpuCkwScopedKernelWriter &wri
  * @param[in]     prefix          Prefix to all the tiles declared within this function
  * @param[in]     const_0         Constant tile of value 0
  */
-inline void get_coord(GpuCkwScopedKernelWriter writer, TileOperand &coord, const TileOperand &gid, int32_t step_v, int32_t leftover_step_v, const std::string &prefix, const TileOperand &const_0)
+inline void get_coord(GpuCkwScopedKernelWriter writer,
+                      TileOperand             &coord,
+                      const TileOperand       &gid,
+                      int32_t                  step_v,
+                      int32_t                  leftover_step_v,
+                      const std::string       &prefix,
+                      const TileOperand       &const_0)
 {
     auto &step          = writer->declare_tile(prefix + "step", step_v);
     auto &leftover_step = writer->declare_tile(prefix + "leftover_step", leftover_step_v);
@@ -122,8 +134,15 @@ inline void get_coord(GpuCkwScopedKernelWriter writer, TileOperand &coord, const
  *
  * @return TensorTileSampler
  */
-inline TensorTileSampler create_boundary_aware_2d_sampler(GpuCkwScopedKernelWriter writer, TileOperand &gid_0, TileOperand &gid_1, int32_t dim0_v, int32_t dim1_v, int32_t n0_v, int32_t m0_v,
-                                                          const std::string prefix, TileOperand &const_0)
+inline TensorTileSampler create_boundary_aware_2d_sampler(GpuCkwScopedKernelWriter writer,
+                                                          TileOperand             &gid_0,
+                                                          TileOperand             &gid_1,
+                                                          int32_t                  dim0_v,
+                                                          int32_t                  dim1_v,
+                                                          int32_t                  n0_v,
+                                                          int32_t                  m0_v,
+                                                          const std::string        prefix,
+                                                          TileOperand             &const_0)
 {
     // Clamp tile size [n0, m0] against dimension [dim0, dim1]
     // This is needed to:

@@ -26,6 +26,7 @@
 #include "arm_compute/core/utils/ActivationFunctionUtils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
@@ -39,10 +40,7 @@ namespace dynamic_fusion
 ClTemplateActivation::ClTemplateActivation(ComponentId                      id,
                                            const ArgumentPack<ITensorInfo> &tensors,
                                            const Attributes                &attributes)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _src{},
-      _dst{},
-      _attributes{ attributes }
+    : IGpuTemplateComponentWriter{id, tensors}, _src{}, _dst{}, _attributes{attributes}
 {
     _src = this->tensors().get_const_tensor(TensorType::ACL_SRC);
     _dst = this->tensors().get_const_tensor(TensorType::ACL_DST);
@@ -62,7 +60,7 @@ std::string ClTemplateActivation::get_component_code(const ComponentGroup &comp_
     code = R"_(
 //------------------ START KERNEL {{meta_kernel_id}} ---------------------
 )_";
-    if(is_root)
+    if (is_root)
     {
         code += R"_(
 // IN(src)              {{src}}
@@ -104,17 +102,11 @@ LOOP_UNROLLING(int, i, 0, 1, M0,
 
 void ClTemplateActivation::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "src");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "dst");
 }
 
 TagLUT ClTemplateActivation::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
@@ -173,7 +165,7 @@ std::string ClTemplateActivation::get_config_id() const
 
 std::set<std::string> ClTemplateActivation::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h", "activation_float_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h", "activation_float_helpers.h"};
 }
 
 Window ClTemplateActivation::get_window() const

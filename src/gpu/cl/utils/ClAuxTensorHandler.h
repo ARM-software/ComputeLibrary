@@ -39,25 +39,26 @@ namespace opencl
 class CLAuxTensorHandler
 {
 public:
-    CLAuxTensorHandler(int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false, bool bypass_alloc = false)
+    CLAuxTensorHandler(
+        int slot_id, TensorInfo &info, ITensorPack &pack, bool pack_inject = false, bool bypass_alloc = false)
         : _tensor()
     {
-        if(info.total_size() == 0)
+        if (info.total_size() == 0)
         {
             return;
         }
         _tensor.allocator()->soft_init(info);
 
         ICLTensor *packed_tensor = utils::cast::polymorphic_downcast<ICLTensor *>(pack.get_tensor(slot_id));
-        if((packed_tensor == nullptr) || (info.total_size() > packed_tensor->info()->total_size()))
+        if ((packed_tensor == nullptr) || (info.total_size() > packed_tensor->info()->total_size()))
         {
-            if(!bypass_alloc)
+            if (!bypass_alloc)
             {
                 _tensor.allocator()->allocate();
                 ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL("Allocating auxiliary tensor");
             }
 
-            if(pack_inject)
+            if (pack_inject)
             {
                 pack.add_tensor(slot_id, &_tensor);
                 _injected_tensor_pack = &pack;
@@ -70,22 +71,21 @@ public:
         }
     }
 
-    CLAuxTensorHandler(TensorInfo &info, ICLTensor &tensor)
-        : _tensor()
+    CLAuxTensorHandler(TensorInfo &info, ICLTensor &tensor) : _tensor()
     {
         _tensor.allocator()->soft_init(info);
-        if(info.total_size() <= tensor.info()->total_size())
+        if (info.total_size() <= tensor.info()->total_size())
         {
             _tensor.allocator()->import_memory(tensor.cl_buffer());
         }
     }
 
-    CLAuxTensorHandler(const CLAuxTensorHandler &) = delete;
+    CLAuxTensorHandler(const CLAuxTensorHandler &)          = delete;
     CLAuxTensorHandler &operator=(const CLAuxTensorHandler) = delete;
 
     ~CLAuxTensorHandler()
     {
-        if(_injected_tensor_pack)
+        if (_injected_tensor_pack)
         {
             _injected_tensor_pack->remove_tensor(_injected_slot_id);
         }
@@ -103,8 +103,8 @@ public:
 
 private:
     CLTensor     _tensor{};
-    ITensorPack *_injected_tensor_pack{ nullptr };
-    int          _injected_slot_id{ TensorType::ACL_UNKNOWN };
+    ITensorPack *_injected_tensor_pack{nullptr};
+    int          _injected_slot_id{TensorType::ACL_UNKNOWN};
 };
 } // namespace opencl
 } // namespace arm_compute

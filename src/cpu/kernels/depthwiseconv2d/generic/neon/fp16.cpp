@@ -29,11 +29,16 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp16_deptwiseconv2dnative(const ITensor *src, const ITensor *weights, const ITensor *bias,
-                                    ITensor *dst, const Window &window, bool has_biases, const ConvolutionInfo &info)
+void neon_fp16_deptwiseconv2dnative(const ITensor         *src,
+                                    const ITensor         *weights,
+                                    const ITensor         *bias,
+                                    ITensor               *dst,
+                                    const Window          &window,
+                                    bool                   has_biases,
+                                    const ConvolutionInfo &info)
 {
     return run_depthwise_float<float16_t, float16_t>(src, weights, bias, dst, window, has_biases, info);
 }
-}
+} // namespace cpu
 } // namespace arm_compute
 #endif //__ARM_FEATURE_FP16_VECTOR_ARITHMETIC

@@ -28,37 +28,46 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "src/gpu/cl/operators/ClActivation.h"
-#include "src/gpu/cl/operators/ClDirectConv2d.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/operators/ClActivation.h"
+#include "src/gpu/cl/operators/ClDirectConv2d.h"
 
 namespace arm_compute
 {
 struct CLDirectConvolutionLayer::Impl
 {
-    const ICLTensor                        *src{ nullptr };
-    const ICLTensor                        *weights{ nullptr };
-    const ICLTensor                        *biases{ nullptr };
-    ICLTensor                              *dst{ nullptr };
-    std::unique_ptr<opencl::ClDirectConv2d> op{ nullptr };
+    const ICLTensor                        *src{nullptr};
+    const ICLTensor                        *weights{nullptr};
+    const ICLTensor                        *biases{nullptr};
+    ICLTensor                              *dst{nullptr};
+    std::unique_ptr<opencl::ClDirectConv2d> op{nullptr};
 };
 
-CLDirectConvolutionLayer::CLDirectConvolutionLayer()
-    : _impl(std::make_unique<Impl>())
+CLDirectConvolutionLayer::CLDirectConvolutionLayer() : _impl(std::make_unique<Impl>())
 {
 }
-CLDirectConvolutionLayer::CLDirectConvolutionLayer(CLDirectConvolutionLayer &&) = default;
+CLDirectConvolutionLayer::CLDirectConvolutionLayer(CLDirectConvolutionLayer &&)            = default;
 CLDirectConvolutionLayer &CLDirectConvolutionLayer::operator=(CLDirectConvolutionLayer &&) = default;
 CLDirectConvolutionLayer::~CLDirectConvolutionLayer()                                      = default;
 
-void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void CLDirectConvolutionLayer::configure(ICLTensor                 *input,
+                                         const ICLTensor           *weights,
+                                         const ICLTensor           *biases,
+                                         ICLTensor                 *output,
+                                         const PadStrideInfo       &conv_info,
+                                         const ActivationLayerInfo &act_info)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info);
 }
 
-void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                         const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void CLDirectConvolutionLayer::configure(const CLCompileContext    &compile_context,
+                                         ICLTensor                 *input,
+                                         const ICLTensor           *weights,
+                                         const ICLTensor           *biases,
+                                         ICLTensor                 *output,
+                                         const PadStrideInfo       &conv_info,
+                                         const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, act_info);
@@ -69,10 +78,15 @@ void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context
     _impl->dst     = output;
 
     _impl->op = std::make_unique<opencl::ClDirectConv2d>();
-    _impl->op->configure(compile_context, input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, act_info);
+    _impl->op->configure(compile_context, input->info(), weights->info(),
+                         (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, act_info);
 }
 
-Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+Status CLDirectConvolutionLayer::validate(const ITensorInfo         *input,
+                                          const ITensorInfo         *weights,
+                                          const ITensorInfo         *biases,
+                                          const ITensorInfo         *output,
+                                          const PadStrideInfo       &conv_info,
                                           const ActivationLayerInfo &act_info)
 {
     return opencl::ClDirectConv2d::validate(input, weights, biases, output, conv_info, act_info);
@@ -87,4 +101,4 @@ void CLDirectConvolutionLayer::run()
     pack.add_tensor(TensorType::ACL_DST, _impl->dst);
     _impl->op->run(pack);
 }
-}
+} // namespace arm_compute

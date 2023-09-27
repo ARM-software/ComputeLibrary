@@ -25,17 +25,23 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
-#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLStridedSliceKernel.h"
 
 namespace arm_compute
 {
 namespace experimental
 {
-void CLStridedSlice::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output,
-                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+void CLStridedSlice::configure(const CLCompileContext &compile_context,
+                               const ITensorInfo      *input,
+                               ITensorInfo            *output,
+                               const Coordinates      &starts,
+                               const Coordinates      &ends,
+                               const BiStrides        &strides,
+                               int32_t                 begin_mask,
+                               int32_t                 end_mask,
+                               int32_t                 shrink_axis_mask)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     auto k = std::make_unique<CLStridedSliceKernel>();
@@ -43,9 +49,14 @@ void CLStridedSlice::configure(const CLCompileContext &compile_context, const IT
     _kernel = std::move(k);
 }
 
-Status CLStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+Status CLStridedSlice::validate(const ITensorInfo *input,
+                                const ITensorInfo *output,
+                                const Coordinates &starts,
+                                const Coordinates &ends,
+                                const BiStrides   &strides,
+                                int32_t            begin_mask,
+                                int32_t            end_mask,
+                                int32_t            shrink_axis_mask)
 {
     return CLStridedSliceKernel::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
@@ -53,32 +64,43 @@ Status CLStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *out
 
 struct CLStridedSlice::Impl
 {
-    const ICLTensor                              *src{ nullptr };
-    ICLTensor                                    *dst{ nullptr };
-    CLRuntimeContext                             *ctx{ nullptr };
-    std::unique_ptr<experimental::CLStridedSlice> op{ nullptr };
+    const ICLTensor                              *src{nullptr};
+    ICLTensor                                    *dst{nullptr};
+    CLRuntimeContext                             *ctx{nullptr};
+    std::unique_ptr<experimental::CLStridedSlice> op{nullptr};
 };
 
-CLStridedSlice::CLStridedSlice(CLRuntimeContext *ctx)
-    : _impl(std::make_unique<Impl>())
+CLStridedSlice::CLStridedSlice(CLRuntimeContext *ctx) : _impl(std::make_unique<Impl>())
 {
     _impl->ctx = ctx;
 }
 
-CLStridedSlice::CLStridedSlice(CLStridedSlice &&) = default;
+CLStridedSlice::CLStridedSlice(CLStridedSlice &&)            = default;
 CLStridedSlice &CLStridedSlice::operator=(CLStridedSlice &&) = default;
 CLStridedSlice::~CLStridedSlice()                            = default;
 
-void CLStridedSlice::configure(const ICLTensor *input, ICLTensor *output,
-                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+void CLStridedSlice::configure(const ICLTensor   *input,
+                               ICLTensor         *output,
+                               const Coordinates &starts,
+                               const Coordinates &ends,
+                               const BiStrides   &strides,
+                               int32_t            begin_mask,
+                               int32_t            end_mask,
+                               int32_t            shrink_axis_mask)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask,
+              shrink_axis_mask);
 }
 
-void CLStridedSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
-                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+void CLStridedSlice::configure(const CLCompileContext &compile_context,
+                               const ICLTensor        *input,
+                               ICLTensor              *output,
+                               const Coordinates      &starts,
+                               const Coordinates      &ends,
+                               const BiStrides        &strides,
+                               int32_t                 begin_mask,
+                               int32_t                 end_mask,
+                               int32_t                 shrink_axis_mask)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -86,14 +108,21 @@ void CLStridedSlice::configure(const CLCompileContext &compile_context, const IC
     _impl->dst = output;
 
     _impl->op = std::make_unique<experimental::CLStridedSlice>();
-    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), starts, ends, strides, begin_mask,
+                         end_mask, shrink_axis_mask);
 }
 
-Status CLStridedSlice::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+Status CLStridedSlice::validate(const ITensorInfo *input,
+                                const ITensorInfo *output,
+                                const Coordinates &starts,
+                                const Coordinates &ends,
+                                const BiStrides   &strides,
+                                int32_t            begin_mask,
+                                int32_t            end_mask,
+                                int32_t            shrink_axis_mask)
 {
-    return experimental::CLStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    return experimental::CLStridedSlice::validate(input, output, starts, ends, strides, begin_mask, end_mask,
+                                                  shrink_axis_mask);
 }
 
 void CLStridedSlice::run()

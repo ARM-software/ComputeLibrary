@@ -22,30 +22,35 @@
  * SOFTWARE.
  */
 #include "src/core/CL/ICLSimpleKernel.h"
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/helpers/WindowHelpers.h"
 
 using namespace arm_compute;
 
-ICLSimpleKernel::ICLSimpleKernel()
-    : _input(nullptr), _output(nullptr)
+ICLSimpleKernel::ICLSimpleKernel() : _input(nullptr), _output(nullptr)
 {
 }
 
-void ICLSimpleKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int num_elems_processed_per_iteration, bool border_undefined, const BorderSize &border_size)
+void ICLSimpleKernel::configure(const ICLTensor  *input,
+                                ICLTensor        *output,
+                                unsigned int      num_elems_processed_per_iteration,
+                                bool              border_undefined,
+                                const BorderSize &border_size)
 {
     _input  = input;
     _output = output;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size);
+    Window win =
+        calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size);

@@ -31,12 +31,13 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "src/core/CPP/Validate.h"
-#include "src/core/NEON/NEMath.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
+#include "src/core/NEON/NEMath.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/instancenorm/list.h"
 
 #include <arm_neon.h>
@@ -51,7 +52,13 @@ struct InstanceNormSelectorData
 };
 
 using InstanceNormSelctorPtr = std::add_pointer<bool(const InstanceNormSelectorData &data)>::type;
-using InstanceNormUKernelPtr = std::add_pointer<void(ITensor *input, ITensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision, const Window &window)>::type;
+using InstanceNormUKernelPtr = std::add_pointer<void(ITensor      *input,
+                                                     ITensor      *output,
+                                                     float         gamma,
+                                                     float         beta,
+                                                     float         epsilon,
+                                                     bool          use_mixed_precision,
+                                                     const Window &window)>::type;
 
 struct InstanceNormKernel
 {
@@ -60,19 +67,12 @@ struct InstanceNormKernel
     InstanceNormUKernelPtr       ukernel;
 };
 
-static const InstanceNormKernel available_kernels[] =
-{
-    {
-        "fp32_neon_instancenorm",
-        [](const InstanceNormSelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_instancenorm)
-    },
+static const InstanceNormKernel available_kernels[] = {
+    {"fp32_neon_instancenorm", [](const InstanceNormSelectorData &data) { return data.dt == DataType::F32; },
+     REGISTER_FP32_NEON(arm_compute::cpu::neon_fp32_instancenorm)},
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    {
-        "fp16_neon_instancenorm",
-        [](const InstanceNormSelectorData & data) { return data.dt == DataType::F16; },
-        REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_instancenorm)
-    },
+    {"fp16_neon_instancenorm", [](const InstanceNormSelectorData &data) { return data.dt == DataType::F16; },
+     REGISTER_FP16_NEON(arm_compute::cpu::neon_fp16_instancenorm)},
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 };
 
@@ -84,9 +84,9 @@ static const InstanceNormKernel available_kernels[] =
  */
 const InstanceNormKernel *get_implementation(const InstanceNormSelectorData &data)
 {
-    for(const auto &uk : available_kernels)
+    for (const auto &uk : available_kernels)
     {
-        if(uk.is_selected(data))
+        if (uk.is_selected(data))
         {
             return &uk;
         }
@@ -102,14 +102,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(epsilon == 0.f, "Epsilon must be different than 0");
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC, "NHWC data layout is not supported by the kernel directly");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC,
+                                    "NHWC data layout is not supported by the kernel directly");
 
-    if(output != nullptr && output->total_size() != 0)
+    if (output != nullptr && output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(), "Input and output have different number of channels");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(),
+                                        "Input and output have different number of channels");
     }
     return Status{};
 }
@@ -132,7 +134,9 @@ NEInstanceNormalizationLayerKernel::NEInstanceNormalizationLayerKernel()
 {
 }
 
-void NEInstanceNormalizationLayerKernel::configure(ITensor *input, ITensor *output, const InstanceNormalizationLayerKernelInfo &info)
+void NEInstanceNormalizationLayerKernel::configure(ITensor                                    *input,
+                                                   ITensor                                    *output,
+                                                   const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -152,10 +156,13 @@ void NEInstanceNormalizationLayerKernel::configure(ITensor *input, ITensor *outp
     INEKernel::configure(std::get<1>(win_config));
 }
 
-Status NEInstanceNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const InstanceNormalizationLayerKernelInfo &info)
+Status NEInstanceNormalizationLayerKernel::validate(const ITensorInfo                          *input,
+                                                    const ITensorInfo                          *output,
+                                                    const InstanceNormalizationLayerKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, info.gamma, info.beta, info.epsilon));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), (output == nullptr ? input->clone().get() : output->clone().get()))));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(
+        input->clone().get(), (output == nullptr ? input->clone().get() : output->clone().get()))));
     return Status{};
 }
 
@@ -165,7 +172,7 @@ void NEInstanceNormalizationLayerKernel::run(const Window &window, const ThreadI
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const auto *uk = get_implementation(InstanceNormSelectorData{ _input->info()->data_type() });
+    const auto *uk = get_implementation(InstanceNormSelectorData{_input->info()->data_type()});
     ARM_COMPUTE_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
     uk->ukernel(_input, _output, _gamma, _beta, _epsilon, _use_mixed_precision, window);

@@ -23,14 +23,13 @@
  */
 #include "ClTemplateElementwiseBinary.h"
 
-#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
-#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
-
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
-#include "src/core/helpers/WindowHelpers.h"
 
+#include "src/core/helpers/WindowHelpers.h"
+#include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentElementwiseBinary.h"
+#include "src/dynamic_fusion/sketch/gpu/GpuKernelComponentGroup.h"
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -44,11 +43,7 @@ constexpr unsigned int vector_size_byte_opencl = 16;
 ClTemplateElementwiseBinary::ClTemplateElementwiseBinary(ComponentId                      id,
                                                          const ArgumentPack<ITensorInfo> &tensors,
                                                          const Attributes                &attributes)
-    : IGpuTemplateComponentWriter{ id, tensors },
-      _lhs{},
-      _rhs{},
-      _dst{},
-      _attributes{ attributes }
+    : IGpuTemplateComponentWriter{id, tensors}, _lhs{}, _rhs{}, _dst{}, _attributes{attributes}
 {
     _lhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _rhs = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
@@ -69,67 +64,67 @@ std::string ClTemplateElementwiseBinary::get_component_code(const ComponentGroup
     const bool  is_rhs_input = comp_group.is_input_tensor(_rhs);
 
     code =
-R"_(
+        R"_(
     //------------------ START KERNEL {{meta_kernel_id}} {{ELTWISE_OP}} ---------------------
 )_";
 
-    if(is_root)
+    if (is_root)
     {
         code +=
-R"_(
+            R"_(
     TILE(uint, M0, 1, g_dst_indirect_y);
 )_";
     }
 
-    if(is_lhs_input)
+    if (is_lhs_input)
     {
         code +=
-R"_(
+            R"_(
     TILE({{DATA_TYPE}}, {{lhs_m0}}, N0, {{lhs}});
 )_";
     }
 
-    if(is_rhs_input)
+    if (is_rhs_input)
     {
         code +=
-R"_(
+            R"_(
     TILE({{DATA_TYPE}}, {{rhs_m0}}, N0, {{rhs}});
 )_";
     }
 
     code +=
-R"_(
+        R"_(
     {
 )_";
 
-    if(is_lhs_input)
+    if (is_lhs_input)
     {
         code +=
-R"_(
+            R"_(
         {{lhs}}_offset_first_element_in_bytes += g_ind_2 * {{lhs}}_stride_w;
         T_LOAD({{DATA_TYPE}}, {{lhs_m0}}, {{lhs_n0}}, BUFFER, {{lhs}}, {{lhs_start_ind_0}}, {{lhs_start_ind_1}}, 1, {{lhs}}_stride_y, {{lhs}});
 )_";
     }
 
-    if(is_rhs_input)
+    if (is_rhs_input)
     {
         code +=
-R"_(
+            R"_(
         {{rhs}}_offset_first_element_in_bytes += g_ind_2 * {{rhs}}_stride_w;
         T_LOAD({{DATA_TYPE}}, {{rhs_m0}}, {{rhs_n0}}, BUFFER, {{rhs}}, {{rhs_start_ind_0}}, {{rhs_start_ind_1}}, 1, {{rhs}}_stride_y, {{rhs}});
 )_";
     }
 
     code +=
-R"_(
+        R"_(
         T_ELTWISE_{{BROADCAST_OP}}{{ELTWISE_OP}}({{DATA_TYPE}}, M0, N0, {{lhs}}, {{rhs}}, {{dst}});
 )_";
 
-    if(is_root)
+    if (is_root)
     {
         // Calculate the destination indirect Y
         code +=
-R"_(
+            R"_(
         LOOP_UNROLLING(int, i, 0, 1, M0,
         {
             g_dst_indirect_y[i].v = (uint)min(g_ind_1 + i, (int)({{arg_dst}}_w * {{arg_dst}}_h) - 1);
@@ -139,7 +134,7 @@ R"_(
     }
 
     code +=
-R"_(
+        R"_(
     }
     //------------------ END KERNEL {{meta_kernel_id}} {{ELTWISE_OP}} ---------------------
 )_";
@@ -147,28 +142,18 @@ R"_(
     return code;
 }
 
-void ClTemplateElementwiseBinary::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+void ClTemplateElementwiseBinary::declare_variables(GpuKernelVariableTable &vtable,
+                                                    const ComponentGroup   &comp_group) const
 {
-    vtable.declare_variable(
-        comp_group,
-        _lhs,
-        GpuKernelArgumentInfo(common_tensor_type),
-        "lhs");
+    vtable.declare_variable(comp_group, _lhs, GpuKernelArgumentInfo(common_tensor_type), "lhs");
 
-    vtable.declare_variable(
-        comp_group,
-        _rhs,
-        GpuKernelArgumentInfo(common_tensor_type),
-        "rhs");
+    vtable.declare_variable(comp_group, _rhs, GpuKernelArgumentInfo(common_tensor_type), "rhs");
 
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(common_tensor_type),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(common_tensor_type), "dst");
 }
 
-TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vtable,
+                                                const ComponentGroup         &comp_group) const
 {
     TagLUT lut{};
 
@@ -182,7 +167,7 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
     lut["dst"]     = vtable.get_variable(_dst);
     lut["arg_dst"] = vtable.get_variable(comp_group.get_any_dst_tensor());
 
-    switch(_attributes.operation())
+    switch (_attributes.operation())
     {
         case Attributes::ElementwiseOp::Add:
             lut["ELTWISE_OP"] = "ADD";
@@ -197,10 +182,10 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
             ARM_COMPUTE_ERROR("Arithmetic Operation not supported");
     }
 
-    ARM_COMPUTE_ERROR_ON(
-        comp_group.is_intermediate_tensor(_lhs) && detail::have_different_dimensions(_lhs->tensor_shape(), _dst->tensor_shape(), 0));
-    ARM_COMPUTE_ERROR_ON(
-        comp_group.is_intermediate_tensor(_rhs) && detail::have_different_dimensions(_rhs->tensor_shape(), _dst->tensor_shape(), 0));
+    ARM_COMPUTE_ERROR_ON(comp_group.is_intermediate_tensor(_lhs) &&
+                         detail::have_different_dimensions(_lhs->tensor_shape(), _dst->tensor_shape(), 0));
+    ARM_COMPUTE_ERROR_ON(comp_group.is_intermediate_tensor(_rhs) &&
+                         detail::have_different_dimensions(_rhs->tensor_shape(), _dst->tensor_shape(), 0));
 
     // Set broadcast parameters
     // PRE: All tensors are broadcast-compatible
@@ -228,9 +213,7 @@ TagLUT ClTemplateElementwiseBinary::get_tag_lut(const GpuKernelVariableTable &vt
     lut["rhs_m0"]          = (rhs_broadcast_yz) ? "1" : "M0";
     lut["rhs_start_ind_1"] = (rhs_broadcast_yz) ? "0" : "g_ind_1";
 
-    lut["BROADCAST_OP"] = (lhs_broadcast_yz) ? "BROADCAST_LHS_X_" :
-                          (rhs_broadcast_yz) ? "BROADCAST_RHS_X_" :
-                                               "";
+    lut["BROADCAST_OP"] = (lhs_broadcast_yz) ? "BROADCAST_LHS_X_" : (rhs_broadcast_yz) ? "BROADCAST_RHS_X_" : "";
 
     return lut;
 }
@@ -268,7 +251,7 @@ std::string ClTemplateElementwiseBinary::get_config_id() const
 
 std::set<std::string> ClTemplateElementwiseBinary::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateElementwiseBinary::get_window() const
@@ -279,8 +262,9 @@ Window ClTemplateElementwiseBinary::get_window() const
     // Collapse Dim 1 (W) and Dim 2 (H) together, leave Dim 0 (C) and upper dimensions unchanged
     // This is in line with the collapsing convention used by operators like Conv2d
     output_shape.collapse(2U, 1U);
-    const unsigned int num_elems_processed_per_iteration = adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
-    Window             win                               = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(vector_size_byte_opencl / _dst->element_size(), _dst->dimension(0));
+    Window win = calculate_max_window(output_shape, Steps(num_elems_processed_per_iteration));
 
     return win;
 }

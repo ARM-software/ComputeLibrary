@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -50,10 +51,13 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_info.stride.x() == 0 || pool_info.stride.y() == 0 || pool_info.stride.z() == 0), "Strides cannot be zero.");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type())) && (!pool_info.exclude_padding
-                                                                                && (pool_info.pool_type == PoolingType::AVG)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        (pool_info.stride.x() == 0 || pool_info.stride.y() == 0 || pool_info.stride.z() == 0),
+        "Strides cannot be zero.");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED,
+                                                         DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((!is_data_type_float(src->data_type())) &&
+                                        (!pool_info.exclude_padding && (pool_info.pool_type == PoolingType::AVG)),
                                     "Exclude padding is unsupported for non-float types for Avg op");
 
     const auto         data_layout       = src->data_layout();
@@ -68,17 +72,21 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     int                output_height     = 0;
     int                output_depth      = 0;
 
-    bool round_type_ceil_with_asymm_padding = (pool_info.round_type == DimensionRoundingType::CEIL) && (!is_symmetric(pool_info.padding));
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(round_type_ceil_with_asymm_padding, "Cannot use dimension round type CEIL when padding is asymmetric.");
+    bool round_type_ceil_with_asymm_padding =
+        (pool_info.round_type == DimensionRoundingType::CEIL) && (!is_symmetric(pool_info.padding));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(round_type_ceil_with_asymm_padding,
+                                    "Cannot use dimension round type CEIL when padding is asymmetric.");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_3d_region_entirely_outside_input(pool_info), "Pooling region that is entirely outside input tensor is unsupported");
-    std::tie(output_width, output_height, output_depth) = scaled_3d_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
-                                                                                      src->tensor_shape()[idx_depth], pool_size_x, pool_size_y,
-                                                                                      pool_size_z, pool_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_pool_3d_region_entirely_outside_input(pool_info),
+                                    "Pooling region that is entirely outside input tensor is unsupported");
+    std::tie(output_width, output_height, output_depth) =
+        scaled_3d_dimensions_signed(src->tensor_shape()[idx_width], src->tensor_shape()[idx_height],
+                                    src->tensor_shape()[idx_depth], pool_size_x, pool_size_y, pool_size_z, pool_info);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1), "Calculated output dimension size is invalid");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1 || output_depth < 1),
+                                    "Calculated output dimension size is invalid");
     // Checks performed when dst is configured
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
@@ -95,11 +103,14 @@ ClPool3dKernel::ClPool3dKernel()
     _type = CLKernelType::POOL;
 }
 
-void ClPool3dKernel::configure(const ClCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const Pooling3dLayerInfo &pool_info)
+void ClPool3dKernel::configure(const ClCompileContext   &compile_context,
+                               const ITensorInfo        *src,
+                               ITensorInfo              *dst,
+                               const Pooling3dLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, dst, pool_info));
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
     // Auto init if empty
     TensorShape out_shape = compute_pool3d_shape(src->tensor_shape(), pool_info);
@@ -112,23 +123,23 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     _num_elems_processed_per_iteration = (dst->data_type() == DataType::F32) ? 2 : 4;
     _num_elems_processed_per_iteration = adjust_vec_size(_num_elems_processed_per_iteration, dst->dimension(0));
 
-    const PoolingType pool_type       = pool_info.pool_type;
-    const int         idx_width       = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-    const int         idx_height      = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-    const int         idx_depth       = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::DEPTH);
-    const int         idx_channel     = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
-    const int         idx_batch_size  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES);
-    const int         pool_size_x     = pool_info.is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
-    const int         pool_size_y     = pool_info.is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
-    const int         pool_size_z     = pool_info.is_global_pooling ? src->dimension(idx_depth) : pool_info.pool_size.depth;
-    const bool        exclude_padding = pool_info.exclude_padding;
-    const int         pool_stride_x   = pool_info.stride.x();
-    const int         pool_stride_y   = pool_info.stride.y();
-    const int         pool_stride_z   = pool_info.stride.z();
-    const int         pool_pad_top    = pool_info.padding.top;
-    const int         pool_pad_left   = pool_info.padding.left;
-    const int         pool_pad_front  = pool_info.padding.front;
-    const DataType    data_type       = src->data_type();
+    const PoolingType pool_type      = pool_info.pool_type;
+    const int         idx_width      = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int         idx_height     = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const int         idx_depth      = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::DEPTH);
+    const int         idx_channel    = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
+    const int         idx_batch_size = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES);
+    const int         pool_size_x = pool_info.is_global_pooling ? src->dimension(idx_width) : pool_info.pool_size.width;
+    const int      pool_size_y = pool_info.is_global_pooling ? src->dimension(idx_height) : pool_info.pool_size.height;
+    const int      pool_size_z = pool_info.is_global_pooling ? src->dimension(idx_depth) : pool_info.pool_size.depth;
+    const bool     exclude_padding = pool_info.exclude_padding;
+    const int      pool_stride_x   = pool_info.stride.x();
+    const int      pool_stride_y   = pool_info.stride.y();
+    const int      pool_stride_z   = pool_info.stride.z();
+    const int      pool_pad_top    = pool_info.padding.top;
+    const int      pool_pad_left   = pool_info.padding.left;
+    const int      pool_pad_front  = pool_info.padding.front;
+    const DataType data_type       = src->data_type();
 
     // Set build options
     CLBuildOptions build_opts;
@@ -149,7 +160,7 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(src->dimension(idx_depth)));
 
     // If datatype is quantized add relevant parameters
-    if(is_data_type_quantized_asymmetric(data_type) && src->quantization_info() != dst->quantization_info())
+    if (is_data_type_quantized_asymmetric(data_type) && src->quantization_info() != dst->quantization_info())
     {
         const UniformQuantizationInfo iq_info = src->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = dst->quantization_info().uniform();
@@ -161,9 +172,9 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     }
 
     // Set the initial value for the pooling operation accordingly with the data type
-    if(pool_type == PoolingType::MAX)
+    if (pool_type == PoolingType::MAX)
     {
-        if(is_data_type_quantized(data_type))
+        if (is_data_type_quantized(data_type))
         {
             PixelValue type_min{};
             std::tie(type_min, std::ignore) = get_min_max(data_type);
@@ -171,7 +182,8 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
         }
         else
         {
-            build_opts.add_option("-DINITIAL_VALUE=" + float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
+            build_opts.add_option("-DINITIAL_VALUE=" +
+                                  float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
         }
     }
     else
@@ -181,16 +193,18 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     }
     // Create kernel
     // Floating point mixed precision is support on F16 only
-    const auto use_fp_mixed_precision = (data_type == DataType::F16) && pool_info.fp_mixed_precision && pool_type != PoolingType::MAX;
+    const auto use_fp_mixed_precision =
+        (data_type == DataType::F16) && pool_info.fp_mixed_precision && pool_type != PoolingType::MAX;
 
     // Wider accumulation is required to avoid accuracy loss
     // Case 1: Floating point mixed precision (fp16 src data and fp32 accumulation)
     DataType acc_data_type = data_type;
-    if(use_fp_mixed_precision)
+    if (use_fp_mixed_precision)
     {
         acc_data_type = DataType::F32;
     }
-    else if(is_data_type_quantized(data_type) && pool_type != PoolingType::MAX) // Use S32 for avg pooling to allow for integer division
+    else if (is_data_type_quantized(data_type) &&
+             pool_type != PoolingType::MAX) // Use S32 for avg pooling to allow for integer division
     {
         acc_data_type = DataType::S32;
     }
@@ -202,11 +216,13 @@ void ClPool3dKernel::configure(const ClCompileContext &compile_context, const IT
     build_opts.add_option("-DDST_DEPTH=" + support::cpp11::to_string(dst->dimension(idx_depth)));
     build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(dst->dimension(idx_channel)));
     build_opts.add_option("-DDST_BATCH_SIZE=" + support::cpp11::to_string(dst->dimension(idx_batch_size)));
-    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" + support::cpp11::to_string(src->dimension(0) % _num_elems_processed_per_iteration));
+    build_opts.add_option("-DVEC_SIZE_LEFTOVER=" +
+                          support::cpp11::to_string(src->dimension(0) % _num_elems_processed_per_iteration));
 
     // if datatype is quantized use quantized kernel function
-    std::string kernel_name = (is_data_type_quantized_asymmetric(data_type) ? "pooling_3d_layer_MxN_ndhwc_quantized" : "pooling_3d_layer_MxN_ndhwc");
-    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+    std::string kernel_name = (is_data_type_quantized_asymmetric(data_type) ? "pooling_3d_layer_MxN_ndhwc_quantized"
+                                                                            : "pooling_3d_layer_MxN_ndhwc");
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*dst, Steps(_num_elems_processed_per_iteration));
@@ -240,8 +256,9 @@ void ClPool3dKernel::run_op(ITensorPack &tensors, const Window &window, cl::Comm
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST_0));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST_0));
 
     // Collapse 3D window
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);

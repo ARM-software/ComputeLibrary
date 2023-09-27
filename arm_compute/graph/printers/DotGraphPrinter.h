@@ -25,7 +25,6 @@
 #define ACL_ARM_COMPUTE_GRAPH_PRINTERS_DOTGRAPHPRINTER_H
 
 #include "arm_compute/graph/IGraphPrinter.h"
-
 #include "arm_compute/graph/INodeVisitor.h"
 
 #include <string>

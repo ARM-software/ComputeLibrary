@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_WINOGRAD_INPUT_TRANSFORM_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -59,7 +60,10 @@ public:
      * @param[in] dst             The output tensor info. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
      * @param[in] winograd_info   Contains Winograd's information described in @ref WinogradInfo.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const WinogradInfo &winograd_info);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   const WinogradInfo     &winograd_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClWinogradInputTransformKernel::configure()
@@ -69,19 +73,19 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
+    void       run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:
     using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    BorderSize   _border_size{ 0 };
-    DataLayout   _data_layout{ DataLayout::UNKNOWN };
-    int          _num_tiles_x{ 0 };
-    int          _num_tiles_y{ 0 };
-    unsigned int _step_z{ 1 };
-    int32_t      _src_width{ 0 };
-    int32_t      _src_height{ 0 };
+    BorderSize   _border_size{0};
+    DataLayout   _data_layout{DataLayout::UNKNOWN};
+    int          _num_tiles_x{0};
+    int          _num_tiles_y{0};
+    unsigned int _step_z{1};
+    int32_t      _src_width{0};
+    int32_t      _src_height{0};
 };
 } // namespace kernels
 } // namespace opencl

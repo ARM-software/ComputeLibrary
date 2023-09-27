@@ -25,6 +25,7 @@
 #define ACL_SRC_CPU_OPERATORS_CPUMATMUL
 
 #include "arm_compute/core/TensorInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
 #include "src/cpu/kernels/CpuTransposeKernel.h"
@@ -66,18 +67,27 @@ public:
      * @param[in]  settings The settings for matmul operation (i.e fast math)
      * @param[in]  act_info Class containing information about fused activation function.
      */
-    void configure(ITensorInfo *lhs, ITensorInfo *rhs, ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ITensorInfo               *lhs,
+                   ITensorInfo               *rhs,
+                   ITensorInfo               *dst,
+                   const MatMulInfo          &info,
+                   const CpuMatMulSettings   &settings,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuMatMul::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *lhs, const ITensorInfo *rhs, const ITensorInfo *dst, const MatMulInfo &info, const CpuMatMulSettings &settings,
+    static Status validate(const ITensorInfo         *lhs,
+                           const ITensorInfo         *rhs,
+                           const ITensorInfo         *dst,
+                           const MatMulInfo          &info,
+                           const CpuMatMulSettings   &settings,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -91,9 +101,9 @@ private:
     };
 
     // Define unique pointers to kernels/operators used by matmul
-    std::unique_ptr<kernels::CpuTransposeKernel> _transpose_kernel_lhs{ nullptr };
-    std::unique_ptr<kernels::CpuTransposeKernel> _transpose_kernel_rhs{ nullptr };
-    std::unique_ptr<CpuGemmAssemblyDispatch>     _asm_glue{ nullptr };
+    std::unique_ptr<kernels::CpuTransposeKernel> _transpose_kernel_lhs{nullptr};
+    std::unique_ptr<kernels::CpuTransposeKernel> _transpose_kernel_rhs{nullptr};
+    std::unique_ptr<CpuGemmAssemblyDispatch>     _asm_glue{nullptr};
 
     // TensorInfo for tensors stored in auxillary memory
     TensorInfo _lhs_transposed{};
@@ -105,13 +115,13 @@ private:
     TensorShape _original_dst_shape{};
 
     // Note : adj_lhs means the same as transposing lhs
-    bool                             _adj_lhs{ false };
-    bool                             _adj_rhs{ false };
-    bool                             _fast_math{ false };
+    bool                             _adj_lhs{false};
+    bool                             _adj_rhs{false};
+    bool                             _fast_math{false};
     AsmGemmInfo                      _gemm_info{};
-    experimental::MemoryRequirements _aux_mem{ Count };
+    experimental::MemoryRequirements _aux_mem{Count};
 };
-}
-}
+} // namespace cpu
+} // namespace arm_compute
 
 #endif /* ACL_SRC_CPU_OPERATORS_CPUMATMUL */

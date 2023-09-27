@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -70,7 +71,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config);
+    static Status validate(const ITensorInfo               *input,
+                           const ITensorInfo               *output,
+                           const ITensorInfo               *idx,
+                           const FFTDigitReverseKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

@@ -26,10 +26,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClCast.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClCast.h"
 
 #include <utility>
 
@@ -37,16 +37,15 @@ namespace arm_compute
 {
 struct CLDepthConvertLayer::Impl
 {
-    const ICLTensor                *src{ nullptr };
-    ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClCast> op{ nullptr };
+    const ICLTensor                *src{nullptr};
+    ICLTensor                      *dst{nullptr};
+    std::unique_ptr<opencl::ClCast> op{nullptr};
 };
 
-CLDepthConvertLayer::CLDepthConvertLayer()
-    : _impl(std::make_unique<Impl>())
+CLDepthConvertLayer::CLDepthConvertLayer() : _impl(std::make_unique<Impl>())
 {
 }
-CLDepthConvertLayer::CLDepthConvertLayer(CLDepthConvertLayer &&) = default;
+CLDepthConvertLayer::CLDepthConvertLayer(CLDepthConvertLayer &&)            = default;
 CLDepthConvertLayer &CLDepthConvertLayer::operator=(CLDepthConvertLayer &&) = default;
 CLDepthConvertLayer::~CLDepthConvertLayer()                                 = default;
 
@@ -55,7 +54,11 @@ void CLDepthConvertLayer::configure(const ICLTensor *input, ICLTensor *output, C
     configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, shift);
 }
 
-void CLDepthConvertLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
+void CLDepthConvertLayer::configure(const CLCompileContext &compile_context,
+                                    const ICLTensor        *input,
+                                    ICLTensor              *output,
+                                    ConvertPolicy           policy,
+                                    uint32_t                shift)
 {
     ARM_COMPUTE_UNUSED(shift);
     ARM_COMPUTE_LOG_PARAMS(input, output, policy, shift);
@@ -70,7 +73,8 @@ void CLDepthConvertLayer::configure(const CLCompileContext &compile_context, con
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), policy);
 }
 
-Status CLDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+Status
+CLDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(shift != 0);
     return opencl::ClCast::validate(input, output, policy);
@@ -78,7 +82,7 @@ Status CLDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo
 
 void CLDepthConvertLayer::run()
 {
-    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }
 } // namespace arm_compute

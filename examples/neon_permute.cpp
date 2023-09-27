@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
-#include "arm_compute/core/Types.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -85,11 +85,13 @@ private:
         window.use_tensor_dimensions(reference.info()->tensor_shape());
         Iterator ref_it(&reference, window);
         Iterator res_it(&result, window);
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            assert(*reinterpret_cast<unsigned char *>(ref_it.ptr()) == *reinterpret_cast<unsigned char *>(res_it.ptr()));
-        },
-        ref_it, res_it);
+        execute_window_loop(
+            window,
+            [&](const Coordinates &) {
+                assert(*reinterpret_cast<unsigned char *>(ref_it.ptr()) ==
+                       *reinterpret_cast<unsigned char *>(res_it.ptr()));
+            },
+            ref_it, res_it);
     }
 
     void fill_tensor(Tensor &tensor)
@@ -98,11 +100,9 @@ private:
         window.use_tensor_dimensions(tensor.info()->tensor_shape());
         Iterator      tensor_it(&tensor, window);
         unsigned char val(0);
-        execute_window_loop(window, [&](const Coordinates &)
-        {
-            *reinterpret_cast<unsigned char *>(tensor_it.ptr()) = val++;
-        },
-        tensor_it);
+        execute_window_loop(
+            window, [&](const Coordinates &) { *reinterpret_cast<unsigned char *>(tensor_it.ptr()) = val++; },
+            tensor_it);
     }
     void init_tensor(const TensorShape shape, Tensor &tensor, DataType type, DataLayout layout)
     {

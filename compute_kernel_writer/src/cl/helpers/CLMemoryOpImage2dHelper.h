@@ -59,14 +59,24 @@ public:
     void finalize() override;
 
 private:
-    static bool validate(const CLKernelWriter *writer, const ITensor *tensor, const TensorSampler *sampler, const Tensor3dMapper *mapper, MemoryOperation op, const CLTile *dst);
+    static bool validate(const CLKernelWriter *writer,
+                         const ITensor        *tensor,
+                         const TensorSampler  *sampler,
+                         const Tensor3dMapper *mapper,
+                         MemoryOperation       op,
+                         const CLTile         *dst);
 
     void out_of_bound_initialize_y(const std::string &coord);
     void out_of_bound_finalize_y();
 
-    std::string to_ls_image2d(MemoryOperation op, int32_t vector_width, const std::string &data, const std::string &sampler, const std::string &address) const;
+    std::string to_ls_image2d(MemoryOperation    op,
+                              int32_t            vector_width,
+                              const std::string &data,
+                              const std::string &sampler,
+                              const std::string &address) const;
     std::string to_ls_image2d_sampler() const;
-    std::string to_ls_image2d_address(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const;
+    std::string
+    to_ls_image2d_address(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const;
 };
 } // namespace ckw
 

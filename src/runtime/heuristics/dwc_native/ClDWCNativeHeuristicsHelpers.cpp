@@ -32,7 +32,7 @@ namespace cl_dwc
 bool use_cl_image_for_weights(const ITensorInfo *weights, unsigned int depth_multiplier)
 {
     // Check whether we can use the cl image with the weights.
-    if(!export_to_cl_image(weights))
+    if (!export_to_cl_image(weights))
     {
         return false;
     }
@@ -45,12 +45,12 @@ bool use_cl_image_for_weights(const ITensorInfo *weights, unsigned int depth_mul
     // If we can use the cl image storage with the weights, we prefer to use the cl buffer storage in the following cases for performance reasons:
     // 1- When the kernel size is 1x1
     // 2- When the depth multiplier is greater than 1 and not multiple of 4.
-    if((kernel_w == 1) && (kernel_h == 1))
+    if ((kernel_w == 1) && (kernel_h == 1))
     {
         return false;
     }
 
-    if((depth_multiplier > 1) && (depth_multiplier % 4) != 0)
+    if ((depth_multiplier > 1) && (depth_multiplier % 4) != 0)
     {
         return false;
     }

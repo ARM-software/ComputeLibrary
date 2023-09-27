@@ -69,7 +69,8 @@ uint32_t DepthwiseConv2dAttributes::depth_multiplier() const
     return _depth_multiplier;
 }
 
-DepthwiseConv2dAttributes &DepthwiseConv2dAttributes::dimension_rounding_type(const DimensionRoundingType &dimension_rounding_type)
+DepthwiseConv2dAttributes &
+DepthwiseConv2dAttributes::dimension_rounding_type(const DimensionRoundingType &dimension_rounding_type)
 {
     _dimension_rounding_type = dimension_rounding_type;
     return *this;

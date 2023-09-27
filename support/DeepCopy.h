@@ -40,9 +40,8 @@ namespace
 template <typename Base, typename Derived>
 Base *default_polymorphic_copy(const Base *ptr)
 {
-    static_assert(std::is_base_of<Base, Derived>::value,
-                  "Derived is not a specialization of Base");
-    if(ptr == nullptr)
+    static_assert(std::is_base_of<Base, Derived>::value, "Derived is not a specialization of Base");
+    if (ptr == nullptr)
     {
         return nullptr;
     }
@@ -62,25 +61,18 @@ class deep_unique_ptr
 public:
     using CopyFunc = std::function<Base *(const Base *)>;
 
-    deep_unique_ptr(std::nullptr_t val = nullptr) noexcept
-        : _val{ val },
-    _copy{}
+    deep_unique_ptr(std::nullptr_t val = nullptr) noexcept : _val{val}, _copy{}
     {
     }
     template <typename Derived, typename CopyFuncDerived>
-    deep_unique_ptr(Derived *value, const CopyFuncDerived &copy) noexcept
-        : _val{ value },
-    _copy{ std::move(copy) }
+    deep_unique_ptr(Derived *value, const CopyFuncDerived &copy) noexcept : _val{value}, _copy{std::move(copy)}
     {
-        static_assert(std::is_base_of<Base, Derived>::value,
-                      "Derived is not a specialization of Base");
-        static_assert(
-            std::is_constructible<CopyFunc, CopyFuncDerived>::value,
-            "CopyFuncDerived is not valid for a copy functor");
+        static_assert(std::is_base_of<Base, Derived>::value, "Derived is not a specialization of Base");
+        static_assert(std::is_constructible<CopyFunc, CopyFuncDerived>::value,
+                      "CopyFuncDerived is not valid for a copy functor");
     }
 
-    deep_unique_ptr(const deep_unique_ptr<Base> &ptr)
-        : deep_unique_ptr(ptr.clone())
+    deep_unique_ptr(const deep_unique_ptr<Base> &ptr) : deep_unique_ptr(ptr.clone())
     {
     }
     deep_unique_ptr &operator=(const deep_unique_ptr<Base> &ptr)
@@ -90,7 +82,7 @@ public:
         return *this;
     }
 
-    deep_unique_ptr(deep_unique_ptr<Base> &&ptr) = default;
+    deep_unique_ptr(deep_unique_ptr<Base> &&ptr)            = default;
     deep_unique_ptr &operator=(deep_unique_ptr<Base> &&ptr) = default;
     ~deep_unique_ptr()                                      = default;
     friend void swap(deep_unique_ptr &ptr0, deep_unique_ptr<Base> &ptr1) noexcept
@@ -135,11 +127,11 @@ public:
 
     bool operator==(const deep_unique_ptr<Base> &rhs) const
     {
-        if(rhs.get() == nullptr && _val == nullptr)
+        if (rhs.get() == nullptr && _val == nullptr)
         {
             return true;
         }
-        else if(rhs.get() == nullptr || _val == nullptr)
+        else if (rhs.get() == nullptr || _val == nullptr)
         {
             return false;
         }
@@ -152,9 +144,9 @@ public:
 private:
     deep_unique_ptr clone() const
     {
-        return { _copy(_val.get()), CopyFunc(_copy) };
+        return {_copy(_val.get()), CopyFunc(_copy)};
     }
-    std::unique_ptr<Base> _val{ nullptr };
+    std::unique_ptr<Base> _val{nullptr};
     CopyFunc              _copy{};
 };
 
@@ -170,31 +162,23 @@ private:
 template <typename Base, typename Derived, typename CopyFunc>
 deep_unique_ptr<Base> make_deep_unique(Derived &&temp, CopyFunc copy)
 {
-    return
-    {
-        new Derived(std::move(temp)),
-        CopyFunc{ std::move(copy) }
-    };
+    return {new Derived(std::move(temp)), CopyFunc{std::move(copy)}};
 }
 
 template <typename Base, typename Derived>
 deep_unique_ptr<Base> make_deep_unique(Derived &&temp)
 {
-    static_assert(std::is_base_of<Base, Derived>::value,
-                  "Derived is not a specialization of Base");
+    static_assert(std::is_base_of<Base, Derived>::value, "Derived is not a specialization of Base");
 
-    return make_deep_unique<Base, Derived>(
-               std::move(temp), default_polymorphic_copy<Base, Derived>);
+    return make_deep_unique<Base, Derived>(std::move(temp), default_polymorphic_copy<Base, Derived>);
 }
 
 template <typename Base, typename Derived, typename... Args>
-deep_unique_ptr<Base> make_deep_unique(Args &&... args)
+deep_unique_ptr<Base> make_deep_unique(Args &&...args)
 {
-    static_assert(std::is_constructible<Derived, Args...>::value,
-                  "Cannot instantiate Derived from arguments");
+    static_assert(std::is_constructible<Derived, Args...>::value, "Cannot instantiate Derived from arguments");
 
-    return make_deep_unique<Base, Derived>(
-               std::move(Derived{ std::forward<Args>(args)... }));
+    return make_deep_unique<Base, Derived>(std::move(Derived{std::forward<Args>(args)...}));
 }
 
 } // namespace memory

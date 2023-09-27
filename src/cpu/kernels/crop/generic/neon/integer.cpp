@@ -29,46 +29,88 @@ namespace arm_compute
 {
 namespace cpu
 {
-void u8_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                              int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void u8_in_bounds_crop_window(const ITensor *input,
+                              const ITensor *output,
+                              float         *output_ptr,
+                              Coordinates    input_offset,
+                              int32_t        window_step_x,
+                              int32_t        output_width_start,
+                              int32_t        output_width_limit,
+                              bool           input_has_single_channel,
+                              bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint8_t>(input, output, output_ptr, input_offset,
-                                          window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<uint8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                          output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
-void u16_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                               int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void u16_in_bounds_crop_window(const ITensor *input,
+                               const ITensor *output,
+                               float         *output_ptr,
+                               Coordinates    input_offset,
+                               int32_t        window_step_x,
+                               int32_t        output_width_start,
+                               int32_t        output_width_limit,
+                               bool           input_has_single_channel,
+                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint16_t>(input, output, output_ptr, input_offset,
-                                           window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<uint16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                           output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
-void u32_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                               int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void u32_in_bounds_crop_window(const ITensor *input,
+                               const ITensor *output,
+                               float         *output_ptr,
+                               Coordinates    input_offset,
+                               int32_t        window_step_x,
+                               int32_t        output_width_start,
+                               int32_t        output_width_limit,
+                               bool           input_has_single_channel,
+                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<uint32_t>(input, output, output_ptr, input_offset,
-                                           window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<uint32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                           output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
-void s8_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                              int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void s8_in_bounds_crop_window(const ITensor *input,
+                              const ITensor *output,
+                              float         *output_ptr,
+                              Coordinates    input_offset,
+                              int32_t        window_step_x,
+                              int32_t        output_width_start,
+                              int32_t        output_width_limit,
+                              bool           input_has_single_channel,
+                              bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int8_t>(input, output, output_ptr, input_offset,
-                                         window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<int8_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                         output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
-void s16_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                               int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void s16_in_bounds_crop_window(const ITensor *input,
+                               const ITensor *output,
+                               float         *output_ptr,
+                               Coordinates    input_offset,
+                               int32_t        window_step_x,
+                               int32_t        output_width_start,
+                               int32_t        output_width_limit,
+                               bool           input_has_single_channel,
+                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int16_t>(input, output, output_ptr, input_offset,
-                                          window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<int16_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                          output_width_limit, input_has_single_channel, is_width_flipped);
 }
 
-void s32_in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                               int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
+void s32_in_bounds_crop_window(const ITensor *input,
+                               const ITensor *output,
+                               float         *output_ptr,
+                               Coordinates    input_offset,
+                               int32_t        window_step_x,
+                               int32_t        output_width_start,
+                               int32_t        output_width_limit,
+                               bool           input_has_single_channel,
+                               bool           is_width_flipped)
 {
-    return in_bounds_crop_window<int32_t>(input, output, output_ptr, input_offset,
-                                          window_step_x, output_width_start, output_width_limit, input_has_single_channel, is_width_flipped);
+    return in_bounds_crop_window<int32_t>(input, output, output_ptr, input_offset, window_step_x, output_width_start,
+                                          output_width_limit, input_has_single_channel, is_width_flipped);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

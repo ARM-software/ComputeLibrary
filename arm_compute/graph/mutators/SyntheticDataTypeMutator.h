@@ -40,7 +40,7 @@ public:
     // Inherited methods overridden
     virtual void mutate(Graph &g) override;
     MutationType type() const override;
-    const char *name() override;
+    const char  *name() override;
 
 private:
     DataType _mutate_type;

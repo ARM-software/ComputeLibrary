@@ -29,11 +29,13 @@
 
 namespace arm_compute
 {
-#define ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(tensor) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_unsupported_fp16(__func__, __FILE__, __LINE__, tensor, CLKernelLibrary::get().fp16_supported()))
+#define ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(tensor)                                                          \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_unsupported_fp16(__func__, __FILE__, __LINE__, tensor, \
+                                                                        CLKernelLibrary::get().fp16_supported()))
 
-#define ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(tensor) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(__func__, __FILE__, __LINE__, tensor, CLKernelLibrary::get().fp16_supported()))
+#define ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(tensor)                                                    \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(__func__, __FILE__, __LINE__, tensor, \
+                                                                         CLKernelLibrary::get().fp16_supported()))
 
 /** Return an error if int64_base_atomics extension is not supported by the device.
  *
@@ -43,11 +45,13 @@ namespace arm_compute
  *
  * @return Status
  */
-inline arm_compute::Status error_on_unsupported_int64_base_atomics(const char *function, const char *file, const int line)
+inline arm_compute::Status
+error_on_unsupported_int64_base_atomics(const char *function, const char *file, const int line)
 {
-    if(!CLKernelLibrary::get().int64_base_atomics_supported())
+    if (!CLKernelLibrary::get().int64_base_atomics_supported())
     {
-        return ARM_COMPUTE_CREATE_ERROR_LOC(arm_compute::ErrorCode::UNSUPPORTED_EXTENSION_USE, function, file, line, "Atomic functions are not supported");
+        return ARM_COMPUTE_CREATE_ERROR_LOC(arm_compute::ErrorCode::UNSUPPORTED_EXTENSION_USE, function, file, line,
+                                            "Atomic functions are not supported");
     }
     return arm_compute::Status{};
 }

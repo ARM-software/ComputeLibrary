@@ -25,9 +25,8 @@
 #define ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
@@ -45,7 +44,8 @@ class CLFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
+    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager  = nullptr,
+                          IWeightsManager                *weights_manager = nullptr);
     /** Default destructor */
     ~CLFullyConnectedLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -83,13 +83,20 @@ public:
      *                             Data type supported: Same as @p input.
      * @param[in]  fc_info         (Optional) Fully connected layer additional info
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *weights,
+                   const ICLTensor        *biases,
+                   ICLTensor              *output,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Set the input and output tensors.
      *
      * Similar to @ref CLFullyConnectedLayer
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+    void configure(const ICLTensor        *input,
+                   const ICLTensor        *weights,
+                   const ICLTensor        *biases,
+                   ICLTensor              *output,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
@@ -97,7 +104,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+    static Status validate(const ITensorInfo      *input,
+                           const ITensorInfo      *weights,
+                           const ITensorInfo      *biases,
+                           const ITensorInfo      *output,
                            FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
     //Inherited methods override

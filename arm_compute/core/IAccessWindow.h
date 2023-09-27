@@ -100,7 +100,10 @@ public:
      * @return a valid region.
      *
      */
-    virtual ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const = 0;
+    virtual ValidRegion compute_valid_region(const Window &window,
+                                             ValidRegion   input_valid_region,
+                                             bool          border_undefined,
+                                             BorderSize    border_size) const = 0;
 };
 
 /** Implementation of a rectangular access pattern. */
@@ -161,7 +164,10 @@ public:
      * @param[in] border_undefined   (Optional) Undefined borders are excluded from the valid region.
      * @param[in] border_size        (Optional) Size of the border around the XY-plane of the tensor.
      */
-    void set_valid_region(const Window &window, const ValidRegion &input_valid_region, bool border_undefined = false, const BorderSize &border_size = BorderSize(0));
+    void set_valid_region(const Window      &window,
+                          const ValidRegion &input_valid_region,
+                          bool               border_undefined = false,
+                          const BorderSize  &border_size      = BorderSize(0));
 
     /** Compute the valid region based on access pattern, valid region of the inputs and border mode.
      *
@@ -189,7 +195,10 @@ public:
      * @return a valid region.
      *
      */
-    ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
+    ValidRegion compute_valid_region(const Window &window,
+                                     ValidRegion   input_valid_region,
+                                     bool          border_undefined,
+                                     BorderSize    border_size) const override;
 
     bool update_window_if_needed(Window &window) const override;
     bool update_padding_if_needed(const Window &window) override;

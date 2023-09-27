@@ -24,15 +24,17 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+
 #include "src/cpu/kernels/add/generic/sve/impl.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void add_fp32_sve(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_fp32_sve(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     return add_same_sve<float>(src0, src1, dst, policy, window);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

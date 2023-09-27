@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSIONKERNEL_LAYER_H
 #define ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSIONKERNEL_LAYER_H
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -65,7 +64,12 @@ public:
      * @param[in]  iou_threshold   The threshold used in non maximum suppression.
      *
      */
-    void configure(const ITensor *input_bboxes, const ITensor *input_scores, ITensor *output_indices, unsigned int max_output_size, const float score_threshold, const float iou_threshold);
+    void configure(const ITensor *input_bboxes,
+                   const ITensor *input_scores,
+                   ITensor       *output_indices,
+                   unsigned int   max_output_size,
+                   const float    score_threshold,
+                   const float    iou_threshold);
 
     /** Static function to check if given arguments will lead to a valid configuration of @ref CPPNonMaximumSuppressionKernel
      *
@@ -77,8 +81,12 @@ public:
      * @param[in]  iou_threshold   The threshold used in non maximum suppression.
      *
      */
-    static Status validate(const ITensorInfo *input_bboxes, const ITensorInfo *input_scores, const ITensorInfo *output_indices, unsigned int max_output_size,
-                           const float score_threshold, const float iou_threshold);
+    static Status validate(const ITensorInfo *input_bboxes,
+                           const ITensorInfo *input_scores,
+                           const ITensorInfo *output_indices,
+                           unsigned int       max_output_size,
+                           const float        score_threshold,
+                           const float        iou_threshold);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

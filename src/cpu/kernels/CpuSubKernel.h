@@ -37,7 +37,8 @@ namespace kernels
 class CpuSubKernel : public ICpuKernel<CpuSubKernel>
 {
 private:
-    using SubKernelPtr                           = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    using SubKernelPtr                           = std::add_pointer<void(
+        const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
     using CpuSubKernelDataTypeISASelectorDataPtr = CpuAddKernelDataTypeISASelectorDataPtr;
 
 public:
@@ -68,7 +69,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
+    static Status
+    validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
 
     // Inherited methods overridden:
     void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -99,9 +101,9 @@ public:
 
 private:
     ConvertPolicy _policy{};
-    SubKernelPtr  _run_method{ nullptr };
+    SubKernelPtr  _run_method{nullptr};
     std::string   _name{};
-    size_t        _split_dimension{ Window::DimY };
+    size_t        _split_dimension{Window::DimY};
 };
 } // namespace kernels
 } // namespace cpu

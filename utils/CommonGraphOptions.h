@@ -24,12 +24,12 @@
 #ifndef ARM_COMPUTE_EXAMPLES_UTILS_COMMON_GRAPH_OPTIONS
 #define ARM_COMPUTE_EXAMPLES_UTILS_COMMON_GRAPH_OPTIONS
 
-#include "utils/command_line/CommandLineOptions.h"
-#include "utils/command_line/CommandLineParser.h"
-
 #include "arm_compute/graph/TypeLoader.h"
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+
+#include "utils/command_line/CommandLineOptions.h"
+#include "utils/command_line/CommandLineParser.h"
 
 namespace arm_compute
 {
@@ -92,16 +92,16 @@ namespace utils
 /** Structure holding all the common graph parameters */
 struct CommonGraphParams
 {
-    bool                             help{ false };
-    int                              threads{ 0 };
-    int                              batches{ 1 };
-    arm_compute::graph::Target       target{ arm_compute::graph::Target::NEON };
-    arm_compute::DataType            data_type{ DataType::F32 };
-    arm_compute::DataLayout          data_layout{ DataLayout::NHWC };
-    bool                             enable_tuner{ false };
-    bool                             enable_cl_cache{ false };
-    arm_compute::CLTunerMode         tuner_mode{ CLTunerMode::NORMAL };
-    arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::Disabled };
+    bool                             help{false};
+    int                              threads{0};
+    int                              batches{1};
+    arm_compute::graph::Target       target{arm_compute::graph::Target::NEON};
+    arm_compute::DataType            data_type{DataType::F32};
+    arm_compute::DataLayout          data_layout{DataLayout::NHWC};
+    bool                             enable_tuner{false};
+    bool                             enable_cl_cache{false};
+    arm_compute::CLTunerMode         tuner_mode{CLTunerMode::NORMAL};
+    arm_compute::graph::FastMathHint fast_math_hint{arm_compute::graph::FastMathHint::Disabled};
     std::string                      data_path{};
     std::string                      image{};
     std::string                      labels{};
@@ -109,8 +109,8 @@ struct CommonGraphParams
     std::string                      validation_path{};
     std::string                      tuner_file{};
     std::string                      mlgo_file{};
-    unsigned int                     validation_range_start{ 0 };
-    unsigned int                     validation_range_end{ std::numeric_limits<unsigned int>::max() };
+    unsigned int                     validation_range_start{0};
+    unsigned int                     validation_range_end{std::numeric_limits<unsigned int>::max()};
 };
 
 /** Formatted output of the CommonGraphParams type

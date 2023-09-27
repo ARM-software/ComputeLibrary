@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_POOL3D_KERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -39,7 +40,8 @@ class CpuPool3dKernel : public ICpuKernel<CpuPool3dKernel>
 {
 private:
     /* Template function for Pooling 3D NDHWC */
-    using Pooling3dKernelPtr = std::add_pointer<void(const ITensor *, ITensor *, Pooling3dLayerInfo &, const Window &)>::type;
+    using Pooling3dKernelPtr =
+        std::add_pointer<void(const ITensor *, ITensor *, Pooling3dLayerInfo &, const Window &)>::type;
 
 public:
     CpuPool3dKernel() = default;
@@ -68,7 +70,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Pooling3dLayerInfo &pool_info);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct Pooling3dKernel
@@ -82,7 +84,7 @@ public:
 
 private:
     Pooling3dLayerInfo _pool_info{};
-    Pooling3dKernelPtr _run_method{ nullptr };
+    Pooling3dKernelPtr _run_method{nullptr};
     std::string        _name{};
 };
 

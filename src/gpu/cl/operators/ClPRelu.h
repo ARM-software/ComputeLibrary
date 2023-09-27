@@ -47,7 +47,8 @@ public:
      * @param[in]  alpha           PRelu layer parameters. Data types supported: same of @p input.
      * @param[out] output          Destination tensor. Data type supported: same as @p input
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *input, ITensorInfo *alpha, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClPRelu::configure()

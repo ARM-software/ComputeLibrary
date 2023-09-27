@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NERangeKernel.h"
 
@@ -31,8 +32,7 @@ namespace arm_compute
 {
 NERange::~NERange() = default;
 
-NERange::NERange()
-    : _kernel()
+NERange::NERange() : _kernel()
 {
 }
 

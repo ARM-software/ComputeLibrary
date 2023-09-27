@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLL2NORMALIZELAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -70,7 +71,12 @@ public:
      * @param[in]  axis            Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon         Lower bound value for the normalization.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   const ICLTensor        *sum,
+                   ICLTensor              *output,
+                   int                     axis,
+                   float                   epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayerKernel.
      *
@@ -84,7 +90,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

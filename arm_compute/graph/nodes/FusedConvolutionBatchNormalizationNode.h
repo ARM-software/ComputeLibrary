@@ -43,7 +43,8 @@ public:
      * @param[in] fast_math_hint   (Optional) Fast math hint
      * @param[in] fused_activation (Optional) Fused activation layer. Disabled if not specified
      */
-    FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
+    FusedConvolutionBatchNormalizationNode(float               epsilon,
+                                           PadStrideInfo       info,
                                            unsigned int        num_groups       = 1,
                                            ConvolutionMethod   method           = ConvolutionMethod::Default,
                                            FastMathHint        fast_math_hint   = FastMathHint::Disabled,
@@ -122,7 +123,7 @@ public:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
+    void             accept(INodeVisitor &v) override;
 
 public:
     static constexpr NodeType node_type = NodeType::FusedConvolutionBatchNormalizationLayer;

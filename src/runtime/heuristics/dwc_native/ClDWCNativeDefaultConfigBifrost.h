@@ -41,20 +41,38 @@ public:
     ClDWCNativeDefaultConfigBifrost(GPUTarget gpu);
 
     // Inherited overridden method
-    DWCComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                   unsigned int depth_multiplier) override;
+    DWCComputeKernelInfo configure(const ITensorInfo   *src,
+                                   const ITensorInfo   *wei,
+                                   const PadStrideInfo &conv_info,
+                                   const Size2D        &dilation,
+                                   unsigned int         depth_multiplier) override;
 
 private:
-    DWCComputeKernelInfo configure_G71_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                           unsigned int depth_multiplier);
-    DWCComputeKernelInfo configure_G71_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                           unsigned int depth_multiplier);
-    DWCComputeKernelInfo configure_G7x_f32(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                           unsigned int depth_multiplier);
-    DWCComputeKernelInfo configure_G7x_f16(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                           unsigned int depth_multiplier);
-    DWCComputeKernelInfo configure_G7x_u8(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info, const Size2D &dilation,
-                                          unsigned int depth_multiplier);
+    DWCComputeKernelInfo configure_G71_f32(const ITensorInfo   *src,
+                                           const ITensorInfo   *wei,
+                                           const PadStrideInfo &conv_info,
+                                           const Size2D        &dilation,
+                                           unsigned int         depth_multiplier);
+    DWCComputeKernelInfo configure_G71_f16(const ITensorInfo   *src,
+                                           const ITensorInfo   *wei,
+                                           const PadStrideInfo &conv_info,
+                                           const Size2D        &dilation,
+                                           unsigned int         depth_multiplier);
+    DWCComputeKernelInfo configure_G7x_f32(const ITensorInfo   *src,
+                                           const ITensorInfo   *wei,
+                                           const PadStrideInfo &conv_info,
+                                           const Size2D        &dilation,
+                                           unsigned int         depth_multiplier);
+    DWCComputeKernelInfo configure_G7x_f16(const ITensorInfo   *src,
+                                           const ITensorInfo   *wei,
+                                           const PadStrideInfo &conv_info,
+                                           const Size2D        &dilation,
+                                           unsigned int         depth_multiplier);
+    DWCComputeKernelInfo configure_G7x_u8(const ITensorInfo   *src,
+                                          const ITensorInfo   *wei,
+                                          const PadStrideInfo &conv_info,
+                                          const Size2D        &dilation,
+                                          unsigned int         depth_multiplier);
 };
 } // namespace cl_dwc
 } // namespace arm_compute

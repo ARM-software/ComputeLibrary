@@ -30,10 +30,10 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
-
 #include "support/StringSupport.h"
 
 namespace arm_compute
@@ -51,9 +51,11 @@ Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITen
 
     const bool is_same_rank = (c->tensor_shape().num_dimensions() == x->tensor_shape().num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(is_same_rank && (x->tensor_shape() != c->tensor_shape()));
-    ARM_COMPUTE_RETURN_ERROR_ON(!is_same_rank && ((c->tensor_shape().num_dimensions() > 1) || (c->tensor_shape().x() != x->tensor_shape()[x->tensor_shape().num_dimensions() - 1])));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_same_rank &&
+                                ((c->tensor_shape().num_dimensions() > 1) ||
+                                 (c->tensor_shape().x() != x->tensor_shape()[x->tensor_shape().num_dimensions() - 1])));
 
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(x, output);
@@ -63,13 +65,16 @@ Status validate_arguments(const ITensorInfo *c, const ITensorInfo *x, const ITen
 }
 } // namespace
 
-CLSelectKernel::CLSelectKernel()
-    : _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
+CLSelectKernel::CLSelectKernel() : _c(nullptr), _x(nullptr), _y(nullptr), _output(nullptr), _has_same_rank(false)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLSelectKernel::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
+void CLSelectKernel::configure(const CLCompileContext &compile_context,
+                               const ICLTensor        *c,
+                               const ICLTensor        *x,
+                               const ICLTensor        *y,
+                               ICLTensor              *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(c, x, y, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(c->info(), x->info(), y->info(), output->info()));
@@ -80,7 +85,7 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
     _output        = output;
     _has_same_rank = (c->info()->tensor_shape().num_dimensions() == x->info()->tensor_shape().num_dimensions());
 
-    auto               padding_info         = get_padding_info({ c, x, y, output });
+    auto               padding_info         = get_padding_info({c, x, y, output});
     const unsigned int vec_size_x           = adjust_vec_size(16 / x->info()->element_size(), x->info()->dimension(0));
     const int          vec_size_x_leftovers = output->info()->dimension(0) % vec_size_x;
 
@@ -92,14 +97,14 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
 
     // Create kernel
     std::string kernel_name = "select";
-    if(_has_same_rank)
+    if (_has_same_rank)
     {
         kernel_name += "_same_rank";
     }
     else
     {
         const bool is_input_rank_greater_than_two = x->info()->tensor_shape().num_dimensions() > 2;
-        if(is_input_rank_greater_than_two)
+        if (is_input_rank_greater_than_two)
         {
             const size_t width      = x->info()->tensor_shape().x();
             const size_t height     = x->info()->tensor_shape().y();
@@ -128,7 +133,8 @@ void CLSelectKernel::configure(const CLCompileContext &compile_context, const IC
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLSelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
+Status
+CLSelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(c, x, y, output));
     return Status{};
@@ -142,7 +148,7 @@ void CLSelectKernel::run(const arm_compute::Window &window, cl::CommandQueue &qu
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
 
-    if(!_has_same_rank)
+    if (!_has_same_rank)
     {
         Window vector_slice = window.first_slice_window_1D();
         vector_slice.set(Window::DimX, Window::Dimension(0, 0, 0));
@@ -153,7 +159,7 @@ void CLSelectKernel::run(const arm_compute::Window &window, cl::CommandQueue &qu
     do
     {
         unsigned int idx = _has_same_rank ? 0 : num_arguments_per_1D_tensor();
-        if(_has_same_rank)
+        if (_has_same_rank)
         {
             add_3D_tensor_argument(idx, _c, slice);
         }
@@ -162,7 +168,6 @@ void CLSelectKernel::run(const arm_compute::Window &window, cl::CommandQueue &qu
         add_3D_tensor_argument(idx, _output, slice);
 
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(collapsed.slide_window_slice_3D(slice));
+    } while (collapsed.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

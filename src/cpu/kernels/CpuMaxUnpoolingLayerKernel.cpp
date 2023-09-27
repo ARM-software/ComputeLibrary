@@ -24,11 +24,12 @@
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
 
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "src/core/CPP/Validate.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/maxunpool/list.h"
@@ -43,50 +44,43 @@ using namespace misc::shape_calculator;
 
 namespace
 {
-static const std::vector<CpuMaxUnpoolingLayerKernel::MaxUnpoolingKernel> available_kernels =
-{
-    {
-        "neon_fp32_maxunpooling",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F32; },
-        REGISTER_FP32_NEON(neon_fp32_maxunpooling)
-    },
-    {
-        "neon_fp16_maxunpooling",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::F16 && data.isa.fp16; },
-        REGISTER_FP16_NEON(neon_fp16_maxunpooling)
-    },
-    {
-        "neon_qu8_maxunpooling",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8; },
-        REGISTER_QASYMM8_NEON(neon_qs8_maxunpooling)
-    },
-    {
-        "neon_qs8_maxunpooling",
-        [](const DataTypeISASelectorData & data) { return data.dt == DataType::QASYMM8_SIGNED; },
-        REGISTER_QASYMM8_SIGNED_NEON(neon_qu8_maxunpooling)
-    },
+static const std::vector<CpuMaxUnpoolingLayerKernel::MaxUnpoolingKernel> available_kernels = {
+    {"neon_fp32_maxunpooling", [](const DataTypeISASelectorData &data) { return data.dt == DataType::F32; },
+     REGISTER_FP32_NEON(neon_fp32_maxunpooling)},
+    {"neon_fp16_maxunpooling",
+     [](const DataTypeISASelectorData &data) { return data.dt == DataType::F16 && data.isa.fp16; },
+     REGISTER_FP16_NEON(neon_fp16_maxunpooling)},
+    {"neon_qu8_maxunpooling", [](const DataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8; },
+     REGISTER_QASYMM8_NEON(neon_qs8_maxunpooling)},
+    {"neon_qs8_maxunpooling", [](const DataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8_SIGNED; },
+     REGISTER_QASYMM8_SIGNED_NEON(neon_qu8_maxunpooling)},
 };
 
-Status validate_arguments(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo      *src,
+                          const ITensorInfo      *indices,
+                          const ITensorInfo      *dst,
+                          const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, indices, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, indices);
 
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    PoolingType         pool_type       = pool_info.pool_type;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    int                 pool_stride_x      = 0;
+    int                 pool_stride_y      = 0;
+    PoolingType         pool_type          = pool_info.pool_type;
+    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    const int    pool_size_x = pool_info.pool_size.width;
-    const int    pool_size_y = pool_info.pool_size.height;
+    const int    pool_size_x               = pool_info.pool_size.width;
+    const int    pool_size_y               = pool_info.pool_size.height;
     const Size2D pool_size(pool_size_x, pool_size_y);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX,
+                                    "Pooling indices only supported for MAX pooling method");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
@@ -96,13 +90,17 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *indices, co
 }
 } // namespace
 
-void CpuMaxUnpoolingLayerKernel::configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+void CpuMaxUnpoolingLayerKernel::configure(const ITensorInfo      *src,
+                                           const ITensorInfo      *indices,
+                                           ITensorInfo            *dst,
+                                           const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst, indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(src, indices, dst, pool_info));
     ARM_COMPUTE_UNUSED(indices);
 
-    const auto uk = CpuMaxUnpoolingLayerKernel::get_implementation(DataTypeISASelectorData{ src->data_type(), CPUInfo::get().get_isa() });
+    const auto uk = CpuMaxUnpoolingLayerKernel::get_implementation(
+        DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
     ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
     _run_method = uk->ukernel;
 
@@ -113,7 +111,10 @@ void CpuMaxUnpoolingLayerKernel::configure(const ITensorInfo *src, const ITensor
     ICpuKernel::configure(window);
 }
 
-Status CpuMaxUnpoolingLayerKernel::validate(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info)
+Status CpuMaxUnpoolingLayerKernel::validate(const ITensorInfo      *src,
+                                            const ITensorInfo      *indices,
+                                            const ITensorInfo      *dst,
+                                            const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, indices, dst);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(src, indices, dst, pool_info));

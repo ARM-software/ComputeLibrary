@@ -24,9 +24,9 @@
 #ifndef SRC_GPU_CLQUEUE_H
 #define SRC_GPU_CLQUEUE_H
 
-#include "src/common/IQueue.h"
-
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/IQueue.h"
 
 #include <memory>
 

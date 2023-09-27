@@ -94,7 +94,9 @@ public:
      *
      * @return The @ref TensorOperand object.
      */
-    TensorOperand &declare_tensor_argument(const std::string &name, const TensorInfo &info, TensorStorageType storage_type = TensorStorageType::BufferUint8Ptr);
+    TensorOperand &declare_tensor_argument(const std::string &name,
+                                           const TensorInfo  &info,
+                                           TensorStorageType  storage_type = TensorStorageType::BufferUint8Ptr);
 
     /** Declare a compile-time constant scalar argument.
      *
@@ -134,7 +136,10 @@ public:
      * @param[in]  sampler    The tensor sampling information.
      * @param[in]  dilation_y Dilation in the Y dimension.
      */
-    void op_load(TileOperand &tile, const TensorOperand &tensor, const TensorTileSampler &sampler, const TileOperand &dilation_y = TileOperand("dil_y", 1));
+    void op_load(TileOperand             &tile,
+                 const TensorOperand     &tensor,
+                 const TensorTileSampler &sampler,
+                 const TileOperand       &dilation_y = TileOperand("dil_y", 1));
 
     /** Load the data from the tensor memory to the tile using the indirect buffer approach and respective of the sampling information.
      *
@@ -221,7 +226,10 @@ public:
      * @param[in]  first    The first argument tile.
      * @param[in]  second   The second argument tile.
      */
-    void op_binary_elementwise_function(const TileOperand &dst, BinaryFunction func, const TileOperand &first, const TileOperand &second);
+    void op_binary_elementwise_function(const TileOperand &dst,
+                                        BinaryFunction     func,
+                                        const TileOperand &first,
+                                        const TileOperand &second);
 
     /** Write function applied to scalar value: `<dst> = <func>(<first>, <second>, <third>);`.
      *
@@ -231,7 +239,11 @@ public:
      * @param[in]  second   The second argument tile.
      * @param[in]  third    The third argument tile.
      */
-    void op_ternary_elementwise_function(const TileOperand &dst, TernaryFunction func, const TileOperand &first, const TileOperand &second, const TileOperand &third);
+    void op_ternary_elementwise_function(const TileOperand &dst,
+                                         TernaryFunction    func,
+                                         const TileOperand &first,
+                                         const TileOperand &second,
+                                         const TileOperand &third);
 
     /** Write if-statement: `if(<lhs> <op> <rhs>) { <body> }`.
      *
@@ -267,7 +279,13 @@ public:
      * @param[in, out]  update_value      The value which is updated at every iteration.
      * @param[in]       body              The body of the for-loop.
      */
-    void op_for_loop(const TileOperand &var_name, BinaryOp cond_op, const TileOperand &cond_value_name, const TileOperand &update_var_name, AssignmentOp update_op, const TileOperand &update_value_name, const std::function<void()> &body);
+    void op_for_loop(const TileOperand           &var_name,
+                     BinaryOp                     cond_op,
+                     const TileOperand           &cond_value_name,
+                     const TileOperand           &update_var_name,
+                     AssignmentOp                 update_op,
+                     const TileOperand           &update_value_name,
+                     const std::function<void()> &body);
 
     /** Write the return statement: `return;`
      */
@@ -311,8 +329,8 @@ private:
     ::std::unique_ptr<prototype::GpuKernelWriterAttribute> _impl_attr;
     ::std::unique_ptr<prototype::IGpuKernelWriter>         _impl;
 
-    int32_t _id_space{ 0 };
-    int32_t _max_id_space{ 0 };
+    int32_t _id_space{0};
+    int32_t _max_id_space{0};
 };
 
 } // namespace ckw

@@ -60,16 +60,23 @@ public:
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  desc            Direct convolution descriptor used to build the NHWC direct/indirect convolution kernel.
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *dst,
-                   const PadStrideInfo &conv_info, const DirectConvComputeKernelInfo &desc);
+    void configure(const CLCompileContext            &compile_context,
+                   ITensorInfo                       *src,
+                   ITensorInfo                       *weights,
+                   ITensorInfo                       *dst,
+                   const PadStrideInfo               &conv_info,
+                   const DirectConvComputeKernelInfo &desc);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClIndirectConv2dAddressPreCalculationKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *dst,
-                           const PadStrideInfo &conv_info, const DirectConvComputeKernelInfo &desc);
+    static Status validate(const ITensorInfo                 *src,
+                           const ITensorInfo                 *weights,
+                           const ITensorInfo                 *dst,
+                           const PadStrideInfo               &conv_info,
+                           const DirectConvComputeKernelInfo &desc);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

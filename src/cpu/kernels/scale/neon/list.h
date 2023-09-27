@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Rounding.h"
@@ -34,10 +35,10 @@ namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SCALE_KERNEL(func_name)                                                                                         \
-    void func_name(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,              \
-                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset, \
-                   bool align_corners, const Window &window)
+#define DECLARE_SCALE_KERNEL(func_name)                                                                            \
+    void func_name(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy, \
+                   InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value,           \
+                   float sampling_offset, bool align_corners, const Window &window)
 
 DECLARE_SCALE_KERNEL(s16_neon_scale);
 DECLARE_SCALE_KERNEL(u8_neon_scale);
@@ -48,14 +49,20 @@ DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
 #undef DECLARE_SCALE_KERNEL
 
 template <typename T>
-void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, float sampling_offset,
-                        bool align_corners, const Window &window)
+void nearest_neon_scale(const ITensor *src,
+                        ITensor       *dst,
+                        const ITensor *offsets,
+                        float          sampling_offset,
+                        bool           align_corners,
+                        const Window  &window)
 {
     ARM_COMPUTE_UNUSED(offsets);
 
     // Compute the ratio between source and destination dimensions
-    const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
-    const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+    const float scale_x =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const float scale_y =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
     const int in_stride_y  = src->info()->strides_in_bytes()[1];
     const int in_stride_z  = src->info()->strides_in_bytes()[2];
@@ -84,17 +91,17 @@ void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets
     const int bo_end   = window_execution[3].end();
     const int bo_step  = window_execution[3].step();
 
-    for(int bo = bo_start; bo < bo_end; bo += bo_step)
+    for (int bo = bo_start; bo < bo_end; bo += bo_step)
     {
         const uint8_t *in_ptr_base  = in.ptr() + bo * in_stride_w;
         uint8_t       *out_ptr_base = out.ptr() + bo * out_stride_w;
 
-        for(int yo = yo_start; yo < yo_end; yo += yo_step)
+        for (int yo = yo_start; yo < yo_end; yo += yo_step)
         {
             // Floating-point coordinate
             float yi_f = ((yo + sampling_offset) * scale_y);
             int   yi   = 0;
-            if(align_corners)
+            if (align_corners)
             {
                 yi = utils::rounding::round_half_away_from_zero(yi_f);
             }
@@ -103,12 +110,12 @@ void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets
                 yi = static_cast<int>(std::floor(yi_f));
             }
 
-            for(int xo = xo_start; xo < xo_end; xo += xo_step)
+            for (int xo = xo_start; xo < xo_end; xo += xo_step)
             {
                 // Floating-point coordinate
                 float xi_f = ((xo + sampling_offset) * scale_x);
                 int   xi   = 0;
-                if(align_corners)
+                if (align_corners)
                 {
                     xi = utils::rounding::round_half_away_from_zero(xi_f);
                 }
@@ -121,15 +128,15 @@ void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets
                 uint8_t       *out_ptr = out_ptr_base + xo * out_stride_y + yo * out_stride_z;
 
                 int cout = 0;
-                for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                for (; cout <= (out_dim_ch - step_cout); cout += step_cout)
                 {
                     auto out0 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
                     wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T)), out0);
                 }
 
-                for(; cout < out_dim_ch; ++cout)
+                for (; cout < out_dim_ch; ++cout)
                 {
-                    auto out0                                            = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
+                    auto out0 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
                     *(reinterpret_cast<T *>(out_ptr + cout * sizeof(T))) = out0;
                 }
             }
@@ -138,9 +145,16 @@ void nearest_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets
 }
 
 template <typename T>
-void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                         BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                         bool align_corners, const Window &window)
+void bilinear_neon_scale(const ITensor *src,
+                         ITensor       *dst,
+                         const ITensor *offsets,
+                         const ITensor *dx,
+                         const ITensor *dy,
+                         BorderMode     border_mode,
+                         PixelValue     constant_border_value,
+                         float          sampling_offset,
+                         bool           align_corners,
+                         const Window  &window)
 {
     ARM_COMPUTE_UNUSED(offsets);
     ARM_COMPUTE_UNUSED(dx);
@@ -148,8 +162,10 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
     // Compute the ratio between source and destination dimensions
-    const float scale_x = scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
-    const float scale_y = scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
+    const float scale_x =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const float scale_y =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(2), dst->info()->dimension(2), align_corners);
 
     const int in_stride_y  = src->info()->strides_in_bytes()[1];
     const int in_stride_z  = src->info()->strides_in_bytes()[2];
@@ -180,7 +196,7 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
     const int bo_end   = window_execution[3].end();
     const int bo_step  = window_execution[3].step();
 
-    if(border_mode == BorderMode::CONSTANT)
+    if (border_mode == BorderMode::CONSTANT)
     {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
@@ -189,12 +205,12 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         const T const_border_value = static_cast<T>(constant_border_value.get<ConstType>());
 
-        for(int bo = bo_start; bo < bo_end; bo += bo_step)
+        for (int bo = bo_start; bo < bo_end; bo += bo_step)
         {
             const uint8_t *in_ptr_base  = in.ptr() + bo * in_stride_w;
             uint8_t       *out_ptr_base = out.ptr() + bo * out_stride_w;
 
-            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            for (int yo = yo_start; yo < yo_end; yo += yo_step)
             {
                 // Floating-point coordinate
                 const float yi_f = ((yo + sampling_offset) * scale_y - sampling_offset);
@@ -204,7 +220,7 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                 const auto a1 = (yi_f - static_cast<float>(yi));
                 const auto b1 = (1.f - a1);
 
-                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                for (int xo = xo_start; xo < xo_end; xo += xo_step)
                 {
                     // Floating-point coordinate
                     const float xi_f = ((xo + sampling_offset) * scale_x - sampling_offset);
@@ -223,32 +239,35 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                     uint8_t       *out_ptr = out_ptr_base + xo * out_stride_y + yo * out_stride_z;
 
                     int cout = 0;
-                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    for (; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
                         auto in00 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
                         auto in01 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
                         auto in10 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
                         auto in11 = wrapper::vdup_n(static_cast<T>(const_border_value), ExactTagType{});
-                        if((yi >= 0) && (yi < in_dim_h))
+                        if ((yi >= 0) && (yi < in_dim_h))
                         {
-                            if((xi >= 0) && (xi < in_dim_w))
+                            if ((xi >= 0) && (xi < in_dim_w))
                             {
                                 in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
                             }
-                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            if (((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
                             {
-                                in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y));
+                                in01 = wrapper::vloadq(
+                                    reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y));
                             }
                         }
-                        if(((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
+                        if (((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
                         {
-                            if((xi >= 0) && (xi < in_dim_w))
+                            if ((xi >= 0) && (xi < in_dim_w))
                             {
-                                in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_z));
+                                in10 = wrapper::vloadq(
+                                    reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_z));
                             }
-                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            if (((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
                             {
-                                in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
+                                in11 = wrapper::vloadq(
+                                    reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
                             }
                         }
 
@@ -264,32 +283,33 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                         wrapper::vstore(reinterpret_cast<T *>(out_ptr + cout * sizeof(T)), out0);
                     }
 
-                    for(; cout < out_dim_ch; ++cout)
+                    for (; cout < out_dim_ch; ++cout)
                     {
                         auto in00 = static_cast<T>(const_border_value);
                         auto in01 = static_cast<T>(const_border_value);
                         auto in10 = static_cast<T>(const_border_value);
                         auto in11 = static_cast<T>(const_border_value);
-                        if((yi >= 0) && (yi < in_dim_h))
+                        if ((yi >= 0) && (yi < in_dim_h))
                         {
-                            if((xi >= 0) && (xi < in_dim_w))
+                            if ((xi >= 0) && (xi < in_dim_w))
                             {
                                 in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T)));
                             }
-                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            if (((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
                             {
                                 in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y));
                             }
                         }
-                        if(((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
+                        if (((yi + 1) >= 0) && ((yi + 1) < in_dim_h))
                         {
-                            if((xi >= 0) && (xi < in_dim_w))
+                            if ((xi >= 0) && (xi < in_dim_w))
                             {
                                 in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_z));
                             }
-                            if(((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
+                            if (((xi + 1) >= 0) && ((xi + 1) < in_dim_w))
                             {
-                                in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
+                                in11 = *(
+                                    reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + in_stride_y + in_stride_z));
                             }
                         }
                         auto out0 = static_cast<T>(0);
@@ -303,14 +323,14 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
             }
         }
     }
-    else if(border_mode == BorderMode::REPLICATE)
+    else if (border_mode == BorderMode::REPLICATE)
     {
-        for(int bo = bo_start; bo < bo_end; bo += bo_step)
+        for (int bo = bo_start; bo < bo_end; bo += bo_step)
         {
             const uint8_t *in_ptr  = in.ptr() + bo * in_stride_w;
             uint8_t       *out_ptr = out.ptr() + bo * out_stride_w;
 
-            for(int yo = yo_start; yo < yo_end; yo += yo_step)
+            for (int yo = yo_start; yo < yo_end; yo += yo_step)
             {
                 // Floating-point coordinate
                 const float yi_f = ((yo + sampling_offset) * scale_y - sampling_offset);
@@ -327,7 +347,7 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                 const int yi1_offset = yi1 * in_stride_z;
 
                 const int y_offset = yo * out_stride_z;
-                for(int xo = xo_start; xo < xo_end; xo += xo_step)
+                for (int xo = xo_start; xo < xo_end; xo += xo_step)
                 {
                     // Floating-point coordinate
                     const float xi_f = ((xo + sampling_offset) * scale_x - sampling_offset);
@@ -356,12 +376,16 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                     const int offset = xo * out_stride_y + y_offset;
 
                     int cout = 0;
-                    for(; cout <= (out_dim_ch - step_cout); cout += step_cout)
+                    for (; cout <= (out_dim_ch - step_cout); cout += step_cout)
                     {
-                        const auto in00 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
-                        const auto in01 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
-                        const auto in10 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
-                        const auto in11 = wrapper::vloadq(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
+                        const auto in00 = wrapper::vloadq(
+                            reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        const auto in01 = wrapper::vloadq(
+                            reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        const auto in10 = wrapper::vloadq(
+                            reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        const auto in11 = wrapper::vloadq(
+                            reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
 
                         auto out0 = wrapper::vmul(in00, s00);
                         out0      = wrapper::vmla(out0, in01, s01);
@@ -370,12 +394,16 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
                         wrapper::vstore(reinterpret_cast<T *>(out_ptr + offset + cout * sizeof(T)), out0);
                     }
 
-                    for(; cout < out_dim_ch; ++cout)
+                    for (; cout < out_dim_ch; ++cout)
                     {
-                        const T in00 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
-                        const T in01 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
-                        const T in10 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
-                        const T in11 = *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
+                        const T in00 =
+                            *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi0_offset));
+                        const T in01 =
+                            *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi0_offset));
+                        const T in10 =
+                            *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi0_offset + yi1_offset));
+                        const T in11 =
+                            *(reinterpret_cast<const T *>(in_ptr + cout * sizeof(T) + xi1_offset + yi1_offset));
 
                         T out0 = in00 * s00_s;
                         out0 += in01 * s01_s;
@@ -394,15 +422,24 @@ void bilinear_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offset
 }
 
 template <typename T>
-void common_neon_scale(const ITensor *src, ITensor *dst, const ITensor *offsets, const ITensor *dx, const ITensor *dy,
-                       InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, float sampling_offset,
-                       bool align_corners, const Window &window)
+void common_neon_scale(const ITensor      *src,
+                       ITensor            *dst,
+                       const ITensor      *offsets,
+                       const ITensor      *dx,
+                       const ITensor      *dy,
+                       InterpolationPolicy policy,
+                       BorderMode          border_mode,
+                       PixelValue          constant_border_value,
+                       float               sampling_offset,
+                       bool                align_corners,
+                       const Window       &window)
 {
-    if(policy == InterpolationPolicy::BILINEAR)
+    if (policy == InterpolationPolicy::BILINEAR)
     {
-        bilinear_neon_scale<T>(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset, align_corners, window);
+        bilinear_neon_scale<T>(src, dst, offsets, dx, dy, border_mode, constant_border_value, sampling_offset,
+                               align_corners, window);
     }
-    else if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    else if (policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
         nearest_neon_scale<T>(src, dst, offsets, sampling_offset, align_corners, window);
     }

@@ -25,7 +25,9 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_COMPONENTS_CL_CLCOMPONENTDEPTHWISECONV2D
 
 #include "arm_compute/core/Error.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/IGpuKernelComponent.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -77,12 +79,12 @@ public:
     unsigned int m0() const;
 
 private:
-    bool         _export_input_to_cl_image{ false };   /**< Export input to cl_image */
-    bool         _export_weights_to_cl_image{ false }; /**< Export the weights to cl_image */
-    bool         _fast_relaxed_math{ true };           /**< Enable/disable -cl-fast-relaxed-math flag */
-    bool         _is_fma_available{ false };           /**< Is fma instruction available */
-    unsigned int _n0{ 0 };                             /**< Number of columns processed by each thread */
-    unsigned int _m0{ 0 };                             /**< Number of rows processed by each thread */
+    bool         _export_input_to_cl_image{false};   /**< Export input to cl_image */
+    bool         _export_weights_to_cl_image{false}; /**< Export the weights to cl_image */
+    bool         _fast_relaxed_math{true};           /**< Enable/disable -cl-fast-relaxed-math flag */
+    bool         _is_fma_available{false};           /**< Is fma instruction available */
+    unsigned int _n0{0};                             /**< Number of columns processed by each thread */
+    unsigned int _m0{0};                             /**< Number of rows processed by each thread */
 };
 
 /** Forward declaration */
@@ -127,22 +129,20 @@ public:
      * |F16            |F16            |F16            |F16            |
      * |F32            |F32            |F32            |F32            |
      */
-    static Status validate(
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    static Status validate(const Properties                &properties,
+                           const ArgumentPack<ITensorInfo> &tensors,
+                           const Attributes                &attributes,
+                           const Settings                  &settings);
 
     /** Constructor
      *
      * Similar to @ref ClComponentDepthwiseConv2d::validate()
      */
-    ClComponentDepthwiseConv2d(
-        ComponentId                      id,
-        const Properties                &properties,
-        const ArgumentPack<ITensorInfo> &tensors,
-        const Attributes                &attributes,
-        const Settings                  &settings);
+    ClComponentDepthwiseConv2d(ComponentId                      id,
+                               const Properties                &properties,
+                               const ArgumentPack<ITensorInfo> &tensors,
+                               const Attributes                &attributes,
+                               const Settings                  &settings);
 
     /** Destructor */
     ~ClComponentDepthwiseConv2d() override;

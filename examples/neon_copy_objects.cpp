@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
-#include "arm_compute/core/Types.h"
 #include "utils/Utils.h"
 
 #include <cstring>
@@ -50,11 +50,11 @@ public:
         dst_data = new float[width * height * batch];
 
         // Fill src_data with pseudo(meaningless) values:
-        for(unsigned int b = 0; b < batch; b++)
+        for (unsigned int b = 0; b < batch; b++)
         {
-            for(unsigned int h = 0; h < height; h++)
+            for (unsigned int h = 0; h < height; h++)
             {
-                for(unsigned int w = 0; w < width; w++)
+                for (unsigned int w = 0; w < width; w++)
                 {
                     src_data[b * (width * height) + h * width + w] = static_cast<float>(100 * b + 10 * h + w);
                 }
@@ -78,9 +78,12 @@ public:
         Window input_window;
         input_window.use_tensor_dimensions(input.info()->tensor_shape());
         std::cout << " Dimensions of the input's iterator:\n";
-        std::cout << " X = [start=" << input_window.x().start() << ", end=" << input_window.x().end() << ", step=" << input_window.x().step() << "]\n";
-        std::cout << " Y = [start=" << input_window.y().start() << ", end=" << input_window.y().end() << ", step=" << input_window.y().step() << "]\n";
-        std::cout << " Z = [start=" << input_window.z().start() << ", end=" << input_window.z().end() << ", step=" << input_window.z().step() << "]\n";
+        std::cout << " X = [start=" << input_window.x().start() << ", end=" << input_window.x().end()
+                  << ", step=" << input_window.x().step() << "]\n";
+        std::cout << " Y = [start=" << input_window.y().start() << ", end=" << input_window.y().end()
+                  << ", step=" << input_window.y().step() << "]\n";
+        std::cout << " Z = [start=" << input_window.z().start() << ", end=" << input_window.z().end()
+                  << ", step=" << input_window.z().step() << "]\n";
 
         // Create an iterator:
         Iterator input_it(&input, input_window);
@@ -98,20 +101,28 @@ public:
         //   }
         // }
         // Except it works for an arbitrary number of dimensions
-        execute_window_loop(input_window, [&](const Coordinates & id)
-        {
-            std::cout << "Setting item [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
-            *reinterpret_cast<float *>(input_it.ptr()) = src_data[id.z() * (width * height) + id.y() * width + id.x()];
-        },
-        input_it);
+        execute_window_loop(
+            input_window,
+            [&](const Coordinates &id)
+            {
+                std::cout << "Setting item [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
+                *reinterpret_cast<float *>(input_it.ptr()) =
+                    src_data[id.z() * (width * height) + id.y() * width + id.x()];
+            },
+            input_it);
 
         // More efficient way: create an iterator to iterate through each row (instead of each element) of the output tensor:
         Window output_window;
-        output_window.use_tensor_dimensions(output.info()->tensor_shape(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
+        output_window.use_tensor_dimensions(
+            output.info()->tensor_shape(),
+            /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
         std::cout << " Dimensions of the output's iterator:\n";
-        std::cout << " X = [start=" << output_window.x().start() << ", end=" << output_window.x().end() << ", step=" << output_window.x().step() << "]\n";
-        std::cout << " Y = [start=" << output_window.y().start() << ", end=" << output_window.y().end() << ", step=" << output_window.y().step() << "]\n";
-        std::cout << " Z = [start=" << output_window.z().start() << ", end=" << output_window.z().end() << ", step=" << output_window.z().step() << "]\n";
+        std::cout << " X = [start=" << output_window.x().start() << ", end=" << output_window.x().end()
+                  << ", step=" << output_window.x().step() << "]\n";
+        std::cout << " Y = [start=" << output_window.y().start() << ", end=" << output_window.y().end()
+                  << ", step=" << output_window.y().step() << "]\n";
+        std::cout << " Z = [start=" << output_window.z().start() << ", end=" << output_window.z().end()
+                  << ", step=" << output_window.z().step() << "]\n";
 
         // Create an iterator:
         Iterator output_it(&output, output_window);
@@ -126,13 +137,15 @@ public:
         //   }
         // }
         // Except it works for an arbitrary number of dimensions
-        execute_window_loop(output_window, [&](const Coordinates & id)
-        {
-            std::cout << "Copying one row starting from [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
-            // Copy one whole row:
-            memcpy(dst_data + id.z() * (width * height) + id.y() * width, output_it.ptr(), width * sizeof(float));
-        },
-        output_it);
+        execute_window_loop(
+            output_window,
+            [&](const Coordinates &id)
+            {
+                std::cout << "Copying one row starting from [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
+                // Copy one whole row:
+                memcpy(dst_data + id.z() * (width * height) + id.y() * width, output_it.ptr(), width * sizeof(float));
+            },
+            output_it);
 
         /** [Copy objects example] */
 

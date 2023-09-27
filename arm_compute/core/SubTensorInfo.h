@@ -24,10 +24,9 @@
 #ifndef ARM_COMPUTE_SUBTENSORINFO_H
 #define ARM_COMPUTE_SUBTENSORINFO_H
 
-#include "arm_compute/core/ITensorInfo.h"
-
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -73,7 +72,7 @@ public:
 
     // Inherited methods overridden:
     std::unique_ptr<ITensorInfo> clone() const override;
-    ITensorInfo &set_data_type(DataType data_type) override
+    ITensorInfo                 &set_data_type(DataType data_type) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_data_type(data_type);
@@ -143,7 +142,7 @@ public:
         return _parent->offset_element_in_bytes(_coords);
     }
     int32_t offset_element_in_bytes(const Coordinates &pos) const override;
-    size_t element_size() const override
+    size_t  element_size() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->element_size();
@@ -227,7 +226,7 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         // Check if subtensor is valid if parent is configured
-        if(_parent->tensor_shape().total_size() != 0)
+        if (_parent->tensor_shape().total_size() != 0)
         {
             ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(_parent->valid_region(), valid_region);
         }

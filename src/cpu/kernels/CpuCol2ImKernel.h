@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_COL2IM_KERNEL_H
 
 #include "arm_compute/core/Size2D.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -75,7 +76,7 @@ public:
     static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const Size2D &convolved_dims);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:

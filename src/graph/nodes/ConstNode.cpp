@@ -30,15 +30,14 @@ namespace arm_compute
 {
 namespace graph
 {
-ConstNode::ConstNode(TensorDescriptor desc)
-    : _desc(std::move(desc))
+ConstNode::ConstNode(TensorDescriptor desc) : _desc(std::move(desc))
 {
     _outputs.resize(1, NullTensorID);
 }
 
 bool ConstNode::forward_descriptors()
 {
-    if(output_id(0) != NullTensorID)
+    if (output_id(0) != NullTensorID)
     {
         Tensor *t = output(0);
         ARM_COMPUTE_ERROR_ON(t == nullptr);

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelArgument.h"
 #include "src/dynamic_fusion/sketch/gpu/GpuKernelSourceCode.h"
 

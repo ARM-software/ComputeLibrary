@@ -101,9 +101,9 @@ protected:
     virtual void unlock() = 0;
 
 private:
-    TensorInfo  _info_owned{};             /**< Tensor's metadata. */
-    TensorInfo *_info_external{ nullptr }; /**< External Tensor's metadata */
-    size_t      _alignment{};              /**< Tensor's alignment in bytes */
+    TensorInfo  _info_owned{};           /**< Tensor's metadata. */
+    TensorInfo *_info_external{nullptr}; /**< External Tensor's metadata */
+    size_t      _alignment{};            /**< Tensor's alignment in bytes */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_ITENSORALLOCATOR_H */

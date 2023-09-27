@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_DIRECT_CONV2D_OUTPUT_STAGE_KERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -55,29 +56,40 @@ public:
      *                      Data type supported: F16/F32 or QASYMM8/QASYMM8_SIGNED if @p src is S32
      * @param[in]      info (Optional) DirectConvolutionLayerOutputStageKernel descriptor metadata
      */
-    void configure(ITensorInfo *src, const ITensorInfo *bias = nullptr, ITensorInfo *dst = nullptr,
-                   const DirectConvolutionLayerOutputStageKernelInfo &info = DirectConvolutionLayerOutputStageKernelInfo());
+    void
+    configure(ITensorInfo                                       *src,
+              const ITensorInfo                                 *bias = nullptr,
+              ITensorInfo                                       *dst  = nullptr,
+              const DirectConvolutionLayerOutputStageKernelInfo &info = DirectConvolutionLayerOutputStageKernelInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to CpuDirectConv2dOutputStageKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias = nullptr, const ITensorInfo *dst = nullptr,
-                           const DirectConvolutionLayerOutputStageKernelInfo &info = DirectConvolutionLayerOutputStageKernelInfo());
+    static Status
+    validate(const ITensorInfo                                 *src,
+             const ITensorInfo                                 *bias = nullptr,
+             const ITensorInfo                                 *dst  = nullptr,
+             const DirectConvolutionLayerOutputStageKernelInfo &info = DirectConvolutionLayerOutputStageKernelInfo());
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:
-    using OutputStageKernel = void(ITensor *src, const ITensor *bias, const Window &window, ITensor *dst,
-                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift);
+    using OutputStageKernel = void(ITensor       *src,
+                                   const ITensor *bias,
+                                   const Window  &window,
+                                   ITensor       *dst,
+                                   int            result_fixedpoint_multiplier,
+                                   int            result_shift,
+                                   int            result_offset_after_shift);
 
-    OutputStageKernel *_func{ nullptr };
-    int                _result_fixedpoint_multiplier{ 0 };
-    int                _result_shift{ 0 };
-    int                _result_offset_after_shift{ 0 };
+    OutputStageKernel *_func{nullptr};
+    int                _result_fixedpoint_multiplier{0};
+    int                _result_shift{0};
+    int                _result_offset_after_shift{0};
 };
 } // namespace kernels
 } // namespace cpu

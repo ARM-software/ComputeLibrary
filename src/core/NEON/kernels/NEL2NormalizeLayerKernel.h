@@ -74,7 +74,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

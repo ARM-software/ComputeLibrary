@@ -23,6 +23,7 @@
  */
 
 #include "src/TensorUtils.h"
+
 #include "ckw/Error.h"
 #include "ckw/TensorInfo.h"
 #include "ckw/types/TensorComponentType.h"
@@ -31,10 +32,10 @@ namespace ckw
 {
 TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayoutComponent component)
 {
-    switch(layout)
+    switch (layout)
     {
         case TensorDataLayout::Nhwc:
-            switch(component)
+            switch (component)
             {
                 case TensorDataLayoutComponent::C:
                     return TensorComponentType::Dim0;
@@ -49,7 +50,7 @@ TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayo
                     return TensorComponentType::Unknown;
             }
         case TensorDataLayout::Ndhwc:
-            switch(component)
+            switch (component)
             {
                 case TensorDataLayoutComponent::C:
                     return TensorComponentType::Dim0;
@@ -73,10 +74,10 @@ TensorComponentType get_tensor_dimension(TensorDataLayout layout, TensorDataLayo
 
 TensorComponentType get_tensor_stride(TensorDataLayout layout, TensorDataLayoutComponent component)
 {
-    switch(layout)
+    switch (layout)
     {
         case TensorDataLayout::Nhwc:
-            switch(component)
+            switch (component)
             {
                 case TensorDataLayoutComponent::C:
                     return TensorComponentType::Stride0;
@@ -91,7 +92,7 @@ TensorComponentType get_tensor_stride(TensorDataLayout layout, TensorDataLayoutC
                     return TensorComponentType::Unknown;
             }
         case TensorDataLayout::Ndhwc:
-            switch(component)
+            switch (component)
             {
                 case TensorDataLayoutComponent::C:
                     return TensorComponentType::Stride0;

@@ -25,16 +25,19 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "src/common/utils/Log.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/kernels/ClPool2dKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
 namespace opencl
 {
-void ClPool2d::configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, const PoolingLayerInfo &info, ITensorInfo *indices)
+void ClPool2d::configure(const ClCompileContext &compile_context,
+                         ITensorInfo            *src,
+                         ITensorInfo            *dst,
+                         const PoolingLayerInfo &info,
+                         ITensorInfo            *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_LOG_PARAMS(src, dst, info, indices);
@@ -49,7 +52,10 @@ void ClPool2d::configure(const ClCompileContext &compile_context, ITensorInfo *s
     CLScheduler::get().tune_kernel_static(*_kernel);
 }
 
-Status ClPool2d::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info, const ITensorInfo *indices)
+Status ClPool2d::validate(const ITensorInfo      *src,
+                          const ITensorInfo      *dst,
+                          const PoolingLayerInfo &info,
+                          const ITensorInfo      *indices)
 {
     return kernels::ClPool2dKernel::validate(src, dst, info, indices);
 }

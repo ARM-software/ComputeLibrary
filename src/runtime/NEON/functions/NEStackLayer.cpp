@@ -30,6 +30,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/NEON/kernels/NEStackLayerKernel.h"
 
@@ -38,9 +39,7 @@ namespace arm_compute
 NEStackLayer::~NEStackLayer() = default;
 
 NEStackLayer::NEStackLayer() // NOLINT
-    : _input(),
-      _stack_kernels(),
-      _num_inputs(0)
+    : _input(), _stack_kernels(), _num_inputs(0)
 {
 }
 
@@ -54,7 +53,7 @@ void NEStackLayer::configure(const std::vector<ITensor *> &input, int axis, ITen
     // Wrap around negative values
     const unsigned int axis_u = wrap_around(axis, static_cast<int>(input[0]->info()->num_dimensions() + 1));
 
-    for(unsigned int i = 0; i < _num_inputs; i++)
+    for (unsigned int i = 0; i < _num_inputs; i++)
     {
         _stack_kernels[i] = std::make_unique<NEStackLayerKernel>();
         _stack_kernels[i]->configure(input[i], axis_u, i, _num_inputs, output);
@@ -72,7 +71,7 @@ Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 
     const unsigned int num_inputs = input.size();
 
-    for(unsigned int i = 0; i < num_inputs; i++)
+    for (unsigned int i = 0; i < num_inputs; i++)
     {
         // All the tensors must have the same rank
         ARM_COMPUTE_RETURN_ERROR_ON(input[i]->num_dimensions() != rank);
@@ -85,7 +84,7 @@ Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
 
 void NEStackLayer::run()
 {
-    for(unsigned i = 0; i < _num_inputs; i++)
+    for (unsigned i = 0; i < _num_inputs; i++)
     {
         NEScheduler::get().schedule(_stack_kernels[i].get(), Window::DimY);
     }

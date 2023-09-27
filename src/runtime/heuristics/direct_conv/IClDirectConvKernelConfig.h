@@ -27,6 +27,7 @@
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 
 namespace arm_compute
@@ -52,8 +53,7 @@ public:
      * @param[in] func_int8 Function to call for direct convolution Int8 (QASYMM8, QASYMM8_SIGNED, QSYMM8_PER_CHANNEL)
      *
      */
-    ClDirectConvConfigArray(T func_f32, T func_f16, T func_int8)
-        : _configs{ func_f32, func_f16, func_int8 }
+    ClDirectConvConfigArray(T func_f32, T func_f16, T func_int8) : _configs{func_f32, func_f16, func_int8}
     {
     }
 
@@ -65,7 +65,7 @@ public:
      */
     T get_function(DataType data_type)
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F32:
                 return _configs.at(DT_F32);
@@ -92,8 +92,7 @@ public:
      *
      * @param[in] arch GPU target
      */
-    IClDirectConvKernelConfig(GPUTarget arch)
-        : _target(arch)
+    IClDirectConvKernelConfig(GPUTarget arch) : _target(arch)
     {
     }
     ARM_COMPUTE_DISALLOW_COPY_ALLOW_MOVE(IClDirectConvKernelConfig);
@@ -105,11 +104,12 @@ public:
      * @param[in] wei       Weights tensor
      * @param[in] conv_info Convolution info
      */
-    virtual DirectConvComputeKernelInfo configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) = 0;
+    virtual DirectConvComputeKernelInfo
+    configure(const ITensorInfo *src, const ITensorInfo *wei, const PadStrideInfo &conv_info) = 0;
 
 protected:
     GPUTarget _target;
 };
-} // namespace opencl
+} // namespace cl_direct_conv
 } // namespace arm_compute
 #endif /* SRC_RUNTIME_HEURISTICS_DIRECT_CONV_ICLDIRECTCONVKERNELCONFIG */

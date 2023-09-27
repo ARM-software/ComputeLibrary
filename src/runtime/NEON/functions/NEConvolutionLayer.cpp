@@ -27,6 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
+
 #include "src/common/utils/Log.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/operators/CpuConv2d.h"
@@ -43,34 +44,44 @@ struct NEConvolutionLayer::Impl
 {
     MemoryGroup                        memory_group{};
     std::shared_ptr<IMemoryManager>    memory_manager{};
-    std::unique_ptr<cpu::ICpuOperator> op{ nullptr };
+    std::unique_ptr<cpu::ICpuOperator> op{nullptr};
     ITensorPack                        run_pack{};
     ITensorPack                        prep_pack{};
     WorkspaceData<Tensor>              workspace{};
     experimental::MemoryRequirements   aux_mem_req{};
-    std::unique_ptr<IFunction>         func{ nullptr };
+    std::unique_ptr<IFunction>         func{nullptr};
 };
 
-NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _impl(std::make_unique<Impl>())
+NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) : _impl(std::make_unique<Impl>())
 {
     _impl->memory_manager = std::move(memory_manager);
 }
 
 NEConvolutionLayer::~NEConvolutionLayer() = default;
 
-void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+void NEConvolutionLayer::configure(ITensor                   *input,
+                                   const ITensor             *weights,
+                                   const ITensor             *biases,
+                                   ITensor                   *output,
+                                   const PadStrideInfo       &conv_info,
+                                   const WeightsInfo         &weights_info,
+                                   const Size2D              &dilation,
+                                   const ActivationLayerInfo &act_info,
+                                   bool                       enable_fast_math,
+                                   unsigned int               num_groups)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(num_groups);
-    ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
-                                                            enable_fast_math, num_groups));
-    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+    ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(
+        input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info,
+        weights_info, dilation, act_info, enable_fast_math, num_groups));
+    ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
+                           enable_fast_math, num_groups);
 
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
-    switch(cpu::CpuConv2d::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))
+    switch (cpu::CpuConv2d::get_convolution_method(input->info(), weights->info(), output->info(), conv_info,
+                                                   weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         case ConvolutionMethod::GEMM:
@@ -78,7 +89,8 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
         case ConvolutionMethod::DIRECT:
         {
             auto f = std::make_unique<cpu::CpuConv2d>();
-            f->configure(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+            f->configure(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr),
+                         output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
             _impl->op = std::move(f);
             break;
         }
@@ -94,33 +106,46 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
             break;
     }
 
-    if(_impl->op)
+    if (_impl->op)
     {
         _impl->memory_group = MemoryGroup(std::move(_impl->memory_manager));
         _impl->aux_mem_req  = _impl->op->workspace();
-        _impl->run_pack     = { { ACL_SRC_0, input }, { ACL_SRC_1, weights }, { ACL_SRC_2, biases }, { ACL_DST, output } };
-        _impl->prep_pack    = { { ACL_SRC_1, weights }, { ACL_SRC_2, biases } };
-        _impl->workspace    = manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
+        _impl->run_pack     = {{ACL_SRC_0, input}, {ACL_SRC_1, weights}, {ACL_SRC_2, biases}, {ACL_DST, output}};
+        _impl->prep_pack    = {{ACL_SRC_1, weights}, {ACL_SRC_2, biases}};
+        _impl->workspace =
+            manage_workspace<Tensor>(_impl->aux_mem_req, _impl->memory_group, _impl->run_pack, _impl->prep_pack);
     }
 }
 
-Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+Status NEConvolutionLayer::validate(const ITensorInfo         *input,
+                                    const ITensorInfo         *weights,
+                                    const ITensorInfo         *biases,
+                                    const ITensorInfo         *output,
+                                    const PadStrideInfo       &conv_info,
+                                    const WeightsInfo         &weights_info,
+                                    const Size2D              &dilation,
+                                    const ActivationLayerInfo &act_info,
+                                    bool                       enable_fast_math,
+                                    unsigned int               num_groups)
 {
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
 
-    switch(cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))
+    switch (cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
+                                                   enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         case ConvolutionMethod::GEMM:
         case ConvolutionMethod::GEMM_CONV2D:
         case ConvolutionMethod::DIRECT:
-            ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuConv2d::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuConv2d::validate(input, weights, biases, output, conv_info,
+                                                                 weights_info, dilation, act_info, enable_fast_math,
+                                                                 num_groups));
             break;
         case ConvolutionMethod::FFT:
-            ARM_COMPUTE_RETURN_ON_ERROR(NEFFTConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(
+                NEFFTConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
             break;
         default:
             ARM_COMPUTE_ERROR("Not supported.");
@@ -129,12 +154,17 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     return Status{};
 }
 
-ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights,
-                                                             const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                             const WeightsInfo &weights_info, const Size2D &dilation,
-                                                             const ActivationLayerInfo &act_info, bool enable_fast_math)
+ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo         *input,
+                                                             const ITensorInfo         *weights,
+                                                             const ITensorInfo         *output,
+                                                             const PadStrideInfo       &conv_info,
+                                                             const WeightsInfo         &weights_info,
+                                                             const Size2D              &dilation,
+                                                             const ActivationLayerInfo &act_info,
+                                                             bool                       enable_fast_math)
 {
-    return cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math);
+    return cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
+                                                  enable_fast_math);
 }
 
 void NEConvolutionLayer::run()
@@ -143,7 +173,7 @@ void NEConvolutionLayer::run()
 
     MemoryGroupResourceScope scope_mg(_impl->memory_group);
 
-    if(_impl->func)
+    if (_impl->func)
     {
         _impl->func->run();
     }
@@ -155,7 +185,7 @@ void NEConvolutionLayer::run()
 
 void NEConvolutionLayer::prepare()
 {
-    if(_impl->func)
+    if (_impl->func)
     {
         _impl->func->prepare();
     }

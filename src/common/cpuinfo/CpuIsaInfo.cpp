@@ -24,6 +24,7 @@
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "src/common/cpuinfo/CpuModel.h"
 
 /* Arm Feature flags */
@@ -31,18 +32,18 @@
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_NEON (1 << 12)
 
 /* Arm64 Feature flags */
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMD (1 << 1)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP (1 << 9)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP (1 << 10)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDDP (1 << 20)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE (1 << 22)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2 (1 << 1)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEI8MM (1 << 9)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMD     (1 << 1)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP      (1 << 9)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP   (1 << 10)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDDP   (1 << 20)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE       (1 << 22)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2     (1 << 1)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEI8MM  (1 << 9)
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEF32MM (1 << 10)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEBF16 (1 << 12)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM (1 << 13)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16 (1 << 14)
-#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME (1 << 23)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEBF16  (1 << 12)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM     (1 << 13)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16     (1 << 14)
+#define ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME      (1 << 23)
 
 namespace arm_compute
 {
@@ -71,12 +72,12 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
     isa.sve2 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVE2);
 
     // Detection of SME from type HWCAP2 in the auxillary vector
-    isa.sme   = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME);
-    isa.sme2  = isa.sme; // Needs to be set properly
+    isa.sme  = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SME);
+    isa.sme2 = isa.sme; // Needs to be set properly
 
     // Data-type support
-    isa.fp16    = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP | ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP);
-    isa.bf16    = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16);
+    isa.fp16 = is_feature_supported(hwcaps, ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP | ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP);
+    isa.bf16 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_BF16);
     isa.svebf16 = is_feature_supported(hwcaps2, ARM_COMPUTE_CPU_FEATURE_HWCAP2_SVEBF16);
 
     // Instruction extensions
@@ -92,12 +93,15 @@ void decode_hwcaps(CpuIsaInfo &isa, const uint32_t hwcaps, const uint32_t hwcaps
 }
 #endif /* defined(__aarch64__) */
 
-void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, const uint64_t pfr0, const uint64_t pfr1, const uint64_t svefr0)
+void decode_regs(CpuIsaInfo    &isa,
+                 const uint64_t isar0,
+                 const uint64_t isar1,
+                 const uint64_t pfr0,
+                 const uint64_t pfr1,
+                 const uint64_t svefr0)
 {
     auto is_supported = [](uint64_t feature_reg, uint8_t feature_pos) -> bool
-    {
-        return ((feature_reg >> feature_pos) & 0xf);
-    };
+    { return ((feature_reg >> feature_pos) & 0xf); };
 
     // High-level SIMD support
     isa.sve  = is_supported(pfr0, 32);
@@ -124,11 +128,11 @@ void decode_regs(CpuIsaInfo &isa, const uint64_t isar0, const uint64_t isar1, co
  */
 void allowlisted_model_features(CpuIsaInfo &isa, CpuModel model)
 {
-    if(isa.dot == false)
+    if (isa.dot == false)
     {
         isa.dot = model_supports_dot(model);
     }
-    if(isa.fp16 == false)
+    if (isa.fp16 == false)
     {
         isa.fp16 = model_supports_fp16(model);
     }
@@ -147,7 +151,8 @@ CpuIsaInfo init_cpu_isa_from_hwcaps(uint32_t hwcaps, uint32_t hwcaps2, uint32_t 
     return isa;
 }
 
-CpuIsaInfo init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr)
+CpuIsaInfo
+init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr)
 {
     CpuIsaInfo isa;
 

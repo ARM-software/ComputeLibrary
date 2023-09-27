@@ -87,7 +87,11 @@ public:
      * @param[in]  axis            (Optional) The dimension in which to apply the function. E.g. for input of shape 4x5x6 and
      *                       axis=1, softmax will be applied to 4x6=24 vectors of size 5. Defaults to 0
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, int32_t axis = 0);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   float                   beta = 1.0f,
+                   int32_t                 axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32 for Softmax and F16/F32 for Log Softmax

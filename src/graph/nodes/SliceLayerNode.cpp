@@ -32,8 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-SliceLayerNode::SliceLayerNode(const Coordinates &starts, const Coordinates &ends)
-    : _starts(starts), _ends(ends)
+SliceLayerNode::SliceLayerNode(const Coordinates &starts, const Coordinates &ends) : _starts(starts), _ends(ends)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -50,19 +49,20 @@ Coordinates SliceLayerNode::ends() const
 }
 
 TensorDescriptor SliceLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                           const Coordinates &starts, const Coordinates &ends)
+                                                           const Coordinates      &starts,
+                                                           const Coordinates      &ends)
 {
     using namespace arm_compute::helpers::tensor_transform;
 
     TensorDescriptor output_desc = input_descriptor;
-    output_desc.shape            = arm_compute::misc::shape_calculator::compute_slice_shape(input_descriptor.shape, starts, ends);
+    output_desc.shape = arm_compute::misc::shape_calculator::compute_slice_shape(input_descriptor.shape, starts, ends);
 
     return output_desc;
 }
 
 bool SliceLayerNode::forward_descriptors()
 {
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    if ((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
         Tensor *dst = output(0);
         ARM_COMPUTE_ERROR_ON(dst == nullptr);

@@ -29,11 +29,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "src/common/utils/Log.h"
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
-
-#include "src/common/utils/Log.h"
 
 namespace arm_compute
 {
@@ -57,7 +57,8 @@ void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis
     configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, epsilon);
 }
 
-void CLL2NormalizeLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon)
+void CLL2NormalizeLayer::configure(
+    const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_LOG_PARAMS(input, output, axis, epsilon);
 
@@ -86,7 +87,8 @@ Status CLL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
     sum_sq.set_tensor_shape(shape);
 
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperation::validate(input, &sum_sq, actual_axis, ReductionOperation::SUM_SQUARE));
+    ARM_COMPUTE_RETURN_ON_ERROR(
+        CLReductionOperation::validate(input, &sum_sq, actual_axis, ReductionOperation::SUM_SQUARE));
 
     // Reduce shape on axis
     shape.set(actual_axis, 1);

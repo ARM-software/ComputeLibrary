@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 #include "arm_compute/core/Helpers.h"
+
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/elementwise_unary/generic/sve/impl.h"
 
@@ -30,11 +31,12 @@ namespace arm_compute
 {
 namespace cpu
 {
-void sve_fp16_elementwise_unary(const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
+void sve_fp16_elementwise_unary(
+    const ITensor *in, ITensor *out, const Window &window, ElementWiseUnary op, const uint8_t *lut)
 {
     ARM_COMPUTE_UNUSED(lut);
     return elementwise_sve_op<float16_t>(in, out, window, op);
 }
-}
+} // namespace cpu
 } // namespace arm_compute
 #endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

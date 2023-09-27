@@ -31,14 +31,15 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #include "examples/gemm_tuner/CommonGemmExampleOptions.h"
 #include "examples/gemm_tuner/GemmTunerHelpers.h"
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "tests/CL/Helper.h"
-#include "utils/Utils.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
+#include "utils/Utils.h"
 
 #include <cstdlib>
 
@@ -53,16 +54,16 @@ namespace
 /** Structure holding all tunable gemm configs specific to this example/strategy */
 struct GemmConfigs
 {
-    size_t m0{ 4 };                        /**< Number of rows processed by the matrix multiplication */
-    size_t n0{ 4 };                        /**< Number of columns processed by the matrix multiplication */
-    size_t k0{ 4 };                        /**< Number of partial accumulations performed by the matrix multiplication */
-    size_t v0{ 1 };                        /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
-    size_t h0{ 1 };                        /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool   interleave_lhs{ true };         /**< Interleave lhs matrix */
-    bool   transpose_lhs{ true };          /**< Transpose lhs matrix. */
-    bool   interleave_rhs{ true };         /**< Interleave rhs matrix */
-    bool   transpose_rhs{ true };          /**< Transpose rhs matrix. */
-    bool   export_to_cl_image_rhs{ true }; /**< Export rhs matrix to cl_image. */
+    size_t m0{4};                /**< Number of rows processed by the matrix multiplication */
+    size_t n0{4};                /**< Number of columns processed by the matrix multiplication */
+    size_t k0{4};                /**< Number of partial accumulations performed by the matrix multiplication */
+    size_t v0{1};                /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
+    size_t h0{1};                /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool   interleave_lhs{true}; /**< Interleave lhs matrix */
+    bool   transpose_lhs{true};  /**< Transpose lhs matrix. */
+    bool   interleave_rhs{true}; /**< Interleave rhs matrix */
+    bool   transpose_rhs{true};  /**< Transpose rhs matrix. */
+    bool   export_to_cl_image_rhs{true}; /**< Export rhs matrix to cl_image. */
 };
 
 /** Formatted output of the GemmConfigs type
@@ -119,8 +120,10 @@ public:
         // FIXME: Currently we only support 2 variants of the gemm reshaped kernels in which transpose_lhs and
         // transpose_rhs are the opposites of each other. In the future we may extend the kernels to include the other
         // 2 variants (both transposed and none transposed)
-        transpose_rhs->set_help("Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)");
-        export_to_cl_image_rhs->set_help("Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)");
+        transpose_rhs->set_help("Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do "
+                                "transpose lhs matrix (0)");
+        export_to_cl_image_rhs->set_help(
+            "Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)");
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GemmConfigOptions(const GemmConfigOptions &) = delete;
@@ -133,17 +136,18 @@ public:
     /** Default destructor */
     ~GemmConfigOptions() = default;
 
-    SimpleOption<size_t> *m0;             /**< Number of rows processed by the matrix multiplication option */
-    SimpleOption<size_t> *n0;             /**< Number of columns processed by the matrix multiplication option */
-    SimpleOption<size_t> *k0;             /**< Number of partial accumulations performed by the matrix multiplication option */
-    SimpleOption<size_t> *v0;             /**< Number of vertical blocks of size (m0xk0) stored on the same output row option */
-    SimpleOption<size_t> *h0;             /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
+    SimpleOption<size_t> *m0; /**< Number of rows processed by the matrix multiplication option */
+    SimpleOption<size_t> *n0; /**< Number of columns processed by the matrix multiplication option */
+    SimpleOption<size_t> *k0; /**< Number of partial accumulations performed by the matrix multiplication option */
+    SimpleOption<size_t> *v0; /**< Number of vertical blocks of size (m0xk0) stored on the same output row option */
+    SimpleOption<size_t> *h0; /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
     SimpleOption<size_t> *interleave_lhs; /**< Interleave lhs matrix option (1 enable; 0 disable) */
     SimpleOption<size_t> *interleave_rhs; /**< Interleave rhs matrix option (1 enable; 0 disable) */
     // FIXME: Currently we only support 2 variants of the gemm reshaped kernels in which transpose_lhs and
     // transpose_rhs are the opposites of each other. In the future we may extend the kernels to include the other
     // 2 variants (both transposed and none transposed)
-    SimpleOption<size_t> *transpose_rhs;          /**< Transpose rhs matrix option (1 enable; 0 disable). Also set the lhs matrix transpose option to the opposite. */
+    SimpleOption<size_t>                   *
+        transpose_rhs; /**< Transpose rhs matrix option (1 enable; 0 disable). Also set the lhs matrix transpose option to the opposite. */
     SimpleOption<size_t> *export_to_cl_image_rhs; /**< Export rhs matrix to cl_image.*/
 };
 
@@ -198,13 +202,13 @@ public:
 
         // Parse command line options
         parser.parse(argc, argv);
-        if(param_options.help->is_set() && param_options.help->value())
+        if (param_options.help->is_set() && param_options.help->value())
         {
             // Print help message
             parser.print_help(argv[0]);
             return false;
         }
-        if(!parser.validate())
+        if (!parser.validate())
         {
             // Invalid arguments. Use default parameters and configs
             std::cerr << "Invalid arguments." << std::endl;
@@ -256,20 +260,22 @@ public:
         kernel_info.broadcast_bias          = true;
         kernel_info.activation_info         = act_info;
 
-        if(rhs_info.h0 == 0)
+        if (rhs_info.h0 == 0)
         {
             rhs_info.h0 = std::max(kernel_info.n / rhs_info.n0, 1U);
         }
 
         // Initialise lhs_reshaped tensor info
-        lhs_reshaped.allocator()->init(TensorInfo(compute_lhs_reshaped_shape(*lhs.info(), lhs_info), 1, params.data_type));
+        lhs_reshaped.allocator()->init(
+            TensorInfo(compute_lhs_reshaped_shape(*lhs.info(), lhs_info), 1, params.data_type));
 
         // Initialise rhs_reshaped tensor info
-        rhs_reshaped.allocator()->init(TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
+        rhs_reshaped.allocator()->init(
+            TensorInfo(compute_rhs_reshaped_shape(*rhs.info(), rhs_info), 1, params.data_type));
 
-        if(rhs_info.export_to_cl_image)
+        if (rhs_info.export_to_cl_image)
         {
-            if(!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
+            if (!examples::gemm_tuner_helpers::update_padding_for_cl_image(rhs_reshaped.info()))
             {
                 std::cerr << "cl_image is not supported on the device, disable export_to_cl_image" << std::endl;
                 return false;
@@ -279,7 +285,7 @@ public:
         // Validate argments
         Status status{};
         status = reshape_lhs.validate(lhs.info(), lhs_reshaped.info(), lhs_info, kernel_info.reinterpret_input_as_3d);
-        if(!status)
+        if (!status)
         {
             // Unsupported arguments
             std::cerr << "Unsupported arguments." << std::endl;
@@ -287,8 +293,9 @@ public:
             return false;
         }
 
-        status = gemm.validate(lhs_reshaped.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
-        if(!status)
+        status = gemm.validate(lhs_reshaped.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info,
+                               rhs_info, kernel_info);
+        if (!status)
         {
             // Unsupported arguments
             std::cerr << "Unsupported arguments." << std::endl;
@@ -300,7 +307,8 @@ public:
         reshape_lhs.configure(lhs.info(), lhs_reshaped.info(), lhs_info);
 
         // Configure function
-        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info, rhs_info, kernel_info);
+        gemm.configure(lhs_reshaped.info(), rhs_reshaped.info(), bias.info(), dst.info(), alpha, beta, lhs_info,
+                       rhs_info, kernel_info);
 
         // Allocate tensors
         lhs.allocator()->allocate();
@@ -315,14 +323,11 @@ public:
     void do_run() override
     {
         // Execute the functions
-        ITensorPack reshape_lsh_pack({ { ACL_SRC, &lhs }, { ACL_DST, &lhs_reshaped } });
+        ITensorPack reshape_lsh_pack({{ACL_SRC, &lhs}, {ACL_DST, &lhs_reshaped}});
         reshape_lhs.run(reshape_lsh_pack);
 
-        ITensorPack gemm_pack({ { ACL_SRC_0, &lhs_reshaped },
-            { ACL_SRC_1, &rhs_reshaped },
-            { ACL_SRC_2, &bias },
-            { ACL_DST, &dst }
-        });
+        ITensorPack gemm_pack(
+            {{ACL_SRC_0, &lhs_reshaped}, {ACL_SRC_1, &rhs_reshaped}, {ACL_SRC_2, &bias}, {ACL_DST, &dst}});
         gemm.run(gemm_pack);
 
         // Make sure all the OpenCL jobs are done executing:

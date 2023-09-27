@@ -62,14 +62,21 @@ public:
      * @param[out] dst             Destination tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  output_stage    GEMMLowp output stage metadata.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, const ITensorInfo *bias, ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage);
+    void configure(const CLCompileContext        &compile_context,
+                   const ITensorInfo             *src,
+                   const ITensorInfo             *bias,
+                   ITensorInfo                   *dst,
+                   const GEMMLowpOutputStageInfo *output_stage);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClGemmLowpQuantizeDownInt32ScaleKernel::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *bias, const ITensorInfo *dst, const GEMMLowpOutputStageInfo *output_stage);
+    static Status validate(const ITensorInfo             *src,
+                           const ITensorInfo             *bias,
+                           const ITensorInfo             *dst,
+                           const GEMMLowpOutputStageInfo *output_stage);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, cl::CommandQueue &queue) override;

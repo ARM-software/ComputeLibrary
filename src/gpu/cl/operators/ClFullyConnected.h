@@ -47,7 +47,7 @@ namespace kernels
 {
 class ClMatMulNativeKernel;
 class ClMatMulLowpNativeKernel;
-}
+} // namespace kernels
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref opencl::kernels::ClIm2ColKernel (called when the input comes from a convolutional layer)
@@ -88,7 +88,11 @@ public:
      *                             Data type supported: Same as @p src.
      * @param[in]  fc_info         (Optional) Fully connected layer additional info
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *biases, ITensorInfo *dst,
+    void configure(const CLCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *weights,
+                   ITensorInfo            *biases,
+                   ITensorInfo            *dst,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration
      *
@@ -96,18 +100,36 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *dst,
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *weights,
+                           const ITensorInfo      *biases,
+                           const ITensorInfo      *dst,
                            FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
     // Inherited methods overriden
-    void run(ITensorPack &tensors) override;
-    void prepare(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
+    void                             prepare(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
-    void configure_fc_fc(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
-    void configure_conv_fc(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
-    void configure_mm(const CLCompileContext &compile_context, ITensorInfo *src, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *dst, const FullyConnectedLayerInfo &fc_info);
+    void configure_fc_fc(const CLCompileContext        &compile_context,
+                         ITensorInfo                   *src,
+                         ITensorInfo                   *weights,
+                         ITensorInfo                   *bias,
+                         ITensorInfo                   *dst,
+                         const FullyConnectedLayerInfo &fc_info);
+    void configure_conv_fc(const CLCompileContext        &compile_context,
+                           ITensorInfo                   *src,
+                           ITensorInfo                   *weights,
+                           ITensorInfo                   *bias,
+                           ITensorInfo                   *dst,
+                           const FullyConnectedLayerInfo &fc_info);
+    void configure_mm(const CLCompileContext        &compile_context,
+                      ITensorInfo                   *src,
+                      ITensorInfo                   *weights,
+                      ITensorInfo                   *bias,
+                      ITensorInfo                   *dst,
+                      const FullyConnectedLayerInfo &fc_info);
 
 private:
     enum AuxTensorIdx
@@ -134,19 +156,19 @@ private:
     TensorInfo _reshaped_weights{};
     TensorInfo _lhs_to_use{};
     TensorInfo _weights_to_use{};
-    int        _weights_to_use_idx{ ACL_SRC_1 };
+    int        _weights_to_use_idx{ACL_SRC_1};
 
-    bool _run_convert_weights{ false };
-    bool _transpose_weights{ false };
-    bool _dynamic_gemm{ false };
-    bool _use_matmul{ false };
+    bool _run_convert_weights{false};
+    bool _transpose_weights{false};
+    bool _dynamic_gemm{false};
+    bool _use_matmul{false};
 
-    bool _is_fc_after_conv{ true };
-    bool _is_quantized{ false };
-    bool _is_prepared{ false };
+    bool _is_fc_after_conv{true};
+    bool _is_quantized{false};
+    bool _is_prepared{false};
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-    int _asrt_run_count {};
+    int _asrt_run_count{};
     int _asrt_prepare_count{};
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
 };

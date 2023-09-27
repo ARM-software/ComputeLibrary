@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_ACTIVATION_KERNEL_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
+
 #include "src/core/common/Macros.h"
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClKernel.h"
@@ -51,7 +52,10 @@ public:
      * @param[out]     dst             Destination tensor info. Data type supported: same as @p src
      * @param[in]      act_info        Activation layer information.
      */
-    void configure(const ClCompileContext &compile_context, ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo act_info);
+    void configure(const ClCompileContext &compile_context,
+                   ITensorInfo            *src,
+                   ITensorInfo            *dst,
+                   ActivationLayerInfo     act_info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClActivationKernel::configure()
@@ -64,7 +68,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    bool _run_in_place{ false };
+    bool _run_in_place{false};
 };
 } // namespace kernels
 } // namespace opencl

@@ -30,6 +30,7 @@
 #include "arm_compute/core/Steps.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/NEON/kernels/assembly/winograd.hpp"
 #include "src/core/NEON/kernels/convolution/common/tensor.hpp"
 #include "src/cpu/ICpuKernel.h"
@@ -53,7 +54,9 @@ public:
     /**  Prevent instances of this class from being moved it contains references.*/
     CpuWinogradConv2dTransformInputKernel &operator=(CpuWinogradConv2dTransformInputKernel &&) = delete;
 
-    CpuWinogradConv2dTransformInputKernel(arm_conv::winograd::WinogradImpl &w_impl, arm_conv::ConvolutionArgs &_c_args, uint32_t nthreads);
+    CpuWinogradConv2dTransformInputKernel(arm_conv::winograd::WinogradImpl &w_impl,
+                                          arm_conv::ConvolutionArgs        &_c_args,
+                                          uint32_t                          nthreads);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -83,7 +86,9 @@ public:
     /**  Prevent instances of this class from being moved it contains references.*/
     CpuWinogradConv2dTransformOutputKernel &operator=(CpuWinogradConv2dTransformOutputKernel &&) = delete;
 
-    CpuWinogradConv2dTransformOutputKernel(arm_conv::winograd::WinogradImpl &w_impl, arm_conv::ConvolutionArgs &_c_args, uint32_t nthreads);
+    CpuWinogradConv2dTransformOutputKernel(arm_conv::winograd::WinogradImpl &w_impl,
+                                           arm_conv::ConvolutionArgs        &_c_args,
+                                           uint32_t                          nthreads);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -95,7 +100,7 @@ public:
 
 private:
     arm_conv::winograd::WinogradImpl &_winograd_impl;
-    const arm_conv::ConvolutionArgs &_conv_args;
+    const arm_conv::ConvolutionArgs  &_conv_args;
     uint32_t                          _nthreads;
 };
 

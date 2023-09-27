@@ -62,8 +62,8 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    int32_t _depth{ 0 };
-    int32_t _input1_width{ 0 };
+    int32_t _depth{0};
+    int32_t _input1_width{0};
 };
 } // namespace kernels
 } // namespace opencl

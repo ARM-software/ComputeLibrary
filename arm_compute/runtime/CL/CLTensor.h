@@ -87,17 +87,17 @@ public:
     TensorInfo       *info() override;
     const cl::Buffer &cl_buffer() const override;
     CLQuantization    quantization() const override;
-    void associate_memory_group(IMemoryGroup *memory_group) override;
+    void              associate_memory_group(IMemoryGroup *memory_group) override;
     CLRuntimeContext *context();
 
 protected:
     // Inherited methods overridden:
     uint8_t *do_map(cl::CommandQueue &q, bool blocking) override;
-    void do_unmap(cl::CommandQueue &q) override;
+    void     do_unmap(cl::CommandQueue &q) override;
 
 private:
     mutable CLTensorAllocator _allocator; /**< Instance of the OpenCL tensor allocator */
-    CLRuntimeContext         *_ctx{ nullptr };
+    CLRuntimeContext         *_ctx{nullptr};
 };
 
 /** OpenCL Image */

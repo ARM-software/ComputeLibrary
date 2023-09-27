@@ -27,9 +27,9 @@
 
 #include "src/cl/helpers/ICLMemoryOpHelper.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace ckw
 {
@@ -65,20 +65,25 @@ private:
     struct LeftoverDescriptor
     {
         LeftoverDescriptor(const std::string &dst, const std::string &coord, const std::string &statement)
-        : dst(dst), coord(coord), statement(statement)
+            : dst(dst), coord(coord), statement(statement)
         {
         }
 
-        std::string dst{};        // Describes the destination tile or part of it
-        std::string coord{};      // Describes the coordinate to be used in boundary checks
-        std::string statement{};  // Describes the memory operation statement
+        std::string dst{};       // Describes the destination tile or part of it
+        std::string coord{};     // Describes the coordinate to be used in boundary checks
+        std::string statement{}; // Describes the memory operation statement
     };
 
     std::vector<int32_t>            _ls_width_part{};
     std::vector<LeftoverDescriptor> _leftovers_x{};
     std::string                     _coord_orig_z{};
 
-    static bool validate(const CLKernelWriter *writer, const ITensor *tensor, const TensorSampler *sampler, const Tensor3dMapper *mapper, MemoryOperation op, const CLTile *dst);
+    static bool validate(const CLKernelWriter *writer,
+                         const ITensor        *tensor,
+                         const TensorSampler  *sampler,
+                         const Tensor3dMapper *mapper,
+                         MemoryOperation       op,
+                         const CLTile         *dst);
 
     void out_of_bound_initialize_x(const std::string &coord);
     void out_of_bound_finalize_x();
@@ -87,8 +92,10 @@ private:
     void out_of_bound_initialize_z(const std::string &coord);
     void out_of_bound_finalize_z();
 
-    std::string to_statement(MemoryOperation op, int32_t vector_width, const std::string &data, const std::string &address) const;
-    std::string to_buffer_address(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const;
+    std::string
+    to_statement(MemoryOperation op, int32_t vector_width, const std::string &data, const std::string &address) const;
+    std::string
+    to_buffer_address(const std::string &x, const std::string &y, const std::string &z, const std::string &b) const;
 };
 } // namespace ckw
 

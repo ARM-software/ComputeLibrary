@@ -31,9 +31,9 @@ bool has_holes(const ITensorInfo &info, size_t dimension)
     const auto &strides        = info.strides_in_bytes();
     size_t      squashed_bytes = info.element_size();
 
-    for(size_t dim = 0; dim <= dimension; ++dim)
+    for (size_t dim = 0; dim <= dimension; ++dim)
     {
-        if(strides[dim] != squashed_bytes)
+        if (strides[dim] != squashed_bytes)
         {
             return true;
         }

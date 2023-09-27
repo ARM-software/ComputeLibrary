@@ -23,17 +23,20 @@
  */
 #include "src/cpu/operators/CpuSub.h"
 
-#include "src/cpu/kernels/CpuSubKernel.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "src/common/utils/Log.h"
-
-#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "src/cpu/kernels/CpuSubKernel.h"
 
 namespace arm_compute
 {
 namespace cpu
 {
-void CpuSub::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+void CpuSub::configure(const ITensorInfo         *src0,
+                       const ITensorInfo         *src1,
+                       ITensorInfo               *dst,
+                       ConvertPolicy              policy,
+                       const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_LOG_PARAMS(src0, src1, dst, policy);
@@ -42,7 +45,11 @@ void CpuSub::configure(const ITensorInfo *src0, const ITensorInfo *src1, ITensor
     _kernel = std::move(k);
 }
 
-Status CpuSub::validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+Status CpuSub::validate(const ITensorInfo         *src0,
+                        const ITensorInfo         *src1,
+                        const ITensorInfo         *dst,
+                        ConvertPolicy              policy,
+                        const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return kernels::CpuSubKernel::validate(src0, src1, dst, policy);

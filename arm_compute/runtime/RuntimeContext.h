@@ -54,8 +54,8 @@ public:
     IAssetManager *asset_manager() override;
 
 private:
-    std::unique_ptr<IScheduler> _owned_scheduler{ nullptr };
-    IScheduler                 *_scheduler{ nullptr };
+    std::unique_ptr<IScheduler> _owned_scheduler{nullptr};
+    IScheduler                 *_scheduler{nullptr};
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_RUNTIME_CONTEXT_H */

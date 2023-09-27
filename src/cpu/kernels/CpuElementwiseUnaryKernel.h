@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_ELEMENTWISE_UNARY_KERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -42,8 +43,10 @@ namespace kernels
 class CpuElementwiseUnaryKernel : public ICpuKernel<CpuElementwiseUnaryKernel>
 {
 private:
-    using ElementwiseUnaryUkernelPtr = std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary, const uint8_t *)>::type;
-    using ElementwiseUnaryPreparePtr = std::add_pointer<std::unique_ptr<uint8_t[]>(ElementWiseUnary op, const ITensorInfo *, const ITensorInfo *)>::type;
+    using ElementwiseUnaryUkernelPtr =
+        std::add_pointer<void(const ITensor *, ITensor *, const Window &, ElementWiseUnary, const uint8_t *)>::type;
+    using ElementwiseUnaryPreparePtr = std::add_pointer<std::unique_ptr<uint8_t[]>(
+        ElementWiseUnary op, const ITensorInfo *, const ITensorInfo *)>::type;
 
 public:
     CpuElementwiseUnaryKernel() = default;
@@ -65,7 +68,7 @@ public:
     static Status validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     struct ElementwiseUnaryKernel
@@ -80,7 +83,7 @@ public:
 
 private:
     ElementWiseUnary           _op{};
-    ElementwiseUnaryUkernelPtr _run_method{ nullptr };
+    ElementwiseUnaryUkernelPtr _run_method{nullptr};
     std::string                _name{};
     std::unique_ptr<uint8_t[]> _lut{};
 };

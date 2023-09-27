@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NELSTMLAYERQUANTIZED_H
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
@@ -37,8 +38,6 @@
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NESlice.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
-
-#include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
 {
@@ -104,11 +103,22 @@ public:
      * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
      */
     void configure(const ITensor *input,
-                   const ITensor *input_to_input_weights, const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
-                   const ITensor *recurrent_to_input_weights, const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
-                   const ITensor *input_gate_bias, const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                   ITensor *cell_state_in, const ITensor *output_state_in,
-                   ITensor *cell_state_out, ITensor *output_state_out);
+                   const ITensor *input_to_input_weights,
+                   const ITensor *input_to_forget_weights,
+                   const ITensor *input_to_cell_weights,
+                   const ITensor *input_to_output_weights,
+                   const ITensor *recurrent_to_input_weights,
+                   const ITensor *recurrent_to_forget_weights,
+                   const ITensor *recurrent_to_cell_weights,
+                   const ITensor *recurrent_to_output_weights,
+                   const ITensor *input_gate_bias,
+                   const ITensor *forget_gate_bias,
+                   const ITensor *cell_bias,
+                   const ITensor *output_gate_bias,
+                   ITensor       *cell_state_in,
+                   const ITensor *output_state_in,
+                   ITensor       *cell_state_out,
+                   ITensor       *output_state_out);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NELSTMLayer
      *
@@ -133,11 +143,22 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input,
-                           const ITensorInfo *input_to_input_weights, const ITensorInfo *input_to_forget_weights, const ITensorInfo *input_to_cell_weights, const ITensorInfo *input_to_output_weights,
-                           const ITensorInfo *recurrent_to_input_weights, const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
-                           const ITensorInfo *input_gate_bias, const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
-                           const ITensorInfo *cell_state_in, const ITensorInfo *output_state_in,
-                           const ITensorInfo *cell_state_out, const ITensorInfo *output_state_out);
+                           const ITensorInfo *input_to_input_weights,
+                           const ITensorInfo *input_to_forget_weights,
+                           const ITensorInfo *input_to_cell_weights,
+                           const ITensorInfo *input_to_output_weights,
+                           const ITensorInfo *recurrent_to_input_weights,
+                           const ITensorInfo *recurrent_to_forget_weights,
+                           const ITensorInfo *recurrent_to_cell_weights,
+                           const ITensorInfo *recurrent_to_output_weights,
+                           const ITensorInfo *input_gate_bias,
+                           const ITensorInfo *forget_gate_bias,
+                           const ITensorInfo *cell_bias,
+                           const ITensorInfo *output_gate_bias,
+                           const ITensorInfo *cell_state_in,
+                           const ITensorInfo *output_state_in,
+                           const ITensorInfo *cell_state_out,
+                           const ITensorInfo *output_state_out);
 
     // Inherited methods overridden:
     void run() override;

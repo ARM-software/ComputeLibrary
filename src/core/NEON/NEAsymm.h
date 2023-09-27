@@ -26,6 +26,7 @@
 
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -90,7 +91,7 @@ inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
         in_s32.val[0] = vmulq_n_s32(in_s32.val[0], (1 << (-result_shift)));
         in_s32.val[1] = vmulq_n_s32(in_s32.val[1], (1 << (-result_shift)));
@@ -130,18 +131,13 @@ inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
     in_s32.val[3] = vmaxq_s32(in_s32.val[3], zero_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to U8
     uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_s16.val[0]), vqmovun_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_u8 = vmaxq_u8(out_u8, min_u8);
         out_u8 = vminq_u8(out_u8, max_u8);
@@ -170,7 +166,7 @@ inline int8x16_t finalize_quantization(int32x4x4_t &in_s32,
                                        int8x16_t    max_s8,
                                        bool         is_bounded_relu)
 {
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
         in_s32.val[0] = vmulq_n_s32(in_s32.val[0], (1 << (-result_shift)));
         in_s32.val[1] = vmulq_n_s32(in_s32.val[1], (1 << (-result_shift)));
@@ -204,18 +200,13 @@ inline int8x16_t finalize_quantization(int32x4x4_t &in_s32,
     in_s32.val[3] = vaddq_s32(in_s32.val[3], result_offset_after_shift_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to S8
     int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s8 = vmaxq_s8(out_s8, min_s8);
         out_s8 = vminq_s8(out_s8, max_s8);
@@ -247,8 +238,7 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
     const static int32x4_t one_s32 = vdupq_n_s32(1);
 
     // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-    int32x4x4_t res_shift_gt0 =
-    {
+    int32x4x4_t res_shift_gt0 = {
         vqrdmulhq_s32(in_s32.val[0], result_fixedpoint_multiplier.val[0]),
         vqrdmulhq_s32(in_s32.val[1], result_fixedpoint_multiplier.val[1]),
         vqrdmulhq_s32(in_s32.val[2], result_fixedpoint_multiplier.val[2]),
@@ -260,8 +250,7 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
     res_shift_gt0.val[2] = rounding_divide_by_pow2(res_shift_gt0.val[2], result_shift.val[2]);
     res_shift_gt0.val[3] = rounding_divide_by_pow2(res_shift_gt0.val[3], result_shift.val[3]);
 
-    int32x4x4_t res_shift_lt0 =
-    {
+    int32x4x4_t res_shift_lt0 = {
         vmulq_s32(in_s32.val[0], vshlq_s32(one_s32, vnegq_s32(result_shift.val[0]))),
         vmulq_s32(in_s32.val[1], vshlq_s32(one_s32, vnegq_s32(result_shift.val[1]))),
         vmulq_s32(in_s32.val[2], vshlq_s32(one_s32, vnegq_s32(result_shift.val[2]))),
@@ -273,8 +262,7 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
     res_shift_lt0.val[3] = vqrdmulhq_s32(res_shift_lt0.val[3], result_fixedpoint_multiplier.val[3]);
 
     // Select result depending on shift value
-    const uint32x4x4_t mask_lt0 =
-    {
+    const uint32x4x4_t mask_lt0 = {
 #ifdef __aarch64__
         vcltzq_s32(result_shift.val[0]),
         vcltzq_s32(result_shift.val[1]),
@@ -300,18 +288,13 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
     in_s32.val[3] = vaddq_s32(in_s32.val[3], result_offset_after_shift_s32);
 
     // Convert S32 to S16
-    const int16x8x2_t in_s16 =
-    {
-        {
-            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
-            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
-        }
-    };
+    const int16x8x2_t in_s16 = {{vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+                                 vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))}};
 
     // Convert S16 to S8
     int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s8 = vmaxq_s8(out_s8, min_s8);
         out_s8 = vminq_s8(out_s8, max_s8);
@@ -332,15 +315,20 @@ inline int8x16_t finalize_quantization_symm(int32x4x4_t       &in_s32,
  *
  * @return Quantized value
  */
-inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
-                                     int32_t result_shift, int32_t result_offset_after_shift_s32,
-                                     uint8_t min_u8, uint8_t max_u8, bool is_bounded_relu)
+inline uint8_t finalize_quantization(int32_t in_value,
+                                     int     result_fixedpoint_multiplier,
+                                     int32_t result_shift,
+                                     int32_t result_offset_after_shift_s32,
+                                     uint8_t min_u8,
+                                     uint8_t max_u8,
+                                     bool    is_bounded_relu)
 {
     int32x4_t in_s32 = vdupq_n_s32(in_value);
 
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
-        in_value = vgetq_lane_s32(vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
+        in_value = vgetq_lane_s32(
+            vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
     }
     else
     {
@@ -355,7 +343,7 @@ inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mul
 
     // Bound the result
     uint8_t out_u8 = static_cast<uint8_t>(std::max<int32_t>(0, std::min<int32_t>(255, in_value)));
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_u8 = static_cast<uint8_t>(std::max(min_u8, std::min(max_u8, out_u8)));
     }
@@ -375,15 +363,20 @@ inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mul
  *
  * @return Quantized value
  */
-inline int8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
-                                    int32_t result_shift, int32_t result_offset_after_shift_s32,
-                                    int8_t min_s8, int8_t max_s8, bool is_bounded_relu)
+inline int8_t finalize_quantization(int32_t in_value,
+                                    int     result_fixedpoint_multiplier,
+                                    int32_t result_shift,
+                                    int32_t result_offset_after_shift_s32,
+                                    int8_t  min_s8,
+                                    int8_t  max_s8,
+                                    bool    is_bounded_relu)
 {
     int32x4_t in_s32 = vdupq_n_s32(in_value);
 
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
-        in_value = vgetq_lane_s32(vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
+        in_value = vgetq_lane_s32(
+            vqrdmulhq_n_s32(vmulq_n_s32(in_s32, (1 << (-result_shift))), result_fixedpoint_multiplier), 0);
     }
     else
     {
@@ -399,7 +392,7 @@ inline int8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mult
 
     // Bound the result
     int8_t out_s8 = static_cast<int8_t>(std::max<int32_t>(-128, std::min<int32_t>(127, in_value)));
-    if(is_bounded_relu)
+    if (is_bounded_relu)
     {
         out_s8 = static_cast<int8_t>(std::max(min_s8, std::min(max_s8, out_s8)));
     }
@@ -416,17 +409,16 @@ inline int8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mult
  */
 inline float32x4x2_t vdequantize(const uint8x8_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale   = qi.scale;
-    const int           offset  = qi.offset;
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x2_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(qv)))), voffset)), vscale),
-        }
-    };
+    const float         scale              = qi.scale;
+    const int           offset             = qi.offset;
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(qv)))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(qv)))), voffset)),
+                  vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -439,17 +431,14 @@ inline float32x4x2_t vdequantize(const uint8x8_t &qv, const UniformQuantizationI
  */
 inline float32x4x2_t vdequantize(const int8x8_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale   = qi.scale;
-    const int           offset  = qi.offset;
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x2_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(qv))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(qv))), voffset)), vscale),
-        }
-    };
+    const float         scale              = qi.scale;
+    const int           offset             = qi.offset;
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(qv))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(qv))), voffset)), vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -462,19 +451,24 @@ inline float32x4x2_t vdequantize(const int8x8_t &qv, const UniformQuantizationIn
  */
 inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale   = qi.scale;
-    const int           offset  = qi.offset;
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
-        }
-    };
+    const float         scale              = qi.scale;
+    const int           offset             = qi.offset;
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)),
+                  vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -487,19 +481,16 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, const UniformQuantizationInfo &qi)
 {
-    const float         scale   = qi.scale;
-    const int           offset  = qi.offset;
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-        }
-    };
+    const float         scale              = qi.scale;
+    const int           offset             = qi.offset;
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -513,17 +504,22 @@ inline float32x4x4_t vdequantize(const int8x16_t &qv, const UniformQuantizationI
  */
 inline float32x4x4_t vdequantize(const uint8x16_t &qv, float scale, int32_t offset)
 {
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
-        }
-    };
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)),
+                  vscale),
+        vmulq_f32(vcvtq_f32_s32(
+                      vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)),
+                  vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -537,17 +533,14 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, float scale, int32_t offs
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, float scale, int32_t offset)
 {
-    const int32x4_t     voffset = vdupq_n_s32(offset);
-    const float32x4_t   vscale  = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
-        }
-    };
+    const int32x4_t     voffset            = vdupq_n_s32(offset);
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -560,15 +553,12 @@ inline float32x4x4_t vdequantize(const int8x16_t &qv, float scale, int32_t offse
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, const float32x4x4_t vscale)
 {
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv))))), vscale.val[0]),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv))))), vscale.val[1]),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv))))), vscale.val[2]),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv))))), vscale.val[3]),
-        }
-    };
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv))))), vscale.val[0]),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv))))), vscale.val[1]),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv))))), vscale.val[2]),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv))))), vscale.val[3]),
+    }};
     return vdequantized_input;
 }
 
@@ -581,16 +571,13 @@ inline float32x4x4_t vdequantize(const int8x16_t &qv, const float32x4x4_t vscale
  */
 inline float32x4x4_t vdequantize(const int8x16_t &qv, float scale)
 {
-    const float32x4_t   vscale = vdupq_n_f32(scale);
-    const float32x4x4_t vdequantized_input =
-    {
-        {
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv))))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv))))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv))))), vscale),
-            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv))))), vscale),
-        }
-    };
+    const float32x4_t   vscale             = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input = {{
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv))))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv))))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv))))), vscale),
+        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv))))), vscale),
+    }};
     return vdequantized_input;
 }
 
@@ -607,18 +594,15 @@ inline uint8x8_t vquantize(const float32x4x2_t &qv, const UniformQuantizationInf
     const int         offset    = qi.offset;
     const float32x4_t voffset   = vdupq_n_f32(offset);
     const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
-    const int32x4x4_t rf =
-    {
-        {
+    const int32x4x4_t rf        = {{
 #ifdef __aarch64__
-            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
-            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
 #else  //__aarch64__
-            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
-            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
 #endif //__aarch64__
-        }
-    };
+    }};
     return vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
 }
 
@@ -635,18 +619,15 @@ inline int8x8_t vquantize_signed(const float32x4x2_t &qv, const UniformQuantizat
     const int         offset    = qi.offset;
     const float32x4_t voffset   = vdupq_n_f32(offset);
     const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
-    const int32x4x4_t rf =
-    {
-        {
+    const int32x4x4_t rf        = {{
 #ifdef __aarch64__
-            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
-            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
 #else  //__aarch64__
-            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
-            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+        vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
 #endif //__aarch64__
-        }
-    };
+    }};
     return vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
 }
 
@@ -654,22 +635,19 @@ inline int32x4x4_t vquantize_internal(const float32x4x4_t &qv, float scale, int3
 {
     const int32x4_t   voffset   = vdupq_n_s32(offset);
     const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
-    const int32x4x4_t rf =
-    {
-        {
+    const int32x4x4_t rf        = {{
 #ifdef __aarch64__
-            vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), voffset),
-            vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[1], vinvscale)), voffset),
-            vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[2], vinvscale)), voffset),
-            vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[3], vinvscale)), voffset),
+        vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), voffset),
+        vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[1], vinvscale)), voffset),
+        vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[2], vinvscale)), voffset),
+        vaddq_s32(vcvtaq_s32_f32(vmulq_f32(qv.val[3], vinvscale)), voffset),
 #else  //__aarch64__
-            vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), voffset),
-            vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale)), voffset),
-            vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[2], vinvscale)), voffset),
-            vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[3], vinvscale)), voffset),
+        vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)), voffset),
+        vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale)), voffset),
+        vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[2], vinvscale)), voffset),
+        vaddq_s32(vcvtq_s32_f32(vmulq_f32(qv.val[3], vinvscale)), voffset),
 #endif //__aarch64__
-        }
-    };
+    }};
     return rf;
 }
 
@@ -715,7 +693,7 @@ inline uint16x8x2_t vquantize_qasymm16(const float32x4x4_t &qv, const UniformQua
     auto             rf = vquantize_internal(qv, qi.scale, qi.offset);
     const uint16x8_t pa = vcombine_u16(vqmovun_s32(rf.val[0]), vqmovun_s32(rf.val[1]));
     const uint16x8_t pb = vcombine_u16(vqmovun_s32(rf.val[2]), vqmovun_s32(rf.val[3]));
-    return { pa, pb };
+    return {pa, pb};
 }
 
 } // namespace arm_compute

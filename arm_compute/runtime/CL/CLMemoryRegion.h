@@ -110,7 +110,7 @@ public:
     // Inherited methods overridden :
     void *ptr() final;
     void *map(cl::CommandQueue &q, bool blocking) final;
-    void unmap(cl::CommandQueue &q) final;
+    void  unmap(cl::CommandQueue &q) final;
 };
 
 /** OpenCL SVM memory region interface */
@@ -156,7 +156,7 @@ public:
 
     // Inherited methods overridden :
     void *map(cl::CommandQueue &q, bool blocking) final;
-    void unmap(cl::CommandQueue &q) final;
+    void  unmap(cl::CommandQueue &q) final;
 };
 
 /** OpenCL fine-grain SVM memory region implementation */
@@ -173,7 +173,7 @@ public:
 
     // Inherited methods overridden :
     void *map(cl::CommandQueue &q, bool blocking) final;
-    void unmap(cl::CommandQueue &q) final;
+    void  unmap(cl::CommandQueue &q) final;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H */

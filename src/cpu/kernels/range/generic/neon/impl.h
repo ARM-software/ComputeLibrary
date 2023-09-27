@@ -26,8 +26,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "src/core/NEON/wrapper/wrapper.h"
+
 #include "src/core/common/Registrars.h"
+#include "src/core/NEON/wrapper/wrapper.h"
 
 namespace arm_compute
 {
@@ -47,35 +48,36 @@ void neon_range_function(ITensor *output, float start, float step, const Window 
     const auto window_end_x   = static_cast<int>(window.x().end());
     const int  window_step_x  = 16 / sizeof(T);
 
-    Window win{ window };
+    Window win{window};
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     Iterator output_it(output, win);
 
-    execute_window_loop(win, [&](const Coordinates &)
-    {
-        int        x       = window_start_x;
-        const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
-        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    execute_window_loop(
+        win,
+        [&](const Coordinates &)
         {
-            for(int count = 0; count < window_step_x; ++count)
+            int        x       = window_start_x;
+            const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
+            for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                id_vec = wrapper::vsetlane(static_cast<T>(x + count), id_vec, count);
+                for (int count = 0; count < window_step_x; ++count)
+                {
+                    id_vec = wrapper::vsetlane(static_cast<T>(x + count), id_vec, count);
+                }
+
+                // start + step * id
+                const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
+                wrapper::vstore(out_ptr + x, res_vec);
             }
 
-            // start + step * id
-            const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
-            wrapper::vstore(out_ptr + x, res_vec);
-        }
-
-        // Compute left-over elements
-        for(; x < window_end_x; ++x)
-        {
-            const auto res = start + x * step;
-            *(out_ptr + x) = res;
-        }
-
-    },
-    output_it);
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                const auto res = start + x * step;
+                *(out_ptr + x) = res;
+            }
+        },
+        output_it);
 }
 } // namespace cpu
 } // namespace arm_compute

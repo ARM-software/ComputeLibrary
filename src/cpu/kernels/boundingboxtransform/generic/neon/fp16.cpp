@@ -29,7 +29,11 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_fp16_boundingboxtransform(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, BoundingBoxTransformInfo bbinfo, const Window &window)
+void neon_fp16_boundingboxtransform(const ITensor           *boxes,
+                                    ITensor                 *pred_boxes,
+                                    const ITensor           *deltas,
+                                    BoundingBoxTransformInfo bbinfo,
+                                    const Window            &window)
 {
     return bounding_box_transform<float16_t>(boxes, pred_boxes, deltas, bbinfo, window);
 }

@@ -29,11 +29,12 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define SVCVT_Z_TO_F32_IMPL(vtype)                                                                                        \
-    template <typename T>                                                                                                 \
-    inline typename std::enable_if<std::is_same<T, float>::value, svfloat32_t>::type svcvt_z(svbool_t pg, const vtype &a) \
-    {                                                                                                                     \
-        return svcvt_f32_z(pg, a);                                                                                        \
+#define SVCVT_Z_TO_F32_IMPL(vtype)                                                                            \
+    template <typename T>                                                                                     \
+    inline typename std::enable_if<std::is_same<T, float>::value, svfloat32_t>::type svcvt_z(svbool_t     pg, \
+                                                                                             const vtype &a)  \
+    {                                                                                                         \
+        return svcvt_f32_z(pg, a);                                                                            \
     }
 
 SVCVT_Z_TO_F32_IMPL(svuint32_t)
@@ -42,11 +43,12 @@ SVCVT_Z_TO_F32_IMPL(svfloat16_t)
 
 #undef SVCVT_Z_TO_F32_IMPL
 
-#define SVCVT_Z_TO_F16_IMPL(vtype)                                                                                            \
-    template <typename T>                                                                                                     \
-    inline typename std::enable_if<std::is_same<T, float16_t>::value, svfloat16_t>::type svcvt_z(svbool_t pg, const vtype &a) \
-    {                                                                                                                         \
-        return svcvt_f16_z(pg, a);                                                                                            \
+#define SVCVT_Z_TO_F16_IMPL(vtype)                                                                                \
+    template <typename T>                                                                                         \
+    inline typename std::enable_if<std::is_same<T, float16_t>::value, svfloat16_t>::type svcvt_z(svbool_t     pg, \
+                                                                                                 const vtype &a)  \
+    {                                                                                                             \
+        return svcvt_f16_z(pg, a);                                                                                \
     }
 
 SVCVT_Z_TO_F16_IMPL(svuint32_t)
@@ -55,11 +57,12 @@ SVCVT_Z_TO_F16_IMPL(svfloat32_t)
 
 #undef SVCVT_Z_TO_F16_IMPL
 
-#define SVCVT_Z_TO_S32_IMPL(vtype)                                                                                        \
-    template <typename T>                                                                                                 \
-    inline typename std::enable_if<std::is_same<T, int32_t>::value, svint32_t>::type svcvt_z(svbool_t pg, const vtype &a) \
-    {                                                                                                                     \
-        return svcvt_s32_z(pg, a);                                                                                        \
+#define SVCVT_Z_TO_S32_IMPL(vtype)                                                                            \
+    template <typename T>                                                                                     \
+    inline typename std::enable_if<std::is_same<T, int32_t>::value, svint32_t>::type svcvt_z(svbool_t     pg, \
+                                                                                             const vtype &a)  \
+    {                                                                                                         \
+        return svcvt_s32_z(pg, a);                                                                            \
     }
 
 SVCVT_Z_TO_S32_IMPL(svfloat16_t)

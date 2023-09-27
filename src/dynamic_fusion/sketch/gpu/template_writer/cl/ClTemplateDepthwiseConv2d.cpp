@@ -36,17 +36,17 @@ ClTemplateDepthwiseConv2d::ClTemplateDepthwiseConv2d(ComponentId                
                                                      const ArgumentPack<ITensorInfo> &tensors,
                                                      const Attributes                &attributes,
                                                      const Settings                  &settings)
-    : IGpuTemplateComponentWriter{ id, tensors },
+    : IGpuTemplateComponentWriter{id, tensors},
       _src{},
       _weight{},
       _bias{},
       _dst{},
-      _attributes{ attributes },
-      _settings{ settings }
+      _attributes{attributes},
+      _settings{settings}
 {
     _src    = this->tensors().get_const_tensor(TensorType::ACL_SRC_0);
     _weight = this->tensors().get_const_tensor(TensorType::ACL_SRC_1);
-    if(this->tensors().get_const_tensor(TensorType::ACL_SRC_2))
+    if (this->tensors().get_const_tensor(TensorType::ACL_SRC_2))
     {
         _bias = this->tensors().get_const_tensor(TensorType::ACL_SRC_2);
     }
@@ -71,7 +71,7 @@ std::string ClTemplateDepthwiseConv2d::get_component_code(const ComponentGroup &
 // IN_1(wei)            {{weight}}
 )_";
 
-    if(_bias != nullptr && _bias->has_valid_id())
+    if (_bias != nullptr && _bias->has_valid_id())
     {
         code += R"_(
 // IN_1(bia)            {{bias}}
@@ -113,7 +113,7 @@ TILE(uint, M0, 1, g_dst_indirect_y);
     })
 )_";
 
-    if(_weight->dimension(height_idx) < 5)
+    if (_weight->dimension(height_idx) < 5)
     {
         code += R"_(
     LOOP_UNROLLING(int, yk, 0, 1, _IWEI_HEIGHT,
@@ -147,7 +147,7 @@ TILE(uint, M0, 1, g_dst_indirect_y);
             {
 )_";
 
-    if(!_settings.is_fma_available())
+    if (!_settings.is_fma_available())
     {
         code += R"_(
                 {{dst}}[m0].v += a[xk + m0].v * b[xk].v;
@@ -166,14 +166,14 @@ TILE(uint, M0, 1, g_dst_indirect_y);
     }
 )_";
 
-    if(_weight->dimension(height_idx) < 5)
+    if (_weight->dimension(height_idx) < 5)
     {
         code += R"_(
     )
 )_";
     }
 
-    if(_bias && _bias->has_valid_id())
+    if (_bias && _bias->has_valid_id())
     {
         code += R"_(
         TILE({{BIA_DATA_TYPE}}, 1, N0, {{bias}});
@@ -198,44 +198,31 @@ TILE(uint, M0, 1, g_dst_indirect_y);
     return code;
 }
 
-void ClTemplateDepthwiseConv2d::declare_variables(GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+void ClTemplateDepthwiseConv2d::declare_variables(GpuKernelVariableTable &vtable,
+                                                  const ComponentGroup   &comp_group) const
 {
-    const GpuKernelArgumentInfo::Type input_type = _settings.export_input_to_cl_image() ?
-                                                       GpuKernelArgumentInfo::Type::Tensor_4D_t_Image :
-                                                       GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
+    const GpuKernelArgumentInfo::Type input_type = _settings.export_input_to_cl_image()
+                                                       ? GpuKernelArgumentInfo::Type::Tensor_4D_t_Image
+                                                       : GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
 
-    vtable.declare_variable(
-        comp_group,
-        _src,
-        GpuKernelArgumentInfo(input_type),
-        "src");
+    vtable.declare_variable(comp_group, _src, GpuKernelArgumentInfo(input_type), "src");
 
-    const GpuKernelArgumentInfo::Type weight_type = _settings.export_weights_to_cl_image() ?
-                                                        GpuKernelArgumentInfo::Type::Tensor_4D_t_Image :
-                                                        GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
+    const GpuKernelArgumentInfo::Type weight_type = _settings.export_weights_to_cl_image()
+                                                        ? GpuKernelArgumentInfo::Type::Tensor_4D_t_Image
+                                                        : GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer;
 
-    vtable.declare_variable(
-        comp_group,
-        _weight,
-        GpuKernelArgumentInfo(weight_type),
-        "weight");
+    vtable.declare_variable(comp_group, _weight, GpuKernelArgumentInfo(weight_type), "weight");
 
-    if(_bias != nullptr && _bias->has_valid_id()) // optional bias
+    if (_bias != nullptr && _bias->has_valid_id()) // optional bias
     {
-        vtable.declare_variable(
-            comp_group,
-            _bias,
-            GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector),
-            "bias");
+        vtable.declare_variable(comp_group, _bias, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Vector), "bias");
     }
-    vtable.declare_variable(
-        comp_group,
-        _dst,
-        GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
-        "dst");
+    vtable.declare_variable(comp_group, _dst, GpuKernelArgumentInfo(GpuKernelArgumentInfo::Type::Tensor_4D_t_Buffer),
+                            "dst");
 }
 
-TagLUT ClTemplateDepthwiseConv2d::get_tag_lut(const GpuKernelVariableTable &vtable, const ComponentGroup &comp_group) const
+TagLUT ClTemplateDepthwiseConv2d::get_tag_lut(const GpuKernelVariableTable &vtable,
+                                              const ComponentGroup         &comp_group) const
 {
     TagLUT lut{};
 
@@ -243,7 +230,7 @@ TagLUT ClTemplateDepthwiseConv2d::get_tag_lut(const GpuKernelVariableTable &vtab
     lut["src"]    = vtable.get_variable(_src);
     lut["weight"] = vtable.get_variable(_weight);
 
-    if(_bias != nullptr && _bias->has_valid_id()) // optional bias
+    if (_bias != nullptr && _bias->has_valid_id()) // optional bias
     {
         lut["bias"]          = vtable.get_variable(_bias);
         lut["BIA_DATA_TYPE"] = get_cl_type_from_data_type(_bias->data_type());
@@ -259,7 +246,7 @@ TagLUT ClTemplateDepthwiseConv2d::get_tag_lut(const GpuKernelVariableTable &vtab
     lut["SRC_DATA_TYPE"]  = _src->data_type();
     lut["WEI_DATA_TYPE"]  = _weight->data_type();
 
-    switch(vtable.get_variable(_src).kernel_argument_info.type)
+    switch (vtable.get_variable(_src).kernel_argument_info.type)
     {
         case GpuKernelArgumentInfo::Type::Image_Export_To_ClImage2D:
         case GpuKernelArgumentInfo::Type::Image_3D_Export_To_ClImage2D:
@@ -271,7 +258,7 @@ TagLUT ClTemplateDepthwiseConv2d::get_tag_lut(const GpuKernelVariableTable &vtab
             break;
     }
 
-    switch(vtable.get_variable(_weight).kernel_argument_info.type)
+    switch (vtable.get_variable(_weight).kernel_argument_info.type)
     {
         case GpuKernelArgumentInfo::Type::Image_Export_To_ClImage2D:
         case GpuKernelArgumentInfo::Type::Image_3D_Export_To_ClImage2D:
@@ -318,7 +305,7 @@ CLBuildOptions ClTemplateDepthwiseConv2d::get_build_options(const ComponentGroup
 
     CLBuildOptions build_opts{};
 
-    if(_settings.fast_relaxed_math())
+    if (_settings.fast_relaxed_math())
     {
         build_opts.add_option("-cl-fast-relaxed-math");
     }
@@ -361,7 +348,7 @@ std::string ClTemplateDepthwiseConv2d::get_config_id() const
 
 std::set<std::string> ClTemplateDepthwiseConv2d::get_headers_list() const
 {
-    return std::set<std::string>{ "helpers.h", "tile_helpers.h" };
+    return std::set<std::string>{"helpers.h", "tile_helpers.h"};
 }
 
 Window ClTemplateDepthwiseConv2d::get_window() const

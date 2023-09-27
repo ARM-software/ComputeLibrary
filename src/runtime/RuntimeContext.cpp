@@ -28,8 +28,7 @@
 
 namespace arm_compute
 {
-RuntimeContext::RuntimeContext()
-    : _owned_scheduler(SchedulerFactory::create()), _scheduler(_owned_scheduler.get())
+RuntimeContext::RuntimeContext() : _owned_scheduler(SchedulerFactory::create()), _scheduler(_owned_scheduler.get())
 {
 }
 

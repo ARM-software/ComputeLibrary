@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/CL/ICLKernel.h"
 
 namespace arm_compute
@@ -67,7 +68,11 @@ public:
      * @param[in]  axis            Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
+    void configure(const CLCompileContext &compile_context,
+                   const ICLTensor        *input,
+                   ICLTensor              *output,
+                   unsigned int            axis,
+                   ReductionOperation      op);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
@@ -79,7 +84,8 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
+    static Status
+    validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CPU_FILL_KERNEL_H
 
 #include "arm_compute/core/PixelValue.h"
+
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuKernel.h"
 
@@ -48,7 +49,7 @@ public:
     void configure(const ITensorInfo *tensor, const PixelValue &constant_value);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
 private:

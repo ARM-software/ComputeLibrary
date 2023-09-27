@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_CLCAST_H
 #define ARM_COMPUTE_CLCAST_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -79,7 +78,8 @@ public:
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
     // Initialize the function's source, destination
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
+    void
+    configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCast
      *
      * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/U64/S64/F16/F32.

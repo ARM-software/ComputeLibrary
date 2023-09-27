@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_CL_SOFTMAX_H
 
 #include "arm_compute/runtime/CL/CLTensor.h"
+
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
 
@@ -52,7 +53,10 @@ public:
      * @param[out] dst             Destination tensor info. Data types supported: same as @p src
      * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo &src, ITensorInfo &dst, const SoftmaxKernelInfo &info);
+    void configure(const CLCompileContext  &compile_context,
+                   const ITensorInfo       &src,
+                   ITensorInfo             &dst,
+                   const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to ClSoftmax::configure()
@@ -61,7 +65,7 @@ public:
      */
     static Status validate(const ITensorInfo &src, const ITensorInfo &dst, const SoftmaxKernelInfo &info);
     // Inherited methods overridden:
-    void run(ITensorPack &tensors) override;
+    void                             run(ITensorPack &tensors) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -79,7 +83,7 @@ private:
     std::unique_ptr<ClPermute>                               _permute_output;
     std::unique_ptr<kernels::ClLogits1DMaxShiftExpSumKernel> _max_shift_exp_sum_kernel;
     std::unique_ptr<kernels::ClLogits1DNormKernel>           _norm_kernel;
-    bool                                                     _needs_permute{ false };
+    bool                                                     _needs_permute{false};
 
     TensorInfo _max_info;
     TensorInfo _sum_info;
@@ -90,6 +94,6 @@ private:
     experimental::MemoryRequirements _aux_mem{};
 };
 
-} // opencl
-} // arm_compute
+} // namespace opencl
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_SOFTMAX_H */

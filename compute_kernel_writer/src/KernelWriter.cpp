@@ -23,14 +23,16 @@
  */
 
 #include "ckw/KernelWriter.h"
+
 #include "ckw/Error.h"
 #include "ckw/TileOperand.h"
 #include "ckw/types/TargetArchitecture.h"
 #include "ckw/types/TargetLanguage.h"
-#include "src/TileView.h"
+
 #include "src/cl/CLKernelWriter.h"
 #include "src/cl/CLTensorArgument.h"
 #include "src/cl/CLTile.h"
+#include "src/TileView.h"
 
 #include <tuple>
 
@@ -42,7 +44,7 @@ KernelWriter::~KernelWriter() = default;
 std::unique_ptr<KernelWriter> KernelWriter::create_instance(TargetArchitecture architecture, TargetLanguage language)
 {
     CKW_UNUSED(architecture);
-    switch(language)
+    switch (language)
     {
         case TargetLanguage::OpenCL:
             // Currently this is the oldest and the only supported GPU architecture.
@@ -95,7 +97,7 @@ TileOperand KernelWriter::create_tile_operand(ITile &tile)
 
 std::tuple<ITile &, TileArea> KernelWriter::get_tile(const TileOperand &operand)
 {
-    return { *operand._tile, { operand._row_start, operand._row_end, operand._col_start, operand._col_end } };
+    return {*operand._tile, {operand._row_start, operand._row_end, operand._col_start, operand._col_end}};
 }
 
 TensorOperand KernelWriter::create_tensor_operand(ITensor &tensor)

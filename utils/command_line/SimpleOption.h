@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_UTILS_SIMPLEOPTION
 
 #include "Option.h"
-
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -74,7 +73,7 @@ protected:
 
 template <typename T>
 inline SimpleOption<T>::SimpleOption(std::string name, T default_value)
-    : Option{ std::move(name), false, true }, _value{ std::move(default_value) }
+    : Option{std::move(name), false, true}, _value{std::move(default_value)}
 {
 }
 
@@ -83,12 +82,12 @@ bool SimpleOption<T>::parse(std::string value)
 {
     try
     {
-        std::stringstream stream{ std::move(value) };
+        std::stringstream stream{std::move(value)};
         stream >> _value;
         _is_set = !stream.fail();
         return _is_set;
     }
-    catch(const std::invalid_argument &)
+    catch (const std::invalid_argument &)
     {
         return false;
     }

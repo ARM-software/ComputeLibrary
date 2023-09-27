@@ -75,7 +75,12 @@ public:
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -90,7 +95,12 @@ public:
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+    void configure(const CLCompileContext    &compile_context,
+                   ICLTensor                 *input,
+                   const ICLTensor           *weights,
+                   const ICLTensor           *biases,
+                   ICLTensor                 *output,
+                   const PadStrideInfo       &conv_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLIndirectConvolutionLayer
      *
@@ -107,7 +117,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *weights,
+                           const ITensorInfo         *biases,
+                           const ITensorInfo         *output,
+                           const PadStrideInfo       &conv_info,
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
@@ -117,5 +131,5 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_CLINDIRECTCONVOLUTIONLAYER_H */

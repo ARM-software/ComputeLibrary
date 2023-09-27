@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEBATCHTOSPACELAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -68,7 +69,11 @@ public:
      * @param[out] output        Tensor output. Data types supported: same as @p input
      * @param[in]  crop_info     Specifies how the output shape is cropped after batch to space is performed
      */
-    void configure(const ITensor *input, int32_t block_shape_x, int32_t block_shape_y, ITensor *output, const CropInfo &crop_info = CropInfo{});
+    void configure(const ITensor  *input,
+                   int32_t         block_shape_x,
+                   int32_t         block_shape_y,
+                   ITensor        *output,
+                   const CropInfo &crop_info = CropInfo{});
     /** Static function to check if given info will lead to a valid configuration of @ref NEBatchToSpaceLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -90,7 +95,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output, const CropInfo &crop_info = CropInfo{});
+    static Status validate(const ITensorInfo *input,
+                           int32_t            block_shape_x,
+                           int32_t            block_shape_y,
+                           const ITensorInfo *output,
+                           const CropInfo    &crop_info = CropInfo{});
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

@@ -25,6 +25,7 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_TEMPLATE_WRITER_CL_CLTEMPLATEDEPTHWISECONV2D
 
 #include "arm_compute/dynamic_fusion/sketch/attributes/DepthwiseConv2dAttributes.h"
+
 #include "src/dynamic_fusion/sketch/gpu/components/cl/ClComponentDepthwiseConv2d.h"
 #include "src/dynamic_fusion/sketch/gpu/template_writer/IGpuTemplateComponentWriter.h"
 

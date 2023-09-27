@@ -27,7 +27,6 @@
 #include "arm_compute/core/Window.h"
 
 #include "ndrange.hpp"
-
 #include <cassert>
 
 /* This file contains mapping between integral types used in arm_compute and arm_gemm
@@ -38,8 +37,7 @@
 namespace arm_gemm
 {
 //we want to unify the maximum number of dimensions used beween arm_gemm and arm compute library
-constexpr std::size_t ndrange_max =
-    arm_compute::Dimensions<unsigned int>::num_max_dimensions;
+constexpr std::size_t ndrange_max = arm_compute::Dimensions<unsigned int>::num_max_dimensions;
 
 using ndrange_t = NDRange<ndrange_max>;
 using ndcoord_t = NDCoordinate<ndrange_max>;
@@ -56,7 +54,7 @@ inline arm_compute::Window to_window(const ndrange_t &ndr)
 {
     arm_compute::Window win;
 
-    for(unsigned int i = 0; i != ndrange_max; ++i)
+    for (unsigned int i = 0; i != ndrange_max; ++i)
     {
         //populate the window with the dimensions of the NDRange
         win.set(i, arm_compute::Window::Dimension(0, ndr.get_size(i)));
@@ -75,7 +73,7 @@ inline arm_compute::Window to_window(const ndcoord_t &ndc)
 {
     arm_compute::Window win;
 
-    for(unsigned int i = 0; i != ndrange_max; ++i)
+    for (unsigned int i = 0; i != ndrange_max; ++i)
     {
         const auto start = ndc.get_position(i);
         const auto size  = ndc.get_size(i);
@@ -98,15 +96,12 @@ inline arm_compute::Window to_window(const ndcoord_t &ndc)
  */
 inline ndrange_t to_ndrange(const arm_compute::Window &win)
 {
-    return
-    {
-        static_cast<unsigned int>(win[0].end() - win[0].start()),
-        static_cast<unsigned int>(win[1].end() - win[1].start()),
-        static_cast<unsigned int>(win[2].end() - win[2].start()),
-        static_cast<unsigned int>(win[3].end() - win[3].start()),
-        static_cast<unsigned int>(win[4].end() - win[4].start()),
-        static_cast<unsigned int>(win[5].end() - win[5].start())
-    };
+    return {static_cast<unsigned int>(win[0].end() - win[0].start()),
+            static_cast<unsigned int>(win[1].end() - win[1].start()),
+            static_cast<unsigned int>(win[2].end() - win[2].start()),
+            static_cast<unsigned int>(win[3].end() - win[3].start()),
+            static_cast<unsigned int>(win[4].end() - win[4].start()),
+            static_cast<unsigned int>(win[5].end() - win[5].start())};
 }
 
 /** Convert an `arm_compute::Window` to an `arm_gemm::NDCoord` of the same max dimensions
@@ -116,15 +111,12 @@ inline ndrange_t to_ndrange(const arm_compute::Window &win)
  */
 inline ndcoord_t to_ndcoord(const arm_compute::Window &win)
 {
-    return
-    {
-        { static_cast<unsigned int>(win[0].start()), static_cast<unsigned int>(win[0].end() - win[0].start()) },
-        { static_cast<unsigned int>(win[1].start()), static_cast<unsigned int>(win[1].end() - win[1].start()) },
-        { static_cast<unsigned int>(win[2].start()), static_cast<unsigned int>(win[2].end() - win[2].start()) },
-        { static_cast<unsigned int>(win[3].start()), static_cast<unsigned int>(win[3].end() - win[3].start()) },
-        { static_cast<unsigned int>(win[4].start()), static_cast<unsigned int>(win[4].end() - win[4].start()) },
-        { static_cast<unsigned int>(win[5].start()), static_cast<unsigned int>(win[5].end() - win[5].start()) }
-    };
+    return {{static_cast<unsigned int>(win[0].start()), static_cast<unsigned int>(win[0].end() - win[0].start())},
+            {static_cast<unsigned int>(win[1].start()), static_cast<unsigned int>(win[1].end() - win[1].start())},
+            {static_cast<unsigned int>(win[2].start()), static_cast<unsigned int>(win[2].end() - win[2].start())},
+            {static_cast<unsigned int>(win[3].start()), static_cast<unsigned int>(win[3].end() - win[3].start())},
+            {static_cast<unsigned int>(win[4].start()), static_cast<unsigned int>(win[4].end() - win[4].start())},
+            {static_cast<unsigned int>(win[5].start()), static_cast<unsigned int>(win[5].end() - win[5].start())}};
 }
 
 } //namespace arm_gemm

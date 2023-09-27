@@ -25,6 +25,7 @@
 #define ACL_SRC_DYNAMIC_FUSION_SKETCH_GPU_CKW_DRIVER_COMPONENTS_UTILS_TYPE_CONVERTER_ELEMENTWISEBINARY
 
 #include "ckw/types/Operators.h"
+
 #include "src/dynamic_fusion/sketch/gpu/operators/internal/GpuElementwiseBinaryCommon.h"
 
 namespace arm_compute
@@ -35,7 +36,7 @@ namespace dynamic_fusion
 {
 inline ckw::BinaryOp to_ckw(const ElementwiseBinaryCommonAttributes &attributes)
 {
-    switch(attributes.operation())
+    switch (attributes.operation())
     {
         case ElementwiseBinaryCommonAttributes::ElementwiseOp::Add:
             return ckw::BinaryOp::Add;

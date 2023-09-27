@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_RUNTIME_MEMORY_REGION_H
 #define ARM_COMPUTE_RUNTIME_MEMORY_REGION_H
 
-#include "arm_compute/runtime/IMemoryRegion.h"
-
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/IMemoryRegion.h"
 
 #include <cstddef>
 
@@ -41,21 +40,17 @@ public:
      * @param[in] size      Region size
      * @param[in] alignment Alignment in bytes of the base pointer. Defaults to 0
      */
-    MemoryRegion(size_t size, size_t alignment = 0)
-        : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
+    MemoryRegion(size_t size, size_t alignment = 0) : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
     {
-        if(size != 0)
+        if (size != 0)
         {
             // Allocate backing memory
             size_t space = size + alignment;
-            _mem         = std::shared_ptr<uint8_t>(new uint8_t[space](), [](uint8_t *ptr)
-            {
-                delete[] ptr;
-            });
-            _ptr = _mem.get();
+            _mem         = std::shared_ptr<uint8_t>(new uint8_t[space](), [](uint8_t *ptr) { delete[] ptr; });
+            _ptr         = _mem.get();
 
             // Calculate alignment offset
-            if(alignment != 0)
+            if (alignment != 0)
             {
                 void *aligned_ptr = _mem.get();
                 std::align(alignment, size, aligned_ptr, space);
@@ -63,10 +58,9 @@ public:
             }
         }
     }
-    MemoryRegion(void *ptr, size_t size)
-        : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
+    MemoryRegion(void *ptr, size_t size) : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
     {
-        if(size != 0)
+        if (size != 0)
         {
             _ptr = ptr;
         }
@@ -91,7 +85,7 @@ public:
     }
     std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) final
     {
-        if(_ptr != nullptr && (offset < _size) && (_size - offset >= size))
+        if (_ptr != nullptr && (offset < _size) && (_size - offset >= size))
         {
             return std::make_unique<MemoryRegion>(static_cast<uint8_t *>(_ptr) + offset, size);
         }

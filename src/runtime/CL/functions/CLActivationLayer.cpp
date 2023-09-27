@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
+
 #include "src/core/CL/ICLKernel.h"
 #include "src/gpu/cl/operators/ClActivation.h"
 
@@ -35,18 +36,17 @@ namespace arm_compute
 {
 struct CLActivationLayer::Impl
 {
-    const ICLTensor                      *src{ nullptr };
-    ICLTensor                            *dst{ nullptr };
-    CLRuntimeContext                     *ctx{ nullptr };
-    std::unique_ptr<opencl::ClActivation> op{ nullptr };
+    const ICLTensor                      *src{nullptr};
+    ICLTensor                            *dst{nullptr};
+    CLRuntimeContext                     *ctx{nullptr};
+    std::unique_ptr<opencl::ClActivation> op{nullptr};
 };
 
-CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
-    : _impl(std::make_unique<Impl>())
+CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx) : _impl(std::make_unique<Impl>())
 {
     _impl->ctx = ctx;
 }
-CLActivationLayer::CLActivationLayer(CLActivationLayer &&) = default;
+CLActivationLayer::CLActivationLayer(CLActivationLayer &&)            = default;
 CLActivationLayer &CLActivationLayer::operator=(CLActivationLayer &&) = default;
 CLActivationLayer::~CLActivationLayer()                               = default;
 
@@ -55,7 +55,10 @@ void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, Activatio
     configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
 }
 
-void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+void CLActivationLayer::configure(const CLCompileContext &compile_context,
+                                  ICLTensor              *input,
+                                  ICLTensor              *output,
+                                  ActivationLayerInfo     act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -66,7 +69,8 @@ void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTe
     _impl->op->configure(compile_context, _impl->src->info(), _impl->dst->info(), act_info);
 }
 
-Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+Status
+CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     return opencl::ClActivation::validate(input, output, act_info);
 }

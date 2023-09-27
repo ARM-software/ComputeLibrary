@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/CL/ICLOperator.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+
 #include <memory>
 
 namespace arm_compute

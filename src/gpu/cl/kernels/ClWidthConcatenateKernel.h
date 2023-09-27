@@ -50,7 +50,8 @@ public:
      * @param[in,out] dst             Destination tensor info. Data types supported: same as @p src.
      *
      */
-    void configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst);
+    void
+    configure(const CLCompileContext &compile_context, ITensorInfo *src, unsigned int width_offset, ITensorInfo *dst);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClWidthConcatenateKernel::configure()
@@ -63,7 +64,7 @@ public:
     void run_op(ITensorPack &tensors, const Window &window, ::cl::CommandQueue &queue) override;
 
 private:
-    int32_t _depth{ 0 };
+    int32_t _depth{0};
 };
 } // namespace kernels
 } // namespace opencl

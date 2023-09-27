@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEFFT2D_H
 #define ARM_COMPUTE_NEFFT2D_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
 #include "arm_compute/runtime/Tensor.h"

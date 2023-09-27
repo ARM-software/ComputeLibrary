@@ -28,9 +28,10 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -51,13 +52,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
     ARM_COMPUTE_RETURN_ERROR_ON(stride <= 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_width] % stride) != 0, "The width of the input tensor must be a multiple of stride");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0, "The height of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_width] % stride) != 0,
+                                    "The width of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0,
+                                    "The height of the input tensor must be a multiple of stride");
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
+        const TensorInfo tensor_info_output =
+            output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -66,8 +70,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 }
 } // namespace
 
-CLReorgLayerKernel::CLReorgLayerKernel()
-    : _input(nullptr), _output(nullptr)
+CLReorgLayerKernel::CLReorgLayerKernel() : _input(nullptr), _output(nullptr)
 {
     _type = CLKernelType::ELEMENTWISE;
 }
@@ -77,17 +80,22 @@ void CLReorgLayerKernel::configure(const ICLTensor *input, ICLTensor *output, in
     configure(CLKernelLibrary::get().get_compile_context(), input, output, stride);
 }
 
-void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t stride)
+void CLReorgLayerKernel::configure(const CLCompileContext &compile_context,
+                                   const ICLTensor        *input,
+                                   ICLTensor              *output,
+                                   int32_t                 stride)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), stride));
-    auto padding_info = get_padding_info({ input, output });
+    auto padding_info = get_padding_info({input, output});
 
     _input  = input;
     _output = output;
 
-    std::string  kernel_name = std::string("reorg_layer_") + lower_string(string_from_data_layout(input->info()->data_layout()));
-    const size_t idx_channel = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
+    std::string kernel_name =
+        std::string("reorg_layer_") + lower_string(string_from_data_layout(input->info()->data_layout()));
+    const size_t idx_channel =
+        get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -98,7 +106,9 @@ void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, cons
 
     // Configure window
     // auto inizialize the output tensor if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input->info(), stride)));
+    auto_init_if_empty(*output->info(),
+                       input->info()->clone()->set_tensor_shape(
+                           misc::shape_calculator::compute_reorg_output_shape(*input->info(), stride)));
 
     Window win = calculate_max_window(*output->info(), Steps());
 
@@ -119,7 +129,9 @@ void CLReorgLayerKernel::configure(const CLCompileContext &compile_context, cons
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLReorgLayerKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output, int32_t stride)
+Status CLReorgLayerKernel::validate(const arm_compute::ITensorInfo *input,
+                                    const arm_compute::ITensorInfo *output,
+                                    int32_t                         stride)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, stride));
 
@@ -139,7 +151,6 @@ void CLReorgLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
-    }
-    while(window.slide_window_slice_3D(slice));
+    } while (window.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

@@ -62,9 +62,16 @@ public:
      * @param[in]  epsilon       (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      * @param[in]  fbn_type      (Optional) Fused batch normalization type. Defaults to CONVOLUTION.
      */
-    void configure(const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias,
-                   const ICLTensor *input_bias = nullptr, const ICLTensor *bn_beta = nullptr, const ICLTensor *bn_gamma = nullptr,
-                   float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
+    void configure(const ICLTensor           *input_weights,
+                   const ICLTensor           *bn_mean,
+                   const ICLTensor           *bn_var,
+                   ICLTensor                 *fused_weights,
+                   ICLTensor                 *fused_bias,
+                   const ICLTensor           *input_bias = nullptr,
+                   const ICLTensor           *bn_beta    = nullptr,
+                   const ICLTensor           *bn_gamma   = nullptr,
+                   float                      epsilon    = 0.001f,
+                   FuseBatchNormalizationType fbn_type   = FuseBatchNormalizationType::CONVOLUTION);
     /** Set the source, destination of the kernel
      *
      * @param[in]  compile_context The compile context to be used.
@@ -81,9 +88,17 @@ public:
      * @param[in]  epsilon         (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      * @param[in]  fbn_type        (Optional) Fused batch normalization type. Defaults to CONVOLUTION.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias,
-                   const ICLTensor *input_bias = nullptr, const ICLTensor *bn_beta = nullptr, const ICLTensor *bn_gamma = nullptr,
-                   float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
+    void configure(const CLCompileContext    &compile_context,
+                   const ICLTensor           *input_weights,
+                   const ICLTensor           *bn_mean,
+                   const ICLTensor           *bn_var,
+                   ICLTensor                 *fused_weights,
+                   ICLTensor                 *fused_bias,
+                   const ICLTensor           *input_bias = nullptr,
+                   const ICLTensor           *bn_beta    = nullptr,
+                   const ICLTensor           *bn_gamma   = nullptr,
+                   float                      epsilon    = 0.001f,
+                   FuseBatchNormalizationType fbn_type   = FuseBatchNormalizationType::CONVOLUTION);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFuseBatchNormalizationKernel
      *
      * @param[in] input_weights Input weights tensor info for convolution or depthwise convolution layer. Data type supported: F16/F32. Data layout supported: NCHW, NHWC
@@ -101,10 +116,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
-                           const ITensorInfo *fused_weights, const ITensorInfo *fused_bias,
-                           const ITensorInfo *input_bias = nullptr, const ITensorInfo *bn_beta = nullptr, const ITensorInfo *bn_gamma = nullptr,
-                           float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
+    static Status validate(const ITensorInfo         *input_weights,
+                           const ITensorInfo         *bn_mean,
+                           const ITensorInfo         *bn_var,
+                           const ITensorInfo         *fused_weights,
+                           const ITensorInfo         *fused_bias,
+                           const ITensorInfo         *input_bias = nullptr,
+                           const ITensorInfo         *bn_beta    = nullptr,
+                           const ITensorInfo         *bn_gamma   = nullptr,
+                           float                      epsilon    = 0.001f,
+                           FuseBatchNormalizationType fbn_type   = FuseBatchNormalizationType::CONVOLUTION);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -25,12 +25,11 @@
 #define SRC_DYNAMIC_FUSION_SKETCH_GPU_GPUKERNELCOMPONENTGROUP
 
 #include "components/Types.h"
-
 #include <cstdint>
 #include <cstdlib>
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
+#include <vector>
 
 namespace arm_compute
 {
@@ -129,9 +128,9 @@ public:
     /** Get the number of components within the group */
     size_t size() const;
     /** Check if the component group is empty */
-    bool empty() const;
-    ComponentPtr &operator[](size_t index);
-    const ComponentPtr &operator[](size_t index) const;
+    bool                                               empty() const;
+    ComponentPtr                                      &operator[](size_t index);
+    const ComponentPtr                                &operator[](size_t index) const;
     typename std::vector<ComponentPtr>::iterator       begin();
     typename std::vector<ComponentPtr>::iterator       end();
     typename std::vector<ComponentPtr>::const_iterator begin() const;
@@ -142,13 +141,13 @@ public:
 private:
     std::vector<ComponentPtr> _components{};
 
-    bool _finalized{ false };
+    bool _finalized{false};
 
-    std::vector<const ITensorInfo *> _argument_tensors{};
-    std::set<const ITensorInfo *> _input_tensors{};
-    std::set<const ITensorInfo *> _interm_tensors{};
-    const ITensorInfo *_any_output_tensor{ nullptr };
-    std::vector<const ITensorInfo *> _tiles{};
+    std::vector<const ITensorInfo *>                   _argument_tensors{};
+    std::set<const ITensorInfo *>                      _input_tensors{};
+    std::set<const ITensorInfo *>                      _interm_tensors{};
+    const ITensorInfo                                 *_any_output_tensor{nullptr};
+    std::vector<const ITensorInfo *>                   _tiles{};
     std::map<const ITensorInfo *, const ITensorInfo *> _tile_map{};
 };
 } // namespace dynamic_fusion

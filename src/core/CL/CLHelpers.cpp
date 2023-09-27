@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
+
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
-#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
-#include "src/gpu/cl/ClCompileContext.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 
+#include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/ClKernelLibrary.h"
 
 #include <utility>
@@ -39,7 +40,7 @@ namespace arm_compute
 {
 std::string get_cl_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -75,7 +76,7 @@ std::string get_cl_type_from_data_type(const DataType &dt)
 
 std::string get_cl_promoted_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -105,7 +106,7 @@ std::string get_cl_promoted_type_from_data_type(const DataType &dt)
 
 std::string get_cl_unsigned_type_from_element_size(size_t element_size)
 {
-    switch(element_size)
+    switch (element_size)
     {
         case 1:
             return "uchar";
@@ -123,7 +124,7 @@ std::string get_cl_unsigned_type_from_element_size(size_t element_size)
 
 std::string get_cl_signed_type_from_element_size(size_t element_size)
 {
-    switch(element_size)
+    switch (element_size)
     {
         case 1:
             return "char";
@@ -141,7 +142,7 @@ std::string get_cl_signed_type_from_element_size(size_t element_size)
 
 std::string get_cl_select_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -174,7 +175,7 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
 
 std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -192,7 +193,7 @@ std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt)
 
 std::string get_data_size_from_data_type(const DataType &dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::S8:
@@ -244,8 +245,9 @@ bool dot8_supported(const cl::Device &device)
     const GPUTarget gpu_target  = get_target_from_name(device_name);
 
     // SW_WORKAROUND: Workaround for DDK revision r14p0.to enable cl_arm_integer_dot_product_int8
-    std::set<GPUTarget> sw_workaround_issue = { GPUTarget::G76 };
-    return (device_supports_extension(device, "cl_arm_integer_dot_product_int8") || sw_workaround_issue.count(gpu_target) != 0);
+    std::set<GPUTarget> sw_workaround_issue = {GPUTarget::G76};
+    return (device_supports_extension(device, "cl_arm_integer_dot_product_int8") ||
+            sw_workaround_issue.count(gpu_target) != 0);
 }
 
 bool dot8_acc_supported(const cl::Device &device)
@@ -256,23 +258,23 @@ bool dot8_acc_supported(const cl::Device &device)
 CLVersion get_cl_version(const cl::Device &device)
 {
     std::string version_str = device.getInfo<CL_DEVICE_VERSION>();
-    if(version_str.find("OpenCL 3") != std::string::npos)
+    if (version_str.find("OpenCL 3") != std::string::npos)
     {
         return CLVersion::CL30;
     }
-    else if(version_str.find("OpenCL 2") != std::string::npos)
+    else if (version_str.find("OpenCL 2") != std::string::npos)
     {
         return CLVersion::CL20;
     }
-    else if(version_str.find("OpenCL 1.2") != std::string::npos)
+    else if (version_str.find("OpenCL 1.2") != std::string::npos)
     {
         return CLVersion::CL12;
     }
-    else if(version_str.find("OpenCL 1.1") != std::string::npos)
+    else if (version_str.find("OpenCL 1.1") != std::string::npos)
     {
         return CLVersion::CL11;
     }
-    else if(version_str.find("OpenCL 1.0") != std::string::npos)
+    else if (version_str.find("OpenCL 1.0") != std::string::npos)
     {
         return CLVersion::CL10;
     }
@@ -287,14 +289,15 @@ bool device_supports_extension(const cl::Device &device, const char *extension_n
     return (pos != std::string::npos);
 }
 
-bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout)
+bool cl_winograd_convolution_layer_supported(const Size2D &output_tile,
+                                             const Size2D &kernel_size,
+                                             DataLayout    data_layout)
 {
     ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
     using WinogradConfiguration = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    std::vector<WinogradConfiguration> winograd_configs_nchw =
-    {
+    std::vector<WinogradConfiguration> winograd_configs_nchw = {
         WinogradConfiguration(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3)),
         WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3)),
         WinogradConfiguration(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1)),
@@ -303,11 +306,9 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
         WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
-        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
-    };
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))};
 
-    std::vector<WinogradConfiguration> winograd_configs_nhwc =
-    {
+    std::vector<WinogradConfiguration> winograd_configs_nhwc = {
         WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3)),
         WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1)),
@@ -324,19 +325,21 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
                             std::pair<int, int>(kernel_size.width, kernel_size.height));
 
     // Return true if supported
-    if(data_layout == DataLayout::NCHW)
+    if (data_layout == DataLayout::NCHW)
     {
-        return (std::find(winograd_configs_nchw.begin(), winograd_configs_nchw.end(), p) != winograd_configs_nchw.end());
+        return (std::find(winograd_configs_nchw.begin(), winograd_configs_nchw.end(), p) !=
+                winograd_configs_nchw.end());
     }
     else
     {
-        return (std::find(winograd_configs_nhwc.begin(), winograd_configs_nhwc.end(), p) != winograd_configs_nhwc.end());
+        return (std::find(winograd_configs_nhwc.begin(), winograd_configs_nhwc.end(), p) !=
+                winograd_configs_nhwc.end());
     }
 }
 
 size_t preferred_vector_width(const cl::Device &device, const DataType dt)
 {
-    switch(dt)
+    switch (dt)
     {
         case DataType::U8:
         case DataType::S8:
@@ -382,7 +385,7 @@ size_t get_cl_image_pitch_alignment(const cl::Device &device)
 
     cl_int err = clGetDeviceInfo(device(), CL_DEVICE_IMAGE_PITCH_ALIGNMENT, sizeof(cl_uint), &pixel_aligment, nullptr);
 
-    if(err == CL_SUCCESS)
+    if (err == CL_SUCCESS)
     {
         return pixel_aligment;
     }
@@ -396,12 +399,14 @@ bool get_cl_non_uniform_work_group_supported(const cl::Device &device)
 {
     cl_bool supported = CL_FALSE;
 
-    cl_int err = clGetDeviceInfo(device(), CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT, sizeof(cl_bool), &supported, nullptr);
+    cl_int err =
+        clGetDeviceInfo(device(), CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT, sizeof(cl_bool), &supported, nullptr);
 
     return (err == CL_SUCCESS && supported == CL_TRUE);
 }
 
-cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
+cl::Kernel
+create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
 {
     opencl::ClKernelLibrary &klib = opencl::ClKernelLibrary::get();
 
@@ -409,7 +414,8 @@ cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_
     auto              kernel_src   = klib.program(program_name);
     const std::string kernel_path  = klib.kernel_path();
 
-    return static_cast<cl::Kernel>(ctx.create_kernel(kernel_name, program_name, kernel_src.program, kernel_path, build_opts, kernel_src.is_binary));
+    return static_cast<cl::Kernel>(ctx.create_kernel(kernel_name, program_name, kernel_src.program, kernel_path,
+                                                     build_opts, kernel_src.is_binary));
 }
 
 cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size)
@@ -423,8 +429,9 @@ cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimensio
 bool get_wbsm_support_info(const cl::Device &device)
 {
     cl_bitfield capabilities = 0;
-    cl_int      err          = clGetDeviceInfo(device.get(), CL_DEVICE_SCHEDULING_CONTROLS_CAPABILITIES_ARM, sizeof(cl_bitfield), &capabilities, nullptr);
-    if((err == CL_SUCCESS) && (capabilities & CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM))
+    cl_int      err = clGetDeviceInfo(device.get(), CL_DEVICE_SCHEDULING_CONTROLS_CAPABILITIES_ARM, sizeof(cl_bitfield),
+                                      &capabilities, nullptr);
+    if ((err == CL_SUCCESS) && (capabilities & CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM))
     {
         return true;
     }
@@ -433,35 +440,33 @@ bool get_wbsm_support_info(const cl::Device &device)
 
 void set_wbsm(cl::Kernel &kernel, cl_int wbsm_hint)
 {
-    cl_int err = clSetKernelExecInfo(kernel.get(),
-                                     CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM,
-                                     sizeof(cl_int),
-                                     &wbsm_hint);
+    cl_int err = clSetKernelExecInfo(kernel.get(), CL_KERNEL_EXEC_INFO_WORKGROUP_BATCH_SIZE_MODIFIER_ARM,
+                                     sizeof(cl_int), &wbsm_hint);
     ARM_COMPUTE_UNUSED(err);
     ARM_COMPUTE_ERROR_ON(err != CL_SUCCESS);
 }
 
 bool export_to_cl_image(const ITensorInfo *tensor)
 {
-    if(tensor->tensor_shape()[0] % 4 != 0)
+    if (tensor->tensor_shape()[0] % 4 != 0)
     {
         return false;
     }
 
     // If not floating point
-    if(!is_data_type_float(tensor->data_type()))
+    if (!is_data_type_float(tensor->data_type()))
     {
         return false;
     }
 
     // Check if the cl_khr_image2d_from_buffer extension is supported on the target platform
-    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    if (!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
     {
         return false;
     }
 
     // Check cl image pitch alignment
-    if(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
+    if (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0)
     {
         return false;
     }
@@ -471,7 +476,7 @@ bool export_to_cl_image(const ITensorInfo *tensor)
     const size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
     const size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
 
-    if(image_w > max_image_w || image_h > max_image_h)
+    if (image_w > max_image_w || image_h > max_image_h)
     {
         return false;
     }
@@ -481,9 +486,9 @@ bool export_to_cl_image(const ITensorInfo *tensor)
 
 void set_unroll_with_pragma(CLBuildOptions &built_opts, std::initializer_list<int> values)
 {
-    for(const int value : values)
+    for (const int value : values)
     {
-        if(value > max_manual_loop_unrolling)
+        if (value > max_manual_loop_unrolling)
         {
             built_opts.add_option("-DUNROLL_WITH_PRAGMA");
             return;

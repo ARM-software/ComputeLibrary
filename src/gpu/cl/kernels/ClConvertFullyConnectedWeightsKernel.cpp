@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
@@ -45,17 +46,21 @@ ClConvertFullyConnectedWeightsKernel::ClConvertFullyConnectedWeightsKernel()
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void ClConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape,
-                                                     DataLayout data_layout)
+void ClConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &compile_context,
+                                                     const ITensorInfo      *src,
+                                                     ITensorInfo            *dst,
+                                                     const TensorShape      &original_src_shape,
+                                                     DataLayout              data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     // Output tensor auto initialisation if not yet initialized
     auto_init_if_empty(*dst, *src->clone());
 
-    auto padding_info = get_padding_info({ src, dst });
+    auto padding_info = get_padding_info({src, dst});
 
-    ARM_COMPUTE_ERROR_THROW_ON(ClConvertFullyConnectedWeightsKernel::validate(src, dst, original_src_shape, data_layout));
+    ARM_COMPUTE_ERROR_THROW_ON(
+        ClConvertFullyConnectedWeightsKernel::validate(src, dst, original_src_shape, data_layout));
 
     const DataLayout src_data_layout = (data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
 
@@ -85,8 +90,10 @@ void ClConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &com
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status ClConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_src_shape,
-                                                      DataLayout data_layout)
+Status ClConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
+                                                      const ITensorInfo *dst,
+                                                      const TensorShape &original_src_shape,
+                                                      DataLayout         data_layout)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
@@ -96,7 +103,7 @@ Status ClConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src, co
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
     // Checks performed when dst is configured
-    if(dst->total_size() != 0)
+    if (dst->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
@@ -110,8 +117,9 @@ void ClConvertFullyConnectedWeightsKernel::run_op(ITensorPack &tensors, const Wi
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const auto src = utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
-    auto       dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
+    const auto src =
+        utils::cast::polymorphic_downcast<const ICLTensor *>(tensors.get_const_tensor(TensorType::ACL_SRC));
+    auto dst = utils::cast::polymorphic_downcast<ICLTensor *>(tensors.get_tensor(TensorType::ACL_DST));
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
 
     unsigned int idx = 0;

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NESPACETOBATCHLAYERKERNEL_H
 
 #include "arm_compute/core/Types.h"
+
 #include "src/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -69,7 +70,12 @@ public:
      * @param[in]  padding_right The padding at the end of every dimension of the output tensor.
      * @param[out] output        Tensor output. Data types supported: same as @p input
      */
-    void configure(const ITensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ITensor *output);
+    void configure(const ITensor *input,
+                   const int      block_shape_x,
+                   const int      block_shape_y,
+                   const Size2D  &padding_left,
+                   const Size2D  &padding_right,
+                   ITensor       *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToBatchLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -79,7 +85,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           const ITensorInfo *block_shape,
+                           const ITensorInfo *paddings,
+                           const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToBatchLayerKernel (Static block shape and paddings)
      *
      * @param[in] input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -91,7 +100,12 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input,
+                           const int          block_shape_x,
+                           const int          block_shape_y,
+                           const Size2D      &padding_left,
+                           const Size2D      &padding_right,
+                           const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

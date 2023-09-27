@@ -24,11 +24,10 @@
 #ifndef ARM_COMPUTE_CLACTIVATIONLAYER_H
 #define ARM_COMPUTE_CLACTIVATIONLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
+#include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
@@ -91,7 +90,10 @@ public:
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      act_info        Activation layer parameters.
      */
-    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+    void configure(const CLCompileContext &compile_context,
+                   ICLTensor              *input,
+                   ICLTensor              *output,
+                   ActivationLayerInfo     act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayer
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result

@@ -59,7 +59,8 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    void configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
+    void
+    configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
@@ -74,7 +75,11 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, const ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
+    void configure(const CLCompileContext    &compile_context,
+                   const ICLTensor           *input,
+                   const ICLTensor           *rois,
+                   const ICLTensor           *output,
+                   const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -92,7 +97,10 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *rois,
+                           const ITensorInfo         *output,
+                           const ROIPoolingLayerInfo &pool_info);
 
 private:
     const ICLTensor    *_input;

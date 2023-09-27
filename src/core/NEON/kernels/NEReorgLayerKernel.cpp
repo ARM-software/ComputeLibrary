@@ -28,8 +28,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/Validate.h"
+
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -50,13 +51,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
     ARM_COMPUTE_RETURN_ERROR_ON(stride <= 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_width] % stride) != 0, "The width of the input tensor must be a multiple of stride");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0, "The height of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_width] % stride) != 0,
+                                    "The width of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0,
+                                    "The height of the input tensor must be a multiple of stride");
 
     // Validate output if initialized
-    if(output->total_size() != 0)
+    if (output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
+        const TensorInfo tensor_info_output =
+            output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -65,8 +69,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 }
 } // namespace
 
-NEReorgLayerKernel::NEReorgLayerKernel()
-    : _input(nullptr), _output(nullptr), _stride(1)
+NEReorgLayerKernel::NEReorgLayerKernel() : _input(nullptr), _output(nullptr), _stride(1)
 {
 }
 
@@ -121,23 +124,26 @@ void NEReorgLayerKernel::run(const Window &window, const ThreadInfo &info)
     Iterator out(_output, collapsed_window);
 
     // Perform reorg
-    execute_window_loop(collapsed_window, [&](const Coordinates & id)
-    {
-        // Get spatial coords and channels
-        const unsigned int w = id[idx_w];
-        const unsigned int h = id[idx_h];
-        const unsigned int c = id[idx_c];
+    execute_window_loop(
+        collapsed_window,
+        [&](const Coordinates &id)
+        {
+            // Get spatial coords and channels
+            const unsigned int w = id[idx_w];
+            const unsigned int h = id[idx_h];
+            const unsigned int c = id[idx_c];
 
-        // Calculate mapping
-        const unsigned int offset     = c / out_c;
-        Coordinates        map_coords = id;
-        map_coords.set(idx_w, w * stride + offset % stride);
-        map_coords.set(idx_h, h * stride + offset / stride);
-        map_coords.set(idx_c, c % out_c);
+            // Calculate mapping
+            const unsigned int offset     = c / out_c;
+            Coordinates        map_coords = id;
+            map_coords.set(idx_w, w * stride + offset % stride);
+            map_coords.set(idx_h, h * stride + offset / stride);
+            map_coords.set(idx_c, c % out_c);
 
-        // Perform mapping
-        std::memcpy(out.ptr(), in_ptr + _input->info()->offset_element_in_bytes(map_coords), _input->info()->element_size());
-    },
-    out);
+            // Perform mapping
+            std::memcpy(out.ptr(), in_ptr + _input->info()->offset_element_in_bytes(map_coords),
+                        _input->info()->element_size());
+        },
+        out);
 }
 } // namespace arm_compute

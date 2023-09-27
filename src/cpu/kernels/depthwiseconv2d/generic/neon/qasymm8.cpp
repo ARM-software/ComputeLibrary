@@ -26,16 +26,26 @@ namespace arm_compute
 {
 namespace cpu
 {
-void neon_qu8_deptwiseconv2dnative(const ITensor *src, const ITensor *weights, const ITensor *bias,
-                                   ITensor *dst, const Window &window, bool has_biases, const ConvolutionInfo &info)
+void neon_qu8_deptwiseconv2dnative(const ITensor         *src,
+                                   const ITensor         *weights,
+                                   const ITensor         *bias,
+                                   ITensor               *dst,
+                                   const Window          &window,
+                                   bool                   has_biases,
+                                   const ConvolutionInfo &info)
 {
     return run_depthwise_quanitized8bit<uint8_t, uint8_t>(src, weights, bias, dst, window, has_biases, info);
 }
 
-void neon_qp8_qu8_deptwiseconv2dnative(const ITensor *src, const ITensor *weights, const ITensor *bias,
-                                       ITensor *dst, const Window &window, bool has_biases, const ConvolutionInfo &info)
+void neon_qp8_qu8_deptwiseconv2dnative(const ITensor         *src,
+                                       const ITensor         *weights,
+                                       const ITensor         *bias,
+                                       ITensor               *dst,
+                                       const Window          &window,
+                                       bool                   has_biases,
+                                       const ConvolutionInfo &info)
 {
     return run_depthwise_quanitized8bit<uint8_t, int8_t>(src, weights, bias, dst, window, has_biases, info);
 }
-}
+} // namespace cpu
 } // namespace arm_compute

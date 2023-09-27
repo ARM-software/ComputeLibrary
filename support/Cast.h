@@ -46,7 +46,7 @@ namespace cast
 template <typename Target, typename Source>
 inline Target polymorphic_cast(Source *v)
 {
-    if(dynamic_cast<Target>(v) == nullptr)
+    if (dynamic_cast<Target>(v) == nullptr)
     {
         ARM_COMPUTE_THROW(std::bad_cast());
     }
@@ -86,7 +86,7 @@ inline Target polymorphic_downcast(Source *v)
 template <typename Target, typename Source, typename Deleter>
 std::unique_ptr<Target, Deleter> polymorphic_cast_unique_ptr(std::unique_ptr<Source, Deleter> &&v)
 {
-    if(dynamic_cast<Target *>(v.get()) == nullptr)
+    if (dynamic_cast<Target *>(v.get()) == nullptr)
     {
         ARM_COMPUTE_THROW(std::bad_cast());
     }

@@ -24,6 +24,7 @@
 #include "ClComponentCast.h"
 
 #include "arm_compute/core/Error.h"
+
 #include "src/core/CL/CLValidate.h"
 #include "src/dynamic_fusion/sketch/ArgumentPack.h"
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
@@ -38,11 +39,10 @@ namespace experimental
 {
 namespace dynamic_fusion
 {
-Status ClComponentCast::validate(
-    const Properties                &properties,
-    const ArgumentPack<ITensorInfo> &tensors,
-    const Attributes                &attributes,
-    const Settings                  &settings)
+Status ClComponentCast::validate(const Properties                &properties,
+                                 const ArgumentPack<ITensorInfo> &tensors,
+                                 const Attributes                &attributes,
+                                 const Settings                  &settings)
 {
     ARM_COMPUTE_UNUSED(properties, attributes, settings);
 
@@ -53,13 +53,15 @@ Status ClComponentCast::validate(
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(dst);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == attributes.data_type(), "input and target data types should be different");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == attributes.data_type(),
+                                    "input and target data types should be different");
 
     // Validate in case of configured dst
-    if(dst->total_size() > 0)
+    if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() != attributes.data_type(), "dst and target data types should be same");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() != attributes.data_type(),
+                                        "dst and target data types should be same");
     }
 
     return Status{};
@@ -69,17 +71,11 @@ ClComponentCast::ClComponentCast(ComponentId                      id,
                                  const ArgumentPack<ITensorInfo> &tensors,
                                  const Attributes                &attributes,
                                  const Settings                  &settings)
-    : IGpuKernelComponent{ id, properties, tensors },
+    : IGpuKernelComponent{id, properties, tensors},
 #ifndef ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<ClTemplateCast>(id, tensors, attributes)
-}
+      _component_writer{std::make_unique<ClTemplateCast>(id, tensors, attributes)}
 #else  //ACL_INTERNAL_TEST_CKW_IN_DF
-      _component_writer
-{
-    std::make_unique<GpuCkwCast>(id, tensors, attributes)
-}
+      _component_writer{std::make_unique<GpuCkwCast>(id, tensors, attributes)}
 #endif //ACL_INTERNAL_TEST_CKW_IN_DF
 {
     ARM_COMPUTE_UNUSED(attributes, settings);

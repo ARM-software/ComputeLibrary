@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_UTILS_TOGGLEOPTION
 
 #include "SimpleOption.h"
-
 #include <string>
 
 namespace arm_compute
@@ -45,26 +44,23 @@ public:
      */
     ToggleOption(std::string name, bool default_value);
 
-    bool parse(std::string value) override;
+    bool        parse(std::string value) override;
     std::string help() const override;
 };
 
 inline ToggleOption::ToggleOption(std::string name, bool default_value)
-    : SimpleOption<bool>
-{
-    std::move(name), default_value
-}
+    : SimpleOption<bool>{std::move(name), default_value}
 {
 }
 
 inline bool ToggleOption::parse(std::string value)
 {
-    if(value == "true")
+    if (value == "true")
     {
         _value  = true;
         _is_set = true;
     }
-    else if(value == "false")
+    else if (value == "false")
     {
         _value  = false;
         _is_set = true;

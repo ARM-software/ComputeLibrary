@@ -63,7 +63,8 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois tensor.
      */
-    void configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info);
+    void
+    configure(const ITensor *input, const ITensor *rois, const ITensor *output, const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -82,7 +83,10 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo         *input,
+                           const ITensorInfo         *rois,
+                           const ITensorInfo         *output,
+                           const ROIPoolingLayerInfo &pool_info);
 
 private:
     const ITensor      *_input;

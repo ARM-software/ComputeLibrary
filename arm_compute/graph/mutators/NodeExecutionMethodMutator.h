@@ -42,7 +42,7 @@ public:
     // Inherited methods overridden
     virtual void mutate(Graph &g) override;
     MutationType type() const override;
-    const char *name() override;
+    const char  *name() override;
 };
 } // namespace graph
 } // namespace arm_compute

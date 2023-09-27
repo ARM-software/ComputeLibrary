@@ -25,6 +25,7 @@
 #define ACL_SRC_CPU_KERNELS_MAXUNPOOL_GENERIC_NEON_IMPL_H
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 namespace arm_compute
 {
@@ -37,13 +38,15 @@ void max_unpooling(const ITensor *input, const ITensor *indices, ITensor *output
     Iterator  indices_itr(indices, window);
     auto      out_ptr      = reinterpret_cast<T *>(output->buffer());
     const int out_stride_w = static_cast<int>(output->info()->strides_in_bytes()[3]);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        auto vindices                                         = reinterpret_cast<uint32_t *>(indices_itr.ptr());
-        auto vinput                                           = reinterpret_cast<T *>(input_itr.ptr());
-        out_ptr[id[3] * out_stride_w / sizeof(T) + *vindices] = *vinput;
-    },
-    input_itr, indices_itr);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            auto vindices                                         = reinterpret_cast<uint32_t *>(indices_itr.ptr());
+            auto vinput                                           = reinterpret_cast<T *>(input_itr.ptr());
+            out_ptr[id[3] * out_stride_w / sizeof(T) + *vindices] = *vinput;
+        },
+        input_itr, indices_itr);
 }
 } // namespace cpu
 } // namespace arm_compute

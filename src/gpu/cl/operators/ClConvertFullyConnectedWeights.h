@@ -43,14 +43,21 @@ public:
      * @param[in] original_src_shape Shape of the original src tensor (the one entering fully connected layer).
      * @param[in] data_layout        The data layout the weights have been trained in.
      */
-    void configure(const CLCompileContext &compile_context, const ITensorInfo *src, ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
+    void configure(const CLCompileContext &compile_context,
+                   const ITensorInfo      *src,
+                   ITensorInfo            *dst,
+                   const TensorShape      &original_src_shape,
+                   DataLayout              data_layout);
     /** Static function to check if given info will lead to a valid configuration
      *
      * Similar to @ref ClConvertFullyConnectedWeights::configure()
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *dst, const TensorShape &original_src_shape, DataLayout data_layout);
+    static Status validate(const ITensorInfo *src,
+                           const ITensorInfo *dst,
+                           const TensorShape &original_src_shape,
+                           DataLayout         data_layout);
 };
 } // namespace opencl
 } // namespace arm_compute

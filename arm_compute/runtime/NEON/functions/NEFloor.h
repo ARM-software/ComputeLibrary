@@ -24,9 +24,8 @@
 #ifndef ARM_COMPUTE_NEFLOOR_H
 #define ARM_COMPUTE_NEFLOOR_H
 
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 

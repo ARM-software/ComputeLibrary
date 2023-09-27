@@ -66,7 +66,10 @@ public:
      * @param[in]  input_wf  WeightFormat of input.
      * @param[in]  output_wf WeightFormat of output.
      */
-    void configure(const ITensor *input, ITensor *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf);
+    void configure(const ITensor            *input,
+                   ITensor                  *output,
+                   arm_compute::WeightFormat input_wf,
+                   arm_compute::WeightFormat output_wf);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorderLayer
      *
@@ -74,7 +77,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, arm_compute::WeightFormat input_wf, arm_compute::WeightFormat output_wf);
+    static Status validate(const ITensorInfo        *input,
+                           const ITensorInfo        *output,
+                           arm_compute::WeightFormat input_wf,
+                           arm_compute::WeightFormat output_wf);
 
     // Inherited methods overridden:
     void run() override;
@@ -85,4 +91,4 @@ private:
 } // namespace arm_compute
 #endif /* ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER */
 
-#endif  // defined(__aarch64__)
+#endif // defined(__aarch64__)

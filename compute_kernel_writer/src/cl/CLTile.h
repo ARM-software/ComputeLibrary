@@ -25,6 +25,7 @@
 #define COMPUTE_KERNEL_WRITER_SRC_CL_CLTILE_H
 
 #include "src/ITile.h"
+
 #include <string>
 
 namespace ckw
@@ -75,9 +76,9 @@ private:
 
     std::string create_var_name(int32_t row) const;
 
-    TileInfo      _info{ DataType::Unknown };
-    std::string   _basename{ "" };
-    bool          _is_constant{ false };
+    TileInfo      _info{DataType::Unknown};
+    std::string   _basename{""};
+    bool          _is_constant{false};
     TileContainer _vals{};
 };
 } // namespace ckw

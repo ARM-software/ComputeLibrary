@@ -26,10 +26,10 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClCast.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClCast.h"
 
 #include <utility>
 
@@ -37,16 +37,15 @@ namespace arm_compute
 {
 struct CLCast::Impl
 {
-    const ICLTensor                *src{ nullptr };
-    ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClCast> op{ nullptr };
+    const ICLTensor                *src{nullptr};
+    ICLTensor                      *dst{nullptr};
+    std::unique_ptr<opencl::ClCast> op{nullptr};
 };
 
-CLCast::CLCast()
-    : _impl(std::make_unique<Impl>())
+CLCast::CLCast() : _impl(std::make_unique<Impl>())
 {
 }
-CLCast::CLCast(CLCast &&) = default;
+CLCast::CLCast(CLCast &&)            = default;
 CLCast &CLCast::operator=(CLCast &&) = default;
 CLCast::~CLCast()                    = default;
 
@@ -55,7 +54,10 @@ void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, policy);
 }
 
-void CLCast::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
+void CLCast::configure(const CLCompileContext &compile_context,
+                       const ICLTensor        *input,
+                       ICLTensor              *output,
+                       ConvertPolicy           policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_LOG_PARAMS(input, output, policy);
@@ -74,7 +76,7 @@ Status CLCast::validate(const ITensorInfo *input, const ITensorInfo *output, Con
 
 void CLCast::run()
 {
-    ITensorPack pack = { { ACL_SRC, _impl->src }, { ACL_DST, _impl->dst } };
+    ITensorPack pack = {{ACL_SRC, _impl->src}, {ACL_DST, _impl->dst}};
     _impl->op->run(pack);
 }
 } // namespace arm_compute

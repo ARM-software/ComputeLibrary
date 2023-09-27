@@ -37,7 +37,8 @@ namespace kernels
 class CpuAddKernel : public ICpuKernel<CpuAddKernel>
 {
 private:
-    using AddKernelPtr = std::add_pointer<void(const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
+    using AddKernelPtr = std::add_pointer<void(
+        const ITensor *, const ITensor *, ITensor *, const ConvertPolicy &, const Window &)>::type;
 
 public:
     struct AddKernel
@@ -74,10 +75,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
+    static Status
+    validate(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
+    void        run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
     const char *name() const override;
 
     /** Return minimum workload size of the relevant kernel
@@ -98,9 +100,9 @@ public:
 
 private:
     ConvertPolicy _policy{};
-    AddKernelPtr  _run_method{ nullptr };
+    AddKernelPtr  _run_method{nullptr};
     std::string   _name{};
-    size_t        _split_dimension{ Window::DimY };
+    size_t        _split_dimension{Window::DimY};
 };
 } // namespace kernels
 } // namespace cpu

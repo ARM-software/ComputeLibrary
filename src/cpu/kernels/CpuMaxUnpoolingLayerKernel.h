@@ -37,7 +37,8 @@ namespace kernels
 class CpuMaxUnpoolingLayerKernel : public ICpuKernel<CpuMaxUnpoolingLayerKernel>
 {
 private:
-    using MaxUnpoolingUKernelPtr = std::add_pointer<void(const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)>::type;
+    using MaxUnpoolingUKernelPtr = std::add_pointer<void(
+        const ITensor *input, const ITensor *indices, ITensor *output, const Window &window)>::type;
 
 public:
     /** Default constructor */
@@ -56,7 +57,8 @@ public:
      * @param[out] dst       Destination tensor. Data types supported: Same as @p src
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
-    void configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info);
+    void
+    configure(const ITensorInfo *src, const ITensorInfo *indices, ITensorInfo *dst, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CpuMaxUnpoolingLayerKernel
      *
      * @param[in]  src       Source tensor to permute. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -66,7 +68,10 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *src, const ITensorInfo *indices, const ITensorInfo *dst, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo      *src,
+                           const ITensorInfo      *indices,
+                           const ITensorInfo      *dst,
+                           const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info) override;
@@ -83,7 +88,7 @@ public:
     const char *name() const override;
 
 private:
-    MaxUnpoolingUKernelPtr _run_method{ nullptr };
+    MaxUnpoolingUKernelPtr _run_method{nullptr};
 };
 
 } // namespace kernels

@@ -23,8 +23,10 @@
  */
 
 #include "src/cpu/kernels/add/generic/neon/impl.h"
+
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/utils/misc/Traits.h"
+
 #include "src/core/NEON/wrapper/wrapper.h"
 namespace arm_compute
 {
@@ -40,7 +42,10 @@ bool add_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo 
     return add_sub_q8_neon_fixedpoint_possible(src0, src1, dst, true);
 }
 
-bool add_sub_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorInfo *src1, const ITensorInfo *dst, bool is_addition)
+bool add_sub_q8_neon_fixedpoint_possible(const ITensorInfo *src0,
+                                         const ITensorInfo *src1,
+                                         const ITensorInfo *dst,
+                                         bool               is_addition)
 {
     const auto iq0 = src0->quantization_info().uniform();
     const auto iq1 = src1->quantization_info().uniform();
@@ -49,7 +54,7 @@ bool add_sub_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorI
     const auto scale0 = iq0.scale / oq.scale;
     const auto scale1 = iq1.scale / oq.scale;
 
-    if(scale0 < -15.f || scale0 > 15.f || scale1 < -15.f || scale1 > 15.f)
+    if (scale0 < -15.f || scale0 > 15.f || scale1 < -15.f || scale1 > 15.f)
     {
         // The scale factor cannot be stored as 5.11 signed fixed-point number.
         return false;
@@ -57,9 +62,10 @@ bool add_sub_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorI
 
     const auto offset = float(oq.offset) - scale0 * float(iq0.offset) - scale1 * float(iq1.offset);
 
-    const auto max_acc = is_addition ? ((std::abs(scale0) + std::abs(scale1)) * 256.f + std::abs(offset)) : ((std::abs(scale0) - std::abs(scale1)) * 256.f + std::abs(offset));
+    const auto max_acc = is_addition ? ((std::abs(scale0) + std::abs(scale1)) * 256.f + std::abs(offset))
+                                     : ((std::abs(scale0) - std::abs(scale1)) * 256.f + std::abs(offset));
 
-    if(max_acc > 1048575.f) // 2^20 - 1
+    if (max_acc > 1048575.f) // 2^20 - 1
     {
         // It might not be possible to store the result as 21.11 signed fixed-point number.
         return false;
@@ -69,13 +75,19 @@ bool add_sub_q8_neon_fixedpoint_possible(const ITensorInfo *src0, const ITensorI
 }
 
 template <typename ScalarType>
-void add_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+void add_q8_neon_fixedpoint(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
 {
     add_sub_q8_neon_fixedpoint<ScalarType>(src0, src1, dst, policy, window, true /*is_addition*/);
 }
 
 template <typename ScalarType>
-void add_sub_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition)
+void add_sub_q8_neon_fixedpoint(const ITensor       *src0,
+                                const ITensor       *src1,
+                                ITensor             *dst,
+                                const ConvertPolicy &policy,
+                                const Window        &window,
+                                bool                 is_addition)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -103,7 +115,7 @@ void add_sub_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITenso
     const auto oq_info   = dst->info()->quantization_info().uniform();
     const auto in0_scale = iq0_info.scale / oq_info.scale;
     const auto in1_scale = is_addition ? (iq1_info.scale / oq_info.scale) : (-(iq1_info.scale / oq_info.scale));
-    const auto offset    = float(oq_info.offset) - in0_scale * float(iq0_info.offset) - in1_scale * float(iq1_info.offset);
+    const auto offset = float(oq_info.offset) - in0_scale * float(iq0_info.offset) - in1_scale * float(iq1_info.offset);
 
     constexpr float _2pow11        = 2048;
     const auto      in0_scale_5p11 = static_cast<int16_t>(support::cpp11::lround(in0_scale * _2pow11));
@@ -112,7 +124,7 @@ void add_sub_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITenso
 
     constexpr uint8_t shift_amount_remainder = 3;
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         // Prefix: a = non-broadcast, b = broadcast.
 
@@ -138,68 +150,75 @@ void add_sub_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITenso
         Iterator out_it(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto a_ptr   = reinterpret_cast<const ScalarType *>(a_input_it.ptr());
-            const auto b_ptr   = reinterpret_cast<const ScalarType *>(b_input_it.ptr());
-            const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
+            win,
+            [&](const Coordinates &)
+            {
+                const auto a_ptr   = reinterpret_cast<const ScalarType *>(a_input_it.ptr());
+                const auto b_ptr   = reinterpret_cast<const ScalarType *>(b_input_it.ptr());
+                const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
 
-            const auto b_val                    = *b_ptr;
-            const auto b_scaled                 = b_scale * b_val;
-            const auto b_scaled_21p11           = static_cast<int32_t>(support::cpp11::lround(b_scaled * _2pow11));
-            const auto b_scaled_offseted_21p11  = b_scaled_21p11 + offset_21p11;
-            const auto b_vscaled_offseted_21p11 = wrapper::vdup_n(b_scaled_offseted_21p11, wrapper::traits::vector_128_tag());
+                const auto b_val                   = *b_ptr;
+                const auto b_scaled                = b_scale * b_val;
+                const auto b_scaled_21p11          = static_cast<int32_t>(support::cpp11::lround(b_scaled * _2pow11));
+                const auto b_scaled_offseted_21p11 = b_scaled_21p11 + offset_21p11;
+                const auto b_vscaled_offseted_21p11 =
+                    wrapper::vdup_n(b_scaled_offseted_21p11, wrapper::traits::vector_128_tag());
 
 #ifndef __aarch64__
-            const auto b_scaled_offseted = b_scaled + offset;
+                const auto b_scaled_offseted = b_scaled + offset;
 #endif // __aarch64__
 
-            int x = window_start_x;
+                int x = window_start_x;
 
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
-            {
-                // Load the input.
-                const auto a_vin_8p0 = wrapper::vloadq(a_ptr + x);
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    // Load the input.
+                    const auto a_vin_8p0 = wrapper::vloadq(a_ptr + x);
 
-                // Widen the non-broadcast elements to signed 16-bit regardless of the input signedness.
-                const auto a_vin_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(a_vin_8p0)));
-                const auto a_vin_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(a_vin_8p0)));
+                    // Widen the non-broadcast elements to signed 16-bit regardless of the input signedness.
+                    const auto a_vin_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(a_vin_8p0)));
+                    const auto a_vin_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(a_vin_8p0)));
 
-                // Multiply the non-broadcast elements by the scale factor, add the scaled broadcast elements and the offset.
-                // Widen and store the result in 32-bit integer.
-                const auto vout_21p11_00 = wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgetlow(a_vin_16p0_0), a_vscale_5p11);
-                const auto vout_21p11_01 = wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgethigh(a_vin_16p0_0), a_vscale_5p11);
-                const auto vout_21p11_10 = wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgetlow(a_vin_16p0_1), a_vscale_5p11);
-                const auto vout_21p11_11 = wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgethigh(a_vin_16p0_1), a_vscale_5p11);
+                    // Multiply the non-broadcast elements by the scale factor, add the scaled broadcast elements and the offset.
+                    // Widen and store the result in 32-bit integer.
+                    const auto vout_21p11_00 =
+                        wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgetlow(a_vin_16p0_0), a_vscale_5p11);
+                    const auto vout_21p11_01 =
+                        wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgethigh(a_vin_16p0_0), a_vscale_5p11);
+                    const auto vout_21p11_10 =
+                        wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgetlow(a_vin_16p0_1), a_vscale_5p11);
+                    const auto vout_21p11_11 =
+                        wrapper::vmlal(b_vscaled_offseted_21p11, wrapper::vgethigh(a_vin_16p0_1), a_vscale_5p11);
 
-                // Remove 3 bits of the fractional part, round, narrow to 16-bit and saturate the result.
-                const auto vout_8p8_0 = wrapper::vcombine(
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_00),
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_01));
-                const auto vout_8p8_1 = wrapper::vcombine(
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_10),
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_11));
+                    // Remove 3 bits of the fractional part, round, narrow to 16-bit and saturate the result.
+                    const auto vout_8p8_0 =
+                        wrapper::vcombine(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_00),
+                                          wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_01));
+                    const auto vout_8p8_1 =
+                        wrapper::vcombine(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_10),
+                                          wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_11));
 
-                // Remove 8 bits of the fractional part, round, narrow to 8-bit and saturate the result.
-                const auto vout_8p0 = wrapper::vcombine(
-                                          wrapper::vqrshrn<8>(vout_8p8_0),
-                                          wrapper::vqrshrn<8>(vout_8p8_1));
+                    // Remove 8 bits of the fractional part, round, narrow to 8-bit and saturate the result.
+                    const auto vout_8p0 =
+                        wrapper::vcombine(wrapper::vqrshrn<8>(vout_8p8_0), wrapper::vqrshrn<8>(vout_8p8_1));
 
-                // Store the result.
-                wrapper::vstore(out_ptr + x, vout_8p0);
-            }
+                    // Store the result.
+                    wrapper::vstore(out_ptr + x, vout_8p0);
+                }
 
-            // Process the left-over elements.
-            for(; x < window_end_x; ++x)
-            {
+                // Process the left-over elements.
+                for (; x < window_end_x; ++x)
+                {
 #ifdef __aarch64__
-                out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(int32_t(a_ptr[x]) * a_scale_5p11 + b_scaled_offseted_21p11));
+                    out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(
+                        int32_t(a_ptr[x]) * a_scale_5p11 + b_scaled_offseted_21p11));
 #else  // __aarch64__
-                out_ptr[x] = utility::clamp<int, ScalarType>(support::cpp11::lround(float(a_ptr[x]) * a_scale + b_scaled_offseted));
+                    out_ptr[x] = utility::clamp<int, ScalarType>(
+                        support::cpp11::lround(float(a_ptr[x]) * a_scale + b_scaled_offseted));
 #endif // __aarch64__
-            }
-        },
-        b_input_it, a_input_it, out_it);
+                }
+            },
+            b_input_it, a_input_it, out_it);
     }
     else
     {
@@ -216,70 +235,85 @@ void add_sub_q8_neon_fixedpoint(const ITensor *src0, const ITensor *src1, ITenso
         Iterator out_it(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto in0_ptr = reinterpret_cast<const ScalarType *>(in0_it.ptr());
-            const auto in1_ptr = reinterpret_cast<const ScalarType *>(in1_it.ptr());
-            const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
-
-            int x = window_start_x;
-
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                // Load the inputs.
-                const auto vin0_8p0 = wrapper::vloadq(in0_ptr + x);
-                const auto vin1_8p0 = wrapper::vloadq(in1_ptr + x);
+                const auto in0_ptr = reinterpret_cast<const ScalarType *>(in0_it.ptr());
+                const auto in1_ptr = reinterpret_cast<const ScalarType *>(in1_it.ptr());
+                const auto out_ptr = reinterpret_cast<ScalarType *>(out_it.ptr());
 
-                // Widen the input elements to signed 16-bit regardless of the input signedness.
-                const auto vin0_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin0_8p0)));
-                const auto vin0_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin0_8p0)));
-                const auto vin1_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin1_8p0)));
-                const auto vin1_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin1_8p0)));
+                int x = window_start_x;
 
-                // Multiply the input elements by the scale factor and add the offset.
-                // Widen and store the result in 32-bit integer.
-                const auto vscaled0_offseted_21p11_00 = wrapper::vmlal(voffset_21p11, wrapper::vgetlow(vin0_16p0_0), vscale0_5p11);
-                const auto vscaled0_offseted_21p11_01 = wrapper::vmlal(voffset_21p11, wrapper::vgethigh(vin0_16p0_0), vscale0_5p11);
-                const auto vscaled0_offseted_21p11_10 = wrapper::vmlal(voffset_21p11, wrapper::vgetlow(vin0_16p0_1), vscale0_5p11);
-                const auto vscaled0_offseted_21p11_11 = wrapper::vmlal(voffset_21p11, wrapper::vgethigh(vin0_16p0_1), vscale0_5p11);
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    // Load the inputs.
+                    const auto vin0_8p0 = wrapper::vloadq(in0_ptr + x);
+                    const auto vin1_8p0 = wrapper::vloadq(in1_ptr + x);
 
-                const auto vout_21p11_00 = wrapper::vmlal(vscaled0_offseted_21p11_00, wrapper::vgetlow(vin1_16p0_0), vscale1_5p11);
-                const auto vout_21p11_01 = wrapper::vmlal(vscaled0_offseted_21p11_01, wrapper::vgethigh(vin1_16p0_0), vscale1_5p11);
-                const auto vout_21p11_10 = wrapper::vmlal(vscaled0_offseted_21p11_10, wrapper::vgetlow(vin1_16p0_1), vscale1_5p11);
-                const auto vout_21p11_11 = wrapper::vmlal(vscaled0_offseted_21p11_11, wrapper::vgethigh(vin1_16p0_1), vscale1_5p11);
+                    // Widen the input elements to signed 16-bit regardless of the input signedness.
+                    const auto vin0_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin0_8p0)));
+                    const auto vin0_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin0_8p0)));
+                    const auto vin1_16p0_0 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgetlow(vin1_8p0)));
+                    const auto vin1_16p0_1 = wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(vin1_8p0)));
 
-                // Remove 3 bits of the fractional part, round, narrow to 16-bit and saturate the result.
-                const auto vout_8p8_0 = wrapper::vcombine(
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_00),
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_01));
-                const auto vout_8p8_1 = wrapper::vcombine(
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_10),
-                                            wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_11));
+                    // Multiply the input elements by the scale factor and add the offset.
+                    // Widen and store the result in 32-bit integer.
+                    const auto vscaled0_offseted_21p11_00 =
+                        wrapper::vmlal(voffset_21p11, wrapper::vgetlow(vin0_16p0_0), vscale0_5p11);
+                    const auto vscaled0_offseted_21p11_01 =
+                        wrapper::vmlal(voffset_21p11, wrapper::vgethigh(vin0_16p0_0), vscale0_5p11);
+                    const auto vscaled0_offseted_21p11_10 =
+                        wrapper::vmlal(voffset_21p11, wrapper::vgetlow(vin0_16p0_1), vscale0_5p11);
+                    const auto vscaled0_offseted_21p11_11 =
+                        wrapper::vmlal(voffset_21p11, wrapper::vgethigh(vin0_16p0_1), vscale0_5p11);
 
-                // Remove 8 bits of the fractional part, round, narrow to 8-bit and saturate the result.
-                const auto vout_8p0 = wrapper::vcombine(
-                                          wrapper::vqrshrn<8>(vout_8p8_0),
-                                          wrapper::vqrshrn<8>(vout_8p8_1));
+                    const auto vout_21p11_00 =
+                        wrapper::vmlal(vscaled0_offseted_21p11_00, wrapper::vgetlow(vin1_16p0_0), vscale1_5p11);
+                    const auto vout_21p11_01 =
+                        wrapper::vmlal(vscaled0_offseted_21p11_01, wrapper::vgethigh(vin1_16p0_0), vscale1_5p11);
+                    const auto vout_21p11_10 =
+                        wrapper::vmlal(vscaled0_offseted_21p11_10, wrapper::vgetlow(vin1_16p0_1), vscale1_5p11);
+                    const auto vout_21p11_11 =
+                        wrapper::vmlal(vscaled0_offseted_21p11_11, wrapper::vgethigh(vin1_16p0_1), vscale1_5p11);
 
-                // Store the result.
-                wrapper::vstore(out_ptr + x, vout_8p0);
-            }
+                    // Remove 3 bits of the fractional part, round, narrow to 16-bit and saturate the result.
+                    const auto vout_8p8_0 =
+                        wrapper::vcombine(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_00),
+                                          wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_01));
+                    const auto vout_8p8_1 =
+                        wrapper::vcombine(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_10),
+                                          wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(vout_21p11_11));
 
-            // Process the left-over elements.
-            for(; x < window_end_x; ++x)
-            {
+                    // Remove 8 bits of the fractional part, round, narrow to 8-bit and saturate the result.
+                    const auto vout_8p0 =
+                        wrapper::vcombine(wrapper::vqrshrn<8>(vout_8p8_0), wrapper::vqrshrn<8>(vout_8p8_1));
+
+                    // Store the result.
+                    wrapper::vstore(out_ptr + x, vout_8p0);
+                }
+
+                // Process the left-over elements.
+                for (; x < window_end_x; ++x)
+                {
 #ifdef __aarch64__
-                out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(int32_t(in0_ptr[x]) * in0_scale_5p11 + int32_t(in1_ptr[x]) * in1_scale_5p11 + offset_21p11));
+                    out_ptr[x] = wrapper::vqrshrn<8>(wrapper::vqrshrn_ex<shift_amount_remainder, ScalarType>(
+                        int32_t(in0_ptr[x]) * in0_scale_5p11 + int32_t(in1_ptr[x]) * in1_scale_5p11 + offset_21p11));
 #else  // __aarch64__
-                out_ptr[x] = utility::clamp<int, ScalarType>(support::cpp11::lround(float(in0_ptr[x]) * in0_scale + float(in1_ptr[x]) * in1_scale + offset));
+                    out_ptr[x] = utility::clamp<int, ScalarType>(
+                        support::cpp11::lround(float(in0_ptr[x]) * in0_scale + float(in1_ptr[x]) * in1_scale + offset));
 #endif // __aarch64__
-            }
-        },
-        in0_it, in1_it, out_it);
+                }
+            },
+            in0_it, in1_it, out_it);
     }
 }
 
-void add_sub_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition)
+void add_sub_qasymm8_neon(const ITensor       *src0,
+                          const ITensor       *src1,
+                          ITensor             *dst,
+                          const ConvertPolicy &policy,
+                          const Window        &window,
+                          bool                 is_addition)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -304,7 +338,7 @@ void add_sub_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst
     const auto scale2 = is_addition ? (iq2_info.scale / oq_info.scale) : (-(iq2_info.scale / oq_info.scale));
     const auto offset = float(oq_info.offset) - scale1 * float(iq1_info.offset) - scale2 * float(iq2_info.offset);
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
@@ -324,63 +358,64 @@ void add_sub_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst
         Iterator output(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto non_broadcast_input_ptr = non_broadcast_input.ptr();
-            const auto output_ptr              = output.ptr();
-
-            const auto broadcast_value = *broadcast_input.ptr();
-            const auto bf              = vdupq_n_f32(float(broadcast_value) * scale2 + offset);
-            const auto bfs             = float(broadcast_value) * bf_scale + offset;
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const uint8x16_t a = vld1q_u8(non_broadcast_input_ptr + x);
+                const auto non_broadcast_input_ptr = non_broadcast_input.ptr();
+                const auto output_ptr              = output.ptr();
 
-                const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
-                const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
+                const auto broadcast_value = *broadcast_input.ptr();
+                const auto bf              = vdupq_n_f32(float(broadcast_value) * scale2 + offset);
+                const auto bfs             = float(broadcast_value) * bf_scale + offset;
 
-                const auto af_0 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
-                const auto af_1 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
-                const auto af_2 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
-                const auto af_3 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    const uint8x16_t a = vld1q_u8(non_broadcast_input_ptr + x);
 
-                int32x4_t rf_0{};
-                int32x4_t rf_1{};
-                int32x4_t rf_2{};
-                int32x4_t rf_3{};
+                    const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
+                    const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
+
+                    const auto af_0 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
+                    const auto af_1 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
+                    const auto af_2 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
+                    const auto af_3 = vmlaq_f32(bf, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
+
+                    int32x4_t rf_0{};
+                    int32x4_t rf_1{};
+                    int32x4_t rf_2{};
+                    int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(af_0);
-                rf_1 = vcvtnq_s32_f32(af_1);
-                rf_2 = vcvtnq_s32_f32(af_2);
-                rf_3 = vcvtnq_s32_f32(af_3);
+                    rf_0 = vcvtnq_s32_f32(af_0);
+                    rf_1 = vcvtnq_s32_f32(af_1);
+                    rf_2 = vcvtnq_s32_f32(af_2);
+                    rf_3 = vcvtnq_s32_f32(af_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(af_0);
-                rf_1 = vcvtq_s32_f32(af_1);
-                rf_2 = vcvtq_s32_f32(af_2);
-                rf_3 = vcvtq_s32_f32(af_3);
+                    rf_0          = vcvtq_s32_f32(af_0);
+                    rf_1          = vcvtq_s32_f32(af_1);
+                    rf_2          = vcvtq_s32_f32(af_2);
+                    rf_3          = vcvtq_s32_f32(af_3);
 #endif //__aarch64__
 
-                const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
-                const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
-                vst1q_u8(output_ptr + x, vcombine_u8(pa, pb));
-            }
+                    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
+                    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
+                    vst1q_u8(output_ptr + x, vcombine_u8(pa, pb));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto result = float(non_broadcast_input_ptr[x]) * af_scale + bfs;
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto result = float(non_broadcast_input_ptr[x]) * af_scale + bfs;
 #ifdef __aarch64__
-                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
+                    output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
 #else  // __aarch64__
-                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
+                    output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
 #endif // __aarch64__
-            }
-        },
-        broadcast_input, non_broadcast_input, output);
+                }
+            },
+            broadcast_input, non_broadcast_input, output);
     }
     else
     {
@@ -397,72 +432,78 @@ void add_sub_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst
         const auto voffset = vdupq_n_f32(offset);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto input1_ptr = input1.ptr();
-            const auto input2_ptr = input2.ptr();
-            const auto output_ptr = output.ptr();
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const uint8x16_t a = vld1q_u8(input1_ptr + x);
-                const uint8x16_t b = vld1q_u8(input2_ptr + x);
+                const auto input1_ptr = input1.ptr();
+                const auto input2_ptr = input2.ptr();
+                const auto output_ptr = output.ptr();
 
-                const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
-                const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
-                const auto b_u16_0 = vmovl_u8(vget_low_u8(b));
-                const auto b_u16_1 = vmovl_u8(vget_high_u8(b));
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    const uint8x16_t a = vld1q_u8(input1_ptr + x);
+                    const uint8x16_t b = vld1q_u8(input2_ptr + x);
 
-                const auto af_0 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
-                const auto af_1 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
-                const auto af_2 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
-                const auto af_3 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
+                    const auto a_u16_0 = vmovl_u8(vget_low_u8(a));
+                    const auto a_u16_1 = vmovl_u8(vget_high_u8(a));
+                    const auto b_u16_0 = vmovl_u8(vget_low_u8(b));
+                    const auto b_u16_1 = vmovl_u8(vget_high_u8(b));
 
-                const auto bf_0 = vmlaq_f32(af_0, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_0))), vscale2);
-                const auto bf_1 = vmlaq_f32(af_1, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_0))), vscale2);
-                const auto bf_2 = vmlaq_f32(af_2, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_1))), vscale2);
-                const auto bf_3 = vmlaq_f32(af_3, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_1))), vscale2);
+                    const auto af_0 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_0))), vscale1);
+                    const auto af_1 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_0))), vscale1);
+                    const auto af_2 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_low_u16(a_u16_1))), vscale1);
+                    const auto af_3 = vmlaq_f32(voffset, vcvtq_f32_u32(vmovl_u16(vget_high_u16(a_u16_1))), vscale1);
 
-                int32x4_t rf_0{};
-                int32x4_t rf_1{};
-                int32x4_t rf_2{};
-                int32x4_t rf_3{};
+                    const auto bf_0 = vmlaq_f32(af_0, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_0))), vscale2);
+                    const auto bf_1 = vmlaq_f32(af_1, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_0))), vscale2);
+                    const auto bf_2 = vmlaq_f32(af_2, vcvtq_f32_u32(vmovl_u16(vget_low_u16(b_u16_1))), vscale2);
+                    const auto bf_3 = vmlaq_f32(af_3, vcvtq_f32_u32(vmovl_u16(vget_high_u16(b_u16_1))), vscale2);
+
+                    int32x4_t rf_0{};
+                    int32x4_t rf_1{};
+                    int32x4_t rf_2{};
+                    int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(bf_0);
-                rf_1 = vcvtnq_s32_f32(bf_1);
-                rf_2 = vcvtnq_s32_f32(bf_2);
-                rf_3 = vcvtnq_s32_f32(bf_3);
+                    rf_0 = vcvtnq_s32_f32(bf_0);
+                    rf_1 = vcvtnq_s32_f32(bf_1);
+                    rf_2 = vcvtnq_s32_f32(bf_2);
+                    rf_3 = vcvtnq_s32_f32(bf_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(bf_0);
-                rf_1 = vcvtq_s32_f32(bf_1);
-                rf_2 = vcvtq_s32_f32(bf_2);
-                rf_3 = vcvtq_s32_f32(bf_3);
+                    rf_0          = vcvtq_s32_f32(bf_0);
+                    rf_1          = vcvtq_s32_f32(bf_1);
+                    rf_2          = vcvtq_s32_f32(bf_2);
+                    rf_3          = vcvtq_s32_f32(bf_3);
 #endif //__aarch64__
 
-                const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
-                const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
-                vst1q_u8(output_ptr + x, vcombine_u8(pa, pb));
-            }
+                    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
+                    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
+                    vst1q_u8(output_ptr + x, vcombine_u8(pa, pb));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto result = float(input1_ptr[x]) * scale1 + float(input2_ptr[x]) * scale2 + offset;
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto result = float(input1_ptr[x]) * scale1 + float(input2_ptr[x]) * scale2 + offset;
 #ifdef __aarch64__
-                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
+                    output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::lround(result));
 #else  // __aarch64__
-                output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
+                    output_ptr[x] = utility::clamp<int, uint8_t>(support::cpp11::trunc(result));
 #endif // __aarch64__
-            }
-        },
-        input1, input2, output);
+                }
+            },
+            input1, input2, output);
     }
 }
 
-void add_sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition)
+void add_sub_qasymm8_signed_neon(const ITensor       *src0,
+                                 const ITensor       *src1,
+                                 ITensor             *dst,
+                                 const ConvertPolicy &policy,
+                                 const Window        &window,
+                                 bool                 is_addition)
 {
     ARM_COMPUTE_UNUSED(policy);
 
@@ -487,7 +528,7 @@ void add_sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITens
     const auto scale2 = is_addition ? (iq2_info.scale / oq_info.scale) : (-(iq2_info.scale / oq_info.scale));
     const auto offset = float(oq_info.offset) - scale1 * float(iq1_info.offset) - scale2 * float(iq2_info.offset);
 
-    if(is_broadcast_across_x)
+    if (is_broadcast_across_x)
     {
         const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
         Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
@@ -507,63 +548,64 @@ void add_sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITens
         Iterator output(dst, win);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto non_broadcast_input_ptr = reinterpret_cast<const int8_t *>(non_broadcast_input.ptr());
-            const auto output_ptr              = reinterpret_cast<int8_t *>(output.ptr());
-
-            const auto broadcast_value = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
-            const auto bf              = vdupq_n_f32(float(broadcast_value) * scale2 + offset);
-            const auto bfs             = float(broadcast_value) * bf_scale + offset;
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const int8x16_t a = vld1q_s8(non_broadcast_input_ptr + x);
+                const auto non_broadcast_input_ptr = reinterpret_cast<const int8_t *>(non_broadcast_input.ptr());
+                const auto output_ptr              = reinterpret_cast<int8_t *>(output.ptr());
 
-                const auto a_s16_0 = vmovl_s8(vget_low_s8(a));
-                const auto a_s16_1 = vmovl_s8(vget_high_s8(a));
+                const auto broadcast_value = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
+                const auto bf              = vdupq_n_f32(float(broadcast_value) * scale2 + offset);
+                const auto bfs             = float(broadcast_value) * bf_scale + offset;
 
-                const auto af_0 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_0))), vscale1);
-                const auto af_1 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_0))), vscale1);
-                const auto af_2 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_1))), vscale1);
-                const auto af_3 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_1))), vscale1);
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    const int8x16_t a = vld1q_s8(non_broadcast_input_ptr + x);
 
-                int32x4_t rf_0{};
-                int32x4_t rf_1{};
-                int32x4_t rf_2{};
-                int32x4_t rf_3{};
+                    const auto a_s16_0 = vmovl_s8(vget_low_s8(a));
+                    const auto a_s16_1 = vmovl_s8(vget_high_s8(a));
+
+                    const auto af_0 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_0))), vscale1);
+                    const auto af_1 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_0))), vscale1);
+                    const auto af_2 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_1))), vscale1);
+                    const auto af_3 = vmlaq_f32(bf, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_1))), vscale1);
+
+                    int32x4_t rf_0{};
+                    int32x4_t rf_1{};
+                    int32x4_t rf_2{};
+                    int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(af_0);
-                rf_1 = vcvtnq_s32_f32(af_1);
-                rf_2 = vcvtnq_s32_f32(af_2);
-                rf_3 = vcvtnq_s32_f32(af_3);
+                    rf_0 = vcvtnq_s32_f32(af_0);
+                    rf_1 = vcvtnq_s32_f32(af_1);
+                    rf_2 = vcvtnq_s32_f32(af_2);
+                    rf_3 = vcvtnq_s32_f32(af_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(af_0);
-                rf_1 = vcvtq_s32_f32(af_1);
-                rf_2 = vcvtq_s32_f32(af_2);
-                rf_3 = vcvtq_s32_f32(af_3);
+                    rf_0          = vcvtq_s32_f32(af_0);
+                    rf_1          = vcvtq_s32_f32(af_1);
+                    rf_2          = vcvtq_s32_f32(af_2);
+                    rf_3          = vcvtq_s32_f32(af_3);
 #endif //__aarch64__
 
-                const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
-                const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
-                vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
-            }
+                    const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
+                    const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
+                    vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto result = float(non_broadcast_input_ptr[x]) * af_scale + bfs;
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto result = float(non_broadcast_input_ptr[x]) * af_scale + bfs;
 #ifdef __aarch64__
-                output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::lround(result));
+                    output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::lround(result));
 #else  // __aarch64__
-                output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::trunc(result));
+                    output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::trunc(result));
 #endif // __aarch64__
-            }
-        },
-        broadcast_input, non_broadcast_input, output);
+                }
+            },
+            broadcast_input, non_broadcast_input, output);
     }
     else
     {
@@ -580,79 +622,102 @@ void add_sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITens
         const auto voffset = vdupq_n_f32(offset);
 
         execute_window_loop(
-            win, [&](const Coordinates &)
-        {
-            const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
-            const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
-            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
-
-            // Compute S elements per iteration
-            int x = window_start_x;
-            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            win,
+            [&](const Coordinates &)
             {
-                const int8x16_t a = vld1q_s8(input1_ptr + x);
-                const int8x16_t b = vld1q_s8(input2_ptr + x);
+                const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
+                const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
+                const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                const auto a_s16_0 = vmovl_s8(vget_low_s8(a));
-                const auto a_s16_1 = vmovl_s8(vget_high_s8(a));
-                const auto b_s16_0 = vmovl_s8(vget_low_s8(b));
-                const auto b_s16_1 = vmovl_s8(vget_high_s8(b));
+                // Compute S elements per iteration
+                int x = window_start_x;
+                for (; x <= (window_end_x - window_step_x); x += window_step_x)
+                {
+                    const int8x16_t a = vld1q_s8(input1_ptr + x);
+                    const int8x16_t b = vld1q_s8(input2_ptr + x);
 
-                const auto af_0 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_0))), vscale1);
-                const auto af_1 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_0))), vscale1);
-                const auto af_2 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_1))), vscale1);
-                const auto af_3 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_1))), vscale1);
+                    const auto a_s16_0 = vmovl_s8(vget_low_s8(a));
+                    const auto a_s16_1 = vmovl_s8(vget_high_s8(a));
+                    const auto b_s16_0 = vmovl_s8(vget_low_s8(b));
+                    const auto b_s16_1 = vmovl_s8(vget_high_s8(b));
 
-                const auto bf_0 = vmlaq_f32(af_0, vcvtq_f32_s32(vmovl_s16(vget_low_s16(b_s16_0))), vscale2);
-                const auto bf_1 = vmlaq_f32(af_1, vcvtq_f32_s32(vmovl_s16(vget_high_s16(b_s16_0))), vscale2);
-                const auto bf_2 = vmlaq_f32(af_2, vcvtq_f32_s32(vmovl_s16(vget_low_s16(b_s16_1))), vscale2);
-                const auto bf_3 = vmlaq_f32(af_3, vcvtq_f32_s32(vmovl_s16(vget_high_s16(b_s16_1))), vscale2);
+                    const auto af_0 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_0))), vscale1);
+                    const auto af_1 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_0))), vscale1);
+                    const auto af_2 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_low_s16(a_s16_1))), vscale1);
+                    const auto af_3 = vmlaq_f32(voffset, vcvtq_f32_s32(vmovl_s16(vget_high_s16(a_s16_1))), vscale1);
 
-                int32x4_t rf_0{};
-                int32x4_t rf_1{};
-                int32x4_t rf_2{};
-                int32x4_t rf_3{};
+                    const auto bf_0 = vmlaq_f32(af_0, vcvtq_f32_s32(vmovl_s16(vget_low_s16(b_s16_0))), vscale2);
+                    const auto bf_1 = vmlaq_f32(af_1, vcvtq_f32_s32(vmovl_s16(vget_high_s16(b_s16_0))), vscale2);
+                    const auto bf_2 = vmlaq_f32(af_2, vcvtq_f32_s32(vmovl_s16(vget_low_s16(b_s16_1))), vscale2);
+                    const auto bf_3 = vmlaq_f32(af_3, vcvtq_f32_s32(vmovl_s16(vget_high_s16(b_s16_1))), vscale2);
+
+                    int32x4_t rf_0{};
+                    int32x4_t rf_1{};
+                    int32x4_t rf_2{};
+                    int32x4_t rf_3{};
 
 #ifdef __aarch64__
-                rf_0 = vcvtnq_s32_f32(bf_0);
-                rf_1 = vcvtnq_s32_f32(bf_1);
-                rf_2 = vcvtnq_s32_f32(bf_2);
-                rf_3 = vcvtnq_s32_f32(bf_3);
+                    rf_0 = vcvtnq_s32_f32(bf_0);
+                    rf_1 = vcvtnq_s32_f32(bf_1);
+                    rf_2 = vcvtnq_s32_f32(bf_2);
+                    rf_3 = vcvtnq_s32_f32(bf_3);
 #else  //__aarch64__
-                rf_0 = vcvtq_s32_f32(bf_0);
-                rf_1 = vcvtq_s32_f32(bf_1);
-                rf_2 = vcvtq_s32_f32(bf_2);
-                rf_3 = vcvtq_s32_f32(bf_3);
+                    rf_0          = vcvtq_s32_f32(bf_0);
+                    rf_1          = vcvtq_s32_f32(bf_1);
+                    rf_2          = vcvtq_s32_f32(bf_2);
+                    rf_3          = vcvtq_s32_f32(bf_3);
 #endif //__aarch64__
 
-                const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
-                const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
-                vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
-            }
+                    const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_0), vqmovn_s32(rf_1)));
+                    const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf_2), vqmovn_s32(rf_3)));
+                    vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
+                }
 
-            // Compute left-over elements
-            for(; x < window_end_x; ++x)
-            {
-                const auto result = float(input1_ptr[x]) * scale1 + float(input2_ptr[x]) * scale2 + offset;
+                // Compute left-over elements
+                for (; x < window_end_x; ++x)
+                {
+                    const auto result = float(input1_ptr[x]) * scale1 + float(input2_ptr[x]) * scale2 + offset;
 #ifdef __aarch64__
-                output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::lround(result));
+                    output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::lround(result));
 #else  // __aarch64__
-                output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::trunc(result));
+                    output_ptr[x] = utility::clamp<int, int8_t>(support::cpp11::trunc(result));
 #endif // __aarch64__
-            }
-        },
-        input1, input2, output);
+                }
+            },
+            input1, input2, output);
     }
 }
 
-template void add_q8_neon_fixedpoint<int8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
-template void add_q8_neon_fixedpoint<uint8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
+template void add_q8_neon_fixedpoint<int8_t>(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
+template void add_q8_neon_fixedpoint<uint8_t>(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window);
 
-template void add_sub_q8_neon_fixedpoint<int8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition);
-template void add_sub_q8_neon_fixedpoint<uint8_t>(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition);
+template void add_sub_q8_neon_fixedpoint<int8_t>(const ITensor       *src0,
+                                                 const ITensor       *src1,
+                                                 ITensor             *dst,
+                                                 const ConvertPolicy &policy,
+                                                 const Window        &window,
+                                                 bool                 is_addition);
+template void add_sub_q8_neon_fixedpoint<uint8_t>(const ITensor       *src0,
+                                                  const ITensor       *src1,
+                                                  ITensor             *dst,
+                                                  const ConvertPolicy &policy,
+                                                  const Window        &window,
+                                                  bool                 is_addition);
 
-void add_sub_qasymm8_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition);
-void add_sub_qasymm8_signed_neon(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window, bool is_addition);
+void add_sub_qasymm8_neon(const ITensor       *src0,
+                          const ITensor       *src1,
+                          ITensor             *dst,
+                          const ConvertPolicy &policy,
+                          const Window        &window,
+                          bool                 is_addition);
+void add_sub_qasymm8_signed_neon(const ITensor       *src0,
+                                 const ITensor       *src1,
+                                 ITensor             *dst,
+                                 const ConvertPolicy &policy,
+                                 const Window        &window,
+                                 bool                 is_addition);
 
 } // namespace cpu
 } // namespace arm_compute

@@ -22,37 +22,38 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
-#include "src/core/CL/kernels/CLPadLayerKernel.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/kernels/CLPadLayerKernel.h"
 
 namespace arm_compute
 {
-CLPadLayer::CLPadLayer()
-    : _pad_kernel(std::make_unique<CLPadLayerKernel>()),
-      _copy(),
-      _perform_pad(false)
+CLPadLayer::CLPadLayer() : _pad_kernel(std::make_unique<CLPadLayerKernel>()), _copy(), _perform_pad(false)
 {
 }
 
 CLPadLayer::~CLPadLayer() = default;
 
-void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
+void CLPadLayer::configure(
+    ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, output, padding, constant_value, mode);
 }
 
-void CLPadLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
+void CLPadLayer::configure(const CLCompileContext &compile_context,
+                           ICLTensor              *input,
+                           ICLTensor              *output,
+                           const PaddingList      &padding,
+                           PixelValue              constant_value,
+                           PaddingMode             mode)
 {
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
     ARM_COMPUTE_LOG_PARAMS(input, output, padding, constant_value, mode);
 
-    _perform_pad = std::any_of(padding.begin(), padding.end(), [](PaddingInfo info)
-    {
-        return info.first > 0 || info.second > 0;
-    });
+    _perform_pad =
+        std::any_of(padding.begin(), padding.end(), [](PaddingInfo info) { return info.first > 0 || info.second > 0; });
 
-    if(_perform_pad)
+    if (_perform_pad)
     {
         _pad_kernel->configure(compile_context, input, output, padding, constant_value, mode);
     }
@@ -62,14 +63,16 @@ void CLPadLayer::configure(const CLCompileContext &compile_context, ICLTensor *i
         _copy.configure(compile_context, input, output);
     }
 }
-Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
+Status CLPadLayer::validate(const ITensorInfo *input,
+                            const ITensorInfo *output,
+                            const PaddingList &padding,
+                            PixelValue         constant_value,
+                            PaddingMode        mode)
 {
-    bool perform_pad = std::any_of(padding.begin(), padding.end(), [](PaddingInfo info)
-    {
-        return info.first > 0 || info.second > 0;
-    });
+    bool perform_pad =
+        std::any_of(padding.begin(), padding.end(), [](PaddingInfo info) { return info.first > 0 || info.second > 0; });
 
-    if(perform_pad)
+    if (perform_pad)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(input, output, padding, constant_value, mode));
     }
@@ -81,7 +84,7 @@ Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
 }
 void CLPadLayer::run()
 {
-    if(_perform_pad)
+    if (_perform_pad)
     {
         CLScheduler::get().enqueue(*_pad_kernel);
     }

@@ -26,9 +26,8 @@
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
 
@@ -72,7 +71,10 @@ public:
      * @param[in]     axis            The axis to unstack along. Valid values are [-R,R) where R is the input's rank. Negative values wrap around.
      *
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const std::vector<ICLTensor *> &output_vector, int axis);
+    void configure(const CLCompileContext         &compile_context,
+                   const ICLTensor                *input,
+                   const std::vector<ICLTensor *> &output_vector,
+                   int                             axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLUnstack
      *
      * @param[in] input         Input tensor info. Data type supported: All.

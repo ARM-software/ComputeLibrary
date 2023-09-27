@@ -33,7 +33,7 @@ namespace wrapper
 #define VSETLANE_IMPL_8(stype, atype, vtype, postfix)                                     \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vset_lane_##postfix(value, vector, 0);                             \
@@ -59,7 +59,7 @@ namespace wrapper
 #define VSETLANE_IMPL_4(stype, atype, vtype, postfix)                                     \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vset_lane_##postfix(value, vector, 0);                             \
@@ -77,7 +77,7 @@ namespace wrapper
 #define VSETLANE_IMPL_2(stype, atype, vtype, postfix)                                     \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vset_lane_##postfix(value, vector, 0);                             \
@@ -102,7 +102,7 @@ VSETLANE_IMPL_4(float16x4_t, float16_t, float16x4_t, f16)
 #define VSETQLANE_IMPL_16(stype, atype, vtype, postfix)                                   \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vsetq_lane_##postfix(value, vector, 0);                            \
@@ -144,7 +144,7 @@ VSETLANE_IMPL_4(float16x4_t, float16_t, float16x4_t, f16)
 #define VSETQLANE_IMPL_8(stype, atype, vtype, postfix)                                    \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vsetq_lane_##postfix(value, vector, 0);                            \
@@ -170,7 +170,7 @@ VSETLANE_IMPL_4(float16x4_t, float16_t, float16x4_t, f16)
 #define VSETQLANE_IMPL_4(stype, atype, vtype, postfix)                                    \
     inline stype vsetlane(const atype value, const vtype vector, const unsigned int lane) \
     {                                                                                     \
-        switch(lane)                                                                      \
+        switch (lane)                                                                     \
         {                                                                                 \
             case 0:                                                                       \
                 return vsetq_lane_##postfix(value, vector, 0);                            \

@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "src/core/CL/ICLKernel.h"
-#include "src/gpu/cl/operators/ClCopy.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CL/ICLKernel.h"
+#include "src/gpu/cl/operators/ClCopy.h"
 
 #include <utility>
 
@@ -38,16 +38,15 @@ namespace arm_compute
 {
 struct CLCopy::Impl
 {
-    const ICLTensor                *src{ nullptr };
-    ICLTensor                      *dst{ nullptr };
-    std::unique_ptr<opencl::ClCopy> op{ nullptr };
+    const ICLTensor                *src{nullptr};
+    ICLTensor                      *dst{nullptr};
+    std::unique_ptr<opencl::ClCopy> op{nullptr};
 };
 
-CLCopy::CLCopy()
-    : _impl(std::make_unique<Impl>())
+CLCopy::CLCopy() : _impl(std::make_unique<Impl>())
 {
 }
-CLCopy::CLCopy(CLCopy &&) = default;
+CLCopy::CLCopy(CLCopy &&)            = default;
 CLCopy &CLCopy::operator=(CLCopy &&) = default;
 CLCopy::~CLCopy()                    = default;
 

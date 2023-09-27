@@ -61,8 +61,16 @@ public:
      * @param[in]  keeps_size       (Optional) Number of filtered indices per class tensor of size [num_classes]. Data types supported: U32.
      * @param[in]  info             (Optional) BoxNMSLimitInfo information.
      */
-    void configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,
-                   ITensor *batch_splits_out = nullptr, ITensor *keeps = nullptr, ITensor *keeps_size = nullptr, const BoxNMSLimitInfo info = BoxNMSLimitInfo());
+    void configure(const ITensor        *scores_in,
+                   const ITensor        *boxes_in,
+                   const ITensor        *batch_splits_in,
+                   ITensor              *scores_out,
+                   ITensor              *boxes_out,
+                   ITensor              *classes,
+                   ITensor              *batch_splits_out = nullptr,
+                   ITensor              *keeps            = nullptr,
+                   ITensor              *keeps_size       = nullptr,
+                   const BoxNMSLimitInfo info             = BoxNMSLimitInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CPPDetectionOutputLayer
      *
      * @param[in] scores_in        The scores input tensor of size [count, num_classes]. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
@@ -81,9 +89,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *scores_in, const ITensorInfo *boxes_in, const ITensorInfo *batch_splits_in, const ITensorInfo *scores_out, const ITensorInfo *boxes_out,
-                           const ITensorInfo *classes,
-                           const ITensorInfo *batch_splits_out = nullptr, const ITensorInfo *keeps = nullptr, const ITensorInfo *keeps_size = nullptr, const BoxNMSLimitInfo info = BoxNMSLimitInfo());
+    static Status validate(const ITensorInfo    *scores_in,
+                           const ITensorInfo    *boxes_in,
+                           const ITensorInfo    *batch_splits_in,
+                           const ITensorInfo    *scores_out,
+                           const ITensorInfo    *boxes_out,
+                           const ITensorInfo    *classes,
+                           const ITensorInfo    *batch_splits_out = nullptr,
+                           const ITensorInfo    *keeps            = nullptr,
+                           const ITensorInfo    *keeps_size       = nullptr,
+                           const BoxNMSLimitInfo info             = BoxNMSLimitInfo());
     // Inherited methods overridden:
     void run() override;
 

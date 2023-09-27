@@ -38,20 +38,22 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/logging/Macros.h"
+
 #include "utils/TypePrinter.h"
 
 /** Create a logger
  *
  * @note It will eventually create all default loggers in don't exist
  */
-#define ARM_COMPUTE_CREATE_ACL_LOGGER()                                                                                        \
-    do                                                                                                                         \
-    {                                                                                                                          \
-        if(arm_compute::logging::LoggerRegistry::get().logger("ComputeLibrary") == nullptr)                                    \
-        {                                                                                                                      \
-            arm_compute::logging::LoggerRegistry::get().create_logger("ComputeLibrary", arm_compute::logging::LogLevel::INFO); \
-        }                                                                                                                      \
-    } while(false)
+#define ARM_COMPUTE_CREATE_ACL_LOGGER()                                                                      \
+    do                                                                                                       \
+    {                                                                                                        \
+        if (arm_compute::logging::LoggerRegistry::get().logger("ComputeLibrary") == nullptr)                 \
+        {                                                                                                    \
+            arm_compute::logging::LoggerRegistry::get().create_logger("ComputeLibrary",                      \
+                                                                      arm_compute::logging::LogLevel::INFO); \
+        }                                                                                                    \
+    } while (false)
 
 /** Log a message to the logger
  *
@@ -63,7 +65,7 @@
     {                                                          \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                       \
         ARM_COMPUTE_LOG_MSG("ComputeLibrary", log_level, msg); \
-    } while(false)
+    } while (false)
 
 /** Log a message with format to the logger
  *
@@ -76,7 +78,7 @@
     {                                                                                   \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                \
         ARM_COMPUTE_LOG_MSG_WITH_FORMAT("ComputeLibrary", log_level, fmt, __VA_ARGS__); \
-    } while(false)
+    } while (false)
 
 /** Log an error message to the logger
  *
@@ -87,7 +89,7 @@
     {                                                                                      \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                   \
         ARM_COMPUTE_LOG_MSG("ComputeLibrary", arm_compute::logging::LogLevel::ERROR, msg); \
-    } while(false)
+    } while (false)
 
 /** Log an error message to the logger with function name before the message
  *
@@ -98,7 +100,7 @@
     {                                                                                                    \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                                 \
         ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME("ComputeLibrary", arm_compute::logging::LogLevel::ERROR, msg); \
-    } while(false)
+    } while (false)
 
 /** Log an information message to the logger with function name before the message
  *
@@ -109,7 +111,7 @@
     {                                                                                                   \
         ARM_COMPUTE_CREATE_ACL_LOGGER();                                                                \
         ARM_COMPUTE_LOG_MSG_WITH_FUNCNAME("ComputeLibrary", arm_compute::logging::LogLevel::INFO, msg); \
-    } while(false)
+    } while (false)
 
 /** Function template specialization for the out of bound element at index = tuple_size
  *
@@ -131,12 +133,13 @@ logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &
  * @param[in]     in_params_tuple Constant reference to a tuple of different input data types
  */
 template <std::size_t Index, typename... Tp>
-inline typename std::enable_if < Index<sizeof...(Tp), void>::type
-logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &in_params_tuple)
+    inline typename std::enable_if <
+    Index<sizeof...(Tp), void>::type logParamsImpl(std::vector<std::string> &data_registry,
+                                                   const std::tuple<Tp...>  &in_params_tuple)
 {
     data_registry.push_back(arm_compute::to_string(std::get<Index>(in_params_tuple)));
     // Unfold the next tuple element
-    logParamsImpl < Index + 1, Tp... > (data_registry, in_params_tuple);
+    logParamsImpl<Index + 1, Tp...>(data_registry, in_params_tuple);
 }
 
 /** Function Template with variable number of inputs to collect all the passed parameters from
@@ -149,10 +152,10 @@ logParamsImpl(std::vector<std::string> &data_registry, const std::tuple<Tp...> &
  * @return  Vector of the parameters' data in a string format
  */
 template <typename... Ts>
-const std::vector<std::string> logParams(Ts &&... ins)
+const std::vector<std::string> logParams(Ts &&...ins)
 {
     std::vector<std::string> data_registry{};
-    std::tuple<Ts...>        in_params_tuple{ ins... };
+    std::tuple<Ts...>        in_params_tuple{ins...};
 
     // Start logging the tuple elements, starting from 0 to tuple_size-1
     logParamsImpl<0>(data_registry, in_params_tuple);
@@ -178,11 +181,11 @@ inline const std::vector<std::string> getParamsNames(const std::string &in_param
 
     // Usually the input parameters string would be name of parameters separated
     // by ',' e.g. "src0, src1, policy"
-    while(std::getline(ss, temp, ','))
+    while (std::getline(ss, temp, ','))
     {
         names.push_back(temp);
     }
-    for(auto &name : names)
+    for (auto &name : names)
     {
         // Totally get rid of white space characters
         name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
@@ -205,7 +208,7 @@ inline const std::string constructDataLog(const std::vector<std::string> &params
 {
     std::string dataLog = "\n ";
     ARM_COMPUTE_ERROR_ON(params_names.size() != data_registry.size());
-    for(uint8_t i = 0; i < params_names.size(); ++i)
+    for (uint8_t i = 0; i < params_names.size(); ++i)
     {
         dataLog += params_names[i] + ": " + data_registry.at(i) + "\n ";
     }
@@ -220,11 +223,11 @@ inline const std::string constructDataLog(const std::vector<std::string> &params
  *
  * @param[in] ... Input parameters
  */
-#define ARM_COMPUTE_LOG_PARAMS(...)                                                           \
-    do                                                                                        \
-    {                                                                                         \
-        ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(constructDataLog(getParamsNames(#__VA_ARGS__), \
-                                                                logParams(__VA_ARGS__)));     \
-    } while(false)
+#define ARM_COMPUTE_LOG_PARAMS(...)                                                  \
+    do                                                                               \
+    {                                                                                \
+        ARM_COMPUTE_LOG_INFO_WITH_FUNCNAME_ACL(                                      \
+            constructDataLog(getParamsNames(#__VA_ARGS__), logParams(__VA_ARGS__))); \
+    } while (false)
 #endif /* ARM_COMPUTE_LOGGING_ENABLED */
 #endif /* SRC_COMMON_LOG_H */
