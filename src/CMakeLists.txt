@@ -642,6 +642,7 @@ target_sources(
 	core/utils/DataTypeUtils.cpp
 	core/utils/FormatUtils.cpp
 	core/utils/InterpolationPolicyUtils.cpp
+	core/utils/Math.cpp
 	core/utils/ScaleUtils.cpp
 	core/utils/StringUtils.cpp
 	core/utils/helpers/fft.cpp

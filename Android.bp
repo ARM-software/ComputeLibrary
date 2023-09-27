@@ -402,6 +402,7 @@ cc_library_static {
         "src/core/utils/DataTypeUtils.cpp",
         "src/core/utils/FormatUtils.cpp",
         "src/core/utils/InterpolationPolicyUtils.cpp",
+        "src/core/utils/Math.cpp",
         "src/core/utils/ScaleUtils.cpp",
         "src/core/utils/StringUtils.cpp",
         "src/core/utils/helpers/fft.cpp",
