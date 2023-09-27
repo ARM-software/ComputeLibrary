@@ -65,7 +65,6 @@ PadStrideInfo compute_upsample_info(const PadStrideInfo &info, uint32_t deconv_p
     return PadStrideInfo(stride_x, stride_y, deconv_pad_left, deconv_pad_right, deconv_pad_top, deconv_pad_bottom,
                          DimensionRoundingType::FLOOR);
 }
-
 } // namespace
 
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
@@ -110,6 +109,16 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo   *input,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     }
 
+    const unsigned int pad_left   = info.pad_left();
+    const unsigned int pad_top    = info.pad_top();
+    const unsigned int pad_right  = info.pad_right();
+    const unsigned int pad_bottom = info.pad_bottom();
+
+    ARM_COMPUTE_RETURN_ERROR_ON(((input->dimension(width_idx) - 1) * info.stride().first +
+                                 weights->dimension(width_idx)) < (pad_left + pad_right));
+    ARM_COMPUTE_RETURN_ERROR_ON(((input->dimension(height_idx) - 1) * info.stride().second +
+                                 weights->dimension(height_idx)) < (pad_top + pad_bottom));
+
     auto out_dims =
         deconvolution_output_dimensions(input->dimension(width_idx), input->dimension(height_idx),
                                         weights->dimension(width_idx), weights->dimension(height_idx), info);
@@ -140,20 +149,14 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo   *input,
                                         "Output's depth is invalid.");
     }
 
-    uint32_t           deconv_pad_x = 0;
-    uint32_t           deconv_pad_y = 0;
-    const unsigned int stride_x     = info.stride().first;
-    const unsigned int stride_y     = info.stride().second;
-    // Guard against overflows in compute_deconvolution_upsampled_shape()
-    const DataLayout   data_layout = input->data_layout();
-    const size_t       idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t       idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int out_x       = (input->dimension(idx_w) - 1) * stride_x + 1;
-    const unsigned int out_y       = (input->dimension(idx_h) - 1) * stride_y + 1;
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) > out_x);
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) > out_y);
-    ARM_COMPUTE_RETURN_ERROR_ON((out_x - weights->dimension(idx_w) + 1) > out_dims.first);
-    ARM_COMPUTE_RETURN_ERROR_ON((out_y - weights->dimension(idx_h) + 1) > out_dims.second);
+    uint32_t       deconv_pad_x   = 0;
+    uint32_t       deconv_pad_y   = 0;
+    const uint32_t stride_x       = info.stride().first;
+    const uint32_t stride_y       = info.stride().second;
+    const auto     deconv_padding = compute_deconvolution_padding(*input, *weights, static_cast<int32_t>(stride_x),
+                                                                  static_cast<int32_t>(stride_y), out_dims);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(deconv_padding.first < 0 || deconv_padding.second < 0,
+                                    "Negative padding not supported");
 
     const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y,
                                                                               out_dims, deconv_pad_x, deconv_pad_y);
@@ -235,6 +238,7 @@ void NEDeconvolutionLayer::configure(ITensor             *input,
     uint32_t          deconv_pad_y    = 0;
     const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(
         *input->info(), *weights->info(), stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
+
     const PadStrideInfo upsample_info = compute_upsample_info(info, deconv_pad_x, deconv_pad_y);
 
     // Do not perform upsampling when the operation uses unit stride in all dimensions

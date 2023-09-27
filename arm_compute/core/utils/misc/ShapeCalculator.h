@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
-#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR
+#ifndef ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR_H
+#define ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
@@ -459,6 +459,37 @@ compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo 
     return output_shape;
 }
 
+/** Calculate padding required for deconvolution
+ *
+ * @param[in] input    Input tensor info
+ * @param[in] weights  Weights tensor shape
+ * @param[in] sx       Stride on x axis
+ * @param[in] sy       Stride on y axis
+ * @param[in] out_dims Output shape dimensions
+ *
+ * @return the padding required
+ */
+inline std::pair<int32_t, int32_t> compute_deconvolution_padding(const ITensorInfo            &input,
+                                                                 const ITensorInfo            &weights,
+                                                                 int32_t                       sx,
+                                                                 int32_t                       sy,
+                                                                 std::pair<uint32_t, uint32_t> out_dims)
+{
+    const DataLayout data_layout = input.data_layout();
+    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    // Find the upsampled dimensions
+    int32_t out_x = (static_cast<int32_t>(input.dimension(idx_w)) - 1) * sx + 1;
+    int32_t out_y = (static_cast<int32_t>(input.dimension(idx_h)) - 1) * sy + 1;
+
+    // Find the padding needed for the convolution with stride 1 in order to match output shape
+    int32_t padx = out_dims.first - (out_x - static_cast<int32_t>(weights.dimension(idx_w)) + 1);
+    int32_t pady = out_dims.second - (out_y - static_cast<int32_t>(weights.dimension(idx_h)) + 1);
+
+    return std::make_pair(padx, pady);
+}
+
 /** Calculate the upsampled output shape used for deconvolution
  *
  * @param[in] input    Input tensor info
@@ -479,17 +510,20 @@ inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo      
                                                          uint32_t                              &padx,
                                                          uint32_t                              &pady)
 {
+    // Find the padding needed for the convolution with stride 1 in order to match output shape
+    const auto padxy =
+        compute_deconvolution_padding(input, weights, static_cast<int32_t>(sx), static_cast<int32_t>(sy), out_dims);
+    padx = static_cast<uint32_t>(padxy.first);
+    pady = static_cast<uint32_t>(padxy.second);
+
     const DataLayout data_layout = input.data_layout();
     const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Find the upsampled dimensions
-    unsigned int out_x = (input.dimension(idx_w) - 1) * sx + 1;
-    unsigned int out_y = (input.dimension(idx_h) - 1) * sy + 1;
+    uint32_t out_x = (input.dimension(idx_w) - 1) * sx + 1;
+    uint32_t out_y = (input.dimension(idx_h) - 1) * sy + 1;
 
-    // Find the padding needed for the convolution with stride 1 in order to match output shape
-    padx = out_dims.first - (out_x - weights.dimension(idx_w) + 1);
-    pady = out_dims.second - (out_y - weights.dimension(idx_h) + 1);
     out_x += padx;
     out_y += pady;
 
@@ -1694,4 +1728,4 @@ compute_gather_shape(const TensorShape &input_shape, const TensorShape &indices_
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute
-#endif /* ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR */
+#endif // ACL_ARM_COMPUTE_CORE_UTILS_MISC_SHAPECALCULATOR_H
