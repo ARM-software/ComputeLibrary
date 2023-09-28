@@ -202,8 +202,6 @@ def gather_sources():
     # Common backend files
     lib_files = filelist['common']
 
-    # TODO Add Fixed format GEMM kernels ?
-
     # Logging files
     lib_files += filelist['logging']
 
@@ -278,6 +276,9 @@ if "__main__" in __name__:
     graph_files, lib_files_sve, lib_files_sve2, lib_files = gather_sources()
 
     if args.bazel:
+        # 8562a4ec: Remove CommonGraphOptions from Utils target and warnings
+        graph_files += ["//utils:CommonGraphOptions.cpp"]
+
         bazel_build_string = build_from_template_bazel(
             graph_files, lib_files_sve, lib_files_sve2, lib_files)
         with open("src/BUILD.bazel", "w") as fp:
