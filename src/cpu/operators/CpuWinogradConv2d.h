@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_WINOGRAD_CONV2D_KERNEL_H
-#define ARM_COMPUTE_CPU_WINOGRAD_CONV2D_KERNEL_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUWINOGRADCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUWINOGRADCONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
-#include "src/cpu/kernels/assembly/gemm_common.hpp"
 #include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
+#include "src/cpu/kernels/assembly/gemm_common.hpp"
 #include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/operators/CpuGemm.h"
 #include "src/cpu/operators/CpuPermute.h"
@@ -65,7 +65,7 @@ public:
      *                              while every optional dimension from 4 and above represent a batch of inputs.
      *                              Data types supported: F16/F32.
      * @param[in]  weights          Weights tensor Info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
-     *                              Currently only 3x3 and 5x5 kernels are supported.
+     *                              For supported kernel sizes, see @ref arm_compute::NEWinogradConvolutionLayer
      * @param[in]  biases           Biases tensor Info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] dst              Destination tensor Info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                              Data types supported: Same as @p input.
@@ -96,8 +96,8 @@ public:
                            bool                       enable_fast_math = false);
 
     // Inherited methods overridden:
-    void                             run(ITensorPack &tensors) override;
-    void                             prepare(ITensorPack &constants) override;
+    void run(ITensorPack &tensors) override;
+    void prepare(ITensorPack &constants) override;
     experimental::MemoryRequirements workspace() const override;
 
 private:
@@ -124,9 +124,9 @@ private:
     std::unique_ptr<CpuPermute>      _permute_input;
     std::unique_ptr<CpuPermute>      _permute_output;
     std::unique_ptr<CpuPermute>      _permute_weights;
-    experimental::MemoryRequirements _aux_mem{Count};
+    experimental::MemoryRequirements _aux_mem{ Count };
     std::unique_ptr<arm_conv::ConvolutionArgs>
-        _conv_args; // Make it unique ptr because this type does not have a default constructor
+    _conv_args; // Make it unique ptr because this type does not have a default constructor
     arm_conv::winograd::WinogradImpl _winograd_impl;
     DataLayout                       _data_layout;
     TensorInfo                       _winograd_transformed_input;
@@ -143,4 +143,4 @@ private:
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_CPU_WINOGRAD_CONV2D_KERNEL_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUWINOGRADCONV2D_H
