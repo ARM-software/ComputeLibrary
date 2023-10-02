@@ -134,7 +134,7 @@ protected:
         {
             auto axis_data = AccessorType(axis);
             auto axis_v    = generate_random_axis(use_negative_axis);
-            std::copy(axis_v.begin(), axis_v.begin() + axis_shape.x(), static_cast<int32_t *>(axis_data.data()));
+            std::copy(axis_v.begin(), axis_v.begin() + _num_dims, static_cast<int32_t *>(axis_data.data()));
         }
 
         // Compute function
