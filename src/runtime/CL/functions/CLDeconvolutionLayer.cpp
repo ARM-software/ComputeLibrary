@@ -178,9 +178,9 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
     if (weights->dimension(idx_w) != deconv_info.stride().first ||
         weights->dimension(idx_h) != deconv_info.stride().second)
     {
-        // We observe better performance for FP32 types only when ofm <= 16.
-        // A better heuristic is required for selecting the method for FP16 data types.
-        if (input->data_layout() == DataLayout::NHWC && !((input->data_type() == DataType::F32) && (ofm > 16)))
+        // We observe better performance for FP32 types only when ofm <= 16, and for FP16 only when ofm <= 32.
+        if (input->data_layout() == DataLayout::NHWC && !((input->data_type() == DataType::F32) && (ofm > 16)) &&
+            !((input->data_type() == DataType::F16) && (ofm > 32)))
         {
             return DeconvolutionMethod::DIRECT;
         }
