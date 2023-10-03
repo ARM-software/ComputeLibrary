@@ -152,7 +152,7 @@ protected:
         // Fill reference
         fill(src);
         auto axis_v = generate_random_axis(use_negative_axis);
-        std::copy(axis_v.begin(), axis_v.begin() + axis_shape.x(), axis.data());
+        std::copy(axis_v.begin(), axis_v.begin() + _num_dims, axis.data());
 
         return reference::reverse<T>(src, axis, use_inverted_axis);
     }

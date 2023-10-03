@@ -59,7 +59,7 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<int32_t> 
         // The values of axis tensor must be between [-rank, rank-1].
         if((axis_i < -rank) || (axis_i >= rank))
         {
-            ARM_COMPUTE_ERROR("the valuses of the axis tensor must be within [-rank, rank-1].");
+            ARM_COMPUTE_ERROR("the values of the axis tensor must be within [-rank, rank-1].");
         }
 
         // In case of negative axis value i.e targeted axis(i) = rank + axis(i)
