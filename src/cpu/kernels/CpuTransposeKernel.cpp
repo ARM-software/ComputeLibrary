@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -736,6 +736,9 @@ void CpuTransposeKernel::configure(const ITensorInfo *src, ITensorInfo *dst)
     // Destination auto inizialitation if not yet initialized
     const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
     auto_init_if_empty(*dst, src->clone()->set_tensor_shape(dst_shape));
+
+    // Explicitly set the tensor shape to preserve dimensions
+    dst->set_tensor_shape(dst_shape);
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate(src, dst));

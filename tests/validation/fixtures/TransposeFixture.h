@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TRANSPOSE_FIXTURE
-#define ARM_COMPUTE_TEST_TRANSPOSE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_TRANSPOSEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_TRANSPOSEFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/reference/Transpose.h"
+#include "tests/validation/reference/Permute.h"
 
 namespace arm_compute
 {
@@ -97,7 +97,7 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::transpose<T>(src);
+        return reference::permute<T>(src, PermutationVector(1U, 0U));
     }
 
     TensorType      _target{};
@@ -106,4 +106,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TRANSPOSE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_TRANSPOSEFIXTURE_H

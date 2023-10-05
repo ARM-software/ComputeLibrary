@@ -54,6 +54,7 @@ v23.11 Public major release
  - Remove legacy PostOps interface. PostOps was the experimental interface for kernel fusion and is replaced by the new Dynamic Fusion interface.
  - Performance optimizations:
    - Optimize @ref cpu::CpuReshape
+   - Optimize @ref opencl::ClTranspose
  - Add new OpenCL™ kernels:
    - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
  - Deprecate support for Bfloat16 in @ref cpu::CpuCast.
