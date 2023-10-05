@@ -28,6 +28,7 @@
 
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/intrinsics/intrinsics.h"
+#include "src/cpu/kernels/pool2d/neon/impl.h"
 #include "src/cpu/kernels/pool2d/neon/list.h"
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
@@ -38,6 +39,116 @@ namespace cpu
 {
 namespace
 {
+float16x4_t
+read_4_boundary_aware_fp16(int srcw, int srch, int pad_l, int pad_t, int x, int y, const float16_t *ptr, float16_t fval)
+{
+    float16_t  vec[4];
+    const bool row_in_bounds((y >= pad_t) && (y < (srch + pad_t)));
+    for (int i = 0; i < 4; i++)
+    {
+        if (row_in_bounds && (x + i >= pad_l) && (x + i < (srcw + pad_l)))
+        {
+            vec[i] = *(ptr + i);
+        }
+        else
+        {
+            vec[i] = fval;
+        }
+    }
+    return wrapper::vload(vec);
+}
+} // namespace
+
+void pooling3_fp16_neon_nchw(const ITensor    *src,
+                             ITensor          *dst0,
+                             ITensor          *dst1,
+                             PoolingLayerInfo &pool_info,
+                             const Window     &window_src,
+                             const Window     &window)
+{
+    ARM_COMPUTE_UNUSED(dst1);
+
+    Iterator in(src, window_src);
+    Iterator out(dst0, window);
+
+    constexpr const int pool_size            = 3;
+    const int           pool_pad_right       = pool_info.pad_stride_info.pad_right();
+    const int           pool_pad_top         = pool_info.pad_stride_info.pad_top();
+    const int           pool_pad_left        = pool_info.pad_stride_info.pad_left();
+    const int           pool_pad_bottom      = pool_info.pad_stride_info.pad_bottom();
+    int                 pool_stride_x        = 0;
+    int                 pool_stride_y        = 0;
+    std::tie(pool_stride_x, pool_stride_y)   = pool_info.pad_stride_info.stride();
+    const int                  src_w         = src->info()->dimension(0);
+    const int                  src_h         = src->info()->dimension(1);
+    const int                  upper_bound_w = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
+    const int                  upper_bound_h = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+    const float16_t            fp16_min      = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
+    const float16_t            fill_value    = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.f;
+    const unsigned char *const src_top_ptr =
+        src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const unsigned char *const src_middle_ptr =
+        src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const unsigned char *const src_bottom_ptr =
+        src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
+
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const auto  x_val   = id.x() * pool_stride_x;
+            const auto  y_val_0 = id.y() * pool_stride_y;
+            const auto  y_val_1 = (id.y() * pool_stride_y) + 1;
+            const auto  y_val_2 = (id.y() * pool_stride_y) + 2;
+            float16x4_t top_data =
+                read_4_boundary_aware_fp16(src_w, src_h, pool_pad_left, pool_pad_top, x_val, y_val_0,
+                                           reinterpret_cast<const float16_t *>(src_top_ptr + in.offset()), fill_value);
+            float16x4_t middle_data = read_4_boundary_aware_fp16(
+                src_w, src_h, pool_pad_left, pool_pad_top, x_val, y_val_1,
+                reinterpret_cast<const float16_t *>(src_middle_ptr + in.offset()), fill_value);
+            float16x4_t bottom_data = read_4_boundary_aware_fp16(
+                src_w, src_h, pool_pad_left, pool_pad_top, x_val, y_val_2,
+                reinterpret_cast<const float16_t *>(src_bottom_ptr + in.offset()), fill_value);
+            float16x4_t res = {};
+
+            // Get power of 2 in case of l2 pooling
+            if (pool_info.pool_type == PoolingType::L2)
+            {
+                top_data    = vmul_f16(top_data, top_data);
+                middle_data = vmul_f16(middle_data, middle_data);
+                bottom_data = vmul_f16(bottom_data, bottom_data);
+            }
+
+            if (pool_info.pool_type != PoolingType::MAX)
+            {
+                // Calculate scale
+                const float scale = calculate_avg_scale_pool2d(
+                    pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h,
+                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                const float16x4_t scale_v = vdup_n_f16(scale);
+                // Perform pooling
+                const float16x4_t sum_data = vadd_f16(vadd_f16(top_data, bottom_data), middle_data);
+                res                        = vpadd_f16(vset_lane_f16(0.f, sum_data, 3), sum_data);
+                res                        = vmul_f16(vpadd_f16(res, res), scale_v);
+            }
+            else
+            {
+                const float16x4_t max_data = vmax_f16(vmax_f16(top_data, bottom_data), middle_data);
+                res                        = vpmax_f16(vset_lane_f16(fp16_min, max_data, 3), max_data);
+                res                        = vpmax_f16(res, res);
+            }
+
+            // Calculate square-root in case of l2 pooling
+            if (pool_info.pool_type == PoolingType::L2)
+            {
+                res = vsqrt_f16(res);
+            }
+
+            *(reinterpret_cast<float16_t *>(out.ptr())) = vget_lane_f16(res, 0);
+        },
+        in, out);
+}
+
 void pooling2_f16_maxpool_indices(const ITensor    *src,
                                   ITensor          *dst0,
                                   ITensor          *dst1,
@@ -167,7 +278,189 @@ void pooling2_f16_maxpool_indices(const ITensor    *src,
         },
         in, out, indices);
 }
-} // namespace
+
+void pooling2_fp16_neon_nchw(const ITensor    *src,
+                             ITensor          *dst0,
+                             ITensor          *dst1,
+                             PoolingLayerInfo &pool_info,
+                             const Window     &window_src,
+                             const Window     &window)
+{
+    if (pool_info.pool_type == PoolingType::MAX && dst1)
+    {
+        pooling2_nchw_maxpool_indices<float16_t>(src, dst0, dst1, pool_info, window_src, window);
+    }
+    else
+    {
+        Iterator      in(src, window_src);
+        Iterator      out(dst0, window);
+        constexpr int pool_size       = 2;
+        const int     pool_pad_right  = pool_info.pad_stride_info.pad_right();
+        const int     pool_pad_top    = pool_info.pad_stride_info.pad_top();
+        const int     pool_pad_left   = pool_info.pad_stride_info.pad_left();
+        const int     pool_pad_bottom = pool_info.pad_stride_info.pad_bottom();
+        int           pool_stride_x, pool_stride_y = 0;
+        std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
+        const int       src_w                  = src->info()->dimension(0);
+        const int       src_h                  = src->info()->dimension(1);
+        const int       upper_bound_w          = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
+        const int       upper_bound_h          = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+        const float16_t fp16_min               = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
+        const float16_t fill_value             = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.0f;
+
+        const unsigned char *const src_top_ptr =
+            src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+        const unsigned char *const src_bottom_ptr =
+            src->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const auto in_top_ptr    = reinterpret_cast<const float16_t *>(src_top_ptr + in.offset());
+                const auto in_bottom_ptr = reinterpret_cast<const float16_t *>(src_bottom_ptr + in.offset());
+
+                const auto  x_val       = id.x() * pool_stride_x;
+                const auto  y_val_0     = id.y() * pool_stride_y;
+                const auto  y_val_1     = (id.y() * pool_stride_y) + 1;
+                float16x4_t top_data    = read_4_boundary_aware_fp16(src_w, src_h, pool_pad_left, pool_pad_top, x_val,
+                                                                     y_val_0, in_top_ptr, fill_value);
+                float16x4_t bottom_data = read_4_boundary_aware_fp16(src_w, src_h, pool_pad_left, pool_pad_top, x_val,
+                                                                     y_val_1, in_bottom_ptr, fill_value);
+                float16x4_t res         = {};
+
+                // Get power of 2 in case of l2 pooling
+                if (pool_info.pool_type == PoolingType::L2)
+                {
+                    top_data    = vmul_f16(top_data, top_data);
+                    bottom_data = vmul_f16(bottom_data, bottom_data);
+                }
+
+                if (pool_info.pool_type != PoolingType::MAX)
+                {
+                    const float scale = calculate_avg_scale_pool2d(
+                        pool_info.exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w,
+                        upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                    const float16x4_t scale_v = vdup_n_f16(scale);
+
+                    const float16x4_t sum_data = vadd_f16(top_data, bottom_data);
+                    res                        = vmul_f16(vpadd_f16(sum_data, sum_data), scale_v);
+                }
+                else
+                {
+                    const float16x4_t max_data = vmax_f16(top_data, bottom_data);
+                    res                        = vpmax_f16(max_data, max_data);
+                }
+
+                // Calculate square-root in case of l2 pooling
+                if (pool_info.pool_type == PoolingType::L2)
+                {
+                    res = vsqrt_f16(res);
+                }
+
+                // Store result
+                *(reinterpret_cast<float16_t *>(out.ptr())) = vget_lane_f16(res, 0);
+            },
+            in, out);
+    }
+}
+
+void poolingMxN_fp16_neon_nchw(const ITensor    *src,
+                               ITensor          *dst0,
+                               ITensor          *dst1,
+                               PoolingLayerInfo &pool_info,
+                               const Window     &window_src,
+                               const Window     &window)
+{
+    ARM_COMPUTE_UNUSED(dst1);
+    Iterator in(src, window_src);
+    Iterator out(dst0, window);
+
+    const int pool_size_x = pool_info.is_global_pooling ? src->info()->tensor_shape().x() : pool_info.pool_size.width;
+    const int pool_size_y = pool_info.is_global_pooling ? src->info()->tensor_shape().y() : pool_info.pool_size.height;
+    const int pool_pad_right               = pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top                 = pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left                = pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom              = pool_info.pad_stride_info.pad_bottom();
+    int       pool_stride_x                = 0;
+    int       pool_stride_y                = 0;
+    std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info.stride();
+    const int       src_w                  = src->info()->dimension(0);
+    const int       src_h                  = src->info()->dimension(1);
+    const int       upper_bound_w          = src_w + (pool_info.exclude_padding ? 0 : pool_pad_right);
+    const int       upper_bound_h          = src_h + (pool_info.exclude_padding ? 0 : pool_pad_bottom);
+    const float16_t fp16_min               = get_initial_min<half_float::half>(pool_info.use_inf_as_limit);
+    const float16_t fill_value             = (pool_info.pool_type == PoolingType::MAX) ? fp16_min : 0.0f;
+
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            float16_t res = 0.0f;
+
+            if (pool_info.pool_type != PoolingType::MAX)
+            {
+                // Calculate scale
+                const float16_t scale = calculate_avg_scale_pool2d(
+                    pool_info.exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w,
+                    upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+
+                // Perform pooling
+                for (int y = 0; y < pool_size_y; ++y)
+                {
+                    for (int x = 0; x < pool_size_x; ++x)
+                    {
+                        const auto ptr = reinterpret_cast<const float16_t *>(
+                            in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) +
+                            (y - pool_pad_top) * static_cast<int>(src->info()->strides_in_bytes().y()));
+
+                        const int idx  = x + id.x() * pool_stride_x - pool_pad_left;
+                        const int idy  = y + id.y() * pool_stride_y - pool_pad_top;
+                        float16_t data = (idx < 0 || idy < 0 || idx >= src_w || idy >= src_h) ? fill_value : *ptr;
+
+                        if (pool_info.pool_type == PoolingType::L2)
+                        {
+                            data *= data;
+                        }
+
+                        res += data;
+                    }
+                }
+
+                // Divide by scale
+                res *= scale;
+            }
+            else // if max pooling
+            {
+                res = fp16_min;
+
+                for (int y = 0; y < pool_size_y; ++y)
+                {
+                    for (int x = 0; x < pool_size_x; ++x)
+                    {
+                        const auto ptr = reinterpret_cast<const float16_t *>(
+                            in.ptr() + (x - pool_pad_left) * static_cast<int>(src->info()->strides_in_bytes().x()) +
+                            (y - pool_pad_top) * static_cast<int>(src->info()->strides_in_bytes().y()));
+
+                        const int idx  = x + id.x() * pool_stride_x - pool_pad_left;
+                        const int idy  = y + id.y() * pool_stride_y - pool_pad_top;
+                        float16_t data = (idx < 0 || idy < 0 || idx >= src_w || idy >= src_h) ? fill_value : *ptr;
+                        res            = std::max(res, data);
+                    }
+                }
+            }
+
+            // Calculate square-root in case of l2 pooling
+            if (pool_info.pool_type == PoolingType::L2)
+            {
+                res = std::sqrt(res);
+            }
+
+            // Store result
+            *(reinterpret_cast<float16_t *>(out.ptr())) = res;
+        },
+        in, out);
+}
 
 void poolingMxN_fp16_neon_nhwc(const ITensor    *src,
                                ITensor          *dst0,

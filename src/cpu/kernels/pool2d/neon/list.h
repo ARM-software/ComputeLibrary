@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_POOLING_LIST_H
-#define SRC_CORE_NEON_KERNELS_POOLING_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_POOL2D_NEON_LIST_H
+#define ACL_SRC_CPU_KERNELS_POOL2D_NEON_LIST_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
@@ -47,11 +47,11 @@ DECLARE_POOLING_KERNEL(poolingMxN_fp32_neon_nhwc);
 
 #if defined(ENABLE_NCHW_KERNELS)
 
-#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
+#if defined(ENABLE_FP16_KERNELS)
 DECLARE_POOLING_KERNEL(pooling2_fp16_neon_nchw);
 DECLARE_POOLING_KERNEL(pooling3_fp16_neon_nchw);
 DECLARE_POOLING_KERNEL(poolingMxN_fp16_neon_nchw);
-#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */
+#endif /* defined(ENABLE_FP16_KERNELS) */
 
 DECLARE_POOLING_KERNEL(pooling2_fp32_neon_nchw);
 DECLARE_POOLING_KERNEL(pooling3_fp32_neon_nchw);
@@ -110,4 +110,4 @@ inline uint32_t offset_no_padding(uint32_t           padded_offset,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // SRC_CORE_NEON_KERNELS_POOLING_LIST_H
+#endif // ACL_SRC_CPU_KERNELS_POOL2D_NEON_LIST_H
