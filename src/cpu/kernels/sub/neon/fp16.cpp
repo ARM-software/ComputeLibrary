@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,30 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_KERNELS_SUB_NEON_LIST_H
-#define ACL_SRC_CPU_KERNELS_SUB_NEON_LIST_H
-
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Traits.h"
 
-#include "src/core/NEON/wrapper/wrapper.h"
+#include "src/cpu/kernels/sub/neon/impl.h"
+
+#if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_SUB_KERNEL(func_name)                                                                   \
-    void func_name(const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, \
-                   const Window &window)
-
-DECLARE_SUB_KERNEL(sub_qasymm8_neon_fixedpoint);
-DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon_fixedpoint);
-DECLARE_SUB_KERNEL(sub_qasymm8_neon);
-DECLARE_SUB_KERNEL(sub_qasymm8_signed_neon);
-DECLARE_SUB_KERNEL(sub_qsymm16_neon);
-DECLARE_SUB_KERNEL(sub_same_neon_fp16);
-
-#undef DECLARE_SUB_KERNEL
+void sub_same_neon_fp16(
+    const ITensor *src0, const ITensor *src1, ITensor *dst, const ConvertPolicy &policy, const Window &window)
+{
+    sub_same_neon<float16_t>(src0, src1, dst, policy, window);
+}
 } // namespace cpu
 } // namespace arm_compute
-#endif // ACL_SRC_CPU_KERNELS_SUB_NEON_LIST_H
+
+#endif /* defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS) */

@@ -809,6 +809,7 @@ target_sources(
 	cpu/kernels/softmax/generic/neon/impl.cpp
 	cpu/kernels/softmax/generic/neon/qasymm8.cpp
 	cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp
+	cpu/kernels/sub/neon/fp16.cpp
 	cpu/kernels/sub/neon/qasymm8.cpp
 	cpu/kernels/sub/neon/qasymm8_signed.cpp
 	cpu/kernels/sub/neon/qsymm16.cpp

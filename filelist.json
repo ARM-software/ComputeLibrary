@@ -2249,13 +2249,17 @@
           "common": [
             "src/cpu/operators/CpuSub.cpp",
             "src/cpu/kernels/CpuSubKernel.cpp",
-            "src/runtime/NEON/functions/NEArithmeticSubtraction.cpp",
-            "src/cpu/kernels/sub/neon/qasymm8.cpp",
-            "src/cpu/kernels/sub/neon/qasymm8_signed.cpp",
-            "src/cpu/kernels/sub/neon/qsymm16.cpp"
-          ]
+            "src/runtime/NEON/functions/NEArithmeticSubtraction.cpp"
+          ],
+          "neon": {
+            "fp16":["src/cpu/kernels/sub/neon/fp16.cpp"],
+            "qasymm8": ["src/cpu/kernels/sub/neon/qasymm8.cpp"],
+            "qasymm8_signed": ["src/cpu/kernels/sub/neon/qasymm8_signed.cpp"],
+            "qsymm16": ["src/cpu/kernels/sub/neon/qsymm16.cpp"]
+          }
         }
       },
+
       "Tile": {
         "files": {
           "common": [

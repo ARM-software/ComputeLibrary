@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/add/generic/neon/impl.h"
+#include "src/cpu/kernels/sub/neon/impl.h"
 #include "src/cpu/kernels/sub/neon/list.h"
 
 #if defined(ENABLE_FP32_KERNELS)
@@ -57,7 +58,7 @@ static const std::vector<CpuSubKernel::SubKernel> available_kernels = {
      REGISTER_FP32_NEON(arm_compute::cpu::sub_same_neon<float>)},
     {"neon_fp16_sub",
      [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F16) && data.isa.fp16; },
-     REGISTER_FP16_NEON(arm_compute::cpu::sub_same_neon<float16_t>)},
+     REGISTER_FP16_NEON(arm_compute::cpu::sub_same_neon_fp16)},
     {"neon_u8_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::U8); },
      REGISTER_INTEGER_NEON(arm_compute::cpu::sub_same_neon<uint8_t>)},
     {"neon_s16_sub", [](const CpuSubKernelDataTypeISASelectorData &data) { return (data.dt == DataType::S16); },

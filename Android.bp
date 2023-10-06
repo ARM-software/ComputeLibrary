@@ -569,6 +569,7 @@ cc_library_static {
         "src/cpu/kernels/softmax/generic/neon/impl.cpp",
         "src/cpu/kernels/softmax/generic/neon/qasymm8.cpp",
         "src/cpu/kernels/softmax/generic/neon/qasymm8_signed.cpp",
+        "src/cpu/kernels/sub/neon/fp16.cpp",
         "src/cpu/kernels/sub/neon/qasymm8.cpp",
         "src/cpu/kernels/sub/neon/qasymm8_signed.cpp",
         "src/cpu/kernels/sub/neon/qsymm16.cpp",
