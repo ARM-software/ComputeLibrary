@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
-#define ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
+#ifndef ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H
+#define ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H
 
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 
 namespace arm_compute
 {
@@ -115,4 +116,4 @@ inline bool is_zero(float a, float epsilon = 0.00001f)
 } // namespace float_ops
 } // namespace helpers
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H */
+#endif // ACL_SRC_CORE_UTILS_HELPERS_FLOAT_OPS_H
