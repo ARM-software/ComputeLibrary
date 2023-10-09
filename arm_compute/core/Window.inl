@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2022 Arm Limited.
+ * Copyright (c) 2016-2020, 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_ARM_COMPUTE_CORE_WINDOW_INL
+#define ACL_ARM_COMPUTE_CORE_WINDOW_INL
+
 namespace arm_compute
 {
 inline Window::Window(const Window &src)
@@ -100,13 +104,21 @@ inline Window Window::collapse_if_possible(const Window &full_window,
     return collapsed;
 }
 
-inline Window Window::shift_dimensions(unsigned int shift_value) const
+inline Window Window::shift_dimensions(unsigned int shift_value, unsigned int start_dim) const
 {
     Window shifted_window;
-    for (size_t n = 0; n < (Coordinates::num_max_dimensions - shift_value); n++)
+    size_t n = 0;
+
+    for (; n < start_dim; ++n)
+    {
+        shifted_window.set(n, _dims[n]);
+    }
+
+    for (; n < (Coordinates::num_max_dimensions - shift_value); n++)
     {
         shifted_window.set(n, _dims[n + shift_value]);
     }
+
     return shifted_window;
 }
 
@@ -313,3 +325,5 @@ inline bool operator==(const Window &lhs, const Window &rhs)
     return (lhs._dims == rhs._dims) && (lhs._is_broadcasted == rhs._is_broadcasted);
 }
 } // namespace arm_compute
+
+#endif // ACL_ARM_COMPUTE_CORE_WINDOW_INL

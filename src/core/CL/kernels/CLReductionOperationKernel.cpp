@@ -204,9 +204,10 @@ void CLReductionOperationKernel::configure(const CLCompileContext &compile_conte
     _kernel = create_kernel(compile_context, "reduction_operation_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(vec_size));
-    win.set(Window::DimX,
-            Window::Dimension(win.x().start(), win.x().end() * _input->info()->num_channels(), win.x().step()));
+    TensorShape actual_input_shape = input->info()->tensor_shape();
+    actual_input_shape[0]          = width;
+
+    Window win = calculate_max_window(actual_input_shape, Steps(vec_size));
     ICLKernel::configure_internal(win);
 
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
@@ -272,55 +273,92 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
         break;
         case 1:
         {
-            // Get first input and output slices
-            Window window_in{window};
-            window_in.set(Window::DimY,
-                          Window::Dimension(0, _input->info()->dimension(1), _input->info()->dimension(1)));
-            Window in_slice  = window_in.first_slice_window_2D();
-            Window out_slice = window.first_slice_window_2D();
+            bool   has_collapsed = true;
+            Window actual_window = window.collapse_if_possible(window, 2, &has_collapsed);
+            ARM_COMPUTE_ERROR_ON(!has_collapsed);
 
-            do
-            {
-                unsigned int idx = 0;
-                add_2D_tensor_argument(idx, _input, in_slice);
-                add_2D_tensor_argument(idx, _output, out_slice);
-                enqueue(queue, *this, in_slice);
-            } while (window_in.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
+            actual_window = actual_window.shift_dimensions(1, Window::DimY);
+
+            const ITensorInfo *input_info    = _input->info();
+            const Strides     &input_strides = input_info->strides_in_bytes();
+
+            const ITensorInfo *output_info    = _output->info();
+            const Strides     &output_strides = output_info->strides_in_bytes();
+
+            unsigned int idx = 0;
+
+            _kernel.setArg(idx++, _input->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, input_strides[1]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[2]);
+            _kernel.setArg<cl_uint>(idx++, input_info->offset_first_element_in_bytes());
+
+            _kernel.setArg(idx++, _output->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, output_strides[2]);
+            _kernel.setArg<cl_uint>(idx++, output_info->offset_first_element_in_bytes());
+
+            enqueue(queue, *this, actual_window);
         }
         break;
         case 2:
         {
-            // Get first input and output slices
-            Window window_in{window};
-            window_in.set(Window::DimZ,
-                          Window::Dimension(0, _input->info()->dimension(2), _input->info()->dimension(2)));
-            Window in_slice  = window_in.first_slice_window_3D();
-            Window out_slice = window.first_slice_window_3D();
+            bool   has_collapsed = true;
+            Window actual_window = window.collapse_if_possible(window, 3, &has_collapsed);
+            ARM_COMPUTE_ERROR_ON(!has_collapsed);
 
-            do
-            {
-                unsigned int idx = 0;
-                add_3D_tensor_argument(idx, _input, in_slice);
-                add_3D_tensor_argument(idx, _output, out_slice);
-                enqueue(queue, *this, in_slice);
-            } while (window_in.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(out_slice));
+            actual_window = actual_window.shift_dimensions(1, Window::DimZ);
+
+            const ITensorInfo *input_info    = _input->info();
+            const Strides     &input_strides = input_info->strides_in_bytes();
+
+            const ITensorInfo *output_info    = _output->info();
+            const Strides     &output_strides = output_info->strides_in_bytes();
+
+            unsigned int idx = 0;
+
+            _kernel.setArg(idx++, _input->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, input_strides[1]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[2]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[3]);
+            _kernel.setArg<cl_uint>(idx++, input_info->offset_first_element_in_bytes());
+
+            _kernel.setArg(idx++, _output->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, output_strides[1]);
+            _kernel.setArg<cl_uint>(idx++, output_strides[3]);
+            _kernel.setArg<cl_uint>(idx++, output_info->offset_first_element_in_bytes());
+
+            enqueue(queue, *this, actual_window);
         }
         break;
         case 3:
         {
-            // Get first input and output slices
-            Window window_in{window};
-            window_in.set(3, Window::Dimension(0, 1, 1));
-            Window in_slice  = window_in.first_slice_window_4D();
-            Window out_slice = window.first_slice_window_4D();
+            bool   has_collapsed = true;
+            Window actual_window = window.shift_dimensions(1, Window::DimW);
 
-            do
-            {
-                unsigned int idx = 0;
-                add_4D_tensor_argument(idx, _input, in_slice);
-                add_4D_tensor_argument(idx, _output, out_slice);
-                enqueue(queue, *this, in_slice);
-            } while (window_in.slide_window_slice_4D(in_slice) && window.slide_window_slice_4D(out_slice));
+            actual_window = actual_window.collapse_if_possible(actual_window, 2, &has_collapsed);
+            ARM_COMPUTE_ERROR_ON(!has_collapsed);
+
+            const ITensorInfo *input_info    = _input->info();
+            const Strides     &input_strides = input_info->strides_in_bytes();
+
+            const ITensorInfo *output_info    = _output->info();
+            const Strides     &output_strides = output_info->strides_in_bytes();
+
+            unsigned int idx = 0;
+
+            _kernel.setArg(idx++, _input->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, input_strides[1]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[2]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[3]);
+            _kernel.setArg<cl_uint>(idx++, input_strides[4]);
+            _kernel.setArg<cl_uint>(idx++, input_info->offset_first_element_in_bytes());
+
+            _kernel.setArg(idx++, _output->cl_buffer());
+            _kernel.setArg<cl_uint>(idx++, output_strides[1]);
+            _kernel.setArg<cl_uint>(idx++, output_strides[2]);
+            _kernel.setArg<cl_uint>(idx++, output_strides[4]);
+            _kernel.setArg<cl_uint>(idx++, output_info->offset_first_element_in_bytes());
+
+            enqueue(queue, *this, actual_window);
         }
         break;
         default:

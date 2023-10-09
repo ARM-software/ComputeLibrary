@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_WINDOW_H
-#define ARM_COMPUTE_WINDOW_H
+#ifndef ACL_ARM_COMPUTE_CORE_WINDOW_H
+#define ACL_ARM_COMPUTE_CORE_WINDOW_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
@@ -213,15 +213,17 @@ public:
      */
     void shift(size_t dimension, int shift_value);
 
-    /** Shift down all the dimensions of a window
+    /** Shift down all the dimensions of a window starting from the specified dimension.
      *
-     * i.e new_dims[n] = old_dims[n+shift_value].
+     * new_dims[i] = old_dims[i]             for all i < start_dim.
+     * new_dims[i] = old_dims[i+shift_value] for all i >= start_dim.
      *
      * @param[in] shift_value Number of dimensions to shift the window by.
+     * @param[in] start_dim   The dimension from which the dimensions start to shift.
      *
      * @return The window with the shifted dimensions.
      */
-    Window shift_dimensions(unsigned int shift_value) const;
+    Window shift_dimensions(unsigned int shift_value, unsigned int start_dim = 0) const;
 
     /** Adjust the start or end of a given dimension by the given value
      *
@@ -460,4 +462,4 @@ private:
 };
 } // namespace arm_compute
 #include "Window.inl"
-#endif /*ARM_COMPUTE_WINDOW_H */
+#endif // ACL_ARM_COMPUTE_CORE_WINDOW_H
