@@ -53,16 +53,11 @@ const auto data9x9_small_asymm = framework::dataset::make("InputShape", TensorSh
                                  *framework::dataset::make("PadLeft", 3)
                                  *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
 
-const auto data9x9_large_asymm = framework::dataset::make("InputShape", TensorShape{ 640U, 360U, 56U, 1U }) *framework::dataset::make("StrideX", 2) *framework::dataset::make("StrideY",
-                                 2)
-                                 *framework::dataset::make("PadLeft", 3)
-                                 *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
-
-const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
-                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
-
-const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
+const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4, 2) * framework::dataset::make("StrideY", 2, 4) * framework::dataset::make("PadX", 1, 3)
                      * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
+
+const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 2, 4) * framework::dataset::make("StrideY", 1, 4, 2) * framework::dataset::make("PadX", 1, 2)
+                     * framework::dataset::make("PadY", 1, 3) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data3x3_asymm = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadLeft", 0, 1)
                            * framework::dataset::make("PadRight", 0, 1) * framework::dataset::make("PadTop", 0, 1) * framework::dataset::make("PadBottom", 0, 1) * framework::dataset::make("NumKernels", { 3 });
@@ -70,18 +65,17 @@ const auto data3x3_asymm = datasets::SmallDeconvolutionShapes() * framework::dat
 const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
                                * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
-const auto data3x3_precommit_large_channels = datasets::SmallDeconvolutionShapesWithLargerChannels() * framework::dataset::make("StrideX", 2) * framework::dataset::make("StrideY",
-                                              2)
+const auto data3x3_precommit_large_channels = datasets::SmallDeconvolutionShapesWithLargerChannels() * framework::dataset::make("StrideX", 2) * framework::dataset::make("StrideY", 2)
                                               * framework::dataset::make("PadX", 1)
                                               * framework::dataset::make("PadY", 2) * framework::dataset::make("NumKernels", { 5 });
 
 const auto data2x2_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 2) * framework::dataset::make("StrideY", 2) * framework::dataset::make("PadX", 1)
                                * framework::dataset::make("PadY", 1) * framework::dataset::make("NumKernels", { 3 });
 
-const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
+const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4, 2) * framework::dataset::make("StrideY", 2, 4) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
-const auto data5x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
+const auto data5x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 2, 4) * framework::dataset::make("StrideY", 1, 4, 2) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
@@ -233,8 +227,8 @@ FIXTURE_DATA_TEST_CASE(RunAsymm, CLDeconvolutionLayerAsymmFixture3x3<float>, fra
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 data_layouts_dataset),
-                                                                                                                 add_bias_dataset))
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                 framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -255,7 +249,7 @@ TEST_SUITE_END() // W2x2
 TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                     data_layouts_dataset),
-                                                                                                            add_bias_dataset))
+                                                                                                            framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -275,7 +269,7 @@ TEST_SUITE_END() // W9x9
 TEST_SUITE(W5x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture5x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data5x1, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                     data_layouts_dataset),
-                                                                                                            add_bias_dataset))
+                                                                                                            framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -289,7 +283,7 @@ TEST_SUITE(FP16)
 TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    data_layouts_dataset),
-                                                                                                           add_bias_dataset))
+                                                                                                           framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -306,8 +300,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<half>, framework
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                        data_layouts_dataset),
-                                                                                                                add_bias_dataset))
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -328,7 +322,7 @@ TEST_SUITE_END() // W2x2
 TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    data_layouts_dataset),
-                                                                                                           add_bias_dataset))
+                                                                                                           framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -338,7 +332,7 @@ TEST_SUITE_END() // W1x1
 TEST_SUITE(W5x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture5x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data5x1, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    data_layouts_dataset),
-                                                                                                           add_bias_dataset))
+                                                                                                           framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -387,7 +381,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, fr
                                                                                                                        data_layouts_dataset),
                                                                                                                        framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
                                                                                                                        framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
-                                                                                                                       add_bias_dataset))
+                                                                                                                       framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -407,12 +401,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data3x3,
-                       framework::dataset::make("DataType",
-                                                DataType::QASYMM8)),
-                       data_layouts_dataset),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                        framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 128) })),
                        framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 128), QuantizationInfo(4.f / 255.f, 128) })),
-                       add_bias_dataset))
+                       framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -438,7 +431,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, fr
                                                                                                                        data_layouts_dataset),
                                                                                                                        framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
                                                                                                                        framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
-                                                                                                                       add_bias_dataset))
+                                                                                                                       framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -451,7 +444,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture5x1<uint8_t>, fr
                                                                                                                        data_layouts_dataset),
                                                                                                                        framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
                                                                                                                        framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
-                                                                                                                       add_bias_dataset))
+                                                                                                                       framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -471,7 +464,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<int8_t>, fra
                                                                                                                       data_layouts_dataset),
                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
-                                                                                                                      add_bias_dataset))
+                                                                                                                      framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -493,12 +486,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<int8_t>
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data3x3,
-                       framework::dataset::make("DataType",
-                                                DataType::QASYMM8_SIGNED)),
-                       data_layouts_dataset),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                        framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, -10), QuantizationInfo(2.f / 255.f, 127) })),
                        framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 64), QuantizationInfo(4.f / 255.f, -128) })),
-                       add_bias_dataset))
+                       framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -524,7 +516,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<int8_t>, fra
                                                                                                                       data_layouts_dataset),
                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
-                                                                                                                      add_bias_dataset))
+                                                                                                                      framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -537,7 +529,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture5x1<int8_t>, fra
                                                                                                                       data_layouts_dataset),
                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
-                                                                                                                      add_bias_dataset))
+                                                                                                                      framework::dataset::make("AddBias", { true })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -559,7 +551,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedPerChannelFixture4
                        data_layouts_dataset),
                        input_qinfo_dataset),
                        output_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -570,7 +562,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFi
                        data_layouts_dataset),
                        input_signed_qinfo_dataset),
                        output_signed_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -584,7 +576,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedPerChannelFixture3
                        data_layouts_dataset),
                        input_qinfo_dataset),
                        output_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -595,7 +587,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFi
                        data_layouts_dataset),
                        input_signed_qinfo_dataset),
                        output_signed_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -659,7 +651,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedPerChannelFixture1
                        data_layouts_dataset),
                        input_qinfo_dataset),
                        output_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { false })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -670,7 +662,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFi
                        data_layouts_dataset),
                        input_signed_qinfo_dataset),
                        output_signed_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -684,7 +676,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedPerChannelFixture5
                        data_layouts_dataset),
                        input_qinfo_dataset),
                        output_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { true })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
@@ -695,7 +687,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSigned, CLDeconvolutionLayerQuantizedPerChannelFi
                        data_layouts_dataset),
                        input_signed_qinfo_dataset),
                        output_signed_qinfo_dataset),
-                       add_bias_dataset),
+                       framework::dataset::make("AddBias", { false })),
                        framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output
