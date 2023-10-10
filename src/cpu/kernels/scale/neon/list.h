@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_SCALE_LIST_H
-#define SRC_CORE_NEON_KERNELS_SCALE_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_SCALE_NEON_LIST_H
+#define ACL_SRC_CPU_KERNELS_SCALE_NEON_LIST_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
@@ -45,8 +45,175 @@ DECLARE_SCALE_KERNEL(u8_neon_scale);
 DECLARE_SCALE_KERNEL(s8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_neon_scale);
 DECLARE_SCALE_KERNEL(qasymm8_signed_neon_scale);
+DECLARE_SCALE_KERNEL(fp16_common_neon_scale);
+DECLARE_SCALE_KERNEL(fp16_bilinear_neon_scale_nchw);
+DECLARE_SCALE_KERNEL(fp16_nearest_neon_scale_nchw);
 
 #undef DECLARE_SCALE_KERNEL
+
+#ifdef ENABLE_NCHW_KERNELS
+template <typename T>
+void scale_nearest_nchw(const ITensor *src,
+                        ITensor       *dst,
+                        const ITensor *dx,
+                        const ITensor *dy,
+                        const ITensor *offsets,
+                        PixelValue     constant_border_value,
+                        float          sampling_offset,
+                        bool           align_corners,
+                        const Window  &window)
+{
+    ARM_COMPUTE_UNUSED(dx, dy);
+    ARM_COMPUTE_UNUSED(constant_border_value);
+    const size_t in_stride_x = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
+
+    // Compute the ratio between source height and destination height
+    const auto hr =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+
+    // Don't increment in X and Y direction for the input tensor
+    // A pointer to the start of this plane is needed as base for the precomputed offsets
+    Window win_in(window);
+    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+
+    // Set offsets window
+    Window win_off;
+    win_off.set(Window::DimX, window[Window::DimX]);
+    win_off.set(Window::DimY, window[Window::DimY]);
+    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
+    {
+        win_off.set(d, Window::Dimension(0, 0, 0));
+    }
+
+    // Create iterators
+    Iterator src_i(src, win_in);
+    Iterator dst_i(dst, window);
+    Iterator offsets_i(offsets, win_off);
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets_i.ptr());
+            const auto in_yi       = static_cast<int32_t>(
+                align_corners ? utils::rounding::round_half_away_from_zero((id.y() + sampling_offset) * hr)
+                                    : std::floor((id.y() + sampling_offset) * hr));
+            const int32_t offset_row = in_yi * in_stride_x;
+            *reinterpret_cast<T *>(dst_i.ptr()) =
+                *(reinterpret_cast<const T *>(src_i.ptr()) + offsets_ptr[0] + offset_row);
+        },
+        src_i, offsets_i, dst_i);
+}
+
+template <typename T>
+void scale_bilinear_nchw(const ITensor *src,
+                         ITensor       *dst,
+                         const ITensor *dx,
+                         const ITensor *dy,
+                         const ITensor *offsets,
+                         BorderMode     border_mode,
+                         PixelValue     constant_border_value,
+                         float          sampling_offset,
+                         bool           align_corners,
+                         const Window  &window)
+{
+    // Compute the ratio between source height and destination height
+    const auto hr =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    Window win_off;
+    win_off.set(Window::DimX, window.x());
+    win_off.set(Window::DimY, window.y());
+
+    // Don't increment in X and Y direction for the input tensor
+    // A pointer to the start of this plane is needed as base for the precomputed offsets
+    Window win_in(window);
+    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+
+    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
+    {
+        win_off.set(d, Window::Dimension(0, 0, 0));
+    }
+
+    Iterator src_i(src, win_in);
+    Iterator dst_i(dst, window);
+    Iterator offsets_i(offsets, win_off);
+    Iterator dx_i(dx, win_off);
+    Iterator dy_i(dy, win_off);
+
+    const int32_t in_dim_w    = src->info()->dimension(0);
+    const int32_t in_dim_h    = src->info()->dimension(1);
+    const int32_t in_stride_w = in_dim_w + src->info()->padding().left + src->info()->padding().right;
+
+    if (border_mode == BorderMode::CONSTANT)
+    {
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        using ConstType = T;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        const T const_border_value = static_cast<T>(constant_border_value.get<ConstType>());
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const int32_t index_h       = std::floor((id.y() + sampling_offset) * hr - sampling_offset);
+                const auto    index_w       = *(reinterpret_cast<const int32_t *>(offsets_i.ptr()));
+                const auto    dx_val        = *(reinterpret_cast<const float *>(dx_i.ptr()));
+                const auto    dy_val        = *(reinterpret_cast<const float *>(dy_i.ptr()));
+                const auto    pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
+
+                const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h)
+                                     ? (*(pixel_row_ptr + index_w + index_h * in_stride_w))
+                                     : const_border_value;
+                const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h)
+                                     ? (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w))
+                                     : const_border_value;
+                const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h && index_h < in_dim_h - 1)
+                                     ? (*(pixel_row_ptr + index_w + index_h * in_stride_w + in_stride_w))
+                                     : const_border_value;
+                const auto a11 = (-1 <= index_w && index_w < in_dim_w - 1 && -1 <= index_h && index_h < in_dim_h - 1)
+                                     ? (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w + in_stride_w))
+                                     : const_border_value;
+
+                *reinterpret_cast<T *>(dst_i.ptr()) =
+                    static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            },
+            src_i, offsets_i, dx_i, dy_i, dst_i);
+    }
+    else if (border_mode == BorderMode::REPLICATE)
+    {
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const int  index_h       = std::floor((id.y() + sampling_offset) * hr - sampling_offset);
+                const auto index_w       = *(reinterpret_cast<const int32_t *>(offsets_i.ptr()));
+                const auto dx_val        = *(reinterpret_cast<const float *>(dx_i.ptr()));
+                const auto dy_val        = *(reinterpret_cast<const float *>(dy_i.ptr()));
+                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
+
+                auto clamped_x  = utility::clamp<int>(index_w, 0, in_dim_w - 1);
+                auto clamped_x1 = utility::clamp<int>(index_w + 1, 0, in_dim_w - 1);
+                auto clamped_y  = utility::clamp<int>(index_h, 0, in_dim_h - 1);
+                auto clamped_y1 = utility::clamp<int>(index_h + 1, 0, in_dim_h - 1);
+
+                const auto a00 = *(pixel_row_ptr + clamped_x + clamped_y * in_stride_w);
+                const auto a01 = *(pixel_row_ptr + clamped_x1 + clamped_y * in_stride_w);
+                const auto a10 = *(pixel_row_ptr + clamped_x + clamped_y1 * in_stride_w);
+                const auto a11 = *(pixel_row_ptr + clamped_x1 + clamped_y1 * in_stride_w);
+
+                *reinterpret_cast<T *>(dst_i.ptr()) =
+                    static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
+            },
+            src_i, offsets_i, dx_i, dy_i, dst_i);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not implemented");
+    }
+}
+#endif // ENABLE_NCHW_KERNELS
 
 template <typename T>
 void nearest_neon_scale(const ITensor *src,
@@ -447,4 +614,4 @@ void common_neon_scale(const ITensor      *src,
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* SRC_CORE_NEON_KERNELS_SCALE_LIST_H */
+#endif // ACL_SRC_CPU_KERNELS_SCALE_NEON_LIST_H

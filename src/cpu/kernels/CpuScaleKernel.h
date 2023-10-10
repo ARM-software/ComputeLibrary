@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_SCALEKERNEL_H
-#define ARM_COMPUTE_CPU_SCALEKERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUSCALEKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUSCALEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 
@@ -40,8 +40,6 @@ class CpuScaleKernel : public ICpuKernel<CpuScaleKernel>
 {
 private:
     /** Scale function to use for the particular function to use */
-    using ScaleFunctionPtr = void (CpuScaleKernel::*)(
-        const ITensor *, ITensor *, const ITensor *, const ITensor *, const ITensor *, const Window &window);
     using ScaleKernelPtr = std::add_pointer<void(const ITensor *,
                                                  ITensor *,
                                                  const ITensor *,
@@ -103,46 +101,7 @@ public:
     static const std::vector<ScaleKernel> &get_available_kernels();
 
 private:
-#ifdef ENABLE_NCHW_KERNELS
-    /** function to perform scale using area interpolation on the given window
-     *
-     *  @note Used only in case down-sampling.
-     */
-    void scale_area_nchw_u8(const ITensor *src,
-                            ITensor       *dst,
-                            const ITensor *dx,
-                            const ITensor *dy,
-                            const ITensor *offsets,
-                            const Window  &window);
-
-    /** function to perform scale using bilinear interpolation on the given window */
-    template <typename T>
-    void scale_bilinear_nchw(const ITensor *src,
-                             ITensor       *dst,
-                             const ITensor *dx,
-                             const ITensor *dy,
-                             const ITensor *offsets,
-                             const Window  &window);
-    /** function to perform scale using bilinear interpolation on the given window */
-    template <typename T>
-    void scale_bilinear_qasymm(const ITensor *src,
-                               ITensor       *dst,
-                               const ITensor *dx,
-                               const ITensor *dy,
-                               const ITensor *offsets,
-                               const Window  &window);
-
-    /** function to perform scale using nearest neighbour on the given window */
-    template <typename T>
-    void scale_nearest_nchw(const ITensor *src,
-                            ITensor       *dst,
-                            const ITensor *dx,
-                            const ITensor *dy,
-                            const ITensor *offsets,
-                            const Window  &window);
-#endif // ENABLE_NCHW_KERNELS
-
-    ScaleFunctionPtr    _func{nullptr};
+    ScaleKernelPtr      _nchw_func{nullptr};
     InterpolationPolicy _policy{};
     BorderMode          _border_mode{};
     PixelValue          _constant_border_value{};
@@ -155,4 +114,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_SCALEKERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUSCALEKERNEL_H

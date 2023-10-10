@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "src/core/NEON/NEMath.h"
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/utils/ScaleUtils.h"
+#include "src/cpu/kernels/scale/neon/list.h"
 #include "support/Rounding.h"
 
 #include <arm_neon.h>
@@ -194,6 +195,41 @@ void fp16_neon_scale_bilinear(const ITensor *src,
 } // namespace
 namespace cpu
 {
+void fp16_bilinear_neon_scale_nchw(const ITensor      *src,
+                                   ITensor            *dst,
+                                   const ITensor      *offsets,
+                                   const ITensor      *dx,
+                                   const ITensor      *dy,
+                                   InterpolationPolicy policy,
+                                   BorderMode          border_mode,
+                                   PixelValue          constant_border_value,
+                                   float               sampling_offset,
+                                   bool                align_corners,
+                                   const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+    arm_compute::cpu::scale_bilinear_nchw<float16_t>(src, dst, dx, dy, offsets, border_mode, constant_border_value,
+                                                     sampling_offset, align_corners, window);
+}
+
+void fp16_nearest_neon_scale_nchw(const ITensor      *src,
+                                  ITensor            *dst,
+                                  const ITensor      *offsets,
+                                  const ITensor      *dx,
+                                  const ITensor      *dy,
+                                  InterpolationPolicy policy,
+                                  BorderMode          border_mode,
+                                  PixelValue          constant_border_value,
+                                  float               sampling_offset,
+                                  bool                align_corners,
+                                  const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+    ARM_COMPUTE_UNUSED(border_mode);
+    arm_compute::cpu::scale_nearest_nchw<float16_t>(src, dst, dx, dy, offsets, constant_border_value, sampling_offset,
+                                                    align_corners, window);
+}
+
 void fp16_neon_scale(const ITensor      *src,
                      ITensor            *dst,
                      const ITensor      *offsets,
@@ -216,6 +252,23 @@ void fp16_neon_scale(const ITensor      *src,
         fp16_neon_scale_nearest(src, dst, offsets, sampling_offset, align_corners, window);
     }
 }
+
+void fp16_common_neon_scale(const ITensor      *src,
+                            ITensor            *dst,
+                            const ITensor      *offsets,
+                            const ITensor      *dx,
+                            const ITensor      *dy,
+                            InterpolationPolicy policy,
+                            BorderMode          border_mode,
+                            PixelValue          constant_border_value,
+                            float               sampling_offset,
+                            bool                align_corners,
+                            const Window       &window)
+{
+    arm_compute::cpu::common_neon_scale<float16_t>(src, dst, offsets, dx, dy, policy, border_mode,
+                                                   constant_border_value, sampling_offset, align_corners, window);
+}
+
 } // namespace cpu
 } // namespace arm_compute
 

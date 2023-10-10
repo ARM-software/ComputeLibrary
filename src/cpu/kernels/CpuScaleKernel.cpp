@@ -41,6 +41,243 @@ namespace arm_compute
 {
 namespace cpu
 {
+
+#ifdef ENABLE_NCHW_KERNELS
+void scale_area_nchw_u8(const ITensor      *src,
+                        ITensor            *dst,
+                        const ITensor      *offsets,
+                        const ITensor      *dx,
+                        const ITensor      *dy,
+                        InterpolationPolicy policy,
+                        BorderMode          border_mode,
+                        PixelValue          constant_border_value,
+                        float               sampling_offset,
+                        bool                align_corners,
+                        const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(dx, dy, offsets, policy, border_mode, constant_border_value, sampling_offset, align_corners);
+    using namespace scale_helpers;
+
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::U8);
+
+    // Don't increment in width/height/channels for the input tensor
+    // A pointer to the start of this plane is needed as base for the precomputed offsets
+    Window win_in(window);
+    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
+
+    Iterator src_i(src, win_in);
+    Iterator dst_i(dst, window);
+
+    const auto wr =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(0), dst->info()->dimension(0), align_corners);
+    const auto hr =
+        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), align_corners);
+    const auto   w         = src->info()->dimension(0);
+    const auto   h         = src->info()->dimension(1);
+    const size_t in_stride = src->info()->strides_in_bytes()[1];
+
+    execute_window_loop(
+        window,
+        [&](const Coordinates &id)
+        {
+            const auto in_ptr = reinterpret_cast<const uint8_t *>(src_i.ptr());
+
+            uint8x8_t tmp0 = vdup_n_u8(0);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x(), id.y()), tmp0, 0);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 1, id.y()), tmp0, 1);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 2, id.y()), tmp0, 2);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 3, id.y()), tmp0, 3);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 4, id.y()), tmp0, 4);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 5, id.y()), tmp0, 5);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 6, id.y()), tmp0, 6);
+            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 7, id.y()), tmp0, 7);
+
+            uint8x8_t tmp1 = vdup_n_u8(0);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 8, id.y()), tmp1, 0);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 9, id.y()), tmp1, 1);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 10, id.y()), tmp1, 2);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 11, id.y()), tmp1, 3);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 12, id.y()), tmp1, 4);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 13, id.y()), tmp1, 5);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 14, id.y()), tmp1, 6);
+            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 15, id.y()), tmp1, 7);
+
+            vst1q_u8(dst_i.ptr(), vcombine_u8(tmp0, tmp1));
+        },
+        src_i, dst_i);
+}
+
+template <typename T>
+void scale_bilinear_qasymm_nchw(const ITensor      *src,
+                                ITensor            *dst,
+                                const ITensor      *offsets,
+                                const ITensor      *dx,
+                                const ITensor      *dy,
+                                InterpolationPolicy policy,
+                                BorderMode          border_mode,
+                                PixelValue          constant_border_value,
+                                float               sampling_offset,
+                                bool                align_corners,
+                                const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+    // Get data layout and width/height indices
+    const int idx_width  = get_data_layout_dimension_index(DataLayout::NCHW, DataLayoutDimension::WIDTH);
+    const int idx_height = get_data_layout_dimension_index(DataLayout::NCHW, DataLayoutDimension::HEIGHT);
+
+    // Compute the ratio between source height and destination height
+    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(idx_height),
+                                                        dst->info()->dimension(idx_height), align_corners);
+    Window     win_off;
+    win_off.set(Window::DimX, Window::Dimension(0, 0, 0));
+    win_off.set(Window::DimY, Window::Dimension(0, 0, 0));
+
+    // Don't increment in X and Y direction for the input tensor
+    // A pointer to the start of this plane is needed as base for the precomputed offsets
+    Window win_in(window);
+    win_in.set(idx_width, Window::Dimension(0, 0, 0));
+    win_in.set(idx_height, Window::Dimension(0, 0, 0));
+
+    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
+    {
+        win_off.set(d, Window::Dimension(0, 0, 0));
+    }
+
+    Iterator src_i(src, win_in);
+    Iterator dst_i(dst, window);
+
+    const int32_t in_dim_w = src->info()->dimension(idx_width);
+    const int32_t in_dim_h = src->info()->dimension(idx_height);
+    const int32_t stride_w = src->info()->strides_in_bytes()[idx_width];
+    const int32_t stride_h = src->info()->strides_in_bytes()[idx_height];
+
+    const UniformQuantizationInfo iq_info = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = dst->info()->quantization_info().uniform();
+
+    if (border_mode == BorderMode::CONSTANT)
+    {
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        using ConstType = T;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        const T const_border_value = static_cast<T>(constant_border_value.get<ConstType>());
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const int32_t index_h = std::floor((id[idx_height] + sampling_offset) * hr - sampling_offset);
+                const int32_t index_w = *(reinterpret_cast<const int32_t *>(
+                    offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto    dx_val =
+                    *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto dy_val =
+                    *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
+
+                const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h)
+                                     ? (*(pixel_row_ptr + index_w * stride_w + index_h * stride_h))
+                                     : const_border_value;
+                const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h)
+                                     ? (*(pixel_row_ptr + (index_w + 1) * stride_w + index_h * stride_h))
+                                     : const_border_value;
+                const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h && index_h < in_dim_h - 1)
+                                     ? (*(pixel_row_ptr + index_w * stride_w + (index_h + 1) * stride_h))
+                                     : const_border_value;
+                const auto a11 = (-1 <= index_w && index_w < in_dim_w - 1 && -1 <= index_h && index_h < in_dim_h - 1)
+                                     ? (*(pixel_row_ptr + (index_w + 1) * stride_w + (index_h + 1) * stride_h))
+                                     : const_border_value;
+
+                const float inp00                   = Qasymm8QuantizationHelper<T>::dequantize(a00, iq_info);
+                const float inp01                   = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
+                const float inp10                   = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
+                const float inp11                   = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
+                *reinterpret_cast<T *>(dst_i.ptr()) = Qasymm8QuantizationHelper<T>::quantize(
+                    scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
+            },
+            src_i, dst_i);
+    }
+    else if (border_mode == BorderMode::REPLICATE)
+    {
+        execute_window_loop(
+            window,
+            [&](const Coordinates &id)
+            {
+                const int     index_h = std::floor((id[idx_height] + sampling_offset) * hr - sampling_offset);
+                const int32_t index_w = *(reinterpret_cast<const int32_t *>(
+                    offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto    dx_val =
+                    *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto dy_val =
+                    *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
+                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
+
+                auto clamped_w  = utility::clamp<int>(index_w, 0, in_dim_w - 1);
+                auto clamped_w1 = utility::clamp<int>(index_w + 1, 0, in_dim_w - 1);
+                auto clamped_h  = utility::clamp<int>(index_h, 0, in_dim_h - 1);
+                auto clamped_h1 = utility::clamp<int>(index_h + 1, 0, in_dim_h - 1);
+
+                const auto a00 = *(pixel_row_ptr + clamped_w * stride_w + clamped_h * stride_h);
+                const auto a01 = *(pixel_row_ptr + clamped_w1 * stride_w + clamped_h * stride_h);
+                const auto a10 = *(pixel_row_ptr + clamped_w * stride_w + clamped_h1 * stride_h);
+                const auto a11 = *(pixel_row_ptr + clamped_w1 * stride_w + clamped_h1 * stride_h);
+
+                const float inp00                   = Qasymm8QuantizationHelper<T>::dequantize(a00, iq_info);
+                const float inp01                   = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
+                const float inp10                   = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
+                const float inp11                   = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
+                *reinterpret_cast<T *>(dst_i.ptr()) = Qasymm8QuantizationHelper<T>::quantize(
+                    scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
+            },
+            src_i, dst_i);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not implemented");
+    }
+}
+
+/** function to perform scale using bilinear interpolation on the given window */
+template <typename T>
+void scale_bilinear_nchw(const ITensor      *src,
+                         ITensor            *dst,
+                         const ITensor      *offsets,
+                         const ITensor      *dx,
+                         const ITensor      *dy,
+                         InterpolationPolicy policy,
+                         BorderMode          border_mode,
+                         PixelValue          constant_border_value,
+                         float               sampling_offset,
+                         bool                align_corners,
+                         const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+    arm_compute::cpu::scale_bilinear_nchw<T>(src, dst, dx, dy, offsets, border_mode, constant_border_value,
+                                             sampling_offset, align_corners, window);
+}
+
+template <typename T>
+void scale_nearest_nchw(const ITensor      *src,
+                        ITensor            *dst,
+                        const ITensor      *offsets,
+                        const ITensor      *dx,
+                        const ITensor      *dy,
+                        InterpolationPolicy policy,
+                        BorderMode          border_mode,
+                        PixelValue          constant_border_value,
+                        float               sampling_offset,
+                        bool                align_corners,
+                        const Window       &window)
+{
+    ARM_COMPUTE_UNUSED(policy, border_mode);
+    arm_compute::cpu::scale_nearest_nchw<T>(src, dst, dx, dy, offsets, constant_border_value, sampling_offset,
+                                            align_corners, window);
+}
+
+#endif // ENABLE_NCHW_KERNELS
+
 namespace kernels
 {
 namespace
@@ -80,7 +317,7 @@ static const std::vector<CpuScaleKernel::ScaleKernel> available_kernels = {
      REGISTER_INTEGER_SVE(arm_compute::cpu::s16_sve_scale)},
     {"neon_fp16_scale",
      [](const ScaleKernelDataTypeISASelectorData &data) { return data.dt == DataType::F16 && data.isa.fp16; },
-     REGISTER_FP16_NEON(arm_compute::cpu::common_neon_scale<float16_t>)},
+     REGISTER_FP16_NEON(arm_compute::cpu::fp16_common_neon_scale)},
     {"neon_fp32_scale", [](const ScaleKernelDataTypeISASelectorData &data) { return data.dt == DataType::F32; },
      REGISTER_FP32_NEON(arm_compute::cpu::common_neon_scale<float>)},
     {"neon_qu8_scale", [](const ScaleKernelDataTypeISASelectorData &data) { return data.dt == DataType::QASYMM8; },
@@ -220,33 +457,26 @@ void CpuScaleKernel::configure(const ITensorInfo     *src,
         function_to_call += string_from_data_layout(_data_layout) + "_";
         function_to_call += string_from_interpolation_policy(_policy);
 
-        static std::map<std::string, ScaleFunctionPtr> map_function = {
-            {"scale_U8_NCHW_AREA_CONSTANT", &CpuScaleKernel::scale_area_nchw_u8},
-
-            {"scale_U8_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_nchw<uint8_t>},
-            {"scale_U8_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<uint8_t>},
-
-            {"scale_QASYMM8_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_qasymm<uint8_t>},
-            {"scale_QASYMM8_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<uint8_t>},
-
-            {"scale_QASYMM8_SIGNED_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_qasymm<int8_t>},
-            {"scale_QASYMM8_SIGNED_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<int8_t>},
-
-            {"scale_S16_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_nchw<int16_t>},
-            {"scale_S16_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<int16_t>},
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-            {"scale_F16_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_nchw<float16_t>},
-            {"scale_F16_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<float16_t>},
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
-            {"scale_F32_NCHW_BILINEAR", &CpuScaleKernel::scale_bilinear_nchw<float>},
-            {"scale_F32_NCHW_NEAREST_NEIGHBOUR", &CpuScaleKernel::scale_nearest_nchw<float>},
+        const static std::map<std::string, ScaleKernelPtr> map_nchw_function = {
+            {"scale_U8_NCHW_AREA_CONSTANT", &arm_compute::cpu::scale_area_nchw_u8},
+            {"scale_U8_NCHW_AREA_CONSTANT", &arm_compute::cpu::scale_area_nchw_u8},
+            {"scale_U8_NCHW_BILINEAR", &arm_compute::cpu::scale_bilinear_nchw<uint8_t>},
+            {"scale_U8_NCHW_NEAREST_NEIGHBOUR", &arm_compute::cpu::scale_nearest_nchw<uint8_t>},
+            {"scale_QASYMM8_NCHW_BILINEAR", &arm_compute::cpu::scale_bilinear_qasymm_nchw<uint8_t>},
+            {"scale_QASYMM8_NCHW_NEAREST_NEIGHBOUR", &arm_compute::cpu::scale_nearest_nchw<uint8_t>},
+            {"scale_QASYMM8_SIGNED_NCHW_BILINEAR", &arm_compute::cpu::scale_bilinear_qasymm_nchw<int8_t>},
+            {"scale_QASYMM8_SIGNED_NCHW_NEAREST_NEIGHBOUR", &arm_compute::cpu::scale_nearest_nchw<int8_t>},
+            {"scale_S16_NCHW_BILINEAR", &arm_compute::cpu::scale_bilinear_nchw<int16_t>},
+            {"scale_S16_NCHW_NEAREST_NEIGHBOUR", &arm_compute::cpu::scale_nearest_nchw<int16_t>},
+            {"scale_F16_NCHW_BILINEAR", REGISTER_FP16_NEON(arm_compute::cpu::fp16_bilinear_neon_scale_nchw)},
+            {"scale_F16_NCHW_NEAREST_NEIGHBOUR", REGISTER_FP16_NEON(arm_compute::cpu::fp16_nearest_neon_scale_nchw)},
+            {"scale_F32_NCHW_BILINEAR", &arm_compute::cpu::scale_bilinear_nchw<float>},
+            {"scale_F32_NCHW_NEAREST_NEIGHBOUR", &arm_compute::cpu::scale_nearest_nchw<float>},
         };
-        auto it = map_function.find(function_to_call);
-        if (it != map_function.end())
+        auto it = map_nchw_function.find(function_to_call);
+        if (it != map_nchw_function.end())
         {
-            _func = it->second;
+            _nchw_func = it->second;
         }
     }
 #endif // ENABLE_NCHW_KERNELS
@@ -255,347 +485,6 @@ void CpuScaleKernel::configure(const ITensorInfo     *src,
     Window win = calculate_max_window(*dst, Steps());
     ICpuKernel::configure(win);
 }
-
-#ifdef ENABLE_NCHW_KERNELS
-template <typename T>
-void CpuScaleKernel::scale_nearest_nchw(const ITensor *src,
-                                        ITensor       *dst,
-                                        const ITensor *dx,
-                                        const ITensor *dy,
-                                        const ITensor *offsets,
-                                        const Window  &window)
-{
-    ARM_COMPUTE_UNUSED(dx, dy);
-    const size_t in_stride_x = src->info()->dimension(0) + src->info()->padding().left + src->info()->padding().right;
-
-    // Compute the ratio between source height and destination height
-    const auto hr =
-        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), _align_corners);
-
-    // Don't increment in X and Y direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-
-    // Set offsets window
-    Window win_off;
-    win_off.set(Window::DimX, window[Window::DimX]);
-    win_off.set(Window::DimY, window[Window::DimY]);
-    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
-    {
-        win_off.set(d, Window::Dimension(0, 0, 0));
-    }
-
-    // Create iterators
-    Iterator src_i(src, win_in);
-    Iterator dst_i(dst, window);
-    Iterator offsets_i(offsets, win_off);
-    execute_window_loop(
-        window,
-        [&](const Coordinates &id)
-        {
-            const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets_i.ptr());
-            const auto in_yi       = static_cast<int32_t>(
-                _align_corners ? utils::rounding::round_half_away_from_zero((id.y() + _sampling_offset) * hr)
-                                     : std::floor((id.y() + _sampling_offset) * hr));
-            const int32_t offset_row = in_yi * in_stride_x;
-            *reinterpret_cast<T *>(dst_i.ptr()) =
-                *(reinterpret_cast<const T *>(src_i.ptr()) + offsets_ptr[0] + offset_row);
-        },
-        src_i, offsets_i, dst_i);
-}
-
-template <typename T>
-void CpuScaleKernel::scale_bilinear_nchw(const ITensor *src,
-                                         ITensor       *dst,
-                                         const ITensor *dx,
-                                         const ITensor *dy,
-                                         const ITensor *offsets,
-                                         const Window  &window)
-{
-    // Compute the ratio between source height and destination height
-    const auto hr =
-        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), _align_corners);
-    Window win_off;
-    win_off.set(Window::DimX, window.x());
-    win_off.set(Window::DimY, window.y());
-
-    // Don't increment in X and Y direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-
-    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
-    {
-        win_off.set(d, Window::Dimension(0, 0, 0));
-    }
-
-    Iterator src_i(src, win_in);
-    Iterator dst_i(dst, window);
-    Iterator offsets_i(offsets, win_off);
-    Iterator dx_i(dx, win_off);
-    Iterator dy_i(dy, win_off);
-
-    const int32_t in_dim_w    = src->info()->dimension(0);
-    const int32_t in_dim_h    = src->info()->dimension(1);
-    const int32_t in_stride_w = in_dim_w + src->info()->padding().left + src->info()->padding().right;
-
-    if (_border_mode == BorderMode::CONSTANT)
-    {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        using ConstType = T;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        const T const_border_value = static_cast<T>(_constant_border_value.get<ConstType>());
-        execute_window_loop(
-            window,
-            [&](const Coordinates &id)
-            {
-                const int32_t index_h       = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
-                const auto    index_w       = *(reinterpret_cast<const int32_t *>(offsets_i.ptr()));
-                const auto    dx_val        = *(reinterpret_cast<const float *>(dx_i.ptr()));
-                const auto    dy_val        = *(reinterpret_cast<const float *>(dy_i.ptr()));
-                const auto    pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
-
-                const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h)
-                                     ? (*(pixel_row_ptr + index_w + index_h * in_stride_w))
-                                     : const_border_value;
-                const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h)
-                                     ? (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w))
-                                     : const_border_value;
-                const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h && index_h < in_dim_h - 1)
-                                     ? (*(pixel_row_ptr + index_w + index_h * in_stride_w + in_stride_w))
-                                     : const_border_value;
-                const auto a11 = (-1 <= index_w && index_w < in_dim_w - 1 && -1 <= index_h && index_h < in_dim_h - 1)
-                                     ? (*(pixel_row_ptr + index_w + 1 + index_h * in_stride_w + in_stride_w))
-                                     : const_border_value;
-
-                *reinterpret_cast<T *>(dst_i.ptr()) =
-                    static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-            },
-            src_i, offsets_i, dx_i, dy_i, dst_i);
-    }
-    else if (_border_mode == BorderMode::REPLICATE)
-    {
-        execute_window_loop(
-            window,
-            [&](const Coordinates &id)
-            {
-                const int  index_h       = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
-                const auto index_w       = *(reinterpret_cast<const int32_t *>(offsets_i.ptr()));
-                const auto dx_val        = *(reinterpret_cast<const float *>(dx_i.ptr()));
-                const auto dy_val        = *(reinterpret_cast<const float *>(dy_i.ptr()));
-                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
-
-                auto clamped_x  = utility::clamp<int>(index_w, 0, in_dim_w - 1);
-                auto clamped_x1 = utility::clamp<int>(index_w + 1, 0, in_dim_w - 1);
-                auto clamped_y  = utility::clamp<int>(index_h, 0, in_dim_h - 1);
-                auto clamped_y1 = utility::clamp<int>(index_h + 1, 0, in_dim_h - 1);
-
-                const auto a00 = *(pixel_row_ptr + clamped_x + clamped_y * in_stride_w);
-                const auto a01 = *(pixel_row_ptr + clamped_x1 + clamped_y * in_stride_w);
-                const auto a10 = *(pixel_row_ptr + clamped_x + clamped_y1 * in_stride_w);
-                const auto a11 = *(pixel_row_ptr + clamped_x1 + clamped_y1 * in_stride_w);
-
-                *reinterpret_cast<T *>(dst_i.ptr()) =
-                    static_cast<T>(scale_helpers::delta_bilinear(a00, a01, a10, a11, dx_val, dy_val));
-            },
-            src_i, offsets_i, dx_i, dy_i, dst_i);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not implemented");
-    }
-}
-
-void CpuScaleKernel::scale_area_nchw_u8(const ITensor *src,
-                                        ITensor       *dst,
-                                        const ITensor *dx,
-                                        const ITensor *dy,
-                                        const ITensor *offsets,
-                                        const Window  &window)
-{
-    ARM_COMPUTE_UNUSED(dx, dy, offsets);
-    using namespace scale_helpers;
-
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::U8);
-
-    // Don't increment in width/height/channels for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    win_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-
-    Iterator src_i(src, win_in);
-    Iterator dst_i(dst, window);
-
-    const auto wr =
-        scale_utils::calculate_resize_ratio(src->info()->dimension(0), dst->info()->dimension(0), _align_corners);
-    const auto hr =
-        scale_utils::calculate_resize_ratio(src->info()->dimension(1), dst->info()->dimension(1), _align_corners);
-    const auto   w         = src->info()->dimension(0);
-    const auto   h         = src->info()->dimension(1);
-    const size_t in_stride = src->info()->strides_in_bytes()[1];
-
-    execute_window_loop(
-        window,
-        [&](const Coordinates &id)
-        {
-            const auto in_ptr = reinterpret_cast<const uint8_t *>(src_i.ptr());
-
-            uint8x8_t tmp0 = vdup_n_u8(0);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x(), id.y()), tmp0, 0);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 1, id.y()), tmp0, 1);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 2, id.y()), tmp0, 2);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 3, id.y()), tmp0, 3);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 4, id.y()), tmp0, 4);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 5, id.y()), tmp0, 5);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 6, id.y()), tmp0, 6);
-            tmp0 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 7, id.y()), tmp0, 7);
-
-            uint8x8_t tmp1 = vdup_n_u8(0);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 8, id.y()), tmp1, 0);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 9, id.y()), tmp1, 1);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 10, id.y()), tmp1, 2);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 11, id.y()), tmp1, 3);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 12, id.y()), tmp1, 4);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 13, id.y()), tmp1, 5);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 14, id.y()), tmp1, 6);
-            tmp1 = vset_lane_u8(pixel_area_c1u8_clamp(in_ptr, in_stride, w, h, wr, hr, id.x() + 15, id.y()), tmp1, 7);
-
-            vst1q_u8(dst_i.ptr(), vcombine_u8(tmp0, tmp1));
-        },
-        src_i, dst_i);
-}
-
-template <typename T>
-void CpuScaleKernel::scale_bilinear_qasymm(const ITensor *src,
-                                           ITensor       *dst,
-                                           const ITensor *dx,
-                                           const ITensor *dy,
-                                           const ITensor *offsets,
-                                           const Window  &window)
-{
-    // Get data layout and width/height indices
-    const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
-    const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
-
-    // Compute the ratio between source height and destination height
-    const auto hr = scale_utils::calculate_resize_ratio(src->info()->dimension(idx_height),
-                                                        dst->info()->dimension(idx_height), _align_corners);
-    Window     win_off;
-    win_off.set(Window::DimX, Window::Dimension(0, 0, 0));
-    win_off.set(Window::DimY, Window::Dimension(0, 0, 0));
-
-    // Don't increment in X and Y direction for the input tensor
-    // A pointer to the start of this plane is needed as base for the precomputed offsets
-    Window win_in(window);
-    win_in.set(idx_width, Window::Dimension(0, 0, 0));
-    win_in.set(idx_height, Window::Dimension(0, 0, 0));
-
-    for (size_t d = Window::DimZ; d < offsets->info()->num_dimensions(); ++d)
-    {
-        win_off.set(d, Window::Dimension(0, 0, 0));
-    }
-
-    Iterator src_i(src, win_in);
-    Iterator dst_i(dst, window);
-
-    const int32_t in_dim_w = src->info()->dimension(idx_width);
-    const int32_t in_dim_h = src->info()->dimension(idx_height);
-    const int32_t stride_w = src->info()->strides_in_bytes()[idx_width];
-    const int32_t stride_h = src->info()->strides_in_bytes()[idx_height];
-
-    const UniformQuantizationInfo iq_info = src->info()->quantization_info().uniform();
-    const UniformQuantizationInfo oq_info = dst->info()->quantization_info().uniform();
-
-    if (_border_mode == BorderMode::CONSTANT)
-    {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        using ConstType = typename std::conditional<std::is_same<T, float16_t>::value, half, T>::type;
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        using ConstType = T;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        const T const_border_value = static_cast<T>(_constant_border_value.get<ConstType>());
-        execute_window_loop(
-            window,
-            [&](const Coordinates &id)
-            {
-                const int32_t index_h = std::floor((id[idx_height] + _sampling_offset) * hr - _sampling_offset);
-                const int32_t index_w = *(reinterpret_cast<const int32_t *>(
-                    offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto    dx_val =
-                    *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto dy_val =
-                    *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
-
-                const auto a00 = (0 <= index_w && index_w < in_dim_w && 0 <= index_h && index_h < in_dim_h)
-                                     ? (*(pixel_row_ptr + index_w * stride_w + index_h * stride_h))
-                                     : const_border_value;
-                const auto a01 = (-1 <= index_w && index_w < in_dim_w - 1 && 0 <= index_h && index_h < in_dim_h)
-                                     ? (*(pixel_row_ptr + (index_w + 1) * stride_w + index_h * stride_h))
-                                     : const_border_value;
-                const auto a10 = (0 <= index_w && index_w < in_dim_w && -1 <= index_h && index_h < in_dim_h - 1)
-                                     ? (*(pixel_row_ptr + index_w * stride_w + (index_h + 1) * stride_h))
-                                     : const_border_value;
-                const auto a11 = (-1 <= index_w && index_w < in_dim_w - 1 && -1 <= index_h && index_h < in_dim_h - 1)
-                                     ? (*(pixel_row_ptr + (index_w + 1) * stride_w + (index_h + 1) * stride_h))
-                                     : const_border_value;
-
-                const float inp00                   = Qasymm8QuantizationHelper<T>::dequantize(a00, iq_info);
-                const float inp01                   = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
-                const float inp10                   = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
-                const float inp11                   = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
-                *reinterpret_cast<T *>(dst_i.ptr()) = Qasymm8QuantizationHelper<T>::quantize(
-                    scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
-            },
-            src_i, dst_i);
-    }
-    else if (_border_mode == BorderMode::REPLICATE)
-    {
-        execute_window_loop(
-            window,
-            [&](const Coordinates &id)
-            {
-                const int     index_h = std::floor((id[idx_height] + _sampling_offset) * hr - _sampling_offset);
-                const int32_t index_w = *(reinterpret_cast<const int32_t *>(
-                    offsets->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto    dx_val =
-                    *(reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto dy_val =
-                    *(reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id[idx_width], id[idx_height]))));
-                const auto pixel_row_ptr = reinterpret_cast<const T *>(src_i.ptr());
-
-                auto clamped_w  = utility::clamp<int>(index_w, 0, in_dim_w - 1);
-                auto clamped_w1 = utility::clamp<int>(index_w + 1, 0, in_dim_w - 1);
-                auto clamped_h  = utility::clamp<int>(index_h, 0, in_dim_h - 1);
-                auto clamped_h1 = utility::clamp<int>(index_h + 1, 0, in_dim_h - 1);
-
-                const auto a00 = *(pixel_row_ptr + clamped_w * stride_w + clamped_h * stride_h);
-                const auto a01 = *(pixel_row_ptr + clamped_w1 * stride_w + clamped_h * stride_h);
-                const auto a10 = *(pixel_row_ptr + clamped_w * stride_w + clamped_h1 * stride_h);
-                const auto a11 = *(pixel_row_ptr + clamped_w1 * stride_w + clamped_h1 * stride_h);
-
-                const float inp00                   = Qasymm8QuantizationHelper<T>::dequantize(a00, iq_info);
-                const float inp01                   = Qasymm8QuantizationHelper<T>::dequantize(a01, iq_info);
-                const float inp10                   = Qasymm8QuantizationHelper<T>::dequantize(a10, iq_info);
-                const float inp11                   = Qasymm8QuantizationHelper<T>::dequantize(a11, iq_info);
-                *reinterpret_cast<T *>(dst_i.ptr()) = Qasymm8QuantizationHelper<T>::quantize(
-                    scale_helpers::delta_bilinear(inp00, inp01, inp10, inp11, dx_val, dy_val), oq_info);
-            },
-            src_i, dst_i);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not implemented");
-    }
-}
-#endif // ENABLE_NCHW_KERNELS
 
 Status CpuScaleKernel::validate(const ITensorInfo     *input,
                                 const ITensorInfo     *dx,
@@ -613,7 +502,7 @@ void CpuScaleKernel::run_op(ITensorPack &tensors, const Window &window, const Th
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICpuKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr && _data_layout == DataLayout::NCHW);
+    ARM_COMPUTE_ERROR_ON(_nchw_func == nullptr && _data_layout == DataLayout::NCHW);
     ARM_COMPUTE_ERROR_ON(_run_method == nullptr && _data_layout == DataLayout::NHWC);
 
     const auto src     = tensors.get_const_tensor(TensorType::ACL_SRC);
@@ -624,7 +513,8 @@ void CpuScaleKernel::run_op(ITensorPack &tensors, const Window &window, const Th
 
     if (_data_layout == DataLayout::NCHW)
     {
-        (this->*_func)(src, dst, dx, dy, offsets, window);
+        _nchw_func(src, dst, offsets, dx, dy, _policy, _border_mode, _constant_border_value, _sampling_offset,
+                   _align_corners, window);
     }
     else
     {
