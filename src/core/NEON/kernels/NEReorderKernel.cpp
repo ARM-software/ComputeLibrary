@@ -211,11 +211,13 @@ Status NEReorderKernel::validate(const ITensorInfo        *input,
         int ksize;
         switch (output_wf)
         {
+#if defined(ARM_COMPUTE_ENABLE_SVE)
             case WeightFormat::OHWIo8:
             {
                 ksize = 8;
                 break;
             }
+#endif /* ARM_COMPUTE_ENABLE_SVE */
             case WeightFormat::OHWIo4:
             {
                 ksize = 4;
