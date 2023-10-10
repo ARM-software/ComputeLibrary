@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLCOMPARISONKERNEL_H
-#define ARM_COMPUTE_CLCOMPARISONKERNEL_H
+#ifndef ACL_SRC_CORE_CL_KERNELS_CLCOMPARISONKERNEL_H
+#define ACL_SRC_CORE_CL_KERNELS_CLCOMPARISONKERNEL_H
 
 #include "arm_compute/core/Types.h"
 
@@ -85,8 +85,7 @@ public:
                            ComparisonOperation operation);
 
     // Inherited methods overridden:
-    void       run(const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
     const ICLTensor *_input1; /**< Source tensor 1 */
@@ -94,4 +93,4 @@ private:
     ICLTensor       *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLCOMPARISONKERNEL_H */
+#endif // ACL_SRC_CORE_CL_KERNELS_CLCOMPARISONKERNEL_H

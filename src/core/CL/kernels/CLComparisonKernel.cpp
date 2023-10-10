@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
@@ -44,11 +45,6 @@ const std::map<ComparisonOperation, std::string> supported_comparison_ops = {
     {ComparisonOperation::Greater, "GREATER"}, {ComparisonOperation::GreaterEqual, "GREATEREQUAL"},
     {ComparisonOperation::Less, "LESS"},       {ComparisonOperation::LessEqual, "LESSEQUAL"},
 };
-
-int calculate_num_elems_processed_per_iteration(const ITensorInfo &input)
-{
-    return 16 / input.element_size();
-}
 
 Status validate_arguments(const ITensorInfo  &input1,
                           const ITensorInfo  &input2,
@@ -77,26 +73,15 @@ Status validate_arguments(const ITensorInfo  &input1,
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     const TensorShape &out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
-    const unsigned int num_elems_processed_per_iteration = calculate_num_elems_processed_per_iteration(input1);
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(16 / input1.element_size(), output.dimension(0));
 
     // Auto initialize output if not initialized
     auto_init_if_empty(output, out_shape, 1, DataType::U8, QuantizationInfo());
 
-    Window win        = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(input2);
+    Window win = calculate_max_window(out_shape, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal input1_access(&input1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(&input2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access) ||
-                          update_window_and_padding(win_input2, input2_access) ||
-                          update_window_and_padding(win, output_access);
-
-    Status err =
-        (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, win);
 }
 } // namespace
 
@@ -133,11 +118,21 @@ void CLComparisonKernel::configure(const CLCompileContext &compile_context,
     const std::string &operation_name = supported_comparison_ops.at(operation);
     std::string        kernel_name    = "compare_" + lower_string(operation_name);
 
+    const unsigned int num_elems_processed_per_iteration =
+        adjust_vec_size(16 / input1->info()->element_size(), output->info()->dimension(0));
+
     // Set kernel build options
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->info()->data_type()));
-    build_opts.emplace("-DVEC_SIZE=" +
-                       support::cpp11::to_string(calculate_num_elems_processed_per_iteration(*input1->info())));
+    build_opts.emplace("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.emplace("-DVEC_SIZE_LEFTOVER=" +
+                       support::cpp11::to_string(output->info()->dimension(0) % num_elems_processed_per_iteration));
+    build_opts.emplace(
+        "-DVEC_SIZE_IN1=" + //
+        support::cpp11::to_string(input1->info()->dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
+    build_opts.emplace(
+        "-DVEC_SIZE_IN2=" + //
+        support::cpp11::to_string(input2->info()->dimension(0) == 1 ? 1 : num_elems_processed_per_iteration));
     build_opts.emplace("-DOP=" + operation_name);
     build_opts.emplace("-DOP_NAME=" + lower_string(operation_name));
     if (is_data_type_quantized(input1->info()->data_type()))
@@ -145,6 +140,7 @@ void CLComparisonKernel::configure(const CLCompileContext &compile_context,
         const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
         const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
 
+        build_opts.emplace("-DIS_QUANTIZED");
         build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(iq1_info.offset));
         build_opts.emplace("-DOFFSET_IN2=" + support::cpp11::to_string(iq2_info.offset));
         build_opts.emplace("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
@@ -228,13 +224,4 @@ void CLComparisonKernel::run(const Window &window, cl::CommandQueue &queue)
     } while (collapsed.slide_window_slice_3D(slice));
 }
 
-BorderSize CLComparisonKernel::border_size() const
-{
-    const int num_elems_processed_per_iteration = calculate_num_elems_processed_per_iteration(*_input1->info());
-
-    const unsigned int replicateSize =
-        _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
-    const unsigned int border = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize{0, border, 0, 0};
-}
 } // namespace arm_compute
