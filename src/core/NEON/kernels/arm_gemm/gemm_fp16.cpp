@@ -32,6 +32,7 @@
 #include "gemm_hybrid_indirect.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
+#include "gemv_pretransposed.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
@@ -42,6 +43,7 @@
 #include "kernels/a64_hybrid_fp16_mla_6x32.hpp"
 #include "kernels/a64_sgemm_8x12.hpp"
 #ifdef ARM_COMPUTE_ENABLE_SME2
+#include "kernels/sme2_gemv_fp16_mla_16VL.hpp"
 #include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_1VLx4VL.hpp"
 #include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_2VLx2VL.hpp"
 #include "kernels/sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL.hpp"
@@ -58,6 +60,13 @@ namespace arm_gemm {
 static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 #ifdef ARM_COMPUTE_ENABLE_SVE
 #ifdef ARM_COMPUTE_ENABLE_SME2
+{
+    GemmMethod::GEMM_HYBRID,
+    "sme2_gemv_fp16_mla_16VL",
+    [](const GemmArgs &args) { return args._ci->has_sme2() && args._Msize==1 && args._nbatches==1 && !args._indirect_input; },
+    nullptr,
+    [](const GemmArgs &args) { return new GemvPretransposed<cls_sme2_gemv_fp16_mla_16VL, __fp16, __fp16>(args); }
+},
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme2_interleaved_nomerge_fp16fp32fp16_mopa_4VLx1VL",
