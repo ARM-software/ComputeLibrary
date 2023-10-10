@@ -37,6 +37,8 @@ namespace arm_compute
 {
 namespace cpu
 {
+#ifdef ENABLE_NCHW_KERNELS
+
 namespace
 {
 float16x4_t
@@ -148,6 +150,7 @@ void pooling3_fp16_neon_nchw(const ITensor    *src,
         },
         in, out);
 }
+#endif // ENABLE_NCHW_KERNELS
 
 void pooling2_f16_maxpool_indices(const ITensor    *src,
                                   ITensor          *dst0,
@@ -278,6 +281,7 @@ void pooling2_f16_maxpool_indices(const ITensor    *src,
         },
         in, out, indices);
 }
+#ifdef ENABLE_NCHW_KERNELS
 
 void pooling2_fp16_neon_nchw(const ITensor    *src,
                              ITensor          *dst0,
@@ -461,6 +465,7 @@ void poolingMxN_fp16_neon_nchw(const ITensor    *src,
         },
         in, out);
 }
+#endif // ENABLE_NCHW_KERNELS
 
 void poolingMxN_fp16_neon_nhwc(const ITensor    *src,
                                ITensor          *dst0,
