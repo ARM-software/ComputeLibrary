@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL_FULLY_CONNECTED_H
-#define ARM_COMPUTE_CL_FULLY_CONNECTED_H
+#ifndef ACL_SRC_GPU_CL_OPERATORS_CLFULLYCONNECTED_H
+#define ACL_SRC_GPU_CL_OPERATORS_CLFULLYCONNECTED_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
 
 #include "src/gpu/cl/ClCompileContext.h"
 #include "src/gpu/cl/IClOperator.h"
+#include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
 
 #include <memory>
 
@@ -174,4 +176,4 @@ private:
 };
 } // namespace opencl
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CL_FULLY_CONNECTED_H */
+#endif // ACL_SRC_GPU_CL_OPERATORS_CLFULLYCONNECTED_H

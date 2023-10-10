@@ -53,9 +53,17 @@ ClMatMulNativeDefaultConfigValhall::configure(const ITensorInfo *lhs, const ITen
         &ClMatMulNativeDefaultConfigValhall::configure_G710_f16,
         &ClMatMulNativeDefaultConfigValhall::configure_G710_u8);
 
+    ClMatMulNativeConfigArray<ConfigurationFunctionExecutorPtr> configs_G715(
+        &ClMatMulNativeDefaultConfigValhall::configure_G715_f32,
+        &ClMatMulNativeDefaultConfigValhall::configure_G715_f16,
+        &ClMatMulNativeDefaultConfigValhall::configure_G715_u8);
+
     ConfigurationFunctionExecutorPtr func = nullptr;
     switch (_target)
     {
+        case GPUTarget::G715:
+            func = configs_G715.get_function(lhs->data_type());
+            break;
         case GPUTarget::G710:
         default:
             func = configs_G710.get_function(lhs->data_type());
@@ -82,6 +90,26 @@ ClMatMulNativeDefaultConfigValhall::configure(const ITensorInfo *lhs, const ITen
 
     ARM_COMPUTE_ERROR_ON_MSG(func == nullptr, "Data type not supported for matmul native");
     return (this->*func)(m, n, k, b, rhs->lock_paddings(), info);
+}
+
+MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G715_f32(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info)
+{
+    ARM_COMPUTE_UNUSED(m, n, k, b, rhs_lock_padding);
+    return {info.adj_lhs(), info.adj_rhs(), /* m0 */ 1, /* n0 */ 4, /* k0 */ 1, /* export_to_cl_image */ false};
+}
+
+MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G715_f16(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info)
+{
+    return configure_G715_f32(m, n, k, b, rhs_lock_padding, info);
+}
+
+MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G715_u8(
+    unsigned int m, unsigned int n, unsigned int k, unsigned int b, bool rhs_lock_padding, const MatMulInfo &info)
+{
+    ARM_COMPUTE_UNUSED(m, n, k, b, rhs_lock_padding);
+    return {info.adj_lhs(), info.adj_rhs(), /* m0 */ 1, /* n0 */ 16, /* k0 */ 4, /* export_to_cl_image */ false};
 }
 
 MatMulKernelInfo ClMatMulNativeDefaultConfigValhall::configure_G710_f32(

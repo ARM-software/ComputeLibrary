@@ -28,7 +28,10 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "src/common/utils/Log.h"
+#include "src/gpu/cl/kernels/ClMatMulLowpNativeKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulLowpNativeMMULKernel.h"
 #include "src/gpu/cl/kernels/ClMatMulNativeKernel.h"
+#include "src/gpu/cl/kernels/ClMatMulNativeMMULKernel.h"
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeDefaultConfigValhall.h"
 #include "src/runtime/heuristics/matmul_native/ClMatMulNativeKernelConfig.h"
 #include "src/runtime/heuristics/matmul_native/IClMatMulNativeKernelConfig.h"
@@ -39,11 +42,62 @@ namespace arm_compute
 {
 namespace opencl
 {
+namespace
+{
+enum class MatMulKernelType
+{
+    /** Native matrix multiplication for FP types */
+    NATIVE_FP,
+
+    /** Native matrix multiplication for quantized types */
+    NATIVE_QUANTIZED,
+
+    /** Native matrix multiplication using MMUL extension for FP types */
+    NATIVE_MMUL_FP,
+
+    /** Native matrix multiplication using MMUL extension for Quantized types */
+    NATIVE_MMUL_QUANTIZED
+};
+
+MatMulKernelType get_matmul_kernel(const ITensorInfo         *lhs,
+                                   const ITensorInfo         *rhs,
+                                   const MatMulInfo          &matmul_info,
+                                   const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_UNUSED(lhs, rhs, matmul_info, act_info);
+
+    const bool is_quantized      = is_data_type_quantized_asymmetric(lhs->data_type());
+    const bool is_mmul_supported = arm_matrix_multiply_supported(CLKernelLibrary::get().get_device());
+
+    const int k = matmul_info.adj_lhs() ? lhs->tensor_shape().y() : lhs->tensor_shape().x();
+
+    if (is_quantized)
+    {
+        // MMUL kernel works only when K is a multiple of 16
+        if (is_mmul_supported && !act_info.enabled() && k % 16 == 0)
+        {
+            return MatMulKernelType::NATIVE_MMUL_QUANTIZED;
+        }
+
+        return MatMulKernelType::NATIVE_QUANTIZED;
+    }
+    else
+    {
+        // MMUL kernel works only when K is a multiple of 4
+        if (is_mmul_supported && !act_info.enabled() && k % 4 == 0)
+        {
+            return MatMulKernelType::NATIVE_MMUL_FP;
+        }
+
+        return MatMulKernelType::NATIVE_FP;
+    }
+
+    return is_quantized ? MatMulKernelType::NATIVE_QUANTIZED : MatMulKernelType::NATIVE_FP;
+}
+} // namespace
 using namespace arm_compute::opencl::kernels;
 
 ClMatMul::ClMatMul()
-    : _matmul_native_kernel(std::make_unique<ClMatMulNativeKernel>()),
-      _matmul_lowp_native_kernel(std::make_unique<ClMatMulLowpNativeKernel>())
 {
 }
 
@@ -65,10 +119,19 @@ Status ClMatMul::validate(const ITensorInfo         *lhs,
 
     const MatMulKernelInfo kernel_info = t->configure(lhs, rhs, matmul_info);
 
-    const bool is_quantized = is_data_type_quantized_asymmetric(lhs->data_type());
-
-    return is_quantized ? ClMatMulLowpNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info)
-                        : ClMatMulNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+    switch (get_matmul_kernel(lhs, rhs, matmul_info, act_info))
+    {
+        case MatMulKernelType::NATIVE_FP:
+            return ClMatMulNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+        case MatMulKernelType::NATIVE_MMUL_FP:
+            return ClMatMulNativeMMULKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info);
+        case MatMulKernelType::NATIVE_QUANTIZED:
+            return ClMatMulLowpNativeKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+        case MatMulKernelType::NATIVE_MMUL_QUANTIZED:
+            return ClMatMulLowpNativeMMULKernel::validate(lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+        default:
+            ARM_COMPUTE_ERROR("Unsupported MatMul Kernel!");
+    }
 }
 
 void ClMatMul::configure(const CLCompileContext    &compile_context,
@@ -84,41 +147,56 @@ void ClMatMul::configure(const CLCompileContext    &compile_context,
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate(lhs, rhs, dst, matmul_info));
 
-    _is_quantized = is_data_type_quantized_asymmetric(lhs->data_type());
+    const GPUTarget        gpu_target    = CLScheduler::get().target();
+    const auto             kernel_config = ClMatMulNativeKernelConfigurationFactory::create(gpu_target);
+    const MatMulKernelInfo kernel_info   = kernel_config->configure(lhs, rhs, matmul_info);
 
-    const GPUTarget gpu_target = CLScheduler::get().target();
-
-    std::unique_ptr<IClMatMulNativeKernelConfig> t = ClMatMulNativeKernelConfigurationFactory::create(gpu_target);
-
-    MatMulKernelInfo kernel_info = t->configure(lhs, rhs, matmul_info);
-
-    if (_is_quantized)
+    switch (get_matmul_kernel(lhs, rhs, matmul_info, act_info))
     {
-        _matmul_lowp_native_kernel->set_target(gpu_target);
+        case MatMulKernelType::NATIVE_FP:
+        {
+            auto kernel = std::make_unique<ClMatMulNativeKernel>();
+            kernel->set_target(gpu_target);
 
-        // Configure the low-precision native matrix multiply kernel
-        _matmul_lowp_native_kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info,
-                                              act_info);
-    }
-    else
-    {
-        _matmul_native_kernel->set_target(gpu_target);
+            kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+            _matmul_kernel = std::move(kernel);
+        }
+        break;
+        case MatMulKernelType::NATIVE_MMUL_FP:
+        {
+            auto kernel = std::make_unique<ClMatMulNativeMMULKernel>();
+            kernel->set_target(gpu_target);
 
-        // Configure the native matrix multiply kernel
-        _matmul_native_kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+            kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info);
+            _matmul_kernel = std::move(kernel);
+        }
+        break;
+        case MatMulKernelType::NATIVE_QUANTIZED:
+        {
+            auto kernel = std::make_unique<ClMatMulLowpNativeKernel>();
+            kernel->set_target(gpu_target);
+
+            kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+            _matmul_kernel = std::move(kernel);
+        }
+        break;
+        case MatMulKernelType::NATIVE_MMUL_QUANTIZED:
+        {
+            auto kernel = std::make_unique<ClMatMulLowpNativeMMULKernel>();
+            kernel->set_target(gpu_target);
+
+            kernel->configure(compile_context, lhs, rhs, nullptr /* bias */, dst, kernel_info, act_info);
+            _matmul_kernel = std::move(kernel);
+        }
+        break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported MatMul Kernel!");
     }
 }
 
 void ClMatMul::run(ITensorPack &tensors)
 {
-    if (_is_quantized)
-    {
-        CLScheduler::get().enqueue_op(*_matmul_lowp_native_kernel, tensors, true);
-    }
-    else
-    {
-        CLScheduler::get().enqueue_op(*_matmul_native_kernel, tensors, true);
-    }
+    CLScheduler::get().enqueue_op(*_matmul_kernel, tensors, /* flush */ true);
 }
 
 } // namespace opencl
