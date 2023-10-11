@@ -240,6 +240,27 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
  */
 void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &data_layout = DataLayout::NHWC, bool only_right_pad = false);
 
+/** For 2d convolution, given the Lhs/Rhs matrix quantization informations and the convolution dimension,
+ *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
+ *
+ * @param[in] in_q_info     Input matrix quantization info
+ * @param[in] weight_q_info Weights matrix quantization info
+ * @param[in] height        Height of the weights tensor
+ * @param[in] width         Width of the weights tensors
+ * @param[in] channels      Number of input channels
+ * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
+ * @param[in] bias_fraction see @ref suggest_mac_dst_q_info_and_bias() for explanation
+ *
+ * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
+ */
+QuantizationHint suggest_conv_dst_q_info_and_bias(const QuantizationInfo &in_q_info,
+                                                  const QuantizationInfo &weight_q_info,
+                                                  int32_t height,
+                                                  int32_t width,
+                                                  int32_t channels,
+                                                  DataType data_type,
+                                                  float bias_fraction);
+
 /** For a matrix multiplication, given the Lhs/Rhs matrix quantization informations and the matrix multiplication dimensions,
  *  calculate a suitable output quantization and suggested bias range for obtaining non-saturated outputs with high probability.
  *
@@ -249,7 +270,7 @@ void add_padding_x(std::initializer_list<ITensor *> tensors, const DataLayout &d
  * @param[in] n             Number of columns of Rhs Matrix
  * @param[in] k             Number of rows/columns of Rhs/Lhs Matrix
  * @param[in] data_type     data type, only QASYMM8, QASYMM8_SIGNED are supported
- * @param[in] bias_fraction the fraction of bias amplitude compared to integer accummulation. 0 if there is no bias.
+ * @param[in] bias_fraction see @ref suggest_mac_dst_q_info_and_bias() for explanation
  *
  * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
@@ -269,7 +290,8 @@ QuantizationHint suggest_matmul_dst_q_info_and_bias(const QuantizationInfo &lhs_
  * @return QuantizationHint object containing the suggested output quantization info and min/max bias range
  */
 QuantizationHint suggest_mac_dst_q_info_and_bias(const QuantizationInfo &lhs_q_info,
-                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type, float bias_fraction);
+                                                 const QuantizationInfo &rhs_q_info, int32_t k, DataType data_type,
+                                                 float bias_fraction);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
