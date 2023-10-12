@@ -195,6 +195,7 @@ void fp16_neon_scale_bilinear(const ITensor *src,
 } // namespace
 namespace cpu
 {
+#ifdef ENABLE_NCHW_KERNELS
 void fp16_bilinear_neon_scale_nchw(const ITensor      *src,
                                    ITensor            *dst,
                                    const ITensor      *offsets,
@@ -229,7 +230,7 @@ void fp16_nearest_neon_scale_nchw(const ITensor      *src,
     arm_compute::cpu::scale_nearest_nchw<float16_t>(src, dst, dx, dy, offsets, constant_border_value, sampling_offset,
                                                     align_corners, window);
 }
-
+#endif // ENABLE_NCHW_KERNELS
 void fp16_neon_scale(const ITensor      *src,
                      ITensor            *dst,
                      const ITensor      *offsets,
