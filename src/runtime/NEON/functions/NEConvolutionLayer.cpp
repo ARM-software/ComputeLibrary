@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 
@@ -131,6 +132,13 @@ Status NEConvolutionLayer::validate(const ITensorInfo         *input,
     const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
+
+    // Biases with dynamic values are not supported with quantized inputs.
+    if (biases)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((!biases->are_values_constant() && is_data_type_quantized(input->data_type())),
+                                        "Dynamic Biases are not supported with quantized input data.");
+    }
 
     switch (cpu::CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
                                                    enable_fast_math))
