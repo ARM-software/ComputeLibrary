@@ -44,7 +44,7 @@ namespace validation
 namespace
 {
 using framework::dataset::make;
-auto run_small_dataset = combine(datasets::SmallShapes(), datasets::Tiny1DShapes());
+auto run_small_dataset = combine(datasets::Small3DShapes(), datasets::Tiny1DShapes());
 auto run_large_dataset = combine(datasets::LargeShapes(), datasets::Tiny1DShapes());
 
 } // namespace
