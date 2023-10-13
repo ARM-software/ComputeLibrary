@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVOLUTION_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_CONVOLUTION_LAYER_FIXTURE
+
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_CONVOLUTIONLAYERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_CONVOLUTIONLAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -91,21 +92,64 @@ public:
                   || std::is_same<typename std::decay<T>::type, int8_t>::value,
                   int32_t, T >::type;
 
+    void setup_quantization(TensorShape input_shape, TensorShape weights_shape, QuantizationInfo &input_q_info,
+        QuantizationInfo &weights_q_info, DataType data_type)
+    {
+        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+
+        std::mt19937                           generator(library->seed() + _hash);
+        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
+
+        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+
+        const int32_t offset_lhs = distribution_t(generator);
+        const int32_t offset_rhs = distribution_t(generator);
+
+        _quantization_info = QuantizationInfo(scale_lhs, offset_lhs);
+        _weight_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
+
+        QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(input_q_info, weights_q_info,
+            weights_shape.y() /* heights */, weights_shape.x() /* width */, input_shape.z() /* channels */,
+            data_type, 0.5f /* bias_fraction */);
+
+        _dst_q_info = q_hint.q_info;
+        _min_bias = q_hint.bias_min;
+        _max_bias = q_hint.bias_max;
+    }
+
 public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
                bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}))
     {
+        // This hash is used by random generators. There may be hash collisions but
+        // this is intentional as it's a very easy way to make the the current
+        // random generation process almost different for many test configurations,
+        // which were using the same set of values before.
+        _hash = input_shape[0] + input_shape[1] + input_shape[2] + input_shape[3] +
+            + weights_shape[0] + weights_shape[1] + weights_shape[2] + weights_shape[3] +
+            mixed_layout + (data_type == DataType::QASYMM8_SIGNED) + (data_layout == DataLayout::NHWC);
+
         _mixed_layout             = mixed_layout;
         _data_type                = data_type;
         _weights_data_type        = weights_data_type;
-        _is_quantized             = is_data_type_quantized_asymmetric(data_type);
+        const bool is_quantized   = is_data_type_quantized(weights_data_type);
         _is_bfloat16              = data_type == DataType::BFLOAT16;
-        _bias_data_type           = _is_quantized ? DataType::S32 : (_is_bfloat16 ? DataType::F32 : data_type);
+        _bias_data_type           = is_quantized ? DataType::S32 : (_is_bfloat16 ? DataType::F32 : data_type);
         _output_data_type         = _is_bfloat16 ? DataType::F32 : data_type;
         _quantization_info        = quantization_info;
         _weight_quantization_info = weight_quantization_info;
         _data_layout              = data_layout;
+        _dst_q_info               = quantization_info;
+
+        if(is_quantized && !is_data_type_quantized_symmetric(weights_data_type) && (!act_info.enabled() || act_info.activation() == ActivationFunction::IDENTITY))
+        {
+            setup_quantization(input_shape, weights_shape, _quantization_info, _weight_quantization_info, data_type);
+            _use_dynamic_output_quant = true;
+        }
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info, pre_pad_layer);
@@ -142,16 +186,34 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::pair<int, int>                     bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
-                library->fill(tensor, distribution, i);
+                if(_use_dynamic_output_quant)
+                {
+                    std::uniform_int_distribution<int32_t> distribution(0, 255);
+                    library->fill(tensor, distribution, i);
+                }
+                else
+                {
+                    // Legacy initialization in case the output quantization info can't be reliably estimated
+                    std::pair<int, int>                     bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
+                    library->fill(tensor, distribution, i);
+                }
                 break;
             }
             case DataType::QASYMM8_SIGNED:
             {
-                std::pair<int, int>                    bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
-                library->fill(tensor, distribution, i);
+                if(_use_dynamic_output_quant)
+                {
+                    std::uniform_int_distribution<int32_t> distribution(-128, 127);
+                    library->fill(tensor, distribution, i);
+                }
+                else
+                {
+                    // Legacy initialization in case the output quantization info can't be reliably estimated
+                    std::pair<int, int>                    bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
+                    library->fill(tensor, distribution, i);
+                }
                 break;
             }
             case DataType::QSYMM8_PER_CHANNEL:
@@ -176,7 +238,7 @@ protected:
             }
             case DataType::S32:
             {
-                std::uniform_int_distribution<int32_t> distribution(-100, 100);
+                std::uniform_int_distribution<int32_t> distribution(_min_bias, _max_bias);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -239,8 +301,8 @@ protected:
         // Create tensors
         TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info, _data_layout);
         TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1, _weight_quantization_info, _data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _quantization_info, _data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _output_data_type, 1, _quantization_info, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _output_data_type, 1, _dst_q_info, _data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -288,9 +350,9 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(weights), 1);
-        fill(AccessorType(bias), 2);
+        fill(AccessorType(src), 0 + _hash);
+        fill(AccessorType(weights), 1 + _hash);
+        fill(AccessorType(bias), 2 + _hash);
 
         if(_mixed_layout)
         {
@@ -322,9 +384,9 @@ protected:
         SimpleTensor<TW>    weights{ weights_shape, weights_dt, 1, _weight_quantization_info };
         SimpleTensor<TBias> bias{ bias_shape, bias_dt, 1, _quantization_info };
 
-        fill(src, 0);
-        fill(weights, 1);
-        fill(bias, 2);
+        fill(src, 0 + _hash);
+        fill(weights, 1 + _hash);
+        fill(bias, 2 + _hash);
 
         // Fill with bfloat16 to perform the conversion and reduce the mismatches in the output
         if(_is_bfloat16)
@@ -338,9 +400,9 @@ protected:
             src = reference::pad_layer<T>(src, pre_pad_layer, PixelValue(0), PaddingMode::CONSTANT);
         }
 
-        return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups),
+        return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info),
                                                                      act_info) :
-               reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups);
+               reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info);
     }
 
     TensorType       _target{};
@@ -352,9 +414,13 @@ protected:
     DataLayout       _data_layout{};
     QuantizationInfo _quantization_info{};
     QuantizationInfo _weight_quantization_info{};
-    bool             _is_quantized = false;
+    QuantizationInfo _dst_q_info{};
     bool             _is_bfloat16  = false;
     bool             _mixed_layout = false;
+    bool             _use_dynamic_output_quant{false};
+    int32_t          _hash{0};
+    int32_t          _min_bias{-100};
+    int32_t          _max_bias{100};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
@@ -707,7 +773,7 @@ public:
         const WeightsInfo weights_info(false, 3U, 3U, 64U, false, query_weight_format);
         _kernel_found = bool(ConvolutionClass::has_opt_impl(_computed_weight_format, &src_info, &weight_info,
                                                             &bias_info, &dst_info, conv_info, weights_info,
-                                                            /*dilation*/ Size2D(1U, 1U), /*act_info*/ ActivationLayerInfo(), enable_fast_math));
+                                                            Size2D(1U, 1U) /*dilation*/, ActivationLayerInfo() /*act_info*/, enable_fast_math));
     }
 
 protected:
@@ -719,4 +785,5 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVOLUTION_LAYER_FIXTURE */
+
+#endif // ACL_TESTS_VALIDATION_FIXTURES_CONVOLUTIONLAYERFIXTURE_H

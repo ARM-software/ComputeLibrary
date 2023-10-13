@@ -1202,12 +1202,17 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
 });
 TEST_SUITE(Quantized)
+/// @note: Every asymmetric quantized test where there's no fused activation will have its quantization info ignored
+/// This is because instead of using the same quantization information for all the tensors, the fixture generates
+/// separate quantization info for each input and the output tensor.
+/// When we can also support dynamic quantization with the presence of activation, these two versions should be merged
+/// again, with the explicitly specified quantization info removed
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
                                                                                                                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -1224,7 +1229,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixtur
                                                                framework::dataset::make("ReshapeWeights", { true })),
                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
                                QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -1237,7 +1242,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>,
                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.01f, -10) })),
+                                                                                                                      framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(0.01f, -10) })),
                                                                                                                       QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -1254,7 +1259,7 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerQuantizedFixtur
                                                                framework::dataset::make("ReshapeWeights", { true })),
                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                       framework::dataset::make("QuantizationInfoIfActivationEnabled", { QuantizationInfo(2.f / 255.f, 10) })),
                                QuantizedActivationFunctionsDataset))
 {
     // Validate output
