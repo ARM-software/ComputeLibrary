@@ -451,7 +451,6 @@ if env['opencl'] and env['embed_kernels']:
                        'src/core/CL/cl_kernels/common/select.cl',
                        'src/core/CL/cl_kernels/common/slice_ops.cl',
                        'src/core/CL/cl_kernels/common/softmax_layer.cl',
-                       'src/core/CL/cl_kernels/common/softmax_layer_quantized.cl',
                        'src/core/CL/cl_kernels/common/stack_layer.cl',
                        'src/core/CL/cl_kernels/common/tile.cl',
                        'src/core/CL/cl_kernels/common/transpose.cl',

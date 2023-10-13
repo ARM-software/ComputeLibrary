@@ -57,6 +57,7 @@ v23.11 Public major release
    - Optimize @ref opencl::ClTranspose
    - Optimize @ref NEStackLayer
    - Optimize @ref CLReductionOperation.
+   - Optimize @ref CLSoftmaxLayer.
  - Add new OpenCL™ kernels:
    - @ref opencl::kernels::ClMatMulLowpNativeMMULKernel support for QASYMM8 and QASYMM8_SIGNED, with batch support
  - Deprecate support for Bfloat16 in @ref cpu::CpuCast.

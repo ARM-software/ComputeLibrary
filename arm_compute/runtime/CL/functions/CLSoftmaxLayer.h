@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLSOFTMAXLAYER_H
-#define ARM_COMPUTE_CLSOFTMAXLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSOFTMAXLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSOFTMAXLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -43,12 +43,6 @@ class CLCompileContext;
  *
  * Log Softmax is calculated by :
  * @f[ out = (x - max(x) * beta) - log(\sum{e^{x - max(x) * beta}}) @f]
- *
- * This function runs the following operators/kernels:
- * -# If axis is not 0:
- * -# @ref opencl::ClPermute
- * -# @ref opencl::kernels::ClLogits1DNormKernel
- * -# @ref opencl::kernels::ClLogits1DMaxShiftExpSumKernel
  */
 template <bool IS_LOG = false>
 class CLSoftmaxLayerGeneric : public IFunction
@@ -115,4 +109,4 @@ private:
 using CLSoftmaxLayer    = CLSoftmaxLayerGeneric<false>;
 using CLLogSoftmaxLayer = CLSoftmaxLayerGeneric<true>;
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLSOFTMAXLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_CL_FUNCTIONS_CLSOFTMAXLAYER_H

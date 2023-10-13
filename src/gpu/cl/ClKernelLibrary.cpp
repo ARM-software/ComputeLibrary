@@ -346,12 +346,8 @@ const std::map<std::string, std::string> ClKernelLibrary::_kernel_program_map = 
     {"select_same_rank", "common/select.cl"},
     {"select_different_rank_2", "common/select.cl"},
     {"select_different_rank_n", "common/select.cl"},
-    {"softmax_layer_norm", "common/softmax_layer.cl"},
-    {"softmax_layer_norm_quantized", "common/softmax_layer_quantized.cl"},
-    {"softmax_layer_max_shift_exp_sum_quantized_serial", "common/softmax_layer_quantized.cl"},
-    {"softmax_layer_max_shift_exp_sum_quantized_parallel", "common/softmax_layer_quantized.cl"},
-    {"softmax_layer_max_shift_exp_sum_serial", "common/softmax_layer.cl"},
-    {"softmax_layer_max_shift_exp_sum_parallel", "common/softmax_layer.cl"},
+    {"softmax_x", "common/softmax_layer.cl"},
+    {"softmax_non_x", "common/softmax_layer.cl"},
     {"stack_layer", "common/stack_layer.cl"},
     {"strided_slice", "common/slice_ops.cl"},
     {"tile", "common/tile.cl"},
@@ -733,10 +729,6 @@ const std::map<std::string, std::string> ClKernelLibrary::_program_source_map = 
     {
         "common/softmax_layer.cl",
 #include "./cl_kernels/common/softmax_layer.clembed"
-    },
-    {
-        "common/softmax_layer_quantized.cl",
-#include "./cl_kernels/common/softmax_layer_quantized.clembed"
     },
     {
         "common/slice_ops.cl",
