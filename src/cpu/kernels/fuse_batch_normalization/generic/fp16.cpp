@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,21 @@ void fused_batch_normalization_conv_f16(const ITensor *conv_weights,
 {
     return fused_batch_normalization_conv<float16_t>(conv_weights, conv_bias, fused_weights, fused_bias, bn_mean,
                                                      bn_var, bn_beta, bn_gamma, epsilon, window);
+}
+
+void fused_batch_normalization_dwc_nchw_f16(const ITensor *dwc_weights,
+                                            const ITensor *dwc_bias,
+                                            ITensor       *fused_weights,
+                                            ITensor       *fused_bias,
+                                            const ITensor *bn_mean,
+                                            const ITensor *bn_var,
+                                            const ITensor *bn_beta,
+                                            const ITensor *bn_gamma,
+                                            float          epsilon,
+                                            const Window  &window)
+{
+    return fused_batch_normalization_dwc_nchw<float16_t>(dwc_weights, dwc_bias, fused_weights, fused_bias, bn_mean,
+                                                         bn_var, bn_beta, bn_gamma, epsilon, window);
 }
 } // namespace cpu
 } // namespace arm_compute
