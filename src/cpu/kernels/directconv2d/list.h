@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef SRC_CORE_NEON_KERNELS_CONV2D_LIST_H
-#define SRC_CORE_NEON_KERNELS_CONV2D_LIST_H
+#ifndef ACL_SRC_CPU_KERNELS_DIRECTCONV2D_LIST_H
+#define ACL_SRC_CPU_KERNELS_DIRECTCONV2D_LIST_H
+
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 
 #include "src/core/common/Registrars.h"
+
+#include <algorithm>
 
 namespace arm_compute
 {
@@ -40,9 +47,31 @@ DECLARE_DIRECT_CONV2D_KERNEL(neon_fp32_nhwc_directconv2d);
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp16_nchw_directconv2d);
 DECLARE_DIRECT_CONV2D_KERNEL(neon_fp32_nchw_directconv2d);
 
+#define DECLARE_IM2COL_KERNEL(func_name)                                                                 \
+    void func_name(const ITensor *src, ITensor *dst, const Window &window, DataLayout data_layout,       \
+                   const PadStrideInfo &conv_info, std::pair<unsigned int, unsigned int> convolved_dims, \
+                   const Size2D &kernel_dims, const Size2D &dilation, uint32_t input_pad_right, bool has_bias)
+
+DECLARE_IM2COL_KERNEL(run_im2col_fp32_nchw_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp32_nchw_nopad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp16_nchw_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp16_nchw_nopad);
+DECLARE_IM2COL_KERNEL(run_im2col_bf16_nchw_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_bf16_nchw_nopad);
+DECLARE_IM2COL_KERNEL(run_im2col_qasymm8_nchw_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_qasymm8_nchw_nopad);
+
+DECLARE_IM2COL_KERNEL(run_im2col_fp32_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp32_nopad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp16_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_fp16_nopad);
+DECLARE_IM2COL_KERNEL(run_im2col_bf16_pad);
+DECLARE_IM2COL_KERNEL(run_im2col_bf16_nopad);
+
 #undef DECLARE_DIRECT_CONV2D_KERNEL
+#undef DECLARE_IM2COL_KERNEL
 
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif //SRC_CORE_NEON_KERNELS_CONV2D_LIST_H
+#endif // ACL_SRC_CPU_KERNELS_DIRECTCONV2D_LIST_H

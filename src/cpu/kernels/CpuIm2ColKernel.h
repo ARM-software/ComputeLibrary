@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_IM2COL_KERNEL_H
-#define ARM_COMPUTE_CPU_IM2COL_KERNEL_H
+#ifndef ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H
+#define ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H
 
 #include "arm_compute/core/Size2D.h"
 
@@ -115,20 +115,20 @@ public:
     size_t get_mws(const CPUInfo &platform, size_t thread_count) const override;
 
 private:
-    /** Template function to run im2col
-     *
-     * @param[in]  src    The input tensor info
-     * @param[out] dst    The output tensor info
-     * @param[in]  window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T, bool has_pads, bool is_nchw>
-    void run_im2col(const ITensor *src, ITensor *dst, const Window &window);
-
     /** Common signature for all the specialised im2col functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using Im2ColFunctionPtr = void (CpuIm2ColKernel::*)(const ITensor *src, ITensor *dst, const Window &window);
+    using Im2ColFunctionPtr = void (*)(const ITensor                        *src,
+                                       ITensor                              *dst,
+                                       const Window                         &window,
+                                       DataLayout                            data_layout,
+                                       const PadStrideInfo                  &conv_info,
+                                       std::pair<unsigned int, unsigned int> convolved_dims,
+                                       const Size2D                         &kernel_dims,
+                                       const Size2D                         &dilation,
+                                       uint32_t                              input_pad_right,
+                                       bool                                  has_bias);
 
     Im2ColFunctionPtr                     _func{nullptr};
     std::pair<unsigned int, unsigned int> _convolved_dims{};
@@ -143,4 +143,4 @@ private:
 } // namespace kernels
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_IM2COL_KERNEL_H */
+#endif // ACL_SRC_CPU_KERNELS_CPUIM2COLKERNEL_H

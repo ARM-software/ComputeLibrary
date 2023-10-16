@@ -1150,10 +1150,16 @@
               "src/core/NEON/kernels/convolution/winograd/weight_transforms/cpp_fp32_1x4_1x5.cpp",
               "src/core/NEON/kernels/convolution/winograd/weight_transforms/cpp_fp32_1x6_1x3.cpp",
               "src/cpu/kernels/directconv2d/nhwc/neon/impl.cpp",
+              "src/cpu/kernels/directconv2d/nhwc/neon/qasymm8.cpp",
               "src/cpu/kernels/directconv2d/nchw/all.cpp"
+
             ],
             "fp32": [
               "src/cpu/kernels/directconv2d/nhwc/neon/fp32.cpp"
+            ],
+            "fp16": [
+              "src/cpu/kernels/directconv2d/nchw/fp16.cpp",
+              "src/cpu/kernels/directconv2d/nhwc/neon/fp16.cpp"
             ]
           },
           "sve": {

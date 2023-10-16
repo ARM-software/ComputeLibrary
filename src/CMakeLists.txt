@@ -736,8 +736,11 @@ target_sources(
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8.cpp
 	cpu/kernels/depthwiseconv2d/generic/neon/qasymm8_signed.cpp
 	cpu/kernels/directconv2d/nchw/all.cpp
+	cpu/kernels/directconv2d/nchw/fp16.cpp
+	cpu/kernels/directconv2d/nhwc/neon/fp16.cpp
 	cpu/kernels/directconv2d/nhwc/neon/fp32.cpp
 	cpu/kernels/directconv2d/nhwc/neon/impl.cpp
+	cpu/kernels/directconv2d/nhwc/neon/qasymm8.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp16.cpp
 	cpu/kernels/elementwise_binary/generic/neon/fp32.cpp
 	cpu/kernels/elementwise_binary/generic/neon/integer.cpp
