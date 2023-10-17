@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_UTILS_CPU_AUX_TENSOR_HANDLER_H
-#define ARM_COMPUTE_CPU_UTILS_CPU_AUX_TENSOR_HANDLER_H
+#ifndef ACL_SRC_CPU_UTILS_CPUAUXTENSORHANDLER_H
+#define ACL_SRC_CPU_UTILS_CPUAUXTENSORHANDLER_H
 
 #include "arm_compute/core/ITensorPack.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -71,7 +71,13 @@ public:
         }
     }
 
-    CpuAuxTensorHandler(TensorInfo &info, ITensor &tensor) : _tensor()
+    /** Create a temporary handle to the original tensor with a new @ref TensorInfo
+     * This is useful if we want to change a tensor's tensor info at run time without modifying the original tensor
+     *
+     * @param[in] info   New tensor info to "assign" to @p tensor
+     * @param[in] tensor Tensor to be assigned a new @ref TensorInfo
+     */
+    CpuAuxTensorHandler(TensorInfo &info, const ITensor &tensor) : _tensor()
     {
         _tensor.allocator()->soft_init(info);
         if (info.total_size() <= tensor.info()->total_size())
@@ -108,4 +114,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_UTILS_CPU_AUX_TENSOR_HANDLER_H */
+#endif // ACL_SRC_CPU_UTILS_CPUAUXTENSORHANDLER_H

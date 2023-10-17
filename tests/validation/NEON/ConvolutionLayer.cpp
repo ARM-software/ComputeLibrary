@@ -1032,6 +1032,8 @@ TEST_SUITE(GEMMConvolutionLayer)
 template <typename T>
 using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>
+using NEGEMMConvolutionLayerPaddedWeightsFixture = ConvolutionValidationPaddedWeightsFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+template <typename T>
 using NEGEMMConvolutionLayerMixedDataLayoutFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T, true>;
 
 /** Test case for memory injection in @ref cpu::CpuGemmConv2d.
@@ -1184,9 +1186,25 @@ FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEGEMMConvolutionLayerMixedDataLayout
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
+/** Padded weights
+ * CpuGemmConv2d uses two different paths for reshaping the weights based on if the weight tensor has holes (a common
+ * way to have "holes" in tensor is via extended paddings)
+ *
+ * We only need to test the padded weight path here on a single floating data type and a single layout, because the fallback path is agnostic of them
+ */
+FIXTURE_DATA_TEST_CASE(RunPaddedWeights, NEGEMMConvolutionLayerPaddedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true }),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })
+                                                                                                            ))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 
+// TODO: COMPMID-6596 Extend quantized tests with at least one suite where the weight is padded (the legacy case, see floating point's RunPaddedWeights)
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 template <typename T>

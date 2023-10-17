@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_OPERATORS_CPUMATMUL
-#define ACL_SRC_CPU_OPERATORS_CPUMATMUL
+#ifndef ACL_SRC_CPU_OPERATORS_CPUMATMUL_H
+#define ACL_SRC_CPU_OPERATORS_CPUMATMUL_H
 
 #include "arm_compute/core/TensorInfo.h"
 
@@ -93,9 +93,8 @@ public:
 private:
     enum InternalTensorIdx
     {
-        AsmGemmWorkspace = 0, // Pre-allocate workspace tensors for CpuGemmAssemblyDispatch
-        PretransposeRHS,      // Pre-allocate workspace tensors for CpuGemmAssemblyDispatch
-        TransposeLHS,
+        /* Slots 0 - 2 reserved for CpuGemmAssemblyDispatch */
+        TransposeLHS = 3,
         TransposeRHS,
         Count
     };
@@ -124,4 +123,4 @@ private:
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* ACL_SRC_CPU_OPERATORS_CPUMATMUL */
+#endif // ACL_SRC_CPU_OPERATORS_CPUMATMUL_H

@@ -297,9 +297,11 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
 
     if (_assembly_path)
     {
-        auto asm_mem_req           = _asm_glue->workspace();
-        _aux_mem[AsmGemmWorkspace] = asm_mem_req[AsmGemmWorkspace];
-        _aux_mem[Pretranspose]     = asm_mem_req[Pretranspose];
+        const auto asm_mem_req = _asm_glue->workspace();
+        for (unsigned int slot = 0; slot < asm_mem_req.size(); ++slot)
+        {
+            _aux_mem[slot] = asm_mem_req[slot];
+        }
     }
 
     // Request memory for LHS and RHS reshape matrix

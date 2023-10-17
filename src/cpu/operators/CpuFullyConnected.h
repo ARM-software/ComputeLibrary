@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_FULLY_CONNECTED_H
-#define ARM_COMPUTE_CPU_FULLY_CONNECTED_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H
+#define ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/FullyConnectedLayerInfo.h"
@@ -145,13 +145,15 @@ private:
     {
         AsmGemmWorkspace = 0,
         Pretranspose,
-        GemmTemp1, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp2, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp3, // Both CpuGemm and CpuGemmLowpMatrixMultiplyCore
-        GemmTemp4, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp5, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp6, // CpuGemmLowpMatrixMultiplyCore only
-        GemmTemp7, // CpuGemmLowpMatrixMultiplyCore only
+        GemmTemp1,
+        GemmTemp2,
+        GemmTemp3,
+        GemmTemp4,
+        GemmTemp5,
+        GemmTemp6,
+        GemmTemp7,
+        GemmTemp8,
+        // Slots above (0-9) reserved for either CpuGemm or CpuGemmLowpMatrixMultiplyCore
         TransposedWeights,
         ConvertedWeights,
         FlattenedSrc,
@@ -189,4 +191,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_FULLY_CONNECTED_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUFULLYCONNECTED_H

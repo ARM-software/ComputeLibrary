@@ -53,6 +53,8 @@ cpu::AsmGemmInfo init_assembly_metadata(const GEMMInfo &info)
     asm_info.fast_mode               = info.fast_math();
     asm_info.fixed_format            = info.fixed_format();
     asm_info.weight_format           = info.weight_format();
+    asm_info.transpose_b =
+        info.pretranspose_B(); // The "pretranspose_B" flag here is not the same as the pretranspose_B_array method. The flag here signals to pretranspose_B_array method if we want to perform additional transpose on B before the pretranspose_B_array method
 
     return asm_info;
 }
@@ -72,7 +74,7 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     const cpu::AsmGemmInfo asm_info  = init_assembly_metadata(gemm_info);
     const bool             is_c_bias = beta == 1 && c != nullptr;
-    bool                   run_optimised =
+    const bool             run_optimised =
         bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, (is_c_bias) ? c : nullptr, d, asm_info)) &&
         (c == nullptr || beta == 0.f || beta == 1.f) && // Optimized GeMM doesn't support beta coefficient.
         !(!b->are_values_constant() &&
@@ -92,14 +94,17 @@ void CpuGemm::configure(const ITensorInfo *a,
 
     if (run_optimised)
     {
+        _run_interleave_transpose   = false;
         const ITensorInfo *c_to_use = is_c_bias ? c : nullptr;
         _asm_glue                   = std::make_unique<cpu::CpuGemmAssemblyDispatch>();
         _asm_glue->configure(a, b, c_to_use, d, asm_info);
         ARM_COMPUTE_ERROR_ON(!_asm_glue->is_configured());
 
-        auto asm_mem_req           = _asm_glue->workspace();
-        _aux_mem[AsmGemmWorkspace] = asm_mem_req[AsmGemmWorkspace];
-        _aux_mem[Pretraspose]      = asm_mem_req[Pretraspose];
+        const auto asm_mem_req = _asm_glue->workspace();
+        for (unsigned int slot = 0; slot < asm_mem_req.size(); ++slot)
+        {
+            _aux_mem[slot] = asm_mem_req[slot];
+        }
 
         // Scale product by alpha
         if (_run_alpha_scale)
@@ -111,37 +116,74 @@ void CpuGemm::configure(const ITensorInfo *a,
     }
     else
     {
+        _run_interleave_transpose = !_run_vector_matrix_multiplication;
         // Pick output tensor in case bias addition should be performed
         ITensorInfo *gemm_output_to_use = (_run_bias_addition) ? &_tmp_d : d;
+        // Pick b tensor in case pretranspose should be performed
+        const ITensorInfo *b_to_use = b;
 
         _mm_kernel = std::make_unique<cpu::kernels::CpuGemmMatrixMultiplyKernel>();
+
+        // Configure rhs pretranspose
+        if (gemm_info.pretranspose_B())
+        {
+            _pretranspose_b_func = std::make_unique<CpuTranspose>();
+            _pretranspose_b_func->configure(b_to_use, &_pretransposed_b);
+            MemoryLifetime lifetime;
+            if (_reshape_b_only_on_first_run)
+            {
+                if (_run_interleave_transpose)
+                {
+                    // PreTransposedRHS tensor is only used in prepare(), but is then succeeded by Transposed1xWRHS
+                    // So PreTransposedRHS can be freed inside prepare()
+                    lifetime = MemoryLifetime::Prepare;
+                }
+                else
+                {
+                    // PreTransposedRHS tensor is only used in prepare(), but is the final transformation of rhs
+                    // So PreTransposedRHS needs to persist beyond prepare()
+                    lifetime = MemoryLifetime::Persistent;
+                }
+            }
+            else
+            {
+                // PreTransposedRHS tensor is always used in run() and doesn't need to persist
+                lifetime = MemoryLifetime::Temporary;
+            }
+            _aux_mem[PreTransposedRHS] =
+                MemoryInfo(offset_int_vec(PreTransposedRHS), lifetime, _pretransposed_b.total_size());
+            b_to_use = &_pretransposed_b;
+        }
 
         // Select between GEMV and GEMM
         if (_run_vector_matrix_multiplication)
         {
             // Configure the matrix multiply kernel
-            _mm_kernel->configure(a, b, gemm_output_to_use, alpha, false);
+            _mm_kernel->configure(a, b_to_use, gemm_output_to_use, alpha, false);
         }
         else
         {
-            const int m = a->dimension(1);
-            const int n = b->dimension(0);
-            const int k = a->dimension(0);
-
+            ARM_COMPUTE_ERROR_ON(!_run_interleave_transpose);
             // Configure interleave kernel
             _interleave_kernel = std::make_unique<cpu::kernels::CpuGemmInterleave4x4Kernel>();
             _interleave_kernel->configure(a, &_tmp_a);
             _aux_mem[InterleavedLHS] =
                 MemoryInfo(offset_int_vec(InterleavedLHS), MemoryLifetime::Temporary, _tmp_a.total_size());
 
-            // Configure transpose kernel
-            _transpose_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
-            _transpose_kernel->configure(b, &_tmp_b);
-            _aux_mem[TransposedRHS] =
-                MemoryInfo(offset_int_vec(TransposedRHS), MemoryLifetime::Persistent, _tmp_b.total_size());
+            // Configure rhs transpose1xw kernel
+            _transpose1xW_b_kernel = std::make_unique<cpu::kernels::CpuGemmTranspose1xWKernel>();
+            _transpose1xW_b_kernel->configure(b_to_use, &_tmp_b);
+            _aux_mem[Transposed1xWRHS] =
+                MemoryInfo(offset_int_vec(Transposed1xWRHS), MemoryLifetime::Persistent, _tmp_b.total_size());
+
+            // Use a and b here instead of _tmp_a and _tmp_b because CpuGemmMatrixMultiplyKernel requires the original m,n,k in case of interleaved a and transposed1xw b
+            const int m = a->dimension(1);
+            const int n = b_to_use->dimension(0);
+            const int k = a->dimension(0);
 
             // Configure matrix multiplication kernel
-            _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, true, GEMMReshapeInfo(m, n, k));
+            _mm_kernel->configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, _run_interleave_transpose,
+                                  GEMMReshapeInfo(m, n, k));
         }
 
         if (_run_bias_addition)
@@ -179,6 +221,16 @@ Status CpuGemm::validate(const ITensorInfo *a,
     ARM_COMPUTE_UNUSED(alpha);
     const bool is_c_bias    = beta == 1 && c != nullptr;
     const bool run_addition = c != nullptr && beta != 0 && beta != 1;
+    // Check if we should use the pretransposed_b or original b
+    // TODO: COMPMID-6597
+    // Note that this check should only apply to the non-optimized path. The reason we brought this at the beginning
+    // instead of only for the fallback path is because of the checks performed below, between here and the run_optimised decision
+    // We should simplify this by
+    //   1. Moving the checks between "fix-start" and "fix-end" into their corresponding ops / kernels (e.g. the weights format checks can and should be moved into CpuGemmAssemblyDispatch)
+    //   2. Moving this b_to_use check back into the non-optimized path
+    TensorInfo pretransposed_b  = b->clone()->set_tensor_shape(misc::shape_calculator::compute_transposed_shape(*b));
+    const ITensorInfo *b_to_use = gemm_info.pretranspose_B() ? &pretransposed_b : b;
+    // TODO: COMPMID-6597 fix-start
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
@@ -187,16 +239,16 @@ Status CpuGemm::validate(const ITensorInfo *a,
     if (is_fixed_format_fast_math(gemm_info.weight_format()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(a, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(b, DataType::BFLOAT16);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(b_to_use, DataType::BFLOAT16);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b_to_use);
     }
 
     const int block_by = arm_compute::block_by(gemm_info.weight_format());
     // test if im2col has changed the dimensions that are needed for padding
-    if (a->dimension(0) != b->dimension(1) && block_by > 1)
+    if (a->dimension(0) != b_to_use->dimension(1) && block_by > 1)
     {
         // have to verify bias
         const size_t dim0_sz = a->dimension(0);
@@ -204,18 +256,18 @@ Status CpuGemm::validate(const ITensorInfo *a,
             (dim0_sz % block_by) != 0,
             ("The matrix A number of columns must be a multiple of block_by=" + std::to_string(block_by)).c_str());
         // a->dimension(0) = kernel_area * input_channel + kernel_area * input_pad_right
-        // b->dimension(1) = kernel_area * input_channel
-        // a->dimension(0) = b->dimension(1) + kernel_area * input_pad_right
-        const size_t input_pad_right = (dim0_sz - b->dimension(1)) % block_by;
-        const size_t kernel_area     = (dim0_sz - b->dimension(1)) / input_pad_right;
+        // b_to_use->dimension(1) = kernel_area * input_channel
+        // a->dimension(0) = b_to_use->dimension(1) + kernel_area * input_pad_right
+        const size_t input_pad_right = (dim0_sz - b_to_use->dimension(1)) % block_by;
+        const size_t kernel_area     = (dim0_sz - b_to_use->dimension(1)) / input_pad_right;
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-            (dim0_sz - kernel_area * input_pad_right) != b->dimension(1),
+            (dim0_sz - kernel_area * input_pad_right) != b_to_use->dimension(1),
             "The product AB is defined only if A number of columns and B number of rows are related");
     }
     else
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-            a->dimension(0) != b->dimension(1),
+            a->dimension(0) != b_to_use->dimension(1),
             "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     }
 
@@ -233,14 +285,14 @@ Status CpuGemm::validate(const ITensorInfo *a,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(c, d);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->dimension(1),
                                         "The C matrix must have the same number of rows as the matrix A");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != c->dimension(0),
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b_to_use->dimension(0) != c->dimension(0),
                                         "The C matrix must have the same number of columns as the matrix B");
     }
 
     if (d->total_size() != 0)
     {
         // For fixed format we are expecting some kind of blocked format for B/RHS so the dimension won't necessarily match the result matrix any more.
-        ARM_COMPUTE_RETURN_ERROR_ON(!gemm_info.fixed_format() && b->dimension(0) != d->dimension(0));
+        ARM_COMPUTE_RETURN_ERROR_ON(!gemm_info.fixed_format() && b_to_use->dimension(0) != d->dimension(0));
         if (gemm_info.depth_output_gemm3d() != 0)
         {
             if (gemm_info.reinterpret_input_as_3d())
@@ -258,10 +310,14 @@ Status CpuGemm::validate(const ITensorInfo *a,
             ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != d->dimension(1));
         }
     }
+    // TODO: COMPMID-6597 fix-end
 
     // Check if we need to run the optimized assembly kernel
     cpu::AsmGemmInfo asm_info = init_assembly_metadata(gemm_info);
-    const bool       run_optimised =
+
+    // Note we use b instead of b_to_use here because asm_info also captures the pretranspose_b() flag
+    // so we pass the original b to CpuGemmAssemblyDispatch
+    const bool run_optimised =
         bool(cpu::CpuGemmAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, d, asm_info)) &&
         (c == nullptr || beta == 0.f || beta == 1.f) && // Optimized GeMM doesn't support beta coefficient.
         !(!b->are_values_constant() &&
@@ -277,13 +333,13 @@ Status CpuGemm::validate(const ITensorInfo *a,
         // Check if the first input tensor is a vector.
         const bool run_vector_matrix_multiplication = a->dimension(1) < 2;
         // Check if we need to reshape the matrix A and matrix B
-        const bool run_interleave_transpose = !run_vector_matrix_multiplication && !b->are_values_constant();
+        const bool run_interleave_transpose = !run_vector_matrix_multiplication;
 
         // Arguments used by GEMMReshapeInfo
         // If we pass the matrix A and matrix B reshaped to CpuGemmMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to GEMMReshapeInfo
         // in order to know how the matrices have been reshaped
         const int m                         = a->dimension(1);
-        const int n                         = b->dimension(0);
+        const int n                         = b_to_use->dimension(0);
         const int k                         = a->dimension(0);
         int       mult_transpose1xW_width   = 1;
         int       mult_interleave4x4_height = 1;
@@ -292,7 +348,7 @@ Status CpuGemm::validate(const ITensorInfo *a,
             m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, gemm_info.depth_output_gemm3d());
 
         const ITensorInfo *matrix_a_info = a;
-        const ITensorInfo *matrix_b_info = b;
+        const ITensorInfo *matrix_b_info = b_to_use;
 
         TensorInfo tmp_a_info{};
         TensorInfo tmp_b_info{};
@@ -309,9 +365,10 @@ Status CpuGemm::validate(const ITensorInfo *a,
             ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmInterleave4x4Kernel::validate(a, &tmp_a_info));
 
             // Validate transpose kernel
-            auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(
-                                               *b, mult_transpose1xW_width)));
-            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmTranspose1xWKernel::validate(b, &tmp_b_info));
+            auto_init_if_empty(tmp_b_info,
+                               b_to_use->clone()->set_tensor_shape(
+                                   compute_transpose1xW_with_element_size_shape(*b_to_use, mult_transpose1xW_width)));
+            ARM_COMPUTE_RETURN_ON_ERROR(cpu::kernels::CpuGemmTranspose1xWKernel::validate(b_to_use, &tmp_b_info));
         }
 
         // Validate matrix multiply
@@ -367,29 +424,46 @@ void CpuGemm::run(ITensorPack &tensors)
     else
     {
         CpuAuxTensorHandler interleaved_a(offset_int_vec(InterleavedLHS), _tmp_a, tensors, true);
-        CpuAuxTensorHandler transposed_b(offset_int_vec(TransposedRHS), _tmp_b, tensors, true);
+        CpuAuxTensorHandler pretransposed_b(offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors);
+        CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors, true);
         CpuAuxTensorHandler temp_d(offset_int_vec(TempResult), _tmp_d, tensors, true);
 
         ITensorPack mm_pack{{ACL_SRC_0, a}, {ACL_SRC_1, b}, {ACL_DST, (_run_bias_addition) ? temp_d.get() : d}};
-        if (!_run_vector_matrix_multiplication)
+
+        if (_run_interleave_transpose)
         {
             // Run interleave kernel
             ITensorPack interleave_pack{{ACL_SRC, a}, {ACL_DST, interleaved_a.get()}};
             NEScheduler::get().schedule_op(_interleave_kernel.get(), Window::DimY, _interleave_kernel->window(),
                                            interleave_pack);
-
-            if (!_reshape_b_only_on_first_run)
-            {
-                // Run transpose kernel
-                ITensorPack transpose_pack{{ACL_SRC, b}, {ACL_DST, transposed_b.get()}};
-                NEScheduler::get().schedule_op(_transpose_kernel.get(), Window::DimY, _transpose_kernel->window(),
-                                               transpose_pack);
-            }
-
             // Use reshaped matrices
             mm_pack.add_const_tensor(ACL_SRC_0, interleaved_a.get());
-            mm_pack.add_const_tensor(ACL_SRC_1, transposed_b.get());
         }
+
+        const ITensor *b_to_use = b;
+        if (_pretranspose_b_func)
+        {
+            if (!_reshape_b_only_on_first_run)
+            {
+                // Run pretranspose kernel
+                ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+                _pretranspose_b_func->run(pretranspose_pack);
+            }
+            b_to_use = pretransposed_b.get();
+        }
+        if (_run_interleave_transpose)
+        {
+            if (!_reshape_b_only_on_first_run)
+            {
+                // Run transpose1xw kernel
+                ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
+                NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
+                                               _transpose1xW_b_kernel->window(), transpose_pack);
+            }
+            b_to_use = transposed1xw_b.get();
+        }
+        // Use reshaped matrices
+        mm_pack.add_const_tensor(ACL_SRC_1, b_to_use);
 
         NEScheduler::get().schedule_op(_mm_kernel.get(),
                                        _run_vector_matrix_multiplication ? Window::DimX : Window::DimY,
@@ -426,17 +500,32 @@ void CpuGemm::prepare(ITensorPack &tensors)
         {
             _asm_glue->prepare(tensors);
         }
-        else if (_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication)
+        else if (_reshape_b_only_on_first_run)
         {
-            const ITensor *b = tensors.get_const_tensor(ACL_SRC_1);
-            ITensor       *b_aux =
-                utils::cast::polymorphic_cast<ITensor *>(tensors.get_tensor(offset_int_vec(TransposedRHS)));
-            ARM_COMPUTE_ERROR_ON_NULLPTR(b, b_aux);
+            const ITensor      *b        = tensors.get_const_tensor(ACL_SRC_1);
+            const ITensor      *b_to_use = b;
+            CpuAuxTensorHandler pretransposed_b(
+                offset_int_vec(PreTransposedRHS), _pretransposed_b, tensors,
+                false /*pack_inject: no need to inject into tensors*/,
+                _pretranspose_b_func ==
+                    nullptr /*bypass_alloc: no need to allocate if _pretranspose_b_func is not run*/);
+            CpuAuxTensorHandler transposed1xw_b(offset_int_vec(Transposed1xWRHS), _tmp_b, tensors,
+                                                false /*pack_inject*/, !_run_interleave_transpose /*bypass_alloc*/);
 
-            CpuAuxTensorHandler transposed_b(_tmp_b, *b_aux);
-            ITensorPack         transpose_pack{{ACL_SRC, b}, {ACL_DST, transposed_b.get()}};
-            NEScheduler::get().schedule_op(_transpose_kernel.get(), Window::DimY, _transpose_kernel->window(),
-                                           transpose_pack);
+            if (_pretranspose_b_func)
+            {
+                // Run pretranspose kernel
+                ITensorPack pretranspose_pack{{ACL_SRC, b_to_use}, {ACL_DST, pretransposed_b.get()}};
+                _pretranspose_b_func->run(pretranspose_pack);
+                b_to_use = pretransposed_b.get();
+            }
+            if (_run_interleave_transpose)
+            {
+                // Run transpose kernel
+                ITensorPack transpose_pack{{ACL_SRC, b_to_use}, {ACL_DST, transposed1xw_b.get()}};
+                NEScheduler::get().schedule_op(_transpose1xW_b_kernel.get(), Window::DimY,
+                                               _transpose1xW_b_kernel->window(), transpose_pack);
+            }
         }
         _is_prepared = true;
     }

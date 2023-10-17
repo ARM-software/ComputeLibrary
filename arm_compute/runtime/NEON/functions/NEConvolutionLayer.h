@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NECONVOLUTIONLAYER_H
-#define ARM_COMPUTE_NECONVOLUTIONLAYER_H
+#ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
+#define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H
 
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -38,7 +38,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following functions:
- * -# @ref cpu::CpuGemm     (executed only in case GEMM is required for the operation)
+ * -# @ref cpu::CpuGemmConv2d     (executed only in case GEMM is required for the operation)
  * -# @ref cpu::CpuWinogradConv2d (executed only in case Winograd is required for the operation)
  * -# @ref cpu::CpuDirectConv2d   (executed only in case Direct Convolution is required for the operation)
  * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
@@ -196,4 +196,4 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_NECONVOLUTIONLAYER_H */
+#endif // ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NECONVOLUTIONLAYER_H

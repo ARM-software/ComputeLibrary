@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_INTERNAL_CPU_GEMM_ASSEMBLY_DISPATCH_H
-#define ARM_COMPUTE_CPU_INTERNAL_CPU_GEMM_ASSEMBLY_DISPATCH_H
+#ifndef ACL_SRC_CPU_OPERATORS_INTERNAL_CPUGEMMASSEMBLYDISPATCH_H
+#define ACL_SRC_CPU_OPERATORS_INTERNAL_CPUGEMMASSEMBLYDISPATCH_H
 
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
@@ -57,6 +57,13 @@ struct AsmGemmInfo
     bool                      fixed_format{false};
     arm_compute::WeightFormat weight_format{arm_compute::WeightFormat::UNSPECIFIED};
     bool                      reshape_b_only_on_first_run{true};
+    /** Whether we want to perform an additional transpose of b before passing it to gemm or pretranspose_B_array
+     * @note This transpose b operation is also considered a form of "reshape" or "transform", so should be counted for
+     *       by the reshape_b_only_on_first_run flag
+     * @note This flag will be silently ignored (assumed to be false) when the weight_format is a fixed format. Because
+     *       fixed format kernels do not accept weights (B) with any prior transformations
+     */
+    bool transpose_b{false};
 };
 
 /** Assembly kernel glue */
@@ -187,4 +194,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CPU_INTERNAL_CPU_GEMM_ASSEMBLY_DISPATCH_H */
+#endif // ACL_SRC_CPU_OPERATORS_INTERNAL_CPUGEMMASSEMBLYDISPATCH_H

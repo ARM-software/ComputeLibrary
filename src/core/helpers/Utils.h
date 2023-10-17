@@ -95,6 +95,18 @@ inline unsigned int get_next_power_two(unsigned int x)
 
 /** Check if the tensor has any holes.
  *
+ * A hole is defined as any gap in the tensor between two consecutive values. This can be a result of extending
+ * the paddings or manipulating the strides of the tensor
+ *
+ * @param[in] info Tensor info object defining the shape of the input tensor.
+ *
+ * @note This function checks for holes in all dimensions.
+ *
+ */
+bool has_holes(const ITensorInfo &info);
+
+/** Check if the tensor has any holes.
+ *
  * @param[in] info      Tensor info object defining the shape of the input tensor.
  * @param[in] dimension Highest dimension to check.
  *

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMMLOWP_MATRIXMULTIPLY_CORE_H
-#define ARM_COMPUTE_CPU_GEMMLOWP_MATRIXMULTIPLY_CORE_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUGEMMLOWPMATRIXMULTIPLYCORE_H
+#define ACL_SRC_CPU_OPERATORS_CPUGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/function_info/GEMMInfo.h"
@@ -134,9 +134,8 @@ public:
 private:
     enum AuxTensorIdx
     {
-        AsmGemmWorkspace = 0,
-        Pretranspose,
-        VectorSumCol,
+        /* Slots 0 - 2 reserved for CpuGemmAssemblyDispatch */
+        VectorSumCol = 3,
         VectorSumRow,
         TmpA,
         TmpB,
@@ -181,4 +180,4 @@ private:
 };
 } // namespace cpu
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CPU_GEMMLOWP_MATRIXMULTIPLY_CORE_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUGEMMLOWPMATRIXMULTIPLYCORE_H

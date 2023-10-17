@@ -123,7 +123,7 @@ public:
 public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
-               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}))
+               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
     {
         // This hash is used by random generators. There may be hash collisions but
         // this is intentional as it's a very easy way to make the the current
@@ -151,7 +151,7 @@ public:
             _use_dynamic_output_quant = true;
         }
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info, pre_pad_layer);
     }
 
@@ -267,7 +267,7 @@ protected:
 
     // given input is IN nchw format
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
+                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -335,8 +335,13 @@ protected:
         ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
-
-        add_padding_x({ &src, &weights, &bias, &dst }, _data_layout);
+        // Test "add padding after configure" behavior. This behavior should not affect the correctness
+        add_padding_x({ &src, &bias, &dst }, _data_layout);
+        // Padding weights may affect code path in some backends
+        if (padded_weights)
+        {
+            add_padding_x({ &weights }, _data_layout);
+        }
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -437,6 +442,19 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+class ConvolutionValidationPaddedWeightsFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+{
+public:
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
+               DataLayout data_layout)
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
+                                                                                                 data_type, data_type, data_layout,
+                                                                                                 QuantizationInfo(), QuantizationInfo(), ActivationLayerInfo(), mixed_layout, PaddingList({}), true);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class ConvolutionValidationWithPaddingFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
@@ -480,6 +498,7 @@ public:
                                                                                                   quantization_info, QuantizationInfo(weights_scales), act_info);
     }
 };
+
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_compute::WeightFormat weight_format)

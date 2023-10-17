@@ -105,6 +105,7 @@ public:
      * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      * @param[in] fixed_format                (Optional) Specify the selection of fixed format kernels for variable weights support in GEMM. These kernels expect the weights tensor to be in amemory format that is fixed by the kernel itself. For more information, see arm_compute::WeightFormat.
      * @param[in] weight_format               (Optional) arm_gemm:WeightFormat enumeration requested by the user. Default is arm_compute::WeightFormat::UNSPECIFIED.
+     * @param[in] pretranspose_B              (Optional) Pretranspose matrix B (transposition of its lowest 2 dimensions), in addition to and before, any further transformations of B
      */
     GEMMInfo(bool                       is_a_reshaped,
              bool                       is_b_reshaped,
@@ -118,7 +119,8 @@ public:
              bool                       broadcast_bias          = false,
              const ActivationLayerInfo &activation_info         = ActivationLayerInfo(),
              bool                       fixed_format            = false,
-             arm_compute::WeightFormat  weight_format           = arm_compute::WeightFormat::UNSPECIFIED) noexcept
+             arm_compute::WeightFormat  weight_format           = arm_compute::WeightFormat::UNSPECIFIED,
+             bool                       pretranspose_B          = false) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -130,7 +132,7 @@ public:
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
           _pretranspose_A(false),
-          _pretranspose_B(false),
+          _pretranspose_B(pretranspose_B),
           _activation_info(activation_info),
           _fixed_format(fixed_format),
           _weight_format(weight_format)
@@ -251,6 +253,8 @@ public:
         _pretranspose_A = flag;
     }
     /** Flag which specifies whether b should be pre-transposed if supported.
+     * More concretely, the "pre-transpose" is the transposition of the b tensor's lowest 2 dimensions
+     * If specified true, this pre-transpose will occur in addition to and before, any further transformations of the b matrix
      *
      * @return True if b should be pre-transposed else false.
      */

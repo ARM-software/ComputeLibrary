@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -294,12 +294,11 @@ void CpuWinogradConv2d::configure(const ITensorInfo         *src,
             _activation_func->configure(dst, nullptr, act_info);
         }
 
-        auto asm_mem_req         = _gemm_function->workspace();
-        _aux_mem[GemmWorkspace]  = asm_mem_req[GemmWorkspace];
-        _aux_mem[Pretranspose]   = asm_mem_req[Pretranspose];
-        _aux_mem[InterleavedLHS] = asm_mem_req[InterleavedLHS];
-        _aux_mem[TransposedRHS]  = asm_mem_req[TransposedRHS];
-        _aux_mem[TempResult]     = asm_mem_req[TempResult];
+        const auto mm_mem_req = _gemm_function->workspace();
+        for (unsigned int slot = 0; slot < mm_mem_req.size(); ++slot)
+        {
+            _aux_mem[slot] = mm_mem_req[slot];
+        }
 
         // Request temporary memory. Overlap memory needed for Input/Output transformations as they run on different non-overlapping time-steps.
         _aux_mem[TransformedInput]  = MemoryInfo(offset_int_vec(TransformedInput), MemoryLifetime::Temporary,

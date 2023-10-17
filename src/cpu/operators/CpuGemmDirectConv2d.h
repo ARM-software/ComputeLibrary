@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CPU_GEMM_DIRECT_CONV_2D_H
-#define ARM_COMPUTE_CPU_GEMM_DIRECT_CONV_2D_H
+#ifndef ACL_SRC_CPU_OPERATORS_CPUGEMMDIRECTCONV2D_H
+#define ACL_SRC_CPU_OPERATORS_CPUGEMMDIRECTCONV2D_H
 
 #include "arm_compute/core/TensorInfo.h"
 
@@ -95,8 +95,10 @@ public:
 private:
     enum AuxTensorIdx
     {
-        AsmGemmWorkspace = 0,
+        GemmTemp0 = 0,
+        GemmTemp1,
         Pretranspose,
+        /* Slots above (0-2) are reserved for CpuGemmAssemblyDispatch */
         PermutedWeights,
         Count
     };
@@ -112,4 +114,4 @@ private:
 } // namespace cpu
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_CPU_GEMM_DIRECT_CONV_2D_H */
+#endif // ACL_SRC_CPU_OPERATORS_CPUGEMMDIRECTCONV2D_H

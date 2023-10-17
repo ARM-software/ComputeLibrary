@@ -140,9 +140,11 @@ void CpuGemmDirectConv2d::configure(const ITensorInfo *src,
     }
 
     // Add auxiliary memory requirements of the assembly dispatch
-    auto asm_mem_req           = _gemm_asm_func->workspace();
-    _aux_mem[AsmGemmWorkspace] = asm_mem_req[AsmGemmWorkspace];
-    _aux_mem[Pretranspose]     = asm_mem_req[Pretranspose];
+    const auto asm_mem_req = _gemm_asm_func->workspace();
+    for (unsigned int slot = 0; slot < asm_mem_req.size(); ++slot)
+    {
+        _aux_mem[slot] = asm_mem_req[slot];
+    }
 
     if (_aux_mem[Pretranspose].size > 0)
     {

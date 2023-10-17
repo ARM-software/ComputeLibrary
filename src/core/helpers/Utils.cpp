@@ -25,6 +25,11 @@
 
 namespace arm_compute
 {
+bool has_holes(const ITensorInfo &info)
+{
+    return has_holes(info, info.num_dimensions() - 1);
+}
+
 bool has_holes(const ITensorInfo &info, size_t dimension)
 {
     const auto &shape          = info.tensor_shape();
