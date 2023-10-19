@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_SVEMATH_H
-#define ARM_COMPUTE_SVEMATH_H
+#ifndef ACL_SRC_CORE_NEON_SVEMATH_H
+#define ACL_SRC_CORE_NEON_SVEMATH_H
 
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 #include "src/core/NEON/wrapper/intrinsics/svcvt.h"
@@ -96,6 +96,19 @@ svfloat16_t svtanh_f16_z(svbool_t pg, svfloat16_t val);
  */
 svfloat16_t svexp_f16_z(svbool_t pg, svfloat16_t x);
 
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+/** Calculate exponential
+ *
+ * @param[in] pg Input predicate.
+ * @param[in] x  Input vector value in F16 format.
+ *
+ * @return The calculated exponent.
+ */
+svfloat16_t svexp_f16_z_sve2(svbool_t pg, svfloat16_t x);
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
+
 /** Calculate reciprocal.
  *
  * @param[in] pg Input predicate.
@@ -113,6 +126,19 @@ svfloat16_t svinv_f16_z(svbool_t pg, svfloat16_t x);
  * @return The calculated logarithm.
  */
 svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x);
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+/** Calculate logarithm
+ *
+ * @param[in] pg Input predicate.
+ * @param[in] x  Input vector value in F32 format.
+ *
+ * @return The calculated logarithm.
+ */
+svfloat16_t svlog_f16_z_sve2(svbool_t pg, svfloat16_t x);
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 /** Calculate inverse square root.
  *
@@ -148,6 +174,19 @@ svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val);
  */
 svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val);
 
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+/** Calculate sine.
+ *
+ * @param[in] pg  Input predicate.
+ * @param[in] val Input vector value in radians, F16 format.
+ *
+ * @return The calculated sine.
+ */
+svfloat16_t svsin_f16_z_sve2(svbool_t pg, svfloat16_t val);
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
+
 /** Calculate n power of a number.
  *
  * pow(x,n) = e^(n*log(x))
@@ -172,6 +211,22 @@ svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b);
  */
 svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b);
 
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] pg Input predicate.
+ * @param[in] a  Input vector value in F16 format.
+ * @param[in] b  Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+svfloat16_t svpow_f16_z_sve2(svbool_t pg, svfloat16_t a, svfloat16_t b);
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
+
 /** Convert and pack four 32-bit float vectors into an 8-bit integer vector
  *
  * @param[in] in_0 The first float vector
@@ -190,4 +245,4 @@ int_vec_type convert_float_to_int(const svfloat32_t &in_0,
 } // namespace arm_compute
 #include "src/core/NEON/SVEMath.inl"
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
-#endif /* ARM_COMPUTE_SVEMATH_H */
+#endif // ACL_SRC_CORE_NEON_SVEMATH_H

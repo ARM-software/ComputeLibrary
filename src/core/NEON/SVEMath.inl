@@ -21,6 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CORE_NEON_SVEMATH_INL
+#define ACL_SRC_CORE_NEON_SVEMATH_INL
+
 #include <cmath>
 #include <limits>
 
@@ -163,23 +167,30 @@ inline svfloat32_t svexp_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svexp_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, x);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svexp_f32_z(pg, bottom);
     top    = svexp_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svexp_f16_z_sve2(svbool_t pg, svfloat16_t x)
+{
+    auto bottom = svcvt_f32_z(pg, x);
+    auto top    = svcvtlt_f32_x(pg, x);
+    auto pg_top = pg;
+
+    bottom = svexp_f32_z(pg, bottom);
+    top    = svexp_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svtanh_f32_z(svbool_t pg, svfloat32_t val)
 {
@@ -243,23 +254,30 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
 inline svfloat16_t svlog_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto bottom = svcvt_f32_z(pg, x);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, x);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(x))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svlog_f32_z(pg, bottom);
     top    = svlog_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svlog_f16_z_sve2(svbool_t pg, svfloat16_t x)
+{
+    auto bottom = svcvt_f32_z(pg, x);
+    auto top    = svcvtlt_f32_x(pg, x);
+    auto pg_top = pg;
+
+    bottom = svlog_f32_z(pg, bottom);
+    top    = svlog_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 {
@@ -317,23 +335,30 @@ inline svfloat32_t svsin_f32_z(svbool_t pg, svfloat32_t val)
 inline svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val)
 {
     auto bottom = svcvt_f32_z(pg, val);
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto top    = svcvtlt_f32_x(pg, val);
-    auto pg_top = pg;
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto top    = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(val))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     bottom = svsin_f32_z(pg, bottom);
     top    = svsin_f32_z(pg_top, top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, bottom), svcvt_f16_z(pg_top, top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svsin_f16_z_sve2(svbool_t pg, svfloat16_t val)
+{
+    auto bottom = svcvt_f32_z(pg, val);
+    auto top    = svcvtlt_f32_x(pg, val);
+    auto pg_top = pg;
+
+    bottom = svsin_f32_z(pg, bottom);
+    top    = svsin_f32_z(pg_top, top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, bottom), pg_top, top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 inline svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b)
 {
@@ -345,25 +370,34 @@ inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
     auto a_bottom = svcvt_f32_z(pg, a);
     auto b_bottom = svcvt_f32_z(pg, b);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    auto pg_top = pg;
-    auto a_top  = svcvtlt_f32_x(pg, a);
-    auto b_top  = svcvtlt_f32_x(pg, b);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     auto pg_top = svptrue_b16();
     auto a_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(a))));
     auto b_top  = svcvt_f32_z(pg_top, svreinterpret_f16(svrevh_z(svptrue_b16(), svreinterpret_u32(b))));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 
     auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
     auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
 
-#if defined(ARM_COMPUTE_ENABLE_SVE2)
-    return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);
-#else  /* defined(ARM_COMPUTE_ENABLE_SVE2) */
     return svtrn1(svcvt_f16_z(pg, res_bottom), svcvt_f16_z(pg_top, res_top));
-#endif /* defined(ARM_COMPUTE_ENABLE_SVE2) */
 }
+
+#ifdef ARM_COMPUTE_ENABLE_SVE2
+
+inline svfloat16_t svpow_f16_z_sve2(svbool_t pg, svfloat16_t a, svfloat16_t b)
+{
+    auto a_bottom = svcvt_f32_z(pg, a);
+    auto b_bottom = svcvt_f32_z(pg, b);
+
+    auto pg_top = pg;
+    auto a_top  = svcvtlt_f32_x(pg, a);
+    auto b_top  = svcvtlt_f32_x(pg, b);
+
+    auto res_bottom = svpow_f32_z(pg, a_bottom, b_bottom);
+    auto res_top    = svpow_f32_z(pg_top, a_top, b_top);
+
+    return svcvtnt_f16_m(svcvt_f16_z(pg, res_bottom), pg_top, res_top);
+}
+
+#endif // ARM_COMPUTE_ENABLE_SVE2
 
 #if defined(ARM_COMPUTE_ENABLE_SVE2)
 template <>
@@ -443,3 +477,5 @@ inline svint8_t convert_float_to_int<svint8_t>(const svfloat32_t &in_0,
 
 } // namespace arm_compute
 #endif /* defined(ARM_COMPUTE_ENABLE_SVE) */
+
+#endif // ACL_SRC_CORE_NEON_SVEMATH_INL
