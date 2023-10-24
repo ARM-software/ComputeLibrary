@@ -40,13 +40,17 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status
+validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis, bool use_inverted_axis)
 {
+    ARM_COMPUTE_UNUSED(use_inverted_axis);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(axis, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->num_dimensions() > 1, "Axis must be a 1D tensor");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4,
+                                    "Current implementation only supports up to 4 dimensions.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis->dimension(0) > 4, "Only up to 4 dimensions can be reversed");
 
     // Checks performed when output is configured
@@ -66,15 +70,19 @@ CLReverseKernel::CLReverseKernel() : _input(nullptr), _output(nullptr), _axis(nu
     _type = CLKernelType::ELEMENTWISE;
 }
 
-void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+void CLReverseKernel::configure(const ICLTensor *input,
+                                ICLTensor       *output,
+                                const ICLTensor *axis,
+                                bool             use_inverted_axis)
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, use_inverted_axis);
 }
 
 void CLReverseKernel::configure(const CLCompileContext &compile_context,
                                 const ICLTensor        *input,
                                 ICLTensor              *output,
-                                const ICLTensor        *axis)
+                                const ICLTensor        *axis,
+                                bool                    use_inverted_axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
     auto padding_info = get_padding_info({input, output, axis});
@@ -86,12 +94,14 @@ void CLReverseKernel::configure(const CLCompileContext &compile_context,
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), *input->info()->clone());
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis->info(), use_inverted_axis));
 
     // Set kernel build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DNUM_REVERSE_DIMS=" + support::cpp11::to_string(axis->info()->dimension(0)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
+    build_opts.add_option("-DRANK=" + support::cpp11::to_string(input->info()->num_dimensions()));
+    build_opts.add_option_if(use_inverted_axis, "-DUSE_INVERTED_AXIS");
 
     // Create kernel
     _kernel = create_kernel(compile_context, "reverse", build_opts.options());
@@ -119,9 +129,12 @@ void CLReverseKernel::configure(const CLCompileContext &compile_context,
     ARM_COMPUTE_ERROR_ON(has_padding_changed(padding_info));
 }
 
-Status CLReverseKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
+Status CLReverseKernel::validate(const ITensorInfo *input,
+                                 const ITensorInfo *output,
+                                 const ITensorInfo *axis,
+                                 bool               use_inverted_axis)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, use_inverted_axis));
     return Status{};
 }
 

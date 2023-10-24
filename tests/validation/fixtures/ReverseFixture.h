@@ -27,9 +27,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#ifdef ARM_COMPUTE_OPENCL_ENABLED
-#include "arm_compute/runtime/CL/functions/CLReverse.h"
-#endif // ARM_COMPUTE_OPENCL_ENABLED
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
@@ -44,31 +41,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-template <typename ReverseFunction, typename TensorType>
-#ifdef ARM_COMPUTE_OPENCL_ENABLED
-std::enable_if_t < !std::is_same<ReverseFunction, CLReverse>::value, void >
-#else  // ARM_COMPUTE_OPENCL_ENABLED
-void
-#endif // ARM_COMPUTE_OPENCL_ENABLED
-configureReverse(ReverseFunction &func, TensorType &src, TensorType &axis, TensorType &dst, bool use_inverted_axis)
-{
-    func.configure(&src, &dst, &axis, use_inverted_axis);
-}
-
-#ifdef ARM_COMPUTE_OPENCL_ENABLED
-template <typename ReverseFunction, typename TensorType>
-std::enable_if_t<std::is_same<ReverseFunction, CLReverse>::value, void>
-configureReverse(ReverseFunction &func, TensorType &src, TensorType &axis, TensorType &dst, bool use_inverted_axis)
-{
-    ARM_COMPUTE_UNUSED(use_inverted_axis);
-    func.configure(&src, &dst, &axis);
-}
-
-#endif // ARM_COMPUTE_OPENCL_ENABLED
-} //namespace
-
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ReverseValidationFixture : public framework::Fixture
 {
@@ -113,8 +85,7 @@ protected:
 
         // Create and configure function
         FunctionType reverse_func;
-
-        configureReverse(reverse_func, src, axis, dst, use_inverted_axis);
+        reverse_func.configure(&src, &dst, &axis, use_inverted_axis);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(axis.info()->is_resizable());

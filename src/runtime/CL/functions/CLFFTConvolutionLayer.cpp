@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -181,7 +181,8 @@ void CLFFTConvolutionLayer::configure(const CLCompileContext    &compile_context
     // Flip weights
     _flipped_weights.allocator()->init(weights_to_use->info()->clone()->set_is_resizable(true).reset_padding());
     _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
-    _flip_weights_func.configure(compile_context, weights_to_use, &_flipped_weights, &_flip_axis);
+    _flip_weights_func.configure(compile_context, weights_to_use, &_flipped_weights, &_flip_axis,
+                                 /* use_inverted_axis */ false);
 
     // Pad weights
     const PaddingList padding_w = {{0, input_dims.x() + pad_valid.x() - 1}, {0, input_dims.y() + pad_valid.y() - 1}};

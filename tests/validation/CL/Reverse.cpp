@@ -44,7 +44,7 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-auto run_small_dataset = combine(datasets::SmallShapes(), datasets::Tiny1DShapes());
+auto run_small_dataset = combine(datasets::Small3DShapes(), datasets::Tiny1DShapes());
 auto run_large_dataset = combine(datasets::LargeShapes(), datasets::Tiny1DShapes());
 
 } // namespace
@@ -80,7 +80,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 {
     Status s = CLReverse::validate(&src_info.clone()->set_is_resizable(false),
                                   &dst_info.clone()->set_is_resizable(false),
-                                  &axis_info.clone()->set_is_resizable(false));
+                                  &axis_info.clone()->set_is_resizable(false),
+                                  false);
     ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -97,8 +98,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(
                            run_small_dataset,
                            make("DataType", DataType::F16),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -110,8 +111,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(
                            run_large_dataset,
                            make("DataType", DataType::F16),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -125,8 +126,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(
                            run_small_dataset,
                            make("DataType", DataType::F32),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -138,8 +139,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(
                            run_large_dataset,
                            make("DataType", DataType::F32),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -155,8 +156,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(
                            run_small_dataset,
                            make("DataType", DataType::QASYMM8),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -168,8 +169,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(
                            run_large_dataset,
                            make("DataType", DataType::QASYMM8),
-                           make("use_negative_axis", { false }),
-                           make("use_inverted_axis", { false })))
+                           make("use_negative_axis", { true, false }),
+                           make("use_inverted_axis", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
