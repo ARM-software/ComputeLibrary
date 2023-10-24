@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited.
+ * Copyright (c) 2021-2023 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,8 +136,12 @@ CpuModel midr_to_model(uint32_t midr)
             case 0xd44: // X1
                 model = CpuModel::X1;
                 break;
-            case 0xd46:
+            case 0xd46: // A510
+            case 0xd80: // A520
                 model = CpuModel::A510;
+                break;
+            case 0xd15: // R82
+                model = CpuModel::A55r1;
                 break;
             default:
                 model = CpuModel::GENERIC;
