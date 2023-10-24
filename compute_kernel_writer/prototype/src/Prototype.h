@@ -3050,7 +3050,7 @@ private:
             address += " * ";
             address += stride_y;
         }
-        if (z != "0" && (_mapper.is_one_component_z() != true))
+        if (z != "0")
         {
             const std::string stride_z = _mapper.tensor_component_stride_z();
             address += " + (";

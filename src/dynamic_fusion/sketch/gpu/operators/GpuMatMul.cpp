@@ -87,8 +87,6 @@ Status is_supported_op_helper(const GpuWorkloadContext &context,
     // Check support level
     // Data type
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
-    // Data layout
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(lhs, DataLayout::NHWC);
 
     // Check components
     if (context.gpu_language() == GpuLanguage::OpenCL)
